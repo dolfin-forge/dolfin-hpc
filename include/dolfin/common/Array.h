@@ -1,11 +1,5 @@
 // Copyright (C) 2003 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2003-2007.
-// Modified by Aurélien Larcher, 2014-217.
-//
-// First added:  2003-09-03
-// Last changed: 2017-02-24
 
 #ifndef __DOLFIN_ARRAY_H
 #define __DOLFIN_ARRAY_H
@@ -299,10 +293,10 @@ public:
 private:
 
   /// Disallow copy constructor
-  Array(T const& other) : offset_(0), stride_(0) {}
+  Array(T const&) : offset_(0), stride_(0) {}
 
   /// Disallow assignement operator
-  Array<T>& operator=(Array<T> const& other) { return *this; }
+  Array<T>& operator=(Array<T> const&) { return *this; }
 
   uint offset_;
   uint stride_;

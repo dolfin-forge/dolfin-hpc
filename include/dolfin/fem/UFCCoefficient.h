@@ -1,6 +1,5 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_UFC_COEFFICENT_H
 #define __DOLFIN_UFC_COEFFICENT_H

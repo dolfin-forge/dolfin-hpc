@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_LINEAR_DISTRIBUTION_H
 #define __DOLFIN_LINEAR_DISTRIBUTION_H

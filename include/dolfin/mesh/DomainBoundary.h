@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-05-23
-// Last changed: 2008-05-23
 
 #ifndef __DOLFIN_DOMAIN_BOUNDARY_H
 #define __DOLFIN_DOMAIN_BOUNDARY_H

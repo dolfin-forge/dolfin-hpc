@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009-2013, 2018-2019.
-// Modified by Balthasar Reuter, 2013
-// Modified by Aurelien Larcher, 2015
-//
 
 #include <dolfin/mesh/DMesh.h>
 
@@ -53,7 +48,7 @@ struct DCell
   }
 
   /// Local index of cell
-  int id;
+  uint id;
 
   /// Index of parent cell
   int parent_id;
@@ -134,7 +129,7 @@ DMesh::DMesh(Mesh& mesh) :
     ctype_(mesh.type().clone()),
     space_(mesh.space().clone()),
     glb_max_(static_cast<long>(mesh.global_size(0))),
-    salt_((static_cast<long>(ctype_->num_entities(0)) * 
+    salt_((static_cast<long>(ctype_->num_entities(0)) *
 	   static_cast<long>(mesh.global_size(mesh.type().dim())))),
     cdeleted_(0),
     vdeleted_(0)
@@ -175,7 +170,7 @@ DMesh::DMesh(Mesh& mesh) :
 
   // Make sure edges and vertices are created
   mesh.init();
-  
+
   delete[] vertices;
 }
 //-----------------------------------------------------------------------------
@@ -216,7 +211,7 @@ void DMesh::exp(Mesh& mesh)
       (*it)->id = i;
     }
 
-    // Renumber glb indicies    
+    // Renumber glb indicies
     renumber_glb(new_global);
   }
   {
@@ -263,17 +258,20 @@ void DMesh::exp(Mesh& mesh)
       if (dv->is_shared)
       {
         dolfin_assert(dv->owner != DVertex::UNDEF);
-        
+
         if (dv->owner != pe_rank)
         {
           dist->set_ghost(current_vertex, dv->owner);
         }
-        
+
       }
     }
   }
-  dist->remap_shared_adj();
-  dist->finalize();
+  if ( dist != NULL )
+  {
+    dist->remap_shared_adj();
+    dist->finalize();
+  }
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
@@ -291,7 +289,8 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-  mesh.topology().distdata()[0].swap(*dist);
+  if ( dist != NULL )
+    swap(*dist, mesh.topology().distdata()[0]);
   mesh.topology().finalize();
 
 #if DEBUG
@@ -542,7 +541,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 	  mv->is_shared = true;
 	  dolfin_assert(mv->owner != DVertex::UNDEF);
 	}
-	
+
         continue;
       }
 
@@ -589,7 +588,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             dolfin_assert(v1->glb_id != v2->glb_id);
             ref_edge[EdgeKey<long>(v1->glb_id, v2->glb_id)] = mv;
           }
-          dolfin_assert((*ic) > 0);
+          dolfin_assert((*ic) != NULL);
           bisect((*ic), mv, v1, v2);
         }
       }
@@ -631,8 +630,8 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
-  int max_prop, recv_count;
-  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INT, MPI_MAX, comm);
+  int max_prop = 0;
+  MPI::all_reduce<MPI::max>( num_prop, max_prop, comm );
 
   long *recv_buff = new long[max_prop];
   long *send_buff = new long[num_prop];
@@ -648,7 +647,6 @@ void DMesh::propagate_naive(Mesh& mesh,
     *(sp++) = static_cast<long>(it->second.owner);
   }
 
-  MPI_Status status;
   uint dest, src;
 
   empty = true;
@@ -657,9 +655,8 @@ void DMesh::propagate_naive(Mesh& mesh,
     src = (pe_rank - j + pe_size) % pe_size;
     dest = (pe_rank + j) % pe_size;
 
-    MPI_Sendrecv(&send_buff[0], num_prop, MPI_LONG, dest, 1, recv_buff,
-                 max_prop, MPI_LONG, src, 1, comm, &status);
-    MPI_Get_count(&status, MPI_LONG, &recv_count);
+    int recv_count = MPI::sendrecv( &send_buff[0], num_prop, dest,
+                                    recv_buff, max_prop, src, 1, comm );
 
     if (recv_count > 0) empty = false;
 
@@ -684,7 +681,7 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   short prop, gprop;
   prop = (empty == false);
-  MPI_Allreduce(&prop, &gprop, 1, MPI_SHORT, MPI_SUM, comm);
+  MPI::all_reduce<MPI::sum>( prop, gprop, comm );
   empty = (gprop == 0);
 
   delete[] send_buff;
@@ -700,8 +697,8 @@ void DMesh::propagate_hypercube(Mesh& mesh,
 
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
-  int total_prop, recv_count;
-  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INT, MPI_SUM, comm);
+  int total_prop = 0;
+  MPI::all_reduce<MPI::sum>( num_prop, total_prop, comm );
 
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];
@@ -719,7 +716,6 @@ void DMesh::propagate_hypercube(Mesh& mesh,
     state_size += 5;
   }
 
-  MPI_Status status;
   uint dest;
   uint D = 1;
 #if  (__sgi || __FreeBSD__)
@@ -735,9 +731,8 @@ void DMesh::propagate_hypercube(Mesh& mesh,
   {
     dest = pe_rank ^ (D << j);
 
-    MPI_Sendrecv(state, state_size, MPI_LONG, dest, 1, recv_buff, total_prop,
-                 MPI_LONG, dest, 1, comm, &status);
-    MPI_Get_count(&status, MPI_LONG, &recv_count);
+    int recv_count = MPI::sendrecv( state, state_size, dest,
+                                    recv_buff, total_prop, dest, 1, comm );
 
     dolfin_assert(recv_count % 5 == 0);
     for (int k = 0; k < recv_count; k += 5)
@@ -767,14 +762,14 @@ void DMesh::propagate_hypercube(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void DMesh::renumber_glb(_map<long, uint>& new_global)
-{  
+{
   uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
   Array<long> *ghost_buffer = new Array<long>[pe_size];
 
   uint num_owned = 0;
   uint num_ghost = 0;
-  
+
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it)
   {
     DVertex * const dv(*it);
@@ -793,9 +788,11 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
 
   uint offset = 0;
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                               MPI::DOLFIN_COMM) );
 #else
-  MPI_Scan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Scan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                             MPI::DOLFIN_COMM) );
   offset -= num_owned;
 #endif
 
@@ -803,47 +800,41 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
   {
     DVertex * const dv(*it);
     dolfin_assert(!dv->deleted);
-   
+
     if (!dv->is_shared || (dv->is_shared && dv->owner == pe_rank))
     {
       new_global[dv->glb_id] = offset++;
     }
   }
 
-  MPI_Status status;
   Array<uint> send_buffer;
   uint src, dest;
-  int recv_count;
 
   /// @todo Reduce comm...
   uint recv_size_gh = 0;
   for (uint i = 0; i < pe_size; i++)
   {
     uint send_size = ghost_buffer[i].size();
-    MPI_Reduce(&send_size, &recv_size_gh, 1, 
-	       MPI_UNSIGNED, MPI_SUM, i, MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Reduce(&send_size, &recv_size_gh, 1,
+	                               MPI_UNSIGNED, MPI_SUM, i, MPI::DOLFIN_COMM) );
   }
 
   long *recv_ghost = new long[recv_size_gh];
   uint *recv_buff = new uint[num_ghost];
 
-  
+
   for(uint j=1; j < pe_size; j++){
     src = (pe_rank - j + pe_size) % pe_size;
     dest = (pe_rank + j) % pe_size;
-    
-    MPI_Sendrecv(&ghost_buffer[dest][0], ghost_buffer[dest].size(),
-                 MPI_LONG, dest, 1, recv_ghost, recv_size_gh,
-                 MPI_LONG, src, 1, MPI::DOLFIN_COMM, &status);
-    MPI_Get_count(&status, MPI_LONG, &recv_count);
+
+    int recv_count = MPI::sendrecv( &ghost_buffer[dest][0], ghost_buffer[dest].size(),
+                                   dest, recv_ghost, recv_size_gh, src, 1 );
 
     for(int k=0; k < recv_count; k++)
       send_buffer.push_back(new_global[recv_ghost[k]]);
 
-    MPI_Sendrecv(&send_buffer[0], send_buffer.size(), MPI_UNSIGNED, src, 2,
-                 recv_buff, num_ghost, MPI_UNSIGNED, dest, 2,
-                 MPI::DOLFIN_COMM,&status);
-    MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+    recv_count = MPI::sendrecv( &send_buffer[0], send_buffer.size(),
+                                src, recv_buff, num_ghost, dest, 2 );
 
     for(int j=0; j < recv_count; j++)
       new_global[ghost_buffer[dest][j]] = recv_buff[j];
@@ -860,19 +851,17 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(Mesh& mesh,
-                            Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh&, Array<Propagation>&, bool&)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(Mesh& mesh,
-                                Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Mesh&, Array<Propagation>&, bool&)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::renumber_glb(_map<long, uint>& new_global)
+void DMesh::renumber_glb(_map<long, uint>&)
 {
   error("Rivara needs MPI");
 }

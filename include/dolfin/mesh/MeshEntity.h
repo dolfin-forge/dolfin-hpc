@@ -1,17 +1,17 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2006-05-11
-// Last changed: 2006-10-23
 
 #ifndef __DOLFIN_MESH_ENTITY_H
 #define __DOLFIN_MESH_ENTITY_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/MeshDistributedData.h>
 
 namespace dolfin
 {
+
+class Mesh;
 
 /**
  *
@@ -139,7 +139,7 @@ protected:
   uint const gdim_;
 
   // Pointer to mesh distributed data if applicable
-  MeshDistributedData const * const distdata_;
+  MeshDistributedData const & distdata_;
 
   // Index of entity within topological dimension
   uint index_;
@@ -175,6 +175,7 @@ inline uint MeshEntity::index() const
 inline uint MeshEntity::num_entities(uint dim) const
 {
   //dolfin_assert(topology_(tdim_, dim).is_initialized());
+  dolfin_assert( topology_(tdim_, dim).min_degree() <= topology_(tdim_, dim).max_degree() );
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
   return topology_(tdim_, dim).degree(index_);
 }
@@ -183,6 +184,7 @@ inline uint MeshEntity::num_entities(uint dim) const
 inline uint * MeshEntity::entities(uint dim)
 {
   //dolfin_assert(topology_(tdim_, dim).is_initialized());
+  dolfin_assert( topology_(tdim_, dim).min_degree() <= topology_(tdim_, dim).max_degree() );
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
   return topology_(tdim_, dim)(index_);
 }
@@ -191,6 +193,7 @@ inline uint * MeshEntity::entities(uint dim)
 inline uint const * MeshEntity::entities(uint dim) const
 {
   //dolfin_assert(topology_(tdim_, dim).is_initialized());
+  dolfin_assert( topology_(tdim_, dim).min_degree() <= topology_(tdim_, dim).max_degree() );
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
   return topology_(tdim_, dim)(index_);
 }

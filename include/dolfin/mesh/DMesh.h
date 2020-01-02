@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009-2019.
-// Modified by Balthasar Reuter, 2013
-// Modified by Aurelien Larcher, 2015
-//
 
 #ifndef __DOLFIN_D_MESH_H
 #define __DOLFIN_D_MESH_H
@@ -24,10 +19,10 @@ namespace dolfin
 
 template<class T> class Array;
 class CellType;
-class DCell;
-class DVertex;
+struct DCell;
+struct DVertex;
 class Mesh;
-template<class T, class E, uint N> class MeshValues;
+template<class T, class E, uint N> struct MeshValues;
 
 /// Dynamic mesh class for on-the-fly changes to the mesh. It is used by the
 /// recursive RivaraRefinement and the EdgeCollapse-MeshCoarsening.

@@ -27,7 +27,8 @@ DOLFIN_START_TEST( test_UFCFunction )
       for (Array<CellType *>::const_iterator it = cells.begin();
           it != cells.end(); ++it)
       {
-        Mesh refcell;
+        CellType * cell = CellType::create(**it);
+        Mesh refcell( *cell, EuclideanSpace( cell->dim() ) );
         (*it)->create_reference_cell(refcell);
         UFCFunction<MidpointDistance> f(refcell);
         real value;
@@ -47,7 +48,8 @@ DOLFIN_START_TEST( test_UFCFunction )
       for (Array<CellType *>::const_iterator it = cells.begin();
           it != cells.end(); ++it)
       {
-        Mesh refcell;
+        CellType * cell = CellType::create(**it);
+        Mesh refcell( *cell, EuclideanSpace( cell->dim() ) );
         (*it)->create_reference_cell(refcell);
         UFCFunction<Diameter<Cell> > f(refcell);
         real value;

@@ -1,8 +1,6 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2015-2016.
-//
+
 // This class has been extensively tortured since 2015 due to flawed design and
 // non-robust implementation.
 // Additionally the topology computation was rewritten to respect abstraction
@@ -12,9 +10,6 @@
 // sections reserved to distributed meshes.
 // Additionally it benefits from several inconsistency fixes merged from mesh
 // distributed data.
-//
-// First added:  2006-05-08
-// Last changed: 2007-11-30
 
 #ifndef __DOLFIN_MESH_TOPOLOGY_H
 #define __DOLFIN_MESH_TOPOLOGY_H
@@ -29,13 +24,13 @@
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/MeshDistributedData.h>
 
 namespace dolfin
 {
 
 class Mesh;
 class Connectivity;
-class MeshDistributedData;
 
 /**
  *
@@ -73,7 +68,10 @@ public:
   ~MeshTopology();
 
   /// Swap instances
-  void swap(MeshTopology& other);
+  friend void swap( MeshTopology& a, MeshTopology& b );
+
+  /// Assignment (Disabled)
+  MeshTopology & operator=( const MeshTopology & other );
 
   /// Equality
   bool operator==(MeshTopology const& other) const;
@@ -120,9 +118,6 @@ public:
   Connectivity const * connectivity(uint d0, uint d1 = 0) const;
 
   //--- Distributed data ------------------------------------------------------
-
-  /// Return if the topology is distributed
-  bool is_distributed() const;
 
   /// Return mesh distribution data if the topology is distributed
   MeshDistributedData& distdata();
@@ -181,16 +176,6 @@ public:
   void renumber() const;
 
 private:
-
-  /// Only Mesh can create empty instances and clear them
-  friend class Mesh;
-
-  /// Default constructor (Disabled)
-  MeshTopology();
-
-  /// Assignment (Disabled)
-  MeshTopology const& operator=(MeshTopology const& other) const;
-
   /// Force reordering of mesh topology connectivities
   void reorder() const;
 
@@ -207,7 +192,7 @@ private:
   mutable Connectivity * C_[CMAX][CMAX];
 
   /// Distributed mesh topology data
-  MeshDistributedData * distdata_;
+  MeshDistributedData distdata_;
 
   //
   int timestamp_;

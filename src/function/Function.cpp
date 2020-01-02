@@ -1,20 +1,12 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Dag Lindbo, 2008.
-// Modified by Kristen Kaasbjerg, 2008.
-// Modified by Niclas Jansson, 2008-2010.
-// Modified by Aurélien Larcher 2013-2014.
-//
-// First added:  2007-04-02
-// Last changed: 2014-02-06
 
 #include <dolfin/function/Function.h>
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
@@ -469,10 +461,11 @@ void Function::interpolate_vertex_values(real* values) const
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
 
-        MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                     &recvbuf[0], recvsize, MPI_DOUBLE, src, 1,
-                     MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
+        MPI::check_error( MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(),
+                                       MPI_UNSIGNED, dst, 1,  &recvbuf[0],
+                                       recvsize, MPI_DOUBLE, src, 1,
+                                       MPI::DOLFIN_COMM, &status) );
+        MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
         // Add contributions, just simplified this part with mappings
         Array<uint> recvmapping = dist0.shared_mapping().from(src);
@@ -491,7 +484,7 @@ void Function::interpolate_vertex_values(real* values) const
       //
       delete[] recvbuf;
       delete[] sendbuf;
-#endif 
+#endif
     }
 
 
@@ -551,6 +544,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 {
   // Check dimension
   dolfin_assert(finite_element.space_dimension() == scratch->local_dimension);
+  MAYBE_UNUSED(finite_element);
 
   // Tabulate dofs
   dofmap_->tabulate_dofs(scratch->dofs, cell, dolfin_cell);
@@ -574,7 +568,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void Function::interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
+                           const Cell& dolfin_cell, uint) const
 {
   interpolate(coefficients, cell, finite_element, dolfin_cell);
 }
@@ -882,7 +876,7 @@ Function& Function::operator=(real value)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator+=(real value)
+Function& Function::operator+=(real)
 {
   dolfin_assert(!this->empty());
   error("Not implemented");
@@ -890,7 +884,7 @@ Function& Function::operator+=(real value)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator-=(real value)
+Function& Function::operator-=(real)
 {
   dolfin_assert(!this->empty());
   error("Not implemented");

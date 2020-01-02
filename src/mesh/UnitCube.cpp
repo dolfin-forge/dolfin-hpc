@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-//
-// First added:  2005-12-02
-// Last changed: 2007-12-06
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitCube.h>
@@ -15,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitCube::UnitCube(uint nx, uint ny, uint nz) :
-    Mesh()
+    Mesh(*CellType::create(CellType::tetrahedron), EuclideanSpace(3))
 {
 
   if (nx < 1 || ny < 1 || nz < 1)
@@ -26,7 +21,7 @@ UnitCube::UnitCube(uint nx, uint ny, uint nz) :
   rename("mesh", "Mesh of the unit cube (0,1) x (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));

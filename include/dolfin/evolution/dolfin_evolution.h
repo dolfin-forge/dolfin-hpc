@@ -8,6 +8,4 @@
 #include <dolfin/evolution/TimeSeries.h>
 #include <dolfin/evolution/TimeStepping.h>
 
-//
-
 #endif /* __DOLFIN_HEADER_EVOLUTION_H */

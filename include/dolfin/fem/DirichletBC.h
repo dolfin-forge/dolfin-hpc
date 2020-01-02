@@ -1,11 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Kristian Oelgaard, 2007
-//
-// First added:  2007-04-10
-// Last changed: 2008-05-22
-//
 
 #ifndef __DOLFIN_DIRICHLET_BC_H
 #define __DOLFIN_DIRICHLET_BC_H
@@ -98,8 +92,8 @@ public:
 private:
 
   /// Apply boundary conditions
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
-             BilinearForm const& form);
+  void apply_impl(GenericMatrix& A, GenericVector& b, const GenericVector* x,
+                  BilinearForm const& form);
 
   ///
   inline void sync(Time const& t) { g_(t); }

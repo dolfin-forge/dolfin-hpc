@@ -1,15 +1,9 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2007, 2008.
-// Modified by Aurélien Larcher, 2014.
-//
+
 // This abstraction was rewritten to violate abstraction the least possible
 // instead of "in every possible way".
 // Additionally support for subsystems was added.
-//
-// First added:  2008-06-18
-// Last changed: 2014-04-02
 
 #ifndef __DOLFIN_BOUNDARY_CONDITION_H
 #define __DOLFIN_BOUNDARY_CONDITION_H

@@ -1,11 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Ola Skavhaug, 2007.
-//
-// First added:  2007-03-15
-// Last changed: 2008-04-23
 
 #ifndef __DOLFIN_SCALAR_H
 #define __DOLFIN_SCALAR_H
@@ -15,6 +9,7 @@
 #include <dolfin/parameter/parameters.h>
 #include "GenericTensor.h"
 #include <dolfin/main/MPI.h>
+#include <dolfin/common/maybe_unused.h>
 
 #ifdef HAVE_PETSC
 #include "PETScFactory.h"
@@ -47,7 +42,7 @@ namespace dolfin
 
     /// Initialize zero tensor using sparsity pattern
     void init(const GenericSparsityPattern& sparsity_pattern)
-    { value = 0.0; }
+    { MAYBE_UNUSED(sparsity_pattern); value = 0.0; }
 
     /// Return copy of tensor
     virtual Scalar* copy() const
@@ -58,19 +53,19 @@ namespace dolfin
     { return 0; }
 
     /// Return size of given dimension
-    uint size(uint dim) const
+    uint size(uint) const
     { error("The size() function is not available for scalars."); return 0; }
 
     /// Get block of values
-    void get(real* block, const uint* num_rows, const uint * const * rows) const
+    void get(real* block, const uint*, const uint * const *) const
     { block[0] = value; }
 
     /// Set block of values
-    void set(const real* block, const uint* num_rows, const uint * const * rows)
+    void set(const real* block, const uint*, const uint * const *)
     { value = block[0]; }
 
     /// Add block of values
-    void add(const real* block, const uint* num_rows, const uint * const * rows)
+    void add(const real* block, const uint*, const uint * const *)
     { value += block[0]; }
 
     /// Set all entries to zero and keep any sparse structure
@@ -78,17 +73,15 @@ namespace dolfin
     { value = 0.0; }
 
     /// Finalize assembly of tensor
-    void apply(FinalizeType finaltype=FINALIZE)
-    { 
-#ifdef HAVE_MPI
-      real tmp = value; 
-      MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI::DOLFIN_COMM);
-#endif
+    void apply(FinalizeType)
+    {
+      real tmp = value;
+      MPI::all_reduce<MPI::sum>(tmp, value);
     }
 
 
     /// Display tensor
-    void disp(uint precision=2) const
+    void disp(uint) const
     { prm("Scalar value", value); }
 
     //--- Scalar interface ---
@@ -104,12 +97,12 @@ namespace dolfin
     //--- Special functions
 
     /// Return a factory for the default linear algebra backend
-    inline LinearAlgebraFactory& factory() const 
+    inline LinearAlgebraFactory& factory() const
     {
 
       // Get backend from parameter system
       std::string backend = dolfin_get("linear algebra backend");
-      
+
 #if (HAVE_PETSC && HAVE_JANPACK)
       if (backend == "PETSc")
       {
@@ -118,12 +111,12 @@ namespace dolfin
       else if (backend == "JANPACK")
       {
 	return JANPACKFactory::instance();
-      }      
+      }
 #elif HAVE_PETSC
       return PETScFactory::instance();
-#elif HAVE_JANPACK 
+#elif HAVE_JANPACK
       return JANPACKFactory::instance();
-#endif      
+#endif
       error("Linear algebra backend \"" + backend + "\" not available.");
     }
 
@@ -132,7 +125,7 @@ namespace dolfin
     { return value; }
 
   private:
-    
+
     // Value of scalar
     real value;
 

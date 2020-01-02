@@ -1,16 +1,13 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher 2017.
-//
-// First added:  2006-06-02
-// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_FACET_H
 #define __DOLFIN_FACET_H
 
-#include "MeshEntity.h"
-#include "MeshEntityIterator.h"
+#include <dolfin/common/DistributedData.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/MeshEntityIterator.h>
 
 namespace dolfin
 {
@@ -61,7 +58,7 @@ public:
 class FacetIterator : public MeshEntityIterator
 {
 public:
-  
+
   FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
   FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().type().facet_dim()) {}
 

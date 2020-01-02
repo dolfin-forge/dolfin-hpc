@@ -1,11 +1,5 @@
 // Copyright (C) 2004-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2006.
-// Modified by Ola Skavhaug 2008.
-//
-// First added:  2004-06-19
-// Last changed: 2008-05-10
 
 #ifndef __DOLFIN_LINEAR_SOLVER_H
 #define __DOLFIN_LINEAR_SOLVER_H

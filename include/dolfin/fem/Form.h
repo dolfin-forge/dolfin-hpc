@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014.
-//
-// First added:  2007-04-02
-// Last changed: 2014-02-27
 
 #ifndef __DOLFIN_FORM_H
 #define __DOLFIN_FORM_H
@@ -118,7 +113,7 @@ protected:
   void init(Array<Coefficient *>& coefficients);
 
   /// Assign coefficients from map to form coefficients
-  void init(Array<Coefficient *>& coefficients, CoefficientMap const& map);
+  void init(Array<Coefficient *>& coefficients, CoefficientMap const & map);
 
 private:
 
@@ -207,7 +202,7 @@ Form::create_interior_facet_integral(uint i) const
 template <class T>
 struct Nil : public T
 {
-    Nil(Mesh& mesh, typename T::Coefficients& coefs) :
+    Nil(Mesh& mesh, typename T::Coefficients&) :
         T(mesh)
     {
     }

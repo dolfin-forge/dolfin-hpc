@@ -12,7 +12,7 @@ template<class CellType, typename T, class Entity>
 void check_reference_cell()
 {
   CellType cellt;
-  Mesh     cellm;
+  Mesh     cellm( cellt, EuclideanSpace( cellt.dim() ) );
   cellt.create_reference_cell(cellm);
   MeshValues<T, Entity> M(cellm);
 
@@ -51,7 +51,7 @@ template<typename T, typename V>
 void check_conversion_vertices_x0()
 {
   QuadrilateralCell cellt;
-  Mesh              cellm;
+  Mesh              cellm( cellt, EuclideanSpace( cellt.dim() ) );
   cellt.create_reference_cell(cellm);
   cellm.geometry() -= Point(0.25, 0.25);
   cellm.geometry() *= 2.0;

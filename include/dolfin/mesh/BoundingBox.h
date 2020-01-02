@@ -1,6 +1,5 @@
 // Copyright (C) 2015 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_BOUNDING_BOX_H
 #define __DOLFIN_BOUNDING_BOX_H

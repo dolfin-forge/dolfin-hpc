@@ -9,7 +9,7 @@
 // generated with VMTK (http://villacamozzi.marionegri.it/~luca/vmtk/).
 
 #include <dolfin.h>
-#include "Poisson.h"
+#include "ufc1/Poisson.h"
 
 using namespace dolfin;
 

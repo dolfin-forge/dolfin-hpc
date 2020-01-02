@@ -1,6 +1,5 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/mesh/RefinementPattern.h>
 

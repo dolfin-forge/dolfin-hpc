@@ -1,12 +1,5 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Jansson 2006.
-// Modified by Ola Skavhaug 2006.
-// Modified by Dag Lindbo 2008.
-//
-// First added:  2006-06-21
-// Last changed: 2006-12-01
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
@@ -56,8 +49,8 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
   VertexIterator v(c);
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) c.index(), p[0], p[1], p[2],
-                      p[0], p[1], p[2]);
+  bbox = gts_bbox_new(gts_bbox_class(), reinterpret_cast<gpointer>(c.index()),
+                      p[0], p[1], p[2], p[0], p[1], p[2]);
 
   for (++v; !v.end(); ++v)
   {

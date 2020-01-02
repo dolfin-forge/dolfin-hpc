@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-05-08
-// Last changed: 2008-05-08
 
 #ifndef __DOLFIN_SOLVER_TYPE_H
 #define __DOLFIN_SOLVER_TYPE_H
@@ -26,7 +23,7 @@ namespace dolfin
   };
 
   //---------------------------------------------------------------------------
-  static SolverType krylov_method(std::string type)
+  inline static SolverType krylov_method(std::string type)
   {
     if (type == "cg")
       return cg;
@@ -43,7 +40,7 @@ namespace dolfin
   }
 
   //---------------------------------------------------------------------------
-  static SolverType solver_type(std::string type, bool fallback = false)
+  inline static SolverType solver_type(std::string type, bool fallback = false)
   {
     if (type == "lu")
     {

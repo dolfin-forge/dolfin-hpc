@@ -1,10 +1,5 @@
 // Copyright (C) 2009 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson 2011.
-//
-// First added:  2009-08-11
-// Last changed: 2011-01-20
 
 #ifndef __DOLFIN_ENCODER_H
 #define __DOLFIN_ENCODER_H

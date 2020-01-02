@@ -1,12 +1,7 @@
-//
-//
-// Modified by Aurelien Larcher, 2014-2016.
-//
 // This class was imported from UNICORN and did not possess any copyright.
 // It was provided with a second argument 'p' to avoid the same mistakes as in
 // the UNICORN implementation where p could have the value 2 or 4 (or even more)
 // at the same time in different parts of the solver.
-//
 
 #ifndef MESH_QUALITY_FUNCTION_H
 #define MESH_QUALITY_FUNCTION_H

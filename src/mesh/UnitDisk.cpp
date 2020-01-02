@@ -1,11 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2007.
-// Modified by Nuno Lopes 2008
-//
-// First added:  2005-12-02
-// Last changed: 2008-06-19
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitDisk.h>
@@ -16,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
-    Mesh()
+    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
 {
   warning("UnitDisk is Experimental: It may be of poor quality.");
 
@@ -28,7 +22,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
   rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::triangle, 2);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices and cells:
   if (type == crisscross)
@@ -163,8 +157,8 @@ real UnitDisk::transformx(real x, real y, Transformation transformation)
   else
   {
     // FIXME: Use easier to understand check
-    if ((transformation != maxn) * (transformation != sumn)
-        * (transformation != rotsumn))
+    if ((transformation != maxn) && (transformation != sumn)
+        && (transformation != rotsumn))
     {
       message("Implemented  transformations are: maxn,sumn and rotsumn");
       message("Using rotsumn transformation");
@@ -204,8 +198,8 @@ real UnitDisk::transformy(real x, real y, Transformation transformation)
   }
   else
   {
-    if ((transformation != maxn) * (transformation != sumn)
-        * (transformation != rotsumn))
+    if ((transformation != maxn) && (transformation != sumn)
+        && (transformation != rotsumn))
     {
       message("Implemented  transformations for are: maxn, sumn and rotsumn");
       message("Using rotsumn transformation");

@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-//
-// First added:  2005
-// Last changed: 2008-04-22
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -36,7 +31,7 @@ PETScLUSolver::PETScLUSolver()
 #endif
 
   //KSPSetType(ksp, KSPPREONLY);
-  
+
   // Set preconditioner to LU factorization
   PC pc;
   KSPGetPC(ksp, &pc);
@@ -46,7 +41,7 @@ PETScLUSolver::PETScLUSolver()
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
   PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
   PCFactorSetShiftAmount(pc, PETSC_DECIDE);
-#else    
+#else
   PCFactorSetShiftNonzero(pc, PETSC_DECIDE);
 
 
@@ -82,10 +77,10 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 #endif
 
   MatGetType(A.mat(), &mat_type);
- 
+
 
   std::string _mat_type = mat_type;
-    
+
   // Convert to UMFPACK matrix if matrix type is MATSEQAIJ and UMFPACK is available.
   #if PETSC_HAVE_UMFPACK
     if(_mat_type == MATSEQAIJ)
@@ -94,10 +89,10 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
       MatConvert(A.mat(), MATUMFPACK, MAT_REUSE_MATRIX, &Atemp);
     }
   #endif
-    
+
   // FIXME: Maybe SUPERLU_DIST should be an option here?
   // Convert to MUMPS matrix if matrix type is MATMPIAIJ and MUMPS is available.
-  #if PETSC_HAVE_MUMPS    
+  #if PETSC_HAVE_MUMPS
     if(_mat_type == MATMPIAIJ) {
       Mat Atemp = A.mat();
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -109,9 +104,9 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 #endif
     }
   #endif
-    
+
     // Make sure MATMPIAIJ matrices has been converted
-    _mat_type = mat_type;    
+    _mat_type = mat_type;
     if( MPI::size() > 1 && _mat_type == MATMPIAIJ)
       error("No support for symbolic LU on matrix type mpiaij."
 	    "Installation of MUMPS is recomended.");
@@ -134,7 +129,7 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
   KSPSetOperators(ksp, A.mat(), A.mat(), DIFFERENT_NONZERO_PATTERN);
 #endif
   KSPSolve(ksp, b.vec(), x.vec());
-  
+
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
   KSPType ksp_type;
@@ -172,7 +167,7 @@ dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
 
   // Copy data to dense matrix
   const real Anorm = copyToDense(A);
-  
+
   // Initialize solution vector (remains untouched if dimensions match)
   x.init(A.size(1));
 
@@ -209,7 +204,7 @@ void PETScLUSolver::disp() const
   KSPView(ksp, PETSC_VIEWER_STDOUT_WORLD);
 }
 //-----------------------------------------------------------------------------
-real PETScLUSolver::copyToDense(const PETScKrylovMatrix& A)
+real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
 {
   error("PETScLUSolver::copyToDense needs to be fixed");
 /*
@@ -254,7 +249,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix& A)
     MatSetValues(B, M, idxm, 1, idxn, values, INSERT_VALUES);
     y.restore(values);
     e(j) = 0.0;
-    
+
     // Compute l1 norm of matrix (maximum column sum)
     const real colsum = y.norm(PETScVector::l1);
     if ( colsum > maxcolsum )

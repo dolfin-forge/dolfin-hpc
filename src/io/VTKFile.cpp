@@ -1,14 +1,5 @@
 // Copyright (C) 2005-2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg 2005-2006.
-// Modified by Kristian Oelgaard 2006.
-// Modified by Niclas Jansson 2008-2009.
-// Modified by Kaspar Mueller 2013.
-// Modified by Aurélien Larcher 2014.
-//
-// First added:  2005-07-05
-// Last changed: 2014-02-08
 
 #include <dolfin/io/VTKFile.h>
 
@@ -592,6 +583,7 @@ void VTKFile::pvdFileWrite(uint num, bool parallel)
                  vtu_filename.size());
   }
 #else
+  MAYBE_UNUSED(parallel)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1,
 	       vtu_filename.size());
 #endif

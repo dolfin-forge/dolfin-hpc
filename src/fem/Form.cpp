@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014.
-//
-// First added:  2007-12-10
-// Last changed: 2014-02-26
 
 #include <dolfin/fem/Form.h>
 
@@ -68,7 +63,7 @@ uint Form::coefficient_index(std::string const& name) const
 }
 
 //-----------------------------------------------------------------------------
-std::string Form::coefficient_name(uint i) const
+std::string Form::coefficient_name(uint) const
 {
   error("Not implemented without UFL support: \n"
         "std::string Form::coefficient_name(uint i) const");

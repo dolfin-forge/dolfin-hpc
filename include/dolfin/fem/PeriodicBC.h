@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2007
-//
-// First added:  2007-07-08
-// Last changed: 2007-12-08
 
 #ifndef __DOLFIN_PERIODIC_BC_H
 #define __DOLFIN_PERIODIC_BC_H

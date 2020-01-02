@@ -1,6 +1,6 @@
 // Copyright (C) 2014 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // The original class named NodeNormal from UNICORN is actually VertexNormal
 // since the former was written for linear Lagrange in 3D only to compute a
 // non-orthogonal, non-anticlockwise, sometimes non-normal basis with no
@@ -8,20 +8,17 @@
 // This class together with the rewrite of the finite element framework
 // provides support for the computation of a normal field and tangential vectors
 // interpolated to a Lagrange finite element space of arbitrary order.
-//
-// First added:  2007-05-01
-// Last changed: 2014-05-22
 
 #ifndef __DOLFIN_NODENORMAL_H
 #define __DOLFIN_NODENORMAL_H
 
-#include <dolfin/fem/BoundaryNormal.h>
-#include <dolfin/mesh/Mesh.h>
-
-#include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/common/constants.h>
+#include <dolfin/fem/BoundaryNormal.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <map>
 
@@ -42,11 +39,12 @@ public:
   };
 
   /// Create normal, tangents for the boundary of mesh
-  NodeNormal(Mesh& mesh, Type w = unit, real alpha = 1.57);
+  NodeNormal( Mesh& mesh, Type w = unit,
+              real alpha = dolfin_get("NodeNormal alpha") );
 
   /// Create normal, tangents for the boundary of mesh for given subdomain
-  NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w = none,
-             real alpha = 1.57);
+  NodeNormal( Mesh& mesh, SubDomain const& subdomain, Type w = none,
+              real alpha = dolfin_get("NodeNormal alpha") );
 
   /// Destructor
   ~NodeNormal();
@@ -56,9 +54,6 @@ public:
 
   /// Returns the node type
   uint node_type(uint node_id) const;
-
-  /// Assignment
-  NodeNormal& operator=(NodeNormal& node_normal);
 
 private:
 
@@ -83,43 +78,6 @@ private:
 
   ///
   _map<uint, uint> node_type_;
-
-  struct FacetData
-  {
-    uint global_index;
-    real weight;
-    Point normal;
-    _set<uint> nodes;
-
-    void disp() const
-    {
-      section("FacetData");
-      prm("global_index", global_index);
-      prm("nodes"       , nodes.size());
-      prm("weight"      , weight);
-      prm("normal"      , normal);
-      end();
-    }
-  };
-
-  struct NodeData
-  {
-    uint node_type;
-    Array<uint> dofs;
-    Array<uint> adjs;
-    Array<FacetData *> facets;
-
-    void disp() const
-    {
-      section("NodeData");
-      prm("node_type" , node_type);
-      prm("dofs"      , dofs.size());
-      prm("adjs"      , adjs.size());
-      prm("facets"    , facets.size());
-      end();
-    }
-  };
-
 };
 
 }

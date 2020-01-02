@@ -1,11 +1,8 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2006-05-11
-// Last changed: 2006-10-20
 
 #include <dolfin/mesh/MeshEntity.h>
-
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/log/dolfin_log.h>
 
 namespace dolfin
@@ -65,16 +62,16 @@ int MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].get_global(index_) : index_);
+  return (topology_.distributed() ? distdata_[tdim_].get_global(index_) : index_);
 }
 //-----------------------------------------------------------------------------
 void MeshEntity::get_global_entities(uint dim, uint * indices) const
 {
   // Get list of entities for given topological dimension
-  if (distdata_ != NULL)
+  if ( topology_.distributed() )
   {
     Connectivity const& mc = topology_(tdim_, dim);
-    (*distdata_)[dim].get_global(mc.degree(index_), mc(index_), indices);
+    distdata_[dim].get_global(mc.degree(index_), mc(index_), indices);
   }
   else
   {
@@ -85,14 +82,14 @@ void MeshEntity::get_global_entities(uint dim, uint * indices) const
 void MeshEntity::get_global_entities(uint ** indices) const
 {
   // Get list of entities for given topological dimension
-  if (distdata_ != NULL)
+  if ( topology_.distributed() )
   {
     for (uint d = 0; d < tdim_; ++d)
     {
       Connectivity const& mc = topology_(tdim_, d);
-      (*distdata_)[d].get_global(mc.degree(index_), mc(index_), indices[d]);
+      distdata_[d].get_global(mc.degree(index_), mc(index_), indices[d]);
     }
-    indices[tdim_][0] = (*distdata_)[tdim_].get_global(index_);
+    indices[tdim_][0] = distdata_[tdim_].get_global(index_);
   }
   else
   {
@@ -102,36 +99,36 @@ void MeshEntity::get_global_entities(uint ** indices) const
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_owned() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].is_owned(index_) : true);
+  return (topology_.distributed() ? distdata_[tdim_].is_owned(index_) : true);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].is_shared(index_) : false);
+  return (topology_.distributed() ? distdata_[tdim_].is_shared(index_) : false);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].is_ghost(index_) : false);
+  return (topology_.distributed() ? distdata_[tdim_].is_ghost(index_) : false);
 }
 //-----------------------------------------------------------------------------
 uint MeshEntity::owner() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].get_owner(index_) : MPI::rank());
+  return (topology_.distributed() ? distdata_[tdim_].get_owner(index_) : MPI::rank());
 }
 //-----------------------------------------------------------------------------
 _set<uint> const * MeshEntity::adjacents() const
 {
-  return (distdata_ ? (*distdata_)[tdim_].ptr_shared_adj(index_) : NULL);
+  return (topology_.distributed() ? distdata_[tdim_].ptr_shared_adj(index_) : NULL);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
 {
-  if(distdata_ != NULL)
+  if( topology_.distributed() )
   {
     if (tdim_ == 0)
     {
-      return (*distdata_)[tdim_].is_shared(index_);
+      return distdata_[tdim_].is_shared(index_);
     }
     else
     {
@@ -139,7 +136,7 @@ bool MeshEntity::has_all_vertices_shared() const
       dolfin_assert(c.order() > 0);
       for (uint v = 0; v < c.degree(index_); ++v)
       {
-        if (!(*distdata_)[0].is_shared(c(index_)[v]))
+        if ( not distdata_[0].is_shared(c(index_)[v]) )
         {
           return false;
         }
@@ -157,13 +154,13 @@ bool MeshEntity::on_boundary() const
 {
   uint const mdim = topology_.dim();
   uint const fdim = topology_.type(index_).facet_dim();
-  if(distdata_ != NULL)
+  if( topology_.distributed() )
   {
     if (tdim_ ==  fdim)
     {
       // Facet has one adjacent cell and is not shared, thus is global
       return (this->num_entities(mdim) == 1)
-          && !(*distdata_)[tdim_].is_shared(index_);
+          && (not distdata_[tdim_].is_shared(index_));
     }
     else
     {
@@ -172,7 +169,7 @@ bool MeshEntity::on_boundary() const
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
-        if ((cfc.degree(fidx) == 1) && !(*distdata_)[fdim].is_shared(fidx))
+        if ( (cfc.degree(fidx) == 1) && (not distdata_[fdim].is_shared(fidx)) )
         {
           // Facet has one adjacent cell and is not shared, thus is global
           return true;

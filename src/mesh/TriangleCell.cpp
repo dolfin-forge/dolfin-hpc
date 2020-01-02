@@ -1,13 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2006.
-// Modified by Kristian Oelgaard, 2006-2007.
-// Modified by Dag Lindbo, 2008.
-// Modified by Aurelien Larcher, 2014-2015.
-//
-// First added:  2006-06-05
-// Last changed: 2014-11-07
 
 #include <dolfin/mesh/TriangleCell.h>
 
@@ -528,25 +520,26 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
   }
   else if  (geometry.dim() == 3)
   {
-    real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
-                        + (x1[1] - x0[1])*(x1[1] - x0[1])
-                        + (x1[2] - x0[2])*(x1[2] - x0[2]));
-    real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
-                        + (x2[1] - x1[1])*(x2[1] - x1[1])
-                        + (x2[2] - x1[2])*(x2[2] - x1[2]));
-    real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
-                        + (x0[1] - x2[1])*(x0[1] - x2[1])
-                        + (x0[2] - x2[2])*(x0[2] - x2[2]));
+    // real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
+    //                     + (x1[1] - x0[1])*(x1[1] - x0[1])
+    //                     + (x1[2] - x0[2])*(x1[2] - x0[2]));
+    // real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
+    //                     + (x2[1] - x1[1])*(x2[1] - x1[1])
+    //                     + (x2[2] - x1[2])*(x2[2] - x1[2]));
+    // real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
+    //                     + (x0[1] - x2[1])*(x0[1] - x2[1])
+    //                     + (x0[2] - x2[2])*(x0[2] - x2[2]));
 
 
-    real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
-    real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
-    real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
-    real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
+    // real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
+    // real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
+    // real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
+    // real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
 
     // Check direction of the normal to the triangle; |n.ez|/||n|| >= sqrt(2)/2
     real d1 = orient3d( x0, x1, x2, &p[0]);
-    if (std::abs(d1) > tol) return false;
+    if (std::abs(d1) > tol)
+      return false;
   }
   else
   {

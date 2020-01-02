@@ -1,10 +1,5 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher 2013. (infinite loop fix)
-//
-// First added:  2006-05-12
-// Last changed: 2013-07-19
 
 #include <dolfin/mesh/MeshEntityIterator.h>
 

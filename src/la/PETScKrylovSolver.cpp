@@ -1,11 +1,5 @@
 // Copyright (C) 2005 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2005-2008.
-// Modified by Garth N. Wells, 2005-2006.
-//
-// First added:  2005-12-02
-// Last changed: 2008-05-08
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -29,7 +23,7 @@ namespace dolfin
 {
 
 // Monitor function
-int monitor(KSP ksp, int iteration, real rnorm, void *mctx)
+int monitor(KSP, int iteration, real rnorm, void *)
 {
   message("Iteration %d: residual = %g", iteration, rnorm);
   return 0;
@@ -102,7 +96,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
   KSPSetOperators(ksp, A.mat(), A.mat());
   if (get("Krylov keep PC"))
     KSPSetReusePreconditioner(ksp, PETSC_TRUE);
-  
+
 #else
   // Solve linear system
   if (get("Krylov keep PC"))
@@ -272,11 +266,11 @@ void PETScKrylovSolver::readParameters()
 #if(PETSC_VERSION_MAJOR > 2)
 #if(PETSC_VERSION_MINOR > 2)
     KSPMonitorSet(ksp, (PetscErrorCode (*)(KSP,PetscInt,PetscReal,void*))
-		  KSPMonitorTrueResidualNorm, PETSC_VIEWER_STDOUT_WORLD, NULL); 
+		  KSPMonitorTrueResidualNorm, PETSC_VIEWER_STDOUT_WORLD, NULL);
 #else
     KSPMonitorSet(ksp, KSPMonitorTrueResidualNorm, 0, 0);
 #endif
-#else    
+#else
     //FIXME: Decide on supported version of PETSc
 #if(PETSC_VERSION_SUBMINOR > 2)
     //KSPMonitorSet(ksp, monitor, 0, 0);

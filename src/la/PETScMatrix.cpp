@@ -1,14 +1,5 @@
 // Copyright (C) 2004-2008 Johan Hoffman, Johan Jansson and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2005-2007.
-// Modified by Andy R. Terrel 2005.
-// Modified by Ola Skavhaug 2007.
-// Modified by Magnus Vikstrøm 2007-2008.
-// Modified by Niclas Jansson 2008-2010.
-//
-// First added:  2004
-// Last changed: 2010-01-03
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -197,6 +188,11 @@ void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
                   PETSC_DETERMINE, (int*)d_nzrow, PETSC_DETERMINE,
                   (PetscInt*)o_nzrow, &A);
 #endif
+#else
+  MAYBE_UNUSED(M);
+  MAYBE_UNUSED(N);
+  MAYBE_UNUSED(d_nzrow);
+  MAYBE_UNUSED(o_nzrow);
 #endif
 
 #if PETSC_VERSION_MAJOR > 2
@@ -582,7 +578,7 @@ void PETScMatrix::dup(GenericMatrix& A)
   MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_COPY_VALUES, &this->A);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::disp(uint precision) const
+void PETScMatrix::disp(uint) const
 {
   section("PETScMatrix");
   MatInfo info;

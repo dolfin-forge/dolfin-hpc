@@ -1,13 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Kristian Oelgaard, 2007
-// Modified by Martin Sandve Alnes, 2008
-// Modified by Niclas Jansson, 2008-2015
-// Modified by Aurélien Larcher, 2014
-//
-// First added:  2007-04-10
-// Last changed: 2014-04-15
 
 #include <dolfin/fem/DirichletBC.h>
 
@@ -62,17 +54,17 @@ DirichletBC::~DirichletBC()
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         BilinearForm const& form)
 {
-  apply(A, b, 0, form);
+  apply_impl(A, b, NULL, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         GenericVector const& x, BilinearForm const& form)
 {
-  apply(A, b, &x, form);
+  apply_impl(A, b, &x, form);
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        GenericVector const* x, BilinearForm const& form)
+void DirichletBC::apply_impl(GenericMatrix& A, GenericVector& b,
+                             GenericVector const* x, BilinearForm const& form)
 {
   if(form.trial_space() != form.test_space())
   {

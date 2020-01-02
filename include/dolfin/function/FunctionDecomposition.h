@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_FUNCTION_DECOMPOSITION_H
 #define __DOLFIN_FUNCTION_DECOMPOSITION_H
@@ -18,18 +15,8 @@ class FunctionDecomposition
 {
 
 public:
-
-  ///
-  FunctionDecomposition(Function const& F, Array<Function *>& Si);
-
   ///
   static Array<Function *> compute(Function const& F);
-
-private:
-
-  Function const& F_;
-  Array<Function *>& Si_;
-
 };
 
 } /* namespace dolfin */

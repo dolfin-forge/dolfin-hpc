@@ -1,8 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2005
-// Last changed: 2006-08-15
 
 #ifndef __DOLFIN_PETSC_LU_SOLVER_H
 #define __DOLFIN_PETSC_LU_SOLVER_H

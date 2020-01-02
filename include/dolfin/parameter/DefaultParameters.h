@@ -1,9 +1,8 @@
 // Default values for the DOLFIN parameter system.
-//
-// First added:  2005-12-19
-// Last changed: 2010-07-02
 
 #include <dolfin/config/dolfin_config.h>
+
+#include <dolfin/common/constants.h>
 
 //--- Linear algebra ---
 #ifdef HAVE_PETSC
@@ -159,3 +158,6 @@ add("Mesh smoothing restricted by rmin", true);
 
 //--- Insitu ---
 add("VisIt directory", "");
+
+//--- Insitu ---
+add("NodeNormal alpha", DOLFIN_PI / 2.);

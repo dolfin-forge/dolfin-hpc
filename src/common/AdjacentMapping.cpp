@@ -1,6 +1,3 @@
-//
-//
-//
 
 #include <dolfin/common/AdjacentMapping.h>
 
@@ -51,12 +48,14 @@ SharedMapping::SharedMapping(DistributedData const& data) :
     send_max_ = std::max(send_max_, (uint) it->second.send.size());
     send_min_ = std::min(send_min_, (uint) it->second.send.size());
     //
-    MPI_Isend(&it->second.send[0], it->second.send.size(), MPI_UNSIGNED,
-              it->first, 0, MPI::DOLFIN_COMM, &sendreq[i]);
+    MPI::check_error( MPI_Isend(&it->second.send[0], it->second.send.size(),
+                                MPI_UNSIGNED, it->first, 0, MPI::DOLFIN_COMM,
+                                &sendreq[i]) );
     // Resize buffer
     it->second.recv.resize(it->second.send.size());
-    MPI_Irecv(&it->second.recv[0], it->second.recv.size(), MPI_UNSIGNED,
-              it->first, 0, MPI::DOLFIN_COMM, &recvreq[i]);
+    MPI::check_error( MPI_Irecv(&it->second.recv[0], it->second.recv.size(),
+                                MPI_UNSIGNED, it->first, 0, MPI::DOLFIN_COMM,
+                                &recvreq[i]) );
   }
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
        it != mappings_.end(); ++it)
@@ -65,13 +64,13 @@ SharedMapping::SharedMapping(DistributedData const& data) :
                     &it->second.send[0]);
   }
 
-  MPI_Waitall(mappings_.size(), &sendreq[0],&status[0]);
+  MPI::check_error( MPI_Waitall(mappings_.size(), &sendreq[0],&status[0]) );
   i = 0;
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
        it != mappings_.end(); ++it, ++i)
   {
-    MPI_Wait(&recvreq[i],&status[i]);
-    MPI_Get_count(&status[i], MPI_UNSIGNED, &recvcount);
+    MPI::check_error( MPI_Wait(&recvreq[i],&status[i]) );
+    MPI::check_error( MPI_Get_count(&status[i], MPI_UNSIGNED, &recvcount) );
     if(uint(recvcount) != it->second.recv.size())
     {
       error("AdjacentMapping : inconsistent count %u from rank %u: expected %u",
@@ -99,7 +98,7 @@ SharedMapping::~SharedMapping()
 {
 }
 //-----------------------------------------------------------------------------
-SharedMapping& SharedMapping::operator=(SharedMapping const& other)
+SharedMapping& SharedMapping::operator=(SharedMapping const&)
 {
   // Do not allow assignment
   return *this;

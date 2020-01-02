@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Andy R. Terrel, 2005.
-//
-// First added:  2005-01-17
-// Last changed: 2006-05-17
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -23,7 +18,7 @@ using namespace dolfin;
 // FIXME: Add an explanation why this function is needed
 namespace dolfin
 {
- 
+
   int usermult(Mat A, Vec x, Vec y)
   {
     void* ctx = 0;
@@ -51,7 +46,7 @@ PETScKrylovMatrix::PETScKrylovMatrix(const PETScVector& x, const PETScVector& y)
 PETScKrylovMatrix::~PETScKrylovMatrix()
 {
   // Free memory of matrix
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1 
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   if ( A ) MatDestroy(&A);
 #else
   if ( A ) MatDestroy(A);
@@ -66,7 +61,7 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
   VecGetLocalSize(x.vec(), &n);
   VecGetSize(y.vec(), &M);
   VecGetSize(x.vec(), &N);
-  
+
   // Free previously allocated memory if necessary
   if ( A )
   {
@@ -86,7 +81,7 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
 #endif
     }
   }
-  
+
 #ifdef HAVE_MPI
   MatCreateShell(MPI::DOLFIN_COMM, m, n, M, N, (void*) this, &A);
 #else
@@ -98,12 +93,12 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
 void PETScKrylovMatrix::init(int M, int N)
 {
   // Put here to set up arbitrary Shell of global size M,N.
-  // Analagous to the matrix being on one processor. 
+  // Analagous to the matrix being on one processor.
 
   // Free previously allocated memory if necessary
   if ( A )
     {
-      // Get size and local size of existing matrix                                                            
+      // Get size and local size of existing matrix
       int MM(0), NN(0);
       MatGetSize(A, &MM, &NN);
 
@@ -141,11 +136,11 @@ Mat PETScKrylovMatrix::mat() const
   return A;
 }
 //-----------------------------------------------------------------------------
-void PETScKrylovMatrix::disp(bool sparse, int precision) const
+void PETScKrylovMatrix::disp(bool, int) const
 {
   // Since we don't really have the matrix, we create the matrix by
   // performing multiplication with unit vectors. Used only for debugging.
-  
+
   warning("Display of PETScKrylovMatrix needs to be fixed.");
 
 /*
@@ -153,7 +148,7 @@ void PETScKrylovMatrix::disp(bool sparse, int precision) const
   uint N = size(1);
   PETScVector x(N), y(M);
   PETScMatrix A(M, N);
-  
+
 
   x = 0.0;
   for (unsigned int j = 0; j < N; j++)

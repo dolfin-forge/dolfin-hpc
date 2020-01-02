@@ -1,17 +1,10 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman 2006.
-// Modified by Garth N. Wells 2006.
-// Modified by Kristian Oelgaard 2006.
-// Modified by Aurelien Larcher, 2015.
-//
-// First added:  2006-06-05
-// Last changed: 2008-06-20
 
 #include <dolfin/mesh/TetrahedronCell.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Vertex.h>
@@ -680,11 +673,12 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p1,
-                                 Point const& p2) const
+bool TetrahedronCell::intersects(MeshEntity const& e, Point const&,
+                                 Point const&) const
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[3][0]);
+  MAYBE_UNUSED(e);
 
   error("Collision of tetrahedron with segment not implemented");
   return false;

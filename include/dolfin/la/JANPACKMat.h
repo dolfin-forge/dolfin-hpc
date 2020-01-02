@@ -1,6 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_JANPACK_MAT_H
 #define __DOLFIN_JANPACK_MAT_H

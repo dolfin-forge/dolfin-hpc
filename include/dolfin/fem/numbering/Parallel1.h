@@ -1,6 +1,5 @@
 // Copyright (C) 2013 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H
 #define __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H
@@ -46,7 +45,8 @@ public:
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const&,
+                            Cell const& cell) const
   {
     uint const ii = ufc_dofmap.local_dimension() * cell.index();
     std::copy(&array[ii], &array[ii] + ufc_dofmap.local_dimension(), dofs);
@@ -182,7 +182,6 @@ public:
     set_range(rank_offset, range);
 
     // Compute renumbering for local and owned shared dofs
-    MPI_Status status;
     uint src, dst, max_recv;
     std::vector<uint> sendbuf;
     for (_set<uint>::iterator it = owned.begin(); it != owned.end();
@@ -203,18 +202,15 @@ public:
     }
     ufc_shared.clear();
     uint local_size = sendbuf.size();
-    MPI_Allreduce(&local_size, &max_recv, 1, MPI_UNSIGNED, MPI_MAX,
-                  MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>( local_size, max_recv );
     uint * recvbuf = new uint[max_recv];
-    int recv_count;
     for (uint j = 1; j < pe_size; ++j)
     {
       src = (rank - j + pe_size) % pe_size;
       dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 1, recvbuf,
-                   max_recv, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      int recv_count = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dst,
+                                      recvbuf, max_recv, src,1 );
 
       for (int k = 0; k < recv_count; k += 2)
       {
@@ -239,7 +235,7 @@ public:
     delete[] recvbuf;
 
     message(1, "Remaining ghost dofs %u", ufc_ghosts.size());
-    
+
     //---
 
     if (ghosts_.size() != num_expected_ghosts)

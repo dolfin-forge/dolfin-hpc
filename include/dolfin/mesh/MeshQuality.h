@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef DOLFIN_MESH_QUALITY_H
 #define DOLFIN_MESH_QUALITY_H

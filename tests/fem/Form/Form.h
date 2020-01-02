@@ -6,6 +6,7 @@
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/CoefficientMap.h>
+#include <dolfin/mesh/UnitSquare.h>
 
 using namespace dolfin;
 
@@ -13,7 +14,7 @@ using namespace dolfin;
 template<class T>
 void test_nil()
 {
-  Mesh mesh;
+  UnitSquare mesh( 5, 5 );
   CoefficientMap coefs;
   Nil<T>(mesh, coefs);
 }

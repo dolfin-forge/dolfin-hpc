@@ -1,10 +1,5 @@
 // Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2014-2017.
-//
-// First  added: 2009
-// Last changed: 2017-09-15
 
 #include <dolfin/io/BinaryFile.h>
 
@@ -19,13 +14,9 @@
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
+#include <dolfin/main/MPI.h>
 
 #include <typeinfo>
-
-#ifdef ENABLE_MPIIO
-#include <mpi.h>
-#endif
-
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -78,16 +69,23 @@ typedef struct atomic_cell
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile("Binary", filename),
+#if defined( HAVE_MPI )
     t_(0),
+#endif
     version_(BINARY_VERSION)
 {
 }
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real const& t) :
     GenericFile("Binary", filename),
+#if defined( HAVE_MPI )
     t_(&t),
+#endif
     version_(BINARY_VERSION)
 {
+#if !defined( HAVE_MPI )
+  MAYBE_UNUSED(t);
+#endif
 }
 //----------------------------------------------------------------------------
 BinaryFile::~BinaryFile()
@@ -114,21 +112,23 @@ void BinaryFile::operator>>(GenericVector& x)
   uint offset[2];
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
-  
+
   MPI_File fh;
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
   bool byteswap;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                    MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) filename.c_str(), MPI_MODE_RDONLY,
+                                  MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                      MPI_BYTE, MPI_STATUS_IGNORE) );
 
   byteswap = hdr_check(hdr, BINARY_VECTOR_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
-  MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint), &offset[0],
-                       2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
+                                         &offset[0], 2, MPI_UNSIGNED,
+                                         MPI_STATUS_IGNORE) );
   if (byteswap)
   {
     offset[0] = bswap(offset[0]);
@@ -145,8 +145,9 @@ void BinaryFile::operator>>(GenericVector& x)
   real *values = new real[size];
 
 #ifdef ENABLE_MPIIO
-  MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real), values,
-                       offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real),
+                                         values, offset[1], MPI_DOUBLE,
+                                         MPI_STATUS_IGNORE) );
   if (byteswap)
   {
     for(uint i = 0; i < offset[1]; ++i)
@@ -154,7 +155,7 @@ void BinaryFile::operator>>(GenericVector& x)
       values[i] = bswap(values[i]);
     }
   }
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 #else
   fp.read((char *)values, size * sizeof(real));
   fp.close();
@@ -192,19 +193,23 @@ void BinaryFile::operator<<(GenericVector& x)
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) filename.c_str(),
+                                  MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                  MPI_INFO_NULL, &fh) );
 
-  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                     MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                       MPI_BYTE, MPI_STATUS_IGNORE) );
   byte_offset = sizeof(BinaryFileHeader);
-  MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
-                        &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
+                                          &offset[0], 2, MPI_UNSIGNED,
+                                          MPI_STATUS_IGNORE) );
   byte_offset += hdr.pe_size * 2 * sizeof(uint);
-  MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real), values,
-                        offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real),
+                                          values, offset[1], MPI_DOUBLE,
+                                          MPI_STATUS_IGNORE) );
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 #else
   std::ofstream fp(filename.c_str(), std::ofstream::binary);
   fp.write((char *)&size, sizeof(uint));
@@ -227,18 +232,18 @@ void BinaryFile::operator>>(Function & f)
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
   bool byteswap;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                    MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+                                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                      MPI_BYTE, MPI_STATUS_IGNORE) );
 
   byteswap = hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
 
   uint nfunc;
-  MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint),
+                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   if (byteswap) nfunc = bswap(nfunc);
   byte_offset += sizeof(uint);
   if (nfunc > 1)
@@ -250,8 +255,9 @@ void BinaryFile::operator>>(Function & f)
   BinaryFunctionHeader f_hdr;
   for (uint i = 0; i < nfunc; ++i)
   {
-    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
-                         MPI_BYTE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &f_hdr,
+                                           sizeof(BinaryFunctionHeader),
+                                           MPI_BYTE, MPI_STATUS_IGNORE) );
     if (byteswap) bswap_func_hdr(f_hdr);
     byte_offset += sizeof(BinaryFunctionHeader);
 
@@ -261,8 +267,9 @@ void BinaryFile::operator>>(Function & f)
 
       uint size = f.value_size() * f.mesh().topology().num_owned(0);
       real *values = new real[size];
-      MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
-                           values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+      MPI::check_error( MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
+                                             values, size, MPI_DOUBLE,
+                                             MPI_STATUS_IGNORE) );
       if (byteswap)
       {
         for (uint j = 0; j < size; ++j)
@@ -273,7 +280,7 @@ void BinaryFile::operator>>(Function & f)
       f.vector().set(values);
       delete[] values;
 
-      MPI_File_close(&fh);
+      MPI::check_error( MPI_File_close(&fh) );
 
       return;
     }
@@ -282,10 +289,11 @@ void BinaryFile::operator>>(Function & f)
     byte_offset += f_hdr.dim * f.mesh().global_size(0) * sizeof(real);
   }
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 
   error("No matching functions found in binary file");
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -299,18 +307,19 @@ void BinaryFile::operator>>(LabelList<Function>& f)
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
   bool byteswap;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                    MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) filename.c_str(), MPI_MODE_RDONLY,
+                                  MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                      MPI_BYTE, MPI_STATUS_IGNORE) );
 
   byteswap = hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
 
   uint nfunc;
-  MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint),
+                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   if (byteswap) nfunc = bswap(nfunc);
   byte_offset += sizeof(uint);
 
@@ -324,8 +333,9 @@ void BinaryFile::operator>>(LabelList<Function>& f)
       it != f.end(); it++)
   {
 
-    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
-                         MPI_BYTE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &f_hdr,
+                                           sizeof(BinaryFunctionHeader),
+                                           MPI_BYTE, MPI_STATUS_IGNORE) );
     if (byteswap) bswap_func_hdr(f_hdr);
     byte_offset += sizeof(BinaryFunctionHeader);
 
@@ -338,8 +348,9 @@ void BinaryFile::operator>>(LabelList<Function>& f)
 
     uint size = u->value_size() * u->mesh().topology().num_owned(0);
     real *values = new real[size];
-    MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
-                         values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
+                                           values, size, MPI_DOUBLE,
+                                           MPI_STATUS_IGNORE) );
     if(byteswap)
     {
       for (uint i = 0; i < size; ++i)
@@ -353,9 +364,10 @@ void BinaryFile::operator>>(LabelList<Function>& f)
     byte_offset += f_hdr.dim * u->mesh().global_size(0) * sizeof(real);
   }
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -391,14 +403,17 @@ void BinaryFile::write_function(
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename_.c_str(),
-                MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
-  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                     MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) bin_filename_.c_str(),
+                                  MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                  MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                       MPI_BYTE, MPI_STATUS_IGNORE) );
   byte_offset = sizeof(BinaryFileHeader);
 
   uint n_func = f.size();
-  MPI_File_write_all(fh, &n_func, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_all(fh, &n_func, 1, MPI_UNSIGNED,
+                                       MPI_STATUS_IGNORE) );
   byte_offset += sizeof(uint);
 
   // Assume same mesh for all data arrays
@@ -443,11 +458,11 @@ void BinaryFile::write_function(
       uint num_values = value_dim * mesh.topology().num_owned(0);
       offset = 0;
 #if ( MPI_VERSION > 1 )
-      MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                 MPI::DOLFIN_COMM);
+      MPI::check_error( MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED,
+                                   MPI_SUM, MPI::DOLFIN_COMM ) );
 #else
-      MPI_Scan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-          MPI::DOLFIN_COMM);
+      MPI::check_error( MPI_Scan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                                 MPI::DOLFIN_COMM) );
       offset -= num_values;
 #endif
 
@@ -469,21 +484,24 @@ void BinaryFile::write_function(
       f_hdr.t = *t_;
     }
     else f_hdr.t = counter;
-    MPI_File_write_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
-                          MPI_BYTE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset, &f_hdr,
+                                            sizeof(BinaryFunctionHeader),
+                                            MPI_BYTE, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(BinaryFunctionHeader);
 
-    MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real), values, size,
-                          MPI_DOUBLE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real),
+                                            values, size, MPI_DOUBLE,
+                                            MPI_STATUS_IGNORE) );
     byte_offset += value_dim * (mesh.global_size(0) * sizeof(real));
 
     delete[] values;
   }
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 
   counter++;
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O is required to save functions in Binary.");
 #endif
 }
@@ -509,7 +527,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     byteswap = hdr_check(hdr, BINARY_MESH_DATA, PE::size());
     fp.read((char *) &gdim, sizeof(uint));
     fp.read((char *) &type, sizeof(uint));
-    
+
     if (byteswap){ gdim = bswap(gdim); type = bswap(type); }
 
     // Create cell type to get topological dimension and number of vertices
@@ -567,19 +585,22 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     MPI_File fh;
     MPI_Offset byte_offset;
-    MPI_File_open(comm, (char *) filename.c_str(),
-                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    MPI::check_error( MPI_File_open(comm, (char *) filename.c_str(),
+                                    MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
 
     // Read binary header
     uint gdim, type, num_vertices;
-    MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                      MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                        MPI_BYTE, MPI_STATUS_IGNORE) );
     byteswap = hdr_check(hdr, BINARY_MESH_DATA, pe_size);
-    MPI_File_read_all(fh, &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    MPI_File_read_all(fh, &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    MPI_File_read_all(fh, &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    
-    if (byteswap) 
+    MPI::check_error( MPI_File_read_all(fh, &gdim, 1, MPI_UNSIGNED,
+                                        MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_File_read_all(fh, &type, 1, MPI_UNSIGNED,
+                                        MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_File_read_all(fh, &num_vertices, 1, MPI_UNSIGNED,
+                                        MPI_STATUS_IGNORE) );
+
+    if (byteswap)
     {
       gdim = bswap(gdim);
       type = bswap(type);
@@ -601,16 +622,16 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint const vertex_offset = vdist.offset * gdim;
     uint const vertex_data   = vdist.size * gdim;
     real * vertex_buffer = new real[vertex_data];
-    MPI_File_read_at_all(fh, byte_offset + vertex_offset * sizeof(real),
-                         vertex_buffer, vertex_data, MPI_DOUBLE,
-                         MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset + vertex_offset * sizeof(real),
+                                           vertex_buffer, vertex_data,
+                                           MPI_DOUBLE, MPI_STATUS_IGNORE) );
     byte_offset += gdim * num_vertices * sizeof(real);
 
     if (byteswap) { bswap(vertex_buffer, vertex_buffer + vertex_data); }
 
     uint num_cells;
-    MPI_File_read_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
-                         MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &num_cells, 1,
+                                           MPI_UNSIGNED, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(uint);
     if (byteswap) num_cells = bswap(num_cells);
 
@@ -618,13 +639,13 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint const cell_offset = cdist.offset * num_cellvertices;
     uint const cell_data   = cdist.size * num_cellvertices;
     uint * cell_buffer = new uint[cell_data];
-    MPI_File_read_at_all(fh, byte_offset + cell_offset * sizeof(uint),
-                         cell_buffer, cell_data, MPI_UNSIGNED,
-                         MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_read_at_all(fh, byte_offset + cell_offset * sizeof(uint),
+                                           cell_buffer, cell_data, MPI_UNSIGNED,
+                                           MPI_STATUS_IGNORE) );
 
     if (byteswap) { bswap(cell_buffer, cell_buffer + cell_data); }
 
-    MPI_File_close(&fh);
+    MPI::check_error( MPI_File_close(&fh) );
 
     _set<uint> ghosted_vertices;
 
@@ -678,19 +699,14 @@ void BinaryFile::operator>>(Mesh& mesh)
       uint *recv_buffer = new uint[buff_size];
 
       // Exchange data
-      MPI_Status status;
-      int num_recv;
-      int src;
-      int dst;
       for (uint i = 1; i < pe_size; ++i)
       {
-        src = (pe_rank - i + pe_size) % pe_size;
-        dst = (pe_rank + i) % pe_size;
+        int src = (pe_rank - i + pe_size) % pe_size;
+        int dst = (pe_rank + i) % pe_size;
 
-        MPI_Sendrecv(&non_local_cells[dst][0], non_local_cells[dst].size(),
-                     MPI_UNSIGNED, dst, 1, recv_buffer, buff_size, MPI_UNSIGNED,
-                     src, 1, comm, &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+        int num_recv = MPI::sendrecv( &non_local_cells[dst][0],
+                                     non_local_cells[dst].size(), dst,
+                                     recv_buffer, buff_size, src, 1, comm );
 
         // Add received cells
         for (int j = 0; j < num_recv; j += num_cellvertices)
@@ -783,7 +799,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
 
       uint buff_size = 0;
-      MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, comm);
+      MPI::all_reduce<MPI::max>(local_max, buff_size );
 
       uint * recv_buffer = new uint[buff_size];
 
@@ -794,21 +810,14 @@ void BinaryFile::operator>>(Mesh& mesh)
       real *recv_buffer_coords = new real[buff_size * gdim];
 
       // Exchange data
-      MPI_Status status;
-      int num_recv;
-      int src;
-      int dst;
-
       _map<uint, uint> new_owner;
       for (uint i = 1; i < pe_size; ++i)
       {
-        src = (pe_rank - i + pe_size) % pe_size;
-        dst = (pe_rank + i) % pe_size;
+        int src = (pe_rank - i + pe_size) % pe_size;
+        int dst = (pe_rank + i) % pe_size;
 
-        MPI_Sendrecv(&ghosts[dst][0], ghosts[dst].size(), MPI_UNSIGNED, dst, 1,
-                     recv_buffer, buff_size, MPI_UNSIGNED, src, 1, comm,
-                     &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+        int num_recv = MPI::sendrecv( &ghosts[dst][0], ghosts[dst].size(), dst,
+                                      recv_buffer, buff_size, src, 1, comm );
 
         /*
          * Check if orphaned
@@ -838,14 +847,13 @@ void BinaryFile::operator>>(Mesh& mesh)
             *(sp++) = vertex_buffer[(gdim * v_index) + l];
           }
         }
-        MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1,
-                     recv_new_owner, buff_size, MPI_UNSIGNED, dst, 1,
-                     comm, &status);
 
-        MPI_Sendrecv(send_buffer_coords, (num_recv * gdim), MPI_DOUBLE, src, 1,
-                     recv_buffer_coords, (buff_size * gdim), MPI_DOUBLE, dst, 1,
-                     comm, &status);
-        MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
+        MPI::sendrecv( send_new_owner, num_recv, src,
+                       recv_new_owner, buff_size, dst, 1, comm );
+
+        num_recv = MPI::sendrecv( send_buffer_coords, (num_recv * gdim), src,
+                                  recv_buffer_coords, (buff_size * gdim),
+                                  dst, 1, comm );
 
         int g_i = 0;
         for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
@@ -952,14 +960,17 @@ void BinaryFile::operator<<(Mesh& mesh)
      * Split and cleanup implementation
      */
 
-    MPI_File_open(comm, (char *) filename.c_str(),
-                  MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+    MPI::check_error( MPI_File_open(comm, (char *) filename.c_str(),
+                                    MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                    MPI_INFO_NULL, &fh) );
 
     // Write Header
-    MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, (void *) &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, (void *) &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                         MPI_BYTE, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_File_write_all(fh, (void *) &gdim, 1, MPI_UNSIGNED,
+                                         MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_File_write_all(fh, (void *) &type, 1, MPI_UNSIGNED,
+                                         MPI_STATUS_IGNORE) );
     byte_offset = sizeof(BinaryFileHeader) + 2 * sizeof(uint);
 
     // Write vertices
@@ -976,11 +987,12 @@ void BinaryFile::operator<<(Mesh& mesh)
         vptr += gdim;
       }
     }
-    MPI_File_write_all(fh, (void *) &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, (void *) &num_vertices, 1,
+                                         MPI_UNSIGNED, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(uint);
-    MPI_File_write_at_all(fh, byte_offset + vertex_offset * sizeof(real),
-                          vertex_buffer, vertex_buffer_size, MPI_DOUBLE,
-                          MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset + vertex_offset * sizeof(real),
+                                            vertex_buffer, vertex_buffer_size,
+                                            MPI_DOUBLE, MPI_STATUS_IGNORE) );
     byte_offset += gdim * num_vertices * sizeof(real);
     delete[] vertex_buffer;
 
@@ -997,16 +1009,16 @@ void BinaryFile::operator<<(Mesh& mesh)
         *(cp++) = mesh.distdata()[0].get_global(c->entities(0)[i]);
       }
     }
-    MPI_File_write_at_all(fh, byte_offset, (void *) &num_cells, 1, MPI_UNSIGNED,
-                          MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset, (void *) &num_cells,
+                                            1, MPI_UNSIGNED, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(uint);
-    MPI_File_write_at_all(fh, byte_offset + cell_offset * sizeof(uint),
-                          cell_buffer, cell_buffer_size, MPI_UNSIGNED,
-                          MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset + cell_offset * sizeof(uint),
+                                            cell_buffer, cell_buffer_size,
+                                            MPI_UNSIGNED, MPI_STATUS_IGNORE) );
 
     delete[] cell_buffer;
 
-    MPI_File_close(&fh);
+    MPI::check_error( MPI_File_close(&fh) );
 
 #else
     error("MPI and MPI I/O is required for writing a mesh in parallel");
@@ -1077,19 +1089,21 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename_.c_str(),
-                MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) bin_filename_.c_str(),
+                                  MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                  MPI_INFO_NULL, &fh) );
 
-  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                     MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                       MPI_BYTE, MPI_STATUS_IGNORE) );
   byte_offset = sizeof(BinaryFileHeader);
 
   uint local_size = 0;
   int mfunc_type = 0;
   if (meshfunction.dim() == mesh.topology_dimension())
   {
-    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
-                          MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1,
+                                            MPI_UNSIGNED, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(uint);
 
     for (CellIterator c(mesh); !c.end(); ++c)
@@ -1102,8 +1116,8 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   else if (meshfunction.dim() == 0)
   {
     mfunc_type = 1;
-    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
-                          MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1,
+                                            MPI_UNSIGNED, MPI_STATUS_IGNORE) );
     byte_offset += sizeof(uint);
 
     for (VertexIterator v(mesh); !v.end(); ++v)
@@ -1124,25 +1138,26 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
   uint offset = 0;
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                               MPI::DOLFIN_COMM) );
 #else
-  MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-           MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                             MPI::DOLFIN_COMM) );
   offset -= local_size;
 #endif
 
-  MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real), values,
-                        local_size * sizeof(real), MPI_BYTE,
-                        MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real),
+                                          values, local_size * sizeof(real),
+                                          MPI_BYTE, MPI_STATUS_IGNORE) );
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 
   counter++;
 
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for writing mesh functions to binary files");
 #endif
 
@@ -1183,18 +1198,19 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
   bool byteswap;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-                    MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                  (char *) filename.c_str(), MPI_MODE_RDONLY,
+                                  MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader),
+                                      MPI_BYTE, MPI_STATUS_IGNORE) );
 
   byteswap = hdr_check(hdr, BINARY_MESH_FUNCTION_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
 
   int mfunc_type = 0;
-  MPI_File_read_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &mfunc_type, 1,
+                                         MPI_UNSIGNED, MPI_STATUS_IGNORE) );
   byte_offset += sizeof(uint);
   if (byteswap) mfunc_type = bswap(mfunc_type);
 
@@ -1210,17 +1226,17 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
   uint offset = 0;
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                               MPI::DOLFIN_COMM) );
 #else
-  MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-           MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                             MPI::DOLFIN_COMM) );
   offset -= local_size;
 #endif
 
-  MPI_File_read_at_all(fh, byte_offset + offset * sizeof(real), values,
-                       local_size * sizeof(real), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + offset * sizeof(real),
+                                         values, local_size * sizeof(real),
+                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   if(byteswap)
   {
     for (uint i = 0; i < (local_size * sizeof(real)); ++i)
@@ -1248,38 +1264,33 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
       ghost_buff[it.owner()].push_back(it.global_index());
     }
 
-    MPI_Status status;
     std::vector<real> send_buff;
-    uint src, dest;
     uint recv_size = mesh.distdata()[0].num_ghost();
-    int recv_count, recv_size_gh, send_size;
+    int recv_size_gh, send_size;
 
     for (uint i = 0; i < pe_size; ++i)
     {
       send_size = ghost_buff[i].size();
-      MPI_Reduce(&send_size, &recv_size_gh, 1, MPI_UNSIGNED, MPI_SUM, i,
-                 MPI::DOLFIN_COMM);
+      MPI::check_error( MPI_Reduce(&send_size, &recv_size_gh, 1, MPI_UNSIGNED,
+                                   MPI_SUM, i, MPI::DOLFIN_COMM) );
     }
     uint *recv_ghost = new uint[recv_size_gh];
     real *recv_buff = new real[recv_size];
 
     for (uint j = 1; j < pe_size; j++)
     {
-      src = (pe_rank - j + pe_size) % pe_size;
-      dest = (pe_rank + j) % pe_size;
+      int src = (pe_rank - j + pe_size) % pe_size;
+      int dest = (pe_rank + j) % pe_size;
 
-      MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
-                   MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh,
-                   MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      int recv_count = MPI::sendrecv( &ghost_buff[dest][0],
+                                      ghost_buff[dest].size(), dest,
+                                      recv_ghost, recv_size_gh, src, 1 );
 
       for (int k = 0; k < recv_count; ++k)
         send_buff.push_back(meshfunction(mesh.distdata()[0].get_local(recv_ghost[k])));
 
-      MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
-                   recv_buff, recv_size, MPI_DOUBLE, dest, 2,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
+      recv_count = MPI::sendrecv( &send_buff[0], send_buff.size(), src,
+                                  recv_buff, recv_size, dest, 2 );
 
       for (int j = 0; j < recv_count; j++)
       {
@@ -1296,11 +1307,12 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
   }
 
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_close(&fh) );
 
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for reading mesh function from binary files");
 #endif
 }

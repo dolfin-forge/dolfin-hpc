@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2003-12-21
-// Last changed: 2008-06-20
 
 #include <dolfin/common/timing.h>
 #include <dolfin/log/dolfin_log.h>

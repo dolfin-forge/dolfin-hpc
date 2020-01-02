@@ -1,17 +1,12 @@
 // Copyright (C) 2007 Magnus Vikstrøm.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2008.
-// Modified by Niclas Jansson, 2009-2010.
-// Modified by Aurelien Larcher, 2016-2017.
-//
-// First added:  2007-11-30
-// Last changed: 2017-08-24
 
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
+#include <dolfin/main/MPI_Datatypes.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -21,6 +16,7 @@
 #define DOLFIN_COMM_NULL  MPI_COMM_NULL
 #else
 #define DOLFIN_COMM_NULL  0
+#define MPI_SUCCESS       0
 #endif
 
 namespace dolfin
@@ -30,6 +26,9 @@ namespace dolfin
 /// processes and current process number.
 
 class Mesh;
+
+template< int R, typename T >
+struct helper;
 
 class MPI
 {
@@ -92,17 +91,34 @@ public:
   enum ReductionType { sum, min, max };
 
   //// Wrap in a template function to allow use of functors
-  template<class T>
-  static void bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM);
+  template<typename T>
+  static int bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM);
 
   //// Wrap in a template function to allow use of functors
-  template<int R, class T>
-  static void all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
+  template<typename T>
+  static int all_gather( T * sendbuf, int sendcount,
+                         T * recvbuf, int recvcount,
+                         Communicator& comm = MPI::DOLFIN_COMM );
 
   //// Wrap in a template function to allow use of functors
-  template<class T>
-  static int sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
-                      Communicator& comm = MPI::DOLFIN_COMM);
+  template<int R,typename T>
+  static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
+
+  //// Wrap in a template function to allow use of functors
+  template<int R,typename T>
+  static int all_reduce( T * x, T * r, uint count,
+                         Communicator& comm = MPI::DOLFIN_COMM );
+
+  //// Wrap in a template function to allow use of functors
+  template<typename T>
+  static int sendrecv( T * sendbuf, int sendcount, int destination,
+                       T * recvbuf, int recvcount, int source, int tag,
+                       Communicator& comm = MPI::DOLFIN_COMM);
+
+  template<typename T>
+  static int sendrecv( Array< T > & sendbuf, int destination,
+                       Array< T > & recvbuf, int source, int tag,
+                       Communicator& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
   static void startTimer();
@@ -123,6 +139,9 @@ public:
   static Communicator DOLFIN_COMM_WORLD;
   static Communicator DOLFIN_COMM_SELF;
   static Communicator DOLFIN_COMM;
+
+  /// Check for MPI errors
+  static int check_error( int const mpi_error );
 
 private:
 
@@ -156,123 +175,168 @@ typedef MPI::Communicator Comm;
 #if HAVE_MPI
 
 //-----------------------------------------------------------------------------
-template<>
-inline void MPI::bcast(uint* x, int n, int r, Communicator& comm)
+template<typename T>
+inline int MPI::bcast(T* x, int n, int r, Communicator& comm)
 {
-  MPI_Bcast(x, n, MPI_UNSIGNED, r, comm);
+  return MPI::check_error( MPI_Bcast(x, n, MPI_type<T>::value, r, comm) );
+}
+//-----------------------------------------------------------------------------
+template<typename T>
+inline int MPI::all_gather( T * sendbuf, int sendcount,
+                            T * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_type<T>::value,
+                                          recvbuf, recvcount, MPI_type<T>::value,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+// unfortunately c++ does not allow partial function template specialization
+// so we have to move the  template to a helper class
+template< int R, typename T >
+struct helper
+{
+  inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm);
+};
+
+template< typename T >
+struct helper<MPI::sum,T>
+{
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(x, r, count,
+                                         MPI_type<T>::value, MPI_SUM, comm) );
+}
+};
+
+template< typename T >
+struct helper<MPI::min,T>
+{
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(x, r, count,
+                                         MPI_type<T>::value, MPI_MIN,comm) );
+}
+};
+
+template< typename T >
+struct helper<MPI::max,T>
+{
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(x, r, count,
+                                         MPI_type<T>::value, MPI_MAX,comm) );
+}
+};
+
+template<int R,typename T>
+inline int MPI::all_reduce(T x, T& r, Communicator& comm)
+{
+  return helper<R,T>::all_reduce(&x, &r, 1, comm);
+}
+
+template<int R,typename T>
+inline int MPI::all_reduce(T * x, T * r, uint count, Communicator& comm)
+{
+  return helper<R,T>::all_reduce(x, r, count, comm);
 }
 //-----------------------------------------------------------------------------
 template<>
-inline void MPI::bcast(real* x, int n, int r, Communicator& comm)
-{
-  MPI_Bcast(x, n, MPI_DOUBLE, r, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::sum>(uint x, uint& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_SUM, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::min>(uint x, uint& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_MIN, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::max>(uint x, uint& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_MAX, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::sum>(real x, real& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_SUM, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::min>(real x, real& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_MIN, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline void MPI::all_reduce<MPI::max>(real x, real& r, Communicator& comm)
-{
-  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_MAX, comm);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline int MPI::sendrecv(bool* s, int ns, int src, bool* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(bool * sendbuf, int sendcount, int destination,
+                         bool * recvbuf, int recvcount, int source,
+                         int tag, Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  int bs = ns * sizeof(bool);
-  int br = nr * sizeof(bool);
-  MPI_Sendrecv(s, bs, MPI_BYTE, src, tg, r, br, MPI_BYTE, dst, tg, comm,
-               &status);
-  MPI_Get_count(&status, MPI_BYTE, &recv_count);
+  int send_bool = sendcount * sizeof(bool);
+	int        recv_bool = recvcount * sizeof( bool );
+	MPI::check_error( MPI_Sendrecv( static_cast< void * >( sendbuf ),
+	                                send_bool,
+	                                MPI_BYTE,
+	                                destination,
+	                                tag,
+	                                static_cast< void * >( recvbuf ),
+	                                recv_bool,
+	                                MPI_BYTE,
+	                                source,
+	                                tag,
+	                                comm,
+	                                &status ) );
+	MPI::check_error( MPI_Get_count(&status, MPI_BYTE, &recv_count) );
   return recv_count / sizeof(bool);
 }
-//-----------------------------------------------------------------------------
-template<>
-inline int MPI::sendrecv(int* s, int ns, int src, int* r, int nr, int dst,
-                         int tg, Communicator& comm)
+
+template<typename T>
+inline int MPI::sendrecv(T * sendbuf, int sendcount, int destination,
+                         T * recvbuf, int recvcount, int source,
+                         int tag, Communicator& comm)
 {
   MPI_Status status;
-  int recv_count;
-  MPI_Sendrecv(s, ns, MPI_INT, src, tg, r, nr, MPI_INT, dst, tg, comm, &status);
-  MPI_Get_count(&status, MPI_INT, &recv_count);
+	int        recv_count;
+	MPI::check_error( MPI_Sendrecv( static_cast< void * >( sendbuf ),
+	                                sendcount,
+	                                MPI_type< T >::value,
+	                                destination,
+	                                tag,
+	                                static_cast< void * >( recvbuf ),
+	                                recvcount,
+	                                MPI_type< T >::value,
+	                                source,
+	                                tag,
+	                                comm,
+	                                &status ) );
+	MPI::check_error( MPI_Get_count(&status, MPI_type<T>::value, &recv_count) );
   return recv_count;
 }
-//-----------------------------------------------------------------------------
-template<>
-inline int MPI::sendrecv(uint* s, int ns, int src, uint* r, int nr, int dst,
-                         int tg, Communicator& comm)
+
+template < typename T >
+inline int MPI::sendrecv( Array< T > &   sendbuf,
+                          int            destination,
+                          Array< T > &   recvbuf,
+                          int            source,
+                          int            tag,
+                          Communicator & comm )
 {
-  MPI_Status status;
-  int recv_count;
-  MPI_Sendrecv(s, ns, MPI_UNSIGNED, src, tg, r, nr, MPI_UNSIGNED, dst, tg, comm,
-               &status);
-  MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-  return recv_count;
-}
-//-----------------------------------------------------------------------------
-template<>
-inline int MPI::sendrecv(real* s, int ns, int src, real* r, int nr, int dst,
-                         int tg, Communicator& comm)
-{
-  MPI_Status status;
-  int recv_count;
-  MPI_Sendrecv(s, ns, MPI_DOUBLE, src, tg, r, nr, MPI_DOUBLE, dst, tg, comm,
-               &status);
-  MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
-  return recv_count;
+	return MPI::sendrecv< T >( sendbuf.data(),
+	                           sendbuf.size(),
+	                           destination,
+	                           recvbuf.data(),
+	                           recvbuf.size(),
+	                           source,
+	                           tag,
+	                           comm );
 }
 //-----------------------------------------------------------------------------
 
 #else
 
 //-----------------------------------------------------------------------------
-template<class T>
-inline void MPI::bcast(T* x, int n, int r, Communicator& comm)
+template<typename T>
+inline int MPI::bcast(T*, int, int, Communicator&)
 {
+  return MPI_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
-template<int R, class T>
-inline void MPI::all_reduce(T x, T& r, Communicator& comm)
-{ r = x; }
+template<typename T>
+inline int MPI::all_gather( T *, int, T *, int, Communicator& )
+{
+  return MPI_SUCCESS;
+}
 
 //-----------------------------------------------------------------------------
-template<class T>
-inline int MPI::sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
-                         Communicator& comm)
+template<int R, typename T>
+inline int MPI::all_reduce(T x, T& r, Communicator&)
 {
-  return 0;
+  r = x;
+  return MPI_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+inline int MPI::sendrecv(T*, int, int, T*, int, int, int, Communicator&)
+{
+  return MPI_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------

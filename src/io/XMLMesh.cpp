@@ -1,10 +1,5 @@
 // Copyright (C) 2003-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-//
-// First added:  2003-10-21
-// Last changed: 2008-07-01
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -20,10 +15,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/io/XMLMesh.h>
 #include <dolfin/parameter/parameters.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -114,7 +106,7 @@ void XMLMesh::endElement(const xmlChar *name)
   }
 }
 //-----------------------------------------------------------------------------
-void XMLMesh::open(std::string const& filename)
+void XMLMesh::open(std::string const&)
 {
   // Do nothing
 }
@@ -160,7 +152,7 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
   }
   dolfin_assert(cell_type_ != NULL);
   editor_ = new MeshEditor(mesh_, cell_type_->cellType(), dim);
-  parallel_ = mesh_.topology().is_distributed();
+  parallel_ = mesh_.topology().distributed();
   if(parallel_)
   {
     warning("Reading DOLFIN xml meshes in parallel is deprecated.\n"
@@ -236,8 +228,20 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   {
   case 3:
     x[2] = parse<real>(name, attrs, "z");
+    // fallthrough is desired here
+#if defined( __clang__ ) && __cplusplus > 201402L
+    [[clang::fallthrough]];
+#elif defined(__GNUC__) && __cplusplus > 201402L
+    __attribute__ ((fallthrough));
+#endif
   case 2:
     x[1] = parse<real>(name, attrs, "y");
+    // fallthrough is desired here
+#if defined( __clang__ ) && __cplusplus > 201402L
+    [[clang::fallthrough]];
+#elif defined(__GNUC__) && __cplusplus > 201402L
+    __attribute__ ((fallthrough));
+#endif
   case 1:
     x[0] = parse<real>(name, attrs, "x");
     break;
@@ -328,13 +332,9 @@ void XMLMesh::endMesh()
     NonLocalAdj nonlocal_adjacents; //XXX: dirty hack
 
     // Exchange ghost points
-    MPI_Status status;
-    uint src;
-    uint dst;
     uint recvmax;
     MPI::all_reduce<MPI::sum>(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
-    int recvcount;
     uint * sendbuf_v = new uint[2*recvmax];
     real * sendbuf_x = new real[gdim*recvmax];
     uint recvcnt_v = 2*shared;
@@ -346,13 +346,11 @@ void XMLMesh::endMesh()
     DistributedData& vdata0 = mesh_.distdata()[0];
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      int src = (rank - j + pe_size) % pe_size;
+      int dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 0,
-                   recvbuf    , recvmax       , MPI_UNSIGNED, src, 0,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      int recvcount = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dst,
+                                     recvbuf, recvmax, src, 0 );
 
       uint count = 0;
       for (int k = 0; k < recvcount; ++k)
@@ -387,17 +385,13 @@ void XMLMesh::endMesh()
         }
       }
 
-      MPI_Sendrecv(&sendbuf_v[0], 2 * count, MPI_UNSIGNED, src, 1,
-                   recvptr_v    , recvcnt_v, MPI_UNSIGNED, dst, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      recvcount = MPI::sendrecv( &sendbuf_v[0], 2 * count, src,
+                                 recvptr_v, recvcnt_v, dst, 1 );
       recvcnt_v -= recvcount;
       recvptr_v += recvcount;
 
-      MPI_Sendrecv(&sendbuf_x[0], gdim * count, MPI_DOUBLE, src, 2,
-                   recvptr_x    , recvcnt_x   , MPI_DOUBLE, dst, 2,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
+      recvcount = MPI::sendrecv( &sendbuf_x[0], gdim * count, src,
+                                 recvptr_x, recvcnt_x, dst, 2 );
       recvcnt_x -= recvcount;
       recvptr_x += recvcount;
     }
@@ -405,9 +399,13 @@ void XMLMesh::endMesh()
     delete[] sendbuf_v;
 
     // Create mesh editor
-    Mesh new_mesh;
+    // Mesh new_mesh;
+    // delete editor_;
+    // editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
+
+    Mesh new_mesh(mesh_.type(), mesh_.space(), mesh_.distdata()[0].comm());
     delete editor_;
-    editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
+    editor_ = new MeshEditor(new_mesh, mesh_.type(), mesh_.space());
 
     // Add vertices
     editor_->init_vertices(mesh_.size(0) + shared - orphan);
@@ -477,7 +475,7 @@ void XMLMesh::endMesh()
     }
     delete[] connectivity;
     editor_->close();
-    mesh_.swap(new_mesh);
+    swap(mesh_, new_mesh);
 
 #if DEBUG
     message("XMLMesh: check ghosts consistency");

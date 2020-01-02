@@ -1,11 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Aurélien Larcher 2013-2014.
-//
-// First added:  2007-04-02
-// Last changed: 2014-02-06
 
 #ifndef __DOLFIN_FUNCTION_H
 #define __DOLFIN_FUNCTION_H

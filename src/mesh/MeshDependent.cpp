@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-03-04
-// Last changed: 2014-03-04
 
 #include <dolfin/mesh/MeshDependent.h>
 #include <dolfin/mesh/Mesh.h>
@@ -19,7 +16,7 @@ MeshDependent::MeshDependent(Mesh& mesh) :
 }
 
 //---------------------------------------------------------------------------
-MeshDependent::MeshDependent(MeshDependent const& other) :
+MeshDependent::MeshDependent(MeshDependent const&) :
   mesh_(NULL),
   topology_token_(0),
   geometry_token_(0)

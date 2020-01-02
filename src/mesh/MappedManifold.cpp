@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-10-05
-// Last changed: 2014-10-05
 
 #include <dolfin/mesh/MappedManifold.h>
 
@@ -19,7 +16,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MappedManifold::MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(mesh),
     subdomainG_(subdomain)
 {

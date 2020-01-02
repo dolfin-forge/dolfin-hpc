@@ -1,9 +1,7 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2016.
+
 // Rewritten to fix distribution bugs and use distributed data class.
-//
 
 #include <dolfin/mesh/MeshRenumber.h>
 
@@ -18,7 +16,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber(MeshTopology& topology)
 {
-  if (!topology.is_distributed())
+  if (!topology.distributed())
   {
     return false;
   }
@@ -145,9 +143,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     // Exchange data to mark which entities are shared
     _map<uint,uint> recvmap;
 
-    MPI_Status status;
-    uint src;
-    uint dst;
     uint sendmax = sendbuf[0].size();
     for (uint j = 1; j < pe_size; ++j)
     {
@@ -156,16 +151,13 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     uint recvmax = 0;
     MPI::all_reduce<MPI::max>(sendmax, recvmax);
     uint * recvbuf = new uint[recvmax];
-    int recvcount;
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      uint src = (rank - j + pe_size) % pe_size;
+      uint dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                   &recvbuf[0], recvmax, MPI_UNSIGNED, src, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      int recvcount = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
+                                     &recvbuf[0], recvmax, src, 1 );
 
       for (int k = 0; k < recvcount; k+=(2 + num_entity_vertices))
       {
@@ -252,13 +244,11 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     uint * recvbuf_back = (num_ghosts == 0 ? NULL : new uint[num_ghosts]);
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      int src = (rank - j + pe_size) % pe_size;
+      int dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                   &recvbuf[0], recvmax, MPI_UNSIGNED, src, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      int recvcount = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
+                                     &recvbuf[0], recvmax, src, 1 );
 
       for (int k = 0; k < recvcount; ++k)
       {
@@ -278,9 +268,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         sendbuf_back[k] = edata.get_global(recvbuf[k]);
       }
 
-      MPI_Sendrecv(&sendbuf_back[0], recvcount, MPI_UNSIGNED, src, 2,
-                   &recvbuf_back[0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 2,
-                   MPI::DOLFIN_COMM, &status);
+      MPI::sendrecv( &sendbuf_back[0], recvcount, src,
+                     &recvbuf_back[0], sendbuf[dst].size(), dst, 2 );
 
       for (int k = 0; k < (int) sendbuf[dst].size(); ++k)
       {

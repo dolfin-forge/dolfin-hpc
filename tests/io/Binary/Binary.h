@@ -65,7 +65,9 @@ DOLFIN_END_TEST
 DOLFIN_START_TEST( test_BinaryFile_Mesh )
   {
     {
-      Mesh mesh1;
+      CellType * type = CellType::create(CellType::triangle);
+      EuclideanSpace space(2);
+      Mesh mesh1(*type, space);
 
       {
         real coords[4][2] = {{0.0,0.0},
@@ -93,7 +95,7 @@ DOLFIN_START_TEST( test_BinaryFile_Mesh )
         f1 << mesh1;
       }
 
-      Mesh mesh2;
+      Mesh mesh2(*type, space);
       {
         BinaryFile f2("mesh.bin");
         f2 >> mesh2;

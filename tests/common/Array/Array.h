@@ -175,23 +175,7 @@ DOLFIN_START_TEST( test_Array )
       ck_assert(a[2] == 23);
       ck_assert(a[3] == 23);
       ck_assert(a[4] == 23);
-
-      ck_assert(b.size() == 3);
-      bool threw_exception = false;
-      try {
-        b.append( a.end(), a.begin() );
-      } catch ( ... )
-      {
-        threw_exception = true;
-      }
-      ck_assert(threw_exception == true);
-      ck_assert(b.size() == 3);
     }
-    //---
-    // {
-    //   /// Assignement operator
-
-    // }
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

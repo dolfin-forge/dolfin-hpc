@@ -436,6 +436,11 @@ void Assembler::initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
 {
   if (A.rank() == 0)
   {
+    if ( reset_tensor )
+    {
+      A.zero();
+    }
+
     return;
   }
 

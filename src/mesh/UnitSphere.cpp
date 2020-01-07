@@ -1,16 +1,18 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitSphere.h>
+
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/TetrahedronCell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 UnitSphere::UnitSphere(uint nx) :
-    Mesh(*CellType::create(CellType::tetrahedron), EuclideanSpace(3))
+    Mesh(TetrahedronCell(), EuclideanSpace(3))
 {
 
   message("UnitSphere is Experimental: It could have a bad quality mesh");

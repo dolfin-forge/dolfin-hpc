@@ -1,16 +1,18 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitCube.h>
+
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/TetrahedronCell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 UnitCube::UnitCube(uint nx, uint ny, uint nz) :
-    Mesh(*CellType::create(CellType::tetrahedron), EuclideanSpace(3))
+    Mesh(TetrahedronCell(), EuclideanSpace(3))
 {
 
   if (nx < 1 || ny < 1 || nz < 1)

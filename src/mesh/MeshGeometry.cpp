@@ -39,6 +39,8 @@ MeshGeometry::MeshGeometry(MeshGeometry const& other) :
 //-----------------------------------------------------------------------------
 MeshGeometry::~MeshGeometry()
 {
+  if ( space_ )
+    delete space_;
 }
 //-----------------------------------------------------------------------------
 MeshGeometry & MeshGeometry::operator=(MeshGeometry const& other)

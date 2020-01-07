@@ -1,16 +1,18 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitSquare.h>
+
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/TriangleCell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
-    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
+    Mesh(TriangleCell(), EuclideanSpace(2))
 {
 
   if (nx < 1 || ny < 1)

@@ -13,6 +13,7 @@
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
+#include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/UniformRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
@@ -25,18 +26,6 @@ namespace dolfin
 #define DOLFIN_DEFAULT_MESH_NAME  "mesh"
 #define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
 
-//-----------------------------------------------------------------------------
-// Mesh::Mesh() :
-//     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-//     topology_(NULL),
-//     geometry_(NULL),
-//     exterior_boundary_(NULL),
-//     interior_boundary_(NULL),
-//     intersection_detector_(NULL),
-//     timestamp_(time(0))
-// {
-//   // Do nothing
-// }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
@@ -78,7 +67,7 @@ Mesh::Mesh(Mesh const& other) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(*CellType::create(CellType::tetrahedron), DOLFIN_COMM,!this->reordering()), // temporary
+    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()), // temporary
     geometry_(EuclideanSpace(3)), // temporary
     exterior_boundary_(NULL),
     interior_boundary_(NULL),

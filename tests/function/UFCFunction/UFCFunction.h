@@ -39,6 +39,7 @@ DOLFIN_START_TEST( test_UFCFunction )
             f.evaluate(&value, v->x(), *c);
           }
         }
+        delete cell;
       }
       cells.free();
     }
@@ -60,6 +61,7 @@ DOLFIN_START_TEST( test_UFCFunction )
             f.evaluate(&value, v->x(), *c);
           }
         }
+        delete cell;
       }
       cells.free();
     }

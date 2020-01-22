@@ -60,7 +60,9 @@ void JANPACKMat::init(uint M, uint N)
 {
   jp_mat_init(A, M, N);
 
-  //  jp_mat_setopt(A, JP_MAT_SORTED);
+  // Allow for zeros to be inserted into the matrix
+  jp_mat_setopt(A, JP_MAT_ZEROS);
+
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::init(uint M, uint N, bool distributed)

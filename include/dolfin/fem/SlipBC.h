@@ -76,6 +76,7 @@ private:
   bool node_normal_local;
 
   Matrix* As;
+  bool As_local;
 
   // Local data structures for assembly
   std::set<uint> row_indices;

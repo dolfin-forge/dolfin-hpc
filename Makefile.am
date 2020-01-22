@@ -72,20 +72,8 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/mesh/meshfunction/meshfunction.xml\
              demo/mesh/meshfunction/Makefile\
              demo/mesh/meshfunction/main.cpp\
-             demo/mesh/partitioning/main.cpp\
-             demo/mesh/partitioning/Makefile\
              demo/mesh/subdomains/Makefile\
              demo/mesh/subdomains/main.cpp\
-             demo/nls/cahn-hilliard/CahnHilliard2D.ufl\
-             demo/nls/cahn-hilliard/CahnHilliard2D.h\
-             demo/nls/cahn-hilliard/CahnHilliard3D.ufl\
-             demo/nls/cahn-hilliard/CahnHilliard3D.h\
-             demo/nls/cahn-hilliard/Makefile\
-             demo/nls/cahn-hilliard/main.cpp\
-             demo/nls/nonlinearpoisson/Makefile\
-             demo/nls/nonlinearpoisson/NonlinearPoisson.ufl\
-             demo/nls/nonlinearpoisson/NonlinearPoisson.h\
-             demo/nls/nonlinearpoisson/main.cpp\
              demo/pde/convection-diffusion/Makefile\
              demo/pde/convection-diffusion/ConvectionDiffusion.ufl\
              demo/pde/convection-diffusion/subdomains.xml.gz\
@@ -128,10 +116,6 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/pde/mixed-poisson/P1Projection.h\
              demo/pde/mixed-poisson/Makefile\
              demo/pde/mixed-poisson/main.cpp\
-             demo/pde/nonlinear-poisson/Makefile\
-             demo/pde/nonlinear-poisson/NonlinearPoisson.ufl\
-             demo/pde/nonlinear-poisson/NonlinearPoisson.h\
-             demo/pde/nonlinear-poisson/main.cpp\
              demo/pde/poisson/README\
              demo/pde/poisson/Makefile\
              demo/pde/poisson/main.cpp\

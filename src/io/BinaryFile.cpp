@@ -139,6 +139,10 @@ void BinaryFile::operator>>(GenericVector& x)
 
 #else
   std::ifstream fp(filename.c_str(), std::ifstream::binary);
+
+  if ( not fp.good() )
+    throw std::runtime_error( "Failed to open file \"" + filename + "\"" );
+
   fp.read((char *)&size, sizeof(uint));
 #endif
 
@@ -212,6 +216,10 @@ void BinaryFile::operator<<(GenericVector& x)
   MPI::check_error( MPI_File_close(&fh) );
 #else
   std::ofstream fp(filename.c_str(), std::ofstream::binary);
+
+  if ( not fp.good() )
+    throw std::runtime_error( "Failed to open file \"" + filename + "\"" );
+
   fp.write((char *)&size, sizeof(uint));
   fp.write((char *)values, x.local_size() * sizeof(real));
   fp.close();
@@ -520,6 +528,9 @@ void BinaryFile::operator>>(Mesh& mesh)
     }
 
     std::ifstream fp(filename.c_str(), std::ifstream::binary);
+
+    if ( not fp.good() )
+      throw std::runtime_error( "Failed to open file \"" + filename + "\"" );
 
     uint type = 0;
     uint gdim = 0;
@@ -923,6 +934,9 @@ void BinaryFile::operator<<(Mesh& mesh)
     }
 
     std::ofstream fp(filename.c_str(), std::ofstream::binary);
+
+    if ( not fp.good() )
+      throw std::runtime_error( "Failed to open file \"" + filename + "\"" );
 
     // Write Header
     fp.write((char *) &hdr, sizeof(BinaryFileHeader));

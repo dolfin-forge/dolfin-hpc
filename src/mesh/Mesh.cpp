@@ -27,6 +27,18 @@ namespace dolfin
 #define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
 
 //-----------------------------------------------------------------------------
+Mesh::Mesh() :
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
+    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
+    geometry_(EuclideanSpace(3)),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
+{
+}
+
+//-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(ctype, DOLFIN_COMM_SELF, !this->reordering()),
@@ -67,8 +79,8 @@ Mesh::Mesh(Mesh const& other) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()), // temporary
-    geometry_(EuclideanSpace(3)), // temporary
+    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
+    geometry_(EuclideanSpace(3)),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),

@@ -63,7 +63,7 @@ class Mesh : public Variable
 public:
 
   /// Create empty mesh
-  // Mesh();
+  Mesh();
 
   /// Constructor from cell type and space
   Mesh(CellType const& ctype, Space const& space);

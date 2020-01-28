@@ -167,7 +167,6 @@ nobase_pkginclude_HEADERS = \
 				math/LinearDistribution.h\
 				math/PKDO.h\
 				mesh/AffineMapping.h \
-				mesh/ALE.h\
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\

@@ -47,7 +47,6 @@ Test::Test(std::string const& dir) :
 void Test::init(int argc, char *argv[])
 {
   int flag;
-  int i = 0;
   while (argc > 1 && -1 != (flag = getopt(argc, argv, "d:m:b")))
   {
     switch (flag)

@@ -247,7 +247,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   uint lreassigned = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
-    if(static_cast<uint>(part[vertex->index()]) != rank)
+    if(static_cast<int>(part[vertex->index()]) != rank)
     {
       ++lreassigned;
     }

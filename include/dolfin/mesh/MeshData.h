@@ -34,7 +34,7 @@ class MeshData
   template <class V, class E>
   struct type : public key { type() : key(values<V>(), entity<E>()) {} };
 
-  struct data_array { virtual ~data_array() = 0; virtual uint size() const = 0; };
+  struct data_array { virtual uint size() const = 0; };
 
   template <class V, class E>
   struct array : public data_array
@@ -48,15 +48,6 @@ class MeshData
 public:
 
   MeshData(Mesh& mesh) : M_(mesh) {}
-
-  ~MeshData()
-  {
-    while ( !S_.empty() )
-    {
-      delete S_.begin()->second;
-      S_.erase(S_.begin());
-    }
-  }
 
   //
   Mesh& mesh() { return M_; }

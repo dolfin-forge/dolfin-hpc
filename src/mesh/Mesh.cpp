@@ -5,7 +5,6 @@
 
 #include <dolfin/io/File.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
@@ -402,11 +401,6 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
     }
   }
   return periodic_mappings_;
-}
-//-----------------------------------------------------------------------------
-void Mesh::move(BoundaryMesh& boundary, ALE::ALEType method)
-{
-  ALE::move(*this, boundary, method);
 }
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash() const

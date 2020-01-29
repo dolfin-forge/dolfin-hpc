@@ -40,8 +40,6 @@ int main( int argc, char * argv[] )
 	// Set up forms
 	ConvectionDiffusion::BilinearForm a( mesh, velocity );
 	ConvectionDiffusion::LinearForm   L( mesh, u0, velocity, f );
-	velocity.init(L.test_space() );
-	File( "velocity.bin" ) >> velocity;
 
 	// Create finite element spaces
 	FiniteElementSpace * FE_vel  = L.create_coefficient_space( "b" );
@@ -49,6 +47,7 @@ int main( int argc, char * argv[] )
 
 	// Read the velocity from file
 	velocity.init( *FE_vel );
+	File( "velocity.bin" ) >> velocity;
 
 	// Set up boundary condition
 	Function          g( a.trial_space() );

@@ -39,7 +39,7 @@ struct ConstantFunction : public Value< ConstantFunction, 1, 3 >
 };
 
 // Dirichlet boundary condition for clamp at left end
-struct Clamp : public Value< Clamp >
+struct Clamp : public Value< Clamp, 3 >
 {
   void eval( real * values, const real * x ) const
   {
@@ -59,7 +59,7 @@ class Left : public SubDomain
 };
 
 // Dirichlet boundary condition for rotation at right end
-struct Rotation : public Value< Rotation >
+struct Rotation : public Value< Rotation, 3 >
 {
   void eval( real * values, const real * x ) const
   {

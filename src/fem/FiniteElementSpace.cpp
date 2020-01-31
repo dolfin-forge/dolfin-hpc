@@ -225,5 +225,4 @@ bool FiniteElementSpace::is_flattenable() const
 
 //-----------------------------------------------------------------------------
 
-}
-/* namespace icorne */
+} // end namespace dolfin

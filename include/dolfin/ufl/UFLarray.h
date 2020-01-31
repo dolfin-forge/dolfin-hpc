@@ -50,5 +50,6 @@ private:
 
 };
 
-} /* namespace icorne */
+} // end namespace ufl
+
 #endif /* __DOLFIN_UFL_ARRAY_H */

@@ -50,6 +50,6 @@ protected:
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __DOLFIN_EXPRESSION_H */

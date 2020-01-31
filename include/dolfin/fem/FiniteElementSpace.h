@@ -164,6 +164,6 @@ inline uint FiniteElementSpace::degree() const
   return ufl_->degree();
 }
 
-}
-/* namespace icorne */
+} // end namespace dolfin
+
 #endif /* __DOLFIN_FINITE_ELEMENT_SPACE_H */

@@ -68,9 +68,8 @@ int main( int argc, char * argv[] )
 	LUSolver lu;
 
 	// Assemble matrix
-	Assembler assembler;
-	assembler.assemble( A, a, true );
-	assembler.assemble( b, L, true );
+	Assembler::assemble( A, a, true );
+	Assembler::assemble( b, L, true );
 
 	real T = 2.0;
 	real k = 0.05;
@@ -83,7 +82,7 @@ int main( int argc, char * argv[] )
 	while ( t < T )
 	{
 		// Assemble vector and apply boundary conditions
-		assembler.assemble( b, L, false );
+		Assembler::assemble( b, L, false );
 		bc.apply( A, b, a );
 		bc0.apply( A, b, a );
 

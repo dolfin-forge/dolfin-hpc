@@ -25,8 +25,6 @@ namespace dolfin
 /// This class provides utility functions for easy access of the number of
 /// processes and current process number.
 
-class Mesh;
-
 template< int R, typename T >
 struct helper;
 

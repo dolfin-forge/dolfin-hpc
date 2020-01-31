@@ -147,5 +147,6 @@ private:
 
 };
 
-} /* namespace ufl */
+} // end namespace ufl
+
 #endif /* __DOLFIN_UFL_FINITE_ELEMENT_BASE_H */

@@ -969,11 +969,6 @@ void BinaryFile::operator<<(Mesh& mesh)
     MPI_File fh;
     MPI_Offset byte_offset;
 
-    /* FIXME:
-     * Add MPI_Info data
-     * Split and cleanup implementation
-     */
-
     MPI::check_error( MPI_File_open(comm, (char *) filename.c_str(),
                                     MPI_MODE_WRONLY | MPI_MODE_CREATE,
                                     MPI_INFO_NULL, &fh) );

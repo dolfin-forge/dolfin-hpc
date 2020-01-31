@@ -151,6 +151,6 @@ public:
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __LICORNE_FUNCTION_VALUE_H_ */

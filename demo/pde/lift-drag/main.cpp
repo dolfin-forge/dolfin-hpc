@@ -13,53 +13,47 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/Lift.h"
-#include "ufc2/Drag.h"
-#else
-#include "ufc1/Lift.h"
-#include "ufc1/Drag.h"
-#endif
+#include "Lift.h"
+#include "Drag.h"
 
 using namespace dolfin;
 
+// Define sub domain for the dolphin
+class Fish : public SubDomain
+{
+  bool inside(const real* x, bool on_boundary) const
+  {
+    return (x[0] > DOLFIN_EPS && x[0] < (1.0 - DOLFIN_EPS) &&
+            x[1] > DOLFIN_EPS && x[1] < (1.0 - DOLFIN_EPS) &&
+            on_boundary);
+  }
+};
+
 int main()
 {
-  // Read velocity field from file and get the mesh
-#ifdef ENABLE_UFL 
-  Function p("ufc2/pressure.xml.gz");
-  Mesh& mesh(p.mesh());
-#else
-  Function p("ufc1/pressure.xml.gz");
-  Mesh& mesh(p.mesh());
-#endif
+  dolfin_init();
 
-  // Define sub domain for the dolphin
-  class Fish : public SubDomain
-  {
-    bool inside(const real* x, bool on_boundary) const
-    {
-      return (x[0] > DOLFIN_EPS && x[0] < (1.0 - DOLFIN_EPS) && 
-              x[1] > DOLFIN_EPS && x[1] < (1.0 - DOLFIN_EPS) &&
-              on_boundary);
-    }
-  };  
-  
-  // Facet normal
-//  FacetNormal n(mesh);
+  // Read velocity field from file and get the mesh
+  Function p;
+  File("pressure.xml.gz") >> p;
+  Mesh& mesh(p.mesh());
 
   // Functionals for lift and drag
-  std::map<std::string const, Function *> coef_map;
-  coef_map["p"] = &p;
-  LiftFunctional L(mesh, coef_map);
-  DragFunctional D(mesh, coef_map);
+  Lift::Functional L(mesh, p);
+  Drag::Functional D(mesh, p);
 
   // Assemble functionals over sub domain
   Fish fish;
-  Assembler assembler(mesh);
-  real lift = assembler.assemble(L, fish);
-  real drag = assembler.assemble(D, fish);
+  Scalar l, d;
+  Assembler::assemble( l, L, fish, true );
+  real lift = l;
+
+  Assembler::assemble( d, D, fish, true );
+  real drag = d;
+
 
   message("Lift: %f", lift);
   message("Drag: %f", drag);
+
+  dolfin_finalize();
 }

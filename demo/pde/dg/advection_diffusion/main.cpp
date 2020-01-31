@@ -8,128 +8,89 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/AdvectionDiffusion.h"
-#include "ufc2/OutflowFacet.h"
-#include "ufc2/Projection.h"
-#else
-#include "ufc1/AdvectionDiffusion.h"
-#include "ufc1/OutflowFacet.h"
-#include "ufc1/Projection.h"
-#endif
-
+#include "AdvectionDiffusion.h"
+#include "OutflowFacet.h"
+#include "Projection.h"
 
 using namespace dolfin;
 
 // Dirichlet boundary condition
-class BC : public ScalarExpression
+struct BC : public Value<BC>
 {
-public:
-
-  BC() : ScalarExpression () {}
-
   void eval(real* values, const real* x) const
   {
     values[0] = sin(DOLFIN_PI*5.0*x[1]);
   }
 };
 
-  // Sub domain for Dirichlet boundary condition
-  class DirichletBoundary : public SubDomain
+// Sub domain for Dirichlet boundary condition
+class DirichletBoundary : public SubDomain
+{
+  bool inside(const real* x, bool on_boundary) const
   {
-    bool inside(const real* x, bool on_boundary) const
-    {
-      return std::abs(x[0] - 1.0) < DOLFIN_EPS && on_boundary;
-    }
-  };
-
-// Advective velocity
-//class Velocity : public VectorExpression
-//{
-//public:
-//    
-//  Velocity() : VectorExpression(2) {}
-//
-//  void eval(real* values, const real* x) const
-//  {
-//    values[0] = -1.0;
-//    values[1] = -0.4;
-//  }
-//
-//  dolfin::uint rank() const
-//  { return 1; }
-//
-//  dolfin::uint dim(dolfin::uint i) const
-//  { return 2; }
-//};
+    return std::abs(x[0] - 1.0) < DOLFIN_EPS && on_boundary;
+  }
+};
 
 int main(int argc, char *argv[])
 {
+  dolfin_init();
+
   // Read simple velocity field (-1.0, -0.4)
   // defined on a 64x64 unit square mesh and a quadratic vector Lagrange element
   UnitSquare mesh(64, 64);
   Function velocity(mesh);
-#ifdef ENABLE_UFL
-  File vel("ufc2/velocity.xml.gz");
-  vel >> velocity;
-#else
-  File vel("ufc1/velocity.xml.gz");
-  vel >> velocity;
-#endif
+  File("velocity.xml.gz") >> velocity;
 
 
   // Set up problem
   Matrix A;
   Vector x, b;
-  Function c(mesh, 0.0); // Diffusivity constant
-  Function f(mesh, 0.0); // Source term
-
-//  FacetNormal N(mesh);
-  AvgMeshSize h(mesh);
+  Constant c(0.0); // Diffusivity constant
+  Constant f(0.0); // Source term
 
   // Definitions for outflow facet function
-  std::map<std::string const, Function *> coef_map;
-  coef_map["velocity"] = &velocity;
-  OutflowFacetFunctional M_of(mesh, coef_map);
-  OutflowFacet of(mesh, M_of); // From SpecialFunctions.h
+  OutflowFacet::Functional M_of(mesh, velocity);
 
   // Penalty parameter
-  Function alpha(mesh, 20.0);
+  Constant alpha(20.0);
 
-  std::map<std::string const, Function *> bil_coef_map;
+  CoefficientMap bil_coef_map;
   bil_coef_map["u"] = &velocity;
   bil_coef_map["kappa"] = &c;
   bil_coef_map["alpha"] = &alpha;
-  AdvectionDiffusionBilinearForm a(mesh, bil_coef_map);
-  AdvectionDiffusionLinearForm L(f);
+  AdvectionDiffusion::BilinearForm a(mesh, bil_coef_map);
+  AdvectionDiffusion::LinearForm L(mesh, f);
 
   // Set up boundary condition (apply strong BCs)
-  BC g;
-  Function g_func (mesh, g);
+  Analytic<BC> g(mesh);
   DirichletBoundary boundary;
-  DirichletBC bc(g_func, mesh, boundary, geometric);
+  DirichletBC bc(g, mesh, boundary, geometric);
 
-  Assembler assembler(mesh);
-  assembler.assemble(A, a, true);
-  assembler.assemble(b, L, true);
+  Assembler::assemble(A, a, true);
+  Assembler::assemble(b, L, true);
   bc.apply(A, b, a);
 
   // Discontinuous solution
   Function uh(mesh);
-  uh.init(mesh, x, a, 1);
+  uh.init(a, 1);
 
-  solve(A, x, b);
+  LinearSolver s;
+
+  s.solve(A, x, b);
 
   // Define PDE for projection
-  ProjectionBilinearForm ap(mesh);
-  ProjectionLinearForm Lp(uh);
-  LinearPDE pde(ap, Lp, mesh);
+  Projection::BilinearForm ap(mesh);
+  Projection::LinearForm Lp(mesh, uh);
+  // LinearPDE pde(ap, Lp, mesh);
 
   // Solve PDE
-  Function up(mesh);
-  pde.solve(up);
+  // Function up(mesh);
+  // pde.solve(up);
 
-  // Save projected solution
-  File file("temperature.pvd");
-  file << up;
+  // // Save projected solution
+  // File file("temperature.pvd");
+  // file << up;
+
+  dolfin_finalize();
 }

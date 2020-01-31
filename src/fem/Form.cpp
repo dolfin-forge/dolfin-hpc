@@ -3,6 +3,7 @@
 
 #include <dolfin/fem/Form.h>
 
+#include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
@@ -10,9 +11,6 @@
 
 namespace dolfin
 {
-
-//-----------------------------------------------------------------------------
-Assembler Form::ASSEMBLER;
 
 //-----------------------------------------------------------------------------
 Form::Form(Mesh& mesh) :
@@ -193,7 +191,7 @@ bool Form::is_valid_index(uint i) const
 //----------------------------------------------------------------------------
 void Form::assemble(GenericTensor& T, bool reset_tensor)
 {
-  ASSEMBLER.assemble(T, *this, reset_tensor);
+  Assembler::assemble(T, *this, reset_tensor);
 }
 
 //-----------------------------------------------------------------------------

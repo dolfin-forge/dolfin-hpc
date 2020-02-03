@@ -7,10 +7,13 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'ufc'
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
 //   no-evaluate_basis:              False
@@ -18,9 +21,14 @@
 //   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
+//   remove_zero_terms:              False
 //   representation:                 'auto'
+//   simplify_basis:                 False
+//   simplify_expressions:           False
 //   split:                          True
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
@@ -40,89 +48,136 @@ class ffc_discontinuous_lagrange_0_1d_finite_element_0: public ufc::finite_eleme
 public:
 
   /// Constructor
-  ffc_discontinuous_lagrange_0_1d_finite_element_0();
+  ffc_discontinuous_lagrange_0_1d_finite_element_0()
+    : ufc::finite_element()
+  {
+      // Do nothing
+  }
 
   /// Destructor
-  ~ffc_discontinuous_lagrange_0_1d_finite_element_0();
+  ~ffc_discontinuous_lagrange_0_1d_finite_element_0()
+  {
+      // Do nothing
+  }
 
   /// Return a string identifying the finite element
-  const char* signature() const;
+  inline const char* signature() const
+  {
+    return "FiniteElement('Discontinuous Lagrange', Cell('interval', Space(1)), 0, None)";
+  }
 
   /// Return the cell shape
-  ufc::shape cell_shape() const;
+  inline ufc::shape cell_shape() const
+  {
+    return ufc::interval;
+  }
 
   /// Return the topological dimension of the cell shape
-  unsigned int topological_dimension() const;
+  inline unsigned int topological_dimension() const
+  {
+    return 1;
+  }
 
   /// Return the geometric dimension of the cell shape
-  unsigned int geometric_dimension() const;
+  inline unsigned int geometric_dimension() const
+  {
+    return 1;
+  }
 
   /// Return the dimension of the finite element function space
-  unsigned int space_dimension() const;
+  inline unsigned int space_dimension() const
+  {
+    return 1;
+  }
 
   /// Return the rank of the value space
-  unsigned int value_rank() const;
+  inline unsigned int value_rank() const
+  {
+    return 0;
+  }
 
   /// Return the dimension of the value space for axis i
-  unsigned int value_dimension(unsigned int i) const;
+  unsigned int value_dimension(unsigned int i) const
+  {
+    return 1;
+  }
+
+  /// Compute mapped coordinates for evaluate_basis()
+  void evaluate_basis_map_coordinates(double & X,
+                                      double & Y,
+                                      double & Z,
+                                      const double* coordinates,
+                                      const ufc::cell& c) const;
+
+  /// Compute mapped coordinates for evaluate_basis()
+  void evaluate_basis_from_coordinates(const double X,
+                                       const double Y,
+                                       const double Z,
+                                       double** values) const;
 
   /// Evaluate basis function i at given point in cell
   void evaluate_basis(unsigned int i,
-                              double* values,
-                              const double* coordinates,
-                              const ufc::cell& c) const;
+                      double* values,
+                      const double* coordinates,
+                      const ufc::cell& c) const;
 
   /// Evaluate all basis functions at given point in cell
   void evaluate_basis_all(double* values,
-                                  const double* coordinates,
-                                  const ufc::cell& c) const;
+                          const double* coordinates,
+                          const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of basis function i at given point in cell
   void evaluate_basis_derivatives(unsigned int i,
-                                          unsigned int n,
-                                          double* values,
-                                          const double* coordinates,
-                                          const ufc::cell& c) const;
+                                  unsigned int n,
+                                  double* values,
+                                  const double* coordinates,
+                                  const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   void evaluate_basis_derivatives_all(unsigned int n,
-                                              double* values,
-                                              const double* coordinates,
-                                              const ufc::cell& c) const;
+                                  double* values,
+                                  const double* coordinates,
+                                  const ufc::cell& c) const;
 
   /// Evaluate linear functional for dof i on the function f
   double evaluate_dof(unsigned int i,
-                              const ufc::function& f,
-                              const ufc::cell& c) const;
+                      const ufc::function& f,
+                      const ufc::cell& c) const;
 
   /// Evaluate linear functionals for all dofs on the function f
   void evaluate_dofs(double* values,
-                             const ufc::function& f,
-                             const ufc::cell& c) const;
+                     const ufc::function& f,
+                     const ufc::cell& c) const;
 
   /// Interpolate vertex values from dof values
   void interpolate_vertex_values(double* vertex_values,
-                                         const double* dof_values,
-                                         const ufc::cell& c) const;
+                                 const double* dof_values,
+                                 const ufc::cell& c) const;
 
   /// Map coordinate xhat from reference cell to coordinate x in cell
   void map_from_reference_cell(double* x,
-                                       const double* xhat,
-                                       const ufc::cell& c) const;
+                               const double* xhat,
+                               const ufc::cell& c) const;
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
   void map_to_reference_cell(double* xhat,
-                                     const double* x,
-                                     const ufc::cell& c) const;
+                             const double* x,
+                             const ufc::cell& c) const;
 
   /// Return the number of sub elements (for a mixed element)
-  unsigned int num_sub_elements() const;
+  inline unsigned int num_sub_elements() const
+  {
+    return 0;
+  }
 
   /// Create a new finite element for sub element i (for a mixed element)
   ufc::finite_element* create_sub_element(unsigned int i) const;
 
   /// Create a new class instance
-  ufc::finite_element* create() const;
+  inline ufc::finite_element* create() const
+  {
+    return new ffc_discontinuous_lagrange_0_1d_finite_element_0();
+  }
 
 };
 
@@ -137,57 +192,134 @@ private:
 public:
 
   /// Constructor
-  ffc_discontinuous_lagrange_0_1d_dofmap_0();
+  ffc_discontinuous_lagrange_0_1d_dofmap_0()
+    : ufc::dofmap()
+  {
+    _global_dimension = 0;
+  }
 
   /// Destructor
-  ~ffc_discontinuous_lagrange_0_1d_dofmap_0();
+  ~ffc_discontinuous_lagrange_0_1d_dofmap_0()
+  {
+    // Do nothing
+  }
 
-  /// Return a string identifying the dofmap
-  const char* signature() const;
+  inline const char* signature() const
+  {
+    return "FFC dofmap for FiniteElement('Discontinuous Lagrange', Cell('interval', Space(1)), 0, None)";
+  }
 
   /// Return true iff mesh entities of topological dimension d are needed
-  bool needs_mesh_entities(unsigned int d) const;
+  inline bool needs_mesh_entities(unsigned int d) const
+  {
+    switch (d)
+    {
+    case 0:
+      {
+        return false;
+        break;
+      }
+    case 1:
+      {
+        return true;
+        break;
+      }
+    }
+    
+    return false;
+  }
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-  bool init_mesh(const ufc::mesh& m);
+  inline bool init_mesh(const ufc::mesh& m)
+  {
+    _global_dimension = m.num_entities[1];
+    return false;
+  }
 
   /// Initialize dofmap for given cell
-  void init_cell(const ufc::mesh& m,
-                         const ufc::cell& c);
+  inline void init_cell(const ufc::mesh& m,
+                         const ufc::cell& c)
+  {
+    // Do nothing
+  }
 
   /// Finish initialization of dofmap for cells
-  void init_cell_finalize();
+  inline void init_cell_finalize()
+  {
+    // Do nothing
+  }
 
   /// Return the topological dimension of the associated cell shape
-  unsigned int topological_dimension() const;
+  inline unsigned int topological_dimension() const
+  {
+    return 1;
+  }
 
   /// Return the geometric dimension of the associated cell shape
-  unsigned int geometric_dimension() const;
+  inline unsigned int geometric_dimension() const
+  {
+    return 1;
+  }
 
   /// Return the dimension of the global finite element function space
-  unsigned int global_dimension() const;
+  inline unsigned int global_dimension() const
+  {
+    return _global_dimension;
+  }
 
 #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the dimension of the local finite element function space for a cell
-  unsigned int local_dimension(const ufc::cell& c) const;
+  inline unsigned int local_dimension(const ufc::cell& c) const
+  {
+    return 1;
+  }
 
   /// Return the maximum dimension of the local finite element function space
-  unsigned int max_local_dimension() const;
+  inline unsigned int max_local_dimension() const
+  {
+    return 1;
+  }
 #else
   /// Return the dimension of the local finite element function space for a cell
-  unsigned int local_dimension() const;
+  inline unsigned int local_dimension() const
+  {
+    return 1;
+  }
 #endif
 
   /// Return the number of dofs on each cell facet
-  unsigned int num_facet_dofs() const;
+  inline unsigned int num_facet_dofs() const
+  {
+    return 0;
+  }
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  unsigned int num_entity_dofs(unsigned int d) const;
+  inline unsigned int num_entity_dofs(unsigned int d) const
+  {
+    switch (d)
+    {
+    case 0:
+      {
+        return 0;
+        break;
+      }
+    case 1:
+      {
+        return 1;
+        break;
+      }
+    }
+    
+    return 0;
+  }
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(unsigned int* dofs,
-                             const ufc::mesh& m,
-                             const ufc::cell& c) const;
+  inline void tabulate_dofs(unsigned int* dofs,
+                            const ufc::mesh& m,
+                            const ufc::cell& c) const
+  {
+    dofs[0] = c.entity_indices[1][0];
+  }
 
   /// Tabulate the local-to-local mapping from facet dofs to cell dofs
   void tabulate_facet_dofs(unsigned int* dofs,
@@ -202,13 +334,22 @@ public:
                                     const ufc::cell& c) const;
 
   /// Return the number of sub dofmaps (for a mixed element)
-  unsigned int num_sub_dofmaps() const;
+  inline unsigned int num_sub_dofmaps() const
+  {
+    return 0;
+  }
 
   /// Create a new dofmap for sub dofmap i (for a mixed element)
-  ufc::dofmap* create_sub_dofmap(unsigned int i) const;
+  inline ufc::dofmap* create_sub_dofmap(unsigned int i) const
+  {
+    return 0;
+  }
 
   /// Create a new class instance
-  ufc::dofmap* create() const;
+  inline ufc::dofmap* create() const
+  {
+    return new ffc_discontinuous_lagrange_0_1d_dofmap_0();
+  }
 
 };
 

@@ -265,7 +265,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     facets_data.insert(std::pair<uint, FacetData *>(data->global_index, data));
 
     // Collect to send ghosted data to the adjacent ranks
-    //FIXME: Dirty hack, send to all adjacents, not optimal but good enough
+    /// @todo Dirty hack, send to all adjacents, not optimal but good enough
     if (!ghost_nodes.empty())
     {
       _set<uint> adjs;

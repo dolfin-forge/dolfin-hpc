@@ -153,13 +153,13 @@ public:
   bool parallel_io() const;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const; // FIXME remove this function
+  bool is_distributed() const; //!< @todo remove this function
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata(); // FIXME remove this function
+  MeshDistributedData& distdata(); //!< @todo remove this function
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const; // FIXME remove this function
+  MeshDistributedData const& distdata() const; //!< @tod remove this function
 
   /// Return global number of entities of given topological dimension
   uint global_size(uint dim) const;

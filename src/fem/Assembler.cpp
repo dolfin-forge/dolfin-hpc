@@ -445,7 +445,7 @@ void initializePeriodicDofs(GenericTensor& A,
   }
 
   // Add zero at periodic dofs to allocate entries
-  //FIXME: This could be fixed by a modification of the assembler's behaviour
+  /// @todo This could be fixed by a modification of the assembler's behaviour
   if(A.rank() == 2)
   {
     //

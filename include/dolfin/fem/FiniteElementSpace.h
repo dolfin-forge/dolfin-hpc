@@ -80,7 +80,7 @@ public:
   Mesh& mesh() const;
 
   /// Return cell on which the reference element is defined
-  Cell& cell() const; //FIXME: Cannot const this due to Mesh implementation
+  Cell& cell() const; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
   FiniteElement const& element() const;

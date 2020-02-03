@@ -108,7 +108,6 @@ add("Krylov maximum iterations", 10000);
 add("Krylov GMRES restart", 30);
 add("Krylov shift nonzero", 0.0);
 add("Krylov report", true);
-add("Krylov monitor convergence", false);
 add("Krylov keep PC", false);
 add("Krylov error on nonconvergence", true);
 

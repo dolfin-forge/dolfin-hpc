@@ -152,7 +152,7 @@ private:
   uint size_;
 
   /// Coordinates for all vertices stored as a contiguous array
-  Array<real> coordinates_; //!< @todo this should actually be Point
+  Array<real> coordinates_; //!< @todo this should actually be Point
 			    //!instead of real
 
   /// Absolute tolerances

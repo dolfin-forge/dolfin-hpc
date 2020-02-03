@@ -7,10 +7,13 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'ufc'
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
 //   no-evaluate_basis:              False
@@ -18,67 +21,190 @@
 //   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
+//   remove_zero_terms:              False
 //   representation:                 'auto'
+//   simplify_basis:                 False
+//   simplify_expressions:           False
 //   split:                          True
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
 #include "ffc_Discontinuous_Lagrange_1_3d.h"
-
-/// Constructor
-ffc_discontinuous_lagrange_1_3d_finite_element_0::ffc_discontinuous_lagrange_1_3d_finite_element_0() : ufc::finite_element()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis_map_coordinates(double & X,
+                                                   double & Y,
+                                                   double & Z,
+                                                   const double* coordinates,
+                                                   const ufc::cell& c) const
 {
-    // Do nothing
+    // Extract vertex coordinates
+    const double * const * x = c.coordinates;
+    
+    // Compute Jacobian of affine map from reference cell
+    const double J_00 = x[1][0] - x[0][0];
+    const double J_01 = x[2][0] - x[0][0];
+    const double J_02 = x[3][0] - x[0][0];
+    const double J_10 = x[1][1] - x[0][1];
+    const double J_11 = x[2][1] - x[0][1];
+    const double J_12 = x[3][1] - x[0][1];
+    const double J_20 = x[1][2] - x[0][2];
+    const double J_21 = x[2][2] - x[0][2];
+    const double J_22 = x[3][2] - x[0][2];
+    
+    // Compute sub determinants
+    const double d_00 = J_11*J_22 - J_12*J_21;
+    const double d_01 = J_12*J_20 - J_10*J_22;
+    const double d_02 = J_10*J_21 - J_11*J_20;
+    const double d_10 = J_02*J_21 - J_01*J_22;
+    const double d_11 = J_00*J_22 - J_02*J_20;
+    const double d_12 = J_01*J_20 - J_00*J_21;
+    const double d_20 = J_01*J_12 - J_02*J_11;
+    const double d_21 = J_02*J_10 - J_00*J_12;
+    const double d_22 = J_00*J_11 - J_01*J_10;
+    
+    // Compute determinant of Jacobian
+    double detJ = J_00*d_00 + J_10*d_10 + J_20*d_20;
+    
+    // Compute inverse of Jacobian
+    
+    // Compute constants
+    const double C0 = x[3][0] + x[2][0] + x[1][0] - x[0][0];
+    const double C1 = x[3][1] + x[2][1] + x[1][1] - x[0][1];
+    const double C2 = x[3][2] + x[2][2] + x[1][2] - x[0][2];
+    
+    // Get coordinates and map to the reference (FIAT) element
+    X = (d_00*(2.0*coordinates[0] - C0) + d_10*(2.0*coordinates[1] - C1) + d_20*(2.0*coordinates[2] - C2)) / detJ;
+    Y = (d_01*(2.0*coordinates[0] - C0) + d_11*(2.0*coordinates[1] - C1) + d_21*(2.0*coordinates[2] - C2)) / detJ;
+    Z = (d_02*(2.0*coordinates[0] - C0) + d_12*(2.0*coordinates[1] - C1) + d_22*(2.0*coordinates[2] - C2)) / detJ;
+    
 }
 
-/// Destructor
-ffc_discontinuous_lagrange_1_3d_finite_element_0::~ffc_discontinuous_lagrange_1_3d_finite_element_0()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis_from_coordinates(const double X,
+                                                    const double Y,
+                                                    const double Z,
+                                                    double** values) const
 {
-    // Do nothing
-}
-
-/// Return a string identifying the finite element
-const char* ffc_discontinuous_lagrange_1_3d_finite_element_0::signature() const
-{
-    return "FiniteElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 1, None)";
-}
-
-/// Return the cell shape
-ufc::shape ffc_discontinuous_lagrange_1_3d_finite_element_0::cell_shape() const
-{
-    return ufc::tetrahedron;
-}
-
-/// Return the topological dimension of the cell shape
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::topological_dimension() const
-{
-    return 3;
-}
-
-/// Return the geometric dimension of the cell shape
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::geometric_dimension() const
-{
-    return 3;
-}
-
-/// Return the dimension of the finite element function space
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::space_dimension() const
-{
-    return 4;
-}
-
-/// Return the rank of the value space
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::value_rank() const
-{
-    return 0;
-}
-
-/// Return the dimension of the value space for axis i
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::value_dimension(unsigned int i) const
-{
-    return 1;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+    
+    // Compute value(s).
+    values[3][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[3][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
 }
 
 /// Evaluate basis function i at given point in cell
@@ -127,9 +253,6 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis(unsigned i
     double Y = (d_01*(2.0*coordinates[0] - C0) + d_11*(2.0*coordinates[1] - C1) + d_21*(2.0*coordinates[2] - C2)) / detJ;
     double Z = (d_02*(2.0*coordinates[0] - C0) + d_12*(2.0*coordinates[1] - C1) + d_22*(2.0*coordinates[2] - C2)) / detJ;
     
-    
-    // Reset values.
-    *values = 0.0;
     switch (i)
     {
     case 0:
@@ -156,9 +279,10 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis(unsigned i
       {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 4; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -186,9 +310,10 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis(unsigned i
       {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 4; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -216,9 +341,10 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis(unsigned i
       {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 4; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -246,9 +372,10 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::evaluate_basis(unsigned i
       {0.288675134594813, 0.0, 0.0, 0.223606797749979};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 4; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -1225,7 +1352,7 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::map_from_reference_cell(d
                                             const double* xhat,
                                             const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
+    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -1233,13 +1360,7 @@ void ffc_discontinuous_lagrange_1_3d_finite_element_0::map_to_reference_cell(dou
                                           const double* x,
                                           const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
-}
-
-/// Return the number of sub elements (for a mixed element)
-unsigned int ffc_discontinuous_lagrange_1_3d_finite_element_0::num_sub_elements() const
-{
-    return 0;
+    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Create a new finite element for sub element i (for a mixed element)
@@ -1248,167 +1369,6 @@ ufc::finite_element* ffc_discontinuous_lagrange_1_3d_finite_element_0::create_su
     return 0;
 }
 
-/// Create a new class instance
-ufc::finite_element* ffc_discontinuous_lagrange_1_3d_finite_element_0::create() const
-{
-    return new ffc_discontinuous_lagrange_1_3d_finite_element_0();
-}
-
-
-/// Constructor
-
-
-ffc_discontinuous_lagrange_1_3d_dofmap_0::ffc_discontinuous_lagrange_1_3d_dofmap_0() : ufc::dofmap()
-{
-    _global_dimension = 0;
-}
-
-/// Destructor
-ffc_discontinuous_lagrange_1_3d_dofmap_0::~ffc_discontinuous_lagrange_1_3d_dofmap_0()
-{
-    // Do nothing
-}
-
-/// Return a string identifying the dofmap
-const char* ffc_discontinuous_lagrange_1_3d_dofmap_0::signature() const
-{
-    return "FFC dofmap for FiniteElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 1, None)";
-}
-
-/// Return true iff mesh entities of topological dimension d are needed
-bool ffc_discontinuous_lagrange_1_3d_dofmap_0::needs_mesh_entities(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return false;
-        break;
-      }
-    case 1:
-      {
-        return false;
-        break;
-      }
-    case 2:
-      {
-        return false;
-        break;
-      }
-    case 3:
-      {
-        return true;
-        break;
-      }
-    }
-    
-    return false;
-}
-
-/// Initialize dofmap for mesh (return true iff init_cell() is needed)
-bool ffc_discontinuous_lagrange_1_3d_dofmap_0::init_mesh(const ufc::mesh& m)
-{
-    _global_dimension = 4*m.num_entities[3];
-    return false;
-}
-
-/// Initialize dofmap for given cell
-void ffc_discontinuous_lagrange_1_3d_dofmap_0::init_cell(const ufc::mesh& m,
-                              const ufc::cell& c)
-{
-    // Do nothing
-}
-
-/// Finish initialization of dofmap for cells
-void ffc_discontinuous_lagrange_1_3d_dofmap_0::init_cell_finalize()
-{
-    // Do nothing
-}
-
-/// Return the topological dimension of the associated cell shape
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::topological_dimension() const
-{
-    return 3;
-}
-
-/// Return the geometric dimension of the associated cell shape
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::geometric_dimension() const
-{
-    return 3;
-}
-
-/// Return the dimension of the global finite element function space
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::global_dimension() const
-{
-    return _global_dimension;
-}
-
-#ifndef UFC_BACKWARD_COMPATIBILITY
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::local_dimension(const ufc::cell& c) const
-{
-    return 4;
-}
-
-/// Return the maximum dimension of the local finite element function space
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::max_local_dimension() const
-{
-    return 4;
-}
-#else
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::local_dimension() const
-{
-    return 4;
-}
-#endif
-
-/// Return the number of dofs on each cell facet
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::num_facet_dofs() const
-{
-    return 0;
-}
-
-/// Return the number of dofs associated with each cell entity of dimension d
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::num_entity_dofs(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return 0;
-        break;
-      }
-    case 1:
-      {
-        return 0;
-        break;
-      }
-    case 2:
-      {
-        return 0;
-        break;
-      }
-    case 3:
-      {
-        return 4;
-        break;
-      }
-    }
-    
-    return 0;
-}
-
-/// Tabulate the local-to-global mapping of dofs on a cell
-void ffc_discontinuous_lagrange_1_3d_dofmap_0::tabulate_dofs(unsigned int* dofs,
-                                  const ufc::mesh& m,
-                                  const ufc::cell& c) const
-{
-    dofs[0] = 4*c.entity_indices[3][0];
-    dofs[1] = 4*c.entity_indices[3][0] + 1;
-    dofs[2] = 4*c.entity_indices[3][0] + 2;
-    dofs[3] = 4*c.entity_indices[3][0] + 3;
-}
 
 /// Tabulate the local-to-local mapping from facet dofs to cell dofs
 void ffc_discontinuous_lagrange_1_3d_dofmap_0::tabulate_facet_dofs(unsigned int* dofs,
@@ -1446,7 +1406,7 @@ void ffc_discontinuous_lagrange_1_3d_dofmap_0::tabulate_entity_dofs(unsigned int
 {
     if (d > 3)
     {
-    throw std::runtime_error(std::string("d is larger than dimension (3)"));
+    throw std::runtime_error("d is larger than dimension (3)");
     }
     
     switch (d)
@@ -1470,7 +1430,7 @@ void ffc_discontinuous_lagrange_1_3d_dofmap_0::tabulate_entity_dofs(unsigned int
       {
         if (i > 0)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (0)"));
+      throw std::runtime_error("i is larger than number of entities (0)");
       }
       
       dofs[0] = 0;
@@ -1501,24 +1461,6 @@ void ffc_discontinuous_lagrange_1_3d_dofmap_0::tabulate_coordinates(double** coo
     coordinates[3][0] = x[3][0];
     coordinates[3][1] = x[3][1];
     coordinates[3][2] = x[3][2];
-}
-
-/// Return the number of sub dofmaps (for a mixed element)
-unsigned int ffc_discontinuous_lagrange_1_3d_dofmap_0::num_sub_dofmaps() const
-{
-    return 0;
-}
-
-/// Create a new dofmap for sub dofmap i (for a mixed element)
-ufc::dofmap* ffc_discontinuous_lagrange_1_3d_dofmap_0::create_sub_dofmap(unsigned int i) const
-{
-    return 0;
-}
-
-/// Create a new class instance
-ufc::dofmap* ffc_discontinuous_lagrange_1_3d_dofmap_0::create() const
-{
-    return new ffc_discontinuous_lagrange_1_3d_dofmap_0();
 }
 
 

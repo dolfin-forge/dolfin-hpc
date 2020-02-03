@@ -19,7 +19,7 @@ add("optimize use dof map cache", false); // Store dof maps in cache for reuse
 add("optimize use tensor cache", false);  // Store tensors in cache for reuse
 add("optimize", false);                   // All of the above
 
-// FIXME: Need to cleanup among parameters below
+/// @todo Need to cleanup among parameters below
 
 //--- General parameters ---
 

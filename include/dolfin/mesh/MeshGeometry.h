@@ -145,17 +145,17 @@ private:
   //
   Space const * space_;
 
-  // Euclidean dimension
+  /// Euclidean dimension
   uint dim_;
 
-  // Number of coordinates
+  /// Number of coordinates
   uint size_;
 
-  // Coordinates for all vertices stored as a contiguous array
-  // FIXME this should actually be Point instead of real
-  Array<real> coordinates_;
+  /// Coordinates for all vertices stored as a contiguous array
+  Array<real> coordinates_; //!< @todo this should actually be Point
+			    //!instead of real
 
-  // Absolute tolerances
+  /// Absolute tolerances
   Array<real> abs_tol_;
 
   //

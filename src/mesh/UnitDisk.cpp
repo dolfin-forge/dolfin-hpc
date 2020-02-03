@@ -158,7 +158,7 @@ real UnitDisk::transformx(real x, real y, Transformation transformation)
   }
   else
   {
-    // FIXME: Use easier to understand check
+    /// @todo Use easier to understand check
     if ((transformation != maxn) && (transformation != sumn)
         && (transformation != rotsumn))
     {

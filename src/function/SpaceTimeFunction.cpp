@@ -125,7 +125,7 @@ void SpaceTimeFunction::eval()
   real const st = this->clock();
   real const t0 = it0->first;
   real const t1 = it1->first;
-  //FIXME: Round-off errors may violate maximum principles
+  /// @todo Round-off errors may violate maximum principles
   real const w0 = (t1 - st) / (t1 - t0);
   real const w1 = (st - t0) / (t1 - t0);
   this->zero();

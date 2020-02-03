@@ -129,8 +129,8 @@ void SlipBC::apply( GenericMatrix & A,
     }
 
     // Initialize normal field on given space and compute at the boundary
-    if ( node_normal_local ) // FIXME: add test for uninitialized external
-                             // NodeNormal objects
+    if ( node_normal_local ) /// @todo add test for uninitialized external
+                             /// NodeNormal objects
     {
       if ( sub_system().depth() == 0 )
       {

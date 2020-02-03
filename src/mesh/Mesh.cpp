@@ -220,7 +220,7 @@ void Mesh::init() const
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate boundary at topology change
+  /// @todo Improve hash logic to regenerate boundary at topology change
   if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
     if(exterior_boundary_)
@@ -235,7 +235,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::interior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate boundary at topology change
+  /// @todo Improve hash logic to regenerate boundary at topology change
   if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
     if(interior_boundary_)
@@ -310,7 +310,7 @@ uint Mesh::geometry_dimension() const
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
 {
-  ///FIXME: Improve hash logic to regenerate detector at topology change
+  /// @todo Improve hash logic to regenerate detector at topology change
   if (intersection_detector_ == NULL)
   {
     if(intersection_detector_)
@@ -351,7 +351,7 @@ void Mesh::distribute()
     MeshValues<uint, Cell> partitions(*this);
     partition(partitions);
     distribute(partitions);
-    //FIXME: following the legacy behaviour entities are always renumbered
+    /// @todo following the legacy behaviour entities are always renumbered
     topology().renumber();
   }
 }

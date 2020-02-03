@@ -48,6 +48,6 @@ uint const ValueSpace<I, J>::DIM[2] = { I, J };
 template<uint I, uint J>
 uint const ValueSpace<I, J>::RANK   = (I > 1 ? (J > 1 ? 2 : 1) : 0);
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __LICORNE_FUNCTION_VALUE_SPACE_H_ */

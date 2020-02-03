@@ -170,6 +170,6 @@ private:
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __LICORNE_FUNCTION_REAL_H_ */

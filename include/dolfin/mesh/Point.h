@@ -75,7 +75,7 @@ public:
 
   /// Subtraction assignment
   point& operator-=(point const& p)
-  { for (size_t i = 0; i < D; ++i) { x_[i] += p.x_[i]; } return *this; }
+  { for (size_t i = 0; i < D; ++i) { x_[i] -= p.x_[i]; } return *this; }
 
   /// Subtraction
   point operator-(point const& p) const { return (point(*this) -= p); }

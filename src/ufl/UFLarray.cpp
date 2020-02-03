@@ -69,4 +69,4 @@ Object::repr_t array::unpack(Object::repr_t const& repr_array)
   return repr_array.substr(openpos + 1, closepos - openpos - 1);
 }
 
-} /* namespace icorne */
+} // end namespace ufl

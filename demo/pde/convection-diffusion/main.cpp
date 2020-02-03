@@ -40,8 +40,6 @@ int main( int argc, char * argv[] )
 	// Set up forms
 	ConvectionDiffusion::BilinearForm a( mesh, velocity );
 	ConvectionDiffusion::LinearForm   L( mesh, u0, velocity, f );
-	velocity.init(L.test_space() );
-	File( "velocity.bin" ) >> velocity;
 
 	// Create finite element spaces
 	FiniteElementSpace * FE_vel  = L.create_coefficient_space( "b" );
@@ -49,6 +47,7 @@ int main( int argc, char * argv[] )
 
 	// Read the velocity from file
 	velocity.init( *FE_vel );
+	File( "velocity.bin" ) >> velocity;
 
 	// Set up boundary condition
 	Function          g( a.trial_space() );
@@ -68,9 +67,8 @@ int main( int argc, char * argv[] )
 	LUSolver lu;
 
 	// Assemble matrix
-	Assembler assembler;
-	assembler.assemble( A, a, true );
-	assembler.assemble( b, L, true );
+	Assembler::assemble( A, a, true );
+	Assembler::assemble( b, L, true );
 
 	real T = 2.0;
 	real k = 0.05;
@@ -83,7 +81,7 @@ int main( int argc, char * argv[] )
 	while ( t < T )
 	{
 		// Assemble vector and apply boundary conditions
-		assembler.assemble( b, L, false );
+		Assembler::assemble( b, L, false );
 		bc.apply( A, b, a );
 		bc0.apply( A, b, a );
 

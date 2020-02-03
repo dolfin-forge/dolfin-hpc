@@ -1,12 +1,12 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-// Adapted from licorne.
 
 #ifndef __DOLFIN_FUNCTION_OPERATORS_H_
 #define __DOLFIN_FUNCTION_OPERATORS_H_
 
-#include "impl/ops.h"
 #include <dolfin/mesh/MeshValues.h>
+
+#include "impl/ops.h"
 
 namespace dolfin
 {
@@ -24,6 +24,6 @@ operator<<(MeshValues<real, Entity>& v, EntityOp<Operator, Entity, Value>& o)
 }
 //-----------------------------------------------------------------------------
 
-}
+} // end namespace dolfin
 
 #endif /* __DOLFIN_FUNCTION_OPERATORS_H_ */

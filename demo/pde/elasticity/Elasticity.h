@@ -10,26 +10,26 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
-//   eliminate_zeros:                True
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'dolfin'
-//   ignore_ones:                    True
-//   ignore_zero_tables:             True
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
-//   optimize:                       True
+//   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
-//   precompute_basis_const:         True
-//   precompute_ip_const:            True
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
-//   remove_zero_terms:              True
+//   remove_zero_terms:              False
 //   representation:                 'auto'
 //   simplify_basis:                 False
-//   simplify_expressions:           True
+//   simplify_expressions:           False
 //   split:                          False
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
@@ -158,7 +158,27 @@ public:
                                        const double Z,
                                        double** values) const
   {
-    values[0][0] = 1.00000000000000;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[1] = {0.0};
+    
+    // Declare helper variables.
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[1] = \
+    {1.0};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 1; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
   }
 
   /// Evaluate basis function i at given point in cell
@@ -181,7 +201,25 @@ public:
     
     // Get coordinates and map to the reference (FIAT) element
     
-    values[0] = 1.00000000000000;
+    
+    // Array of basisvalues.
+    double basisvalues[1] = {0.0};
+    
+    // Declare helper variables.
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[1] = \
+    {1.0};
+    
+    // Compute value(s).
+    values[0] = 0.0;
+    for (unsigned int r = 0; r < 1; r++)
+    {
+      values[0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
   }
 
   /// Evaluate all basis functions at given point in cell
@@ -674,10 +712,122 @@ public:
                                        const double Z,
                                        double** values) const
   {
-    values[0][0] = -0.5*X-0.5*Y-0.5*Z-0.5;
-    values[1][0] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-    values[2][0] = 0.5*Y+0.5;
-    values[3][0] = 0.5*Z+0.5;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+    
+    // Compute value(s).
+    values[3][0] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[3][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
   }
 
   /// Evaluate basis function i at given point in cell
@@ -730,22 +880,126 @@ public:
     {
     case 0:
       {
-        values[0] = -0.5*X-0.5*Y-0.5*Z-0.5;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 1:
       {
-        values[0] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 2:
       {
-        values[0] = 0.5*Y+0.5;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 3:
       {
-        values[0] = 0.5*Z+0.5;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+      
+      // Compute value(s).
+      values[0] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     }
@@ -1877,42 +2131,378 @@ public:
                                        const double Z,
                                        double** values) const
   {
-    values[0][0] = -0.5*X-0.5*Y-0.5*Z-0.5;
-    values[0][2] = 0.0;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
     values[0][1] = 0.0;
-    values[1][0] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-    values[1][2] = 0.0;
+    values[0][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
     values[1][1] = 0.0;
-    values[2][0] = 0.5*Y+0.5;
-    values[2][2] = 0.0;
+    values[1][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
     values[2][1] = 0.0;
-    values[3][0] = 0.5*Z+0.5;
-    values[3][2] = 0.0;
+    values[2][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+    
+    // Compute value(s).
+    values[3][0] = 0.0;
     values[3][1] = 0.0;
-    values[4][1] = -0.5*X-0.5*Y-0.5*Z-0.5;
-    values[4][2] = 0.0;
+    values[3][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[3][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
     values[4][0] = 0.0;
-    values[5][1] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-    values[5][2] = 0.0;
+    values[4][1] = 0.0;
+    values[4][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[4][1] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
     values[5][0] = 0.0;
-    values[6][1] = 0.5*Y+0.5;
-    values[6][2] = 0.0;
+    values[5][1] = 0.0;
+    values[5][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[5][1] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+    
+    // Compute value(s).
     values[6][0] = 0.0;
-    values[7][1] = 0.5*Z+0.5;
-    values[7][2] = 0.0;
+    values[6][1] = 0.0;
+    values[6][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[6][1] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+    
+    // Compute value(s).
     values[7][0] = 0.0;
-    values[8][2] = -0.5*X-0.5*Y-0.5*Z-0.5;
-    values[8][1] = 0.0;
+    values[7][1] = 0.0;
+    values[7][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[7][1] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
     values[8][0] = 0.0;
-    values[9][2] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-    values[9][1] = 0.0;
+    values[8][1] = 0.0;
+    values[8][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[8][2] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+    
+    // Compute value(s).
     values[9][0] = 0.0;
-    values[10][2] = 0.5*Y+0.5;
-    values[10][1] = 0.0;
+    values[9][1] = 0.0;
+    values[9][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[9][2] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+    
+    // Compute value(s).
     values[10][0] = 0.0;
-    values[11][2] = 0.5*Z+0.5;
-    values[11][1] = 0.0;
+    values[10][1] = 0.0;
+    values[10][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[10][2] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[1] *= std::sqrt(7.5);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[4] = \
+    {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+    
+    // Compute value(s).
     values[11][0] = 0.0;
+    values[11][1] = 0.0;
+    values[11][2] = 0.0;
+    for (unsigned int r = 0; r < 4; r++)
+    {
+      values[11][2] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
   }
 
   /// Evaluate basis function i at given point in cell
@@ -1965,86 +2555,398 @@ public:
     {
     case 0:
       {
-        values[0] = -0.5*X-0.5*Y-0.5*Z-0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
       values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 1:
       {
-        values[0] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
       values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 2:
       {
-        values[0] = 0.5*Y+0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+      
+      // Compute value(s).
+      values[0] = 0.0;
       values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 3:
       {
-        values[0] = 0.5*Z+0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+      
+      // Compute value(s).
+      values[0] = 0.0;
       values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[0] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 4:
       {
-        values[1] = -0.5*X-0.5*Y-0.5*Z-0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[1] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 5:
       {
-        values[1] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[1] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 6:
       {
-        values[1] = 0.5*Y+0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[1] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 7:
       {
-        values[1] = 0.5*Z+0.5;
-      values[2] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[1] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 8:
       {
-        values[2] = -0.5*X-0.5*Y-0.5*Z-0.5;
-      values[1] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, -0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[2] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 9:
       {
-        values[2] = 0.499999999999999*X-5.55111512312578e-16*Y-5.82867087928207e-16*Z+0.499999999999999;
-      values[1] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.182574185835055, -0.105409255338946, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[2] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 10:
       {
-        values[2] = 0.5*Y+0.5;
-      values[1] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.210818510677892, -0.074535599249993};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[2] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     case 11:
       {
-        values[2] = 0.5*Z+0.5;
-      values[1] = 0.0;
+        
+      // Array of basisvalues.
+      double basisvalues[4] = {0.0, 0.0, 0.0, 0.0};
+      
+      // Declare helper variables.
+      double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+      
+      // Compute basisvalues.
+      basisvalues[0] = 1.0;
+      basisvalues[1] = tmp0;
+      basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+      basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+      basisvalues[0] *= std::sqrt(0.75);
+      basisvalues[3] *= std::sqrt(1.25);
+      basisvalues[2] *= std::sqrt(2.5);
+      basisvalues[1] *= std::sqrt(7.5);
+      
+      // Table(s) of coefficients.
+      static const double coefficients0[4] = \
+      {0.288675134594813, 0.0, 0.0, 0.223606797749979};
+      
+      // Compute value(s).
       values[0] = 0.0;
+      values[1] = 0.0;
+      values[2] = 0.0;
+      for (unsigned int r = 0; r < 4; r++)
+      {
+        values[2] += coefficients0[r]*basisvalues[r];
+      }// end loop over 'r'
         break;
       }
     }
@@ -5610,402 +6512,53 @@ public:
     // Quadrature points on the UFC reference element: (0.25, 0.25, 0.25)
     
     // Value of basis functions at quadrature points.
-    static const double FE0_C0_D001[1][2] = \
-    {{-1.0, 1.0}};
+    static const double FE0_C0_D001[1][12] = \
+    {{-1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc1[2] = {0, 3};
+    static const double FE0_C0_D010[1][12] = \
+    {{-1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc5[2] = {4, 7};
+    static const double FE0_C0_D100[1][12] = \
+    {{-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc9[2] = {8, 11};
+    static const double FE0_C1_D001[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc2[2] = {0, 2};
+    static const double FE0_C1_D010[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc6[2] = {4, 6};
+    static const double FE0_C1_D100[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc10[2] = {8, 10};
+    static const double FE0_C2_D001[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc3[2] = {0, 1};
+    static const double FE0_C2_D010[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0}};
     
-    // Array of non-zero columns
-    static const unsigned int nzc7[2] = {4, 5};
-    
-    // Array of non-zero columns
-    static const unsigned int nzc11[2] = {8, 9};
+    static const double FE0_C2_D100[1][12] = \
+    {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0}};
     
     // Reset values in the element tensor.
     for (unsigned int r = 0; r < 144; r++)
     {
       A[r] = 0.0;
     }// end loop over 'r'
-    // Number of operations to compute geometry constants: 387.
-    double G[45];
-    G[0] = W1*det*(K_12*K_12*w[1][0] + w[0][0]*(2.0*K_12*K_12 + K_10*K_10 + K_11*K_11));
-    G[1] = W1*det*(K_02*K_12*w[1][0] + w[0][0]*(2.0*K_02*K_12 + K_00*K_10 + K_01*K_11));
-    G[2] = W1*det*(K_10*K_22*w[0][0] + K_12*K_20*w[1][0]);
-    G[3] = K_10*K_12*W1*det*(w[0][0] + w[1][0]);
-    G[4] = W1*det*(K_00*K_12*w[1][0] + K_02*K_10*w[0][0]);
-    G[5] = W1*det*(K_11*K_22*w[0][0] + K_12*K_21*w[1][0]);
-    G[6] = K_11*K_12*W1*det*(w[0][0] + w[1][0]);
-    G[7] = W1*det*(K_01*K_12*w[1][0] + K_02*K_11*w[0][0]);
-    G[8] = W1*det*(K_12*K_22*w[1][0] + w[0][0]*(2.0*K_12*K_22 + K_10*K_20 + K_11*K_21));
-    G[9] = W1*det*(K_02*K_02*w[1][0] + w[0][0]*(2.0*K_02*K_02 + K_00*K_00 + K_01*K_01));
-    G[10] = W1*det*(K_00*K_22*w[0][0] + K_02*K_20*w[1][0]);
-    G[11] = W1*det*(K_00*K_12*w[0][0] + K_02*K_10*w[1][0]);
-    G[12] = K_00*K_02*W1*det*(w[0][0] + w[1][0]);
-    G[13] = W1*det*(K_01*K_22*w[0][0] + K_02*K_21*w[1][0]);
-    G[14] = W1*det*(K_01*K_12*w[0][0] + K_02*K_11*w[1][0]);
-    G[15] = K_01*K_02*W1*det*(w[0][0] + w[1][0]);
-    G[16] = W1*det*(K_02*K_22*w[1][0] + w[0][0]*(2.0*K_02*K_22 + K_00*K_20 + K_01*K_21));
-    G[17] = W1*det*(K_20*K_20*w[1][0] + w[0][0]*(2.0*K_20*K_20 + K_21*K_21 + K_22*K_22));
-    G[18] = W1*det*(K_10*K_20*w[1][0] + w[0][0]*(2.0*K_10*K_20 + K_11*K_21 + K_12*K_22));
-    G[19] = W1*det*(K_00*K_20*w[1][0] + w[0][0]*(2.0*K_00*K_20 + K_01*K_21 + K_02*K_22));
-    G[20] = K_20*K_21*W1*det*(w[0][0] + w[1][0]);
-    G[21] = W1*det*(K_10*K_21*w[0][0] + K_11*K_20*w[1][0]);
-    G[22] = W1*det*(K_00*K_21*w[0][0] + K_01*K_20*w[1][0]);
-    G[23] = K_20*K_22*W1*det*(w[0][0] + w[1][0]);
-    G[24] = W1*det*(K_10*K_10*w[1][0] + w[0][0]*(2.0*K_10*K_10 + K_11*K_11 + K_12*K_12));
-    G[25] = W1*det*(K_00*K_10*w[1][0] + w[0][0]*(2.0*K_00*K_10 + K_01*K_11 + K_02*K_12));
-    G[26] = W1*det*(K_10*K_21*w[1][0] + K_11*K_20*w[0][0]);
-    G[27] = K_10*K_11*W1*det*(w[0][0] + w[1][0]);
-    G[28] = W1*det*(K_00*K_11*w[0][0] + K_01*K_10*w[1][0]);
-    G[29] = W1*det*(K_10*K_22*w[1][0] + K_12*K_20*w[0][0]);
-    G[30] = W1*det*(K_00*K_00*w[1][0] + w[0][0]*(2.0*K_00*K_00 + K_01*K_01 + K_02*K_02));
-    G[31] = W1*det*(K_00*K_21*w[1][0] + K_01*K_20*w[0][0]);
-    G[32] = W1*det*(K_00*K_11*w[1][0] + K_01*K_10*w[0][0]);
-    G[33] = K_00*K_01*W1*det*(w[0][0] + w[1][0]);
-    G[34] = W1*det*(K_00*K_22*w[1][0] + K_02*K_20*w[0][0]);
-    G[35] = W1*det*(K_21*K_21*w[1][0] + w[0][0]*(2.0*K_21*K_21 + K_20*K_20 + K_22*K_22));
-    G[36] = W1*det*(K_11*K_21*w[1][0] + w[0][0]*(2.0*K_11*K_21 + K_10*K_20 + K_12*K_22));
-    G[37] = W1*det*(K_01*K_21*w[1][0] + w[0][0]*(2.0*K_01*K_21 + K_00*K_20 + K_02*K_22));
-    G[38] = K_21*K_22*W1*det*(w[0][0] + w[1][0]);
-    G[39] = W1*det*(K_11*K_11*w[1][0] + w[0][0]*(2.0*K_11*K_11 + K_10*K_10 + K_12*K_12));
-    G[40] = W1*det*(K_01*K_11*w[1][0] + w[0][0]*(2.0*K_01*K_11 + K_00*K_10 + K_02*K_12));
-    G[41] = W1*det*(K_11*K_22*w[1][0] + K_12*K_21*w[0][0]);
-    G[42] = W1*det*(K_01*K_01*w[1][0] + w[0][0]*(2.0*K_01*K_01 + K_00*K_00 + K_02*K_02));
-    G[43] = W1*det*(K_01*K_22*w[1][0] + K_02*K_21*w[0][0]);
-    G[44] = W1*det*(K_22*K_22*w[1][0] + w[0][0]*(2.0*K_22*K_22 + K_20*K_20 + K_21*K_21));
     
     // Compute element tensor using UFL quadrature representation
-    // Optimisations: ('eliminate zeros', True), ('ignore ones', True), ('ignore zero tables', True), ('optimisation', True), ('precompute basis const', True), ('precompute ip const', True), ('remove zero terms', True), ('simplify expressions', True)
+    // Optimisations: ('eliminate zeros', False), ('ignore ones', False), ('ignore zero tables', False), ('optimisation', False), ('precompute basis const', False), ('precompute ip const', False), ('remove zero terms', False), ('simplify expressions', False)
     
     // Loop quadrature points for integral.
-    // Number of operations to compute element tensor for following IP loop = 508
+    // Number of operations to compute element tensor for following IP loop = 36576
     // Only 1 integration point, omitting IP loop.
     
-    // Number of operations for primary indices: 508
-    for (unsigned int j = 0; j < 2; j++)
+    // Number of operations for primary indices: 36576
+    for (unsigned int j = 0; j < 12; j++)
     {
-      for (unsigned int k = 0; k < 2; k++)
+      for (unsigned int k = 0; k < 12; k++)
       {
-        double B[46];
-        // Number of operations: 1
-        B[0] = FE0_C0_D001[0][j]*FE0_C0_D001[0][k];
-        
-        // Number of operations: 1
-        B[1] = B[0]*G[0];
-        
-        // Number of operations: 1
-        B[2] = B[0]*G[1];
-        
-        // Number of operations: 1
-        B[3] = B[0]*G[2];
-        
-        // Number of operations: 1
-        B[4] = B[0]*G[3];
-        
-        // Number of operations: 1
-        B[5] = B[0]*G[4];
-        
-        // Number of operations: 1
-        B[6] = B[0]*G[5];
-        
-        // Number of operations: 1
-        B[7] = B[0]*G[6];
-        
-        // Number of operations: 1
-        B[8] = B[0]*G[7];
-        
-        // Number of operations: 1
-        B[9] = B[0]*G[8];
-        
-        // Number of operations: 1
-        B[10] = B[0]*G[9];
-        
-        // Number of operations: 1
-        B[11] = B[0]*G[10];
-        
-        // Number of operations: 1
-        B[12] = B[0]*G[11];
-        
-        // Number of operations: 1
-        B[13] = B[0]*G[12];
-        
-        // Number of operations: 1
-        B[14] = B[0]*G[13];
-        
-        // Number of operations: 1
-        B[15] = B[0]*G[14];
-        
-        // Number of operations: 1
-        B[16] = B[0]*G[15];
-        
-        // Number of operations: 1
-        B[17] = B[0]*G[16];
-        
-        // Number of operations: 1
-        B[18] = B[0]*G[17];
-        
-        // Number of operations: 1
-        B[19] = B[0]*G[18];
-        
-        // Number of operations: 1
-        B[20] = B[0]*G[19];
-        
-        // Number of operations: 1
-        B[21] = B[0]*G[20];
-        
-        // Number of operations: 1
-        B[22] = B[0]*G[21];
-        
-        // Number of operations: 1
-        B[23] = B[0]*G[22];
-        
-        // Number of operations: 1
-        B[24] = B[0]*G[23];
-        
-        // Number of operations: 1
-        B[25] = B[0]*G[24];
-        
-        // Number of operations: 1
-        B[26] = B[0]*G[25];
-        
-        // Number of operations: 1
-        B[27] = B[0]*G[26];
-        
-        // Number of operations: 1
-        B[28] = B[0]*G[27];
-        
-        // Number of operations: 1
-        B[29] = B[0]*G[28];
-        
-        // Number of operations: 1
-        B[30] = B[0]*G[29];
-        
-        // Number of operations: 1
-        B[31] = B[0]*G[30];
-        
-        // Number of operations: 1
-        B[32] = B[0]*G[31];
-        
-        // Number of operations: 1
-        B[33] = B[0]*G[32];
-        
-        // Number of operations: 1
-        B[34] = B[0]*G[33];
-        
-        // Number of operations: 1
-        B[35] = B[0]*G[34];
-        
-        // Number of operations: 1
-        B[36] = B[0]*G[35];
-        
-        // Number of operations: 1
-        B[37] = B[0]*G[36];
-        
-        // Number of operations: 1
-        B[38] = B[0]*G[37];
-        
-        // Number of operations: 1
-        B[39] = B[0]*G[38];
-        
-        // Number of operations: 1
-        B[40] = B[0]*G[39];
-        
-        // Number of operations: 1
-        B[41] = B[0]*G[40];
-        
-        // Number of operations: 1
-        B[42] = B[0]*G[41];
-        
-        // Number of operations: 1
-        B[43] = B[0]*G[42];
-        
-        // Number of operations: 1
-        B[44] = B[0]*G[43];
-        
-        // Number of operations: 1
-        B[45] = B[0]*G[44];
-        
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc10[k]] += B[1];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc11[k]] += B[2];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc1[k]] += B[3];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc2[k]] += B[4];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc3[k]] += B[5];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc5[k]] += B[6];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc6[k]] += B[7];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc7[k]] += B[8];
-        // Number of operations to compute entry: 1
-        A[nzc10[j]*12 + nzc9[k]] += B[9];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc10[k]] += B[2];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc11[k]] += B[10];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc1[k]] += B[11];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc2[k]] += B[12];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc3[k]] += B[13];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc5[k]] += B[14];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc6[k]] += B[15];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc7[k]] += B[16];
-        // Number of operations to compute entry: 1
-        A[nzc11[j]*12 + nzc9[k]] += B[17];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc10[k]] += B[3];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc11[k]] += B[11];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc1[k]] += B[18];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc2[k]] += B[19];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc3[k]] += B[20];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc5[k]] += B[21];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc6[k]] += B[22];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc7[k]] += B[23];
-        // Number of operations to compute entry: 1
-        A[nzc1[j]*12 + nzc9[k]] += B[24];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc10[k]] += B[4];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc11[k]] += B[12];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc1[k]] += B[19];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc2[k]] += B[25];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc3[k]] += B[26];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc5[k]] += B[27];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc6[k]] += B[28];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc7[k]] += B[29];
-        // Number of operations to compute entry: 1
-        A[nzc2[j]*12 + nzc9[k]] += B[30];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc10[k]] += B[5];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc11[k]] += B[13];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc1[k]] += B[20];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc2[k]] += B[26];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc3[k]] += B[31];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc5[k]] += B[32];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc6[k]] += B[33];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc7[k]] += B[34];
-        // Number of operations to compute entry: 1
-        A[nzc3[j]*12 + nzc9[k]] += B[35];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc10[k]] += B[6];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc11[k]] += B[14];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc1[k]] += B[21];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc2[k]] += B[27];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc3[k]] += B[32];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc5[k]] += B[36];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc6[k]] += B[37];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc7[k]] += B[38];
-        // Number of operations to compute entry: 1
-        A[nzc5[j]*12 + nzc9[k]] += B[39];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc10[k]] += B[7];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc11[k]] += B[15];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc1[k]] += B[22];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc2[k]] += B[28];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc3[k]] += B[33];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc5[k]] += B[37];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc6[k]] += B[40];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc7[k]] += B[41];
-        // Number of operations to compute entry: 1
-        A[nzc6[j]*12 + nzc9[k]] += B[42];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc10[k]] += B[8];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc11[k]] += B[16];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc1[k]] += B[23];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc2[k]] += B[29];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc3[k]] += B[34];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc5[k]] += B[38];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc6[k]] += B[41];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc7[k]] += B[43];
-        // Number of operations to compute entry: 1
-        A[nzc7[j]*12 + nzc9[k]] += B[44];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc10[k]] += B[9];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc11[k]] += B[17];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc1[k]] += B[24];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc2[k]] += B[30];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc3[k]] += B[35];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc5[k]] += B[39];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc6[k]] += B[42];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc7[k]] += B[44];
-        // Number of operations to compute entry: 1
-        A[nzc9[j]*12 + nzc9[k]] += B[45];
+        // Number of operations to compute entry: 254
+        A[j*12 + k] += ((((K_00*FE0_C0_D100[0][j] + K_10*FE0_C0_D010[0][j] + K_20*FE0_C0_D001[0][j]))*((((((2.0*((K_00*FE0_C0_D100[0][k] + K_10*FE0_C0_D010[0][k] + K_20*FE0_C0_D001[0][k])))*0.5 + (2.0*((K_01*FE0_C1_D100[0][k] + K_11*FE0_C1_D010[0][k] + K_21*FE0_C1_D001[0][k])))*0.5 + (2.0*((K_02*FE0_C2_D100[0][k] + K_12*FE0_C2_D010[0][k] + K_22*FE0_C2_D001[0][k])))*0.5))*1.0)*w[1][0] + (((2.0*((K_00*FE0_C0_D100[0][k] + K_10*FE0_C0_D010[0][k] + K_20*FE0_C0_D001[0][k])))*0.5)*w[0][0])*2.0)) + ((K_00*FE0_C1_D100[0][j] + K_10*FE0_C1_D010[0][j] + K_20*FE0_C1_D001[0][j]))*((((((K_01*FE0_C0_D100[0][k] + K_11*FE0_C0_D010[0][k] + K_21*FE0_C0_D001[0][k]) + (K_00*FE0_C1_D100[0][k] + K_10*FE0_C1_D010[0][k] + K_20*FE0_C1_D001[0][k])))*0.5)*w[0][0])*2.0) + ((K_00*FE0_C2_D100[0][j] + K_10*FE0_C2_D010[0][j] + K_20*FE0_C2_D001[0][j]))*((((((K_02*FE0_C0_D100[0][k] + K_12*FE0_C0_D010[0][k] + K_22*FE0_C0_D001[0][k]) + (K_00*FE0_C2_D100[0][k] + K_10*FE0_C2_D010[0][k] + K_20*FE0_C2_D001[0][k])))*0.5)*w[0][0])*2.0)) + (((K_01*FE0_C0_D100[0][j] + K_11*FE0_C0_D010[0][j] + K_21*FE0_C0_D001[0][j]))*((((((K_00*FE0_C1_D100[0][k] + K_10*FE0_C1_D010[0][k] + K_20*FE0_C1_D001[0][k]) + (K_01*FE0_C0_D100[0][k] + K_11*FE0_C0_D010[0][k] + K_21*FE0_C0_D001[0][k])))*0.5)*w[0][0])*2.0) + ((K_01*FE0_C1_D100[0][j] + K_11*FE0_C1_D010[0][j] + K_21*FE0_C1_D001[0][j]))*((((((2.0*((K_00*FE0_C0_D100[0][k] + K_10*FE0_C0_D010[0][k] + K_20*FE0_C0_D001[0][k])))*0.5 + (2.0*((K_01*FE0_C1_D100[0][k] + K_11*FE0_C1_D010[0][k] + K_21*FE0_C1_D001[0][k])))*0.5 + (2.0*((K_02*FE0_C2_D100[0][k] + K_12*FE0_C2_D010[0][k] + K_22*FE0_C2_D001[0][k])))*0.5))*1.0)*w[1][0] + (((2.0*((K_01*FE0_C1_D100[0][k] + K_11*FE0_C1_D010[0][k] + K_21*FE0_C1_D001[0][k])))*0.5)*w[0][0])*2.0)) + ((K_01*FE0_C2_D100[0][j] + K_11*FE0_C2_D010[0][j] + K_21*FE0_C2_D001[0][j]))*((((((K_02*FE0_C1_D100[0][k] + K_12*FE0_C1_D010[0][k] + K_22*FE0_C1_D001[0][k]) + (K_01*FE0_C2_D100[0][k] + K_11*FE0_C2_D010[0][k] + K_21*FE0_C2_D001[0][k])))*0.5)*w[0][0])*2.0)) + (((K_02*FE0_C0_D100[0][j] + K_12*FE0_C0_D010[0][j] + K_22*FE0_C0_D001[0][j]))*((((((K_00*FE0_C2_D100[0][k] + K_10*FE0_C2_D010[0][k] + K_20*FE0_C2_D001[0][k]) + (K_02*FE0_C0_D100[0][k] + K_12*FE0_C0_D010[0][k] + K_22*FE0_C0_D001[0][k])))*0.5)*w[0][0])*2.0) + ((K_02*FE0_C1_D100[0][j] + K_12*FE0_C1_D010[0][j] + K_22*FE0_C1_D001[0][j]))*((((((K_01*FE0_C2_D100[0][k] + K_11*FE0_C2_D010[0][k] + K_21*FE0_C2_D001[0][k]) + (K_02*FE0_C1_D100[0][k] + K_12*FE0_C1_D010[0][k] + K_22*FE0_C1_D001[0][k])))*0.5)*w[0][0])*2.0) + ((K_02*FE0_C2_D100[0][j] + K_12*FE0_C2_D010[0][j] + K_22*FE0_C2_D001[0][j]))*((((((2.0*((K_00*FE0_C0_D100[0][k] + K_10*FE0_C0_D010[0][k] + K_20*FE0_C0_D001[0][k])))*0.5 + (2.0*((K_01*FE0_C1_D100[0][k] + K_11*FE0_C1_D010[0][k] + K_21*FE0_C1_D001[0][k])))*0.5 + (2.0*((K_02*FE0_C2_D100[0][k] + K_12*FE0_C2_D010[0][k] + K_22*FE0_C2_D001[0][k])))*0.5))*1.0)*w[1][0] + (((2.0*((K_02*FE0_C2_D100[0][k] + K_12*FE0_C2_D010[0][k] + K_22*FE0_C2_D001[0][k])))*0.5)*w[0][0])*2.0))))*W1*det;
       }// end loop over 'k'
     }// end loop over 'j'
   }

@@ -136,7 +136,7 @@ void GenericFile::write()
 {
   if (!opened_write)
   {
-    std::ofstream f(filename);
+    std::ofstream f(filename.c_str());
     f.close();
   }
   opened_write = true;

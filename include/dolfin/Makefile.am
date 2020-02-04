@@ -236,7 +236,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/Vertex.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
-				parameter/DefaultParameters.h\
 				parameter/dolfin_parameter.h\
 				parameter/Parameter.h\
 				parameter/ParameterList.h\

@@ -97,7 +97,7 @@ public:
   }
 
   /// Evaluate expression at given point
-  void eval(real* values, real const* x) const
+  void eval(real* values, real const*) const
   {
     std::fill(values, values + I * J, 0.0);
   }
@@ -151,6 +151,6 @@ public:
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __LICORNE_FUNCTION_VALUE_H_ */

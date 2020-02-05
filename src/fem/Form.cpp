@@ -1,13 +1,9 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014.
-//
-// First added:  2007-12-10
-// Last changed: 2014-02-26
 
 #include <dolfin/fem/Form.h>
 
+#include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
@@ -15,9 +11,6 @@
 
 namespace dolfin
 {
-
-//-----------------------------------------------------------------------------
-Assembler Form::ASSEMBLER;
 
 //-----------------------------------------------------------------------------
 Form::Form(Mesh& mesh) :
@@ -68,7 +61,7 @@ uint Form::coefficient_index(std::string const& name) const
 }
 
 //-----------------------------------------------------------------------------
-std::string Form::coefficient_name(uint i) const
+std::string Form::coefficient_name(uint) const
 {
   error("Not implemented without UFL support: \n"
         "std::string Form::coefficient_name(uint i) const");
@@ -198,7 +191,7 @@ bool Form::is_valid_index(uint i) const
 //----------------------------------------------------------------------------
 void Form::assemble(GenericTensor& T, bool reset_tensor)
 {
-  ASSEMBLER.assemble(T, *this, reset_tensor);
+  Assembler::assemble(T, *this, reset_tensor);
 }
 
 //-----------------------------------------------------------------------------

@@ -1,13 +1,11 @@
 // Copyright (C) 2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-11-23
-// Last changed: 2007-11-23
 
 #include <dolfin/mesh/UnitInterval.h>
 
 #include <dolfin/math/LinearDistribution.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
@@ -15,14 +13,14 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitInterval::UnitInterval(uint nx) :
-    Mesh()
+    Mesh(IntervalCell(), EuclideanSpace(1))
 {
   if (nx < 1) error("Size of unit interval must be at least 1.");
 
   rename("mesh", "Mesh of the unit interval (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::interval, 1);
+  MeshEditor editor(*this, this->type(), this->space());
 
   //
   uint const rank = MPI::rank();

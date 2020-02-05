@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-21
-// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLMixedElement.h>
 
@@ -102,7 +99,7 @@ std::pair<ValueArray, ValueArray> MixedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   check_component(i);
-  
+
   ValueArray k;
   ValueArray j;
   /*
@@ -196,7 +193,7 @@ FiniteElementSpace::List MixedElement::cloneSubElementsList(
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementSpace::List MixedElement::createSubElementsList(repr_t const& repr)
+FiniteElementSpace::List MixedElement::createSubElementsList(repr_t const&)
 {
   List subelms;
   // Unpack array then split arguments
@@ -219,13 +216,13 @@ void MixedElement::createReprStr()
   {
     error("A mixed element should contain more than one subelement");
   }
-  
+
   // Create string representation
   std::stringstream ssrepr;
   std::stringstream ssstr;
   ssrepr << "MixedElement(*[";
   ssstr << "<Mixed element: (";
-  
+
   List::const_iterator it = sub_elements_.begin();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
@@ -233,9 +230,9 @@ void MixedElement::createReprStr()
   {
     ssrepr << ", " << (*it)->repr();
     ssstr << ", " << (*it)->str();
-    
+
   }
-  
+
   ssrepr << "], **{'value_shape': " << value_shape_.str() << " })";
   ssstr << ")>";
   repr_ = ssrepr.str();

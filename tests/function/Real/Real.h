@@ -64,6 +64,7 @@ DOLFIN_START_TEST( test_Realt )
     real const k = t.measure() / 10;
     for (real s = t.begin(); t.is_valid(k/10); t.step(k))
     {
+      (void) s;
       r(t);
       ck_assert(r[0] == 2.0);
       t.disp();

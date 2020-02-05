@@ -1,6 +1,5 @@
 // Copyright (C) 2015 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_DOF_NUMBERING_H
 #define __DOLFIN_DOF_NUMBERING_H

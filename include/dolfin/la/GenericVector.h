@@ -1,20 +1,15 @@
 // Copyright (C) 2006-2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2006-2008.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Ola Skavhaug, 2008.
-// Modified by Martin Sandve Alnes, 2008.
-//
-// First added:  2006-04-25
-// Last changed: 2008-04-29
 
 #ifndef __DOLFIN_GENERIC_VECTOR_H
 #define __DOLFIN_GENERIC_VECTOR_H
 
 #include "VectorNormType.h"
+#include "VectorPointwiseOp.h"
 #include "GenericSparsityPattern.h"
 #include "GenericTensor.h"
+
+#include <dolfin/common/maybe_unused.h>
 
 #include <set>
 #include <map>
@@ -46,7 +41,7 @@ namespace dolfin
 
     /// Return size of given dimension
     inline uint size(uint dim) const
-    { dolfin_assert(dim == 0); return size(); }
+    { dolfin_assert(dim == 0); MAYBE_UNUSED(dim); return size(); }
 
     /// Get block of values
     inline void get(real* block, const uint* num_rows, const uint * const * rows) const
@@ -122,6 +117,10 @@ namespace dolfin
 
     /// Return maximum value of vector
     virtual real max() const = 0;
+
+    /// Return pointwise operator op of vector and given vector x 
+    virtual void pointwise(const GenericVector& x,
+			   VectorPointwiseOp op=pw_min) const = 0;
 
     /// Multiply vector by given number
     virtual const GenericVector& operator*= (real a) = 0;

@@ -1,6 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_PRIVATE_NUMBERING_DG0V_H
 #define __DOLFIN_PRIVATE_NUMBERING_DG0V_H
@@ -42,7 +41,8 @@ public:
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
+                            Cell const&) const
   {
     std::fill_n(dofs, value_size_, value_size_ * ufc_cell.index);
     for (uint k = 1; k < value_size_; ++k)

@@ -1,12 +1,5 @@
 // Copyright (C) 2007 Magnus Vikstrom.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson, 2008-2015.
-// Modified by Aurélien Larcher 2012.
-//
-// First added:  2007-04-03
-// Last changed: 2015-01-05
 
 #include <dolfin/mesh/MeshPartition.h>
 
@@ -60,18 +53,17 @@ void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
 }
 //-----------------------------------------------------------------------------
 #else
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
+void MeshPartition::partition(MeshValues<uint, Cell>&)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
-                              MeshValues<uint, Cell>& weight)
+void MeshPartition::partition(MeshValues<uint, Cell>&, MeshValues<uint, Cell>&)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
+void MeshPartition::partition_geom(MeshValues<uint, Vertex>&)
 {
   error("Geometric mesh partitioning requires MPI");
 }

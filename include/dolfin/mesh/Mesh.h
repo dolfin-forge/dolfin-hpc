@@ -1,14 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman 2007.
-// Modified by Magnus Vikstrøm 2007.
-// Modified by Garth N. Wells 2007.
-// Modified by Balthasar Reuter, 2013.
-// Modified by Aurélien Larcher, 2014.
-//
-// First added:  2006-05-08
-// Last changed: 2013-03-22
 
 #ifndef __DOLFIN_MESH_H
 #define __DOLFIN_MESH_H
@@ -31,9 +22,9 @@ class Cell;
 class IntersectionDetector;
 class MappedManifold;
 class MeshData;
-template<class T, class E, uint N = 1> class MeshValues;
+template<class T, class E, uint N = 1> struct MeshValues;
 class PeriodicSubDomain;
-class Space;
+struct Space;
 class Vertex;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
@@ -89,7 +80,10 @@ public:
   virtual ~Mesh();
 
   /// Swap instances
-  void swap(Mesh& other);
+  friend void swap( Mesh& a, Mesh& b );
+
+  /// Assignment
+  Mesh const& operator=(Mesh const& other);
 
   /// Identity
   bool operator ==(Mesh const& other) const;
@@ -159,13 +153,13 @@ public:
   bool parallel_io() const;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const;
+  bool is_distributed() const; //!< @todo remove this function
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata();
+  MeshDistributedData& distdata(); //!< @todo remove this function
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const;
+  MeshDistributedData const& distdata() const; //!< @tod remove this function
 
   /// Return global number of entities of given topological dimension
   uint global_size(uint dim) const;
@@ -212,8 +206,8 @@ public:
   /// Partition mesh into num_processes partitions
   void partition(MeshValues<uint, Cell>& partitions);
 
-  /// Partition mesh into num_partitions = numProc with weights on vertices
-  /// ^H^H^H on the *fucking* *cells*
+  /// Partition mesh into num_partitions = numProc with weights
+  /// on the vertices of the dual graph
   void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
   /// Partition mesh into num_partitions = numProc
@@ -240,7 +234,7 @@ public:
   /// Refine mesh uniformly
   void refine();
 
-  //---
+  //---------------------------------------------------------------------------
 
   /// Return hash to identify the state of the mesh
   std::string const hash() const;
@@ -254,10 +248,10 @@ public:
 private:
 
   // Mesh topology
-  MeshTopology * topology_;
+  MeshTopology topology_;
 
   // Mesh geometry
-  MeshGeometry * geometry_;
+  MeshGeometry geometry_;
 
   /// Exterior boundary mesh
   mutable BoundaryMesh * exterior_boundary_;
@@ -272,10 +266,6 @@ private:
   mutable Array<MappedManifold *> periodic_mappings_;
 
   int timestamp_;
-
-  /// Assignment (Disabled)
-  Mesh const& operator=(Mesh const& other) { return *this; }
-
 };
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------

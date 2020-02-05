@@ -1,8 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2006-06-05
-// Last changed: 2008-06-20
 
 #ifndef __DOLFIN_CELL_TYPE_H
 #define __DOLFIN_CELL_TYPE_H
@@ -247,15 +244,15 @@ template<class E> inline uint dimension(CellType const& c);
 
 class Vertex;
 template<>
-inline uint dimension<Vertex>(CellType const& c) { return 0; }
+inline uint dimension<Vertex>(CellType const&) { return 0; }
 
 class Edge;
 template<>
-inline uint dimension<Edge>(CellType const& c) { return 1; }
+inline uint dimension<Edge>(CellType const&) { return 1; }
 
 class Face;
 template<>
-inline uint dimension<Face>(CellType const& c) { return 2; }
+inline uint dimension<Face>(CellType const&) { return 2; }
 
 class Facet;
 template<>

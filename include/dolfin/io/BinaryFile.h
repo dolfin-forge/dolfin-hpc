@@ -1,10 +1,5 @@
 // Copyright (C) 2009-2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2014-2017.
-//
-// First  added: 2009
-// Last changed: 2017-09-15
 
 #ifndef __DOLFIN_BINARY_FILE_H
 #define __DOLFIN_BINARY_FILE_H
@@ -119,7 +114,9 @@ private:
   std::string bin_filename_;
 
   // Current time
+#if defined( HAVE_MPI )
   real const * const t_;
+#endif
 
   // Version number of the binary file
   uint version_;

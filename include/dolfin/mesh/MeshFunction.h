@@ -1,16 +1,10 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman, 2007.
-// Modified by Aurelien Larcher, 2014-2016.
-//
+
 // This class suffered from some cleanup and was cured from segmentation faults
 // on initialization to zero size, which in the course of 2006-2012 was the
 // cause of many ugly workarounds as well as erratic behaviour of parallel
 // algorithms.
-//
-// First added:  2006-05-22
-// Last changed: 2008-05-21
 
 #ifndef __DOLFIN_MESH_FUNCTION_H
 #define __DOLFIN_MESH_FUNCTION_H
@@ -42,6 +36,9 @@ namespace dolfin
  *            - uint : 0
  *            - real : 0.0
  */
+
+template<typename T>
+class XMLMeshFunction;
 
 template<class T>
 class MeshFunction
@@ -100,10 +97,19 @@ public:
 
   /// Required for assignment operator
   friend class MeshFunction<bool>;
+  friend class XMLMeshFunction<bool>;
+
   friend class MeshFunction<int>;
+  friend class XMLMeshFunction<int>;
+
   friend class MeshFunction<uint>;
+  friend class XMLMeshFunction<uint>;
+
   friend class MeshFunction<float>;
+  friend class XMLMeshFunction<float>;
+
   friend class MeshFunction<real>;
+  friend class XMLMeshFunction<real>;
 
   /// Assignment conversion operator
   template <class V>
@@ -247,16 +253,15 @@ public:
   }
 
   /// Swap instances
-  void swap(MeshFunction<T>& other)
+  friend void swap( MeshFunction<T>& a, MeshFunction<T>& b )
   {
-    if (this != &other)
-    {
-      std::swap(mesh_   , other.mesh_);
-      std::swap(dim_    , other.dim_);
-      std::swap(size_   , other.size_);
-      std::swap(values_ , other.values_);
-    }
-  }
+    using std::swap;
+
+		swap( a.mesh_,   b.mesh_   );
+		swap( a.dim_,    b.dim_    );
+		swap( a.size_,   b.size_   );
+		swap( a.values_, b.values_ );
+	}
 
   /// Display mesh function data
   void disp() const
@@ -324,7 +329,6 @@ protected:
 
 // Copyright (C) 2013 Balthasar Reuter.
 // Licensed under the GNU LGPL Version 2.1.
-//
 /// Helper function that performs symmetric rounding to closest integer
 
 template<> template<> inline

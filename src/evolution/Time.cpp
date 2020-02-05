@@ -1,7 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-//
-// Imported from licorne
 
 #include <dolfin/evolution/Time.h>
 

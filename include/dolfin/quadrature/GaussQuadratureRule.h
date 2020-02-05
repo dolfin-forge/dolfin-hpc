@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2005 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_GAUSS_QUADRATURE_RULE_H
 #define __DOLFIN_GAUSS_QUADRATURE_RULE_H

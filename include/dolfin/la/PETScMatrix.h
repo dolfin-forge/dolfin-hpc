@@ -1,13 +1,5 @@
 // Copyright (C) 2004-2008 Johan Hoffman, Johan Jansson and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Andy R. Terrel, 2005.
-// Modified by Garth N. Wells, 2006-2007.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Ola Skavhaug, 2008.
-//
-// First added:  2004-01-01
-// Last changed: 2008-05-15
 
 #ifndef __DOLFIN_PETSC_MATRIX_H
 #define __DOLFIN_PETSC_MATRIX_H

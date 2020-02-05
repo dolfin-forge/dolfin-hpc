@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-28
-// Last changed: 2014-01-28
 
 #include <dolfin/ufl/UFLFamily.h>
 
@@ -63,21 +60,21 @@ Family::DefinitionList const Family::__init_definitions()
 {
   Domain::Set interval;
   interval.insert(Domain::interval);
-  
+
   Domain::Set triangle;
   triangle.insert(Domain::triangle);
-  
+
   Domain::Set triangle_tetrahedron;
   triangle_tetrahedron.insert(Domain::triangle);
   triangle_tetrahedron.insert(Domain::tetrahedron);
-  
+
   Domain::Set interval_triangle_tetrahedron;
   interval_triangle_tetrahedron.insert(Domain::interval);
   interval_triangle_tetrahedron.insert(Domain::triangle);
   interval_triangle_tetrahedron.insert(Domain::tetrahedron);
-  
+
   DefinitionList m;
-  
+
   //--- Standard elements -----------------------------------------------------
   register_family(m, Family::ARG, "'Argyris'", "ARG", 0, 1, None,
                   triangle_tetrahedron);
@@ -104,7 +101,7 @@ Family::DefinitionList const Family::__init_definitions()
                   1, None, triangle_tetrahedron);
   register_family(m, Family::RT, "'Raviart-Thomas'", "RT", 1, 1, None,
                   triangle_tetrahedron);
-  
+
   //--- Special elements ------------------------------------------------------
   register_family(m, Family::BQ, "'Boundary Quadrature'", "BQ", 0, 0, None,
                   interval_triangle_tetrahedron);
@@ -116,7 +113,7 @@ Family::DefinitionList const Family::__init_definitions()
                   interval_triangle_tetrahedron);
   register_family(m, Family::U, "'Undefined'", "U", 0, 0, None,
                   interval_triangle_tetrahedron);
-  
+
   //--- Meta elements ---------------------------------------------------------
   register_family(m, Family::Mixed, "'Mixed'", "MIXED", 0, 0, None,
                   interval_triangle_tetrahedron);
@@ -128,7 +125,7 @@ Family::DefinitionList const Family::__init_definitions()
                   interval_triangle_tetrahedron);
   register_family(m, Family::Restricted, "'Restricted'", "RESTRICTED", 0, 0,
                   None, interval_triangle_tetrahedron);
-  
+
   return m;
 }
 
@@ -255,4 +252,4 @@ Family::Type Family::repr_type(repr_t const& repr)
   return Mapping().find(repr)->second;
 }
 
-} /* namespace icorne */
+} // end namespace ufl

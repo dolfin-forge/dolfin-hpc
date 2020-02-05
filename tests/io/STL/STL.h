@@ -11,9 +11,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_STLMesh )
 {
-  File F(path(testdata("io", "STL"), "mug.stl"));
-  Mesh M;
-  F >> M;
+  Mesh M( path(testdata("io", "STL"), "mug.stl") );
   dolfin_assert(M.is_distributed() == false);
   pushd(testresu("io", "STL"));
   pushd(strcounter(PE::rank()));

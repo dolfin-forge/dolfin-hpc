@@ -1,10 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Import from licorne
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_UFC_EXPRESSION_H
 #define __DOLFIN_UFC_EXPRESSION_H
@@ -26,7 +21,7 @@ struct UFCExpression : ufc::function
 
   ///
   inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+                       const ufc::cell&) const
   {
     E_.eval(values, coordinates);
   }

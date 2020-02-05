@@ -1,13 +1,5 @@
 // Copyright (C) 2004-2007 Johan Hoffman, Johan Jansson and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2005-2007.
-// Modified by Martin Sandve Alnes 2008.
-// Modified by Niclas Jansson 2008.
-// Modified by Niyazi Cem Degirmenci 2013.
-//
-// First added:  2004
-// Last changed: 2008-10-28
 
 #include <dolfin/la/PETScVector.h>
 
@@ -225,7 +217,7 @@ void PETScVector::add(const real* block, uint m, const uint* rows)
                ADD_VALUES);
 }
 //-----------------------------------------------------------------------------
-void PETScVector::apply(FinalizeType finaltype)
+void PETScVector::apply(FinalizeType)
 {
 
   VecAssemblyBegin(x_);
@@ -408,7 +400,36 @@ real PETScVector::max() const
   return value;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::disp(uint precision) const
+void PETScVector::pointwise(const GenericVector& x, VectorPointwiseOp op) const
+{
+
+  const PETScVector& v = x.down_cast<PETScVector>();
+  dolfin_assert(v.x_);
+
+  switch(op)
+  {
+  case pw_min:
+    VecPointwiseMin(x_, x_, v.x_);
+    break;
+  case pw_max:
+    VecPointwiseMax(x_, x_, v.x_);
+    break;
+  case pw_mult:
+    VecPointwiseMult(x_, x_, v.x_);
+    break;
+  case pw_div:
+    VecPointwiseDivide(x_, x_, v.x_);
+    break;
+  case pw_maxabs:
+    VecPointwiseMaxAbs(x_, x_, v.x_);
+    break;
+  default:
+    error("Unknown operator");
+  }
+    
+}
+//-----------------------------------------------------------------------------
+void PETScVector::disp(uint) const
 {
   section("PETScVector");
   if (PE::size() > 1 && is_distributed_)
@@ -427,7 +448,7 @@ Vec PETScVector::vec() const
   return x_;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
+void PETScVector::init_ghosted(uint, std::set<uint>& indices,
                                std::map<uint, uint>& map)
 {
   if (!is_distributed_)

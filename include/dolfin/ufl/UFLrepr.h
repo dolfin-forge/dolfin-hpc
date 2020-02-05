@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-27
-// Last changed: 2014-01-27
 
 #ifndef __DOLFIN_UFL_REPR_H
 #define __DOLFIN_UFL_REPR_H
@@ -52,8 +49,9 @@ public:
   ///
   repr(Class const& owner, std::vector<Object const *> const& prototype);
 
-  //FIXME: Is it really necessary to add the same function also for Expressions?
-//  repr(Expression const& owner, std::vector<Expression const *> const& prototype);
+  /// @todo Is it really necessary to add the same function also for
+  /// Expressions? repr(Expression const& owner,
+  /// std::vector<Expression const *> const& prototype);
 
   template<class OBJ>
     repr(Class const& owner, std::vector<OBJ const *> const& prototype);

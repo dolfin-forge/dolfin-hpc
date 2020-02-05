@@ -1,11 +1,5 @@
 // Copyright (C) 2007 Magnus Vikstrom
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson, 2008-2015.
-//
-// First added:  2007-04-24
-// Last changed: 2015-01-05
 
 #ifndef __DOLFIN_MESH_PARTITIONING_H
 #define __DOLFIN_MESH_PARTITIONING_H

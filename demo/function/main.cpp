@@ -1,9 +1,6 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2008-03-11
-// Last changed: 2007-03-17
-//
 // Testing evaluation at arbitrary points
 
 #include <dolfin.h>
@@ -11,18 +8,25 @@
 
 using namespace dolfin;
 
-class F : public ScalarExpression
+//------------------------------------------------------------------------------
+struct F : public Value<F>
 {
-public:
-  
-  F() : ScalarExpression() {}
-
   void eval(real* values, const real* x) const
   {
     values[0] = sin(3.0*x[0])*sin(3.0*x[1])*sin(3.0*x[2]);
   }
 };
+//------------------------------------------------------------------------------
+// Sub domain for Dirichlet boundary condition
+struct DirichletBoundary : public SubDomain
+{
+  bool inside(const real* x, bool on_boundary) const
+  {
+    return x[0] < DOLFIN_EPS && on_boundary;
+  }
+};
 
+//------------------------------------------------------------------------------
 int main()
 {
   // Create mesh and a point in the mesh
@@ -32,15 +36,29 @@ int main()
   real g_values[1] = {0.0};
 
   // A user-defined function
-  F force;
-  Function f(mesh, force);
+  Analytic<F> f(mesh);
+
+  // Create boundary condition
+  Constant u0(0.0);
+  DirichletBoundary boundary;
+  DirichletBC bc(u0, mesh, boundary);
 
   // Project to a discrete function
-  ProjectionBilinearForm a(mesh);
-  ProjectionLinearForm L(f);
-  LinearPDE pde(a, L, mesh);
-  Function g(mesh);
-  pde.solve(g);
+  Projection::BilinearForm a(mesh);
+  Projection::LinearForm L(mesh, f);
+
+  // solve PDE
+  Matrix A;
+  Vector b;
+  a.assemble(A, true);
+  L.assemble(b, true);
+  bc.apply(A, b, a);
+
+  Function g(a.trial_space());
+  KrylovSolver solver(bicgstab, bjacobi);
+
+  solver.solve(A, g.vector(), b);
+  g.sync();
 
   // Evaluate user-defined function f
   f.eval(f_values, x);

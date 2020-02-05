@@ -1,11 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Nuno Lopes, 2008.
-//
-// First added:  2005-12-02
-// Last changed: 2008-06-19
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Box.h>
@@ -16,7 +10,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Box::Box(real a, real b, real c, real d, real e, real f, uint nx, uint ny,
          uint nz) :
-    Mesh()
+    Mesh(*CellType::create(CellType::tetrahedron), EuclideanSpace(3))
 {
 
   if (nx < 1 || ny < 1 || nz < 1)
@@ -27,7 +21,7 @@ Box::Box(real a, real b, real c, real d, real e, real f, uint nx, uint ny,
   rename("mesh", "Mesh of the cuboid (a,b) x (c,d) x (e,f)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));

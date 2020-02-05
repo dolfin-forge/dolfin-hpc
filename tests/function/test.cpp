@@ -5,7 +5,6 @@
 #include "Analytic/Analytic.h"
 #include "Constant/Constant.h"
 #include "Expression/Expression.h"
-#include "Field/Field.h"
 #include "Function/Function.h"
 #include "Operators/Operators.h"
 #include "Real/Real.h"
@@ -41,9 +40,6 @@ DOLFIN_SUITE_BEGIN(suite, "function")
 
   DOLFIN_TCASE_CREATE("Function");
   DOLFIN_TCASE_ADD(test_Function);
-
-  DOLFIN_TCASE_CREATE("Field");
-  DOLFIN_TCASE_ADD(test_Field);
 
   DOLFIN_TCASE_CREATE("SpaceTimeFunction");
   DOLFIN_TCASE_ADD(test_SpaceTimeFunction);

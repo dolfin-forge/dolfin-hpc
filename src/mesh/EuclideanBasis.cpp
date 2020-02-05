@@ -1,6 +1,3 @@
-//
-//
-//
 
 #include <dolfin/mesh/EuclideanBasis.h>
 

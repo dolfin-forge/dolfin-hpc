@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014-2016.
-//
-// First added:  2008-07-03
-// Last changed: 2016-04-04
 
 #ifndef __DOLFIN_MESH_DISTRIBUTED_DATA_H
 #define __DOLFIN_MESH_DISTRIBUTED_DATA_H
@@ -78,7 +73,7 @@ private:
   uint dim_;
 
   // Distributed data
-  DistributedData * data_;
+  Array<DistributedData> data_;
 
 };
 

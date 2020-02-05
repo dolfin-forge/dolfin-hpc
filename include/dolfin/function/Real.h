@@ -10,9 +10,6 @@ namespace dolfin
 template<uint I = 1, uint J = 1>
 class Real : public Coefficient
 {
-
-  static const ValueSpace<I, J> VS_;
-
 public:
 
   /// Default constructor
@@ -37,8 +34,7 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(real* values, const real*, const ufc::cell&) const
   {
     std::copy(value_, value_ + I * J, values);
   }
@@ -46,14 +42,13 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(uint n, real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(uint, real* values, const real*, const ufc::cell&) const
   {
     std::copy(value_, value_ + I * J, values);
   }
 
   /// Evaluate function at given point
-  inline void eval(real* values, const real* x) const
+  inline void eval(real* values, const real*) const
   {
     std::copy(value_, value_ + I * J, values);
   }
@@ -61,19 +56,19 @@ public:
   /// Return the rank of the value space
   inline uint rank() const
   {
-    return VS_.rank();
+    return ValueSpace<I, J>::rank();
   }
 
   /// Return the dimension of the value space for axis i
   inline uint dim(uint i) const
   {
-    return VS_.dim(i);
+    return ValueSpace<I, J>::dim(i);
   }
 
   /// Value size
   inline uint value_size() const
   {
-    return VS_.value_size();
+    return ValueSpace<I, J>::value_size();
   }
 
   /// Assign constant real number
@@ -120,7 +115,7 @@ public:
   real const& operator[](uint i) const { return value_[i]; }
 
   ///
-  inline Real<I, J> const& operator()(Time const& t) const
+  inline Real<I, J> const& operator()(Time const&) const
   {
     // No-op
     return *this;
@@ -129,7 +124,7 @@ public:
   /// Interpolate function to finite element space on cell
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell) const
+                          const Cell&) const
   {
     finite_element.evaluate_dofs(coefficients, *this, cell);
   }
@@ -137,7 +132,7 @@ public:
   /// Interpolate function to finite element space on facet
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell, uint facet) const
+                          const Cell&, uint) const
   {
     finite_element.evaluate_dofs(coefficients, *this, cell);
   }
@@ -169,12 +164,12 @@ public:
 
 private:
 
-  void sync(Time const& t) { /* No-op */ }
+  void sync(Time const&) { /* No-op */ }
 
   real value_[I * J];
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __LICORNE_FUNCTION_REAL_H_ */

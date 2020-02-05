@@ -1,11 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson 2013.
-// Modified by Aurélien Larcher 2014.
-//
-// First added:  2007-04-10
-// Last changed: 2014-02-07
 
 #ifndef __DOLFIN_SUB_DOMAIN_H
 #define __DOLFIN_SUB_DOMAIN_H

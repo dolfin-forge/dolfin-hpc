@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-21
-// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLTensorElement.h>
 
@@ -92,7 +89,7 @@ std::map<dolfin::uint, dolfin::uint> const& TensorElement::symmetry() const
 
 //-----------------------------------------------------------------------------
 std::pair<ValueArray, ValueArray> TensorElement::extract_subelement_component(
-    ValueArray const& i) const
+    ValueArray const&) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
@@ -136,7 +133,7 @@ void TensorElement::createReprStr()
   ssrepr << "TensorElement(" << this->family().repr() << ", " << cell().repr()
          << ", " << this->degree() << ", " << quadrature_scheme().repr() << ")";
   repr_ = ssrepr.str();
-  
+
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << " vector element of degree "
         << this->degree() << " on a " << cell().str() << ": "

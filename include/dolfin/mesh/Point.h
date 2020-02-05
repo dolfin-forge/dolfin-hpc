@@ -1,15 +1,9 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2006.
-// Modified by Aurélien Larcher, 2014-2017.
-//
+
 // This class is now reimplemented in terms of a template.
 // Additionally it specifies a MAX_SIZE public attribute to avoid the madness of
 // having half of the classes with 2 or 3 hard-coded as dimension.
-//
-// First added:  2006-06-12
-// Last changed: 2017-06-17
 
 #ifndef __DOLFIN_POINT_H
 #define __DOLFIN_POINT_H
@@ -81,7 +75,7 @@ public:
 
   /// Subtraction assignment
   point& operator-=(point const& p)
-  { for (size_t i = 0; i < D; ++i) { x_[i] += p.x_[i]; } return *this; }
+  { for (size_t i = 0; i < D; ++i) { x_[i] -= p.x_[i]; } return *this; }
 
   /// Subtraction
   point operator-(point const& p) const { return (point(*this) -= p); }
@@ -154,7 +148,7 @@ private:
 
 //-----------------------------------------------------------------------------
 template<>
-inline point<3> point<1>::cross(point const& p) const
+inline point<3> point<1>::cross(point const&) const
 {
   return point<3>();
 }

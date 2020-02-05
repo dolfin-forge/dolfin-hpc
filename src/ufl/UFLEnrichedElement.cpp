@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-21
-// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLEnrichedElement.h>
 #include <dolfin/ufl/UFLElementList.h>
@@ -23,7 +20,7 @@ EnrichedElement::EnrichedElement(List const& elements) :
   std::stringstream ssstr;
   ssrepr << "EnrichedElement(";
   ssstr << "<";
-  
+
   List::const_iterator it = sub_elements_.begin();
   //dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
@@ -32,9 +29,9 @@ EnrichedElement::EnrichedElement(List const& elements) :
   {
     ssrepr << ", " << (*it)->repr();
     ssstr << " + " << (*it)->str();
-    
+
   }
-  
+
   ssrepr << ")";
   ssstr << ">";
   repr_ = ssrepr.str();
@@ -96,7 +93,7 @@ std::map<dolfin::uint, dolfin::uint> const& EnrichedElement::symmetry() const
 
 //-----------------------------------------------------------------------------
 std::pair<ValueArray, ValueArray> EnrichedElement::extract_subelement_component(
-    ValueArray const& i) const
+    ValueArray const&) const
 {
   return std::pair<ValueArray, ValueArray>();
 }

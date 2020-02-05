@@ -1,6 +1,5 @@
 // Copyright (C) 2016-2017 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/mesh/Connectivity.h>
 
@@ -13,21 +12,13 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity() :
-    order_(0),
-    min_degree_(0),
-    max_degree_(0),
-    connections_(NULL)
-{
-}
-//-----------------------------------------------------------------------------
 Connectivity::Connectivity(uint order, uint degree) :
   order_(order),
   min_degree_(degree),
   max_degree_(degree),
   connections_(new uint*[order_ + 1])
 {
-  connections_[0] = order * degree ? new uint[order * degree]() : NULL;
+  connections_[0] = (order * degree > 0) ? new uint[order * degree]() : NULL;
   for (uint e = 0; e < order_; ++e)
   {
     connections_[e + 1] = connections_[e] + degree;

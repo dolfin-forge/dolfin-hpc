@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #include <dolfin/ufl/UFLCoefficient.h>
 #include <dolfin/ufl/UFLVectorElement.h>
@@ -41,8 +38,8 @@ CoefficientBase::CoefficientBase(std::string const& name, Cell const& cell,
 
 //-----------------------------------------------------------------------------
 CoefficientBase::CoefficientBase(
-    std::string const& name, Cell const& cell, ValueArray const& shape,
-    std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& c) :
+    std::string const& name, Cell const& cell, ValueArray const&,
+    std::map<dolfin::uint, dolfin::uint> const&, dolfin::uint const& c) :
     Expression(name),
     finite_element_(
         new TensorElement(Family::R, cell, 0, cell.geometric_dimension())),
@@ -101,7 +98,7 @@ CoefficientBase const* CoefficientBase::create(Object::repr_t const& repr)
   {
     error("Unknown type of ufl::CoefficientBase: '" + name + "'");
   }
-  
+
   return NULL;
 }
 
@@ -139,10 +136,10 @@ dict<IndexBase, type<dolfin::uint> > const CoefficientBase::index_dimensions() c
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const CoefficientBase::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const& , std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -198,10 +195,10 @@ std::vector<std::vector<Class const*> > const Coefficient::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -266,10 +263,10 @@ std::vector<std::vector<Class const*> > const Constant::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -337,10 +334,10 @@ std::vector<std::vector<Class const*> > const VectorConstant::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -411,10 +408,10 @@ std::vector<std::vector<Class const*> > const TensorConstant::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 

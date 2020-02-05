@@ -1,6 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -291,6 +290,11 @@ real JANPACKVec::max() const
 {
   error("Not implemented.");
   return 0.0;
+}
+//-----------------------------------------------------------------------------
+void JANPACKVec::pointwise(const GenericVector& x, VectorPointwiseOp op) const
+{
+  error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::disp(uint precision) const

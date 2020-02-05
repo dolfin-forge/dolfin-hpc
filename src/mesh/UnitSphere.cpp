@@ -1,22 +1,18 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Nuno Lopes, 2008
-//
-// First added:  2005-12-02
-// Last changed: 2008-06-20
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitSphere.h>
+
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/TetrahedronCell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 UnitSphere::UnitSphere(uint nx) :
-    Mesh()
+    Mesh(TetrahedronCell(), EuclideanSpace(3))
 {
 
   message("UnitSphere is Experimental: It could have a bad quality mesh");
@@ -32,7 +28,7 @@ UnitSphere::UnitSphere(uint nx) :
   rename("mesh", "Mesh of the unit cube (0,1) x (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));
@@ -141,11 +137,11 @@ real UnitSphere::max(real x, real y, real z)
 {
   real rtrn = 0.0;
 
-  if ((x >= y) * (x >= z))
+  if ((x >= y) && (x >= z))
   {
     rtrn = x;
   }
-  else if ((y >= x) * (y >= z))
+  else if ((y >= x) && (y >= z))
   {
     rtrn = y;
   }

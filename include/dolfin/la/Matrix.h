@@ -1,12 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Ola Skavhaug, 2007-2008.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Martin Sandve Alnes, 2008.
-//
-// First added:  2006-05-15
-// Last changed: 2008-05-17
 
 #ifndef __DOLFIN_MATRIX_H
 #define __DOLFIN_MATRIX_H
@@ -129,7 +122,7 @@ namespace dolfin
 
     /// Divide matrix by given number
     const Matrix& operator/= (real a)
-    { *this /= a; return *this; }
+    { *matrix /= a; return *this; }
 
     /// Assignment operator
     const GenericMatrix& operator= (const GenericMatrix& A)

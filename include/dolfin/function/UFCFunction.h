@@ -1,8 +1,5 @@
 // Copyright (C) 2005-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2005-11-28
-// Last changed: 2008-03-17
 
 #ifndef __DOLFIN_UFC_FUNCTION_H
 #define __DOLFIN_UFC_FUNCTION_H
@@ -84,7 +81,7 @@ public:
   }
 
   /// Evaluate function at given point coordinate, cell is searched for
-  void eval(real* values, const real* x) const
+  void eval(real*, const real*) const
   {
     error("UFCFunction : eval unimplemented");
   }
@@ -105,7 +102,7 @@ public:
   uint value_size() const { return Coefficient::value_size(); }
 
   /// Interpolate function to vertices of mesh
-  void interpolate_vertex_values(real* values) const
+  void interpolate_vertex_values(real*) const
   {
     error("UFCFunction : interpolate_vertex_values unimplemented");
   }
@@ -113,7 +110,7 @@ public:
   /// Interpolate function to finite element space on cell
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell) const
+                          const Cell&) const
   {
     dolfin_assert(coefficients);
     finite_element.evaluate_dofs(coefficients, *this, cell);
@@ -122,7 +119,7 @@ public:
   /// Interpolate function to finite element space on facet
   inline  void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
+                           const Cell&, uint facet) const
   {
     this->facet_ = facet;
     dolfin_assert(coefficients);

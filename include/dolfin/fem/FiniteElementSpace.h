@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-02-03
-// Last changed: 2014-02-03
 
 #ifndef __DOLFIN_FINITE_ELEMENT_SPACE_H
 #define __DOLFIN_FINITE_ELEMENT_SPACE_H
@@ -83,7 +80,7 @@ public:
   Mesh& mesh() const;
 
   /// Return cell on which the reference element is defined
-  Cell& cell() const; //FIXME: Cannot const this due to Mesh implementation
+  Cell& cell() const; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
   FiniteElement const& element() const;
@@ -167,6 +164,6 @@ inline uint FiniteElementSpace::degree() const
   return ufl_->degree();
 }
 
-}
-/* namespace icorne */
+} // end namespace dolfin
+
 #endif /* __DOLFIN_FINITE_ELEMENT_SPACE_H */

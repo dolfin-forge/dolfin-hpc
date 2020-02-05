@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-21
-// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLFiniteElement.h>
 
@@ -30,7 +27,7 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
   {
     error("The finite element definition is not valid.");
   }
-  
+
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree
         << quadrature_scheme().str() << " on a " << cell.str() << ">";
@@ -54,7 +51,7 @@ FiniteElement::FiniteElement(repr_t const& repr) :
   {
     error("The finite element definition is not valid.");
   }
-  
+
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree()
         << quadrature_scheme().str() << " on a " << cell().str() << ">";
@@ -110,7 +107,7 @@ std::map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
 
 //-----------------------------------------------------------------------------
 std::pair<ValueArray, ValueArray> FiniteElement::extract_subelement_component(
-    ValueArray const& i) const
+    ValueArray const&) const
 {
   return std::pair<ValueArray, ValueArray>();
 }

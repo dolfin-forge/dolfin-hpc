@@ -23,7 +23,6 @@ libdolfin_fem_la_SOURCES = \
 			PeriodicBC.cpp\
 			PeriodicDofsMapping.cpp\
 			ScratchSpace.cpp\
-			SetOfBCs.cpp\
 			SlipBC.cpp\
 			SlipFrictionBC.cpp\
 			SparsityPatternBuilder.cpp\

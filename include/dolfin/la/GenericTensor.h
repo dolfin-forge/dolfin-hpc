@@ -1,12 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Ola Skavhaug, 2007.
-// Modified by Martin Alnæs, 2008.
-//
-// First added:  2007-01-17
-// Last changed: 2008-04-23
 
 #ifndef __DOLFIN_GENERIC_TENSOR_H
 #define __DOLFIN_GENERIC_TENSOR_H

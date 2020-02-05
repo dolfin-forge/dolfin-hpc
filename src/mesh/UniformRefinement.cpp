@@ -1,12 +1,5 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-// Modified by Stefanie Strunk, 2013.
-// Modified by Aurelien Larcher, 2017.
-//
-// First added:  2006-06-08
-// Last changed: 2017-12-15
 
 #include <dolfin/mesh/UniformRefinement.h>
 
@@ -67,8 +60,8 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 void UniformRefinement::operator()(Mesh& mesh)
 {
   // Create new mesh, refinement manager and open for editing
-  Mesh refined_mesh;
-  MeshEditor editor(refined_mesh, mesh.type(), mesh.space());
+  Mesh refined_mesh(mesh.type(), mesh.space());
+  MeshEditor editor(refined_mesh, refined_mesh.type(), refined_mesh.space());
 
   // Refinement pattern provides the number of refined vertices
   editor.init_vertices(mesh.type().RefinementPattern::num_refined_vertices(mesh));
@@ -117,7 +110,7 @@ void UniformRefinement::operator()(Mesh& mesh)
   refined_mesh.topology().remap(0, vertex_map);
 
   // Overwrite old mesh with refined mesh
-  mesh.swap(refined_mesh);
+  swap( mesh, refined_mesh );
   mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------

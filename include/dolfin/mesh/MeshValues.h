@@ -1,10 +1,5 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Imported from licorne.
-//
-// First added:  2017-10-10
-// Last changed: 2017-10-10
 
 #ifndef __DOLFIN_MESH_VALUES_H
 #define __DOLFIN_MESH_VALUES_H
@@ -86,11 +81,10 @@ struct MeshValues : public MeshFunction<T>
     return *this;
   }
 
-
   /// Swap operator
-  void swap(MeshValues<T, E, N>& other)
+  friend void swap( MeshValues<T,E,N>& a, MeshValues<T,E,N>& b )
   {
-    MeshFunction<T>::swap(other);
+    swap( static_cast<MeshFunction<T>&>(a), static_cast<MeshFunction<T>&>(b) );
   }
 
   ///--- Value accessors

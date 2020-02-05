@@ -1,8 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-03-01
-// Last changed: 2007-03-13
 
 #ifndef __DOLFIN_UFC_CELL_H
 #define __DOLFIN_UFC_CELL_H

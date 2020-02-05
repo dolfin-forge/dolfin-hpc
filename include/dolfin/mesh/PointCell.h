@@ -1,11 +1,5 @@
 // Copyright (C) 2007-2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Aurelien Larcher, 2015.
-//
-// First added:  2007-12-12
-// Last changed: 2008-06-20
 
 #ifndef __DOLFIN_POINT_CELL_H
 #define __DOLFIN_POINT_CELL_H

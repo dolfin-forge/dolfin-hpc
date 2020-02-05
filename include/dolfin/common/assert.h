@@ -1,11 +1,5 @@
 // Copyright (C) 2003-2008 Anders Logg and Jim Tilander.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Ola Skavhaug, 2007.
-// Modified by Niclas Jansson, 2009-2015.
-//
-// First added:  2003-03-13
-// Last changed: 2015-07-02
 
 #ifndef __DOLFIN_ASSERT_H
 #define __DOLFIN_ASSERT_H

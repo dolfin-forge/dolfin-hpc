@@ -1,14 +1,8 @@
 // Copyright (C) 2003-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-// Modified by Niclas Jansson, 2015-2016.
-//
+
 // This class was cleaned up and merged with the parallel implementation which
 // got some fixes in the process.
-//
-// First added:  2003-10-21
-// Last changed: 2008-05-21
 
 #ifndef __DOLFIN_XML_MESH_H
 #define __DOLFIN_XML_MESH_H

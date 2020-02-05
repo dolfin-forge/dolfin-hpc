@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-27
-// Last changed: 2014-01-27
 
 #ifndef __DOLFIN_UFL_TYPE_H
 #define __DOLFIN_UFL_TYPE_H
@@ -166,8 +163,7 @@ std::string type<T>::make_str(T const& val) const
 
 //-----------------------------------------------------------------------------
 template<typename T>
-std::vector<Object::repr_t> type<T>::make_args_repr(
-    repr_t const& repr, bool without_pre_pos) const
+std::vector<Object::repr_t> type<T>::make_args_repr(repr_t const&, bool) const
 {
   return std::vector<Object::repr_t>();
 }

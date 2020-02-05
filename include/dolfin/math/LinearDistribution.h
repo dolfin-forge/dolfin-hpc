@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_LINEAR_DISTRIBUTION_H
 #define __DOLFIN_LINEAR_DISTRIBUTION_H
@@ -72,7 +69,7 @@ struct LinearDistribution
     this->L       = std::floor((real) global_size / (real) card);
     this->R       = global_size % card;
     this->offset  = rank * L + std::min(rank,R);
-    this->size    = (global_size + card - rank - 1) / card;
+    this->size    = std::floor(((real) global_size + (real) card - (real) rank - 1.0) / (real) card);
   }
 
   ///

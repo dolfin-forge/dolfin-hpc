@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-//
-// First added:  2014-08-18
-// Last changed: 2014-08-18
 
 #include <dolfin/evolution/TimeSeries.h>
 
@@ -25,7 +22,6 @@ TimeSeries::TimeSeries(std::string const& filename,
     filename_(filename),
     timespan_(interval),
     measure_(interval.second - interval.first),
-    fixed_timestep_(true),
     timestep_(k),
     degree_(degree),
     value_size_(0.0),
@@ -191,7 +187,7 @@ void TimeSeries::disp() const
 }
 
 //-----------------------------------------------------------------------------
-void TimeSeries::loadData(std::string const& filename)
+void TimeSeries::loadData(std::string const&)
 {
   Array<real> times;
   if ((MPI::rank() == 0) && (access(filename_.c_str(), F_OK) == 0))
@@ -238,20 +234,22 @@ void TimeSeries::loadData(std::string const& filename)
     data_size[0] = times.size();
     data_size[1] = value_size_;
     dolfin_assert(value_size_ == values_.size());
-    MPI_Bcast(&data_size[0], 2, MPI_UNSIGNED, 0, dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Bcast(&data_size[0], 2, MPI_UNSIGNED, 0,
+                                dolfin::MPI::DOLFIN_COMM) );
 
     // Discrete times
     int tcount = data_size[0];
     times.resize(tcount);
-    MPI_Bcast(&times[0], tcount, MPI_DOUBLE, 0, dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Bcast(&times[0], tcount, MPI_DOUBLE, 0,
+                                dolfin::MPI::DOLFIN_COMM) );
 
     // Data values
     int vcount = data_size[0] * data_size[1];
     value_size_ = data_size[1];
     values_.resize(value_size_);
     data_values_.resize(vcount);
-    MPI_Bcast(&data_values_[0], vcount, MPI_DOUBLE, 0,
-              dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Bcast(&data_values_[0], vcount, MPI_DOUBLE, 0,
+                                dolfin::MPI::DOLFIN_COMM) );
 #endif
   }
 

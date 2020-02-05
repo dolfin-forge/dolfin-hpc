@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-01-30
-// Last changed: 2015-03-22
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/MeshRenumber.h>
@@ -194,7 +191,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
 
   // Count number of dual graph edges
   uint i = 0;
-  for (CellIterator c(*mesh); !c.end(); i++, ++c) 
+  for (CellIterator c(*mesh); !c.end(); i++, ++c)
   {
     num_edges[i] = 0;
     for (FacetIterator f(*c); !f.end(); ++f)
@@ -207,7 +204,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
       num_edges[i]++;
     }
   }
-  
+
 
   *ierr = ZOLTAN_OK;
 }
@@ -237,15 +234,15 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
 
   uint rank = MPI::rank();
   uint pe_size = MPI::size();
-  
-  Array<uint> *glb_facet = new Array<uint>[pe_size];  
+
+  Array<uint> *glb_facet = new Array<uint>[pe_size];
   for (SharedIterator f(dist); f.valid(); ++f)
   {
     uint const adj_rank = *(f.adj().begin());
     glb_facet[adj_rank].push_back(f.global_index());
-  }  
+  }
 
-  uint max_recv = 0;  
+  uint max_recv = 0;
   for (int i = 0; i < pe_size; i++)
   {
     max_recv = std::max(max_recv, (uint) glb_facet[i].size());
@@ -253,21 +250,15 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   uint *recv_buff = new uint[max_recv];
   uint *send_buff = new uint[max_recv];
 
-  MPI_Status status;
-  int src = 0;
-  int dest = 0;
-  int recv_count;
   for (int j = 1; j < (int) pe_size; ++j)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dest = (rank + j) % pe_size;
+    int src = (rank - j + pe_size) % pe_size;
+    int dest = (rank + j) % pe_size;
 
-    // Exchange global facet index    
-    MPI_Sendrecv(&glb_facet[dest][0], glb_facet[dest].size(), MPI_UNSIGNED,
-                 dest, 1, recv_buff, max_recv, MPI_UNSIGNED, src, 1,
-                 MPI::DOLFIN_COMM, &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-    
+    // Exchange global facet index
+    int recv_count = MPI::sendrecv( &glb_facet[dest][0], glb_facet[dest].size(),
+                                    dest, recv_buff, max_recv, src, 1 );
+
     for (uint k = 0; k < recv_count; k++)
     {
       Facet f(*mesh, dist.get_local(recv_buff[k]));
@@ -275,12 +266,10 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     }
 
     // Send back corresponding global cell index
-    MPI_Sendrecv(&send_buff[0], recv_count, MPI_UNSIGNED, src, 2,
-                 recv_buff, max_recv, MPI_UNSIGNED, dest, 2, MPI::DOLFIN_COMM,
-                 &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recv_count = MPI::sendrecv( &send_buff[0], recv_count, src,
+                                recv_buff, max_recv, dest, 2 );
 
-    for (uint k = 0; k < recv_count; k++) 
+    for (uint k = 0; k < recv_count; k++)
     {
       facet_cell_map[glb_facet[dest][k]] = recv_buff[k];
     }
@@ -293,7 +282,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   uint i = 0;
 
   // Construct dual graph
-  for (CellIterator c(*mesh); !c.end(); i++, ++c) 
+  for (CellIterator c(*mesh); !c.end(); i++, ++c)
   {
     for (FacetIterator f(*c); !f.end(); ++f)
     {
@@ -361,15 +350,14 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
-                                            MeshValues<uint, Cell>& partitions,
-                                            MeshValues<uint, Cell>* weight)
+void ZoltanInterface::partitionCommonZoltan(Mesh&,
+                                            MeshValues<uint, Cell>&,
+                                            MeshValues<uint, Cell>*)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
-					MeshValues<uint, Vertex> & partitions)
+void ZoltanInterface::partitionGeomZoltan(Mesh&, MeshValues<uint, Vertex> &)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }

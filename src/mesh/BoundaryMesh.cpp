@@ -1,10 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson 2008.
-//
-// First added:  2006-06-21
-// Last changed: 2008-06-26
 
 #include <iostream>
 
@@ -22,7 +17,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
     boundary_of_boundary_(false),
@@ -34,7 +29,7 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
     boundary_of_boundary_(true),
@@ -47,7 +42,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
                            BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(mesh),
     type_(type),
     boundary_of_boundary_(false),
@@ -93,7 +88,7 @@ void BoundaryMesh::init(Mesh& mesh, BoundaryMesh::Type type)
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
                            bool inside) :
-    Mesh(),
+    Mesh(boundary.type(), boundary.space(), boundary.topology().comm()),
     MeshDependent(boundary.mesh()),
     type_(boundary.type_),
     boundary_of_boundary_(true),
@@ -366,15 +361,16 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI_Send(&shared_vertices[(*adj)][0], shared_vertices[(*adj)].size(),
-                 MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM);
+        MPI::check_error( MPI_Send(&shared_vertices[(*adj)][0],
+                                   shared_vertices[(*adj)].size(),
+                                   MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM) );
       }
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
-                 MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+        MPI::check_error( MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj),
+                                   0, MPI::DOLFIN_COMM, &status) );
+        MPI::check_error( MPI_Get_count(&status, MPI_UNSIGNED, &recvcount) );
         for(int k = 0; k < recvcount; ++k)
         {
           dolfin_assert(distdata.has_global(recvbuf[k]));

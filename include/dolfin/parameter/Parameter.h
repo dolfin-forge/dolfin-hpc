@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2005 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2003-05-06
-// Last changed: 2005-03-24
 
 #ifndef __DOLFIN_PARAMETER_H
 #define __DOLFIN_PARAMETER_H
@@ -12,7 +9,7 @@
 namespace dolfin
 {
 
-class ParameterValue;
+struct ParameterValue;
 
 /// This class represents a parameter of some given type.
 /// Supported value types are bool, int, uint, real, and string.

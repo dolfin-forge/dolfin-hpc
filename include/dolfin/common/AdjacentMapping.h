@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_ADJACENT_MAPPING_H
 #define __DOLFIN_ADJACENT_MAPPING_H
@@ -18,7 +15,6 @@ namespace dolfin
  *
  */
 
-//
 struct AdjacentMapping
 {
   Array<uint> send;

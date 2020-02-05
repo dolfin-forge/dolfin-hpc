@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014
-//
-// First added:  2007-04-12
-// Last changed: 2014-09-21
 
 #ifndef __DOLFIN_ELEMENT_LIBRARY_H
 #define __DOLFIN_ELEMENT_LIBRARY_H

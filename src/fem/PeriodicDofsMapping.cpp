@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-04-24
-// Last changed: 2015-04-24
 
 #include <dolfin/fem/PeriodicDofsMapping.h>
 
@@ -186,7 +183,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     _set<uint> const& setG = manifold.Gfacets();
     _set<uint> const& setH = manifold.Hfacets();
     _set<uint> const& setI = manifold.Ifacets();
+#if HAVE_MPI
     uint const GpmOffset = Gcount;
+#endif
 
     //--- Collect dofs and exchange -------------------------------------------
     // Reserve array for mapped coordinates
@@ -345,14 +344,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       //--- Exchange data -----------------------------------------------------
       uint rank = dolfin::MPI::rank();
       uint pe_size = dolfin::MPI::size();
-      MPI_Status status;
-      uint src = 0;
-      uint dst = 0;
-      int u_count = 0;
       int u_recvdata_size = Gcount - GpmOffset;
       int u_recvdata_maxi = 0;
-      MPI_Allreduce(&u_recvdata_size, &u_recvdata_maxi, 1, MPI_INT, MPI_MAX,
-                    dolfin::MPI::DOLFIN_COMM);
+      MPI::all_reduce<MPI::max>( u_recvdata_size, u_recvdata_maxi );
       uint * u_recvbuff = new uint[u_recvdata_maxi];
       Array<uint> u_sendbuff;
       int r_recvdata_size = u_recvdata_size * gdim;
@@ -366,18 +360,15 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       uint * r_datsize = new uint[pe_size];
       for (int j = 1; j < (int) pe_size; ++j)
       {
-        src = (rank - j + pe_size) % pe_size;
-        dst = (rank + j) % pe_size;
+        int src = (rank - j + pe_size) % pe_size;
+        int dst = (rank + j) % pe_size;
 
-        MPI_Sendrecv(&Gdofs_indices[GpmOffset], u_recvdata_size, MPI_UNSIGNED,
-                     dst, 1, &u_recvbuff[0], u_recvdata_maxi, MPI_UNSIGNED, src,
-                     1, dolfin::MPI::DOLFIN_COMM, &status);
 
-        MPI_Get_count(&status, MPI_UNSIGNED, &u_count);
+        int u_count = MPI::sendrecv( &Gdofs_indices[GpmOffset], u_recvdata_size,
+                                     dst, &u_recvbuff[0], u_recvdata_maxi, src, 1 );
 
-        MPI_Sendrecv(&Gdofs_xcoords[GpmOffset * gdim], r_recvdata_size,
-                     MPI_DOUBLE, dst, 1, &r_recvbuff[0], r_recvdata_maxi,
-                     MPI_DOUBLE, src, 1, dolfin::MPI::DOLFIN_COMM, &status);
+        MPI::sendrecv( &Gdofs_xcoords[GpmOffset * gdim], r_recvdata_size, dst,
+                       &r_recvbuff[0], r_recvdata_maxi, src, 1 );
 
         // If the local mesh contains H facets find matching G facets
         u_offsets[src] = u_sendbuff.size();
@@ -447,33 +438,27 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       //
       u_recvdata_size = u_sendbuff.size();
       u_recvdata_maxi = 0;
-      MPI_Allreduce(&u_recvdata_size, &u_recvdata_maxi, 1, MPI_INT, MPI_MAX,
-                    dolfin::MPI::DOLFIN_COMM);
+      MPI::all_reduce<MPI::max>( u_recvdata_size, u_recvdata_maxi );
       delete[] u_recvbuff;
       u_recvbuff = NULL;
       u_recvbuff = new uint[u_recvdata_maxi];
       r_recvdata_size = r_sendbuff.size();
       r_recvdata_maxi = 0;
-      MPI_Allreduce(&r_recvdata_size, &r_recvdata_maxi, 1, MPI_INT, MPI_MAX,
-                    dolfin::MPI::DOLFIN_COMM);
+      MPI::all_reduce<MPI::max>( r_recvdata_size, r_recvdata_maxi );
       delete[] r_recvbuff;
       r_recvbuff = NULL;
       r_recvbuff = new real[r_recvdata_maxi];
 
       for (int j = 1; j < (int) pe_size; ++j)
       {
-        src = (rank - j + pe_size) % pe_size;
-        dst = (rank + j) % pe_size;
+        int src = (rank - j + pe_size) % pe_size;
+        int dst = (rank + j) % pe_size;
 
-        MPI_Sendrecv(&u_sendbuff[u_offsets[dst]], u_datsize[dst], MPI_UNSIGNED,
-                     dst, 1, &u_recvbuff[0], u_recvdata_maxi, MPI_UNSIGNED, src,
-                     1, dolfin::MPI::DOLFIN_COMM, &status);
+        int u_count = MPI::sendrecv( &u_sendbuff[u_offsets[dst]], u_datsize[dst],
+                                     dst, &u_recvbuff[0], u_recvdata_maxi, src, 1 );
 
-        MPI_Get_count(&status, MPI_UNSIGNED, &u_count);
-
-        MPI_Sendrecv(&r_sendbuff[r_offsets[dst]], r_datsize[dst], MPI_DOUBLE,
-                     dst, 1, &r_recvbuff[0], r_recvdata_maxi, MPI_DOUBLE, src,
-                     1, dolfin::MPI::DOLFIN_COMM, &status);
+        MPI::sendrecv( &r_sendbuff[r_offsets[dst]], r_datsize[dst], dst,
+                       &r_recvbuff[0], r_recvdata_maxi, src, 1 );
 
         uint uii = 0;
         uint rii = 0;

@@ -6,6 +6,9 @@
 /* Version of DOLFIN */
 #undef DOLFIN_VERSION
 
+/* Build info (date,host,CXX) of DOLFIN */
+#undef DOLFIN_BUILD_INFO
+
 /* Compile with support for Boost TR1 headers */
 #undef ENABLE_BOOST_TR1
 
@@ -57,7 +60,7 @@
 /* Have LIBGEOM library */
 #undef HAVE_LIBGEOM
 
-/* VisIt/libsim support */
+/* VisIt/Libsim support */
 #undef HAVE_LIBSIM
 
 /* Define if you have the Zlib library. */
@@ -126,12 +129,8 @@
 /* Define if you have the Zoltan library. */
 #undef HAVE_ZOLTAN
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
-
-/* Compile without progress bar */
-#undef NO_PROGRESS_BAR
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

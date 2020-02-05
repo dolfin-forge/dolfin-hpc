@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
-//
-// Modified by Niclas Jansson, 2013.
-// Modified by Aurélien Larcher, 2013-2017.
-//
-// First added:  2005-11-26
 
 #include <dolfin/function/SpaceTimeFunction.h>
 
@@ -64,15 +59,11 @@ uint SpaceTimeFunction::load()
     MPI_File fh;
 
     MPI::Communicator& comm = this->mesh().topology().comm();
-    int err;
-    err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
-                        MPI_INFO_NULL, &fh);
-    if (err != MPI_SUCCESS)
-    {
-      error("SpaceTimeFunction : failed to load %s", sname.c_str());
-    }
-    MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
-    MPI_File_close(&fh);
+    MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
+                                    MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
+    MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real),
+                                        MPI_BYTE, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_File_close(&fh) );
 #else
     std::ifstream fp(sname.c_str(), std::ifstream::binary);
     fp.read((char *)&st, sizeof(real));
@@ -134,7 +125,7 @@ void SpaceTimeFunction::eval()
   real const st = this->clock();
   real const t0 = it0->first;
   real const t1 = it1->first;
-  //FIXME: Round-off errors may violate maximum principles
+  /// @todo Round-off errors may violate maximum principles
   real const w0 = (t1 - st) / (t1 - t0);
   real const w1 = (st - t0) / (t1 - t0);
   this->zero();
@@ -186,45 +177,44 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
 {
   real st;
   uint sp;
-  uint offset[3] = { 0 };
+  uint offset[3] = { 0, 0, 0 };
   Array<real> values(w.vector().local_size());
 
 #ifdef ENABLE_MPIIO
-  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
-                      MPI_INFO_NULL, &fh);
-  if (err != MPI_SUCCESS)
-  {
-    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
-  }
-  MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
+                                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
+  MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE,
+                                      MPI_STATUS_IGNORE) );
   byte_offset += sizeof(real);
-  MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint),
+                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   byte_offset += sizeof(uint);
   if (sp != pe_size)
   {
     error("SpaceTimeFunction : communicator size mismatch %u != %u", sp,
           pe_size);
   }
-  MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
-                       &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
+                                         &offset[0], 2, MPI_UNSIGNED,
+                                         MPI_STATUS_IGNORE) );
   byte_offset += pe_size * 2 * sizeof(uint);
   if (offset[1] != w.vector().local_size())
   {
     error("SpaceTimeFunction : local size mismatch");
   }
-  MPI_File_read_at_all(fh, byte_offset, &offset[2], sizeof(uint), MPI_BYTE,
-                       MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &offset[2],
+                                         sizeof(uint), MPI_BYTE,
+                                         MPI_STATUS_IGNORE) );
   byte_offset += sizeof(uint);
-  MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real), &values[0],
-                       offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real),
+                                         &values[0], offset[1], MPI_DOUBLE,
+                                         MPI_STATUS_IGNORE) );
+  MPI::check_error( MPI_File_close(&fh) );
 #else
   std::ifstream fp(sname.c_str(), std::ifstream::binary);
   fp.read((char *)&st, sizeof(real));
@@ -251,41 +241,40 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   x.get(values);
 
 #ifdef ENABLE_MPIIO
-  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  err = MPI_File_open(comm, (char *) sname.c_str(),
-                      MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
-  if (err != MPI_SUCCESS)
-  {
-    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
-  }
+  MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
+                                  MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                  MPI_INFO_NULL, &fh) );
   if (pe_rank == 0)
   {
-    MPI_File_write(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write(fh, &st, sizeof(real),
+                                     MPI_BYTE, MPI_STATUS_IGNORE) );
   }
   byte_offset += sizeof(real);
   if (pe_rank == 0)
   {
-    MPI_File_write_at(fh, byte_offset, &pe_size, sizeof(uint), MPI_BYTE,
-                      MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at(fh, byte_offset, &pe_size, sizeof(uint),
+                                        MPI_BYTE, MPI_STATUS_IGNORE) );
   }
   byte_offset += sizeof(uint);
-  MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
-                        &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
+                                          &offset[0], 2, MPI_UNSIGNED,
+                                          MPI_STATUS_IGNORE) );
   byte_offset += pe_size * 2 * sizeof(uint);
   if (pe_rank == 0)
   {
-    MPI_File_write_at(fh, byte_offset, &offset[2], sizeof(uint), MPI_BYTE,
-                      MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at(fh, byte_offset, &offset[2], sizeof(uint),
+                                        MPI_BYTE, MPI_STATUS_IGNORE) );
   }
   byte_offset += sizeof(uint);
-  MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real), values,
-                        offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
-  MPI_File_close(&fh);
+  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real),
+                                          values, offset[1], MPI_DOUBLE,
+                                          MPI_STATUS_IGNORE) );
+  MPI::check_error( MPI_File_close(&fh) );
 #else
   uint sp = 1;
   std::ofstream fp(sname.c_str(), std::ofstream::binary);

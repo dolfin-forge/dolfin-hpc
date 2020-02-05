@@ -85,8 +85,7 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(real* values, const real*, const ufc::cell&) const
   {
     values[0] = value_;
   }
@@ -94,14 +93,13 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(uint n, real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(uint n, real* values, const real*,const ufc::cell&) const
   {
     std::fill_n(values, n, value_);
   }
 
   /// Evaluate function at given point
-  inline void eval(real* values, const real* x) const
+  inline void eval(real* values, const real*) const
   {
     values[0] = value_;
   }
@@ -113,7 +111,7 @@ public:
   }
 
   /// Return the dimension of the value space for axis i
-  inline uint dim(uint i) const
+  inline uint dim(uint) const
   {
     return 1;
   }
@@ -125,16 +123,16 @@ public:
   }
 
   ///
-  inline Constant const& operator()(Time const& t) const
+  inline Constant const& operator()(Time const&) const
   {
     // No-op
     return *this;
   }
 
   /// Interpolate function to finite element space on cell
-  inline void interpolate(real* coefficients, const ufc::cell& cell,
+  inline void interpolate(real* coefficients, const ufc::cell&,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell) const
+                          const Cell&) const
   {
     dolfin_assert(coefficients);
     for (uint i = 0; i < finite_element.space_dimension(); ++i)
@@ -144,9 +142,9 @@ public:
   }
 
   /// Interpolate function to finite element space on facet
-  inline void interpolate(real* coefficients, const ufc::cell& cell,
+  inline void interpolate(real* coefficients, const ufc::cell&,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell, uint facet) const
+                          const Cell&, uint) const
   {
     dolfin_assert(coefficients);
     for (uint i = 0; i < finite_element.space_dimension(); ++i)
@@ -172,12 +170,12 @@ public:
 
 private:
 
-  void sync(Time const& t) { /* No-op */ }
+  void sync(Time const&) { /* No-op */ }
 
   real value_;
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __DOLFIN_CONSTANT_H_ */

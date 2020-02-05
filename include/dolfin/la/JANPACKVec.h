@@ -1,6 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_JANPACK_VEC_H
 #define __DOLFIN_JANPACK_VEC_H
@@ -112,6 +111,9 @@ namespace dolfin
 
     /// Return maximum value of vector
     real max() const;
+
+    /// Return pointwise operator op of vector and given vector x
+    void pointwise(const GenericVector& x, VectorPointwiseOp op=pw_min) const;
 
     /// Multiply vector by given number
     JANPACKVec& operator*= (real a);

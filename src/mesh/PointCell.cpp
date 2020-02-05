@@ -1,14 +1,9 @@
 // Copyright (C) 2007-2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Aurelien Larcher, 2015.
-//
-// First added:  2007-12-12
-// Last changed: 2008-06-20
 
 #include <dolfin/mesh/PointCell.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/MeshEntity.h>
 #include <dolfin/mesh/Point.h>
@@ -46,6 +41,7 @@ uint PointCell::dim() const
 uint PointCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
+  MAYBE_UNUSED(dim);
   return 1;
 }
 //-----------------------------------------------------------------------------
@@ -53,16 +49,19 @@ uint PointCell::num_entities(uint d0, uint d1) const
 {
   dolfin_assert(d0 <= TD);
   dolfin_assert(d1 <= TD);
+  MAYBE_UNUSED(d0);
+  MAYBE_UNUSED(d1);
   return 1;
 }
 //-----------------------------------------------------------------------------
 uint PointCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
+  MAYBE_UNUSED(dim);
   return 1;
 }
 //-----------------------------------------------------------------------------
-uint PointCell::orientation(Cell const& cell) const
+uint PointCell::orientation(Cell const&) const
 {
   return 0;
 }
@@ -76,12 +75,12 @@ void PointCell::create_entities(uint** e, uint dim, uint const* v) const
   e[0][0] = v[0];
 }
 //-----------------------------------------------------------------------------
-void PointCell::order_entities(MeshTopology& topology, uint i) const
+void PointCell::order_entities(MeshTopology&, uint) const
 {
   // do nothing
 }
 //-----------------------------------------------------------------------------
-void PointCell::order_facet(uint vertices[], Facet& facet) const
+void PointCell::order_facet(uint[], Facet&) const
 {
   // Do nothing
 }
@@ -89,10 +88,12 @@ void PointCell::order_facet(uint vertices[], Facet& facet) const
 bool PointCell::connectivity_needs_ordering(uint d0, uint d1) const
 {
   dolfin_assert(d0 <= TD && d1 <= TD);
+  MAYBE_UNUSED(d0);
+  MAYBE_UNUSED(d1);
   return false;
 }
 //-----------------------------------------------------------------------------
-void PointCell::initialize_connectivities(Mesh& mesh) const
+void PointCell::initialize_connectivities(Mesh&) const
 {
   // Do nothing
 }
@@ -108,27 +109,27 @@ uint PointCell::num_refined_cells() const
   return 1;
 }
 //-----------------------------------------------------------------------------
-uint PointCell::num_refined_vertices(uint dim) const
+uint PointCell::num_refined_vertices(uint ) const
 {
   return 1;
 }
 //-----------------------------------------------------------------------------
-real PointCell::volume(MeshEntity const& entity) const
+real PointCell::volume(MeshEntity const&) const
 {
   return 0.0;
 }
 //-----------------------------------------------------------------------------
-real PointCell::diameter(MeshEntity const& entity) const
+real PointCell::diameter(MeshEntity const&) const
 {
   return 0.0;
 }
 //-----------------------------------------------------------------------------
-real PointCell::circumradius(MeshEntity const& entity) const
+real PointCell::circumradius(MeshEntity const&) const
 {
   return 0.0;
 }
 //-----------------------------------------------------------------------------
-real PointCell::inradius(MeshEntity const& entity) const
+real PointCell::inradius(MeshEntity const&) const
 {
   return 0.0;
 }
@@ -142,12 +143,12 @@ void PointCell::midpoint(MeshEntity const& entity, real * p) const
   std::copy(p0, p0 + entity.mesh().geometry_dimension(), p);
 }
 //-----------------------------------------------------------------------------
-void PointCell::normal(Cell const& cell, uint facet, real * n) const
+void PointCell::normal(Cell const& , uint, real *) const
 {
   error("PointCell::normal() is undefined");
 }
 //-----------------------------------------------------------------------------
-real PointCell::facet_area(Cell const& cell, uint facet) const
+real PointCell::facet_area(Cell const&, uint) const
 {
   return 0.0;
 }
@@ -157,8 +158,7 @@ bool PointCell::intersects(MeshEntity const& e, Point const& p) const
   return abscmp(p.dist(e.mesh().geometry().point(e.index())), 0.0);
 }
 //-----------------------------------------------------------------------------
-bool PointCell::intersects(MeshEntity const& e, Point const& p1,
-                           Point const& p2) const
+bool PointCell::intersects(MeshEntity const&, Point const&, Point const&) const
 {
   error("PointCell::intersects() not implemented.");
   return true;

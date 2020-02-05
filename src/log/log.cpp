@@ -1,6 +1,6 @@
 // Copyright (C) 2018 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 #include <dolfin/log/log.h>
 
 #include <ctime>
@@ -40,14 +40,14 @@ void message(char const * msg, ...)
 //-----------------------------------------------------------------------------
 void message(uint n, std::string msg)
 {
-  if (n > cout.verbose()) return;
+  if ((int) n > cout.verbose()) return;
   simple_output(cout, "", msg, "\n");
 }
 
 //-----------------------------------------------------------------------------
 void message(uint n, char const * msg, ...)
 {
-  if (n > cout.verbose()) return;
+  if ((int) n > cout.verbose()) return;
   format_output(cout, "", msg, "\n");
 }
 

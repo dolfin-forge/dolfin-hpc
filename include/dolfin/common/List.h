@@ -1,7 +1,5 @@
 // Copyright (C) 2003 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2005.
 
 #ifndef __DOLFIN_LIST_H
 #define __DOLFIN_LIST_H

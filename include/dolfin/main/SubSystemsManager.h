@@ -1,11 +1,5 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson 2009-2015.
-// Modified by Aurelien Larcher 2017.
-//
-// First added:  2008-01-07
-// Last changed: 2017-02-23
 
 #ifndef __DOLFIN_SUB_SYSTEMS_MANAGER_H
 #define __DOLFIN_SUB_SYSTEMS_MANAGER_H
@@ -36,8 +30,7 @@ public:
               petsc     = 2,
               petscmpi  = 4,
               janpack   = 8,
-              zoltan    = 16,
-              slepc     = 32 };
+              zoltan    = 16 };
 
   //-------------------------------------------------------------------------
   static int start(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0)
@@ -115,12 +108,6 @@ public:
 
     ///
     static int sema;
-  };
-
-  //-------------------------------------------------------------------------
-  struct SLEPc
-  {
-    static SubSystemsManager::Type const flag = slepc;
   };
 
   //-------------------------------------------------------------------------

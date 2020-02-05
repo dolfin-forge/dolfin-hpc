@@ -1,17 +1,11 @@
 // Copyright (C) 2002-2008 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008-2012.
-//
-// First added:  2002-11-12
-// Last changed: 2012-05-11
-
-// FIXME: Use streams instead of stdio
-#include <stdio.h>
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/GenericFile.h>
 #include <dolfin/main/MPI.h>
+
+#include <fstream>
 
 namespace dolfin
 {
@@ -19,7 +13,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 GenericFile::GenericFile(std::string const& type, std::string const& filename) :
   type_(type),
-  filename(filename), 
+  filename(filename),
   opened_read(false),
   opened_write(false),
   check_header(false),
@@ -33,102 +27,102 @@ GenericFile::~GenericFile()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(GenericVector& x)
+void GenericFile::operator>>(GenericVector&)
 {
   read_not_impl("Vector");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(GenericMatrix& A)
+void GenericFile::operator>>(GenericMatrix&)
 {
   read_not_impl("Matrix");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(Mesh& mesh)
+void GenericFile::operator>>(Mesh&)
 {
   read_not_impl("Mesh");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<int>& meshfunction)
+void GenericFile::operator>>(MeshFunction<int>&)
 {
   read_not_impl("MeshFunction<int>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<uint>& meshfunction)
+void GenericFile::operator>>(MeshFunction<uint>&)
 {
   read_not_impl("MeshFunction<uint>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<real>& meshfunction)
+void GenericFile::operator>>(MeshFunction<real>&)
 {
   read_not_impl("MeshFunction<real>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<bool>& meshfunction)
+void GenericFile::operator>>(MeshFunction<bool>&)
 {
   read_not_impl("MeshFunction<bool>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(Function& f)
+void GenericFile::operator>>(Function&)
 {
   read_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(ParameterList& parameters)
+void GenericFile::operator>>(ParameterList&)
 {
   read_not_impl("ParameterList");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>> (LabelList<Function>& f)
+void GenericFile::operator>> (LabelList<Function>&)
 {
   read_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(GenericVector& x)
+void GenericFile::operator<<(GenericVector&)
 {
   write_not_impl("Vector");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(GenericMatrix& A)
+void GenericFile::operator<<(GenericMatrix&)
 {
   write_not_impl("Matrix");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(Mesh& mesh)
+void GenericFile::operator<<(Mesh&)
 {
   write_not_impl("Mesh");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<int>& meshfunction)
+void GenericFile::operator<<(MeshFunction<int>&)
 {
   write_not_impl("MeshFunction<int>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<uint>& meshfunction)
+void GenericFile::operator<<(MeshFunction<uint>&)
 {
   write_not_impl("MeshFunction<uint>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<real>& meshfunction)
+void GenericFile::operator<<(MeshFunction<real>&)
 {
   write_not_impl("MeshFunction<real>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<bool>& meshfunction)
+void GenericFile::operator<<(MeshFunction<bool>&)
 {
   write_not_impl("MeshFunction<bool>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(Function& u)
+void GenericFile::operator<<(Function&)
 {
   write_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(ParameterList& parameters)
+void GenericFile::operator<<(ParameterList&)
 {
   write_not_impl("ParameterList");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<< (LabelList<Function>& f)
+void GenericFile::operator<< (LabelList<Function>&)
 {
   write_not_impl("Function");
 }
@@ -142,8 +136,8 @@ void GenericFile::write()
 {
   if (!opened_write)
   {
-      FILE* fp = fopen(filename.c_str(), "w");
-      fclose(fp);
+    std::ofstream f(filename.c_str());
+    f.close();
   }
   opened_write = true;
 }

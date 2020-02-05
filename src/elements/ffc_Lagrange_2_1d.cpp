@@ -7,10 +7,13 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'ufc'
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
 //   no-evaluate_basis:              False
@@ -18,67 +21,127 @@
 //   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
+//   remove_zero_terms:              False
 //   representation:                 'auto'
+//   simplify_basis:                 False
+//   simplify_expressions:           False
 //   split:                          True
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
 #include "ffc_Lagrange_2_1d.h"
-
-/// Constructor
-ffc_lagrange_2_1d_finite_element_0::ffc_lagrange_2_1d_finite_element_0() : ufc::finite_element()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_lagrange_2_1d_finite_element_0::evaluate_basis_map_coordinates(double & X,
+                                                   double & Y,
+                                                   double & Z,
+                                                   const double* coordinates,
+                                                   const ufc::cell& c) const
 {
-    // Do nothing
+    // Extract vertex coordinates
+    const double * const * x = c.coordinates;
+    
+    // Compute Jacobian of affine map from reference cell
+    const double J_00 = x[1][0] - x[0][0];
+    
+    // Compute determinant of Jacobian
+    
+    // Compute inverse of Jacobian
+    
+    // Get coordinates and map to the reference (FIAT) element
+    X = (2.0*coordinates[0] - x[0][0] - x[1][0]) / J_00;
 }
 
-/// Destructor
-ffc_lagrange_2_1d_finite_element_0::~ffc_lagrange_2_1d_finite_element_0()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_lagrange_2_1d_finite_element_0::evaluate_basis_from_coordinates(const double X,
+                                                    const double Y,
+                                                    const double Z,
+                                                    double** values) const
 {
-    // Do nothing
-}
-
-/// Return a string identifying the finite element
-const char* ffc_lagrange_2_1d_finite_element_0::signature() const
-{
-    return "FiniteElement('Lagrange', Cell('interval', Space(1)), 2, None)";
-}
-
-/// Return the cell shape
-ufc::shape ffc_lagrange_2_1d_finite_element_0::cell_shape() const
-{
-    return ufc::interval;
-}
-
-/// Return the topological dimension of the cell shape
-unsigned int ffc_lagrange_2_1d_finite_element_0::topological_dimension() const
-{
-    return 1;
-}
-
-/// Return the geometric dimension of the cell shape
-unsigned int ffc_lagrange_2_1d_finite_element_0::geometric_dimension() const
-{
-    return 1;
-}
-
-/// Return the dimension of the finite element function space
-unsigned int ffc_lagrange_2_1d_finite_element_0::space_dimension() const
-{
-    return 3;
-}
-
-/// Return the rank of the value space
-unsigned int ffc_lagrange_2_1d_finite_element_0::value_rank() const
-{
-    return 0;
-}
-
-/// Return the dimension of the value space for axis i
-unsigned int ffc_lagrange_2_1d_finite_element_0::value_dimension(unsigned int i) const
-{
-    return 1;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = X;
+    basisvalues[2] = X*basisvalues[1]*1.5 - basisvalues[0]*0.5;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      basisvalues[r] *= std::sqrt((0.5 + r));
+    }// end loop over 'r'
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.235702260395516, -0.408248290463863, 0.210818510677892};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = X;
+    basisvalues[2] = X*basisvalues[1]*1.5 - basisvalues[0]*0.5;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      basisvalues[r] *= std::sqrt((0.5 + r));
+    }// end loop over 'r'
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.235702260395516, 0.408248290463863, 0.210818510677892};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = X;
+    basisvalues[2] = X*basisvalues[1]*1.5 - basisvalues[0]*0.5;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      basisvalues[r] *= std::sqrt((0.5 + r));
+    }// end loop over 'r'
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.942809041582063, 0.0, -0.421637021355784};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
 }
 
 /// Evaluate basis function i at given point in cell
@@ -99,9 +162,6 @@ void ffc_lagrange_2_1d_finite_element_0::evaluate_basis(unsigned int i,
     
     // Get coordinates and map to the reference (FIAT) element
     double X = (2.0*coordinates[0] - x[0][0] - x[1][0]) / J_00;
-    
-    // Reset values.
-    *values = 0.0;
     switch (i)
     {
     case 0:
@@ -126,9 +186,10 @@ void ffc_lagrange_2_1d_finite_element_0::evaluate_basis(unsigned int i,
       {0.235702260395516, -0.408248290463863, 0.210818510677892};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -154,9 +215,10 @@ void ffc_lagrange_2_1d_finite_element_0::evaluate_basis(unsigned int i,
       {0.235702260395516, 0.408248290463863, 0.210818510677892};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -182,9 +244,10 @@ void ffc_lagrange_2_1d_finite_element_0::evaluate_basis(unsigned int i,
       {0.942809041582063, 0.0, -0.421637021355784};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -791,7 +854,7 @@ void ffc_lagrange_2_1d_finite_element_0::map_from_reference_cell(double* x,
                                             const double* xhat,
                                             const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
+    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -799,13 +862,7 @@ void ffc_lagrange_2_1d_finite_element_0::map_to_reference_cell(double* xhat,
                                           const double* x,
                                           const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
-}
-
-/// Return the number of sub elements (for a mixed element)
-unsigned int ffc_lagrange_2_1d_finite_element_0::num_sub_elements() const
-{
-    return 0;
+    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Create a new finite element for sub element i (for a mixed element)
@@ -814,149 +871,6 @@ ufc::finite_element* ffc_lagrange_2_1d_finite_element_0::create_sub_element(unsi
     return 0;
 }
 
-/// Create a new class instance
-ufc::finite_element* ffc_lagrange_2_1d_finite_element_0::create() const
-{
-    return new ffc_lagrange_2_1d_finite_element_0();
-}
-
-
-/// Constructor
-
-
-ffc_lagrange_2_1d_dofmap_0::ffc_lagrange_2_1d_dofmap_0() : ufc::dofmap()
-{
-    _global_dimension = 0;
-}
-
-/// Destructor
-ffc_lagrange_2_1d_dofmap_0::~ffc_lagrange_2_1d_dofmap_0()
-{
-    // Do nothing
-}
-
-/// Return a string identifying the dofmap
-const char* ffc_lagrange_2_1d_dofmap_0::signature() const
-{
-    return "FFC dofmap for FiniteElement('Lagrange', Cell('interval', Space(1)), 2, None)";
-}
-
-/// Return true iff mesh entities of topological dimension d are needed
-bool ffc_lagrange_2_1d_dofmap_0::needs_mesh_entities(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return true;
-        break;
-      }
-    case 1:
-      {
-        return true;
-        break;
-      }
-    }
-    
-    return false;
-}
-
-/// Initialize dofmap for mesh (return true iff init_cell() is needed)
-bool ffc_lagrange_2_1d_dofmap_0::init_mesh(const ufc::mesh& m)
-{
-    _global_dimension = m.num_entities[0] + m.num_entities[1];
-    return false;
-}
-
-/// Initialize dofmap for given cell
-void ffc_lagrange_2_1d_dofmap_0::init_cell(const ufc::mesh& m,
-                              const ufc::cell& c)
-{
-    // Do nothing
-}
-
-/// Finish initialization of dofmap for cells
-void ffc_lagrange_2_1d_dofmap_0::init_cell_finalize()
-{
-    // Do nothing
-}
-
-/// Return the topological dimension of the associated cell shape
-unsigned int ffc_lagrange_2_1d_dofmap_0::topological_dimension() const
-{
-    return 1;
-}
-
-/// Return the geometric dimension of the associated cell shape
-unsigned int ffc_lagrange_2_1d_dofmap_0::geometric_dimension() const
-{
-    return 1;
-}
-
-/// Return the dimension of the global finite element function space
-unsigned int ffc_lagrange_2_1d_dofmap_0::global_dimension() const
-{
-    return _global_dimension;
-}
-
-#ifndef UFC_BACKWARD_COMPATIBILITY
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_lagrange_2_1d_dofmap_0::local_dimension(const ufc::cell& c) const
-{
-    return 3;
-}
-
-/// Return the maximum dimension of the local finite element function space
-unsigned int ffc_lagrange_2_1d_dofmap_0::max_local_dimension() const
-{
-    return 3;
-}
-#else
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_lagrange_2_1d_dofmap_0::local_dimension() const
-{
-    return 3;
-}
-#endif
-
-/// Return the number of dofs on each cell facet
-unsigned int ffc_lagrange_2_1d_dofmap_0::num_facet_dofs() const
-{
-    return 1;
-}
-
-/// Return the number of dofs associated with each cell entity of dimension d
-unsigned int ffc_lagrange_2_1d_dofmap_0::num_entity_dofs(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return 1;
-        break;
-      }
-    case 1:
-      {
-        return 1;
-        break;
-      }
-    }
-    
-    return 0;
-}
-
-/// Tabulate the local-to-global mapping of dofs on a cell
-void ffc_lagrange_2_1d_dofmap_0::tabulate_dofs(unsigned int* dofs,
-                                  const ufc::mesh& m,
-                                  const ufc::cell& c) const
-{
-    unsigned int offset = 0;
-    dofs[0] = offset + c.entity_indices[0][0];
-    dofs[1] = offset + c.entity_indices[0][1];
-    offset += m.num_entities[0];
-    dofs[2] = offset + c.entity_indices[1][0];
-    offset += m.num_entities[1];
-}
 
 /// Tabulate the local-to-local mapping from facet dofs to cell dofs
 void ffc_lagrange_2_1d_dofmap_0::tabulate_facet_dofs(unsigned int* dofs,
@@ -984,7 +898,7 @@ void ffc_lagrange_2_1d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
 {
     if (d > 1)
     {
-    throw std::runtime_error(std::string("d is larger than dimension (1)"));
+    throw std::runtime_error("d is larger than dimension (1)");
     }
     
     switch (d)
@@ -993,7 +907,7 @@ void ffc_lagrange_2_1d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
       {
         if (i > 1)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (1)"));
+      throw std::runtime_error("i is larger than number of entities (1)");
       }
       
       switch (i)
@@ -1016,7 +930,7 @@ void ffc_lagrange_2_1d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
       {
         if (i > 0)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (0)"));
+      throw std::runtime_error("i is larger than number of entities (0)");
       }
       
       dofs[0] = 2;
@@ -1035,24 +949,6 @@ void ffc_lagrange_2_1d_dofmap_0::tabulate_coordinates(double** coordinates,
     coordinates[0][0] = x[0][0];
     coordinates[1][0] = x[1][0];
     coordinates[2][0] = 0.5*x[0][0] + 0.5*x[1][0];
-}
-
-/// Return the number of sub dofmaps (for a mixed element)
-unsigned int ffc_lagrange_2_1d_dofmap_0::num_sub_dofmaps() const
-{
-    return 0;
-}
-
-/// Create a new dofmap for sub dofmap i (for a mixed element)
-ufc::dofmap* ffc_lagrange_2_1d_dofmap_0::create_sub_dofmap(unsigned int i) const
-{
-    return 0;
-}
-
-/// Create a new class instance
-ufc::dofmap* ffc_lagrange_2_1d_dofmap_0::create() const
-{
-    return new ffc_lagrange_2_1d_dofmap_0();
 }
 
 

@@ -58,7 +58,7 @@ public:
 
   /// Evaluate function at given point in cell
   inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+                       const ufc::cell&) const
   {
     evaluant_.eval(values, coordinates);
   }
@@ -135,7 +135,7 @@ public:
   /// Interpolate function to finite element space on cell
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell) const
+                          const Cell&) const
   {
     dolfin_assert(coefficients);
     finite_element.evaluate_dofs(coefficients, *this, cell);
@@ -144,7 +144,7 @@ public:
   /// Interpolate function to finite element space on facet
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell, uint facet) const
+                          const Cell&, uint) const
   {
     dolfin_assert(coefficients);
     finite_element.evaluate_dofs(coefficients, *this, cell);
@@ -192,6 +192,6 @@ inline T& evaluant(Analytic<T>& A) { return static_cast<T&>(A); }
 
 //-----------------------------------------------------------------------------
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __DOLFIN_FUNCTION_ANALYTIC_H_ */

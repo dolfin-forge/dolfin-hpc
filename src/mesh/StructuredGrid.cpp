@@ -1,6 +1,5 @@
 // Copyright (C) 2015 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/mesh/StructuredGrid.h>
 
@@ -11,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 StructuredGrid::StructuredGrid(CellType const& type, uint N) :
-    Mesh(),
+    Mesh(type, EuclideanSpace(type.space_dim())),
     bbox_(type.dim()),
     n_(N)
 {
@@ -20,7 +19,7 @@ StructuredGrid::StructuredGrid(CellType const& type, uint N) :
 
 //-----------------------------------------------------------------------------
 StructuredGrid::StructuredGrid(CellType const& type, uint N, BoundingBox bbox) :
-    Mesh(),
+    Mesh(type, EuclideanSpace(type.space_dim())),
     bbox_(bbox),
     n_(N)
 
@@ -46,7 +45,7 @@ void StructuredGrid::init(CellType const& type)
   //
   uint const tdim = type.dim();
   uint const gdim = type.space_dim();
-  MeshEditor editor(*this, type.cellType(), gdim);
+  MeshEditor editor(*this, type);
   // Number of cells in each direction
   uint * n = new uint[tdim];
   for (uint i = 0; i < tdim; ++i) { n[i] = n_; } // isotropic
@@ -90,16 +89,16 @@ void StructuredGrid::init(CellType const& type)
     }
   }
 
-  // Create cells
+  // Create cellsnnnnn
   uint cell = 0;
   uint const v0 = 0;
   uint const v1 = 1;
   uint const v2 = (n[0] + 1);
   uint const v3 = (n[0] + 1) + 1;
-  uint const v4 = v0 + (n[0] + 1) * (n[1] + 1);
-  uint const v5 = v1 + (n[0] + 1) * (n[1] + 1);
-  uint const v6 = v2 + (n[0] + 1) * (n[1] + 1);
-  uint const v7 = v3 + (n[0] + 1) * (n[1] + 1);
+  uint const v4 = v0 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v5 = v1 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v6 = v2 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v7 = v3 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
   switch (type.cellType())
     {
     case CellType::point:
@@ -111,7 +110,8 @@ void StructuredGrid::init(CellType const& type)
           {
             for (uint i = 0; i < n[0]; ++i)
             {
-              uint cv = k * (n[1] + 1) * (n[0] + 1) + j * (n[0] + 1) + i;
+              uint cv = k * ( (tdim > 1 ) ? (n[1] + 1) : 0 ) * (n[0] + 1)
+                        + j * (n[0] + 1) + i;
               editor.add_cell(cell++, &cv);
             }
           }

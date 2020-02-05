@@ -1,11 +1,8 @@
 // Copyright (C) 2010 Niclas Jansson.
 // Copyright (C) 2015 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // Based on Niclas Jansson's AdaptiveRefinement.
-//
-// First added:
-// Last changed:
 
 #include <dolfin/function/FunctionDecomposition.h>
 
@@ -19,15 +16,6 @@
 
 namespace dolfin
 {
-
-//-----------------------------------------------------------------------------
-FunctionDecomposition::FunctionDecomposition(Function const& F,
-                                             Array<Function *>& Si) :
-    F_(F),
-    Si_(Si)
-{
-}
-
 //-----------------------------------------------------------------------------
 Array<Function *> FunctionDecomposition::compute(Function const& F)
 {

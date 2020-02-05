@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-27
-// Last changed: 2014-01-27
 
 #ifndef __DOLFIN_UFL_ARRAY_H
 #define __DOLFIN_UFL_ARRAY_H
@@ -53,5 +50,6 @@ private:
 
 };
 
-} /* namespace icorne */
+} // end namespace ufl
+
 #endif /* __DOLFIN_UFL_ARRAY_H */

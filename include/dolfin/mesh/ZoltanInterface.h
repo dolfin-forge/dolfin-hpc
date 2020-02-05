@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-01-30
-// Last changed: 2015-03-22
 
 #ifndef __DOLFIN_ZOLTAN_INTERFACE_H
 #define __DOLFIN_ZOLTAN_INTERFACE_H

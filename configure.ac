@@ -25,10 +25,6 @@ AC_ARG_ENABLE(optimize-p1, AC_HELP_STRING([--enable-optimize-p1],
               [enable_optimize_p1=${enableval}],
               [enable_optimize_p1=no])
 
-AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],
-              [Compile without progress bar]),
-              [enable_progressbar=no],
-              [enable_progressbar=yes])
 AC_ARG_ENABLE(mpi, AC_HELP_STRING([--enable-mpi],
               [Compile with support for MPI]),
               [enable_mpi=${enableval}], [enable_mpi=no])
@@ -77,10 +73,6 @@ AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
            [Compile with support for PETSc linear algebra]),
            [with_petsc=${withval}],[with_petsc=no])
 
-AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom], 
-            [Compile with support for LIBGEOM]),
-            [with_libgeom=${withval}],[with_libgeom=no])
-
 AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim], 
             [Compile with support for VisIt/libsim]),
             [with_libsim=${withval}],[with_libsim=no])
@@ -104,11 +96,6 @@ if test "x${enable_optimize_p1}" = xyes; then
    [Compile with optimization for P1 elements])
 fi
 
-if test "x${enable_progressbar}" != xyes; then
-   AC_DEFINE(NO_PROGRESS_BAR, [1], 
-   [Compile without progress bar])
-fi
-
 if test "x${enable_boosttr1}" = xyes; then
    AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
    need_boost=yes    
@@ -121,6 +108,7 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
+AX_COMPILER_VERSION
 if test "x${enable_mpi}" != xno; then
    AX_MPI    
    CXX="$MPICXX"
@@ -134,8 +122,6 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-
-
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
@@ -145,6 +131,9 @@ else
    fi
 fi
 
+# Store build information (date, host, CXX)
+AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
+	["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
@@ -350,13 +339,6 @@ if test "x${enable_quad}" = xyes; then
    fi
 fi
 
-if test "x${with_libgeom}" = xyes; then
-   PKG_CHECK_MODULES([libgeom], [libgeom])
-   CPPFLAGS="$CPPFLAGS $libgeom_CFLAGS"
-   LIBS="$LIBS $libgeom_LIBS"
-   AC_DEFINE(HAVE_LIBGEOM,[1],[Have LIBGEOM library])
-fi
-
 if test "x${with_libsim}" != xno; then
    AX_LIBSIM
 fi
@@ -409,6 +391,13 @@ if test "x${enable_python}" = xyes; then
     if ! ${HAVE_PYTHON}; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi
+    case ${PYTHON_VERSION} in
+    2*)
+    ;;
+    *)	
+    AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
+    ;;
+    esac
 fi
 # Add variable for installation of Python modules
 AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])
@@ -485,13 +474,11 @@ Package features:
   PETSc: ${with_petsc}
   JANPACK: ${with_janpack}
   GTS: ${with_gts}
-  LIBGEOM: ${with_libgeom}
   ParMETIS: ${with_parmetis}
   Zoltan: ${with_zoltan}
   libsim: ${with_libsim}
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
-  Progress bar: ${enable_progressbar}
   Unordered containers: ${found_unordered_containers}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}

@@ -1,11 +1,5 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Magnus Vikstrom, 2008.
-// Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson, 2009.
-// Modified by Aurélien Larcher, 2015-2016.
-//
 
 #include <dolfin/la/SparsityPattern.h>
 
@@ -122,10 +116,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
       local_range_[i] = &range_[i][pe_rank];
       // Collect all the range size in the array then sum to compute offsets
       // Previous code created a temporary array, why not do it in-place.
-#ifdef HAVE_MPI
-      MPI_Allgather((real *) &range[i], 1, MPI_UNSIGNED, &range_[i][1], 1, MPI_UNSIGNED,
-                    MPI::DOLFIN_COMM);
-#endif
+      MPI::all_gather( (uint*) &range[i], 1, (uint*) &range_[i][1], 1 );
       range_[i][0] = 0;
       for (uint j = 0; j < pe_size; ++j)
       {
@@ -137,7 +128,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
   {
     // Since the pattern is not distributed only store the process range, this
     // means that calls to functions assuming distributed pattern will be
-    // invalid. That is enough for now: cannot rewrite the entire world.
+    // invalid.
     range_ = new uint*[rank];
     local_range_ = new uint*[rank];
     for (uint i = 0; i < rank; ++i)
@@ -149,9 +140,9 @@ void SparsityPattern::init(uint rank, uint const * dim,
     }
   }
 
-  // This data structure contains set of non-zero column for each row in the
-  // process range: since this range has a given size and every row has at least
-  // a non-zero entry, the reason for using an ordered map remains a mystery.
+  // This data structure contains set of non-zero column for each row
+  // in the process range: since this range has a given size and every
+  // row has at least a non-zero entry
   d_entries_ = new std::set<uint>[this->size(0)];
   if (distributed_)
   {
@@ -397,21 +388,14 @@ void SparsityPattern::apply()
   uint const c1 = local_range_[1][1];
 
   /// Exchange entries and add to diagonal and off-diagonal data structures
-  MPI_Status status;
-  uint dst;
-  uint src;
   uint * recvbuf = new uint[recvmax];
-  int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
+    uint src = (rank - j + pe_size) % pe_size;
+    uint dst = (rank + j) % pe_size;
 
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
-
-    MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                 recvbuf, recvmax, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM,
-                 &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
+                                    recvbuf, recvmax, src, 1 );
 
     for (int k = 0; k < recv_count;)
     {

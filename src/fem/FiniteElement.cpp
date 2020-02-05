@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-09-12
-// Last changed: 2013-09-12
 
 #include <dolfin/fem/FiniteElement.h>
 
@@ -43,7 +40,7 @@ FiniteElement::FiniteElement(ufc::finite_element const& element,
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(CellType const& type, Form& form, uint const i) :
+FiniteElement::FiniteElement(CellType const&, Form& form, uint const i) :
     ufc_finite_element_(NULL),
     sub_value_dims_(NULL)
 {

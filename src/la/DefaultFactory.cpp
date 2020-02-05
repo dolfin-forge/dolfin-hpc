@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2010-2011.
-//
-// First added:  2008-05-17
-// Last changed: 2011-06-10
 
 #include <dolfin/la/DefaultFactory.h>
 

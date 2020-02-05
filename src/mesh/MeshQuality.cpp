@@ -1,6 +1,3 @@
-//
-//
-//
 
 #include <dolfin/mesh/MeshQuality.h>
 
@@ -142,30 +139,21 @@ void MeshQuality::compute()
 real MeshQuality::reduceMinReal(real val)
 {
   real val_tmp = val;
-#ifdef HAVE_MPI
-  MPI_Allreduce(&val_tmp, &val, 1, MPI_DOUBLE, MPI_MIN,
-                dolfin::MPI::DOLFIN_COMM);
-#endif
+  MPI::all_reduce<MPI::min>(val_tmp, val );
   return val;
 }
 //-----------------------------------------------------------------------------
 real MeshQuality::reduceMaxReal(real val)
 {
   real val_tmp = val;
-#ifdef HAVE_MPI
-  MPI_Allreduce(&val_tmp, &val, 1, MPI_DOUBLE, MPI_MAX,
-                dolfin::MPI::DOLFIN_COMM);
-#endif
+  MPI::all_reduce<MPI::max>(val_tmp, val );
   return val;
 }
 //-----------------------------------------------------------------------------
 real MeshQuality::reduceAvgReal(real val)
 {
   real val_tmp = val;
-#ifdef HAVE_MPI
-  MPI_Allreduce(&val_tmp, &val, 1, MPI_DOUBLE, MPI_SUM,
-                dolfin::MPI::DOLFIN_COMM);
-#endif
+  MPI::all_reduce<MPI::min>(val_tmp, val );
   return val / dolfin::MPI::size();
 }
 //-----------------------------------------------------------------------------

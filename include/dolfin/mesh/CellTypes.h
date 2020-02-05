@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:   2017-11-01
-// Last changed:  2017-11-01
 
 #ifndef __DOLFIN_CELL_TYPES_H
 #define __DOLFIN_CELL_TYPES_H

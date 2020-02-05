@@ -1,15 +1,10 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2012-2016.
-//
+
 // This class was initially cured in 2012 from a terrible disease "infinite
 // loop on zero-size connectivity".
 // The absence of robustness of the original class is fixed by "on-demand"
 // computation of connectivities in the mesh topology.
-//
-// First added:  2006-05-09
-// Last changed: 2007-05-02
 
 #ifndef __DOLFIN_MESH_ENTITY_ITERATOR_H
 #define __DOLFIN_MESH_ENTITY_ITERATOR_H

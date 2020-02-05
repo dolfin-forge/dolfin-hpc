@@ -1,9 +1,5 @@
 // Copyright (C) 2007 Garth N. Wells
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2007-2008.
-// Modified by Aurélien Larcher, 2015-2016.
-//
 
 #ifndef __DOLFIN_SPARSITY_PATTERN_H
 #define __DOLFIN_SPARSITY_PATTERN_H

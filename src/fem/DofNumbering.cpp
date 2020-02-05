@@ -1,12 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Martin Alnes, 2008
-// Modified by Niclas Jansson, 2009
-// Modified by Aurélien Larcher, 2013  (Pk bug, extension and partial rewrite)
-//
-// First added:  2007-03-01
-// Last changed: 2009-11-01
 
 #include <dolfin/fem/DofNumbering.h>
 
@@ -67,13 +60,6 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
             ufc_dofmap.signature());
     ret = new DG0sNumbering(mesh, ufc_dofmap);
   }
-  // CG1v
-  else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
-  {
-    message(1, "DofNumbering : create CG1vNumbering for %s",
-            ufc_dofmap.signature());
-    ret = new CG1vNumbering(mesh, ufc_dofmap);
-  }
   // DG0v
   else if (vector && ufc_dofmap.global_dimension() == value_size * num_cells)
   {
@@ -89,6 +75,13 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
       message(1, "DofNumbering : create Parallel0Numbering for %s",
               ufc_dofmap.signature());
       ret = new Parallel0Numbering(mesh, ufc_dofmap);
+    }
+    // CG1v
+    else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
+    {
+      message(1, "DofNumbering : create CG1vNumbering for %s",
+              ufc_dofmap.signature());
+      ret = new CG1vNumbering(mesh, ufc_dofmap);
     }
     // Generic parallel for value rank > 0
     else
@@ -137,7 +130,7 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
   }
 }
 //-----------------------------------------------------------------------------
-DofNumbering& DofNumbering::operator=(DofNumbering const& other)
+DofNumbering& DofNumbering::operator=(DofNumbering const&)
 {
   return *this;
 }
@@ -229,7 +222,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
   if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
   {
-    error("DofNumbering::init : invalid topological dimension.");
+    error("DofNumbering::init : invalid geometrical dimension.");
   }
   if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {

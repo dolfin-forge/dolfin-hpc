@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-28
-// Last changed: 2014-01-28
 
 #include <dolfin/ufl/UFLarray.h>
 
@@ -72,4 +69,4 @@ Object::repr_t array::unpack(Object::repr_t const& repr_array)
   return repr_array.substr(openpos + 1, closepos - openpos - 1);
 }
 
-} /* namespace icorne */
+} // end namespace ufl

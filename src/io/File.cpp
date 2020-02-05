@@ -1,14 +1,5 @@
 // Copyright (C) 2002-2006 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2005, 2006.
-// Modified by Haiko Etzel 2005.
-// Modified by Magnus Vikstrom 2007.
-// Modified by Nuno Lopes 2008
-// Modified by Niclas Jansson, 2008-2012.
-//
-// First added:  2002-11-12
-// Last changed: 2012-05-11
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -32,35 +23,34 @@ namespace dolfin
 File::File(const std::string& filename) :
     file_(NULL)
 {
+  uint const len = filename.size();
+
   // Choose file type base on suffix.
-
-  // FIXME: Use correct funtion to find the suffix; using rfind() makes
-  // FIXME: it essential that the suffixes are checked in the correct order.
-
-  if ( filename.rfind(".xml") != filename.npos )
+  if ( filename.rfind( ".xml" ) == ( len - std::string( ".xml" ).size() ) )
 #ifdef HAVE_XML
-    file_ = new XMLFile(filename);
+    file_ = new XMLFile( filename );
 #else
-    error("DOLFIN is not built with XML support");
+    error( "DOLFIN is not built with XML support" );
 #endif
-  else if ( filename.rfind(".xml.gz") != filename.npos )
+  else if ( filename.rfind( ".xml.gz" )
+            == ( len - std::string( ".xml.gz" ).size() ) )
 #ifdef HAVE_XML
-    file_ = new XMLFile(filename);
+    file_ = new XMLFile( filename );
 #else
-    error("DOLFIN is not built with XML support");
+    error( "DOLFIN is not built with XML support" );
 #endif
-  else if ( filename.rfind(".bin") != filename.npos)
-    file_ = new BinaryFile(filename);
-  else if ( filename.rfind(".off") != filename.npos )
-    file_ = new OFFFile(filename);
-  else if ( filename.rfind(".pvd") != filename.npos )
-    file_ = new VTKFile(filename);
-  else if ( filename.rfind(".stl") != filename.npos )
-    file_ = new STLFile(filename);
+  else if ( filename.rfind( ".bin" ) == ( len - std::string( ".bin" ).size() ) )
+    file_ = new BinaryFile( filename );
+  else if ( filename.rfind( ".off" ) == ( len - std::string( ".off" ).size() ) )
+    file_ = new OFFFile( filename );
+  else if ( filename.rfind( ".pvd" ) == ( len - std::string( ".pvd" ).size() ) )
+    file_ = new VTKFile( filename );
+  else if ( filename.rfind( ".stl" ) == ( len - std::string( ".stl" ).size() ) )
+    file_ = new STLFile( filename );
   else
   {
     file_ = NULL;
-    error("Unknown file type for \"%s\".", filename.c_str());
+    error( "Unknown file type for \"%s\".", filename.c_str() );
   }
 }
 //-----------------------------------------------------------------------------

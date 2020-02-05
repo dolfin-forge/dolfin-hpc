@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2017-05-24
-// Last changed: 2018-01-01
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
@@ -32,7 +29,7 @@ void libsimInterface::init(Mode mode, bool debug)
     error("VisIt/libsim environment initialization error");
   }
 
-  if (debug) 
+  if (debug)
   {
     VisItSetOptions("-debug 5 -clobber_vlogs");
   }
@@ -54,7 +51,7 @@ void libsimInterface::init(Mode mode, bool debug)
   default:
     error("Invalid VisIt/libsim mode");
   }
-} 
+}
 //-----------------------------------------------------------------------------
 int libsimInterface::initBatch()
 {
@@ -72,24 +69,24 @@ int libsimInterface::initBatch()
   InsituData_.batch_ = true;
 
   return VISIT_OKAY;
-  
+
 }
 //-----------------------------------------------------------------------------
 int libsimInterface::initInteractive()
 {
 
-  if (VisItInitializeSocketAndDumpSimFile("sim", 
+  if (VisItInitializeSocketAndDumpSimFile("sim",
 					  "DOLFIN HPC In-situ viz",
-					  "/tmp", 
-					  NULL, NULL, NULL) != VISIT_OKAY) 
+					  "/tmp",
+					  NULL, NULL, NULL) != VISIT_OKAY)
   {
-    error("VisIt/libsim socket initialization error"); 
+    error("VisIt/libsim socket initialization error");
   }
-  
+
   InsituData_.batch_ = false;
 
   return VISIT_OKAY;
-  
+
 }
 //-----------------------------------------------------------------------------
 int libsimInterface::setupEnv()
@@ -110,7 +107,7 @@ int libsimInterface::setupEnv()
 #endif
 
   if (PE::rank() == 0)
-  {    
+  {
     env = VisItGetEnvironment();
 
     if (env == NULL)
@@ -155,7 +152,7 @@ void libsimInterface::shutdown()
 //-----------------------------------------------------------------------------
 void libsimInterface::batchRender(real t, uint tstep)
 {
-  
+
   if (!InsituData_.batch_)
   {
     error("VisIt/libsim not initialized in batch mode");
@@ -167,14 +164,14 @@ void libsimInterface::batchRender(real t, uint tstep)
   VisItTimeStepChanged();
 
   VisItUpdatePlots();
-  
+
   // Execute all insitu pipelines
   for(Array<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
       it != InsituData_.pipelines_.end(); it++)
   {
     (*it)->exec(InsituData_.t_, InsituData_.tstep_);
   }
-  
+
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
@@ -193,7 +190,7 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
 
   int visit_state = VisItDetectInput(blocking, -1);
 
-  if (visit_state < 0) 
+  if (visit_state < 0)
   {
     error("Badness...");
   }
@@ -214,9 +211,9 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
     {
       error("VisIt/libsim callbacks initialization error");
     }
-    
 
-    while(1) 
+
+    while(1)
     {
       blocking = 1;
       visit_state = VisItDetectInput(blocking, -1);
@@ -225,29 +222,29 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
       {
 	VisItDisconnect();
 	return;
-      }	
+      }
     }
 
   }
 }
 //-----------------------------------------------------------------------------
 #else
-void libsimInterface::init(Mode mode, bool debug)
+void libsimInterface::init(Mode, bool)
 {
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::shutdown() 
+void libsimInterface::shutdown()
 {
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender(real t, uint tstep)
+void libsimInterface::batchRender(real, uint)
 {
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
+void libsimInterface::ctrlLoop(real, uint, int)
 {
   error("VisIt/libsim is required for in-situ viz");
 }

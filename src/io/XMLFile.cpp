@@ -1,15 +1,5 @@
 // Copyright (C) 2002-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Erik Svensson, 2003.
-// Modified by Garth N. Wells, 2006.
-// Modified by Ola Skavhaug, 2006.
-// Modified by Magnus Vikstrom, 2007.
-// Modified by Niclas Jansson, 2008.
-// Modified by Aurélien Larcher, 2013.
-//
-// First added:  2002-12-03
-// Last changed: 2013-09-13
 
 #include <dolfin/config/dolfin_config.h>
 
@@ -55,6 +45,26 @@ void XMLFile::operator>>(Mesh& mesh)
   delete xmlObject;
   xmlObject = new XMLMesh(mesh);
   parseFile();
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator>> (MeshFunction<int>& meshfunction)
+{
+  read_meshfunction<int>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator>> (MeshFunction<uint>& meshfunction)
+{
+  read_meshfunction<uint>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator>> (MeshFunction<real>& meshfunction)
+{
+  read_meshfunction<real>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator>> (MeshFunction<bool>& meshfunction)
+{
+  read_meshfunction<bool>(meshfunction);
 }
 //-----------------------------------------------------------------------------
 void XMLFile::operator<<(Mesh& mesh)
@@ -191,21 +201,25 @@ void XMLFile::operator<<(Mesh& mesh)
 
     //-------------------------------------------------------------------------
     // Delete if file exists
-    MPI_File_delete((char *) filename.c_str(), MPI_INFO_NULL );
+    MPI::check_error( MPI_File_delete((char *) filename.c_str(),
+                                      MPI_INFO_NULL ) );
 
     // Open file
     MPI_File fh;
     MPI_Offset curr_offset = 0;
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                  MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
-    MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, (char *) "native", MPI_INFO_NULL );
+    MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                    (char *) filename.c_str(),
+                                    MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                    MPI_INFO_NULL, &fh) );
+    MPI::check_error( MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR,
+                                        (char *) "native", MPI_INFO_NULL ) );
 
     // Write DOLFIN XML format header
     std::string const hdr =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<dolfin xmlns:dolfin=\"http://www.fenics.org/dolfin/\">\n";
-    MPI_File_write_all(fh, (void *) hdr.c_str(), hdr.size(), MPI_CHAR,
-                       MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, (void *) hdr.c_str(), hdr.size(),
+                                         MPI_CHAR, MPI_STATUS_IGNORE) );
     curr_offset += hdr.size();
     //-------------------------------------------------------------------------
     // Mesh properties
@@ -224,8 +238,9 @@ void XMLFile::operator<<(Mesh& mesh)
     s0
     << "<mesh celltype=\"" << cell_str << "\" " << "dim=\"" << gdim << "\">\n"
     << "<vertices size=\"" << num_global_vertices << "\">\n";
-    MPI_File_write_all(fh, (void *) s0.str().c_str(), s0.str().size(), 
-		       MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, (void *) s0.str().c_str(),
+                                         s0.str().size(), MPI_CHAR,
+                                         MPI_STATUS_IGNORE) );
     curr_offset += s0.str().size();
 
     // Determine maximum size of line to allocate buffer
@@ -298,17 +313,17 @@ void XMLFile::operator<<(Mesh& mesh)
     }
     uint voffset = 0;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                 dolfin::MPI::DOLFIN_COMM) );
 #else
-    MPI_Scan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-	     dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Scan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                               dolfin::MPI::DOLFIN_COMM) );
     voffset -= vsize;
 #endif
-    MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer, vsize, MPI_CHAR,
-                          MPI_STATUS_IGNORE);
-    MPI_Allreduce(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer,
+                                            vsize, MPI_CHAR, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_Allreduce(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                    dolfin::MPI::DOLFIN_COMM) );
     curr_offset += voffset;
     delete [] vbuffer;
 
@@ -317,8 +332,10 @@ void XMLFile::operator<<(Mesh& mesh)
     s1
     << "</vertices>\n"
     << "<cells size=\"" << num_global_cells << "\">\n";
-    MPI_File_write_at_all(fh, curr_offset, (void *) s1.str().c_str(), 
-			  s1.str().size(), MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset,
+                                            (void *) s1.str().c_str(),
+                                            s1.str().size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
     curr_offset += s1.str().size();
 
     // Determine maximum size of line to allocate buffer
@@ -433,34 +450,36 @@ void XMLFile::operator<<(Mesh& mesh)
     }
     uint coffset = 0;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                 dolfin::MPI::DOLFIN_COMM) );
 #else
-    MPI_Scan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-	     dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Scan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                               dolfin::MPI::DOLFIN_COMM) );
     coffset -= csize;
 #endif
-    MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer, csize, MPI_CHAR,
-                          MPI_STATUS_IGNORE);
-    MPI_Allreduce(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer,
+                                            csize, MPI_CHAR, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_Allreduce(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                    dolfin::MPI::DOLFIN_COMM) );
     curr_offset += coffset;
     delete [] cbuffer;
 
     // Close cells and mesh
     std::string const s2("</cells>\n</mesh>\n");
-    MPI_File_write_at_all(fh, curr_offset, (void *) s2.c_str(), s2.size(), 
-			  MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset, (void *) s2.c_str(),
+                                            s2.size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
     curr_offset += s2.size();
 
     //-------------------------------------------------------------------------
     // Write DOLFIN XML format footer
     std::string const ftr("</dolfin>\n");
-    MPI_File_write_at_all(fh, curr_offset, (void *) ftr.c_str(), ftr.size(), 
-			  MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset, (void *) ftr.c_str(),
+                                            ftr.size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
 
     // Close file
-    MPI_File_close(&fh);
+    MPI::check_error( MPI_File_close(&fh) );
 
 #else
     parallel_write_not_impl("Mesh");
@@ -468,6 +487,26 @@ void XMLFile::operator<<(Mesh& mesh)
   }
 
   message(1, "Saved mesh to file %s in DOLFIN XML format.", filename.c_str());
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<int>& meshfunction)
+{
+  write_meshfunction<int>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<uint>& meshfunction)
+{
+  write_meshfunction<uint>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<real>& meshfunction)
+{
+  write_meshfunction<real>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<bool>& meshfunction)
+{
+  write_meshfunction<bool>(meshfunction);
 }
 //-----------------------------------------------------------------------------
 FILE* XMLFile::openFile()
@@ -525,9 +564,9 @@ void XMLFile::parseFile()
 void XMLFile::parseSAX()
 {
   // Set up the sax handler. Note that it is important that we initialise
-  // all (24) fields, even the ones we don't use!
-  xmlSAXHandler sax =
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  // all (32) fields, even the ones we don't use!
+  xmlSAXHandler sax = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
   // Set up handlers for parser events
   sax.startDocument = sax_start_document;
@@ -547,12 +586,12 @@ void XMLFile::parseSAX()
 //-----------------------------------------------------------------------------
 // Callback functions for the SAX interface
 //-----------------------------------------------------------------------------
-void sax_start_document(void *ctx)
+void sax_start_document(void *)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void sax_end_document(void *ctx)
+void sax_end_document(void *)
 {
   // Do nothing
 }
@@ -568,7 +607,7 @@ void sax_end_element(void *ctx, const xmlChar *name)
   ((XMLObject *) ctx)->endElement(name);
 }
 //-----------------------------------------------------------------------------
-void sax_warning(void *ctx, const char *msg, ...)
+void sax_warning(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
@@ -578,7 +617,7 @@ void sax_warning(void *ctx, const char *msg, ...)
   va_end(args);
 }
 //-----------------------------------------------------------------------------
-void sax_error(void *ctx, const char *msg, ...)
+void sax_error(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
@@ -588,7 +627,7 @@ void sax_error(void *ctx, const char *msg, ...)
   va_end(args);
 }
 //-----------------------------------------------------------------------------
-void sax_fatal_error(void *ctx, const char *msg, ...)
+void sax_fatal_error(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);

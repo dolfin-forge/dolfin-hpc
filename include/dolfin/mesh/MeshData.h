@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2017-10-10
-// Last changed: 2017-10-10
 
 #ifndef __DOLFIN_MESH_DATA_H
 #define __DOLFIN_MESH_DATA_H

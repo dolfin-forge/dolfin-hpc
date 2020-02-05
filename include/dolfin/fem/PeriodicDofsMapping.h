@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-04-24
-// Last changed: 2015-04-24
 
 #ifndef __DOLFIN_PERIODIC_DOFS_MAPPING
 #define __DOLFIN_PERIODIC_DOFS_MAPPING

@@ -1,6 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <string>
 
@@ -61,7 +60,9 @@ void JANPACKMat::init(uint M, uint N)
 {
   jp_mat_init(A, M, N);
 
-  //  jp_mat_setopt(A, JP_MAT_SORTED);
+  // Allow for zeros to be inserted into the matrix
+  jp_mat_setopt(A, JP_MAT_ZEROS);
+
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::init(uint M, uint N, bool distributed)
@@ -219,30 +220,7 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 void JANPACKMat::setrow(uint row, const Array<uint>& columns,
 			const Array<real>& values)
 {
-  // Check size of arrays
-  if (columns.size() != values.size())
-    error("Number of columns and values don't match for setrow() operation.");
-
-  // Handle case n = 0
-  const uint n = columns.size();
-  if (n == 0)
-    return;
-
-  // Assign values to arrays
-  uint* cols = new uint[n];
-  real* vals = new real[n];
-  for (uint j = 0; j < n; j++)
-    {
-      cols[j] = columns[j];
-      vals[j] = values[j];
-    }
-
-  // Set values
-  set(vals, 1, &row, n, cols);
-
-  // Free temporary storage
-  delete [] cols;
-  delete [] vals;
+  set(&values[0], 1, &row, columns.size(), &columns[0]);
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKMat::factory() const

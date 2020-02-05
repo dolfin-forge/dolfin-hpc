@@ -400,6 +400,35 @@ real PETScVector::max() const
   return value;
 }
 //-----------------------------------------------------------------------------
+void PETScVector::pointwise(const GenericVector& x, VectorPointwiseOp op) const
+{
+
+  const PETScVector& v = x.down_cast<PETScVector>();
+  dolfin_assert(v.x);
+
+  switch(op)
+  {
+  case pw_min:
+    VecPointwiseMin(x_, x_, v.x_);
+    break;
+  case pw_max:
+    VecPointwiseMax(x_, x_, v.x_);
+    break;
+  case pw_mult:
+    VecPointwiseMult(x_, x_, v.x_);
+    break;
+  case pw_div:
+    VecPointwiseDivide(x_, x_, v.x_);
+    break;
+  case pw_maxabs:
+    VecPointwiseMaxAbs(x_, x_, v.x_);
+    break;
+  default:
+    error("Unknown operator");
+  }
+    
+}
+//-----------------------------------------------------------------------------
 void PETScVector::disp(uint) const
 {
   section("PETScVector");

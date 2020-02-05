@@ -104,26 +104,26 @@ DOLFIN_START_TEST( test_ParameterValue )
     message("string");
     {
       parameter<std::string> P;
-      message("P = %s", std::string(P).c_str());
-      ck_assert(static_cast<std::string>(P) == std::string());
+      message("P = %s", static_cast<std::string&>(P).c_str());
+      ck_assert(static_cast<std::string&>(P) == std::string());
       parameter<std::string> Q("");
-      message("Q = %s", std::string(Q).c_str());
-      ck_assert(static_cast<std::string>(Q) == "");
+      message("Q = %s", static_cast<std::string&>(Q).c_str());
+      ck_assert(static_cast<std::string&>(Q) == "");
       ck_assert(P == Q);
       parameter<std::string> R("1");
-      message("R = %s", std::string(P).c_str());
-      ck_assert(static_cast<std::string>(R) == "1");
+      message("R = %s", static_cast<std::string&>(P).c_str());
+      ck_assert(static_cast<std::string&>(R) == "1");
       ck_assert(P != R);
       ck_assert(Q != R);
       parameter<std::string> S("11");
-      message("S = %s", std::string(P).c_str());
-      ck_assert(static_cast<std::string>(S) == "11");
+      message("S = %s", static_cast<std::string&>(P).c_str());
+      ck_assert(static_cast<std::string&>(S) == "11");
       ck_assert(P != S);
       ck_assert(Q != S);
       ck_assert(R != S);
       static_cast<std::string&>(R) += "1";
       parameter<std::string> T(S);
-      message("T = %s", std::string(P).c_str());
+      message("T = %s", static_cast<std::string&>(P).c_str());
       ck_assert(R == S);
       ck_assert(R == T);
     }

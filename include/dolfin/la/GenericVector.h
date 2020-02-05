@@ -5,6 +5,7 @@
 #define __DOLFIN_GENERIC_VECTOR_H
 
 #include "VectorNormType.h"
+#include "VectorPointwiseOp.h"
 #include "GenericSparsityPattern.h"
 #include "GenericTensor.h"
 

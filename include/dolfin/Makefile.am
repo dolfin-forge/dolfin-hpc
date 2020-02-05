@@ -141,6 +141,7 @@ nobase_pkginclude_HEADERS = \
 				la/SparsityPattern.h\
 				la/Vector.h\
 				la/VectorNormType.h\
+				la/VectorPointwiseOp.h\
 				log/dolfin_log.h\
 				log/log.h\
 				log/LogStream.h\

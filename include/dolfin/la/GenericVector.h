@@ -118,6 +118,10 @@ namespace dolfin
     /// Return maximum value of vector
     virtual real max() const = 0;
 
+    /// Return pointwise operator op of vector and given vector x 
+    virtual void pointwise(const GenericVector& x,
+			   VectorPointwiseOp op=pw_min) const = 0;
+
     /// Multiply vector by given number
     virtual const GenericVector& operator*= (real a) = 0;
 

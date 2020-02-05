@@ -404,7 +404,7 @@ void PETScVector::pointwise(const GenericVector& x, VectorPointwiseOp op) const
 {
 
   const PETScVector& v = x.down_cast<PETScVector>();
-  dolfin_assert(v.x);
+  dolfin_assert(v.x_);
 
   switch(op)
   {

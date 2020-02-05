@@ -292,6 +292,11 @@ real JANPACKVec::max() const
   return 0.0;
 }
 //-----------------------------------------------------------------------------
+void JANPACKVec::pointwise(const GenericVector& x, VectorPointwiseOp op) const
+{
+  error("Not implemented.");
+}
+//-----------------------------------------------------------------------------
 void JANPACKVec::disp(uint precision) const
 {
   jp_vec_print(const_cast<jp_vec_type *>(x));

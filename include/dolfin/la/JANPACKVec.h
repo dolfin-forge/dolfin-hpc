@@ -112,6 +112,9 @@ namespace dolfin
     /// Return maximum value of vector
     real max() const;
 
+    /// Return pointwise operator op of vector and given vector x
+    void pointwise(const GenericVector& x, VectorPointwiseOp op=pw_min) const;
+
     /// Multiply vector by given number
     JANPACKVec& operator*= (real a);
 

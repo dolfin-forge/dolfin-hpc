@@ -97,15 +97,11 @@ JANPACKVec* JANPACKVec::copy() const
 void JANPACKVec::get(real* values) const
 {
   jp_vec_get_local(const_cast<jp_vec_type *>(x), values);
-  // error("Not implemented.");
-  //memcpy(values, x->x, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(real* values)
 {
   jp_vec_set_local(const_cast<jp_vec_type *>(x), values);
-  //  error("Not implemented.");
-  //  memcpy(x->x,values, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::add(real* values)
@@ -146,7 +142,6 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
   jp_vec_add_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block),
 		   reinterpret_cast<uint*>(const_cast<uint*>(rows)), m);
 
-  //  error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::apply(FinalizeType finaltype)
@@ -200,7 +195,6 @@ JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
   dolfin_assert(v.x);
 
   init(v.local_size());
-  //jp_vec_copy(x, v.x);
   jp_vec_copy(const_cast<jp_vec_type *>(v.x), const_cast<jp_vec_type *>(x));
   return *this;
 }
@@ -282,14 +276,12 @@ real JANPACKVec::norm(VectorNormType type) const
 //-----------------------------------------------------------------------------
 real JANPACKVec::min() const
 {
-  error("Not implemented.");
-  return 0.0;
+  return jp_vec_min(const_cast<jp_vec_type *>(x));
 }
 //-----------------------------------------------------------------------------
 real JANPACKVec::max() const
 {
-  error("Not implemented.");
-  return 0.0;
+  return jp_vec_max(const_cast<jp_vec_type *>(x));
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::pointwise(const GenericVector& x, VectorPointwiseOp op) const

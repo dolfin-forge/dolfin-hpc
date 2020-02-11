@@ -195,9 +195,9 @@ void refine_and_project( Mesh& mesh,
 
     std::stringstream p_filename;
 #ifdef ENABLE_MPIIO
-    p_filename << "../scratch/projected_" << f << ".bin" << std::ends;
+    p_filename << "../scratch/projected_" << f << ".bin";
 #else
-    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin" << std::ends;
+    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin";
 #endif
     File p_file(p_filename.str());
     p_file << proj.vector();

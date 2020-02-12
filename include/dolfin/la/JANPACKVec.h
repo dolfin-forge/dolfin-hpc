@@ -8,6 +8,9 @@
 
 #ifdef HAVE_JANPACK
 
+#include <dolfin/la/GenericVector.h>
+#include <dolfin/common/Variable.h>
+
 #ifdef HAVE_JANPACK_MPI
 #define jp_vec_type jp_vec_t
 #else
@@ -17,11 +20,6 @@
 
 #include <janpack/vec.h>
 
-#include <dolfin/log/LogStream.h>
-#include <dolfin/common/Variable.h>
-#include "GenericVector.h"
-
-#include <dolfin/common/Array.h>
 #include <set>
 #include <map>
 
@@ -157,9 +155,9 @@ namespace dolfin
     // JANPACK vector pointer
 #ifdef HAVE_JANPACK_MPI
     jp_vec_t _x;
-    jp_vec_t *x;
+    jp_vec_t *x_;
 #else
-    char x[JP_VEC_SIZE_T];
+    char x_[JP_VEC_SIZE_T];
 #endif
 
     // True if the vector has ghost points

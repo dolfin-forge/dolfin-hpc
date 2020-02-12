@@ -113,7 +113,7 @@ protected:
   void init(Array<Coefficient *>& coefficients);
 
   /// Assign coefficients from map to form coefficients
-  void init(Array<Coefficient *>& coefficients, CoefficientMap const & map);
+  void init(Array<Coefficient *>& coefficients, CoefficientMap & map);
 
 private:
 

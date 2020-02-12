@@ -195,7 +195,7 @@ void Form::assemble(GenericTensor& T, bool reset_tensor)
 }
 
 //-----------------------------------------------------------------------------
-void Form::init(Array<Coefficient *>& coefficients, CoefficientMap const& map)
+void Form::init(Array<Coefficient *>& coefficients, CoefficientMap & map)
 {
   coefficients.clear();
   for (uint i = 0; i < this->num_coefficients(); ++i)

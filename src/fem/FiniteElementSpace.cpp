@@ -207,14 +207,14 @@ bool FiniteElementSpace::is_cellwise_constant() const
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::is_vertex_based() const
 {
-  //FIXME: Only a particular case.
+  /// @todo Only a particular case.
   return (this->family() == ufl::Family::CG) && (this->degree() == 1);
 }
 
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::is_flattenable() const
 {
-  //FIXME: Only a particular case.
+  /// @todo Only a particular case.
   uint value_size = 1;
   for(uint i = 0; i < this->element().value_rank(); ++i)
   {
@@ -225,5 +225,4 @@ bool FiniteElementSpace::is_flattenable() const
 
 //-----------------------------------------------------------------------------
 
-}
-/* namespace icorne */
+} // end namespace dolfin

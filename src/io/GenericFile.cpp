@@ -1,12 +1,11 @@
 // Copyright (C) 2002-2008 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-// FIXME: Use streams instead of stdio
-#include <stdio.h>
-
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/GenericFile.h>
 #include <dolfin/main/MPI.h>
+
+#include <fstream>
 
 namespace dolfin
 {
@@ -137,8 +136,8 @@ void GenericFile::write()
 {
   if (!opened_write)
   {
-      FILE* fp = fopen(filename.c_str(), "w");
-      fclose(fp);
+    std::ofstream f(filename.c_str());
+    f.close();
   }
   opened_write = true;
 }

@@ -13,8 +13,6 @@
 namespace dolfin
 {
 
-class Mesh;
-
 class TimeSeries
 {
 

@@ -13,7 +13,7 @@
 namespace dolfin
 {
 
-#if not defined( HAVE_MPI )
+#if !defined( HAVE_MPI )
 
 typedef void * MPI_Datatype;
 

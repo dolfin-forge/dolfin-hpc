@@ -576,13 +576,13 @@ real HexahedronCell::diameter(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 real HexahedronCell::circumradius(MeshEntity const& entity) const
 {
-  //FIXME: No better idea for now
+  /// @todo No better idea for now
   return 0.5*std::sqrt(3.0)*this->diameter(entity);
 }
 //-----------------------------------------------------------------------------
 real HexahedronCell::inradius(MeshEntity const& entity) const
 {
-  //FIXME: No better idea for now
+  /// @todo No better idea for now
   return 0.5*this->diameter(entity);
 }
 //-----------------------------------------------------------------------------

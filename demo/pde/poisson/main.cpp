@@ -67,52 +67,42 @@ int main()
   dolfin_init();
 
   // Create mesh
-  Mesh mesh("/home/julian/Code/ingrid-test-suite/cylinder/EdgedCylinder/Data/coarse.bin");
-  // UnitCube mesh( 10, 10, 10 );
+  Mesh mesh("UnitSquareMesh_32x32.xml");
 
   // Create coefficients
-  // Analytic<Source>  f(mesh);
-  // Analytic<Flux>    g(mesh);
+  Analytic<Source>  f(mesh);
+  Analytic<Flux>    g(mesh);
 
-  // // Create boundary condition
-  // Constant u0(0.0);
-  // DirichletBoundary boundary;
-  // DirichletBC bc(u0, mesh, boundary);
+  // Create boundary condition
+  Constant u0(0.0);
+  DirichletBoundary boundary;
+  DirichletBC bc(u0, mesh, boundary);
 
-  // // Define PDE
-  // Poisson::BilinearForm a(mesh);
-  // Poisson::LinearForm   L(mesh, f, g);
+  // Define PDE
+  Poisson::BilinearForm a(mesh);
+  Poisson::LinearForm   L(mesh, f, g);
 
-  // // Solve PDE
-  // Matrix A;
-  // Vector b;
+  // Solve PDE
+  Matrix A;
+  Vector b;
 
-  // a.assemble(A, true);
-  // L.assemble(b, true);
-  // bc.apply(A, b, a);
+  a.assemble(A, true);
+  L.assemble(b, true);
+  bc.apply(A, b, a);
 
 
-  // Function u(a.trial_space());
-  // KrylovSolver solver(bicgstab, bjacobi);
+  Function u(a.trial_space());
+  KrylovSolver solver(bicgstab, bjacobi);
 
-  // solver.solve(A, u.vector(), b);
-  // u.sync();
-  message( "Now!" );
-  dolfin_set("Load balancer redistribute", false);
-  MeshValues< bool, Cell > cell_marker( mesh, false );
-  LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
-  MeshValues<uint, Cell>& partitions = LoadBalancer::partitions(mesh);
-  // MeshValues< uint, Cell > partitions( mesh, PE::rank() );
-  MeshData D(mesh);
-  D.add(cell_marker);
-  MPIMeshCommunicator::distribute(partitions,&D);
+  solver.solve(A, u.vector(), b);
+  u.sync();
 
-  // message("vector l2  norm: %e", u.vector().norm());
-  // message("vector inf norm: %e", u.vector().max());
+  message("vector l2  norm: %e", u.vector().norm());
+  message("vector inf norm: %e", u.vector().max());
 
   // Save solution to file
-  // File file("poisson.pvd");
-  // file << u;
+  File file("poisson.pvd");
+  file << u;
 
   return 0;
 }

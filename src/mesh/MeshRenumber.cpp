@@ -113,7 +113,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         // Append to send buffer for each adjacent
         if(all_shared)
         {
-          //FIXME: randomness may be harmful
+          /// @todo randomness may be harmful
           uint const vote = std::rand();
           vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)
@@ -178,7 +178,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         _map<EntityKey, uint>::iterator it = entity_map.find(key);
         if (it != entity_map.end())
         {
-          //FIXME: Hash collision possible ?
+          /// @todo Hash collision possible ?
           uint const local_index = it->first.idx;
           uint const vote0 = it->second;
 

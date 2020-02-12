@@ -1,6 +1,6 @@
 
 AC_PREREQ(2.59)
-AC_INIT([dolfin],[0.9.0-hpc])
+AC_INIT([dolfin],[0.9.0-hpc-devel])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -49,11 +49,11 @@ AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
 
-AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
+AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check],
               [Compile with support for unit testing, requires libcheck]),
               [enable_check=${enableval}],[enable_check=no])
 
-AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python], 
+AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python],
               [Install Python modules, requires a Python interpreter]),
               [enable_python=${enableval}],[enable_python=no])
 
@@ -65,40 +65,40 @@ AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
             [with_gts=${withval}],[with_gts=no])
 
-AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], 
+AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack],
              [Compile with support for JANPACK]),
              [with_janpack=${withval}],[with_janpack=no])
 
-AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], 
+AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
            [Compile with support for PETSc linear algebra]),
            [with_petsc=${withval}],[with_petsc=no])
 
-AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim], 
+AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim],
             [Compile with support for VisIt/libsim]),
             [with_libsim=${withval}],[with_libsim=no])
 
-AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis], 
+AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis],
 		     [Compile with support for ParMETIS]),
 		     [with_parmetis=${withval}],[with_parmetis=no])
 
-AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan], 
+AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
 		     [Compile with support for Zoltan]),
 		     [with_zoltan=${withval}],[with_zoltan=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
-   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], 
+   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1],
    [Compile with local data cache in functions])
 fi
 
 if test "x${enable_optimize_p1}" = xyes; then
-   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], 
+   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1],
    [Compile with optimization for P1 elements])
 fi
 
 if test "x${enable_boosttr1}" = xyes; then
    AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
-   need_boost=yes    
+   need_boost=yes
 fi
 
 # Checks for programs.
@@ -110,12 +110,12 @@ PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
 if test "x${enable_mpi}" != xno; then
-   AX_MPI    
+   AX_MPI
    CXX="$MPICXX"
-   LIBS="$MPILIBS $LIBS"   
+   LIBS="$MPILIBS $LIBS"
    if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       LIBS="$LIBS -lmpi++"
-   fi   
+   fi
 
    if test "x${enable_mpiio}" != xno; then
       AC_DEFINE(ENABLE_MPIIO, 1, [Compile with support for MPI I/O])
@@ -127,7 +127,7 @@ if test "x${enable_openmp}" != xno; then
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      CXXFLAGS="-hnoomp $CXXFLAGS" 
+      CXXFLAGS="-hnoomp $CXXFLAGS"
    fi
 fi
 
@@ -142,11 +142,11 @@ found_unordered_containers="no"
 if test "x${enable_unordered_cxx}" = xyes; then
 
    #Ugly hack to check for C++11 unordered containers, without all c++11
-   #dependencies pulled in from "standard" m4 container macros. 
+   #dependencies pulled in from "standard" m4 container macros.
    #Note these requires correct C++11 flags to be passed through CXXFLAGS.
    AX_CXX_HEADER_NONTR1_UNORDERED_MAP
    AX_CXX_HEADER_NONTR1_UNORDERED_SET
-  
+
    if test "x${ax_cv_cxx_unordered_map}" != xyes; then
       AX_CXX_HEADER_TR1_UNORDERED_MAP
       AX_CXX_HEADER_TR1_UNORDERED_SET
@@ -154,7 +154,7 @@ if test "x${enable_unordered_cxx}" = xyes; then
       	 found_unordered_containers="yes"
       fi
    else
-      found_unordered_containers="yes"	
+      found_unordered_containers="yes"
    fi
 fi
 
@@ -228,7 +228,7 @@ found_domain_decomp="no"
    else
       if test "x${with_parmetis}" != xno; then
          AX_PARMETIS
-         if test "${PARMETIS_LIBS}"; then     
+         if test "${PARMETIS_LIBS}"; then
             LIBS="$PARMETIS_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_parmetis="yes"
@@ -236,14 +236,14 @@ found_domain_decomp="no"
 	    with_parmetis="no"
          fi
       fi
-      
+
       if test "x${with_zoltan}" != xno; then
       	 if test "x${enable_optimize_p1}" != xno; then
 	    AC_MSG_ERROR([Zoltan requires facet connectivity])
 	 fi
 
          AX_ZOLTAN
-         if test "${ZOLTAN_LIBS}"; then     
+         if test "${ZOLTAN_LIBS}"; then
             LIBS="$ZOLTAN_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_zoltan="yes"
@@ -271,11 +271,11 @@ if test "x${with_petsc}" != xno; then
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
       AX_CRAY_PETSC
-      if test "x${have_cray_petsc}" = xyes; then      
+      if test "x${have_cray_petsc}" = xyes; then
          found_la_backend="yes"
       	 with_petsc="yes"
       else
-	 with_petsc="no" 
+	 with_petsc="no"
       fi
    else
       AX_PETSC
@@ -291,9 +291,9 @@ fi
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
    if test "${janpack_LIBS}"; then
-     found_la_backend="yes"  
+     found_la_backend="yes"
    elif test "${janpack_mpi_LIBS}"; then
-     found_la_backend="yes"  
+     found_la_backend="yes"
    else
      with_janpack="no"
    fi
@@ -305,33 +305,33 @@ if test "x${found_la_backend}" != xyes; then
 fi
 
 
-if test "x${enable_quad}" = xyes; then 
+if test "x${enable_quad}" = xyes; then
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AX_CRAY_LIBSCI
       if test $have_cray_libsci = yes; then
-      	 have_lapack=yes	
+      	 have_lapack=yes
       else
 	 have_lapack=no
       fi
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
-      AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"], 
+      AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"],
                    have_lapack=no,)
-   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then 
-      AC_CHECK_LIB(sunperf,dgesv_,[have_lapack=yes, LIBS="$LIBS -lsunperf"], 
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
+      AC_CHECK_LIB(sunperf,dgesv_,[have_lapack=yes, LIBS="$LIBS -lsunperf"],
                    [have_lapack=no],)
    else
       AC_CHECK_LIB(lapack,dgesv_,
-                   [have_lapack=yes, LIBS="$LIBS -lblas -llapack"], 
+                   [have_lapack=yes, LIBS="$LIBS -lblas -llapack"],
                    [have_lapack=no], [-lblas])
-   fi 
+   fi
 
    if test $have_lapack = no; then
-      AC_CHECK_LIB(lapack,dgesv_,[have_lapack=yes, LIBS="$LIBS"], 
+      AC_CHECK_LIB(lapack,dgesv_,[have_lapack=yes, LIBS="$LIBS"],
                    have_lapack=no,)
-   fi    
+   fi
 
-  
+
    if test $have_lapack = yes; then
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
    elif test $have_lapack = no; then
@@ -394,7 +394,7 @@ if test "x${enable_python}" = xyes; then
     case ${PYTHON_VERSION} in
     2*)
     ;;
-    *)	
+    *)
     AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
     ;;
     esac
@@ -468,7 +468,7 @@ Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:
 
-  MPI: ${enable_mpi} 
+  MPI: ${enable_mpi}
   MPI I/O: ${enable_mpiio}
   OpenMP: ${enable_openmp}
   PETSc: ${with_petsc}
@@ -491,9 +491,9 @@ echo \
 "  Python modules will be installed in:
 
         ${pythondir}
-        
+
   with \${prefix} = ${prefix} .
-  
+
   Do not forget to set the PYTHONPATH variable.
 ---------------------------------------------------------
 "

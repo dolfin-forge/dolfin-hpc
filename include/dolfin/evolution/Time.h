@@ -1,6 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-// Imported from licorne
 
 #ifndef DOLFIN_EVOLUTION_TIME_H
 #define DOLFIN_EVOLUTION_TIME_H

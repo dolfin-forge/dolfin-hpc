@@ -49,15 +49,6 @@ public:
 
   MeshData(Mesh& mesh) : M_(mesh) {}
 
-  ~MeshData()
-  {
-    while ( !S_.empty() )
-    {
-      delete S_.begin()->second;
-      S_.erase(S_.begin());
-    }
-  }
-
   //
   Mesh& mesh() { return M_; }
 

@@ -39,12 +39,25 @@ AC_DEFUN([AX_CRAY_PETSC],[
 
 AC_DEFUN([AX_CRAY_PARMETIS],[
 	AC_MSG_CHECKING([Cray ParMETIS])
-	if test "${CRAY_TRILINOS_VERSION}"; then
-	   have_cray_parmetis="yes"
-	elif test "${CRAY_PETSC_VERSION}"; then
-	   have_cray_parmetis="yes"
+	AC_EGREP_CPP(yes,
+	[#if defined(__CRAYXC)
+	  yes
+	 #endif
+	], [is_cray_xc="yes"], [is_cray_cx="no"])
+	if test "x${is_cray_xc}" = xyes; then
+	  if test "${CRAY_TPSL_VERSION}"; then
+	     have_cray_parmetis="yes"
+          else
+	     have_cray_parmetis="no"
+          fi
 	else
-	   have_cray_parmetis="no"
+	  if test "${CRAY_TRILINOS_VERSION}"; then
+	     have_cray_parmetis="yes"
+	  elif test "${CRAY_PETSC_VERSION}"; then
+	     have_cray_parmetis="yes"
+	  else
+	     have_cray_parmetis="no"
+	  fi
 	fi
 	AC_SUBST(have_cray_parmetis)
 	if test "x${have_cray_parmetis}" = xyes; then

@@ -49,8 +49,9 @@ public:
   ///
   repr(Class const& owner, std::vector<Object const *> const& prototype);
 
-  //FIXME: Is it really necessary to add the same function also for Expressions?
-//  repr(Expression const& owner, std::vector<Expression const *> const& prototype);
+  /// @todo Is it really necessary to add the same function also for
+  /// Expressions? repr(Expression const& owner,
+  /// std::vector<Expression const *> const& prototype);
 
   template<class OBJ>
     repr(Class const& owner, std::vector<OBJ const *> const& prototype);

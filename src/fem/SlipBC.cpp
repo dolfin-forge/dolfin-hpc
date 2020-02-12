@@ -34,6 +34,7 @@ SlipBC::SlipBC( Mesh & mesh, SubDomain const & sub_domain )
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
   , As( NULL )
+  , As_local( true )
 {
   // Do nothing
 }
@@ -46,6 +47,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , node_normal( &normals )
   , node_normal_local( false )
   , As( NULL )
+  , As_local( true )
 {
   // Do nothing
 }
@@ -58,6 +60,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
   , As( NULL )
+  , As_local( true )
 {
   // Do nothing
 }
@@ -67,7 +70,8 @@ SlipBC::~SlipBC()
   if ( node_normal_local )
     delete node_normal;
 
-  delete As;
+  if ( As_local )
+    delete As;
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply( GenericMatrix & A,
@@ -96,6 +100,7 @@ void SlipBC::apply( GenericMatrix & A,
     if ( la_backend == "JANPACK" )
     {
       As = reinterpret_cast< Matrix * >( &A );
+      As_local = false;
     }
     else
     {
@@ -124,8 +129,8 @@ void SlipBC::apply( GenericMatrix & A,
     }
 
     // Initialize normal field on given space and compute at the boundary
-    if ( node_normal_local ) // FIXME: add test for uninitialized external
-                             // NodeNormal objects
+    if ( node_normal_local ) /// @todo add test for uninitialized external
+                             /// NodeNormal objects
     {
       if ( sub_system().depth() == 0 )
       {

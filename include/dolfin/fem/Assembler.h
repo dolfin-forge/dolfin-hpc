@@ -4,101 +4,43 @@
 #ifndef __DOLFIN_ASSEMBLER_H
 #define __DOLFIN_ASSEMBLER_H
 
-#include <ufc.h>
-
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshValues.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {
 
-class Coefficient;
-class DofMapSet;
 class Form;
 class GenericTensor;
-class Mesh;
 class SubDomain;
-class UFC;
-template<class T> class Array;
 
 /**
- *  @class Assembler
+ *  @namespace Assembler
  *
- *  @brief  This class provides assembly of linear systems, or more generally,
- *          assembly of a sparse tensor from a given variational form.
+ *  @brief This namesapce provides assembly of linear systems, or more
+ *         generally, assembly of a sparse tensor from a given variational form.
  */
 
-class Assembler
+namespace Assembler
 {
 
-public:
+/// Assemble tensor from given variational form
+void assemble(GenericTensor& A, Form& form, bool reset_tensor);
 
-  /// Constructor
-  Assembler();
+/// Assemble tensor from given variational form over a sub domain
+void assemble(GenericTensor& A, Form& form, SubDomain const& sub_domain,
+              bool reset_tensor);
 
-  /// Destructor
-  ~Assembler();
+/// Assemble tensor from given variational form over sub domains
+void assemble(GenericTensor& A, Form& form,
+              MeshValues<uint, Cell> const& cell_domains,
+              MeshValues<uint, Facet> const& exterior_facet_domains,
+              MeshValues<uint, Facet> const& interior_facet_domains,
+              bool reset_tensor);
 
-  /// Assemble tensor from given variational form
-  void assemble(GenericTensor& A, Form& form, bool reset_tensor);
-
-  /// Assemble tensor from given variational form over a sub domain
-  void assemble(GenericTensor& A, Form& form, SubDomain const& sub_domain,
-                bool reset_tensor);
-
-  /// Assemble tensor from given variational form over sub domains
-  void assemble(GenericTensor& A, Form& form,
-                MeshValues<uint, Cell> const& cell_domains,
-                MeshValues<uint, Facet> const& exterior_facet_domains,
-                MeshValues<uint, Facet> const& interior_facet_domains,
-                bool reset_tensor);
-
-private:
-
-  /// Assemble tensor from given (UFC) form, coefficients and sub domains.
-  /// This is the main assembly function in DOLFIN. All other assembly functions
-  /// end up calling this function.
-  ///
-  /// The MeshFunction arguments can be used to specify assembly over subdomains
-  /// of the mesh cells, exterior facets and interior facets.
-  /// Either a null pointer or an empty MeshFunction may be used to specify that
-  /// the tensor should be assembled over the entire set of cells or facets.
-  void assemble(GenericTensor& A, const Form& form,
-                Array<Coefficient*> const& coefficients,
-                DofMapSet const& dofmaps,
-                MeshValues<uint, Cell> const* cell_domains,
-                MeshValues<uint, Facet> const* exterior_facet_domains,
-                MeshValues<uint, Facet> const* interior_facet_domains,
-                bool reset_tensor = true);
-
-  // Assemble over cells
-  void assembleCells(GenericTensor& A, Array<Coefficient*> const& coefficients,
-                     DofMapSet const& dofmaps, UFC& data,
-                     MeshValues<uint, Cell> const* domains) const;
-
-  // Assemble over exterior facets
-  void assembleExteriorFacets(GenericTensor& A,
-                              Array<Coefficient*> const& coefficients,
-                              DofMapSet const& dofmaps, UFC& data,
-                              MeshValues<uint, Facet> const* domains) const;
-
-  // Assemble over interior facets
-  void assembleInteriorFacets(GenericTensor& A,
-                              Array<Coefficient*> const& coefficients,
-                              DofMapSet const& dofmaps, UFC& data,
-                              MeshValues<uint, Facet> const* domains) const;
-
-  // Bogus-assemble periodic contributions
-  void initializePeriodicDofs(GenericTensor& A,
-                              Array<Coefficient*> const& coefficients,
-                              DofMapSet const& dofmaps, UFC& data,
-                              MeshValues<uint, Facet> const* domains) const;
-
-  // Initialize global tensor
-  void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,
-                        bool reset_tensor) const;
-
-};
+} // end namespace Assembler
 
 } /* namespace dolfin */
 

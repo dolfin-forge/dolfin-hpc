@@ -7,10 +7,13 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'ufc'
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
 //   no-evaluate_basis:              False
@@ -18,67 +21,524 @@
 //   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
+//   remove_zero_terms:              False
 //   representation:                 'auto'
+//   simplify_basis:                 False
+//   simplify_expressions:           False
 //   split:                          True
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
 #include "ffc_Lagrange_2_3d.h"
-
-/// Constructor
-ffc_lagrange_2_3d_finite_element_0::ffc_lagrange_2_3d_finite_element_0() : ufc::finite_element()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_map_coordinates(double & X,
+                                                   double & Y,
+                                                   double & Z,
+                                                   const double* coordinates,
+                                                   const ufc::cell& c) const
 {
-    // Do nothing
+    // Extract vertex coordinates
+    const double * const * x = c.coordinates;
+    
+    // Compute Jacobian of affine map from reference cell
+    const double J_00 = x[1][0] - x[0][0];
+    const double J_01 = x[2][0] - x[0][0];
+    const double J_02 = x[3][0] - x[0][0];
+    const double J_10 = x[1][1] - x[0][1];
+    const double J_11 = x[2][1] - x[0][1];
+    const double J_12 = x[3][1] - x[0][1];
+    const double J_20 = x[1][2] - x[0][2];
+    const double J_21 = x[2][2] - x[0][2];
+    const double J_22 = x[3][2] - x[0][2];
+    
+    // Compute sub determinants
+    const double d_00 = J_11*J_22 - J_12*J_21;
+    const double d_01 = J_12*J_20 - J_10*J_22;
+    const double d_02 = J_10*J_21 - J_11*J_20;
+    const double d_10 = J_02*J_21 - J_01*J_22;
+    const double d_11 = J_00*J_22 - J_02*J_20;
+    const double d_12 = J_01*J_20 - J_00*J_21;
+    const double d_20 = J_01*J_12 - J_02*J_11;
+    const double d_21 = J_02*J_10 - J_00*J_12;
+    const double d_22 = J_00*J_11 - J_01*J_10;
+    
+    // Compute determinant of Jacobian
+    double detJ = J_00*d_00 + J_10*d_10 + J_20*d_20;
+    
+    // Compute inverse of Jacobian
+    
+    // Compute constants
+    const double C0 = x[3][0] + x[2][0] + x[1][0] - x[0][0];
+    const double C1 = x[3][1] + x[2][1] + x[1][1] - x[0][1];
+    const double C2 = x[3][2] + x[2][2] + x[1][2] - x[0][2];
+    
+    // Get coordinates and map to the reference (FIAT) element
+    X = (d_00*(2.0*coordinates[0] - C0) + d_10*(2.0*coordinates[1] - C1) + d_20*(2.0*coordinates[2] - C2)) / detJ;
+    Y = (d_01*(2.0*coordinates[0] - C0) + d_11*(2.0*coordinates[1] - C1) + d_21*(2.0*coordinates[2] - C2)) / detJ;
+    Z = (d_02*(2.0*coordinates[0] - C0) + d_12*(2.0*coordinates[1] - C1) + d_22*(2.0*coordinates[2] - C2)) / detJ;
+    
 }
 
-/// Destructor
-ffc_lagrange_2_3d_finite_element_0::~ffc_lagrange_2_3d_finite_element_0()
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_from_coordinates(const double X,
+                                                    const double Y,
+                                                    const double Z,
+                                                    double** values) const
 {
-    // Do nothing
-}
-
-/// Return a string identifying the finite element
-const char* ffc_lagrange_2_3d_finite_element_0::signature() const
-{
-    return "FiniteElement('Lagrange', Cell('tetrahedron', Space(3)), 2, None)";
-}
-
-/// Return the cell shape
-ufc::shape ffc_lagrange_2_3d_finite_element_0::cell_shape() const
-{
-    return ufc::tetrahedron;
-}
-
-/// Return the topological dimension of the cell shape
-unsigned int ffc_lagrange_2_3d_finite_element_0::topological_dimension() const
-{
-    return 3;
-}
-
-/// Return the geometric dimension of the cell shape
-unsigned int ffc_lagrange_2_3d_finite_element_0::geometric_dimension() const
-{
-    return 3;
-}
-
-/// Return the dimension of the finite element function space
-unsigned int ffc_lagrange_2_3d_finite_element_0::space_dimension() const
-{
-    return 10;
-}
-
-/// Return the rank of the value space
-unsigned int ffc_lagrange_2_3d_finite_element_0::value_rank() const
-{
-    return 0;
-}
-
-/// Return the dimension of the value space for axis i
-unsigned int ffc_lagrange_2_3d_finite_element_0::value_dimension(unsigned int i) const
-{
-    return 1;
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {-0.0577350269189625, -0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, 0.050395263067897, 0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {-0.0577350269189625, 0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, -0.050395263067897, -0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {-0.0577350269189626, 0.0, 0.0702728368926307, -0.0248451997499977, 0.0, 0.0, 0.0, 0.0872871560943969, -0.0475131096733199, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {-0.0577350269189626, 0.0, 0.0, 0.074535599249993, 0.0, 0.0, 0.0, 0.0, 0.0, 0.100790526135794};
+    
+    // Compute value(s).
+    values[3][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[3][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, 0.0, 0.140545673785261, 0.0993807989999907, 0.0, 0.0, 0.0, 0.0, 0.1187827741833, -0.0671936840905293};
+    
+    // Compute value(s).
+    values[4][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[4][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, 0.121716123890037, -0.0702728368926307, 0.0993807989999907, 0.0, 0.0, 0.102868899974728, 0.0, -0.0593913870916499, -0.0671936840905293};
+    
+    // Compute value(s).
+    values[5][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[5][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, 0.121716123890037, 0.0702728368926307, -0.0993807989999906, 0.0, 0.100790526135794, -0.0205737799949456, -0.087287156094397, -0.01187827741833, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[6][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[6][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, -0.121716123890037, -0.0702728368926306, 0.0993807989999906, 0.0, 0.0, -0.102868899974728, 0.0, -0.0593913870916499, -0.0671936840905293};
+    
+    // Compute value(s).
+    values[7][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[7][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, -0.121716123890037, 0.0702728368926306, -0.0993807989999906, 0.0, -0.100790526135794, 0.0205737799949456, -0.0872871560943969, -0.01187827741833, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[8][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[8][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = 0.5*(2.0 + Y + Z + 2.0*X);
+    double tmp1 = 0.25*(Y + Z)*(Y + Z);
+    double tmp2 = 0.5*(1.0 + Z + 2.0*Y);
+    double tmp3 = 0.5*(1.0 - Z);
+    double tmp4 = tmp3*tmp3;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[4] = 1.5*tmp0*basisvalues[1] - 0.5*tmp1*basisvalues[0];
+    basisvalues[2] = 0.5*(2.0 + 3.0*Y + Z)*basisvalues[0];
+    basisvalues[5] = (0.5*(2.0 + 3.0*Y + Z) + 1.0*(1.0 + Y))*basisvalues[1];
+    basisvalues[7] = (1.66666666666667*tmp2 + 0.111111111111111*tmp3)*basisvalues[2] - 0.555555555555556*tmp4*basisvalues[0];
+    basisvalues[3] = (2.0*Z + 1.0)*basisvalues[0];
+    basisvalues[8] = (3.0*Z + 2.0)*basisvalues[2];
+    basisvalues[6] = (3.0*Z + 2.0)*basisvalues[1];
+    basisvalues[9] = basisvalues[3]*(0.3125 + 1.875*Z) - 0.5625*basisvalues[0];
+    basisvalues[0] *= std::sqrt(0.75);
+    basisvalues[3] *= std::sqrt(1.25);
+    basisvalues[9] *= std::sqrt(1.75);
+    basisvalues[2] *= std::sqrt(2.5);
+    basisvalues[8] *= std::sqrt(3.5);
+    basisvalues[7] *= std::sqrt(5.25);
+    basisvalues[1] *= std::sqrt(7.5);
+    basisvalues[6] *= std::sqrt(10.5);
+    basisvalues[5] *= std::sqrt(15.75);
+    basisvalues[4] *= std::sqrt(26.25);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[10] = \
+    {0.23094010767585, 0.0, -0.140545673785261, -0.0993807989999906, -0.130120009726471, 0.0, 0.0, 0.0290957186981323, 0.02375655483666, 0.0167984210226323};
+    
+    // Compute value(s).
+    values[9][0] = 0.0;
+    for (unsigned int r = 0; r < 10; r++)
+    {
+      values[9][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
 }
 
 /// Evaluate basis function i at given point in cell
@@ -127,9 +587,6 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
     double Y = (d_01*(2.0*coordinates[0] - C0) + d_11*(2.0*coordinates[1] - C1) + d_21*(2.0*coordinates[2] - C2)) / detJ;
     double Z = (d_02*(2.0*coordinates[0] - C0) + d_12*(2.0*coordinates[1] - C1) + d_22*(2.0*coordinates[2] - C2)) / detJ;
     
-    
-    // Reset values.
-    *values = 0.0;
     switch (i)
     {
     case 0:
@@ -169,12 +626,13 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189624, -0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, 0.050395263067897, 0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+      {-0.0577350269189625, -0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, 0.050395263067897, 0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -215,12 +673,13 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189625, 0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, -0.0503952630678969, -0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+      {-0.0577350269189625, 0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, -0.050395263067897, -0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -261,12 +720,13 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189625, 0.0, 0.0702728368926307, -0.0248451997499977, 0.0, 0.0, 0.0, 0.0872871560943969, -0.0475131096733199, 0.0167984210226323};
+      {-0.0577350269189626, 0.0, 0.0702728368926307, -0.0248451997499977, 0.0, 0.0, 0.0, 0.0872871560943969, -0.0475131096733199, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -310,9 +770,10 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       {-0.0577350269189626, 0.0, 0.0, 0.074535599249993, 0.0, 0.0, 0.0, 0.0, 0.0, 0.100790526135794};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -353,12 +814,13 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {0.23094010767585, 0.0, 0.140545673785261, 0.0993807989999906, 0.0, 0.0, 0.0, 0.0, 0.1187827741833, -0.0671936840905293};
+      {0.23094010767585, 0.0, 0.140545673785261, 0.0993807989999907, 0.0, 0.0, 0.0, 0.0, 0.1187827741833, -0.0671936840905293};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -402,9 +864,10 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       {0.23094010767585, 0.121716123890037, -0.0702728368926307, 0.0993807989999907, 0.0, 0.0, 0.102868899974728, 0.0, -0.0593913870916499, -0.0671936840905293};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -445,12 +908,13 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {0.23094010767585, 0.121716123890037, 0.0702728368926307, -0.0993807989999906, 0.0, 0.100790526135794, -0.0205737799949456, -0.0872871560943969, -0.01187827741833, 0.0167984210226323};
+      {0.23094010767585, 0.121716123890037, 0.0702728368926307, -0.0993807989999906, 0.0, 0.100790526135794, -0.0205737799949456, -0.087287156094397, -0.01187827741833, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -494,9 +958,10 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       {0.23094010767585, -0.121716123890037, -0.0702728368926306, 0.0993807989999906, 0.0, 0.0, -0.102868899974728, 0.0, -0.0593913870916499, -0.0671936840905293};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -540,9 +1005,10 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       {0.23094010767585, -0.121716123890037, 0.0702728368926306, -0.0993807989999906, 0.0, -0.100790526135794, 0.0205737799949456, -0.0872871560943969, -0.01187827741833, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -586,9 +1052,10 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis(unsigned int i,
       {0.23094010767585, 0.0, -0.140545673785261, -0.0993807989999906, -0.130120009726471, 0.0, 0.0, 0.0290957186981323, 0.02375655483666, 0.0167984210226323};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 10; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -772,7 +1239,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189624, -0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, 0.050395263067897, 0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+      {-0.0577350269189625, -0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, 0.050395263067897, 0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[10][10] = \
@@ -793,7 +1260,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -990,7 +1457,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189625, 0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, -0.0503952630678969, -0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
+      {-0.0577350269189625, 0.0608580619450185, -0.0351364184463153, -0.0248451997499977, 0.0650600048632355, -0.050395263067897, -0.0411475599898912, 0.0290957186981323, 0.0237565548366599, 0.0167984210226323};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[10][10] = \
@@ -1011,7 +1478,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -1208,7 +1675,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {-0.0577350269189625, 0.0, 0.0702728368926307, -0.0248451997499977, 0.0, 0.0, 0.0, 0.0872871560943969, -0.0475131096733199, 0.0167984210226323};
+      {-0.0577350269189626, 0.0, 0.0702728368926307, -0.0248451997499977, 0.0, 0.0, 0.0, 0.0872871560943969, -0.0475131096733199, 0.0167984210226323};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[10][10] = \
@@ -1229,7 +1696,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -1447,7 +1914,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -1644,7 +2111,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {0.23094010767585, 0.0, 0.140545673785261, 0.0993807989999906, 0.0, 0.0, 0.0, 0.0, 0.1187827741833, -0.0671936840905293};
+      {0.23094010767585, 0.0, 0.140545673785261, 0.0993807989999907, 0.0, 0.0, 0.0, 0.0, 0.1187827741833, -0.0671936840905293};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[10][10] = \
@@ -1665,7 +2132,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -1883,7 +2350,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -2080,7 +2547,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       
       // Table(s) of coefficients.
       static const double coefficients0[10] = \
-      {0.23094010767585, 0.121716123890037, 0.0702728368926307, -0.0993807989999906, 0.0, 0.100790526135794, -0.0205737799949456, -0.0872871560943969, -0.01187827741833, 0.0167984210226323};
+      {0.23094010767585, 0.121716123890037, 0.0702728368926307, -0.0993807989999906, 0.0, 0.100790526135794, -0.0205737799949456, -0.087287156094397, -0.01187827741833, 0.0167984210226323};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[10][10] = \
@@ -2101,7 +2568,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -2319,7 +2786,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -2537,7 +3004,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -2755,7 +3222,7 @@ void ffc_lagrange_2_3d_finite_element_0::evaluate_basis_derivatives(unsigned int
       {5.47722557505166, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.95803989154981, 5.61248608016091, -1.08012344973464, -0.763762615825973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309962, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {2.29128784747792, 7.24568837309472, 4.18330013267038, -0.591607978309961, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {1.87082869338697, 0.0, 0.0, 4.34741302385683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {-2.64575131106459, 0.0, 9.66091783079296, 0.683130051063973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {3.24037034920393, 0.0, 0.0, 7.52994023880668, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -3141,7 +3608,7 @@ void ffc_lagrange_2_3d_finite_element_0::map_from_reference_cell(double* x,
                                             const double* xhat,
                                             const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
+    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -3149,13 +3616,7 @@ void ffc_lagrange_2_3d_finite_element_0::map_to_reference_cell(double* xhat,
                                           const double* x,
                                           const ufc::cell& c) const
 {
-    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
-}
-
-/// Return the number of sub elements (for a mixed element)
-unsigned int ffc_lagrange_2_3d_finite_element_0::num_sub_elements() const
-{
-    return 0;
+    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
 }
 
 /// Create a new finite element for sub element i (for a mixed element)
@@ -3164,176 +3625,6 @@ ufc::finite_element* ffc_lagrange_2_3d_finite_element_0::create_sub_element(unsi
     return 0;
 }
 
-/// Create a new class instance
-ufc::finite_element* ffc_lagrange_2_3d_finite_element_0::create() const
-{
-    return new ffc_lagrange_2_3d_finite_element_0();
-}
-
-
-/// Constructor
-
-
-ffc_lagrange_2_3d_dofmap_0::ffc_lagrange_2_3d_dofmap_0() : ufc::dofmap()
-{
-    _global_dimension = 0;
-}
-
-/// Destructor
-ffc_lagrange_2_3d_dofmap_0::~ffc_lagrange_2_3d_dofmap_0()
-{
-    // Do nothing
-}
-
-/// Return a string identifying the dofmap
-const char* ffc_lagrange_2_3d_dofmap_0::signature() const
-{
-    return "FFC dofmap for FiniteElement('Lagrange', Cell('tetrahedron', Space(3)), 2, None)";
-}
-
-/// Return true iff mesh entities of topological dimension d are needed
-bool ffc_lagrange_2_3d_dofmap_0::needs_mesh_entities(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return true;
-        break;
-      }
-    case 1:
-      {
-        return true;
-        break;
-      }
-    case 2:
-      {
-        return false;
-        break;
-      }
-    case 3:
-      {
-        return false;
-        break;
-      }
-    }
-    
-    return false;
-}
-
-/// Initialize dofmap for mesh (return true iff init_cell() is needed)
-bool ffc_lagrange_2_3d_dofmap_0::init_mesh(const ufc::mesh& m)
-{
-    _global_dimension = m.num_entities[0] + m.num_entities[1];
-    return false;
-}
-
-/// Initialize dofmap for given cell
-void ffc_lagrange_2_3d_dofmap_0::init_cell(const ufc::mesh& m,
-                              const ufc::cell& c)
-{
-    // Do nothing
-}
-
-/// Finish initialization of dofmap for cells
-void ffc_lagrange_2_3d_dofmap_0::init_cell_finalize()
-{
-    // Do nothing
-}
-
-/// Return the topological dimension of the associated cell shape
-unsigned int ffc_lagrange_2_3d_dofmap_0::topological_dimension() const
-{
-    return 3;
-}
-
-/// Return the geometric dimension of the associated cell shape
-unsigned int ffc_lagrange_2_3d_dofmap_0::geometric_dimension() const
-{
-    return 3;
-}
-
-/// Return the dimension of the global finite element function space
-unsigned int ffc_lagrange_2_3d_dofmap_0::global_dimension() const
-{
-    return _global_dimension;
-}
-
-#ifndef UFC_BACKWARD_COMPATIBILITY
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_lagrange_2_3d_dofmap_0::local_dimension(const ufc::cell& c) const
-{
-    return 10;
-}
-
-/// Return the maximum dimension of the local finite element function space
-unsigned int ffc_lagrange_2_3d_dofmap_0::max_local_dimension() const
-{
-    return 10;
-}
-#else
-/// Return the dimension of the local finite element function space for a cell
-unsigned int ffc_lagrange_2_3d_dofmap_0::local_dimension() const
-{
-    return 10;
-}
-#endif
-
-/// Return the number of dofs on each cell facet
-unsigned int ffc_lagrange_2_3d_dofmap_0::num_facet_dofs() const
-{
-    return 6;
-}
-
-/// Return the number of dofs associated with each cell entity of dimension d
-unsigned int ffc_lagrange_2_3d_dofmap_0::num_entity_dofs(unsigned int d) const
-{
-    switch (d)
-    {
-    case 0:
-      {
-        return 1;
-        break;
-      }
-    case 1:
-      {
-        return 1;
-        break;
-      }
-    case 2:
-      {
-        return 0;
-        break;
-      }
-    case 3:
-      {
-        return 0;
-        break;
-      }
-    }
-    
-    return 0;
-}
-
-/// Tabulate the local-to-global mapping of dofs on a cell
-void ffc_lagrange_2_3d_dofmap_0::tabulate_dofs(unsigned int* dofs,
-                                  const ufc::mesh& m,
-                                  const ufc::cell& c) const
-{
-    unsigned int offset = 0;
-    dofs[0] = offset + c.entity_indices[0][0];
-    dofs[1] = offset + c.entity_indices[0][1];
-    dofs[2] = offset + c.entity_indices[0][2];
-    dofs[3] = offset + c.entity_indices[0][3];
-    offset += m.num_entities[0];
-    dofs[4] = offset + c.entity_indices[1][0];
-    dofs[5] = offset + c.entity_indices[1][1];
-    dofs[6] = offset + c.entity_indices[1][2];
-    dofs[7] = offset + c.entity_indices[1][3];
-    dofs[8] = offset + c.entity_indices[1][4];
-    dofs[9] = offset + c.entity_indices[1][5];
-    offset += m.num_entities[1];
-}
 
 /// Tabulate the local-to-local mapping from facet dofs to cell dofs
 void ffc_lagrange_2_3d_dofmap_0::tabulate_facet_dofs(unsigned int* dofs,
@@ -3391,7 +3682,7 @@ void ffc_lagrange_2_3d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
 {
     if (d > 3)
     {
-    throw std::runtime_error(std::string("d is larger than dimension (3)"));
+    throw std::runtime_error("d is larger than dimension (3)");
     }
     
     switch (d)
@@ -3400,7 +3691,7 @@ void ffc_lagrange_2_3d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
       {
         if (i > 3)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (3)"));
+      throw std::runtime_error("i is larger than number of entities (3)");
       }
       
       switch (i)
@@ -3433,7 +3724,7 @@ void ffc_lagrange_2_3d_dofmap_0::tabulate_entity_dofs(unsigned int* dofs,
       {
         if (i > 5)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (5)"));
+      throw std::runtime_error("i is larger than number of entities (5)");
       }
       
       switch (i)
@@ -3522,24 +3813,6 @@ void ffc_lagrange_2_3d_dofmap_0::tabulate_coordinates(double** coordinates,
     coordinates[9][0] = 0.5*x[0][0] + 0.5*x[1][0];
     coordinates[9][1] = 0.5*x[0][1] + 0.5*x[1][1];
     coordinates[9][2] = 0.5*x[0][2] + 0.5*x[1][2];
-}
-
-/// Return the number of sub dofmaps (for a mixed element)
-unsigned int ffc_lagrange_2_3d_dofmap_0::num_sub_dofmaps() const
-{
-    return 0;
-}
-
-/// Create a new dofmap for sub dofmap i (for a mixed element)
-ufc::dofmap* ffc_lagrange_2_3d_dofmap_0::create_sub_dofmap(unsigned int i) const
-{
-    return 0;
-}
-
-/// Create a new class instance
-ufc::dofmap* ffc_lagrange_2_3d_dofmap_0::create() const
-{
-    return new ffc_lagrange_2_3d_dofmap_0();
 }
 
 

@@ -172,7 +172,7 @@ private:
 public:
 
   /// Force renumbering of mesh topology entities
-  ///FIXME: public for the moment but this just legacy of bad design
+  /// @todo public for the moment but this just legacy of bad design
   void renumber() const;
 
 private:

@@ -180,6 +180,12 @@ public:
     return vector_->max();
   }
 
+  /// Return pointwise operator op of vector and given vector x
+  void pointwise(const GenericVector& x, VectorPointwiseOp op=pw_min) const
+  {
+    return vector_->pointwise(x, op);
+  }
+
   /// Multiply vector by given number
   Vector& operator*=(real a)
   {

@@ -64,43 +64,20 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/insitu/convection-diffusion/ConvectionDiffusion.ufl\
              demo/insitu/convection-diffusion/ConvectionDiffusion.h\
 	     demo/insitu/convection-diffusion/UnitSquareMesh_32x32.xml\
-             demo/mesh/ale/Makefile\
-             demo/mesh/ale/main.cpp\
              demo/mesh/refinement/Makefile\
              demo/mesh/refinement/main.cpp\
              demo/mesh/meshfunction/mesh2D.xml.gz\
              demo/mesh/meshfunction/meshfunction.xml\
              demo/mesh/meshfunction/Makefile\
              demo/mesh/meshfunction/main.cpp\
-             demo/mesh/partitioning/main.cpp\
-             demo/mesh/partitioning/Makefile\
              demo/mesh/subdomains/Makefile\
              demo/mesh/subdomains/main.cpp\
-             demo/nls/cahn-hilliard/CahnHilliard2D.ufl\
-             demo/nls/cahn-hilliard/CahnHilliard2D.h\
-             demo/nls/cahn-hilliard/CahnHilliard3D.ufl\
-             demo/nls/cahn-hilliard/CahnHilliard3D.h\
-             demo/nls/cahn-hilliard/Makefile\
-             demo/nls/cahn-hilliard/main.cpp\
-             demo/nls/nonlinearpoisson/Makefile\
-             demo/nls/nonlinearpoisson/NonlinearPoisson.ufl\
-             demo/nls/nonlinearpoisson/NonlinearPoisson.h\
-             demo/nls/nonlinearpoisson/main.cpp\
              demo/pde/convection-diffusion/Makefile\
              demo/pde/convection-diffusion/ConvectionDiffusion.ufl\
              demo/pde/convection-diffusion/subdomains.xml.gz\
              demo/pde/convection-diffusion/velocity.xml.gz\
              demo/pde/convection-diffusion/ConvectionDiffusion.h\
              demo/pde/convection-diffusion/main.cpp\
-             demo/pde/dg/advection_diffusion/main.cpp\
-             demo/pde/dg/advection_diffusion/AdvectionDiffusion.ufl\
-             demo/pde/dg/advection_diffusion/velocity.xml.gz\
-             demo/pde/dg/advection_diffusion/AdvectionDiffusion.h\
-             demo/pde/dg/advection_diffusion/Makefile\
-             demo/pde/dg/advection_diffusion/OutflowFacet.ufl\
-             demo/pde/dg/advection_diffusion/OutflowFacet.h\
-             demo/pde/dg/advection_diffusion/Projection.ufl\
-             demo/pde/dg/advection_diffusion/Projection.h\
              demo/pde/dg/poisson/main.cpp\
              demo/pde/dg/poisson/Makefile\
              demo/pde/dg/poisson/P1Projection.ufl\
@@ -115,33 +92,11 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/pde/functional/EnergyNorm.ufl\
              demo/pde/functional/Makefile\
              demo/pde/functional/main.cpp\
-             demo/pde/lift-drag/Drag.ufl\
-             demo/pde/lift-drag/pressure.xml.gz\
-             demo/pde/lift-drag/Drag.h\
-             demo/pde/lift-drag/Lift.ufl\
-             demo/pde/lift-drag/Lift.h\
-             demo/pde/lift-drag/Makefile\
-             demo/pde/lift-drag/main.cpp\
-             demo/pde/mixed-poisson/MixedPoisson.ufl\
-             demo/pde/mixed-poisson/MixedPoisson.h\
-             demo/pde/mixed-poisson/P1Projection.ufl\
-             demo/pde/mixed-poisson/P1Projection.h\
-             demo/pde/mixed-poisson/Makefile\
-             demo/pde/mixed-poisson/main.cpp\
-             demo/pde/nonlinear-poisson/Makefile\
-             demo/pde/nonlinear-poisson/NonlinearPoisson.ufl\
-             demo/pde/nonlinear-poisson/NonlinearPoisson.h\
-             demo/pde/nonlinear-poisson/main.cpp\
              demo/pde/poisson/README\
              demo/pde/poisson/Makefile\
              demo/pde/poisson/main.cpp\
              demo/pde/poisson/Poisson.ufl\
              demo/pde/poisson/Poisson.h\
-             demo/pde/stokes/Stokes2D.h\
-             demo/pde/stokes/stabilized/Makefile\
-             demo/pde/stokes/stabilized/Stokes.ufl\
-             demo/pde/stokes/stabilized/Stokes.h\
-             demo/pde/stokes/stabilized/main.cpp\
              demo/pde/stokes/taylor-hood/Makefile\
              demo/pde/stokes/taylor-hood/Stokes.ufl\
              demo/pde/stokes/taylor-hood/Stokes.h\

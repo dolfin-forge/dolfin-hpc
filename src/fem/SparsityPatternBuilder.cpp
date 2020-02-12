@@ -30,6 +30,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
   {
+    tocd(1);
     return;
   }
 
@@ -37,6 +38,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   std::string la_backend = dolfin_get("linear algebra backend");
   if(la_backend == "JANPACK")
   {
+    tocd(1);
     return;
   }
 

@@ -2296,7 +2296,7 @@ public:
     Form::init(coefficients_);
   }
 
-  BilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& map) : dolfin::BilinearForm(mesh)
+  BilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap& map) : dolfin::BilinearForm(mesh)
   {
     Form::init(coefficients_, map); 
   }
@@ -2343,7 +2343,7 @@ public:
     Form::init(coefficients_);
   }
 
-  LinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& map) : dolfin::LinearForm(mesh)
+  LinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap& map) : dolfin::LinearForm(mesh)
   {
     Form::init(coefficients_, map); 
   }

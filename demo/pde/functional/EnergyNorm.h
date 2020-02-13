@@ -2504,7 +2504,7 @@ public:
     Form::init(coefficients_);
   }
 
-  Functional(dolfin::Mesh& mesh, dolfin::CoefficientMap const& map) : dolfin::Functional(mesh)
+  Functional(dolfin::Mesh& mesh, dolfin::CoefficientMap& map) : dolfin::Functional(mesh)
   {
     Form::init(coefficients_, map); 
   }

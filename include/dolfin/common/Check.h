@@ -19,8 +19,11 @@ namespace dolfin
 {
 
 extern "C" typedef void(*CheckVoidFunctionPtr)(void);
+#if (CHECK_MINOR_VERSION > 12)
+extern "C" typedef const TTest * CheckIntFunctionPtr;
+#else
 extern "C" typedef void(*CheckIntFunctionPtr)(int);
-
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -56,26 +59,29 @@ int main() \
   return DOLFIN_SUITE_RUN(_name, _suite_function()); \
 }
 
-#if (CHECK_MAJOR_VERSION >= 0 && CHECK_MINOR_VERSION >= 13)
-
+#if (CHECK_MINOR_VERSION > 12)
 #define DOLFIN_START_TEST(_name) \
 START_TEST( _name ) \
-{ \
+{\
   int init_failed = 0; \
   Test T;
-
 #else
-
 #define DOLFIN_START_TEST(_name) \
 START_TEST( _name ) \
   int init_failed = 0; \
   Test T;
-
 #endif
 
+#if (CHECK_MINOR_VERSION > 12)
+#define DOLFIN_END_TEST \
+  ck_assert( init_failed == 0 ); \
+} \
+END_TEST
+#else
 #define DOLFIN_END_TEST \
   ck_assert( init_failed == 0 ); \
 END_TEST
+#endif
 
 //-----------------------------------------------------------------------------
 

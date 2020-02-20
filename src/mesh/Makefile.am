@@ -2,7 +2,6 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 libdolfin_mesh_la_SOURCES = \
 			AffineMapping.cpp\
-			ALE.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
 			Cell.cpp\

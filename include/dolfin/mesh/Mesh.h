@@ -7,7 +7,6 @@
 #include <dolfin/common/Variable.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
@@ -63,7 +62,7 @@ class Mesh : public Variable
 public:
 
   /// Create empty mesh
-  // Mesh();
+  Mesh();
 
   /// Constructor from cell type and space
   Mesh(CellType const& ctype, Space const& space);
@@ -154,13 +153,13 @@ public:
   bool parallel_io() const;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const; // FIXME remove this function
+  bool is_distributed() const; //!< @todo remove this function
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata(); // FIXME remove this function
+  MeshDistributedData& distdata(); //!< @todo remove this function
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const; // FIXME remove this function
+  MeshDistributedData const& distdata() const; //!< @tod remove this function
 
   /// Return global number of entities of given topological dimension
   uint global_size(uint dim) const;
@@ -236,7 +235,6 @@ public:
   void refine();
 
   //---------------------------------------------------------------------------
-  void move(BoundaryMesh& boundary, ALE::ALEType method = ALE::lagrange);
 
   /// Return hash to identify the state of the mesh
   std::string const hash() const;

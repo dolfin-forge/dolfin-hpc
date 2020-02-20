@@ -293,7 +293,7 @@ void Checkpoint::load(std::vector<Function *> func)
   uint pe_size = MPI::size();
   uint vector_offset[3];
 #endif
-  // FIXME store max(local_size)
+  /// @todo store max(local_size)?
   for (it = func.begin(); it != func.end(); ++it)
   {
 #ifdef ENABLE_MPIIO

@@ -32,23 +32,60 @@
 namespace dolfin
 {
 
-//-----------------------------------------------------------------------------
-Assembler::Assembler()
+namespace Assembler
 {
-  // Do nothing
-}
+
+/// Assemble tensor from given (UFC) form, coefficients and sub domains.
+/// This is the main assembly function in DOLFIN. All other assembly functions
+/// end up calling this function.
+///
+/// The MeshFunction arguments can be used to specify assembly over subdomains
+/// of the mesh cells, exterior facets and interior facets.
+/// Either a null pointer or an empty MeshFunction may be used to specify that
+/// the tensor should be assembled over the entire set of cells or facets.
+void assemble(GenericTensor& A, const Form& form,
+              Array<Coefficient*> const& coefficients,
+              DofMapSet const& dofmaps,
+              MeshValues<uint, Cell> const* cell_domains,
+              MeshValues<uint, Facet> const* exterior_facet_domains,
+              MeshValues<uint, Facet> const* interior_facet_domains,
+              bool reset_tensor = true);
+
+// Assemble over cells
+void assembleCells(GenericTensor& A, Array<Coefficient*> const& coefficients,
+                   DofMapSet const& dofmaps, UFC& data,
+                   MeshValues<uint, Cell> const* domains);
+
+// Assemble over exterior facets
+void assembleExteriorFacets(GenericTensor& A,
+                            Array<Coefficient*> const& coefficients,
+                            DofMapSet const& dofmaps, UFC& data,
+                            MeshValues<uint, Facet> const* domains);
+
+// Assemble over interior facets
+void assembleInteriorFacets(GenericTensor& A,
+                            Array<Coefficient*> const& coefficients,
+                            DofMapSet const& dofmaps, UFC& data,
+                            MeshValues<uint, Facet> const* domains);
+
+// Bogus-assemble periodic contributions
+void initializePeriodicDofs(GenericTensor& A,
+                            Array<Coefficient*> const& coefficients,
+                            DofMapSet const& dofmaps, UFC& data,
+                            MeshValues<uint, Facet> const* domains);
+
+// Initialize global tensor
+void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,
+                      bool reset_tensor);
+
 //-----------------------------------------------------------------------------
-Assembler::~Assembler()
-{
-}
-//-----------------------------------------------------------------------------
-void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
+void assemble(GenericTensor& A, Form& form, bool reset_tensor)
 {
 OPENMP_PRAGMA( parallel )
   assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
-void Assembler::assemble(GenericTensor& A, Form& form,
+void assemble(GenericTensor& A, Form& form,
                          SubDomain const& sub_domain, bool reset_tensor)
 {
   Mesh& mesh = form.mesh();
@@ -89,7 +126,7 @@ OPENMP_PRAGMA( master )
   }
 }
 //-----------------------------------------------------------------------------
-void Assembler::assemble(GenericTensor& A, Form& form,
+void assemble(GenericTensor& A, Form& form,
                          MeshValues<uint, Cell> const& cell_domains,
                          MeshValues<uint, Facet> const& exterior_facet_domains,
                          MeshValues<uint, Facet> const& interior_facet_domains,
@@ -99,7 +136,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
            &exterior_facet_domains, &interior_facet_domains, reset_tensor);
 }
 //-----------------------------------------------------------------------------
-void Assembler::assemble(GenericTensor& A, const Form& form,
+void assemble(GenericTensor& A, const Form& form,
                          Array<Coefficient*> const& coefficients,
                          DofMapSet const& dofmaps,
                          MeshValues<uint, Cell> const* cell_domains,
@@ -152,11 +189,11 @@ OPENMP_PRAGMA( master )
 OPENMP_PRAGMA( barrier )
 }
 //-----------------------------------------------------------------------------
-void Assembler::assembleCells(GenericTensor& A,
+void assembleCells(GenericTensor& A,
                               Array<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps,
                               UFC& ufc,
-                              MeshValues<uint, Cell> const* domains) const
+                              MeshValues<uint, Cell> const* domains)
 {
   if (ufc.form.num_cell_integrals() == 0)
   {
@@ -217,11 +254,11 @@ OPENMP_PRAGMA( for )
   tocd(1);
 }
 //-----------------------------------------------------------------------------
-void Assembler::assembleExteriorFacets(GenericTensor& A,
+void assembleExteriorFacets(GenericTensor& A,
                                        Array<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshValues<uint, Facet> const* domains) const
+                                       MeshValues<uint, Facet> const* domains)
 {
   if (ufc.form.num_exterior_facet_integrals() == 0)
   {
@@ -296,11 +333,11 @@ OPENMP_PRAGMA( for )
   tocd(1);
 }
 //-----------------------------------------------------------------------------
-void Assembler::assembleInteriorFacets(GenericTensor& A,
+void assembleInteriorFacets(GenericTensor& A,
                                        Array<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshValues<uint, Facet> const* domains) const
+                                       MeshValues<uint, Facet> const* domains)
 {
   if (ufc.form.num_interior_facet_integrals() == 0)
   {
@@ -396,11 +433,11 @@ OPENMP_PRAGMA( for )
   tocd(1);
 }
 //-----------------------------------------------------------------------------
-void Assembler::initializePeriodicDofs(GenericTensor& A,
-                                       Array<Coefficient*> const&,
-                                       DofMapSet const& dofmaps,
-                                       UFC&,
-                                       MeshValues<uint, Facet> const*) const
+void initializePeriodicDofs(GenericTensor& A,
+                            Array<Coefficient*> const&,
+                            DofMapSet const& dofmaps,
+                            UFC&,
+                            MeshValues<uint, Facet> const*)
 {
   if(!dofmaps[0].mesh().has_periodic_constraint())
   {
@@ -408,7 +445,7 @@ void Assembler::initializePeriodicDofs(GenericTensor& A,
   }
 
   // Add zero at periodic dofs to allocate entries
-  //FIXME: This could be fixed by a modification of the assembler's behaviour
+  /// @todo This could be fixed by a modification of the assembler's behaviour
   if(A.rank() == 2)
   {
     //
@@ -431,11 +468,16 @@ void Assembler::initializePeriodicDofs(GenericTensor& A,
   }
 }
 //-----------------------------------------------------------------------------
-void Assembler::initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
-                                 UFC& ufc, bool reset_tensor) const
+void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
+                      UFC& ufc, bool reset_tensor)
 {
   if (A.rank() == 0)
   {
+    if ( reset_tensor )
+    {
+      A.zero();
+    }
+
     return;
   }
 
@@ -460,4 +502,6 @@ void Assembler::initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
 }
 //-----------------------------------------------------------------------------
 
-}
+} // namespace Assembler
+
+} // namespace dolfin

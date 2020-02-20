@@ -1,3 +1,12 @@
+0.9.0-hpc [2020-02-05]
+ - Move to UFL
+ - Support for Quad/Hex elements
+ - New DOLFIN binary format
+ - Adaptive refinement with projection
+ - Slip boundary condition for arbitrary order elements
+ - Insitu support batch/interactive (libsim)
+ - Almost seven years of improvements (see git log)
+ - Various bugs and portability fixes
 0.8.4-hpc [2013-10-22]
  - Parallel mesh coarsening
  - Parallel CAD projection

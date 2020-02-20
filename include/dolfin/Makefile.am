@@ -31,7 +31,6 @@ nobase_pkginclude_HEADERS = \
 				evolution/Time.h\
 				evolution/TimeDependent.h\
 				evolution/TimeSeries.h\
-				evolution/TimeStepping.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\
 				fem/BoundaryCondition.h\
@@ -64,7 +63,6 @@ nobase_pkginclude_HEADERS = \
 				fem/PeriodicBC.h\
 				fem/PeriodicDofsMapping.h\
 				fem/ScratchSpace.h\
-				fem/SetOfBCs.h\
 				fem/SlipBC.h\
 				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\
@@ -80,7 +78,6 @@ nobase_pkginclude_HEADERS = \
 				function/Constant.h\
 				function/dolfin_function.h\
 				function/Expression.h\
-				function/Field.h\
 				function/Function.h\
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
@@ -144,6 +141,7 @@ nobase_pkginclude_HEADERS = \
 				la/SparsityPattern.h\
 				la/Vector.h\
 				la/VectorNormType.h\
+				la/VectorPointwiseOp.h\
 				log/dolfin_log.h\
 				log/log.h\
 				log/LogStream.h\
@@ -167,7 +165,6 @@ nobase_pkginclude_HEADERS = \
 				math/LinearDistribution.h\
 				math/PKDO.h\
 				mesh/AffineMapping.h \
-				mesh/ALE.h\
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
@@ -240,7 +237,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/Vertex.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
-				parameter/DefaultParameters.h\
 				parameter/dolfin_parameter.h\
 				parameter/Parameter.h\
 				parameter/ParameterList.h\

@@ -142,7 +142,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Update vtu file name and clear file
   vtuNameUpdate(counter);
 
-  //FIXME: This only writes the first mesh encountered
+  /// @todo This only writes the first mesh encountered
   Mesh& mesh = f[0].first->mesh();
 
   // Only the root updates the pvd file

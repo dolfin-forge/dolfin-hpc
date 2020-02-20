@@ -1,16 +1,18 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitDisk.h>
+
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/TriangleCell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
-    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
+    Mesh(TriangleCell(), EuclideanSpace(2))
 {
   warning("UnitDisk is Experimental: It may be of poor quality.");
 
@@ -156,7 +158,7 @@ real UnitDisk::transformx(real x, real y, Transformation transformation)
   }
   else
   {
-    // FIXME: Use easier to understand check
+    /// @todo Use easier to understand check
     if ((transformation != maxn) && (transformation != sumn)
         && (transformation != rotsumn))
     {

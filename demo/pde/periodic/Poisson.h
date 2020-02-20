@@ -10,18 +10,26 @@
 //   convert_exceptions_to_warnings: False
 //   cpp_optimize:                   False
 //   cpp_optimize_flags:             '-O2'
+//   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
 //   form_postfix:                   True
 //   format:                         'dolfin'
+//   ignore_ones:                    False
+//   ignore_zero_tables:             False
 //   log_level:                      20
 //   log_prefix:                     ''
 //   optimize:                       False
 //   output_dir:                     '.'
 //   precision:                      15
+//   precompute_basis_const:         False
+//   precompute_ip_const:            False
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
+//   remove_zero_terms:              False
 //   representation:                 'auto'
+//   simplify_basis:                 False
+//   simplify_expressions:           False
 //   split:                          False
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
@@ -41,7 +49,8 @@ class poisson_finite_element_0: public ufc::finite_element
 public:
 
   /// Constructor
-  poisson_finite_element_0() : ufc::finite_element()
+  poisson_finite_element_0()
+    : ufc::finite_element()
   {
     // Do nothing
   }
@@ -53,37 +62,37 @@ public:
   }
 
   /// Return a string identifying the finite element
-  const char* signature() const
+  inline const char* signature() const
   {
     return "FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None)";
   }
 
   /// Return the cell shape
-  ufc::shape cell_shape() const
+  inline ufc::shape cell_shape() const
   {
     return ufc::triangle;
   }
 
   /// Return the topological dimension of the cell shape
-  unsigned int topological_dimension() const
+  inline unsigned int topological_dimension() const
   {
     return 2;
   }
 
   /// Return the geometric dimension of the cell shape
-  unsigned int geometric_dimension() const
+  inline unsigned int geometric_dimension() const
   {
     return 2;
   }
 
   /// Return the dimension of the finite element function space
-  unsigned int space_dimension() const
+  inline unsigned int space_dimension() const
   {
     return 3;
   }
 
   /// Return the rank of the value space
-  unsigned int value_rank() const
+  inline unsigned int value_rank() const
   {
     return 0;
   }
@@ -94,11 +103,130 @@ public:
     return 1;
   }
 
+  /// Compute mapped coordinates for evaluate_basis()
+  void evaluate_basis_map_coordinates(double & X,
+                                      double & Y,
+                                      double & Z,
+                                      const double* coordinates,
+                                      const ufc::cell& c) const
+  {
+    // Extract vertex coordinates
+    const double * const * x = c.coordinates;
+    
+    // Compute Jacobian of affine map from reference cell
+    const double J_00 = x[1][0] - x[0][0];
+    const double J_01 = x[2][0] - x[0][0];
+    const double J_10 = x[1][1] - x[0][1];
+    const double J_11 = x[2][1] - x[0][1];
+    
+    // Compute determinant of Jacobian
+    double detJ = J_00*J_11 - J_01*J_10;
+    
+    // Compute inverse of Jacobian
+    
+    // Compute constants
+    const double C0 = x[1][0] + x[2][0];
+    const double C1 = x[1][1] + x[2][1];
+    
+    // Get coordinates and map to the reference (FIAT) element
+    X = (J_01*(C1 - 2.0*coordinates[1]) + J_11*(2.0*coordinates[0] - C0)) / detJ;
+    Y = (J_00*(2.0*coordinates[1] - C1) + J_10*(C0 - 2.0*coordinates[0])) / detJ;
+  }
+
+  /// Compute mapped coordinates for evaluate_basis()
+  void evaluate_basis_from_coordinates(const double X,
+                                       const double Y,
+                                       const double Z,
+                                       double** values) const
+  {
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = (1.0 + Y + 2.0*X)/2.0;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = basisvalues[0]*(0.5 + 1.5*Y);
+    basisvalues[0] *= std::sqrt(0.5);
+    basisvalues[2] *= std::sqrt(1.0);
+    basisvalues[1] *= std::sqrt(3.0);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.471404520791032, -0.288675134594813, -0.166666666666667};
+    
+    // Compute value(s).
+    values[0][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[0][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = (1.0 + Y + 2.0*X)/2.0;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = basisvalues[0]*(0.5 + 1.5*Y);
+    basisvalues[0] *= std::sqrt(0.5);
+    basisvalues[2] *= std::sqrt(1.0);
+    basisvalues[1] *= std::sqrt(3.0);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.471404520791032, 0.288675134594813, -0.166666666666667};
+    
+    // Compute value(s).
+    values[1][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[1][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+    {
+    
+    // Array of basisvalues.
+    double basisvalues[3] = {0.0, 0.0, 0.0};
+    
+    // Declare helper variables.
+    double tmp0 = (1.0 + Y + 2.0*X)/2.0;
+    
+    // Compute basisvalues.
+    basisvalues[0] = 1.0;
+    basisvalues[1] = tmp0;
+    basisvalues[2] = basisvalues[0]*(0.5 + 1.5*Y);
+    basisvalues[0] *= std::sqrt(0.5);
+    basisvalues[2] *= std::sqrt(1.0);
+    basisvalues[1] *= std::sqrt(3.0);
+    
+    // Table(s) of coefficients.
+    static const double coefficients0[3] = \
+    {0.471404520791032, 0.0, 0.333333333333333};
+    
+    // Compute value(s).
+    values[2][0] = 0.0;
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      values[2][0] += coefficients0[r]*basisvalues[r];
+    }// end loop over 'r'
+    }
+  }
+
   /// Evaluate basis function i at given point in cell
   void evaluate_basis(unsigned int i,
-                              double* values,
-                              const double* coordinates,
-                              const ufc::cell& c) const
+                      double* values,
+                      const double* coordinates,
+                      const ufc::cell& c) const
   {
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
@@ -121,9 +249,6 @@ public:
     // Get coordinates and map to the reference (FIAT) element
     double X = (J_01*(C1 - 2.0*coordinates[1]) + J_11*(2.0*coordinates[0] - C0)) / detJ;
     double Y = (J_00*(2.0*coordinates[1] - C1) + J_10*(C0 - 2.0*coordinates[0])) / detJ;
-    
-    // Reset values.
-    *values = 0.0;
     switch (i)
     {
     case 0:
@@ -148,9 +273,10 @@ public:
       {0.471404520791032, -0.288675134594813, -0.166666666666667};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -176,9 +302,10 @@ public:
       {0.471404520791032, 0.288675134594813, -0.166666666666667};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -204,9 +331,10 @@ public:
       {0.471404520791032, 0.0, 0.333333333333333};
       
       // Compute value(s).
+      values[0] = 0.0;
       for (unsigned int r = 0; r < 3; r++)
       {
-        *values += coefficients0[r]*basisvalues[r];
+        values[0] += coefficients0[r]*basisvalues[r];
       }// end loop over 'r'
         break;
       }
@@ -216,8 +344,8 @@ public:
 
   /// Evaluate all basis functions at given point in cell
   void evaluate_basis_all(double* values,
-                                  const double* coordinates,
-                                  const ufc::cell& c) const
+                          const double* coordinates,
+                          const ufc::cell& c) const
   {
     // Helper variable to hold values of a single dof.
     double dof_values = 0.0;
@@ -232,10 +360,10 @@ public:
 
   /// Evaluate order n derivatives of basis function i at given point in cell
   void evaluate_basis_derivatives(unsigned int i,
-                                          unsigned int n,
-                                          double* values,
-                                          const double* coordinates,
-                                          const ufc::cell& c) const
+                                  unsigned int n,
+                                  double* values,
+                                  const double* coordinates,
+                                  const ufc::cell& c) const
   {
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
@@ -773,9 +901,9 @@ public:
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   void evaluate_basis_derivatives_all(unsigned int n,
-                                              double* values,
-                                              const double* coordinates,
-                                              const ufc::cell& c) const
+                                      double* values,
+                                      const double* coordinates,
+                                      const ufc::cell& c) const
   {
     // Compute number of derivatives.
     unsigned int num_derivatives = 1;
@@ -807,8 +935,8 @@ public:
 
   /// Evaluate linear functional for dof i on the function f
   double evaluate_dof(unsigned int i,
-                              const ufc::function& f,
-                              const ufc::cell& c) const
+                      const ufc::function& f,
+                      const ufc::cell& c) const
   {
     // Declare variables for result of evaluation.
     double vals[1];
@@ -849,8 +977,8 @@ public:
 
   /// Evaluate linear functionals for all dofs on the function f
   void evaluate_dofs(double* values,
-                             const ufc::function& f,
-                             const ufc::cell& c) const
+                     const ufc::function& f,
+                     const ufc::cell& c) const
   {
     // Declare variables for result of evaluation.
     double vals[1];
@@ -874,8 +1002,8 @@ public:
 
   /// Interpolate vertex values from dof values
   void interpolate_vertex_values(double* vertex_values,
-                                         const double* dof_values,
-                                         const ufc::cell& c) const
+                                 const double* dof_values,
+                                 const ufc::cell& c) const
   {
     // Evaluate function and change variables
     vertex_values[0] = dof_values[0];
@@ -885,22 +1013,22 @@ public:
 
   /// Map coordinate xhat from reference cell to coordinate x in cell
   void map_from_reference_cell(double* x,
-                                       const double* xhat,
-                                       const ufc::cell& c) const
+                               const double* xhat,
+                               const ufc::cell& c) const
   {
-    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
+    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
   void map_to_reference_cell(double* xhat,
-                                     const double* x,
-                                     const ufc::cell& c) const
+                             const double* x,
+                             const ufc::cell& c) const
   {
-    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
+    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
   }
 
   /// Return the number of sub elements (for a mixed element)
-  unsigned int num_sub_elements() const
+  inline unsigned int num_sub_elements() const
   {
     return 0;
   }
@@ -911,8 +1039,8 @@ public:
     return 0;
   }
 
-  /// Create a new class instance 
-  ufc::finite_element* create() const
+  /// Create a new class instance
+  inline ufc::finite_element* create() const
   {
     return new poisson_finite_element_0();
   }
@@ -930,7 +1058,8 @@ private:
 public:
 
   /// Constructor
-  poisson_dofmap_0() : ufc::dofmap()
+  poisson_dofmap_0()
+    : ufc::dofmap()
   {
     _global_dimension = 0;
   }
@@ -942,13 +1071,13 @@ public:
   }
 
   /// Return a string identifying the dofmap
-  const char* signature() const
+  inline const char* signature() const
   {
     return "FFC dofmap for FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None)";
   }
 
   /// Return true iff mesh entities of topological dimension d are needed
-  bool needs_mesh_entities(unsigned int d) const
+  inline bool needs_mesh_entities(unsigned int d) const
   {
     switch (d)
     {
@@ -973,71 +1102,71 @@ public:
   }
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-  bool init_mesh(const ufc::mesh& m)
+  inline bool init_mesh(const ufc::mesh& m)
   {
     _global_dimension = m.num_entities[0];
     return false;
   }
 
   /// Initialize dofmap for given cell
-  void init_cell(const ufc::mesh& m,
+  inline void init_cell(const ufc::mesh& m,
                          const ufc::cell& c)
   {
     // Do nothing
   }
 
   /// Finish initialization of dofmap for cells
-  void init_cell_finalize()
+  inline void init_cell_finalize()
   {
     // Do nothing
   }
 
   /// Return the topological dimension of the associated cell shape
-  unsigned int topological_dimension() const
+  inline unsigned int topological_dimension() const
   {
     return 2;
   }
 
   /// Return the geometric dimension of the associated cell shape
-  unsigned int geometric_dimension() const
+  inline unsigned int geometric_dimension() const
   {
     return 2;
   }
 
   /// Return the dimension of the global finite element function space
-  unsigned int global_dimension() const
+  inline unsigned int global_dimension() const
   {
     return _global_dimension;
   }
 
 #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the dimension of the local finite element function space for a cell
-  unsigned int local_dimension(const ufc::cell& c) const
+  inline unsigned int local_dimension(const ufc::cell& c) const
   {
     return 3;
   }
 
   /// Return the maximum dimension of the local finite element function space
-  unsigned int max_local_dimension() const
+  inline unsigned int max_local_dimension() const
   {
     return 3;
   }
 #else
   /// Return the dimension of the local finite element function space for a cell
-  unsigned int local_dimension() const
+  inline unsigned int local_dimension() const
   {
     return 3;
   }
 #endif
 
   /// Return the number of dofs on each cell facet
-  unsigned int num_facet_dofs() const
+  inline unsigned int num_facet_dofs() const
   {
     return 2;
   }
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  unsigned int num_entity_dofs(unsigned int d) const
+  inline unsigned int num_entity_dofs(unsigned int d) const
   {
     switch (d)
     {
@@ -1062,9 +1191,9 @@ public:
   }
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(unsigned int* dofs,
-                             const ufc::mesh& m,
-                             const ufc::cell& c) const
+  inline void tabulate_dofs(unsigned int* dofs,
+                            const ufc::mesh& m,
+                            const ufc::cell& c) const
   {
     dofs[0] = c.entity_indices[0][0];
     dofs[1] = c.entity_indices[0][1];
@@ -1105,7 +1234,7 @@ public:
   {
     if (d > 2)
     {
-    throw std::runtime_error(std::string("d is larger than dimension (2)"));
+    throw std::runtime_error("d is larger than dimension (2)");
     }
     
     switch (d)
@@ -1114,7 +1243,7 @@ public:
       {
         if (i > 2)
       {
-      throw std::runtime_error(std::string("i is larger than number of entities (2)"));
+      throw std::runtime_error("i is larger than number of entities (2)");
       }
       
       switch (i)
@@ -1167,19 +1296,19 @@ public:
   }
 
   /// Return the number of sub dofmaps (for a mixed element)
-  unsigned int num_sub_dofmaps() const
+  inline unsigned int num_sub_dofmaps() const
   {
     return 0;
   }
 
   /// Create a new dofmap for sub dofmap i (for a mixed element)
-  ufc::dofmap* create_sub_dofmap(unsigned int i) const
+  inline ufc::dofmap* create_sub_dofmap(unsigned int i) const
   {
     return 0;
   }
 
   /// Create a new class instance
-  ufc::dofmap* create() const
+  inline ufc::dofmap* create() const
   {
     return new poisson_dofmap_0();
   }
@@ -1195,7 +1324,8 @@ class poisson_cell_integral_0_0: public ufc::cell_integral
 public:
 
   /// Constructor
-  poisson_cell_integral_0_0() : ufc::cell_integral()
+  poisson_cell_integral_0_0()
+    : ufc::cell_integral()
   {
     // Do nothing
   }
@@ -1214,7 +1344,7 @@ public:
     // Number of operations (multiply-add pairs) for Jacobian data:      11
     // Number of operations (multiply-add pairs) for geometry tensor:    8
     // Number of operations (multiply-add pairs) for tensor contraction: 11
-    // Total number of operations (multiply-add pairs):                  30
+    // Total number of operations (multiply-add pairs):                  31
     
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
@@ -1254,7 +1384,7 @@ public:
     A[7] = 0.5*G0_1_0;
     A[8] = 0.5*G0_1_1;
   }
- #ifndef UFC_BACKWARD_COMPATIBILITY 
+ #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Tabulate the tensor for the contribution from a local cell
   /// using the specified reference cell quadrature points/weights
   void tabulate_tensor(double* A,
@@ -1264,7 +1394,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not available when using the FFC tensor representation."));
+    throw std::runtime_error("Quadrature version of tabulate_tensor not available when using the FFC tensor representation.");
   }
 #endif
 };
@@ -1278,7 +1408,8 @@ class poisson_cell_integral_1_0: public ufc::cell_integral
 public:
 
   /// Constructor
-  poisson_cell_integral_1_0() : ufc::cell_integral()
+  poisson_cell_integral_1_0()
+    : ufc::cell_integral()
   {
     // Do nothing
   }
@@ -1297,7 +1428,7 @@ public:
     // Number of operations (multiply-add pairs) for Jacobian data:      9
     // Number of operations (multiply-add pairs) for geometry tensor:    3
     // Number of operations (multiply-add pairs) for tensor contraction: 7
-    // Total number of operations (multiply-add pairs):                  19
+    // Total number of operations (multiply-add pairs):                  20
     
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
@@ -1326,7 +1457,7 @@ public:
     A[1] = 0.0416666666666667*G0_0 + 0.0833333333333333*G0_1 + 0.0416666666666666*G0_2;
     A[2] = 0.0416666666666667*G0_0 + 0.0416666666666666*G0_1 + 0.0833333333333333*G0_2;
   }
- #ifndef UFC_BACKWARD_COMPATIBILITY 
+ #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Tabulate the tensor for the contribution from a local cell
   /// using the specified reference cell quadrature points/weights
   void tabulate_tensor(double* A,
@@ -1336,7 +1467,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not available when using the FFC tensor representation."));
+    throw std::runtime_error("Quadrature version of tabulate_tensor not available when using the FFC tensor representation.");
   }
 #endif
 };
@@ -1361,7 +1492,8 @@ class poisson_form_0: public ufc::form
 public:
 
   /// Constructor
-  poisson_form_0() : ufc::form()
+  poisson_form_0()
+    : ufc::form()
   {
     // Do nothing
   }
@@ -1373,58 +1505,58 @@ public:
   }
 
   /// Return a string identifying the form
-  const char* signature() const
+  inline const char* signature() const
   {
     return "Form([Integral(IndexSum(Product(Indexed(ComponentTensor(SpatialDerivative(Argument(FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None), 0), MultiIndex((Index(0),), {Index(0): 2})), MultiIndex((Index(0),), {Index(0): 2})), MultiIndex((Index(1),), {Index(1): 2})), Indexed(ComponentTensor(SpatialDerivative(Argument(FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None), 1), MultiIndex((Index(2),), {Index(2): 2})), MultiIndex((Index(2),), {Index(2): 2})), MultiIndex((Index(1),), {Index(1): 2}))), MultiIndex((Index(1),), {Index(1): 2})), Measure('cell', 0, None))])";
   }
 
   /// Return the rank of the global tensor (r)
-  unsigned int rank() const
+  inline unsigned int rank() const
   {
     return 2;
   }
 
   /// Return the number of coefficients (n)
-  unsigned int num_coefficients() const
+  inline unsigned int num_coefficients() const
   {
     return 0;
   }
 
- #ifndef UFC_BACKWARD_COMPATIBILITY 
+ #ifndef UFC_BACKWARD_COMPATIBILITY
 
   /// Return the number of cell domains
-  unsigned int num_cell_domains() const
+  inline unsigned int num_cell_domains() const
   {
     return 1;
   }
 
   /// Return the number of exterior facet domains
-  unsigned int num_exterior_facet_domains() const
+  inline unsigned int num_exterior_facet_domains() const
   {
     return 0;
   }
 
   /// Return the number of interior facet domains
-  unsigned int num_interior_facet_domains() const
+  inline unsigned int num_interior_facet_domains() const
   {
     return 0;
   }
 #else
 
   /// Return the number of cell domains
-  unsigned int num_cell_integrals() const
+  inline unsigned int num_cell_integrals() const
   {
     return 1;
   }
 
   /// Return the number of exterior facet domains
-  unsigned int num_exterior_facet_integrals() const
+  inline unsigned int num_exterior_facet_integrals() const
   {
     return 0;
   }
 
   /// Return the number of interior facet domains
-  unsigned int num_interior_facet_integrals() const
+  inline unsigned int num_interior_facet_integrals() const
   {
     return 0;
   }
@@ -1471,7 +1603,7 @@ public:
   }
 
   /// Create a new cell integral on sub domain i
-  ufc::cell_integral* create_cell_integral(unsigned int i) const
+  inline ufc::cell_integral* create_cell_integral(unsigned int i) const
   {
     switch (i)
     {
@@ -1486,13 +1618,13 @@ public:
   }
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral* create_exterior_facet_integral(unsigned int i) const
+  inline ufc::exterior_facet_integral* create_exterior_facet_integral(unsigned int i) const
   {
     return 0;
   }
 
   /// Create a new interior facet integral on sub domain i
-  ufc::interior_facet_integral* create_interior_facet_integral(unsigned int i) const
+  inline ufc::interior_facet_integral* create_interior_facet_integral(unsigned int i) const
   {
     return 0;
   }
@@ -1519,7 +1651,8 @@ class poisson_form_1: public ufc::form
 public:
 
   /// Constructor
-  poisson_form_1() : ufc::form()
+  poisson_form_1()
+    : ufc::form()
   {
     // Do nothing
   }
@@ -1531,58 +1664,58 @@ public:
   }
 
   /// Return a string identifying the form
-  const char* signature() const
+  inline const char* signature() const
   {
     return "Form([Integral(Product(Argument(FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None), 0), Coefficient(FiniteElement('Lagrange', Cell('triangle', Space(2)), 1, None), 0)), Measure('cell', 0, None))])";
   }
 
   /// Return the rank of the global tensor (r)
-  unsigned int rank() const
+  inline unsigned int rank() const
   {
     return 1;
   }
 
   /// Return the number of coefficients (n)
-  unsigned int num_coefficients() const
+  inline unsigned int num_coefficients() const
   {
     return 1;
   }
 
- #ifndef UFC_BACKWARD_COMPATIBILITY 
+ #ifndef UFC_BACKWARD_COMPATIBILITY
 
   /// Return the number of cell domains
-  unsigned int num_cell_domains() const
+  inline unsigned int num_cell_domains() const
   {
     return 1;
   }
 
   /// Return the number of exterior facet domains
-  unsigned int num_exterior_facet_domains() const
+  inline unsigned int num_exterior_facet_domains() const
   {
     return 0;
   }
 
   /// Return the number of interior facet domains
-  unsigned int num_interior_facet_domains() const
+  inline unsigned int num_interior_facet_domains() const
   {
     return 0;
   }
 #else
 
   /// Return the number of cell domains
-  unsigned int num_cell_integrals() const
+  inline unsigned int num_cell_integrals() const
   {
     return 1;
   }
 
   /// Return the number of exterior facet domains
-  unsigned int num_exterior_facet_integrals() const
+  inline unsigned int num_exterior_facet_integrals() const
   {
     return 0;
   }
 
   /// Return the number of interior facet domains
-  unsigned int num_interior_facet_integrals() const
+  inline unsigned int num_interior_facet_integrals() const
   {
     return 0;
   }
@@ -1629,7 +1762,7 @@ public:
   }
 
   /// Create a new cell integral on sub domain i
-  ufc::cell_integral* create_cell_integral(unsigned int i) const
+  inline ufc::cell_integral* create_cell_integral(unsigned int i) const
   {
     switch (i)
     {
@@ -1644,13 +1777,13 @@ public:
   }
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral* create_exterior_facet_integral(unsigned int i) const
+  inline ufc::exterior_facet_integral* create_exterior_facet_integral(unsigned int i) const
   {
     return 0;
   }
 
   /// Create a new interior facet integral on sub domain i
-  ufc::interior_facet_integral* create_interior_facet_integral(unsigned int i) const
+  inline ufc::interior_facet_integral* create_interior_facet_integral(unsigned int i) const
   {
     return 0;
   }
@@ -1675,7 +1808,7 @@ public:
     Form::init(coefficients_);
   }
 
-  BilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& map) : dolfin::BilinearForm(mesh)
+  BilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap& map) : dolfin::BilinearForm(mesh)
   {
     Form::init(coefficients_, map); 
   }
@@ -1722,7 +1855,7 @@ public:
     Form::init(coefficients_);
   }
 
-  LinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& map) : dolfin::LinearForm(mesh)
+  LinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap& map) : dolfin::LinearForm(mesh)
   {
     Form::init(coefficients_, map); 
   }

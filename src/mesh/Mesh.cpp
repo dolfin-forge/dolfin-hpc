@@ -5,7 +5,6 @@
 
 #include <dolfin/io/File.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
@@ -13,6 +12,7 @@
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
+#include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/UniformRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
@@ -26,17 +26,17 @@ namespace dolfin
 #define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
 
 //-----------------------------------------------------------------------------
-// Mesh::Mesh() :
-//     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-//     topology_(NULL),
-//     geometry_(NULL),
-//     exterior_boundary_(NULL),
-//     interior_boundary_(NULL),
-//     intersection_detector_(NULL),
-//     timestamp_(time(0))
-// {
-//   // Do nothing
-// }
+Mesh::Mesh() :
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
+    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
+    geometry_(EuclideanSpace(3)),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
+{
+}
+
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
@@ -78,8 +78,8 @@ Mesh::Mesh(Mesh const& other) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(*CellType::create(CellType::tetrahedron), DOLFIN_COMM,!this->reordering()), // temporary
-    geometry_(EuclideanSpace(3)), // temporary
+    topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
+    geometry_(EuclideanSpace(3)),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -220,7 +220,7 @@ void Mesh::init() const
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate boundary at topology change
+  /// @todo Improve hash logic to regenerate boundary at topology change
   if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
     if(exterior_boundary_)
@@ -235,7 +235,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::interior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate boundary at topology change
+  /// @todo Improve hash logic to regenerate boundary at topology change
   if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
     if(interior_boundary_)
@@ -310,7 +310,7 @@ uint Mesh::geometry_dimension() const
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
 {
-  ///FIXME: Improve hash logic to regenerate detector at topology change
+  /// @todo Improve hash logic to regenerate detector at topology change
   if (intersection_detector_ == NULL)
   {
     if(intersection_detector_)
@@ -351,7 +351,7 @@ void Mesh::distribute()
     MeshValues<uint, Cell> partitions(*this);
     partition(partitions);
     distribute(partitions);
-    //FIXME: following the legacy behaviour entities are always renumbered
+    /// @todo following the legacy behaviour entities are always renumbered
     topology().renumber();
   }
 }
@@ -401,11 +401,6 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
     }
   }
   return periodic_mappings_;
-}
-//-----------------------------------------------------------------------------
-void Mesh::move(BoundaryMesh& boundary, ALE::ALEType method)
-{
-  ALE::move(*this, boundary, method);
 }
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash() const

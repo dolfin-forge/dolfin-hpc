@@ -176,6 +176,6 @@ private:
 
 };
 
-} /* namespace licorne */
+} // end namespace dolfin
 
 #endif /* __DOLFIN_CONSTANT_H_ */

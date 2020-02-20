@@ -70,10 +70,10 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   PeriodicSubDomain const& subdomain =
       static_cast<PeriodicSubDomain const&>(this->sub_domain());
 
-  // FIXME: Make this work for non-scalar subsystems, like vector-valued
-  // FIXME: Lagrange where more than one per element is associated with
-  // FIXME: each coordinate. Note that globally there may very well be
-  // FIXME: more than one dof per coordinate (for conforming elements).
+  /// @todo Make this work for non-scalar subsystems, like vector-valued
+  /// Lagrange where more than one per element is associated with
+  /// each coordinate. Note that globally there may very well be
+  /// more than one dof per coordinate (for conforming elements).
   uint const gdim = mesh().geometry_dimension();
   uint const tdim = mesh().geometry_dimension();
 
@@ -234,7 +234,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
           "Unable to find a pair of matching dofs for periodic boundary condition.");
     }
 
-    // FIXME: Perhaps this can be done more efficiently?
+    /// @todo Perhaps this can be done more efficiently?
 
     // Set x_i - x_j = 0
     rows[0] = static_cast<uint>(dof0);

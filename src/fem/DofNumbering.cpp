@@ -222,7 +222,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
   if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
   {
-    error("DofNumbering::init : invalid topological dimension.");
+    error("DofNumbering::init : invalid geometrical dimension.");
   }
   if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {

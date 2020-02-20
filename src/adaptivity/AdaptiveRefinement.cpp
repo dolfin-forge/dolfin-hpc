@@ -175,7 +175,7 @@ void refine_and_project( Mesh& mesh,
     uint const num_sub = space.element().num_sub_elements();
 
     Array<Function> post;
-    // FIXME: Invalid for scalar functions due to the zero subspace assumption
+    /// @todo Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
       post.push_back( Function( FiniteElementSpace( coarse[f][i]->space() ) ) );
@@ -195,9 +195,9 @@ void refine_and_project( Mesh& mesh,
 
     std::stringstream p_filename;
 #ifdef ENABLE_MPIIO
-    p_filename << "../scratch/projected_" << f << ".bin" << std::ends;
+    p_filename << "../scratch/projected_" << f << ".bin";
 #else
-    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin" << std::ends;
+    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin";
 #endif
     File p_file(p_filename.str());
     p_file << proj.vector();
@@ -238,7 +238,7 @@ void redistribute_func( Mesh& mesh, Function const& f,
   {
     uint target_proc = distribution(*c);
 
-    //FIXME: Only P1 friendly.
+    /// @todo Only P1 friendly.
     for (VertexIterator v(*c); !v.end(); ++v)
     {
       real value = 0.0;
@@ -333,7 +333,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
     ufccell.update(*c);
     space.dofmap().tabulate_dofs(local_indices.data(), ufccell, *c);
 
-    //FIXME: Only P1 friendly.
+    /// @todo Only P1 friendly.
     for (VertexIterator v(*c); !v.end(); ++v)
     {
       uint ci   = 0;

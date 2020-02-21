@@ -373,7 +373,7 @@ void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
 //-----------------------------------------------------------------------------
 void Mesh::refine()
 {
-  UniformRefinement R; R(*this);
+  UniformRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const

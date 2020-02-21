@@ -18,6 +18,9 @@
 namespace dolfin
 {
 
+namespace UniformRefinement
+{
+
 //-----------------------------------------------------------------------------
 template<class E>
 void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
@@ -30,6 +33,7 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
     uint const voffset = editor.current_vertex();
     for (typename E::iterator e(mesh); !e.end(); ++e)
     {
+      message( "%d - %d", voffset, e->index() );
       editor.add_vertex(voffset + e->index(), e->midpoint());
     }
     if (mesh.is_distributed())
@@ -57,7 +61,7 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-void UniformRefinement::operator()(Mesh& mesh)
+void refine(Mesh& mesh)
 {
   // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh(mesh.type(), mesh.space());
@@ -115,5 +119,7 @@ void UniformRefinement::operator()(Mesh& mesh)
 }
 //-----------------------------------------------------------------------------
 
-} /* namespace dolfin */
+} // namespace UniformRefinement
+
+} // namespace dolfin
 

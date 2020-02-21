@@ -138,7 +138,7 @@ bool Connectivity::operator==( Connectivity const & other ) const
 //-----------------------------------------------------------------------------
 bool Connectivity::operator!=(Connectivity const& other) const
 {
-  return !(*this == other);
+  return not (*this == other);
 }
 //-----------------------------------------------------------------------------
 Array< Array< uint > > & Connectivity::operator()()
@@ -231,14 +231,9 @@ void Connectivity::remap_l(Array<uint> const& map)
 //-----------------------------------------------------------------------------
 void Connectivity::remap_r(Array<uint> const& map)
 {
-  // for (uint * c = this->data(); c != this->bound(); ++c)
-  // for (uint e = 0; e < order_; ++e)
-  // {
-  //   connections_[e] = map[e];
-  // }
-
-  message( "remap_r: %u", map.size() );
-  disp();
+  for (uint e = 0; e < order_; ++e)
+    for ( uint i = 0; i < degree(e); ++i )
+      connections_[e][i] = map[connections_[e][i]];
 }
 //-----------------------------------------------------------------------------
 void Connectivity::disp() const

@@ -86,7 +86,7 @@ public:
     {
       // Single process, pointer to mesh topological data
       for (uint d = 0; d < topological_dimension; d++)
-        entity_indices[d] = cell.entities(d);
+        entity_indices[d] = cell.entities(d).data();
     }
     else
     {
@@ -95,7 +95,7 @@ public:
       {
         entity_indices[d] = new uint[cell.num_entities(d)];
         for (uint i = 0; i < cell.num_entities(d); i++)
-          entity_indices[d][i] = (cell.entities(d))[i];
+          entity_indices[d][i] = cell.entities(d)[i];
       }
     }
 

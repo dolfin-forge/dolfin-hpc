@@ -91,9 +91,6 @@ public:
   ///
   CellType const& type() const;
 
-  ///
-  CellType const& type(uint i) const;
-
   /// Remap local entities of given dimension
   void remap(uint d0,  Array<uint> const& mapping);
 
@@ -200,13 +197,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-CellType const & MeshTopology::type() const
-{
-  dolfin_assert( type_ );
-  return *type_;
-}
-//-----------------------------------------------------------------------------
-CellType const & MeshTopology::type( uint ) const
+inline CellType const & MeshTopology::type() const
 {
   dolfin_assert( type_ );
   return *type_;

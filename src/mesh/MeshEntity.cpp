@@ -151,7 +151,7 @@ bool MeshEntity::has_all_vertices_shared() const
 bool MeshEntity::on_boundary() const
 {
   uint const mdim = topology_.dim();
-  uint const fdim = topology_.type(index_).facet_dim();
+  uint const fdim = topology_.type().facet_dim();
   if( topology_.distributed() )
   {
     if (tdim_ ==  fdim)

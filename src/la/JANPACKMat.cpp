@@ -172,9 +172,7 @@ void JANPACKMat::ident(uint m, const uint* rows)
   dolfin_assert(A);
 
   for(uint i = 0; i < m; i ++) {
-    //jp_mat_ident(A, rows[i]);
-    jp_mat_zero_row(A, rows[i]);
-    jp_mat_insert(A, rows[i], rows[i], 1.0);
+    jp_mat_ident(A, rows[i]);
   }
 }
 //-----------------------------------------------------------------------------

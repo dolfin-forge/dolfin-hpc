@@ -33,7 +33,6 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
     uint const voffset = editor.current_vertex();
     for (typename E::iterator e(mesh); !e.end(); ++e)
     {
-      message( "%d - %d", voffset, e->index() );
       editor.add_vertex(voffset + e->index(), e->midpoint());
     }
     if (mesh.is_distributed())

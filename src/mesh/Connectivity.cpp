@@ -16,12 +16,8 @@ Connectivity::Connectivity( uint order, uint degree )
   : order_( order )
   , min_degree_( degree )
   , max_degree_( degree )
-  , connections_( order_ )
+  , connections_( order_, Array< uint >( degree, 0 ) )
 {
-	for ( uint e = 0; e < order_; ++e )
-	{
-		connections_[e] = Array< uint >( degree, 0 );
-	}
 }
 //-----------------------------------------------------------------------------
 Connectivity::Connectivity( Array< uint > const & valency )

@@ -1,3 +1,6 @@
+0.9.0p1-hpc [2020-02-24]
+ - Fixed tic/toc counters
+ - Fixed regression in I/O interface (short filenames)
 0.9.0-hpc [2020-02-05]
  - Move to UFL
  - Support for Quad/Hex elements

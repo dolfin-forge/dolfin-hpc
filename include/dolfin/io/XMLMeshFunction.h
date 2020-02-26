@@ -7,6 +7,10 @@
 #ifndef __NEW_XML_MESHFUNCTION_H
 #define __NEW_XML_MESHFUNCTION_H
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/io/XMLObject.h>
 
@@ -148,4 +152,5 @@ void XMLMeshFunction<T>::readEntities(const xmlChar* name,
 
 } // namespace dolfin
 
+#endif
 #endif

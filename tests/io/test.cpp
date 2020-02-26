@@ -1,9 +1,12 @@
 #include <dolfin_tests.h>
+#include <dolfin/config/dolfin_config.h>
 
 #ifdef HAVE_CHECK
 
 #include "File/File.h"
+#ifdef HAVE_XML
 #include "XML/XML.h"
+#endif
 #include "STL/STL.h"
 #include "VTK/VTK.h"
 #include "Binary/Binary.h"
@@ -14,10 +17,12 @@ DOLFIN_SUITE_BEGIN(suite, "io")
   DOLFIN_TCASE_CREATE("File");
   DOLFIN_TCASE_ADD(test_File);
 
+#ifdef HAVE_XML
   DOLFIN_TCASE_CREATE("XML");
   DOLFIN_TCASE_ADD(test_XMLFile);
   DOLFIN_TCASE_ADD(test_XMLMesh);
-
+#endif
+  
   DOLFIN_TCASE_CREATE("STL");
   DOLFIN_TCASE_ADD(test_STLMesh);
 

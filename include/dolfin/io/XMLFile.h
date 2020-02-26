@@ -97,12 +97,14 @@ namespace dolfin
 template<typename T>
 void XMLFile::read_meshfunction( MeshFunction<T> & meshfunction )
 {
+#ifdef HAVE_XML
   message(1, "Reading meshfunction from file %s.", filename.c_str());
 
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLMeshFunction<T>(meshfunction);
   parseFile();
+#endif
 }
 
 //------------------------------------------------------------------------------

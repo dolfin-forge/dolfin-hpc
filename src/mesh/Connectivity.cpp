@@ -22,7 +22,7 @@ Connectivity::Connectivity( uint order, uint degree )
 //-----------------------------------------------------------------------------
 Connectivity::Connectivity( Array< uint > const & valency )
   : order_( valency.size() )
-  , min_degree_( valency[0] )
+  , min_degree_( ( order_ > 0 ) ? valency[0] : 0 )
   , max_degree_( 0 )
   , connections_( order_ )
 {
@@ -30,13 +30,13 @@ Connectivity::Connectivity( Array< uint > const & valency )
 	{
 		min_degree_     = std::min( min_degree_, valency[e] );
 		max_degree_     = std::max( max_degree_, valency[e] );
-		connections_[e] = Array< uint >( valency[e] );
+		connections_[e] = Array< uint >( valency[e], 0. );
 	}
 }
 //-----------------------------------------------------------------------------
 Connectivity::Connectivity( Array< Array< uint > > const & connectivity )
   : order_( connectivity.size() )
-  , min_degree_( connectivity[0].size() )
+  , min_degree_( ( order > 0 ) ? connectivity[0].size() : 0 )
   , max_degree_( 0 )
   , connections_( order_ )
 {
@@ -180,7 +180,8 @@ uint Connectivity::regular() const
 void Connectivity::set(uint entity, uint const * connections)
 {
   dolfin_assert(entity < order_);
-  dolfin_assert(connections_);
+  dolfin_assert(not connections_.empty() );
+  dolfin_assert( connections != NULL );
 
   for ( uint e = 0; e < connections_[entity].size(); ++e )
     connections_[entity][e] = connections[e];

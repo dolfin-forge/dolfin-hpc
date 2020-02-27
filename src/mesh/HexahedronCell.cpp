@@ -173,7 +173,7 @@ void HexahedronCell::create_entities(uint** e, uint dim, uint const* v) const
 void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1, 3 - 0, 3 - 1, 3 - 2
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
@@ -847,7 +847,7 @@ uint HexahedronCell::findEdge(uint i, Cell const& cell) const
   for (uint j = 0; j < 12; ++j)
   {
     Array< uint > const & ev = topology(1, 0)[e[j]];
-    dolfin_assert(ev);
+    dolfin_assert( not ev.empty() );
     // Check incident pairs instead of non-incident quadruples
     uint const v0 = v[EIV[i][0]];
     uint const v1 = v[EIV[i][1]];
@@ -882,7 +882,7 @@ uint HexahedronCell::findFace(uint i, Cell const& cell) const
   for (uint j = 0; j < 6; ++j)
   {
     Array< uint > const & fv = topology(2, 0)[f[j]];
-    dolfin_assert(fv);
+    dolfin_assert( not fv.empty()  );
     if (fv[0] != v0 && fv[0] != v1 && fv[0] != v2 && fv[0] != v3 &&
         fv[1] != v0 && fv[1] != v1 && fv[1] != v2 && fv[1] != v3 &&
         fv[2] != v0 && fv[2] != v1 && fv[2] != v2 && fv[2] != v3 &&

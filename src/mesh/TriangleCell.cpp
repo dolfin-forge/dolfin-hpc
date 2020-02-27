@@ -104,7 +104,7 @@ void TriangleCell::create_entities(uint** e, uint dim, uint const* v) const
 void TriangleCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
@@ -652,9 +652,9 @@ uint TriangleCell::findEdge(uint i, Cell const& cell) const
 
   // Get vertices and edges
   Array<uint> const & v = cell.entities(0);
-  dolfin_assert(!v.empty());
+  dolfin_assert( not v.empty() );
   Array<uint> const & e = cell.entities(1);
-  dolfin_assert(!e.empty());
+  dolfin_assert( not e.empty() );
 
   // Look for edge satisfying ordering convention
   MeshTopology const& topology = cell.mesh().topology();
@@ -682,7 +682,7 @@ bool TriangleCell::check(Cell& cell) const
   // These connectivities should always exist, catching assertion if it is not
   // the case is the right behaviour
   Array<uint> const & cell_verts = cell.entities(0);
-  dolfin_assert(!cell_verts.emtpy());
+  dolfin_assert( not cell_verts.empty() );
   uint const num_cell_verts = this->num_vertices(this->dim());
   if(!is_sorted(cell_verts.data(), cell_verts.data() + num_cell_verts))
   {
@@ -702,7 +702,7 @@ bool TriangleCell::check(Cell& cell) const
     for (uint i = 0; i < 3; ++i)
     {
       Array<uint> const & ev = topology(1, 0)[e[i]];
-      dolfin_assert(ev);
+      dolfin_assert( not ev.empty() );
       for (uint j = 0; j < 2; ++j)
       {
         if (ev[j] != v[EIV[i][j]])

@@ -106,7 +106,7 @@ void QuadrilateralCell::create_entities(uint** e, uint dim, uint const* v) const
 void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
@@ -594,9 +594,9 @@ bool QuadrilateralCell::check(Cell& cell) const
   if (cell.mesh().topology().connectivity(1, 0))
   {
     Array<uint> const & v = cell.entities(0);
-    dolfin_assert(v);
+    dolfin_assert( not v.empty() );
     Array<uint> const & e = cell.entities(1);
-    dolfin_assert(e);
+    dolfin_assert( not e.empty() );
     MeshTopology const& topology = cell.mesh().topology();
     for (uint i = 0; i < 4; ++i)
     {
@@ -623,9 +623,9 @@ uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
 
   // Get vertices and edges
   Array<uint> const & v = cell.entities(0);
-  dolfin_assert(!v.empty());
+  dolfin_assert( not v.empty() );
   Array<uint> const & e = cell.entities(1);
-  dolfin_assert(!e.empty());
+  dolfin_assert( not e.empty() );
 
   // Look for edge satisfying ordering convention
   MeshTopology const& topology = cell.mesh().topology();
@@ -634,7 +634,7 @@ uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
   for (uint j = 0; j < 4; ++j)
   {
     Array<uint> const & ev = topology(1, 0)[e[j]];
-    dolfin_assert(ev);
+    dolfin_assert( not ev.empty() );
     if (ev[0] != v0 && ev[0] != v1 && ev[1] != v0 && ev[1] != v1)
     {
       return j;

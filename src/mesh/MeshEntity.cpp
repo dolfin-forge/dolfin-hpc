@@ -26,15 +26,18 @@ MeshEntity::~MeshEntity()
 void MeshEntity::get_entities(uint dim, uint * indices) const
 {
   Array<uint> const & e = topology_(tdim_, dim)[index_];
+  dolfin_assert( indices != NULL );
   std::copy(e.begin(), e.end(), indices);
 }
 //-----------------------------------------------------------------------------
 void MeshEntity::get_entities(uint ** indices) const
 {
+  dolfin_assert( indices != NULL );
   for (uint dim = 0; dim < tdim_; ++dim)
   {
     Array< Array<uint> > const & e = topology_(tdim_, dim)();
-    std::copy(e[dim].begin(), e[dim].begin(), indices[dim]);
+    dolfin_assert( indices[dim] != NULL );
+    std::copy(e[index_].begin(), e[index_].end(), indices[dim]);
   }
   indices[tdim_][0] = index_;
 }

@@ -89,7 +89,7 @@ void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
 void IntervalCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
@@ -312,7 +312,7 @@ bool IntervalCell::check(Cell& cell) const
   if (cell.mesh().topology().connectivity(1, 0))
   {
     Array< uint > const & cell_verts = cell.entities(0);
-    dolfin_assert(cell_verts);
+    dolfin_assert( not cell_verts.empty() );
     if (cell_verts[1] < cell_verts[0])
     {
       ret = false;

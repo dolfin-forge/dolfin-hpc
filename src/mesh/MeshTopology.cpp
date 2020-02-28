@@ -429,7 +429,7 @@ Connectivity const *
         uint const   d1 = cv1->degree( c0[i] );
         for ( uint j = 0; j < d1; ++j )
         {
-          if ( contains( c0.data(), d0, ( *c1v )[c1[j]].data(), d1 ) )
+          if ( contains( c0, ( *c1v )[c1[j]] ) )
           {
             entities.insert( c1[j] );
           }

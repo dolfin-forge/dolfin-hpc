@@ -48,7 +48,7 @@ public:
   uint index() const;
 
   /// Return number of incident mesh entities of given topological dimension
-  uint num_entities(uint dim) const;
+  uint num_entities(uint dim) const; //!< @tod remove this function
 
   /// Copy global indices of mesh entities to array
   void get_entities(uint dim, uint * indices) const;
@@ -58,11 +58,11 @@ public:
 
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
-  uint * entities(uint dim);
+  Array<uint> & entities(uint dim);
 
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
-  uint const * entities(uint dim) const;
+  Array<uint> const & entities(uint dim) const;
 
   /// Check if given entity is incident
   bool incident(MeshEntity const& entity) const;
@@ -181,21 +181,21 @@ inline uint MeshEntity::num_entities(uint dim) const
 }
 
 //-----------------------------------------------------------------------------
-inline uint * MeshEntity::entities(uint dim)
+inline Array<uint> & MeshEntity::entities(uint dim)
 {
   //dolfin_assert(topology_(tdim_, dim).is_initialized());
   dolfin_assert( topology_(tdim_, dim).min_degree() <= topology_(tdim_, dim).max_degree() );
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return topology_(tdim_, dim)(index_);
+  return topology_(tdim_, dim)[index_];
 }
 
 //-----------------------------------------------------------------------------
-inline uint const * MeshEntity::entities(uint dim) const
+inline Array<uint> const & MeshEntity::entities(uint dim) const
 {
   //dolfin_assert(topology_(tdim_, dim).is_initialized());
   dolfin_assert( topology_(tdim_, dim).min_degree() <= topology_(tdim_, dim).max_degree() );
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return topology_(tdim_, dim)(index_);
+  return topology_(tdim_, dim)[index_];
 }
 
 //-----------------------------------------------------------------------------

@@ -30,7 +30,7 @@ struct DirichletBoundary : public SubDomain
 int main()
 {
   // Create mesh and finite element
-  Mesh mesh("../../../../data/meshes/aneurysm.xml.gz");
+  Mesh mesh("../../../data/meshes/aneurysm.xml.gz");
 
   // Define variational problem
   Constant f(0.0);

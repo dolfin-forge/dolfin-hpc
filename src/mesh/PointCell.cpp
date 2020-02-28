@@ -101,7 +101,7 @@ void PointCell::initialize_connectivities(Mesh&) const
 void PointCell::refine_cell(Cell& cell, MeshEditor& editor,
                            uint& current_cell) const
 {
-  editor.add_cell(current_cell++, cell.entities(0));
+  editor.add_cell(current_cell++, cell.entities(0).data());
 }
 //-----------------------------------------------------------------------------
 uint PointCell::num_refined_cells() const

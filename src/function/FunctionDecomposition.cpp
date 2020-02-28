@@ -45,7 +45,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       S.cell.update(*c);
-      uint * cvi = c->entities(0);
+      Array<uint> const & cvi = c->entities(0);
       for (VertexIterator v(*c); !v.end(); ++v)
       {
         uint ci = 0;

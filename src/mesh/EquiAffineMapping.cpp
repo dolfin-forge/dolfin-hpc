@@ -92,7 +92,7 @@ void EquiAffineMapping::updateTriangle(Cell const& cell)
   dolfin_assert(cell.dim() == 2);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::fill(&p0[0], &p0[d_], 0.0);
   std::fill(&p1[0], &p1[d_], 0.0);
@@ -143,7 +143,7 @@ void EquiAffineMapping::updateTetrahedron(Cell const& cell)
   dolfin_assert(cell.dim() == 3);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::fill(&p0[0], &p0[d_], 0.0);
   std::fill(&p1[0], &p1[d_], 0.0);

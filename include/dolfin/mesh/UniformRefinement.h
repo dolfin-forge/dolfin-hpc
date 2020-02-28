@@ -4,23 +4,21 @@
 #ifndef __DOLFIN_MESH_UNIFORM_REFINEMENT_H
 #define __DOLFIN_MESH_UNIFORM_REFINEMENT_H
 
-#include <dolfin/common/types.h>
-
 namespace dolfin
 {
 
 class Mesh;
 
-/// This class implements uniform mesh refinement for different mesh types.
+/// This file implements uniform mesh refinement for different mesh types.
 
-struct UniformRefinement
+namespace UniformRefinement
 {
 
-  /// Refine mesh uniformly according to default pattern
-  void operator()(Mesh& mesh);
+/// Refine mesh uniformly according to default pattern
+void refine( Mesh& mesh );
 
-};
+} // namespace UniformRefinement
 
-} /* namespace dolfin */
+} // namespace dolfin
 
 #endif /* __DOLFIN_MESH_UNIFORM_REFINEMENT_H */

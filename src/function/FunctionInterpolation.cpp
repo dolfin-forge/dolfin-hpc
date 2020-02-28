@@ -221,7 +221,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         Cell c1(M1, v1->entities(tdim1)[0]);
         S1.cell.update(c1);
         dm1.tabulate_dofs(S1.dofs, S1.cell);
-        uint *vid = c1.entities(0);
+        Array<uint> & vid = c1.entities(0);
         uint vpos = 0;
         while (vid[vpos] != v1->index())
         {

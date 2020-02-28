@@ -337,7 +337,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
     for (VertexIterator v(*c); !v.end(); ++v)
     {
       uint ci   = 0;
-      uint *cvi = c->entities(0);
+      Array<uint> const & cvi = c->entities(0);
       for (; ci < c->num_entities(0); ci++)
       {
         if (cvi[ci] == v->index())
@@ -359,7 +359,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
       {
         for (EdgeIterator e(*v); !e.end(); ++e)
         {
-          uint const *edge_v = e->entities(0);
+          Array<uint> const & edge_v = e->entities(0);
           uint const index = ( edge_v[0] != v->index() ) ? 0 : 1;
           Vertex v_e( new_mesh, edge_v[index] );
 

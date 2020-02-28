@@ -89,13 +89,13 @@ void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
 void IntervalCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
   {
-    uint* cell_vertices = topology(1, 0)(i);
-    std::sort(cell_vertices, cell_vertices + 2);
+    Array< uint > & cell_vertices = topology(1, 0)[i];
+    std::sort(cell_vertices.data(), cell_vertices.data() + 2);
   }
 }
 //-----------------------------------------------------------------------------
@@ -121,8 +121,8 @@ void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
   dolfin_assert(cell.type() == this->cell_type);
 
   // Get vertices
-  uint const* v = cell.entities(0);
-  dolfin_assert(v);
+  Array< uint > const & v = cell.entities(0);
+  dolfin_assert(!v.empty());
 
   // Add midpoint vertex
   uint const offset = cell.mesh().size(0);
@@ -156,7 +156,7 @@ real IntervalCell::volume(MeshEntity const& entity) const
   MeshGeometry const& geometry = entity.mesh().geometry();
 
   // Get the coordinates of the two vertices
-  uint const* vertices = entity.entities(0);
+  Array< uint > const & vertices = entity.entities(0);
   real const* x0 = geometry.x(vertices[0]);
   real const* x1 = geometry.x(vertices[1]);
 
@@ -194,7 +194,7 @@ void IntervalCell::midpoint(MeshEntity const& entity, real * p) const
   dolfin_assert(entity.num_entities(0) == NE[1][0]);
 
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const * vertices = entity.entities(0);
+  Array< uint > const & vertices = entity.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   uint const gdim = geometry.dim();
@@ -209,7 +209,7 @@ void IntervalCell::normal(Cell const& cell, uint facet, real * n) const
   dolfin_assert(cell.type() == this->cell_type);
 
   MeshGeometry const& geometry = cell.mesh().geometry();
-  uint const * vertices = cell.entities(0);
+  Array< uint > const & vertices = cell.entities(0);
   real const * p0 = geometry.x(vertices[facet]);
   real const * p1 = geometry.x(vertices[(facet + 1) % 2]);
   uint const gdim = geometry.dim();
@@ -240,7 +240,7 @@ bool IntervalCell::intersects(MeshEntity const& e, Point const& p) const
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = e.mesh().geometry();
-  uint const* vertices = e.entities(0);
+  Array< uint > const & vertices = e.entities(0);
   real const* x0 = geometry.x(vertices[0]);
   real const* x1 = geometry.x(vertices[1]);
 
@@ -311,8 +311,8 @@ bool IntervalCell::check(Cell& cell) const
   // Check that cell vertices are in ascending order (so are edge vertices then)
   if (cell.mesh().topology().connectivity(1, 0))
   {
-    uint* cell_verts = cell.entities(0);
-    dolfin_assert(cell_verts);
+    Array< uint > const & cell_verts = cell.entities(0);
+    dolfin_assert( not cell_verts.empty() );
     if (cell_verts[1] < cell_verts[0])
     {
       ret = false;

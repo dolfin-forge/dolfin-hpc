@@ -25,9 +25,9 @@ struct EdgeKey : public std::pair<T, T>
       std::pair<T, T>(),
       idx(std::rand())
   {
-    uint const * v = e.entities(0);
-    this->first  = (T) (v[0] < v[1] ? v[0] : v[1]);
-    this->second = (T) (v[0] < v[1] ? v[1] : v[0]);
+    Array<uint> const & v = e.entities(0);
+    this->first  = static_cast<T>( v[0] < v[1] ? v[0] : v[1] );
+    this->second = static_cast<T>( v[0] < v[1] ? v[1] : v[0] );
   }
 
   /// An edge contains a pair of vertices
@@ -40,9 +40,9 @@ struct EdgeKey : public std::pair<T, T>
   /// Construct a key from edge vertices
   inline void set(Edge const& e)
   {
-    uint const * v = e.entities(0);
-    this->first  = (T) (v[0] < v[1] ? v[0] : v[1]);
-    this->second = (T) (v[0] < v[1] ? v[1] : v[0]);
+    Array<uint> const & v = e.entities(0);
+    this->first  = static_cast<T>( v[0] < v[1] ? v[0] : v[1] );
+    this->second = static_cast<T>( v[0] < v[1] ? v[1] : v[0] );
     idx = std::rand();
   }
 

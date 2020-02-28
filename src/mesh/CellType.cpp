@@ -315,13 +315,13 @@ bool CellType::check(Cell& cell) const
   bool ret = true;
   if (cell.mesh().topology().connectivity(1, 0))
   {
-    uint const * cell_edges = cell.entities(1);
-    dolfin_assert(cell_edges);
+    Array<uint> const & cell_edges = cell.entities(1);
+    dolfin_assert( not cell_edges.empty() );
     uint const num_cell_edges = this->num_entities(1);
     for (uint e = 0; e < num_cell_edges; ++e)
     {
-      uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);
-      dolfin_assert(edge_verts);
+      Array<uint> const & edge_verts = cell.mesh().topology()(1, 0)[cell_edges[e]];
+      dolfin_assert( not edge_verts.empty() );
       if (edge_verts[1] < edge_verts[0])
       {
         ret = false;

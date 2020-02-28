@@ -18,6 +18,9 @@
 namespace dolfin
 {
 
+namespace UniformRefinement
+{
+
 //-----------------------------------------------------------------------------
 template<class E>
 void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
@@ -57,7 +60,7 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-void UniformRefinement::operator()(Mesh& mesh)
+void refine(Mesh& mesh)
 {
   // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh(mesh.type(), mesh.space());
@@ -115,5 +118,7 @@ void UniformRefinement::operator()(Mesh& mesh)
 }
 //-----------------------------------------------------------------------------
 
-} /* namespace dolfin */
+} // namespace UniformRefinement
+
+} // namespace dolfin
 

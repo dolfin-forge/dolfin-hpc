@@ -224,21 +224,11 @@ static inline void range(Iterator begin, Iterator end, T v = T(), int s = 1)
 }
 
 /// e0 contains e1
-static inline bool contains(uint const* e0, uint n0, uint const* e1, uint n1)
+static inline bool contains( Array<uint> const & e0, Array<uint> const & e1 )
 {
-  for (uint i1 = 0; i1 < n1; ++i1)
-  {
-    bool found = false;
-    for (uint i0 = 0; i0 < n0; ++i0)
-    {
-      if (e0[i0] == e1[i1])
-      {
-        found = true;
-        break;
-      }
-    }
-    if (!found) return false;
-  }
+  for ( Array<uint>::const_iterator e = e1.begin(); e != e1.end(); ++e )
+    if ( e0.end() == std::find( e0.begin(), e0.end(), *e ) )
+      return false;
   return true;
 }
 

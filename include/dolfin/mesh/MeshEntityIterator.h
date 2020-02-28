@@ -95,8 +95,8 @@ private:
   uint const end_;
 
   // Mapping from pos to index (if any)
-  uint const * index_;
-  
+  Array<uint> const * index_;
+
 };
 
 //--- INLINES -----------------------------------------------------------------
@@ -123,7 +123,7 @@ inline bool MeshEntityIterator::end() const
 inline MeshEntity* MeshEntityIterator::operator->()
 {
   // WARNING: index is only updated if iterator is dereferenced
-  entity_.index_ = (index_ ? index_[pos_] : pos_);
+  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
   return &entity_;
 }
 
@@ -131,7 +131,7 @@ inline MeshEntity* MeshEntityIterator::operator->()
 inline MeshEntity& MeshEntityIterator::operator*()
 {
   // WARNING: index is only updated if iterator is dereferenced
-  entity_.index_ = (index_ ? index_[pos_] : pos_);
+  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
   return entity_;
 }
 
@@ -140,7 +140,7 @@ inline MeshEntity& MeshEntityIterator::operator[](uint i)
 {
   dolfin_assert(i < end_);
   pos_ = i;
-  entity_.index_ = (index_ ? index_[pos_] : pos_);
+  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
   return entity_;
 }
 

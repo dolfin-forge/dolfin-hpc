@@ -187,12 +187,12 @@ uint Mesh::num_cells() const
   return topology_.size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
-uint* Mesh::cells()
+Array< Array< uint > > & Mesh::cells()
 {
   return topology_(topology_.dim(), 0)();
 }
 //-----------------------------------------------------------------------------
-uint const * Mesh::cells() const
+Array< Array< uint > > const & Mesh::cells() const
 {
   return topology_(topology_.dim(), 0)();
 }
@@ -373,7 +373,7 @@ void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
 //-----------------------------------------------------------------------------
 void Mesh::refine()
 {
-  UniformRefinement R; R(*this);
+  UniformRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const

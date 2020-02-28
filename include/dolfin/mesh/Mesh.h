@@ -119,10 +119,10 @@ public:
   uint num_cells() const;
 
   /// Return connectivity for all cells
-  uint * cells();
+  Array< Array< uint > > & cells(); //!< @tod remove this function
 
   /// Return connectivity for all cells
-  uint const * cells() const;
+  Array< Array< uint > > const & cells() const; //!< @tod remove this function
 
   /// Compute entities of given topological dimension
   void init(uint dim) const;

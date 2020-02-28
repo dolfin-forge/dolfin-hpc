@@ -19,7 +19,7 @@ MeshEntityIterator::MeshEntityIterator(MeshEntity& entity, uint dim) :
     entity_(entity.mesh(), dim, 0),
     pos_(0),
     end_(entity.num_entities(dim)),
-    index_(entity.entities(dim))
+    index_(&entity.entities(dim))
 {
 }
 //-----------------------------------------------------------------------------

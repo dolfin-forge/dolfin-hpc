@@ -73,7 +73,7 @@ uint QuadrilateralCell::orientation(Cell const& cell) const
 
   // Get the coordinates of vertices v0, v1 and v2
   MeshGeometry const& geometry = cell.mesh().geometry();
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   real const * v0 = geometry.x(vertices[0]);
   real const * v1 = geometry.x(vertices[1]);
   real const * v2 = geometry.x(vertices[2]);
@@ -106,7 +106,7 @@ void QuadrilateralCell::create_entities(uint** e, uint dim, uint const* v) const
 void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1
-  dolfin_assert(topology.type(i).cellType() == this->cell_type);
+  dolfin_assert(topology.type().cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.connectivity(1, 0))
@@ -114,13 +114,13 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
     dolfin_assert(topology.connectivity(2, 1));
 
     // Get edges
-    uint* cell_edges = topology(2, 1)(i);
+    Array<uint> const & cell_edges = topology(2, 1)[i];
 
     // Sort vertices on each edge
     for (uint i = 0; i < 4; ++i)
     {
-      uint* edge_vertices = topology(1, 0)(cell_edges[i]);
-      std::sort(edge_vertices, edge_vertices + 2);
+      Array<uint> & edge_vertices = topology(1, 0)[cell_edges[i]];
+      std::sort(edge_vertices.data(), edge_vertices.data() + 2);
     }
   }
 
@@ -133,8 +133,8 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
     dolfin_assert(topology.connectivity(2, 1));
 
     // Get cell vertices and edges
-    uint* cell_vertices = topology(2, 0)(i);
-    uint* cell_edges = topology(2, 1)(i);
+    Array<uint> const & cell_vertices = topology(2, 0)[i];
+    Array<uint> & cell_edges = topology(2, 1)[i];
 
     // Loop on non-incident vertices on cell as lexicographical pairs
     // (i, j): (0,1) (0,3) (1,2) (2,3)
@@ -148,18 +148,22 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
       for (uint k = m; k < 4; ++k)
       {
         // Get local vertices on edge
-        uint* edge_vertices = topology(1, 0)(cell_edges[k]);
+        Array<uint> const & edge_vertices = topology(1, 0)[cell_edges[k]];
 
         // Check if the ith and jth vertex of the cell are non-incident on edge k
 #if __SUNPRO_CC
         int n1 = 0;
         int n2 = 0;
-        std::count(edge_vertices, edge_vertices+2, cell_vertices[v0], n1);
-        std::count(edge_vertices, edge_vertices+2, cell_vertices[v1], n2);
+        std::count(edge_vertices.data(), edge_vertices.data() + 2,
+                   cell_vertices[v0], n1);
+        std::count(edge_vertices.data(), edge_vertices.data() + 2,
+                   cell_vertices[v1], n2);
         if (!n1 && !n2 )
 #else
-        if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0])
-         && !std::count(edge_vertices, edge_vertices + 2, cell_vertices[v1]))
+        if (!std::count(edge_vertices.data(), edge_vertices.data() + 2,
+                        cell_vertices[v0])
+         && !std::count(edge_vertices.data(), edge_vertices.data() + 2,
+                        cell_vertices[v1]))
 #endif
         {
           // Swap edge numbers
@@ -232,10 +236,10 @@ void QuadrilateralCell::refine_cell(Cell& cell, MeshEditor& editor,
   dolfin_assert(cell.type() == this->cell_type);
 
   // Get vertices and edges
-  uint const * v = cell.entities(0);
-  dolfin_assert(v);
-  uint const * e = cell.entities(1);
-  dolfin_assert(e);
+  Array<uint> const & v = cell.entities(0);
+  dolfin_assert(!v.empty());
+  Array<uint> const & e = cell.entities(1);
+  dolfin_assert(!e.empty());
 
   // Compute indices for the nine new vertices
   uint const v0 = v[0];
@@ -280,7 +284,7 @@ real QuadrilateralCell::volume(MeshEntity const& entity) const
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const * vertices = entity.entities(0);
+  Array<uint> const & vertices = entity.entities(0);
   real const * a = geometry.x(vertices[0]);
   real const * b = geometry.x(vertices[1]);
   real const * c = geometry.x(vertices[2]);
@@ -315,7 +319,7 @@ real QuadrilateralCell::diameter(MeshEntity const& entity) const
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const * vertices = entity.entities(0);
+  Array<uint> const & vertices = entity.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   real const * x2 = geometry.x(vertices[2]);
@@ -339,7 +343,7 @@ real QuadrilateralCell::circumradius(MeshEntity const& entity) const
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const * vertices = entity.entities(0);
+  Array<uint> const & vertices = entity.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   real const * x2 = geometry.x(vertices[2]);
@@ -375,7 +379,7 @@ real QuadrilateralCell::inradius(MeshEntity const& entity) const
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const * vertices = entity.entities(0);
+  Array<uint> const & vertices = entity.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   real const * x2 = geometry.x(vertices[2]);
@@ -417,7 +421,7 @@ void QuadrilateralCell::midpoint(MeshEntity const& entity, real * p) const
   dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const* vertices = entity.entities(0);
+  Array<uint> const & vertices = entity.entities(0);
   real const* x0 = geometry.x(vertices[0]);
   real const* x1 = geometry.x(vertices[1]);
   real const* x2 = geometry.x(vertices[2]);
@@ -439,7 +443,7 @@ void QuadrilateralCell::normal(Cell const& cell, uint facet, real * n) const
   // Get coordinates of first non-incident vertex
   real const * p0 = geometry.x(c.entities(0)[ENV[facet][0]]);
   // Get coordinates of edge vertices
-  uint const * vertices = f.entities(0);
+  Array<uint> const & vertices = f.entities(0);
   real const * p1 = geometry.x(vertices[0]);
   real const * p2 = geometry.x(vertices[1]);
   uint const gdim = geometry.dim();
@@ -492,7 +496,7 @@ real QuadrilateralCell::facet_area(Cell const& cell, uint facet) const
   Cell& c = const_cast<Cell&>(cell);
   Facet f(c.mesh(), c.entities(1)[facet]);
   MeshGeometry const& geometry = cell.mesh().geometry();
-  uint const * vertices = f.entities(0);
+  Array<uint> const & vertices = f.entities(0);
   real const * p0 = geometry.x(vertices[0]);
   real const * p1 = geometry.x(vertices[1]);
   // Compute distance between vertices
@@ -589,15 +593,15 @@ bool QuadrilateralCell::check(Cell& cell) const
   // Check edge -> incident vertices mapping
   if (cell.mesh().topology().connectivity(1, 0))
   {
-    uint const* v = cell.entities(0);
-    dolfin_assert(v);
-    uint const* e = cell.entities(1);
-    dolfin_assert(e);
+    Array<uint> const & v = cell.entities(0);
+    dolfin_assert( not v.empty() );
+    Array<uint> const & e = cell.entities(1);
+    dolfin_assert( not e.empty() );
     MeshTopology const& topology = cell.mesh().topology();
     for (uint i = 0; i < 4; ++i)
     {
-      uint const * ev = topology(1, 0)(e[i]);
-      dolfin_assert(ev);
+      Array<uint> const & ev = topology(1, 0)[e[i]];
+      dolfin_assert(ev.size() >= 2);
       for (uint j = 0; j < 2; ++j)
       {
         if (ev[j] != v[EIV[i][0]] && ev[j] != v[EIV[i][1]])
@@ -618,10 +622,10 @@ uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
   // Ordering convention for edges (order of non-incident vertices)
 
   // Get vertices and edges
-  uint const * v = cell.entities(0);
-  dolfin_assert(v);
-  uint const * e = cell.entities(1);
-  dolfin_assert(e);
+  Array<uint> const & v = cell.entities(0);
+  dolfin_assert( not v.empty() );
+  Array<uint> const & e = cell.entities(1);
+  dolfin_assert( not e.empty() );
 
   // Look for edge satisfying ordering convention
   MeshTopology const& topology = cell.mesh().topology();
@@ -629,8 +633,8 @@ uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
   uint const v1 = v[ENV[i][1]];
   for (uint j = 0; j < 4; ++j)
   {
-    uint const * ev = topology(1, 0)(e[j]);
-    dolfin_assert(ev);
+    Array<uint> const & ev = topology(1, 0)[e[j]];
+    dolfin_assert( not ev.empty() );
     if (ev[0] != v0 && ev[0] != v1 && ev[1] != v0 && ev[1] != v1)
     {
       return j;

@@ -157,9 +157,9 @@ inline bool Connectivity::incident(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-	return ( connections_[entity].end()
-	         != std::find(
-	           connections_[entity].begin(), connections_[entity].end(), edge ) );
+  Array< uint >::const_iterator pos =
+    std::find( connections_[entity].begin(), connections_[entity].end(), edge );
+  return ( connections_[entity].end() != pos );
 }
 
 //-----------------------------------------------------------------------------
@@ -167,12 +167,10 @@ inline int Connectivity::index(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  uint index = 0;
-  for (; index < connections_[entity].size(); ++index )
+  for (uint index = 0; index < connections_[entity].size(); ++index )
     if ( connections_[entity][index] == edge )
-      break;
-
-  return ( index == connections_[entity].size() ) ? -1 : index;
+      return index;
+  return -1;
 }
 
 //--- OPERATORS ---------------------------------------------------------------

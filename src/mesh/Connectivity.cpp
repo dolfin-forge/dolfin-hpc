@@ -36,7 +36,7 @@ Connectivity::Connectivity( Array< uint > const & valency )
 //-----------------------------------------------------------------------------
 Connectivity::Connectivity( Array< Array< uint > > const & connectivity )
   : order_( connectivity.size() )
-  , min_degree_( ( order > 0 ) ? connectivity[0].size() : 0 )
+  , min_degree_( ( order_ > 0 ) ? connectivity[0].size() : 0 )
   , max_degree_( 0 )
   , connections_( order_ )
 {

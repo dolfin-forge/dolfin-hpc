@@ -48,7 +48,7 @@ public:
   uint index() const;
 
   /// Return number of incident mesh entities of given topological dimension
-  uint num_entities(uint dim) const;
+  uint num_entities(uint dim) const; //!< @tod remove this function
 
   /// Copy global indices of mesh entities to array
   void get_entities(uint dim, uint * indices) const;

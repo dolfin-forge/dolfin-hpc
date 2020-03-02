@@ -224,14 +224,14 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   // Write cell connectivity
   fprintf(fp, "<Cells>\n");
-  fprintf(fp, "<DataArray  type=\"Int64\"  Name=\"connectivity\"  format=\"binary\">\n");
-  std::vector<int64_t> c_data(cell_verts_block_size);
-  std::vector<int64_t>::iterator c_entry = c_data.begin();
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\">\n");
+  std::vector<int32_t> c_data(cell_verts_block_size);
+  std::vector<int32_t>::iterator c_entry = c_data.begin();
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     for (VertexIterator v(*c); !v.end(); ++v)
     {
-      *c_entry++ = static_cast<int64_t>( v->index() );
+      *c_entry++ = static_cast<int32_t>( v->index() );
     }
   }
 
@@ -242,12 +242,12 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   fprintf(fp, "</DataArray>\n");
 
   // Write offset into connectivity array for the end of each cell
-  fprintf(fp, "<DataArray  type=\"Int64\"  Name=\"offsets\"  format=\"binary\">\n");
-  std::vector<int64_t> o_data(cell_verts_block_size);
-  std::vector<int64_t>::iterator oo_entry = o_data.begin();
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">\n");
+  std::vector<int32_t> o_data(cell_verts_block_size);
+  std::vector<int32_t>::iterator oo_entry = o_data.begin();
   for (uint offsets = 1; offsets <= num_mesh_cells; ++offsets)
   {
-    *oo_entry++ = static_cast<int64_t>( offsets * num_cell_verts );
+    *oo_entry++ = static_cast<int32_t>( offsets * num_cell_verts );
   }
 
   std::stringstream base64_oo_stream;
@@ -621,8 +621,8 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
            << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">\n"
            << "<PUnstructuredGrid GhostLevel=\"0\">\n"
            << "<PCellData>\n"
-           << "<PDataArray  type=\"Int64\"  Name=\"connectivity\" />\n"
-           << "<PDataArray  type=\"Int64\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"connectivity\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"offsets\" />\n"
            << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
            << "</PCellData>\n"
            << "<PPoints>\n"
@@ -702,8 +702,8 @@ void VTKFile::pvtuFileWriteFunction(
 
   //
   pvtuFile << "<PCellData>\n"
-           << "<PDataArray  type=\"Int64\"  Name=\"connectivity\"  />\n"
-           << "<PDataArray  type=\"Int64\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"connectivity\"  />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"offsets\" />\n"
            << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
            << "</PCellData>\n";
 

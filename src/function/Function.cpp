@@ -277,23 +277,7 @@ void Function::clear()
 void Function::evaluate(real* values, const real* x,
                         const ufc::cell& cell) const
 {
-  UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
-
-  // Get expansion coefficients on cell
-  dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
-  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
-
-  // Compute linear combination
-  std::fill_n(values, scratch->size, 0.0);
-  for (uint i = 0; i < element_->space_dimension(); ++i)
-  {
-    //FIXME: Idiotic
-    element_->evaluate_basis(i, scratch->basis_values, x, *ufc_cell);
-    for (uint j = 0; j < scratch->size; ++j)
-    {
-      values[j] += scratch->coefficients[i] * scratch->basis_values[j];
-    }
-  }
+  evaluate( 1, values, x, cell );
 }
 
 //--- GenericFunction ---------------------------------------------------------

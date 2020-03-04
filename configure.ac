@@ -57,7 +57,7 @@ AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python],
               [Install Python modules, requires a Python interpreter]),
               [enable_python=${enableval}],[enable_python=no])
 
-AC_ARG_ENABLE(basis_function_optimization, AC_HELP_STRING([--enable-opt-basis],
+AC_ARG_ENABLE(opt-basis, AC_HELP_STRING([--enable-opt-basis],
               [Enable basis function optimization]),
               [enable_opt_basis=${enableval}], [enable_opt_basis=no])
 

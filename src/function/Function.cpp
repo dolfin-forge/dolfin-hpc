@@ -290,6 +290,9 @@ Mesh& Function::mesh() const
 void Function::evaluate(uint n, real* values, const real* x,
                         const ufc::cell& cell) const
 {
+  dolfin_assert( values != NULL );
+  dolfin_assert( x != NULL );
+
   UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
 
   // Get expansion coefficients on cell
@@ -298,6 +301,23 @@ void Function::evaluate(uint n, real* values, const real* x,
   std::fill_n(values, n * scratch->size, 0.0);
   for (uint q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
   {
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+    dolfin_assert( scratch->size <= Space::MAX_DIMENSION );
+    dolfin_assert( element_->space_dimension() <= scratch->space_dimension );
+
+    real coord[Space::MAX_DIMENSION];
+
+    element_->evaluate_basis_map_coordinates( coord[0], coord[1], coord[2],
+                                              x, *ufc_cell );
+
+    element_->evaluate_basis_from_coordinates( coord[0], coord[1], coord[2],
+                                               scratch->all_basis_values );
+
+    // Compute linear combination
+    for (uint i = 0; i < element_->space_dimension(); ++i)
+      for (uint j = 0; j < scratch->size; ++j)
+        values[j] += scratch->coefficients[i] * scratch->all_basis_values[i][j];
+#else
     // Compute linear combination
     for (uint i = 0; i < element_->space_dimension(); ++i)
     {
@@ -308,6 +328,7 @@ void Function::evaluate(uint n, real* values, const real* x,
         values[j] += scratch->coefficients[i] * scratch->basis_values[j];
       }
     }
+#endif
   }
 }
 

@@ -57,6 +57,10 @@ AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python],
               [Install Python modules, requires a Python interpreter]),
               [enable_python=${enableval}],[enable_python=no])
 
+AC_ARG_ENABLE(opt-basis, AC_HELP_STRING([--enable-opt-basis],
+              [Enable basis function optimization]),
+              [enable_opt_basis=${enableval}], [enable_opt_basis=no])
+
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
             [Compile with support for reading/writing XML data]),
@@ -99,6 +103,11 @@ fi
 if test "x${enable_boosttr1}" = xyes; then
    AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
    need_boost=yes
+fi
+
+if test "x${enable_opt_basis}" = xyes; then
+   AC_DEFINE(ENABLE_EVALUATE_BASIS_FROM_COORDINATES, [1],
+   [Enable basis function optimization])
 fi
 
 # Checks for programs.
@@ -482,6 +491,7 @@ Package features:
   Unordered containers: ${found_unordered_containers}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
+  Basis function optimization: ${enable_opt_basis}
   CHECK support: ${enable_check}
 
 ---------------------------------------------------------

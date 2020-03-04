@@ -34,6 +34,44 @@
 //   swig_path:                      ''
 
 #include "ffc_Brezzi_Douglas_Marini_1_2d.h"
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_brezzi_douglas_marini_1_2d_finite_element_0::evaluate_basis_map_coordinates(double & X,
+                                                   double & Y,
+                                                   double & Z,
+                                                   const double* coordinates,
+                                                   const ufc::cell& c) const
+{
+    // Extract vertex coordinates
+    const double * const * x = c.coordinates;
+
+    // Compute Jacobian of affine map from reference cell
+    const double J_00 = x[1][0] - x[0][0];
+    const double J_01 = x[2][0] - x[0][0];
+    const double J_10 = x[1][1] - x[0][1];
+    const double J_11 = x[2][1] - x[0][1];
+
+    // Compute determinant of Jacobian
+    double detJ = J_00*J_11 - J_01*J_10;
+
+    // Compute inverse of Jacobian
+
+    // Compute constants
+    const double C0 = x[1][0] + x[2][0];
+    const double C1 = x[1][1] + x[2][1];
+
+    // Get coordinates and map to the reference (FIAT) element
+    X = (J_01*(C1 - 2.0*coordinates[1]) + J_11*(2.0*coordinates[0] - C0)) / detJ;
+    Y = (J_00*(2.0*coordinates[1] - C1) + J_10*(C0 - 2.0*coordinates[0])) / detJ;
+}
+
+/// Compute mapped coordinates for evaluate_basis()
+void ffc_brezzi_douglas_marini_1_2d_finite_element_0::evaluate_basis_from_coordinates(const double X,
+                                                    const double Y,
+                                                    const double Z,
+                                                    double** values) const
+{
+    throw std::runtime_error("evaluate_basis_from_coordinates not yet implemented (introduced in UFC 2.2).");
+}
 
 /// Evaluate basis function i at given point in cell
 void ffc_brezzi_douglas_marini_1_2d_finite_element_0::evaluate_basis(unsigned int i,

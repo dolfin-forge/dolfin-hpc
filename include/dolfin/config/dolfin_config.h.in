@@ -15,6 +15,9 @@
 /* Compile with local data cache in functions */
 #undef ENABLE_FUNCTION_CACHE
 
+/* Enable basis function optimization */
+#undef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+
 /* Compile with support for MPI I/O */
 #undef ENABLE_MPIIO
 

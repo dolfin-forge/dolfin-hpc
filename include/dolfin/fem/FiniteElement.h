@@ -101,6 +101,21 @@ public:
   /// UFC @since 1.1
   uint value_dimension(uint i) const;
 
+  /// Compute mapped coordinates for evaluate_basis()
+  /// UFC @since 2.2.0
+  void evaluate_basis_map_coordinates(double & X,
+                                      double & Y,
+                                      double & Z,
+                                      const double* coordinates,
+                                      const ufc::cell& c) const;
+
+  /// Compute mapped coordinates for evaluate_basis()
+  /// UFC @since 2.2.0
+  void evaluate_basis_from_coordinates(const double X,
+                                       const double Y,
+                                       const double Z,
+                                       double** values) const;
+
   /// Evaluate basis function i at given point in cell
   /// UFC @since 1.1
   void evaluate_basis(uint i, double* values, const double* coordinates,
@@ -256,6 +271,27 @@ inline uint FiniteElement::value_rank() const
 inline uint FiniteElement::value_dimension(uint i) const
 {
   return ufc_finite_element_->value_dimension(i);
+}
+
+/// Compute mapped coordinates for evaluate_basis()
+/// FIXME UFC @since 1.2
+inline void FiniteElement::evaluate_basis_map_coordinates(double & X,
+                                                          double & Y,
+                                                          double & Z,
+                                                          const double* coordinates,
+                                                          const ufc::cell& c) const
+{
+  ufc_finite_element_->evaluate_basis_map_coordinates(X, Y, Z, coordinates, c);
+}
+
+/// Compute mapped coordinates for evaluate_basis()
+/// FIXME UFC @since 1.2
+inline void FiniteElement::evaluate_basis_from_coordinates(const double X,
+                                                           const double Y,
+                                                           const double Z,
+                                                           double** values) const
+{
+  ufc_finite_element_->evaluate_basis_from_coordinates(X, Y, Z, values);
 }
 
 //-----------------------------------------------------------------------------

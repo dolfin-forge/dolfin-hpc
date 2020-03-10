@@ -73,6 +73,37 @@ EOF
 	  fi		
 	fi
 	if test x"${have_petsc}" = xno; then
+	   if test -d "$ac_petsc_dir/conf"; then
+	   
+          cat <<EOF >config_petsc
+include $PETSC_DIR/conf/variables
+
+petsclibs:
+	echo -L$PETSC_DIR/lib64/  \$(PETSC_LIB)
+petscinc:
+	echo \$(PETSC_CC_INCLUDES)
+EOF
+	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
+	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
+	     rm -fr config_petsc
+	     have_petsc="yes"
+	  elif test -d "$ac_petsc_dir/lib64/petsc/conf"; then
+	   
+          cat <<EOF >config_petsc
+include $PETSC_DIR/lib/petsc/conf/variables
+
+petsclibs:
+	echo -L$PETSC_DIR/lib64/  \$(PETSC_LIB)
+petscinc:
+	echo \$(PETSC_CC_INCLUDES)
+EOF
+	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
+	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
+	     rm -fr config_petsc
+	     have_petsc="yes"
+	  fi		
+	fi
+	if test x"${have_petsc}" = xno; then
 	   AC_MSG_RESULT(no)
 	   PKG_CHECK_MODULES([pkgconfig_PETSc],[PETSc],
 	   [have_petsc="yes"

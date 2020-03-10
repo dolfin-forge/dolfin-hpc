@@ -25,6 +25,7 @@ AC_DEFUN([AX_PETSC],[
 	CPPFLAGS_SAVED="$CPPFLAGS"
 	LDFLAGS_SAVED="$LDFLAGS"
 	have_petsc=no
+	have_pkgconfig_petsc="no"
 	if test -d "$ac_petsc_dir"; then
 	   if test -d "$ac_petsc_dir/bmake"; then
 	      ac_petsc_arch=`grep PETSC_ARCH  $ac_petsc_dir/bmake/petscconf | sed 's/PETSC_ARCH=/''/'`
@@ -71,6 +72,15 @@ EOF
 
 	  fi		
 	fi
+	if test x"${have_petsc}" = xno; then
+	   AC_MSG_RESULT(no)
+	   PKG_CHECK_MODULES([pkgconfig_PETSc],[PETSc],
+	   [have_petsc="yes"
+	   PETSC_CPPFLAGS="$pkgconfig_PETSc_CFLAGS"
+	   PETSC_LDFLAGS="$pkgconfig_PETSc_LIBS"
+	   have_pkgconfig_petsc="yes"],
+	   [have_petsc="no"])
+	fi
 	AC_SUBST(PETSC_LDFLAGS)
 	if test x"${have_petsc}" = xyes; then
 	   AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
@@ -79,7 +89,9 @@ EOF
 	   if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then	
 	      LDFLAGS="$LDFLAGS -lfpe"
 	   fi
-	   AC_MSG_RESULT(yes)
+	   if test x"${have_pkgconfig_petsc}" = xno; then
+	      AC_MSG_RESULT(yes)
+	   fi
 	else
 	   CPPFLAGS="$CPPFLAGS_SAVED"
 	   LDFLAGS="$LDFLAGS_SAVED"

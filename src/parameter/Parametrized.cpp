@@ -89,7 +89,7 @@ Parameter Parametrized::get(std::string key) const
   }
 
   // Fall back on global database
-  return dolfin::dolfin_get(key);
+  return ParameterSystem::parameters.get( key );
 }
 //-----------------------------------------------------------------------------
 bool Parametrized::has(std::string key) const

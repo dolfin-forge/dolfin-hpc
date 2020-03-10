@@ -31,7 +31,7 @@ LinearAlgebraFactory& DefaultFactory::factory()
 {
 
   // Get backend from parameter system
-  std::string backend = dolfin_get("linear algebra backend");
+  std::string backend = dolfin_get<std::string>("linear algebra backend");
 
 #ifdef HAVE_PETSC
   if (backend == "PETSc")

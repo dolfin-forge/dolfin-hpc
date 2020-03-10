@@ -90,7 +90,7 @@ void SlipBC::apply( GenericMatrix & A,
   // bool const is_P1 = (scratch.space_dimension
   //                       == mesh.type().num_entities(0) * scratch.size);
 
-  std::string const la_backend = dolfin_get( "linear algebra backend" );
+  std::string const la_backend = dolfin_get<std::string>( "linear algebra backend" );
 
   if ( As == NULL
        || As->size( 0 ) != A.size( 0 )

@@ -40,11 +40,11 @@ public:
 
   /// Create normal, tangents for the boundary of mesh
   NodeNormal( Mesh& mesh, Type w = unit,
-              real alpha = dolfin_get("NodeNormal alpha") );
+              real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Create normal, tangents for the boundary of mesh for given subdomain
   NodeNormal( Mesh& mesh, SubDomain const& subdomain, Type w = none,
-              real alpha = dolfin_get("NodeNormal alpha") );
+              real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Destructor
   ~NodeNormal();

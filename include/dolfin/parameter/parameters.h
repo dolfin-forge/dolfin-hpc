@@ -4,24 +4,26 @@
 #ifndef __DOLFIN_PARAMETERS_H
 #define __DOLFIN_PARAMETERS_H
 
-#include "Parameter.h"
-#include <ostream>
+#include <dolfin/parameter/Parameter.h>
+
+#include <dolfin/parameter/ParameterSystem.h>
 
 namespace dolfin
 {
 
-  /// Get value of parameter with given key
-  Parameter dolfin_get(std::string key);
-  
-  /// Set value of parameter
-  void dolfin_set(std::string key, dolfin::Parameter value);
+/// Set value of parameter
+void dolfin_set( std::string key, Parameter value );
 
-  /// Set special key/value pair
-  void dolfin_set(std::string key, std::ostream& ostream);
+/// Add parameter
+void dolfin_add( std::string key, Parameter value );
 
-  /// Add parameter
-  void dolfin_add(std::string key, dolfin::Parameter value);
- 
+/// Get value of parameter with given key
+template < typename T >
+T dolfin_get( std::string key )
+{
+	return static_cast< T >( ParameterSystem::parameters.get( key ) );
 }
+
+} // end namespace dolfin
 
 #endif

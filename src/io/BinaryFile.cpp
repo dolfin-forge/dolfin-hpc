@@ -520,7 +520,7 @@ void BinaryFile::operator>>(Mesh& mesh)
   bool byteswap;
   BinaryFileHeader hdr;
 
-  if (PE::size() == 1 || dolfin_get("Mesh read in serial"))
+  if (PE::size() == 1 || dolfin_get<bool>("Mesh read in serial"))
   {
     if(PE::rank() > 0)
     {

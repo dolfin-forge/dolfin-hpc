@@ -35,8 +35,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   }
 
   // JANPACK doesn't need any sparsity pattern information
-  std::string la_backend = dolfin_get("linear algebra backend");
-  if(la_backend == "JANPACK")
+  if( dolfin_get<std::string>("linear algebra backend") == "JANPACK" )
   {
     tocd(1);
     return;

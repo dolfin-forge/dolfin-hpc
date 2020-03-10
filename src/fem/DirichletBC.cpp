@@ -161,8 +161,7 @@ void DirichletBC::apply_impl(GenericMatrix& A, GenericVector& b,
   b.set(values, boundary_values.size(), dofs);
 
   // Modify linear system (A_ii = 1)
-  bool keep_pc = static_cast<bool>(dolfin_get("Krylov keep PC"));
-  if(!keep_pc)
+  if( not dolfin_get<bool>("Krylov keep PC") )
   {
     A.ident(boundary_values.size(), dofs);
   }
@@ -172,7 +171,7 @@ void DirichletBC::apply_impl(GenericMatrix& A, GenericVector& b,
   delete[] values;
 
   // Finalise changes to A
-  if(!keep_pc)
+  if( not dolfin_get<bool>("Krylov keep PC") )
     A.apply();
 
   // Finalise changes to b

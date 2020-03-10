@@ -293,7 +293,7 @@ std::string File::filename( std::string basename, std::string format )
 //-----------------------------------------------------------------------------
 std::string File::filename( std::string basename )
 {
-  return filename( basename, dolfin_get( "output_format" ) );
+  return filename( basename, dolfin_get<std::string>( "output_format" ) );
 }
 //-----------------------------------------------------------------------------
 

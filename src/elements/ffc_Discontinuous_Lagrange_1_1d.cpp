@@ -3,10 +3,7 @@
 // 
 // This code was generated with the following parameters:
 // 
-//   cache_dir:                      ''
 //   convert_exceptions_to_warnings: False
-//   cpp_optimize:                   False
-//   cpp_optimize_flags:             '-O2'
 //   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
@@ -30,8 +27,6 @@
 //   simplify_basis:                 False
 //   simplify_expressions:           False
 //   split:                          True
-//   swig_binary:                    'swig'
-//   swig_path:                      ''
 
 #include "ffc_Discontinuous_Lagrange_1_1d.h"
 /// Compute mapped coordinates for evaluate_basis()

@@ -3,10 +3,7 @@
 // 
 // This code was generated with the following parameters:
 // 
-//   cache_dir:                      ''
 //   convert_exceptions_to_warnings: False
-//   cpp_optimize:                   False
-//   cpp_optimize_flags:             '-O2'
 //   eliminate_zeros:                False
 //   epsilon:                        1e-14
 //   error_control:                  False
@@ -30,8 +27,6 @@
 //   simplify_basis:                 False
 //   simplify_expressions:           False
 //   split:                          True
-//   swig_binary:                    'swig'
-//   swig_path:                      ''
 
 #ifndef __FFC_LAGRANGE_1_1D_H
 #define __FFC_LAGRANGE_1_1D_H
@@ -267,25 +262,11 @@ public:
     return _global_dimension;
   }
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
-  /// Return the dimension of the local finite element function space for a cell
-  inline unsigned int local_dimension(const ufc::cell& c) const
-  {
-    return 2;
-  }
-
-  /// Return the maximum dimension of the local finite element function space
-  inline unsigned int max_local_dimension() const
-  {
-    return 2;
-  }
-#else
   /// Return the dimension of the local finite element function space for a cell
   inline unsigned int local_dimension() const
   {
     return 2;
   }
-#endif
 
   /// Return the number of dofs on each cell facet
   inline unsigned int num_facet_dofs() const

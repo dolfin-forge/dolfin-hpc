@@ -167,13 +167,9 @@ if test "x${enable_unordered_cxx}" = xyes; then
    fi
 fi
 
-
-
-
-
 # UFL is now default
-PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.1.4])
-CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
+CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
 
 if test "x${need_boost}" = xyes; then
@@ -396,15 +392,15 @@ AC_CHECK_FUNCS([floor memset pow sqrt])
 
 # Checks for Python
 if test "x${enable_python}" = xyes; then
-    AM_PATH_PYTHON([2.6])
+    AM_PATH_PYTHON([3.0])
     if ! ${HAVE_PYTHON}; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi
     case ${PYTHON_VERSION} in
-    2*)
+    3*)
     ;;
     *)
-    AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
+    AC_MSG_ERROR([No Python3 interpreter found, module cannot be installed.])
     ;;
     esac
 fi

@@ -3,16 +3,9 @@
 
 #include <dolfin/parameter/parameters.h>
 
-#include <dolfin/parameter/ParameterSystem.h>
-
 namespace dolfin
 {
 
-//-----------------------------------------------------------------------------
-Parameter dolfin_get(std::string key)
-{
-  return ParameterSystem::parameters.get(key);
-}
 //-----------------------------------------------------------------------------
 void dolfin_set(std::string key, Parameter value)
 {

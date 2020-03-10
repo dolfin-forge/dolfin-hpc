@@ -76,7 +76,7 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p) const
 
   GtsBBox* bbox;
 
-  real btol = dolfin_get("GTS Tolerance");
+  real btol = dolfin_get<real>("GTS Tolerance");
   bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, p[0] - btol, p[1] - btol,
                       p[2] - btol, p[0] + btol, p[1] + btol, p[2] + btol);
 

@@ -250,7 +250,7 @@ BoundaryMesh& Mesh::interior_boundary()
 //-----------------------------------------------------------------------------
 bool Mesh::serial_io() const
 {
-  return (PE::size() == 1) || dolfin_get("Mesh read in serial");
+  return (PE::size() == 1) || dolfin_get<bool>("Mesh read in serial");
 }
 //-----------------------------------------------------------------------------
 bool Mesh::parallel_io() const

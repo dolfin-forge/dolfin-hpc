@@ -49,7 +49,7 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   message("  - vertices before: %d", numvertsbefore);
 
   std::string marked_filename("marked");
-  std::string const marked_format = dolfin_get("output_format");
+  std::string const marked_format = dolfin_get<std::string>("output_format");
   if (marked_format == "vtk")
   {
     marked_filename += ".pvd";
@@ -61,7 +61,7 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 
   File( marked_filename ) << cell_marker;
 
-  if ( dolfin_get("adapt_algorithm") == "rivara")
+  if ( dolfin_get<std::string>("adapt_algorithm") == "rivara")
   {
     RivaraRefinement::refine(mesh, cell_marker);
   }
@@ -91,7 +91,7 @@ void refine_and_project( Mesh& mesh,
   message("  - cells    before: %d", mesh.num_global_cells());
   message("  - vertices before: %d", mesh.global_size(0));
 
-  std::string const refine_type = dolfin_get("adapt_algorithm");
+  std::string const refine_type = dolfin_get<std::string>("adapt_algorithm");
   if (refine_type == "simple")
   {
     LoadBalancer::balance(mesh, cell_marker);
@@ -106,7 +106,7 @@ void refine_and_project( Mesh& mesh,
   }
 
   std::string marked_filename( "marked" );
-  std::string const marked_format = dolfin_get("output_format");
+  std::string const marked_format = dolfin_get<std::string>("output_format");
   if (marked_format == "vtk")
   {
     marked_filename += ".pvd";
@@ -316,8 +316,8 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
   projected.vector().zero();
   projected.sync();
 
-  real gts_tol = dolfin_get("GTS Tolerance");
-  real geom_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
+  real gts_tol = dolfin_get<real>("GTS Tolerance");
+  real geom_tol = dolfin_get<real>("Geometrical Tolerance Tetrahedron");
 
   dolfin_set("GTS Tolerance", 1e-10);
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);

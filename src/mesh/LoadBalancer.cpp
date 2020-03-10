@@ -96,7 +96,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh); D.add(cell_marker);
     message("Redistribute mesh");
@@ -107,7 +107,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -203,7 +203,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -219,7 +219,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -323,7 +323,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -344,7 +344,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -437,7 +437,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -453,7 +453,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 

@@ -17,7 +17,7 @@ namespace dolfin
 #ifdef HAVE_MPI
 void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
 {
-  const std::string method = dolfin_get("Mesh partitioner");
+  const std::string method = dolfin_get<std::string>("Mesh partitioner");
 
   if (method == "parmetis")
     MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, 0);
@@ -30,7 +30,7 @@ void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
 void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
                               MeshValues<uint, Cell>& weight)
 {
-  const std::string method = dolfin_get("Mesh partitioner");
+  const std::string method = dolfin_get<std::string>("Mesh partitioner");
 
   if (method == "parmetis")
     MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, &weight);
@@ -42,7 +42,7 @@ void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
 //-----------------------------------------------------------------------------
 void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
 {
-  const std::string method = dolfin_get("Mesh partitioner");
+  const std::string method = dolfin_get<std::string>("Mesh partitioner");
 
   if (method == "parmetis")
     MetisInterface::partitionGeomMetis(partitions.mesh(), partitions);

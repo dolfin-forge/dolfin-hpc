@@ -392,7 +392,7 @@ AC_CHECK_FUNCS([floor memset pow sqrt])
 
 # Checks for Python
 if test "x${enable_python}" = xyes; then
-    AM_PATH_PYTHON([2.6])
+    AM_PATH_PYTHON([3.0])
     if ! ${HAVE_PYTHON}; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi

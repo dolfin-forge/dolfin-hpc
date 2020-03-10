@@ -397,10 +397,10 @@ if test "x${enable_python}" = xyes; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi
     case ${PYTHON_VERSION} in
-    2*)
+    3*)
     ;;
     *)
-    AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
+    AC_MSG_ERROR([No Python3 interpreter found, module cannot be installed.])
     ;;
     esac
 fi

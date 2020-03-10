@@ -227,6 +227,9 @@ bool SubSystemsManager::PETSc::init(int argc, char* argv[])
   PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
   SUBSYSTEM_SET_INIT(PETSc);
 
+  // remove PETSc Signal handling
+  PetscPopSignalHandler();
+
 #ifdef HAVE_MPI
   // If PETSc initialized MPI, it is responsible for MPI finalization
   if (!mpi_init_status && MPI::initialized())

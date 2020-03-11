@@ -12,11 +12,11 @@ several different architectures such as SGI Origin systems, IBM
 BlueGene/L and Cray XT6-XE6 systems.
 
 
-The package dependencies of DOLFIN HPC 0.9.0 are:
+The package dependencies of DOLFIN HPC 0.9.1 are:
 
-    * ufc 2.1.4-hpc
-    * ffc 1.0.2-hpc
-    * ufl 1.0.2-hpc
+    * ufc 2.2.0-hpc (https://bitbucket.org/adaptivesimulations/ufc2-hpc)
+    * ffc 1.1.0-hpc (https://bitbucket.org/adaptivesimulations/ffc-hpc)
+    * ufl 1.1.0-hpc (https://bitbucket.org/adaptivesimulations/ufl-hpc)
     * ParMETIS
     * Supported LA-backend (currently PETSc or JANPACK)
 
@@ -26,7 +26,7 @@ DOLFIN HPC uses autotools. To build and install the package, follow
 these steps:
 
 1. ./configure
-2. make 
+2. make
 3. make install
 
 DOLFIN HPC can be build with various options, issue ./configure --help

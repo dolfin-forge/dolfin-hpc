@@ -17,45 +17,49 @@
 namespace dolfin
 {
 
-  /// This class defines an interface for a AMG solver. 
-  
+  /// This class defines an interface for a AMG solver.
+
   class AMGSolver : public Parametrized
   {
   public:
-    
+
     /// Create Krylov solver
     AMGSolver(MultigridScheme scheme_type = default_scheme,
 	      MultigridSmoother smoother_type = default_smoother,
 	      MultigridCoarsening coarsening_type = default_coarsening)
       : scheme_type(scheme_type), smoother_type(smoother_type),
       coarsening_type(coarsening_type), janpack_solver(0) {}
-    
+
     /// Destructor
     ~AMGSolver()
     {
       delete janpack_solver;
     }
-    
+
     /// Solve linear system Ax = b
     uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
-    { 
+    {
       Timer timer("AMG solver");
 
 #if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
       if (A.has_type<JANPACKMat>())
       {
-	if (!janpack_solver)
-	{
-	  janpack_solver = new JANPACKAMGSolver(scheme_type, smoother_type, coarsening_type);
-	  janpack_solver->set("parent", *this);
-	}
-	return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
+        if (!janpack_solver)
+        {
+          janpack_solver = new JANPACKAMGSolver(scheme_type, smoother_type, coarsening_type);
+          janpack_solver->set("parent", *this);
+        }
+        return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
       }
-#endif      
+#else
+      MAYBE_UNUSED(A);
+      MAYBE_UNUSED(x);
+      MAYBE_UNUSED(b);
+#endif
       error("No AMG solver for given backend");
       return 0;
     }
-    
+
   private:
 
     // Multigrid Scheme

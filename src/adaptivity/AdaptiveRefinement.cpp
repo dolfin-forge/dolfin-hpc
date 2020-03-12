@@ -13,11 +13,10 @@
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/parameter/parameters.h>
-
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 
 #include <algorithm>
 #include <fstream>
@@ -83,7 +82,7 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 }
 //-----------------------------------------------------------------------------
 void refine_and_project( Mesh& mesh,
-                         Array<Function *> const& functions,
+                         FunctionMapping const& functions,
                          MeshValues<bool, Cell>& cell_marker)
 {
   dolfin_set("Load balancer redistribute", false);
@@ -126,7 +125,8 @@ void refine_and_project( Mesh& mesh,
 
   for (uint f = 0; f < functions.size(); ++f )
   {
-    uint const num_sub = functions[f]->space().element().num_sub_elements();
+    Function * func = functions[f].second;
+    uint const num_sub = func->space().element().num_sub_elements();
 
     if (num_sub == 0)
     {
@@ -134,10 +134,10 @@ void refine_and_project( Mesh& mesh,
     }
 
     // make sure data is synchronized
-    functions[f]->vector().apply();
+    func->vector().apply();
 
     // decompose function
-    coarse[f] = FunctionDecomposition::compute(*functions[f]);
+    coarse[f] = FunctionDecomposition::compute(*func);
 
     dolfin_assert( num_sub <= coarse[f].size() );
 
@@ -167,11 +167,9 @@ void refine_and_project( Mesh& mesh,
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.topology().renumber();
 
-  mkdir( "../scratch" );
-
   for (uint f = 0; f < functions.size(); ++f )
   {
-    FiniteElementSpace const& space = functions[f]->space();
+    FiniteElementSpace const& space = functions[f].second->space();
     uint const num_sub = space.element().num_sub_elements();
 
     Array<Function> post;
@@ -193,14 +191,15 @@ void refine_and_project( Mesh& mesh,
     Function proj(projected_space);
     AdaptiveRefinement::project(new_mesh, post, proj);
 
-    std::stringstream p_filename;
 #ifdef ENABLE_MPIIO
-    p_filename << "../scratch/projected_" << f << ".bin";
+    std::string const filename = "projected_" + functions[f].first + ".bin";
 #else
-    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin";
+    std::stringstream pf;
+    pf << "projected_" << functions[f].first << "_" << MPI::rank() << ".bin";
+    std::string const filename = pf.str();
 #endif
-    File p_file(p_filename.str());
-    p_file << proj.vector();
+
+    File( filename ) << proj.vector();
   }
 
   // cleanup coarse functions

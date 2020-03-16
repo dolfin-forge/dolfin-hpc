@@ -3,7 +3,6 @@
 
 /// DOLFIN parameter interface
 
-#include <dolfin/parameter/Parametrized.h>
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterSystem.h>
 #include <dolfin/parameter/parameters.h>

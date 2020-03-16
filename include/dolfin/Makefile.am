@@ -239,11 +239,8 @@ nobase_pkginclude_HEADERS = \
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\
 				parameter/Parameter.h\
-				parameter/ParameterList.h\
 				parameter/parameters.h\
 				parameter/ParameterSystem.h\
-				parameter/ParameterValue.h\
-				parameter/Parametrized.h\
 				quadrature/dolfin_quadrature.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/GaussQuadrature.h\

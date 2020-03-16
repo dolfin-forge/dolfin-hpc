@@ -8,11 +8,10 @@
 
 #ifdef HAVE_PETSC
 
+#include "PETScVector.h"
+
 #include <petscmat.h>
 #include <petscksp.h>
-
-#include <dolfin/parameter/Parametrized.h>
-#include "PETScVector.h"
 
 namespace dolfin
 {
@@ -25,11 +24,11 @@ namespace dolfin
   /// This class implements the direct solution (LU factorization) for
   /// linear systems of the form Ax = b. It is a wrapper for the LU
   /// solver of PETSc.
-  
-  class PETScLUSolver : public Parametrized
+
+  class PETScLUSolver
   {
   public:
-    
+
     /// Constructor
     PETScLUSolver();
 
@@ -46,7 +45,7 @@ namespace dolfin
     void disp() const;
 
   private:
-    
+
     // Create dense copy of virtual matrix
     real copyToDense(const PETScKrylovMatrix& A);
 

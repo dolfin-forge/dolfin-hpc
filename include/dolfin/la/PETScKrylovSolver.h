@@ -12,7 +12,6 @@
 #include <dolfin/la/PETScPreconditioner.h>
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/SolverType.h>
-#include <dolfin/parameter/Parametrized.h>
 
 namespace dolfin
 {
@@ -26,7 +25,7 @@ class PETScKrylovMatrix;
 /// of the form Ax = b. It is a wrapper for the Krylov solvers
 /// of PETSc.
 
-class PETScKrylovSolver : public Parametrized
+class PETScKrylovSolver
 {
 public:
 

@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 
 #include <dolfin/parameter/ParameterSystem.h>
+
 #include <dolfin/common/constants.h>
 
 using namespace dolfin;
@@ -10,95 +11,154 @@ using namespace dolfin;
 ParameterSystem ParameterSystem::parameters;
 
 //-----------------------------------------------------------------------------
+
 ParameterSystem::ParameterSystem()
-  : ParameterList()
 {
-#include <dolfin/config/dolfin_config.h>
-
-
 //--- Linear algebra ---
 #ifdef HAVE_PETSC
-  add( "linear algebra backend", "PETSc" );
+  set( "linear algebra backend", "PETSc" );
 #elif HAVE_JANPACK
-  add( "linear algebra backend", "JANPACK" );
+  set( "linear algebra backend", "JANPACK" );
 #else
-  add( "linear algebra backend", "none" );
+  set( "linear algebra backend", "none" );
 #endif
 
-  //--- JIT compiler ---
-  add( "optimize form",
-       false ); // Use optimization -O2 when compiling generated code
-  add( "optimize use dof map cache",
-       false ); // Store dof maps in cache for reuse
-  add( "optimize use tensor cache", false ); // Store tensors in cache for reuse
-  add( "optimize", false );                  // All of the above
-
   //--- General parameters ---
-
-  add( "solution file name", "solution.pvd" );
+  set( "solution file name", "solution.pvd" );
 
   //--- Parameters for input/output ---
-
-  add( "output_format", "vtk" );
+  set( "output_format", "vtk" );
 
   //--- Parameters for Krylov solvers ---
-
-  add( "Krylov relative tolerance", 1e-10 );
-  add( "Krylov absolute tolerance", 1e-20 );
-  add( "Krylov divergence limit", 1e4 );
-  add( "Krylov maximum iterations", 10000 );
-  add( "Krylov GMRES restart", 30 );
-  add( "Krylov shift nonzero", 0.0 );
-  add( "Krylov report", true );
-  add( "Krylov keep PC", false );
-  add( "Krylov error on nonconvergence", true );
+  set( "Krylov relative tolerance", 1e-10 );
+  set( "Krylov absolute tolerance", 1e-20 );
+  set( "Krylov divergence limit", 1e4 );
+  set( "Krylov maximum iterations", 10000 );
+  set( "Krylov GMRES restart", 30 );
+  set( "Krylov shift nonzero", 0.0 );
+  set( "Krylov report", true );
+  set( "Krylov keep PC", false );
+  set( "Krylov error on nonconvergence", true );
 
   //--- Parameters for AMG solvers ---
-
-  add( "AMG relative tolerance", 1e-10 );
-  add( "AMG absolute tolerance", 1e-20 );
-  add( "AMG maximum iterations", 10000 );
-  add( "AMG pre-smoothing steps", 5 );
-  add( "AMG post-smoothing steps", 5 );
-  add( "AMG theta", 0.15 );
-  add( "AMG levels", 20 );
-  add( "AMG keep levels", false );
+  set( "AMG relative tolerance", 1e-10 );
+  set( "AMG absolute tolerance", 1e-20 );
+  set( "AMG maximum iterations", 10000 );
+  set( "AMG pre-smoothing steps", 5 );
+  set( "AMG post-smoothing steps", 5 );
+  set( "AMG theta", 0.15 );
+  set( "AMG levels", 20 );
+  set( "AMG keep levels", false );
 
   //--- Parameter for direct (LU) solver ---
-  add( "LU report", true );
+  set( "LU report", true );
 
   //--- Parameter for PDE solver ---
-  add( "PDE linear solver", "iterative" );
+  set( "PDE linear solver", "iterative" );
 
   //--- Mesh partitioning ---
-  add( "report edge cut", false ); // ?
-  add( "Mesh read in serial", false );
+  set( "report edge cut", false ); // ?
+  set( "Mesh read in serial", false );
 #if HAVE_PARMETIS
-  add( "Mesh partitioner", "parmetis" );
+  set( "Mesh partitioner", "parmetis" );
 #elif HAVE_ZOLTAN
-  add( "Mesh partitioner", "zoltan" );
+  set( "Mesh partitioner", "zoltan" );
 #endif
 
   //--- Load balancing ---
-  add( "Load balancer report", false );
-  add( "Load balancer redistribute", true );
+  set( "Load balancer report", false );
+  set( "Load balancer redistribute", true );
 
   //--- Parameters for intersection detection ---
-  add( "GTS Tolerance", 0.0 ); // Tolerance of GTS BB
+  set( "GTS Tolerance", 0.0 ); // Tolerance of GTS BB
   // define size for trianlge tolerance ("is the point within this triangle?")
-  add( "Geometrical Tolerance Interval", 0.0 );
-  add( "Geometrical Tolerance Triangle", 0.0 );
-  add( "Geometrical Tolerance Tetrahedron", 0.0 );
-  add( "SubDomain Geometrical Tolerance", 1e-6 );
-  add( "SubDomain Intersect Boundary", true );
+  set( "Geometrical Tolerance Interval", 0.0 );
+  set( "Geometrical Tolerance Triangle", 0.0 );
+  set( "Geometrical Tolerance Tetrahedron", 0.0 );
+  set( "SubDomain Geometrical Tolerance", 1e-6 );
+  set( "SubDomain Intersect Boundary", true );
 
   //--- Mesh smoothing ---
-  add( "Mesh smoothing restricted by rmin", true );
+  set( "Mesh smoothing restricted by rmin", true );
 
   //--- Insitu ---
-  add( "VisIt directory", "" );
+  set( "VisIt directory", "" );
 
   //--- Insitu ---
-  add( "NodeNormal alpha", DOLFIN_PI / 2. );
+  set( "NodeNormal alpha", DOLFIN_PI / 2. );
 }
+
+//-----------------------------------------------------------------------------
+
+ParameterSystem::~ParameterSystem()
+{
+  for ( iterator it = this->begin(); it != this->end(); ++it )
+    delete it->second;
+}
+
+//-----------------------------------------------------------------------------
+
+Parameter const & ParameterSystem::get(std::string const& key) const
+{
+  const_iterator p = this->find(key);
+
+  if (p == this->end())
+  {
+    error("Unknown parameter \"%s\".", key.c_str());
+  }
+
+  return *(p->second);
+}
+
+//-----------------------------------------------------------------------------
+
+bool ParameterSystem::defined(std::string const& key) const
+{
+  return (this->count(key) > 0);
+}
+
+//-----------------------------------------------------------------------------
+
+void ParameterSystem::disp() const
+{
+  for (const_iterator it = this->begin(); it != this->end(); ++it)
+  {
+    std::stringstream ss;
+    ss << std::left << std::setw(32) << it->first << " = ";
+    switch( it->second->type() )
+    {
+      case Parameter::bool_t:
+        ss << dynamic_cast< parameter<bool> const * >(it->second)->get();
+        break;
+      case Parameter::int_t:
+        ss << dynamic_cast< parameter<int> const * >(it->second)->get();
+        break;
+      case Parameter::uint_t:
+        ss << dynamic_cast< parameter<uint> const * >(it->second)->get();
+        break;
+      case Parameter::real_t:
+        ss << dynamic_cast< parameter<real> const * >(it->second)->get();
+        break;
+      case Parameter::string_t:
+        ss << dynamic_cast< parameter<std::string> const * >(it->second)->get();
+        break;
+      default:
+        ss << "Unknown Parameter";
+    }
+    message(ss.str());
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+void ParameterSystem::delete_parameter( std::string const & key )
+{
+  if ( defined( key ) )
+  {
+    std::map< std::string, Parameter * >::iterator p = this->find( key );
+    delete p->second;
+    this->erase( p );
+  }
+}
+
 //-----------------------------------------------------------------------------

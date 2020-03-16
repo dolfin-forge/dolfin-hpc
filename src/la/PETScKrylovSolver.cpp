@@ -1,14 +1,16 @@
 // Copyright (C) 2005 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/la/PETScKrylovSolver.h>
+
 #include <dolfin/config/dolfin_config.h>
 
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/la/PETScKrylovSolver.h>
+#include <dolfin/la/PETScKrylovMatrix.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/la/PETScVector.h>
-#include <dolfin/la/PETScKrylovMatrix.h>
+#include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PETSC
 
@@ -79,7 +81,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
   }
 
   // Write a message
-  if (get("Krylov report"))
+  if ( dolfin_get<bool>("Krylov report") )
   {
     message("Solving linear system of size %d x %d (Krylov solver).", M, N);
   }
@@ -94,12 +96,12 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
   if (!parameters_read) readParameters();
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
   KSPSetOperators(ksp, A.mat(), A.mat());
-  if (get("Krylov keep PC"))
+  if ( dolfin_get<bool>("Krylov keep PC") )
     KSPSetReusePreconditioner(ksp, PETSC_TRUE);
 
 #else
   // Solve linear system
-  if (get("Krylov keep PC"))
+  if ( dolfin_get<bool>("Krylov keep PC") )
   {
     KSPSetOperators(ksp, A.mat(), A.mat(), SAME_PRECONDITIONER);
   }
@@ -124,7 +126,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
   KSPGetConvergedReason(ksp, &reason);
   if (reason < 0)
   {
-    if (get("Krylov error on nonconvergence"))
+    if ( dolfin_get<bool>("Krylov error on nonconvergence") )
     {
       error("Krylov solver did not converge.");
     }
@@ -156,7 +158,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A,
   }
 
   // Write a message
-  if (get("Krylov report"))
+  if ( dolfin_get<bool>("Krylov report") )
   {
     message("Solving virtual linear system of size %d x %d (Krylov solver).", M,
             N);
@@ -192,7 +194,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A,
   KSPGetConvergedReason(ksp, &reason);
   if (reason < 0)
   {
-    if (get("Krylov error on nonconvergence"))
+    if ( dolfin_get<bool>("Krylov error on nonconvergence") )
     {
       error("Krylov solver did not converge.");
     }
@@ -261,10 +263,10 @@ void PETScKrylovSolver::readParameters()
   if (!ksp) return;
 
   // Set tolerances
-  KSPSetTolerances(ksp, get("Krylov relative tolerance"),
-                   get("Krylov absolute tolerance"),
-                   get("Krylov divergence limit"),
-                   get("Krylov maximum iterations"));
+  KSPSetTolerances(ksp, dolfin_get<real>("Krylov relative tolerance"),
+                        dolfin_get<real>("Krylov absolute tolerance"),
+                        dolfin_get<real>("Krylov divergence limit"),
+                        dolfin_get<uint>("Krylov maximum iterations"));
 
   // Set nonzero shift for preconditioner
   if (!pc_dolfin)
@@ -274,9 +276,9 @@ void PETScKrylovSolver::readParameters()
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
-    PCFactorSetShiftAmount(pc, get("Krylov shift nonzero"));
+    PCFactorSetShiftAmount(pc, dolfin_get<real>("Krylov shift nonzero"));
 #else
-    PCFactorSetShiftNonzero(pc, get("Krylov shift nonzero"));
+    PCFactorSetShiftNonzero(pc, dolfin_get<real>("Krylov shift nonzero"));
 #endif
   }
 
@@ -342,33 +344,33 @@ void PETScKrylovSolver::setPETScPreconditioner()
 void PETScKrylovSolver::writeReport(int num_iterations)
 {
   // Check if we should write the report
-  bool report = get("Krylov report");
-  if (!report) return;
-
+  if ( dolfin_get<bool>("Krylov report") )
+  {
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
-  KSPType ksp_type;
-  PCType pc_type;
+    KSPType ksp_type;
+    PCType pc_type;
 #else
-  const KSPType ksp_type;
-  const PCType pc_type;
+    const KSPType ksp_type;
+    const PCType pc_type;
 #endif
 #else
-  KSPType ksp_type;
-  PCType pc_type;
+    KSPType ksp_type;
+    PCType pc_type;
 #endif
 
-  // Get name of solver
-  KSPGetType(ksp, &ksp_type);
+    // Get name of solver
+    KSPGetType(ksp, &ksp_type);
 
-  // Get name of preconditioner
-  PC pc;
-  KSPGetPC(ksp, &pc);
-  PCGetType(pc, &pc_type);
+    // Get name of preconditioner
+    PC pc;
+    KSPGetPC(ksp, &pc);
+    PCGetType(pc, &pc_type);
 
-  // Report number of iterations and solver type
-  message("Krylov solver (%s, %s) converged in %d iterations.", ksp_type,
-          pc_type, num_iterations);
+    // Report number of iterations and solver type
+    message("Krylov solver (%s, %s) converged in %d iterations.", ksp_type,
+            pc_type, num_iterations);
+  }
 }
 //-----------------------------------------------------------------------------
 KSPType PETScKrylovSolver::getType(SolverType method) const

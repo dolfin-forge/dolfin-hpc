@@ -13,7 +13,7 @@
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Space.h>
 
-#include <cstring>
+#include <iostream>
 
 namespace dolfin
 {
@@ -139,7 +139,6 @@ public:
     message("( %+e, %+e, %+e )", x_[0], (D>1?x_[1]:0), (D>2?x_[2]:0));
     end();
   }
-
 private:
 
   real x_[D];
@@ -188,6 +187,16 @@ inline point<D> operator*(real a, point<D> const& p) { return p * a; }
 //-----------------------------------------------------------------------------
 template<uint D>
 inline LogStream& operator<<(LogStream& ss, point<D> const& p)
+{
+  ss << "[ point x = ( " << p[0];
+  for (uint i = 1; i < D; ++i) ss << ", " << p[i];
+  ss  << " ) ]";
+  return ss;
+}
+
+//-----------------------------------------------------------------------------
+template<uint D>
+inline std::ostream& operator<<(std::ostream& ss, point<D> const& p)
 {
   ss << "[ point x = ( " << p[0];
   for (uint i = 1; i < D; ++i) ss << ", " << p[i];

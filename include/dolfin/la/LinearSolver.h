@@ -4,8 +4,6 @@
 #ifndef __DOLFIN_LINEAR_SOLVER_H
 #define __DOLFIN_LINEAR_SOLVER_H
 
-#include <dolfin/parameter/Parametrized.h>
-
 #include <dolfin/la/SolverType.h>
 #include <dolfin/la/PreconditionerType.h>
 
@@ -21,7 +19,7 @@ class LUSolver;
 /// Available methods are defined in SolverType.h and available
 /// preconditioners are defined in PreconditionerType.h.
 
-class LinearSolver : public Parametrized
+class LinearSolver
 {
 
 public:

@@ -5,7 +5,6 @@
 #define __DOLFIN_AMG_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/parameter/Parametrized.h>
 #include <dolfin/common/Timer.h>
 #include "GenericMatrix.h"
 #include "GenericVector.h"
@@ -19,7 +18,7 @@ namespace dolfin
 
   /// This class defines an interface for a AMG solver.
 
-  class AMGSolver : public Parametrized
+  class AMGSolver
   {
   public:
 
@@ -47,7 +46,6 @@ namespace dolfin
         if (!janpack_solver)
         {
           janpack_solver = new JANPACKAMGSolver(scheme_type, smoother_type, coarsening_type);
-          janpack_solver->set("parent", *this);
         }
         return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
       }

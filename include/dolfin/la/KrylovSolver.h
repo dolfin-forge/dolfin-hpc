@@ -8,7 +8,6 @@
 
 #include <dolfin/la/SolverType.h>
 #include <dolfin/la/PreconditionerType.h>
-#include <dolfin/parameter/Parametrized.h>
 
 #include "PETScMatrix.h"
 #include "PETScVector.h"
@@ -33,7 +32,7 @@ class PETScVector;
 /// This class defines an interface for a Krylov solver. The underlying
 /// Krylov solver type is defined in default_type.h.
 
-class KrylovSolver : public Parametrized
+class KrylovSolver
 {
 
 public:

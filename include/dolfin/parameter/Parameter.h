@@ -1,114 +1,103 @@
-// Copyright (C) 2003-2005 Anders Logg.
+// Copyright (C) 2005 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
 #ifndef __DOLFIN_PARAMETER_H
 #define __DOLFIN_PARAMETER_H
 
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/common/types.h>
+
+#include <string>
 
 namespace dolfin
 {
 
-struct ParameterValue;
-
-/// This class represents a parameter of some given type.
-/// Supported value types are bool, int, uint, real, and string.
-
+/// Base class for parameter values
 class Parameter
 {
 public:
-
   /// Supported parameter types
   enum Type
   {
-    type_real, type_int, type_uint, type_bool, type_string
+    bool_t,
+    real_t,
+    int_t,
+    uint_t,
+    string_t
   };
 
-  /// Create int-valued parameter
-  Parameter(int value);
-
-  /// Create int-valued parameter
-  Parameter(uint value);
-
-  /// Create real-valued parameter
-  Parameter(real value);
-
-  /// Create bool-valued parameter
-  Parameter(bool value);
-
-  /// Create string-valued parameter
-  Parameter(std::string value);
-
-  /// Create string-valued parameter
-  Parameter(const char* value);
-
-  /// Copy constructor
-  Parameter(Parameter const& parameter);
+public:
+  /// Constructor
+  Parameter( Type const & t )
+    : type_( t )
+  {
+  }
 
   /// Destructor
-  ~Parameter();
+  virtual ~Parameter()
+  {
+  }
 
-  /// Equality
-  bool operator==(Parameter const& other) const;
-  bool operator!=(Parameter const& other) const;
+  /// Return type of Parameter
+  Type type() const
+  {
+    return type_;
+  }
 
-  /// Assignment of int
-  Parameter const& operator=(int value);
-
-  /// Assignment of uint
-  Parameter const& operator=(uint value);
-
-  /// Assignment of real
-  Parameter const& operator=(real value);
-
-  /// Assignment of bool
-  Parameter const& operator=(bool value);
-
-  /// Assignment of string
-  Parameter const& operator=(std::string value);
-
-  /// Assignment of Parameter
-  Parameter const& operator=(Parameter const& parameter);
-
-  /// Cast parameter to int
-  operator int() const;
-
-  /// Cast parameter to uint
-  operator uint() const;
-
-  /// Cast parameter to real
-  operator real() const;
-
-  /// Cast parameter to bool
-  operator bool() const;
-
-  /// Cast parameter to string
-  operator std::string() const;
-
-  /// Return type of parameter
-  Type type() const;
-
-  /// Return type of parameter
-  std::string strtype() const;
-
-  /// Output
-  friend std::ostream& operator<<(std::ostream& stream, Parameter const& parameter);
-
-  /// Friends
-  friend class XMLFile;
-
-private:
-
-  // Pointer to parameter value
-  ParameterValue* value_;
-
-  // Type of parameter
+  ///
+  // virtual Parameter * clone() const = 0;
+protected:
   Type type_;
-
 };
 
-std::ostream& operator<<(std::ostream& stream, Parameter const& parameter);
+/// specialization class which actually holds the data
+template < class T >
+struct parameter : public Parameter
+{
+  /// Constructor
+  parameter( T const & value, Type const & t )
+    : Parameter( t )
+    , v_( value )
+  {
+  }
 
-}
+  /// Copy constructor
+  parameter( parameter< T > const & other )
+    : Parameter( other.type_ )
+    , v_( other.v_ )
+  {
+  }
+
+  /// Destructor
+  ~parameter()
+  {
+  }
+
+  /// Assignment
+  Parameter & set( T const & value )
+  {
+    this->v_ = value;
+    return *this;
+  }
+
+  /// Access
+  T & get()
+  {
+    return v_;
+  }
+
+  T const & get() const
+  {
+    return v_;
+  }
+
+  /// Clone
+  // Parameter * clone() const { return new parameter<T>(*this); }
+
+private:
+  T v_;
+};
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
 
 #endif

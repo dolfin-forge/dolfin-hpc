@@ -40,6 +40,8 @@ public:
   template < typename T >
   T get( std::string const & key ) const;
 
+  Parameter::Type get_type( std::string const & key );
+
   /// Check if parameter with given key has been defined
   bool defined( std::string const & key ) const;
 

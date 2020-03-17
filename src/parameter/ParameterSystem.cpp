@@ -112,6 +112,14 @@ Parameter const & ParameterSystem::get(std::string const& key) const
 
 //-----------------------------------------------------------------------------
 
+Parameter::Type ParameterSystem::get_type( std::string const & key )
+{
+  dolfin_assert( this->defined( key ) );
+  return (*this)[key]->type();
+}
+
+//-----------------------------------------------------------------------------
+
 bool ParameterSystem::defined(std::string const& key) const
 {
   return (this->count(key) > 0);
@@ -121,31 +129,31 @@ bool ParameterSystem::defined(std::string const& key) const
 
 void ParameterSystem::disp() const
 {
-  for (const_iterator it = this->begin(); it != this->end(); ++it)
+  for ( const_iterator it = this->begin(); it != this->end(); ++it )
   {
     std::stringstream ss;
-    ss << std::left << std::setw(32) << it->first << " = ";
-    switch( it->second->type() )
+    ss << std::left << std::setw( 32 ) << it->first << " = ";
+    switch ( it->second->type() )
     {
       case Parameter::bool_t:
-        ss << dynamic_cast< parameter<bool> const * >(it->second)->get();
+        ss << std::boolalpha << this->get< bool >( it->first );
         break;
       case Parameter::int_t:
-        ss << dynamic_cast< parameter<int> const * >(it->second)->get();
+        ss << this->get< int >( it->first );
         break;
       case Parameter::uint_t:
-        ss << dynamic_cast< parameter<uint> const * >(it->second)->get();
+        ss << this->get< uint >( it->first );
         break;
       case Parameter::real_t:
-        ss << dynamic_cast< parameter<real> const * >(it->second)->get();
+        ss << this->get< real >( it->first );
         break;
       case Parameter::string_t:
-        ss << dynamic_cast< parameter<std::string> const * >(it->second)->get();
+        ss << this->get< std::string >( it->first );
         break;
       default:
         ss << "Unknown Parameter";
     }
-    message(ss.str());
+    message( ss.str() );
   }
 }
 

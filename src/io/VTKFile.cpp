@@ -649,12 +649,9 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
 
   std::string fname;
   // Remove rank from vtu filename ( <rank>.vtu)
-  fname.assign(vtu_filename, filename.find_last_of("/") + 1,
-               vtu_filename.size() - 5);
+  fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
   for (uint i = 0; i < MPI::size(); i++)
-  {
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
-  }
 
   pvtuFile << "</PUnstructuredGrid>\n"
            << "</VTKFile>\n";
@@ -744,8 +741,7 @@ void VTKFile::pvtuFileWriteFunction(
   std::string fname;
 
   // Remove rank from vtu filename ( <rank>.vtu)
-  fname.assign(vtu_filename, filename.find_last_of("/") + 1,
-               vtu_filename.size() - 5);
+  fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
   for (uint i = 0; i < MPI::size(); i++)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
@@ -798,14 +794,13 @@ void VTKFile::VTKHeaderClose() const
 //----------------------------------------------------------------------------
 void VTKFile::vtuNameUpdate(const int counter)
 {
-  std::string filestart, extension;
+  std::string filestart;
   std::ostringstream fileid, newfilename;
 
   fileid.fill('0');
   fileid.width(6);
 
-  filestart.assign(filename, 0, filename.find("."));
-  extension.assign(filename, filename.find("."), filename.size());
+  filestart.assign(filename, 0, filename.rfind("."));
 
   fileid << counter;
   newfilename << filestart << fileid.str() << "_" << PE::rank()

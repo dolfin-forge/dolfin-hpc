@@ -171,6 +171,11 @@ void SlipBC::apply( GenericMatrix & A,
     A = *( As->instance() );
   }
   b.apply();
+
+  Array<Function> & ff = node_normal->basis();
+  File("n.pvd") << ff[0];
+  File("tau1.pvd") << ff[1];
+  File("tau2.pvd") << ff[2];
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix&, GenericVector&, GenericVector const&,

@@ -134,6 +134,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   uint const rank = dolfin::MPI::rank();
 #endif
 
+  MeshValues<real,Cell> nt( boundary, 0. );
+
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;
   // Maps dofs to facet global indices
@@ -217,7 +219,9 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
         break;
       }
     data->normal = cell.normal(local_facet);
-    dolfin_assert(abscmp(data->normal.norm(), 1.0));
+    // dolfin_assert(abscmp(data->normal.norm(), 1.0));
+
+    nt( *bcell ) = data->weight;
 
     // Set valid dofs within the current facet
     std::set<uint> ghost_nodes;
@@ -297,6 +301,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
       used_ghost_nodes.insert(ghost_nodes.begin(), ghost_nodes.end());
     }
   }
+
+  File("nt.pvd") << nt;
 
   //--- Exchange data for exterior facets with shared entities
   if (mesh.is_distributed())

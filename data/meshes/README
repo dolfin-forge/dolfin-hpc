@@ -1,21 +1,21 @@
 This directory contains a number of example meshes DOLFIN XML format.
 Descriptions of (some of) the meshes follow below.
 
-cylinder.xml.gz
+cylinder.bim
 ---------------
 
-dolfin-1.xml.gz
+dolfin-1.bim
 ---------------
 
   Mesh of a two-dimensional dolphin in a box, generated with
   MATLABs PDE toolbox.
 
-dolfin-2.xml.gz
+dolfin-2.bim
 ---------------
 
-  Same as dolfin-1.xml.gz, but finer mesh.
+  Same as dolfin-1.bim, but finer mesh.
 
-gear.xml.gz
+gear.bim
 -----------
 
   Mesh of a gear, generated with tetgen from example m744 of
@@ -25,62 +25,62 @@ gear.xml.gz
   The gear is centered at (x, y, z) = (0.5, 0.5, 0.219) and is
   bounded by [0.025, 0.975] x [0.025, 0.975] x [0.025, 0.413].
 
-slit.xml.gz
+slit.bim
 -----------
 
-tetmesh-16.xml.gz
+tetmesh-16.bim
 -----------------
 
-tetmesh-1.xml.gz
+tetmesh-1.bim
 ----------------
 
-tetmesh_24_8_8.xml.gz
+tetmesh_24_8_8.bim
 ---------------------
 
-tetmesh-4.xml.gz
+tetmesh-4.bim
 ----------------
 
-tetmesh-8.xml.gz
+tetmesh-8.bim
 ----------------
 
-tetmesh_backward_facing_step_32_8_8.xml.gz
+tetmesh_backward_facing_step_32_8_8.bim
 ------------------------------------------
 
-tetmesh_bluff_body_32_8_8.xml.gz
+tetmesh_bluff_body_32_8_8.bim
 --------------------------------
 
-tetmesh_LES_10_2_7.xml.gz
+tetmesh_LES_10_2_7.bim
 -------------------------
 
-tetrahedron.xml.gz
+tetrahedron.bim
 ------------------
 
-triangle.xml.gz
+triangle.bim
 ---------------
 
-trimesh-128.xml.gz
+trimesh-128.bim
 ------------------
 
-trimesh-16.xml.gz
+trimesh-16.bim
 -----------------
 
-trimesh-1.xml.gz
+trimesh-1.bim
 ----------------
 
-trimesh-2.xml.gz
+trimesh-2.bim
 ----------------
 
-trimesh-32.xml.gz
+trimesh-32.bim
 -----------------
 
-trimesh-4.xml.gz
+trimesh-4.bim
 ----------------
 
-trimesh-64.xml.gz
+trimesh-64.bim
 -----------------
 
-trimesh-8.xml.gz
+trimesh-8.bim
 ----------------
 
-two_particles.xml.gz
+two_particles.bim
 --------------------

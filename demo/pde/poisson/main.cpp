@@ -67,7 +67,7 @@ int main()
   dolfin_init();
 
   // Create mesh
-  Mesh mesh("UnitSquareMesh_32x32.xml");
+  Mesh mesh("UnitSquareMesh_32x32.bin");
 
   // Create coefficients
   Analytic<Source>  f(mesh);
@@ -90,7 +90,6 @@ int main()
   L.assemble(b, true);
   bc.apply(A, b, a);
 
-
   Function u(a.trial_space());
   KrylovSolver solver(bicgstab, bjacobi);
 
@@ -101,8 +100,7 @@ int main()
   message("vector inf norm: %e", u.vector().max());
 
   // Save solution to file
-  File file("poisson.pvd");
-  file << u;
+  File("poisson.pvd") << u;
 
   return 0;
 }

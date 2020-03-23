@@ -9,7 +9,6 @@
 #include <dolfin/io/OFFFile.h>
 #include <dolfin/io/STLFile.h>
 #include <dolfin/io/VTKFile.h>
-#include <dolfin/io/XMLFile.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/log/log.h>
@@ -46,25 +45,6 @@ File::File( const std::string & filename )
   {
     file_ = new STLFile( filename );
   }
-  else if ( ( filename.rfind( ".xml" ) != std::string::npos )
-            and filename.rfind( ".xml" ) + std::string( ".xml" ).size() == len )
-  {
-#ifdef HAVE_XML
-    file_ = new XMLFile( filename );
-#else
-    error( "DOLFIN is not built with XML support" );
-#endif
-  }
-	else if ( ( filename.rfind( ".xml.gz" ) != std::string::npos )
-	          and ( filename.rfind( ".xml.gz" ) + std::string( ".xml.gz" ).size()
-	                == len ) )
-	{
-#ifdef HAVE_XML
-    file_ = new XMLFile( filename );
-#else
-    error( "DOLFIN is not built with XML support" );
-#endif
-	}
 	else
   {
     // Could not deduce file type
@@ -76,11 +56,6 @@ File::File( const std::string & filename, Type type )
 {
   switch ( type )
   {
-#ifdef HAVE_XML
-    case xml:
-      file_ = new XMLFile( filename );
-      break;
-#endif
     case binary:
       file_ = new BinaryFile( filename );
       break;

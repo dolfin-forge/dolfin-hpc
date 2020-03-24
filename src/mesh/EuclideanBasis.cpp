@@ -194,7 +194,7 @@ uint EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
     }
     uint j = (i + 1) % gdim;
     real sp = B[i].dot(B[j]);
-    if(!abscmp(sp, 0.0, gdim*DOLFIN_EPS))
+    if( not abscmp( sp, 0.0, 1e-13 ) )
     {
       error("Basis is not orthogonal: e%u . e%u = %e", i, j, sp);
     }

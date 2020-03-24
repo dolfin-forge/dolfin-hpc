@@ -217,7 +217,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
         break;
       }
     data->normal = cell.normal(local_facet);
-    dolfin_assert(abscmp(data->normal.norm(), 1.0));
+    dolfin_assert( abscmp( data->normal.norm(), 1.0, 1e-13 ) );
 
     // Set valid dofs within the current facet
     std::set<uint> ghost_nodes;
@@ -429,7 +429,9 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
     // Compute basis and node type
     uint numS = EuclideanBasis::compute(gdim, B, N, W, cosalpha, weighted);
-    uint const node_type = std::min(tdim, numS);
+    uint node_type = std::min(tdim, numS);
+    if ( dolfin_get<bool>( "NodeNormal restricted" ) == true )
+      node_type = ( node_type == 2 ) ? 3 : node_type;
 
     // Set node type
     node_type_[node_id] = node_type;

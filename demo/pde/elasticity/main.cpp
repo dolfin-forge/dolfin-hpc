@@ -93,7 +93,7 @@ class Right : public SubDomain
 int main()
 {
   // Read mesh
-  Mesh mesh( "../../../data/meshes/gear.xml.gz" );
+  Mesh mesh( "../../../data/meshes/gear.bin" );
 
   // Create right-hand side
   Analytic< Null > f( mesh );

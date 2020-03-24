@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4 --install
 SUBDIRS = src include
 
-if ENABLE_CHECK 
+if ENABLE_CHECK
 SUBDIRS += tests
 endif
 
@@ -15,40 +15,40 @@ endif
 
 dist_data_DATA = regen.sh
 
-EXTRA_DIST = data/meshes/aneurysm.xml.gz\
+EXTRA_DIST = data/meshes/aneurysm.bim\
              data/meshes/README\
-             data/meshes/snake_hole.xml.gz\
-             data/meshes/circle.xml.gz\
-             data/meshes/cylinder.xml.gz\
-             data/meshes/dolfin-1.xml.gz\
-             data/meshes/dolfin-2.xml.gz\
-             data/meshes/gear.xml.gz\
-             data/meshes/meshbc.xml.gz\
-             data/meshes/slit.xml.gz\
-             data/meshes/snake.xml.gz\
-             data/meshes/tetmesh-1.xml.gz\
-             data/meshes/sphere.xml.gz\
-             data/meshes/tetmesh_24_8_8.xml.gz\
-             data/meshes/tetmesh-16.xml.gz\
-             data/meshes/tetmesh-4.xml.gz\
-             data/meshes/tetmesh-8.xml.gz\
-             data/meshes/tetmesh_backward_facing_step_32_8_8.xml.gz\
-             data/meshes/tetmesh_LES_10_2_7.xml.gz\
-             data/meshes/tetmesh_bluff_body_32_8_8.xml.gz\
-             data/meshes/tetrahedron.xml.gz\
-             data/meshes/torso.xml.gz\
-             data/meshes/triangle.xml.gz\
-             data/meshes/trimesh-1.xml.gz\
-             data/meshes/trimesh-128.xml.gz\
-             data/meshes/trimesh-16.xml.gz\
-             data/meshes/trimesh-2.xml.gz\
-             data/meshes/trimesh-32.xml.gz\
-             data/meshes/trimesh-4.xml.gz\
-             data/meshes/trimesh-64.xml.gz\
-             data/meshes/trimesh-8.xml.gz\
-             data/meshes/two_particles.xml.gz\
-             data/meshes/unstruct-trimesh-1.xml.gz\
-             data/meshes/unstruct-trimesh-2.xml.gz\
+             data/meshes/snake_hole.bim\
+             data/meshes/circle.bim\
+             data/meshes/cylinder.bim\
+             data/meshes/dolfin-1.bim\
+             data/meshes/dolfin-2.bim\
+             data/meshes/gear.bim\
+             data/meshes/meshbc.bim\
+             data/meshes/slit.bim\
+             data/meshes/snake.bim\
+             data/meshes/tetmesh-1.bim\
+             data/meshes/sphere.bim\
+             data/meshes/tetmesh_24_8_8.bim\
+             data/meshes/tetmesh-16.bim\
+             data/meshes/tetmesh-4.bim\
+             data/meshes/tetmesh-8.bim\
+             data/meshes/tetmesh_backward_facing_step_32_8_8.bim\
+             data/meshes/tetmesh_LES_10_2_7.bim\
+             data/meshes/tetmesh_bluff_body_32_8_8.bim\
+             data/meshes/tetrahedron.bim\
+             data/meshes/torso.bim\
+             data/meshes/triangle.bim\
+             data/meshes/trimesh-1.bim\
+             data/meshes/trimesh-128.bim\
+             data/meshes/trimesh-16.bim\
+             data/meshes/trimesh-2.bim\
+             data/meshes/trimesh-32.bim\
+             data/meshes/trimesh-4.bim\
+             data/meshes/trimesh-64.bim\
+             data/meshes/trimesh-8.bim\
+             data/meshes/two_particles.bim\
+             data/meshes/unstruct-trimesh-1.bim\
+             data/meshes/unstruct-trimesh-2.bim\
              demo/function/Makefile\
              demo/function/Projection.ufl\
              demo/function/Projection.h\
@@ -57,27 +57,21 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/insitu/poisson/main.cpp\
              demo/insitu/poisson/Poisson.ufl\
              demo/insitu/poisson/Poisson.h\
-	     demo/insitu/poisson/UnitSquareMesh_32x32.xml\
-	     demo/insitu/poisson/poisson.session\
+             demo/insitu/poisson/UnitSquareMesh_32x32.bim\
+             demo/insitu/poisson/poisson.session\
              demo/insitu/convection-diffusion/Makefile\
              demo/insitu/convection-diffusion/main.cpp\
              demo/insitu/convection-diffusion/ConvectionDiffusion.ufl\
              demo/insitu/convection-diffusion/ConvectionDiffusion.h\
-	     demo/insitu/convection-diffusion/UnitSquareMesh_32x32.xml\
+             demo/insitu/convection-diffusion/UnitSquareMesh_32x32.bim\
              demo/mesh/refinement/Makefile\
              demo/mesh/refinement/main.cpp\
-             demo/mesh/meshfunction/mesh2D.xml.gz\
-             demo/mesh/meshfunction/meshfunction.xml\
+             demo/mesh/meshfunction/mesh2D.bim\
+             demo/mesh/meshfunction/meshfunction.bim\
              demo/mesh/meshfunction/Makefile\
              demo/mesh/meshfunction/main.cpp\
              demo/mesh/subdomains/Makefile\
              demo/mesh/subdomains/main.cpp\
-             demo/pde/convection-diffusion/Makefile\
-             demo/pde/convection-diffusion/ConvectionDiffusion.ufl\
-             demo/pde/convection-diffusion/subdomains.xml.gz\
-             demo/pde/convection-diffusion/velocity.xml.gz\
-             demo/pde/convection-diffusion/ConvectionDiffusion.h\
-             demo/pde/convection-diffusion/main.cpp\
              demo/pde/dg/poisson/main.cpp\
              demo/pde/dg/poisson/Makefile\
              demo/pde/dg/poisson/P1Projection.ufl\

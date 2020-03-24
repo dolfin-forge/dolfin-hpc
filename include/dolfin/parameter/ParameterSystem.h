@@ -145,8 +145,6 @@ inline bool ParameterSystem::get( std::string const & key ) const
         return dynamic_cast< parameter< uint > const * >( &p )->get();
         break;
       case Parameter::real_t:
-        return dynamic_cast< parameter< real > const * >( &p )->get();
-        break;
       case Parameter::string_t:
       default:
         error( "Unknown parameter \"%s\".", key.c_str() );

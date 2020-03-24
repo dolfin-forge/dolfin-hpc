@@ -15,13 +15,11 @@ void test(std::string filename, VertexNormal::Type type)
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_VertexNormal )
   {
-#ifdef HAVE_XML
-    test(mesh_file("cylinder.xml.gz"), VertexNormal::none);
-    test(mesh_file("aneurysm.xml.gz"), VertexNormal::none);
-    test(mesh_file("sphere.xml.gz"), VertexNormal::none);
-#endif
+    test(mesh_file("cylinder.bin"), VertexNormal::none);
+    test(mesh_file("aneurysm.bin"), VertexNormal::none);
+    test(mesh_file("sphere.bin"), VertexNormal::none);
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-  
+
 #endif

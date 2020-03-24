@@ -28,7 +28,7 @@ namespace dolfin
   public:
 
     /// File formats
-    enum Type {xml, vtk, binary, off ,raw, stl, xyz};
+    enum Type {vtk, binary, off ,raw, stl, xyz};
 
     /// Create a file with given name
     File(const std::string& filename);

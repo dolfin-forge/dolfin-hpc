@@ -56,7 +56,7 @@ struct Flux : public Value<Flux>
 // Pipeline to render the mesh
 class RenderMesh : public libsimPipeline
 {
-public: 
+public:
 
   void exec(real t, uint step) const
   {
@@ -70,7 +70,7 @@ public:
 // Pipeline to render the solution
 class RenderU : public libsimPipeline
 {
-public: 
+public:
 
   void exec(real t, uint step) const
   {
@@ -84,14 +84,14 @@ public:
 // Pipline to render both mesh and solution in the same plot
 class RenderAll : public libsimPipeline
 {
-public: 
+public:
 
   void exec(real t, uint step) const
   {
     VisItAddPlot("Mesh", "Mesh");
     VisItAddPlot("Pseudocolor", "U");
     VisItDrawPlots();
-    VisItSaveWindow("./mesh_and_solution.png", 
+    VisItSaveWindow("./mesh_and_solution.png",
 		    800, 600, VISIT_IMAGEFORMAT_PNG);
     VisItDeleteActivePlots();
   }
@@ -101,11 +101,11 @@ public:
 class RenderSession : public libsimPipeline
 {
 public:
-  
-  void exec(real t, uint step) const 
+
+  void exec(real t, uint step) const
   {
     VisItRestoreSession("./poisson.session");
-    VisItSaveWindow("./session.png", 
+    VisItSaveWindow("./session.png",
 		    800, 600, VISIT_IMAGEFORMAT_PNG);
   }
 };
@@ -129,16 +129,16 @@ int main(int argc, char **argv)
   dolfin_init(argc, argv);
 
   // VisIt directory should point to the top installation dir.
-  // dolfin_set("VisIt directory","/opt/visit/2.10.0");  
+  // dolfin_set("VisIt directory","/opt/visit/2.10.0");
 
   const std::string visit_path = dolfin_get("VisIt directory");
   if (visit_path == "")
     error("Parameter 'VisIt directory' not set properly");
-  
+
   libsimInterface::init(libsimInterface::batch);
 
   // Create mesh
-  Mesh mesh("UnitSquareMesh_32x32.xml");
+  Mesh mesh("UnitSquareMesh_32x32.bin");
 
   // Expose a mesh named Mesh to libsim
   libsimInterface::addData(mesh, "Mesh");
@@ -152,9 +152,9 @@ int main(int argc, char **argv)
   RenderSession render_session;
 
   // Add all pipelines to the insitu interface
-  libsimInterface::addPipeline(render_u); 
-  libsimInterface::addPipeline(render_mesh); 
-  libsimInterface::addPipeline(render_all); 
+  libsimInterface::addPipeline(render_u);
+  libsimInterface::addPipeline(render_mesh);
+  libsimInterface::addPipeline(render_all);
   libsimInterface::addPipeline(render_session);
 
   // Create boundary condition
@@ -186,6 +186,6 @@ int main(int argc, char **argv)
 
   // Render all pipelines
   libsimInterface::batchRender();
-  
+
   return 0;
 }

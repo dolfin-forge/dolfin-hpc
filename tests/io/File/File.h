@@ -36,29 +36,10 @@ DOLFIN_START_TEST( test_File )
   catch ( ... ) { did_throw = true; }
   ck_assert( did_throw == false );
 //-------------------------------------------------------------------------
-#ifdef HAVE_XML
-  did_throw = false;
-  try { File f("a.xml.gz"); }
-  catch ( ... ) { did_throw = true; }
-  ck_assert( did_throw == false );
-//-------------------------------------------------------------------------
-  did_throw = false;
-  try { File f("filename.xml.gz"); }
-  catch ( ... ) { did_throw = true; }
-  ck_assert( did_throw == false );
-#endif
-//-------------------------------------------------------------------------
   did_throw = false;
   try { File f("a"); }
   catch ( ... ) { did_throw = true; }
   ck_assert( did_throw == true );
-//-------------------------------------------------------------------------
-#ifdef HAVE_XML
-  did_throw = false;
-  try { File f("xml.gz"); }
-  catch ( ... ) { did_throw = true; }
-  ck_assert( did_throw == true );
-#endif
 //-------------------------------------------------------------------------
   did_throw = false;
   try { File f("pvd"); }

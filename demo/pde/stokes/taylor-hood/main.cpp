@@ -21,7 +21,7 @@ int main( int argc, char ** argv )
 
 	{
 		// Read mesh and sub domain markers
-		Mesh mesh( "../../../../data/meshes/dolfin-2.xml.gz" );
+		Mesh mesh( "../../../../data/meshes/dolfin-2.bin" );
 
 		// Create functions for boundary conditions
 		Analytic< NoSlip >    noslip( mesh );

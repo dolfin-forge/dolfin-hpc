@@ -5,6 +5,4 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = ParameterValue/ParameterValue.h \
-             Parameter/Parameter.h \
-             Parametrized/Parametrized.h
+EXTRA_DIST = Parameter/Parameter.h

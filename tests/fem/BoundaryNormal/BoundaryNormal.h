@@ -22,11 +22,9 @@ void test(std::string file)
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_NodeNormal )
   {
-#ifdef HAVE_XML
-    test(mesh_file("cylinder.xml.gz"));
-    test(mesh_file("aneurysm.xml.gz"));
-    test(mesh_file("sphere.xml.gz"  ));
-#endif
+    test(mesh_file("cylinder.bin"));
+    test(mesh_file("aneurysm.bin"));
+    test(mesh_file("sphere.bin"  ));
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

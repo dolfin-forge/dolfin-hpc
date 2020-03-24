@@ -42,10 +42,10 @@ int main()
   };
 
   // Read mesh
-  Mesh mesh("../../../data/meshes/dolfin-2.xml.gz");
+  Mesh mesh("../../../data/meshes/dolfin-2.bin");
 
   // Create mesh function over the cell facets
-  MeshValues<uint, Facet> sub_domains(mesh);
+  MeshValues<uint, Cell> sub_domains(mesh);
 
   // Mark all facets as sub domain 3
   sub_domains = 3;
@@ -63,6 +63,5 @@ int main()
   outflow.mark(sub_domains, 2);
 
   // Save sub domains to file
-  File file("subdomains.xml");
-  file << sub_domains;
+  File("subdomains.bin") << sub_domains;
 }

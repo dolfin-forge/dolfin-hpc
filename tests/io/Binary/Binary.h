@@ -149,7 +149,7 @@ DOLFIN_START_TEST( test_BinaryFile_Poisson )
       //------------------------------------------------------------------------
 
       // Create mesh
-      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
       UnitSquare mesh(32,32);
 
       // Create coefficients
@@ -210,7 +210,7 @@ DOLFIN_START_TEST( test_BinaryFile_Function )
       // FiniteElementSpace Vh0(m0, DG0);
       // Function U0(Vh0);
 
-      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
       ufl::Family f(ufl::Family::CG);
       ufl::Domain dom(ufl::Domain::triangle);
       ufl::Cell cell(dom);

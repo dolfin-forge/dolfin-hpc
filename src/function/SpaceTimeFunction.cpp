@@ -57,11 +57,9 @@ uint SpaceTimeFunction::load()
   {
 #ifdef ENABLE_MPIIO
     MPI_File fh;
-
     MPI::Communicator& comm = this->mesh().topology().comm();
     MPI::file_open( fh, sname, MPI_MODE_RDONLY, comm );
-    MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real),
-                                        MPI_BYTE, MPI_STATUS_IGNORE) );
+    MPI::file_read_all( fh, st );
     MPI::file_close( fh );
 #else
     std::ifstream fp(sname.c_str(), std::ifstream::binary);
@@ -186,32 +184,23 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
   MPI::file_open( fh, sname, MPI_MODE_RDONLY, comm );
-  MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE,
-                                      MPI_STATUS_IGNORE) );
-  byte_offset += sizeof(real);
-  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint),
-                                         MPI_BYTE, MPI_STATUS_IGNORE) );
-  byte_offset += sizeof(uint);
+  byte_offset += MPI::file_read_all( fh, st );
+  byte_offset += MPI::file_read_at_all( fh, sp, byte_offset );
   if (sp != pe_size)
   {
     error("SpaceTimeFunction : communicator size mismatch %u != %u", sp,
           pe_size);
   }
-  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
-                                         &offset[0], 2, MPI_UNSIGNED,
-                                         MPI_STATUS_IGNORE) );
-  byte_offset += pe_size * 2 * sizeof(uint);
+  byte_offset += MPI::file_read_at_all( fh, &offset[0], 2,
+                                        byte_offset + pe_rank * 2 * sizeof(uint),
+                                        pe_size * 2 );
   if (offset[1] != w.vector().local_size())
   {
     error("SpaceTimeFunction : local size mismatch");
   }
-  MPI::check_error( MPI_File_read_at_all(fh, byte_offset, &offset[2],
-                                         sizeof(uint), MPI_BYTE,
-                                         MPI_STATUS_IGNORE) );
-  byte_offset += sizeof(uint);
-  MPI::check_error( MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real),
-                                         &values[0], offset[1], MPI_DOUBLE,
-                                         MPI_STATUS_IGNORE) );
+  byte_offset += MPI::file_read_at_all( fh, offset[2], byte_offset );
+  MPI::file_read_at_all( fh, &values[0], offset[1],
+                         byte_offset + offset[0] * sizeof(real) );
   MPI::file_close( fh );
 #else
   std::ifstream fp(sname.c_str(), std::ifstream::binary);

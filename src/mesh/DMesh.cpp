@@ -787,14 +787,7 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
   }
 
   uint offset = 0;
-#if ( MPI_VERSION > 1 )
-  MPI::check_error( MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                               MPI::DOLFIN_COMM) );
-#else
-  MPI::check_error( MPI_Scan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                             MPI::DOLFIN_COMM) );
-  offset -= num_owned;
-#endif
+  MPI::exscan_sum( &num_owned, &offset, 1 );
 
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it)
   {

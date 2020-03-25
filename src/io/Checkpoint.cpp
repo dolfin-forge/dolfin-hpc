@@ -400,8 +400,12 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
                                           MPI_STATUS_IGNORE) );
   byte_offset_ += hdr_.disp[0] * sizeof(real);
 
+  Array<uint> cell_data;
+  for ( uint c1 = 0; c1 < mesh.cells().size(); ++c1 )
+    cell_data.append( mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
+
   MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[1] * sizeof(uint),
-                                          mesh.cells().data(), hdr_.num_centities,
+                                          cell_data.data(), hdr_.num_centities,
                                           MPI_UNSIGNED, MPI_STATUS_IGNORE) );
   byte_offset_ += hdr_.disp[1] * sizeof(uint);
 

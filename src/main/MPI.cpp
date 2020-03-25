@@ -227,14 +227,7 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
   // Fool-proof as the value for rank 0 is undefined according to MPI specs
   offset = 0;
 #ifdef HAVE_MPI
-#if ( MPI_VERSION > 1 )
-  MPI::check_error( MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                               MPI::DOLFIN_COMM) );
-  MAYBE_UNUSED(comm)
-#else
-  MPI::check_error( MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm) );
-  offset -= local;
-#endif
+  MPI::exscan_sum( &local, &offset, 1, comm );
 #else
   MAYBE_UNUSED(local)
   MAYBE_UNUSED(comm)

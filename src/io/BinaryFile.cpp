@@ -420,15 +420,7 @@ void BinaryFile::write_function(
       // Compute new vertex based offset
       uint num_values = value_dim * mesh.topology().num_owned(0);
       offset = 0;
-#if ( MPI_VERSION > 1 )
-      MPI::check_error( MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED,
-                                   MPI_SUM, MPI::DOLFIN_COMM ) );
-#else
-      MPI::check_error( MPI_Scan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                                 MPI::DOLFIN_COMM) );
-      offset -= num_values;
-#endif
-
+      MPI::exscan_sum( &num_values, &offset, 1 );
     }
     else
     {
@@ -1059,18 +1051,9 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   }
 
   uint offset = 0;
-#if ( MPI_VERSION > 1 )
-  MPI::check_error( MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                               MPI::DOLFIN_COMM) );
-#else
-  MPI::check_error( MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                             MPI::DOLFIN_COMM) );
-  offset -= local_size;
-#endif
-
+  MPI::exscan_sum( &local_size, &offset, 1 );
   MPI::file_write_at_all( fh, values, local_size * sizeof(real),
                           byte_offset + offset * sizeof(real) );
-
   MPI::file_close( fh );
 
   counter++;
@@ -1138,15 +1121,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
                                     : mesh.num_cells());
 
   uint offset = 0;
-#if ( MPI_VERSION > 1 )
-  MPI::check_error( MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                               MPI::DOLFIN_COMM) );
-#else
-  MPI::check_error( MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-                             MPI::DOLFIN_COMM) );
-  offset -= local_size;
-#endif
-
+  MPI::exscan_sum( &local_size, &offset, 1 );
   MPI::file_read_at_all( fh, values, local_size * sizeof(real),
                          byte_offset + offset * sizeof(real) );
   if(byteswap)

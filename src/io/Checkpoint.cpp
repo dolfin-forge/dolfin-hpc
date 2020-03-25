@@ -55,18 +55,7 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
 			   hdr_.num_vertices, (2 * hdr_.num_ghosts)};
 
     memset(&hdr_.offsets[0], 0, 4 * sizeof(uint));
-#if ( MPI_VERSION > 1 )
-    MPI::check_error( MPI_Exscan(&local_data[0], &hdr_.offsets[0], 4,
-                                 MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM) );
-#else
-    MPI::check_error( MPI_Scan(&local_data[0], &hdr_.offsets[0], 4,
-                               MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM) );
-
-    hdr_.offsets[0] -= local_data[0];
-    hdr_.offsets[1] -= local_data[1];
-    hdr_.offsets[2] -= local_data[2];
-    hdr_.offsets[3] -= local_data[3];
-#endif
+    MPI::exscan_sum( &local_data[0], &hdr_.offsets[0], 4 );
 
     if (!disp_initialized_ || !static_mesh)
     {

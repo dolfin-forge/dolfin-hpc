@@ -185,6 +185,10 @@ public:
                                  MPI_Offset offset,
                                  MPI_Status * status = MPI_STATUS_IGNORE );
 
+  template< typename T >
+  static void exscan_sum( T const * send, T * recv, int count,
+                          Communicator & comm = MPI::DOLFIN_COMM  );
+
   static void file_close( MPI_File & file );
 private:
 
@@ -442,6 +446,23 @@ uint MPI::file_write_at_all( MPI_File & file, T const & element,
 }
 
 //-----------------------------------------------------------------------------
+
+template<typename T >
+void MPI::exscan_sum( T const * send, T * recv, int count, Communicator & comm )
+{
+#if ( MPI_VERSION > 1 )
+  MPI::check_error( MPI_Exscan( static_cast< void const * >( send ),
+                                static_cast< void * >( recv ),
+                                count, MPI_type< T >::value, MPI_SUM, comm ) );
+#else
+  MPI::check_error( MPI_Scan( static_cast< void const * >( send ),
+                              static_cast< void * >( recv ),
+                              count, MPI_type< T >::value, MPI_SUM, comm ) );
+
+  for ( int i = 0; i < count; ++i )
+    recv[i] -= send[i];
+#endif
+}
 
 #else
 

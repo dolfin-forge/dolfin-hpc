@@ -379,25 +379,20 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
   uint pe_size = MPI::size();
   uint pe_rank = MPI::rank();
 
-  MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + pe_rank * sizeof(chkp_mesh_hdr),
-                                          &hdr_, sizeof(chkp_mesh_hdr), MPI_BYTE,
-                                          MPI_STATUS_IGNORE) );
+  MPI::file_write_at_all( out, hdr_, byte_offset_ + pe_rank * sizeof(chkp_mesh_hdr) );
   byte_offset_ += pe_size * sizeof(chkp_mesh_hdr);
 
-  MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[0] * sizeof(real),
-                                          mesh.geometry().coordinates(),
-                                          hdr_.num_coords, MPI_DOUBLE,
-                                          MPI_STATUS_IGNORE) );
-  byte_offset_ += hdr_.disp[0] * sizeof(real);
+  byte_offset_ += MPI::file_write_at_all(
+                  out, mesh.geometry().coordinates(), hdr_.num_coords,
+                  byte_offset_ + hdr_.offsets[0] * sizeof(real), hdr_.disp[0] );
 
   Array<uint> cell_data;
   for ( uint c1 = 0; c1 < mesh.cells().size(); ++c1 )
     cell_data.append( mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
 
-  MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[1] * sizeof(uint),
-                                          cell_data.data(), hdr_.num_centities,
-                                          MPI_UNSIGNED, MPI_STATUS_IGNORE) );
-  byte_offset_ += hdr_.disp[1] * sizeof(uint);
+  byte_offset_ += MPI::file_write_at_all( out, cell_data.data(), hdr_.num_centities,
+                                          byte_offset_ + hdr_.offsets[1] * sizeof(uint),
+                                          hdr_.disp[1] );
 
 #else
   out.write((char *)&hdr_, sizeof(chkp_mesh_hdr));
@@ -414,10 +409,9 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
       mapping[v->index()] = v->global_index();
     }
 #ifdef ENABLE_MPIIO
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[2] * sizeof(uint),
-                                            mapping, hdr_.num_vertices,
-                                            MPI_UNSIGNED, MPI_STATUS_IGNORE) );
-    byte_offset_ += hdr_.disp[2] * sizeof(uint);
+    byte_offset_ += MPI::file_write_at_all( out, mapping, hdr_.num_vertices,
+                                            byte_offset_ + hdr_.offsets[2] * sizeof(uint),
+                                            hdr_.disp[2] );
 #else
     out.write((char *)mapping, hdr_.num_vertices * sizeof(uint));
 #endif
@@ -431,10 +425,9 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
       *gp++ = g.owner();
     }
 #ifdef ENABLE_MPIIO
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[3] * sizeof(uint),
-                                            ghosts, 2 * hdr_.num_ghosts,
-                                            MPI_UNSIGNED, MPI_STATUS_IGNORE) );
-    byte_offset_ += hdr_.disp[3] * sizeof(uint);
+    byte_offset_ += MPI::file_write_at_all( out, ghosts, 2 * hdr_.num_ghosts,
+                                            byte_offset_ + hdr_.offsets[3] * sizeof(uint),
+                                            hdr_.disp[3] );
 #else
     out.write((char *)ghosts, 2 * hdr_.num_ghosts * sizeof(uint));
 #endif
@@ -470,15 +463,12 @@ void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
     vector_offset[1] = (*it)->vector().local_size();
     vector_offset[2] = (*it)->vector().size();
 
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + pe_rank * 3 * sizeof(uint),
-                                            &vector_offset[0], 3, MPI_UNSIGNED,
-                                            MPI_STATUS_IGNORE) );
-    byte_offset_ += pe_size * 3 * sizeof(uint);
-
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + vector_offset[0] * sizeof(real),
-                                            values, vector_offset[1], MPI_DOUBLE,
-                                            MPI_STATUS_IGNORE) );
-    byte_offset_ += (*it)->vector().size() * sizeof(real);
+    byte_offset_ += MPI::file_write_at_all( out, &vector_offset[0], 3,
+                                            byte_offset_ + pe_rank * 3 * sizeof(uint),
+                                            pe_size * 3 );
+    byte_offset_ += MPI::file_write_at_all( out, values, vector_offset[1],
+                                            byte_offset_ + vector_offset[0] * sizeof(real),
+                                            (*it)->vector().size() );
 #else
     uint local_size = (*it)->vector().local_size();
     out.write((char *)&local_size, sizeof(uint));
@@ -515,15 +505,12 @@ void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
     vector_offset[1] = (*it)->local_size();
     vector_offset[2] = (*it)->size();
 
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + pe_rank * 3 * sizeof(uint),
-                                            &vector_offset[0], 3, MPI_UNSIGNED,
-                                            MPI_STATUS_IGNORE) );
-    byte_offset_ += pe_size * 3 * sizeof(uint);
-
-    MPI::check_error( MPI_File_write_at_all(out, byte_offset_ + vector_offset[0] * sizeof(real),
-                                            values, vector_offset[1], MPI_DOUBLE,
-                                            MPI_STATUS_IGNORE) );
-    byte_offset_ += vector_offset[2] * sizeof(real);
+    byte_offset_ += MPI::file_write_at_all( out, &vector_offset[0], 3,
+                                            byte_offset_ + pe_rank * 3 * sizeof(uint),
+                                            pe_size * 3 );
+    byte_offset_ += MPI::file_write_at_all( out, values, vector_offset[1],
+                                            byte_offset_ + vector_offset[0] * sizeof(real),
+                                            vector_offset[2] );
 #else
     uint local_size = (*it)->local_size();
     out.write((char *)&local_size, sizeof(uint));

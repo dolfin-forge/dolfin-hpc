@@ -59,7 +59,7 @@ uint SpaceTimeFunction::load()
     MPI_File fh;
 
     MPI::Communicator& comm = this->mesh().topology().comm();
-    MPI::file_open( fh, sname, MPI_MODE_RDONLY );
+    MPI::file_open( fh, sname, MPI_MODE_RDONLY, comm );
     MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real),
                                         MPI_BYTE, MPI_STATUS_IGNORE) );
     MPI::file_close( fh );
@@ -185,7 +185,7 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  MPI::file_open( fh, sname, MPI_MODE_RDONLY );
+  MPI::file_open( fh, sname, MPI_MODE_RDONLY, comm );
   MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE,
                                       MPI_STATUS_IGNORE) );
   byte_offset += sizeof(real);
@@ -244,7 +244,7 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  MPI::file_open( fh, sname, MPI_MODE_WRONLY | MPI_MODE_CREATE );
+  MPI::file_open( fh, sname, MPI_MODE_WRONLY | MPI_MODE_CREATE, comm );
   if (pe_rank == 0)
   {
     MPI::check_error( MPI_File_write(fh, &st, sizeof(real),
@@ -257,19 +257,17 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   }
   byte_offset += sizeof(uint);
-  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
-                                          &offset[0], 2, MPI_UNSIGNED,
-                                          MPI_STATUS_IGNORE) );
-  byte_offset += pe_size * 2 * sizeof(uint);
+  byte_offset += MPI::file_write_at_all( fh, &offset[0], 2,
+                                         byte_offset + pe_rank * 2 * sizeof(uint),
+                                         pe_size * 2 );
   if (pe_rank == 0)
   {
     MPI::check_error( MPI_File_write_at(fh, byte_offset, &offset[2], sizeof(uint),
                                         MPI_BYTE, MPI_STATUS_IGNORE) );
   }
   byte_offset += sizeof(uint);
-  MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real),
-                                          values, offset[1], MPI_DOUBLE,
-                                          MPI_STATUS_IGNORE) );
+  MPI::file_write_at_all( fh, values, offset[1],
+                          byte_offset + offset[0] * sizeof(real) );
   MPI::file_close( fh );
 #else
   uint sp = 1;

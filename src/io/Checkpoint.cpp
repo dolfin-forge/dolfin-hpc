@@ -272,8 +272,10 @@ void Checkpoint::load(Mesh& mesh)
   }
   _mesh.distdata()[0].remap_shared_adj();
   _mesh.distdata()[0].finalize();
+  _mesh.distdata()[0].valid_numbering = true;
   editor.close();
   swap( mesh, _mesh );
+
 
   restart_state_ = FUNC;
 

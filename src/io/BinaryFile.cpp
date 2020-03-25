@@ -22,6 +22,7 @@
 #include <fstream>
 #include <list>
 #include <stdint.h>
+#include <stdexcept>
 
 namespace dolfin
 {

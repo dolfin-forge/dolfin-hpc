@@ -436,5 +436,17 @@ int MPI::check_error( int const mpi_error )
 
   return mpi_error;
 }
+//-----------------------------------------------------------------------------
+void MPI::file_open( MPI_File & file, std::string const & filename,
+                    int mode, Communicator & comm, MPI_Info info )
+{
+  check_error( MPI_File_open( comm, filename.c_str(), mode, info, &file ) );
+}
+//-----------------------------------------------------------------------------
+void MPI::file_close( MPI_File & file )
+{
+  check_error( MPI_File_close( &file ) );
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

@@ -59,11 +59,10 @@ uint SpaceTimeFunction::load()
     MPI_File fh;
 
     MPI::Communicator& comm = this->mesh().topology().comm();
-    MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
-                                    MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
+    MPI::file_open( fh, sname, MPI_MODE_RDONLY );
     MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real),
                                         MPI_BYTE, MPI_STATUS_IGNORE) );
-    MPI::check_error( MPI_File_close(&fh) );
+    MPI::file_close( fh );
 #else
     std::ifstream fp(sname.c_str(), std::ifstream::binary);
     fp.read((char *)&st, sizeof(real));
@@ -186,8 +185,7 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
-                                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh) );
+  MPI::file_open( fh, sname, MPI_MODE_RDONLY );
   MPI::check_error( MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE,
                                       MPI_STATUS_IGNORE) );
   byte_offset += sizeof(real);
@@ -214,7 +212,7 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   MPI::check_error( MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real),
                                          &values[0], offset[1], MPI_DOUBLE,
                                          MPI_STATUS_IGNORE) );
-  MPI::check_error( MPI_File_close(&fh) );
+  MPI::file_close( fh );
 #else
   std::ifstream fp(sname.c_str(), std::ifstream::binary);
   fp.read((char *)&st, sizeof(real));
@@ -246,9 +244,7 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   MPI::Communicator& comm = w.mesh().topology().comm();
   uint pe_rank = w.mesh().topology().comm_rank();
   uint pe_size = w.mesh().topology().comm_size();
-  MPI::check_error( MPI_File_open(comm, (char *) sname.c_str(),
-                                  MPI_MODE_WRONLY | MPI_MODE_CREATE,
-                                  MPI_INFO_NULL, &fh) );
+  MPI::file_open( fh, sname, MPI_MODE_WRONLY | MPI_MODE_CREATE );
   if (pe_rank == 0)
   {
     MPI::check_error( MPI_File_write(fh, &st, sizeof(real),
@@ -274,7 +270,7 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   MPI::check_error( MPI_File_write_at_all(fh, byte_offset + offset[0] * sizeof(real),
                                           values, offset[1], MPI_DOUBLE,
                                           MPI_STATUS_IGNORE) );
-  MPI::check_error( MPI_File_close(&fh) );
+  MPI::file_close( fh );
 #else
   uint sp = 1;
   std::ofstream fp(sname.c_str(), std::ofstream::binary);

@@ -141,6 +141,18 @@ public:
   /// Check for MPI errors
   static int check_error( int const mpi_error );
 
+  static void file_open( MPI_File & file, std::string const & filename,
+                         int mode, Communicator & comm = MPI::DOLFIN_COMM,
+                         MPI_Info info = MPI_INFO_NULL )
+  {
+    check_error( MPI_File_open( comm, filename.c_str(), mode, info, &file ) );
+  }
+
+  static void file_close( MPI_File & file)
+  {
+    check_error( MPI_File_close( &file ) );
+  }
+
 private:
 
   static real time_;

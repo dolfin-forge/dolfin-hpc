@@ -104,10 +104,7 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   _fname << fname << (n_++) % 2 << ".chkp";
 
   MPI_File out;
-  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
-                                 (char *) _fname.str().c_str(),
-                                 MPI_MODE_WRONLY | MPI_MODE_CREATE,
-                                 MPI_INFO_NULL, &out) );
+  MPI::file_open( out, _fname.str(), MPI_MODE_WRONLY | MPI_MODE_CREATE );
 
   byte_offset_ = 0;
   MPI::check_error( MPI_File_write_all(out, &id, 1, MPI_UNSIGNED,
@@ -125,7 +122,7 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   write(vec, out);
 
 #ifdef ENABLE_MPIIO
-  MPI::check_error( MPI_File_close(&out) );
+  MPI::file_close( out );
 #else
   out.close();
 #endif
@@ -151,9 +148,7 @@ void Checkpoint::restart(std::string fname)
 #endif
 
 #ifdef ENABLE_MPIIO
-  MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
-                                  (char *) _fname.str().c_str(),
-                                  MPI_MODE_RDONLY, MPI_INFO_NULL, &in_) );
+  MPI::file_open( in_, _fname.str(), MPI_MODE_RDONLY );
   MPI::check_error( MPI_File_read_all(in_, &id_, 1, MPI_UNSIGNED,
                                       MPI_STATUS_IGNORE) );
   MPI::check_error( MPI_File_read_all(in_, &t_, 1, MPI_DOUBLE,
@@ -378,7 +373,7 @@ void Checkpoint::load(std::vector<Vector *> vec)
   }
 
 #ifdef ENABLE_MPIIO
-  MPI::check_error( MPI_File_close(&in_) );
+  MPI::file_close( in_ );
 #else
   in_.close();
 #endif

@@ -105,15 +105,8 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
 
   MPI_File out;
   MPI::file_open( out, _fname.str(), MPI_MODE_WRONLY | MPI_MODE_CREATE );
-
-  byte_offset_ = 0;
-  MPI::check_error( MPI_File_write_all(out, &id, 1, MPI_UNSIGNED,
-                                      MPI_STATUS_IGNORE) );
-  MPI::check_error( MPI_File_write_all(out, &t, 1, MPI_DOUBLE,
-                                      MPI_STATUS_IGNORE) );
-
-  byte_offset_ += sizeof(uint);
-  byte_offset_ += sizeof(real);
+  byte_offset_ = MPI::file_write_all( out, id );
+  byte_offset_ += MPI::file_write_all( out, t );
 #endif
 
   hdr_init(mesh, static_mesh);

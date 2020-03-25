@@ -148,6 +148,27 @@ public:
     check_error( MPI_File_open( comm, filename.c_str(), mode, info, &file ) );
   }
 
+  template< typename T >
+  static uint file_write_all( MPI_File & file, T const & element,
+                              MPI_Status * status = MPI_STATUS_IGNORE )
+  {
+      check_error(
+        MPI_File_write_all( file , static_cast< void const * >( &element ),
+                            1, MPI_type< T >::value, status ) );
+      return sizeof( T );
+  }
+
+  template< typename T >
+  static uint file_write_all( MPI_File & file,
+                              T const & element, uint const size,
+                              MPI_Status * status = MPI_STATUS_IGNORE )
+  {
+      check_error(
+        MPI_File_write_all( file , static_cast< void const * >( &element ),
+                            size, MPI_BYTE, status ) );
+      return size;
+  }
+
   static void file_close( MPI_File & file)
   {
     check_error( MPI_File_close( &file ) );

@@ -198,10 +198,7 @@ void BinaryFile::operator<<(GenericVector& x)
   MPI_Offset byte_offset;
 
   MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
-
-  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
-                                       MPI_BYTE, MPI_STATUS_IGNORE) );
-  byte_offset = sizeof(BinaryFileHeader);
+  byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
   MPI::check_error( MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
                                           &offset[0], 2, MPI_UNSIGNED,
                                           MPI_STATUS_IGNORE) );
@@ -408,14 +405,8 @@ void BinaryFile::write_function(
   MPI_File fh;
   MPI_Offset byte_offset;
   MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
-  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
-                                       MPI_BYTE, MPI_STATUS_IGNORE) );
-  byte_offset = sizeof(BinaryFileHeader);
-
-  uint n_func = f.size();
-  MPI::check_error( MPI_File_write_all(fh, &n_func, 1, MPI_UNSIGNED,
-                                       MPI_STATUS_IGNORE) );
-  byte_offset += sizeof(uint);
+  byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
+  byte_offset += MPI::file_write_all( fh, static_cast<uint>( f.size() ) );
 
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
@@ -965,13 +956,9 @@ void BinaryFile::operator<<(Mesh& mesh)
     MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
 
     // Write Header
-    MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
-                                         MPI_BYTE, MPI_STATUS_IGNORE) );
-    MPI::check_error( MPI_File_write_all(fh, (void *) &gdim, 1, MPI_UNSIGNED,
-                                         MPI_STATUS_IGNORE) );
-    MPI::check_error( MPI_File_write_all(fh, (void *) &type, 1, MPI_UNSIGNED,
-                                         MPI_STATUS_IGNORE) );
-    byte_offset = sizeof(BinaryFileHeader) + 2 * sizeof(uint);
+    byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
+    byte_offset += MPI::file_write_all( fh, gdim );
+    byte_offset += MPI::file_write_all( fh, type );
 
     // Write vertices
     uint vertex_offset = 0;
@@ -987,9 +974,7 @@ void BinaryFile::operator<<(Mesh& mesh)
         vptr += gdim;
       }
     }
-    MPI::check_error( MPI_File_write_all(fh, (void *) &num_vertices, 1,
-                                         MPI_UNSIGNED, MPI_STATUS_IGNORE) );
-    byte_offset += sizeof(uint);
+    byte_offset += MPI::file_write_all( fh, num_vertices );
     MPI::check_error( MPI_File_write_at_all(fh, byte_offset + vertex_offset * sizeof(real),
                                             vertex_buffer, vertex_buffer_size,
                                             MPI_DOUBLE, MPI_STATUS_IGNORE) );
@@ -1091,10 +1076,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   MPI_Offset byte_offset;
 
   MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
-
-  MPI::check_error( MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader),
-                                       MPI_BYTE, MPI_STATUS_IGNORE) );
-  byte_offset = sizeof(BinaryFileHeader);
+  byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
 
   uint local_size = 0;
   int mfunc_type = 0;

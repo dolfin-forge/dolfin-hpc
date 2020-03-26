@@ -382,7 +382,7 @@ uint MPI::file_read_at_all( MPI_File & file, T * elements, uint const count,
                             MPI_Offset offset, uint const global_count,
                             MPI_Status * status )
 {
-  dolfin_assert( count <= global_count );
+  dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_read_at_all( file, offset,
                                      static_cast< void * >( elements ),
                                      count, MPI_type< T >::value, status ) );
@@ -428,7 +428,7 @@ uint MPI::file_write_at_all( MPI_File & file, T const * elements,
                              uint const count, MPI_Offset offset,
                              uint const global_count, MPI_Status * status )
 {
-  dolfin_assert( count <= global_count );
+  dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_write_at_all( file, offset,
                                       static_cast< void const * >( elements ),
                                       count, MPI_type< T >::value, status ) );

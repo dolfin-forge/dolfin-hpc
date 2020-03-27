@@ -26,9 +26,8 @@ DofMapCache::~DofMapCache()
 {
   if (cache_.size() != 0)
   {
-    disp();
-    error("DofMapCache is not empty: "
-          "some dof maps have not been properly released");
+    warning("DofMapCache is not empty: "
+            "some dof maps have not been properly released");
   }
   for (container_t::iterator it = cache_.begin(); it != cache_.end(); ++it)
   {

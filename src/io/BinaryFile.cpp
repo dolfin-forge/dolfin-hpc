@@ -376,7 +376,7 @@ void BinaryFile::write_function(
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
+  MPI::file_open( fh, bin_filename_, MPI_MODE_WRONLY | MPI_MODE_CREATE );
   byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
   byte_offset += MPI::file_write_all( fh, static_cast<uint>( f.size() ) );
 
@@ -1014,7 +1014,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   MPI_File fh;
   MPI_Offset byte_offset;
 
-  MPI::file_open( fh, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
+  MPI::file_open( fh, bin_filename_, MPI_MODE_WRONLY | MPI_MODE_CREATE );
   byte_offset = MPI::file_write_all( fh, hdr, sizeof( BinaryFileHeader ) );
 
   uint local_size = 0;

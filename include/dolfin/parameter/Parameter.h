@@ -18,11 +18,11 @@ public:
   /// Supported parameter types
   enum Type
   {
-    bool_t,
-    real_t,
-    int_t,
-    uint_t,
-    string_t
+    bool_t   = 0,
+    real_t   = 1,
+    int_t    = 2,
+    uint_t   = 3,
+    string_t = 4
   };
 
 public:

@@ -128,6 +128,88 @@ bool ParameterSystem::defined(std::string const& key) const
 
 //-----------------------------------------------------------------------------
 
+std::string ParameterSystem::serialize() const
+{
+  std::stringstream ss;
+  // Parameters are encoded as: "name";type;"value";
+  for ( const_iterator it = this->begin(); it != this->end(); ++it )
+  {
+    ss << "\"" << it->first << "\";" << it->second->type() << ";";
+    switch ( it->second->type() )
+    {
+      case Parameter::bool_t:
+        ss << "\"" << std::boolalpha << this->get< bool >( it->first ) << "\";";
+        break;
+      case Parameter::int_t:
+        ss << "\"" << this->get< int >( it->first ) << "\";";
+        break;
+      case Parameter::uint_t:
+        ss << "\"" << this->get< uint >( it->first ) << "\";";
+        break;
+      case Parameter::real_t:
+        ss << "\"" << this->get< real >( it->first ) << "\";";
+        break;
+      case Parameter::string_t:
+        ss << "\"" << this->get< std::string >( it->first ) << "\";";
+        break;
+      default:
+        ss << "\"Unknown Parameter Type\";";
+    }
+  }
+  message( "ParameterSystem:\n%s", ss.str().c_str() );
+  return ss.str();
+}
+
+//-----------------------------------------------------------------------------
+
+void ParameterSystem::deserialize( std::string const & parameters )
+{
+  std::string::size_type pos = 0;
+
+  while ( pos < parameters.size() )
+  {
+    dolfin_assert( parameters[pos] == '\"' );
+
+    std::string name( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
+    pos += name.size() + 3;
+
+    std::string type( parameters, pos, parameters.find(";", pos ) - pos );
+    pos += type.size() + 1;
+
+    std::string value( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
+    pos += value.size() + 3;
+
+    switch ( std::atoi( type.c_str() ) )
+    {
+      case Parameter::bool_t:
+        if ( value == "true" )
+          this->set( name, true );
+        else if ( value == "false" )
+          this->set( name, false );
+        else
+          warning( "Invalid bool value: %s = %s", name.c_str(), value.c_str() );
+        break;
+      case Parameter::int_t:
+        this->set( name, std::atoi( value.c_str() ) );
+        break;
+      case Parameter::uint_t:
+        this->set( name, static_cast< uint >( std::atoi( value.c_str() ) ) );
+        break;
+      case Parameter::real_t:
+        this->set( name, static_cast< real >( std::atof( value.c_str() ) ) );
+        break;
+      case Parameter::string_t:
+        this->set( name, value );
+        break;
+      default:
+        warning( "\"Unknown Parameter Type\";" );
+    }
+
+  }
+}
+
+//-----------------------------------------------------------------------------
+
 void ParameterSystem::disp() const
 {
   for ( const_iterator it = this->begin(); it != this->end(); ++it )
@@ -152,7 +234,7 @@ void ParameterSystem::disp() const
         ss << this->get< std::string >( it->first );
         break;
       default:
-        ss << "Unknown Parameter";
+        ss << "Unknown Parameter Type";
     }
     message( ss.str() );
   }

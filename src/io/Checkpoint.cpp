@@ -1,33 +1,36 @@
 // Copyright (C) 2009 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <cstring>
-#include <sstream>
-#include <fstream>
+#include <dolfin/io/Checkpoint.h>
+
+#include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/function/Function.h>
-#include <dolfin/io/Checkpoint.h>
-#include <dolfin/main/MPI.h>
+#include <dolfin/parameter/ParameterSystem.h>
+
+#include <fstream>
+#include <sstream>
+#include <string>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Checkpoint::Checkpoint() :
-  state_(CHECKPOINT),
-  restart_state_(OPEN),
+Checkpoint::Checkpoint()
+  : state_( CHECKPOINT )
+  , restart_state_( OPEN )
 #ifdef ENABLE_MPIIO
-  byte_offset_(0),
+  , byte_offset_( 0 )
 #endif
-  in_(),
-  n_(0),
-  id_(0),
-  t_(0.0),
-  hdr_initialized_(false),
-  disp_initialized_(false)
+  , in_()
+  , n_( 0 )
+  , id_( 0 )
+  , t_( 0.0 )
+  , hdr_initialized_( false )
+  , disp_initialized_( false )
 {
 }
 //-----------------------------------------------------------------------------
@@ -37,7 +40,6 @@ Checkpoint::~Checkpoint()
 //-----------------------------------------------------------------------------
 void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
 {
-
   if (!hdr_initialized_ || !static_mesh)
   {
     hdr_.num_coords = mesh.size(0) * mesh.geometry_dimension();
@@ -77,6 +79,10 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
 {
 
   message("Writing checkpoint (%s%d) at time %g", fname.c_str(), n_ % 2, t);
+
+  std::string parameters = ParameterSystem::parameters.serialize();
+  uint param_size        = parameters.size() * sizeof(char);
+
   std::ostringstream _fname;
 #ifndef ENABLE_MPIIO
   if( MPI::size() > 1)
@@ -88,6 +94,8 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
 
   out.write((char *) &id, sizeof(uint));
   out.write((char *) &t, sizeof(real));
+  out.write((char *) &param_size, sizeof(uint) );
+  out.write((char *) parameters.c_str(), param_size);
 
 #else
   _fname << fname << (n_++) % 2 << ".chkp";
@@ -96,6 +104,8 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   MPI::file_open( out, _fname.str(), MPI_MODE_WRONLY | MPI_MODE_CREATE );
   byte_offset_ = MPI::file_write_all( out, id );
   byte_offset_ += MPI::file_write_all( out, t );
+  byte_offset_ += MPI::file_write_all( out, param_size );
+  byte_offset_ += MPI::file_write_all( out, parameters.c_str()[0], param_size );
 #endif
 
   hdr_init(mesh, static_mesh);
@@ -129,16 +139,26 @@ void Checkpoint::restart(std::string fname)
   _fname << fname << ".chkp";
 #endif
 
+  uint param_size = 0;
+
 #ifdef ENABLE_MPIIO
   MPI::file_open( in_, _fname.str(), MPI_MODE_RDONLY );
   byte_offset_ = MPI::file_read_all( in_, id_ );
   byte_offset_ += MPI::file_read_all( in_, t_ );
+  byte_offset_ += MPI::file_read_all( in_, param_size );
+  Array<char> p( param_size / sizeof(char) );
+  byte_offset_ += MPI::file_read_all( in_, p[0], param_size );
 #else
   in_.open(_fname.str().c_str(), std::ifstream::binary);
   in_.read((char *) &id_, sizeof(uint));
   in_.read((char *) &t_, sizeof(real));
+  in_.read((char *) &param_size, sizeof(uint));
+  Array<char> p( param_size / sizeof(char) );
+  in_.read((char *) p.data(), param_size );
 #endif
+
   message("Restarting from time %g checkpoint id %d", t_, id_);
+  ParameterSystem::parameters.deserialize( std::string( p.data(), p.size() ) );
 
   state_ = RESTART;
   restart_state_ = MESH;
@@ -497,5 +517,4 @@ void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
 
 }
 //-----------------------------------------------------------------------------
-
 }

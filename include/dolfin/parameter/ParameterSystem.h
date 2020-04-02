@@ -45,6 +45,10 @@ public:
   /// Check if parameter with given key has been defined
   bool defined( std::string const & key ) const;
 
+  // (de)serialize ParameterSystem
+  std::string serialize() const;
+  void deserialize( std::string const & parameters );
+
   /// print contents of the ParameterSystem
   void disp() const;
 

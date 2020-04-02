@@ -156,7 +156,6 @@ std::string ParameterSystem::serialize() const
         ss << "\"Unknown Parameter Type\";";
     }
   }
-  message( "ParameterSystem:\n%s", ss.str().c_str() );
   return ss.str();
 }
 
@@ -173,8 +172,12 @@ void ParameterSystem::deserialize( std::string const & parameters )
     std::string name( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
     pos += name.size() + 3;
 
+    dolfin_assert( parameters[pos+1] == ';' );
+
     std::string type( parameters, pos, parameters.find(";", pos ) - pos );
     pos += type.size() + 1;
+
+    dolfin_assert( parameters[pos] == '\"' );
 
     std::string value( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
     pos += value.size() + 3;

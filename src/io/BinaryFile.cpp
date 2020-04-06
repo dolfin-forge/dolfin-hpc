@@ -955,19 +955,14 @@ void BinaryFile::operator<<(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::nameUpdate(const int counter)
 {
-  std::string filestart, extension;
-  std::ostringstream fileid, newfilename;
+  std::string file_start( filename, 0, filename.rfind(".") );
 
-  fileid.fill('0');
-  fileid.width(6);
+  std::ostringstream file_id;
+  file_id.fill('0');
+  file_id.width(6);
+  file_id << counter;
 
-  filestart.assign(filename, 0, filename.find("."));
-  extension.assign(filename, filename.find("."), filename.size());
-
-  fileid << counter;
-  newfilename << filestart << fileid.str() << ".bin";
-
-  bin_filename_ = newfilename.str();
+  bin_filename_ = file_start + file_id.str() + ".bin";
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(MeshFunction<bool>& meshfunction)

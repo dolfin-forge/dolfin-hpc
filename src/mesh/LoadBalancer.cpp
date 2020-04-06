@@ -795,8 +795,7 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
     for (uint j = 0; j < m; j++)
       count[((Matrix[tmp[j]]) >> (8 * i)) & 0xff]++;
 
-    MPI::check_error( MPI_Allreduce(count, glb_count, 256, MPI_UNSIGNED,
-                                    MPI_SUM, MPI::DOLFIN_COMM) );
+    MPI::all_reduce<MPI::sum>( count, glb_count, 256 );
 
     offset = 0;
     for (uint j = 0; j < 256; j++)

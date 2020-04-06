@@ -308,31 +308,27 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // subdomain has a hole in the interior of the facet.
 
     // Exchange values
+    int maxsendcount[2] = { 0, 0 };
+    int maxrecvcount[2] = { 0, 0 };
 
-    int u_maxsendcount = 0;
-    int u_maxrecvcount = 0;
-    int r_maxsendcount = 0;
-    int r_maxrecvcount = 0;
     _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
-
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
-      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
-      r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuf[*it].size()));
+      maxsendcount[0] = std::max( maxsendcount[0], int(u_sendbuf[*it].size()) );
+      maxsendcount[1] = std::max( maxsendcount[1], int(r_sendbuf[*it].size()) );
     }
 
-    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
-    dolfin_assert(u_maxrecvcount > 0);
+    MPI::all_reduce<MPI::max>( maxsendcount, maxrecvcount, 2 );
 
-    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
-    dolfin_assert(r_maxrecvcount > 0);
+    dolfin_assert( maxrecvcount[0] > 0 );
+    dolfin_assert( maxrecvcount[1] > 0 );
 
-    Array< uint > u_recvbuf( u_maxrecvcount );
-    Array< real > r_recvbuf( r_maxrecvcount );
+    Array< uint > u_recvbuf( maxrecvcount[0] );
+    Array< real > r_recvbuf( maxrecvcount[1] );
 
     for (uint j = 1; j < pe_size; ++j)
     {
-      int src = (rank - j + pe_size) % pe_size;
+      int src  = (rank - j + pe_size) % pe_size;
       int dest = (rank + j) % pe_size;
 
       int n_u_recv = MPI::sendrecv( u_sendbuf[dest], dest, u_recvbuf, src, 1);

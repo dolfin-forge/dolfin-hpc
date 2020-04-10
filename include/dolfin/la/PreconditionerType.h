@@ -35,6 +35,8 @@ namespace dolfin
       return sor;
     else if (type == "ilu")
       return ilu;
+    else if (type == "dilu")
+      return dilu;
     else if (type == "amg")
       return amg;
     else

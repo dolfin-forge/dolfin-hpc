@@ -99,6 +99,8 @@ int JANPACKKrylovSolver::getType(SolverType method) const
   {
   case bicgstab:
     return JP_BICGSTAB;
+  case pipebicgstab:
+    return JP_PIPEBICGSTAB;
   case cg:
     return JP_CG;
   case pipecg:

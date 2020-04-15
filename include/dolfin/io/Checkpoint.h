@@ -4,17 +4,15 @@
 #ifndef __DOLFIN_CHECKPOINT_H
 #define __DOLFIN_CHECKPOINT_H
 
-#include <fstream>
-#include <string>
-#include <vector>
-
-#include <dolfin/la/Vector.h>
+#include <dolfin/common/Array.h>
+#include <dolfin/common/Label.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/la/Vector.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellType.h>
 
-#ifdef ENABLE_MPIIO
-#include <mpi.h>
-#endif
+#include <fstream>
+#include <string>
 
 namespace dolfin
 {
@@ -23,100 +21,25 @@ class Mesh;
 
 class Checkpoint
 {
-
 public:
-
-  ///
-  Checkpoint();
-
-  ///
-  ~Checkpoint();
-
-  ///
-  void write(std::string fname, uint id, real t, Mesh& mesh,
-             std::vector<Function *> func, std::vector<Vector *> vec,
-             bool static_mesh = false);
-
-  ///
-  void restart(std::string fname);
-
-  ///
-  void load(Mesh& mesh);
-
-  ///
-  void load(std::vector<Function *> func);
-
-  ///
-  void load(std::vector<Vector *> vec);
-
-  ///
-  inline bool restart()
-  {
-    return state_ == RESTART;
-  }
-
-  ///
-  inline dolfin::uint id()
-  {
-    if (state_ != RESTART)
-    {
-      error("Shut her down, Scotty, she's sucking mud again!");
-    }
-    return id_;
-  }
-
-  ///
-  inline dolfin::real restart_time()
-  {
-    if (state_ != RESTART)
-    {
-      error("Shut her down, Scotty, she's sucking mud again!");
-    }
-    return t_;
-  }
-
-  ///
-  inline void reset()
-  {
-    state_ = CHECKPOINT;
-    restart_state_ = OPEN;
-    hdr_initialized_ = false;
-    disp_initialized_ = false;
-  }
-
-private:
-
 #ifdef ENABLE_MPIIO
-  typedef MPI_File chkp_outstream;
+  typedef MPI_File stream_t;
+  typedef MPI_Offset offset_t;
 #else
-  typedef std::ofstream chkp_outstream;
+  typedef std::ofstream stream_t;
+  typedef long long offset_t;
 #endif
 
-  void hdr_init(Mesh& mesh, bool static_mesh);
-  void write(Mesh& mesh, chkp_outstream& out);
-  void write(std::vector<Function *> func, chkp_outstream& out);
-  void write(std::vector<Vector *> vec, chkp_outstream& out);
-
-  enum CheckpointState
+  struct CheckpointHeader
   {
-    CHECKPOINT, RESTART
-  };
-  enum RestartState
-  {
-    OPEN, MESH, FUNC, VEC
+    real     time;
+    offset_t offset_psystem;
+    offset_t offset_mesh;
+    offset_t offset_functions;
+    offset_t offset_vectors;
   };
 
-  CheckpointState state_;
-  RestartState restart_state_;
-
-#ifdef ENABLE_MPIIO
-  MPI_Offset byte_offset_;
-  MPI_File in_;
-#else
-  std::ifstream in_;
-#endif
-
-  typedef struct
+  struct MeshHeader
   {
     CellType::Type type;
     uint tdim;
@@ -127,19 +50,88 @@ private:
     uint num_centities;
     uint num_coords;
     uint num_ghosts;
-#ifdef ENABLE_MPIIO
+  #ifdef ENABLE_MPIIO
     uint offsets[4];
     uint disp[4];
-#endif
-  } chkp_mesh_hdr;
+  #endif
+  };
 
-  chkp_mesh_hdr hdr_;
+  struct FunctionsHeader
+  {
+    uint                   count;
+    Checkpoint::offset_t   total_offset;
+    Array< Array< uint > > offset;
+    Array< std::string >   names;
 
+    static uint const name_length = 20;
+  };
+
+  typedef FunctionsHeader VectorsHeader;
+
+public:
+  ///
+  Checkpoint();
+
+  ///
+  ~Checkpoint();
+
+  ///
+  void write( std::string filename, real const t, Mesh & mesh,
+              LabelList< Function > & func, LabelList< GenericVector > & vec );
+
+  ///
+  void load_parametersystem( std::string filename );
+
+  ///
+  void load( std::string filename, Mesh & mesh );
+
+  ///
+  void load( std::string filename, LabelList< Function > & func );
+
+  ///
+  void load( std::string filename, LabelList< GenericVector > & vec );
+
+  ///
+  inline bool restart()
+  {
+    return true;//state_ == RESTART;
+  }
+
+  ///
+  inline dolfin::real restart_time()
+  {
+    return chkp_header.time;
+  }
+
+private:
+  void fill_headers( real const t,
+                     Mesh & mesh, MeshHeader & mesh_header,
+                     LabelList< Function > & func,
+                     FunctionsHeader & functions_header,
+                     LabelList< GenericVector > & vec,
+                     VectorsHeader & vectors_header );
+
+  void write_mesh( stream_t file, Checkpoint::offset_t & byte_offset,
+                   Mesh & mesh,
+                   MeshHeader & mesh_header );
+
+  void write_func( stream_t file, Checkpoint::offset_t & byte_offset,
+                   LabelList< Function > & func,
+                   FunctionsHeader & functions_header );
+
+  void write_vect( stream_t file, Checkpoint::offset_t & byte_offset,
+                   LabelList< GenericVector > & vec,
+                   VectorsHeader & vectors_header );
+
+  std::string get_filename( std::string filebasename );
+  stream_t open_file( std::string filebasename );
+  void close_file( stream_t & file );
+
+private:
   uint n_;
-  uint id_;
-  real t_;
-  bool hdr_initialized_;
-  bool disp_initialized_;
+
+  offset_t byte_offset;
+  CheckpointHeader chkp_header;
 };
 
 }

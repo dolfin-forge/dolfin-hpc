@@ -83,6 +83,9 @@ public:
               FunctionMap & func, VectorMap & vec );
 
   ///
+  void load_header( std::string filename );
+
+  ///
   void load_parametersystem( std::string filename );
 
   ///
@@ -95,10 +98,7 @@ public:
   void load( std::string filename, VectorMap & vec );
 
   ///
-  uint id() const;
-
-  ///
-  real restart_time() const;
+  real time() const;
 
 private:
   void fill_headers( real const t, Mesh & mesh,

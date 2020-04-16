@@ -8,7 +8,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/parameter/ParameterSystem.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <sstream>
 
@@ -54,6 +54,9 @@ Checkpoint::~Checkpoint()
 void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
                         FunctionMap & func, VectorMap & vec )
 {
+  dolfin_set( "checkpoint_id", n_ );
+  dolfin_set( "checkpoint_time", t );
+
   filename = build_filename( filename );
   message( "Writing checkpoint (%s %d) at time %g",
            filename.c_str(), n_, t );
@@ -98,6 +101,14 @@ void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
 
 //-----------------------------------------------------------------------------
 
+void Checkpoint::load_header( std::string filename )
+{
+  stream_t file = load_file( filename );
+  close_file( file );
+}
+
+//-----------------------------------------------------------------------------
+
 void Checkpoint::load_parametersystem( std::string filename )
 {
   stream_t file = load_file( filename );
@@ -120,6 +131,8 @@ void Checkpoint::load_parametersystem( std::string filename )
 
   ParameterSystem::parameters.deserialize( std::string( p.data(), p.size() ) );
   message( "Checkpoint: Loaded ParameterSystem from time %g", chkp_header.time );
+
+  n_ = dolfin_get<uint>( "checkpoint_id" );
 
   close_file( file );
 }
@@ -388,14 +401,7 @@ void Checkpoint::load( std::string filename, VectorMap & vec )
 
 //-----------------------------------------------------------------------------
 
-uint Checkpoint::id() const
-{
-  return n_;
-}
-
-//-----------------------------------------------------------------------------
-
-real Checkpoint::restart_time() const
+real Checkpoint::time() const
 {
   return chkp_header.time;
 }
@@ -652,7 +658,8 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, VectorMap & vec )
 std::string Checkpoint::build_filename( std::string filename )
 {
   // if the input filename contains the extension, remove it
-  if ( filename.rfind( ".chkp" ) == filename.size() - 5 )
+  if ( filename.size() > 5
+       and filename.rfind( ".chkp" ) == filename.size() - 5 )
     filename.resize( filename.size() - 5 );
 
   // build filename
@@ -674,7 +681,8 @@ std::string Checkpoint::build_filename( std::string filename )
 Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
 {
   // if the input filename contains the extension, remove it
-  if ( filename.rfind( ".chkp" ) != filename.size() - 5 )
+  if ( filename.size() > 5
+       and filename.rfind( ".chkp" ) != filename.size() - 5 )
     filename = filename + ".chkp";
 
 #ifdef ENABLE_MPIIO

@@ -5,11 +5,11 @@
 #define __DOLFIN_CHECKPOINT_H
 
 #include <dolfin/common/Array.h>
-#include <dolfin/common/Label.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellType.h>
 
 #include <fstream>
+#include <map>
 #include <string>
 
 namespace dolfin
@@ -22,6 +22,9 @@ class Function;
 class Checkpoint
 {
 public:
+  typedef std::map< std::string, Function * >      FunctionMap;
+  typedef std::map< std::string, GenericVector * > VectorMap;
+
 #ifdef ENABLE_MPIIO
   typedef MPI_File   stream_t;
   typedef MPI_Offset offset_t;
@@ -77,7 +80,7 @@ public:
 
   ///
   void write( std::string filename, real const t, Mesh & mesh,
-              LabelList< Function > & func, LabelList< GenericVector > & vec );
+              FunctionMap & func, VectorMap & vec );
 
   ///
   void load_parametersystem( std::string filename );
@@ -86,27 +89,26 @@ public:
   void load( std::string filename, Mesh & mesh );
 
   ///
-  void load( std::string filename, LabelList< Function > & func );
+  void load( std::string filename, FunctionMap & func );
 
   ///
-  void load( std::string filename, LabelList< GenericVector > & vec );
+  void load( std::string filename, VectorMap & vec );
+
+  ///
+  uint id() const;
 
   ///
   real restart_time() const;
 
 private:
   void fill_headers( real const t, Mesh & mesh,
-                     LabelList< Function > & func,
-                     LabelList< GenericVector > & vec );
+                     FunctionMap & func, VectorMap & vec );
 
-  void write( stream_t file, offset_t & byte_offset,
-              Mesh & mesh );
+  void write( stream_t file, offset_t & byte_offset, Mesh & mesh );
 
-  void write( stream_t file, offset_t & byte_offset,
-              LabelList< Function > & func );
+  void write( stream_t file, offset_t & byte_offset, FunctionMap & func );
 
-  void write( stream_t file, offset_t & byte_offset,
-              LabelList< GenericVector > & vec );
+  void write( stream_t file, offset_t & byte_offset, VectorMap & vec );
 
   std::string build_filename( std::string filename );
   stream_t    load_file( std::string & filename );

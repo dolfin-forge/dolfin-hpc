@@ -3,9 +3,9 @@
 
 #include <dolfin/io/Checkpoint.h>
 
-#include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/ParameterSystem.h>
@@ -52,8 +52,7 @@ Checkpoint::~Checkpoint()
 //-----------------------------------------------------------------------------
 
 void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
-                        LabelList< Function > & func,
-                        LabelList< GenericVector > & vec )
+                        FunctionMap & func, VectorMap & vec )
 {
   filename = build_filename( filename );
   message( "Writing checkpoint (%s %d) at time %g",
@@ -235,7 +234,7 @@ void Checkpoint::load( std::string filename, Mesh & mesh )
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::load( std::string filename, LabelList< Function > & func )
+void Checkpoint::load( std::string filename, FunctionMap & func )
 {
   stream_t file = load_file( filename );
 
@@ -273,20 +272,7 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
     file.read( ( char * ) &functions_header.offset[i][1], sizeof( uint ) );
 #endif
 
-    // find out if we 'requested' this function in the LabelList
-    functions_header.names[i] = functions_header.names[i].substr(
-                                  0, functions_header.names[i].find( '?' ) );
-    uint index = func.size() + 1;
-    for ( uint idx = 0; idx < func.size() ; ++idx )
-    {
-      if ( functions_header.names[i].size() == func[idx].second.size()
-           and functions_header.names[i].find( func[idx].second ) == 0 )
-      {
-        index = idx;
-        break;
-      }
-    }
-
+    // load data
     Array< real > values( functions_header.offset[i][1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
@@ -296,17 +282,22 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
     file.read( ( char * ) values.data(), functions_header.offset[i][1] * sizeof( real ) );
 #endif
 
-    if ( index < func.size() )
+    // find out if we 'requested' this function in the FunctionMap
+    functions_header.names[i] = functions_header.names[i].substr(
+                                  0, functions_header.names[i].find( '?' ) );
+    FunctionMap::iterator f = func.find( functions_header.names[i] );
+
+    if ( f != func.end() )
     {
-      if ( functions_header.offset[i][1] != func[index].first->vector().local_size() )
+      if ( functions_header.offset[i][1] != f->second->vector().local_size() )
       {
         error( "Size mismatch while reloading functions from checkpoint:\n"
                "\tExpected : %d\n\tRead     : %d\n",
-               func[index].first->vector().local_size(), functions_header.offset[i][1] );
+               f->second->vector().local_size(), functions_header.offset[i][1] );
       }
 
-      func[index].first->vector().set( values.data() );
-      func[index].first->vector().apply();
+      f->second->vector().set( values.data() );
+      f->second->vector().apply();
 
       ++loaded_count;
     }
@@ -320,7 +311,7 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
+void Checkpoint::load( std::string filename, VectorMap & vec )
 {
   stream_t file = load_file( filename );
 
@@ -358,20 +349,7 @@ void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
     file.read( ( char * ) &vectors_header.offset[i][1], sizeof( uint ) );
 #endif
 
-    // find out if we 'requested' this function in the LabelList
-    vectors_header.names[i] = vectors_header.names[i].substr(
-                                0, vectors_header.names[i].find( '?' ) );
-    uint index = vec.size() + 1;
-    for ( uint idx = 0; idx < vec.size() ; ++idx )
-    {
-      if ( vectors_header.names[i].size() == vec[idx].second.size()
-           and vectors_header.names[i].find( vec[idx].second ) == 0 )
-      {
-        index = idx;
-        break;
-      }
-    }
-
+    // load data
     Array< real > values( vectors_header.offset[i][1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
@@ -381,17 +359,22 @@ void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
     file.read( ( char * ) values.data(), vectors_header.offset[i][1] * sizeof( real ) );
 #endif
 
-    if ( index < vec.size() )
+    // find out if we 'requested' this function in the VectorMap
+    vectors_header.names[i]   = vectors_header.names[i].substr(
+                                  0, vectors_header.names[i].find( '?' ) );
+    VectorMap::iterator v = vec.find( vectors_header.names[i] );
+
+    if ( v != vec.end() )
     {
-      if ( vectors_header.offset[i][1] != vec[index].first->local_size() )
+      if ( vectors_header.offset[i][1] != v->second->local_size() )
       {
         error( "Size mismatch while reloading vectors from checkpoint:\n"
                "\tExpected : %d\n\tRead     : %d\n",
-               vec[index].first->local_size(), vectors_header.offset[i][1] );
+               v->second->local_size(), vectors_header.offset[i][1] );
       }
 
-      vec[index].first->set( values.data() );
-      vec[index].first->apply();
+      v->second->set( values.data() );
+      v->second->apply();
 
       ++loaded_count;
     }
@@ -405,6 +388,13 @@ void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
 
 //-----------------------------------------------------------------------------
 
+uint Checkpoint::id() const
+{
+  return n_;
+}
+
+//-----------------------------------------------------------------------------
+
 real Checkpoint::restart_time() const
 {
   return chkp_header.time;
@@ -413,8 +403,7 @@ real Checkpoint::restart_time() const
 //-----------------------------------------------------------------------------
 
 void Checkpoint::fill_headers( real const t, Mesh & mesh,
-                               LabelList< Function > & func,
-                               LabelList< GenericVector > & vec )
+                               FunctionMap & func, VectorMap & vec )
 {
   // mesh header
   mesh_header.num_coords    = mesh.size( 0 ) * mesh.geometry_dimension();
@@ -441,54 +430,52 @@ void Checkpoint::fill_headers( real const t, Mesh & mesh,
 #endif
 
   // functions header
-  functions_header.offset.resize( func.size() );
-  functions_header.names.resize( func.size() );
+  functions_header.offset.resize( 0 );
+  functions_header.names.resize( 0 );
 
   // fill header
   functions_header.count = func.size();
   functions_header.total_offset = MPI::size() * sizeof( uint );
 
-  for ( uint i = 0; i < func.size(); ++i )
+  for ( FunctionMap::iterator f = func.begin(); f != func.end(); ++f )
   {
-    Function * f = func[i].first;
-    functions_header.offset[i].resize( 3 );
-    functions_header.offset[i][0] = f->vector().offset();
-    functions_header.offset[i][1] = f->vector().local_size();
-    functions_header.offset[i][2] = f->vector().size();
-    functions_header.names.push_back( func[i].second );
+    functions_header.offset.push_back( Array< uint >( 3 ) );
+    functions_header.offset.back()[0] = f->second->vector().offset();
+    functions_header.offset.back()[1] = f->second->vector().local_size();
+    functions_header.offset.back()[2] = f->second->vector().size();
+    functions_header.names.push_back( f->first );
 
     // header offset
     functions_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
                               + functions_header.name_length * sizeof( char ) );
 
     // function offset
-    functions_header.total_offset+= functions_header.offset[i][2]
+    functions_header.total_offset+= functions_header.offset.back()[2]
                                      * sizeof( real );
   }
 
   // vectors header
-  vectors_header.offset.resize( func.size() );
+  vectors_header.offset.resize( 0 );
   vectors_header.names.resize( 0 );
 
   // fill header
   vectors_header.count = vec.size();
   vectors_header.total_offset = MPI::size() * sizeof( uint );
 
-  for ( uint i = 0; i < vec.size(); ++i )
+  for ( VectorMap::iterator v = vec.begin(); v != vec.end(); ++v )
   {
-    GenericVector * f = vec[i].first;
-    vectors_header.offset[i].resize( 3 );
-    vectors_header.offset[i][0] = f->offset();
-    vectors_header.offset[i][1] = f->local_size();
-    vectors_header.offset[i][2] = f->size();
-    vectors_header.names.push_back( vec[i].second );
+    vectors_header.offset.push_back( Array< uint >( 3 ) );
+    vectors_header.offset.back()[0] = v->second->offset();
+    vectors_header.offset.back()[1] = v->second->local_size();
+    vectors_header.offset.back()[2] = v->second->size();
+    vectors_header.names.push_back( v->first );
 
     // header offset
     vectors_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
                               + vectors_header.name_length * sizeof( char ) );
 
     // vector offset
-    vectors_header.total_offset += vectors_header.offset[i][2]
+    vectors_header.total_offset += vectors_header.offset.back()[2]
                                    * sizeof( real );
   }
 
@@ -577,7 +564,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, Mesh & mesh )
 //-----------------------------------------------------------------------------
 
 void Checkpoint::write( stream_t file, offset_t & byte_offset,
-                        LabelList< Function > & func )
+                        FunctionMap & func )
 {
   dolfin_assert( byte_offset == chkp_header.offset_functions );
 
@@ -588,37 +575,39 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset,
     file.write( static_cast< char * >( &functions_header.count ), sizeof( uint ) );
 #endif
 
-  for ( uint i = 0; i < func.size(); ++i )
+  uint i = 0;
+  for ( FunctionMap::iterator f = func.begin(); f != func.end(); ++f, ++i )
   {
     Array< real > values( functions_header.offset[i][1] );
-    func[i].first->vector().get( values.data() );
+    f->second->vector().get( values.data() );
 
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_write_at_all( file, functions_header.offset[i].data(),
                      3, byte_offset + MPI::rank() * 3 * sizeof( uint ),
                      MPI::size() * 3 );
 
-    func[i].second.resize( functions_header.name_length, '?' );
-    byte_offset += MPI::file_write_at_all( file, func[i].second.c_str(), functions_header.name_length,
+    std::string name( f->first );
+    name.resize( functions_header.name_length, '?' );
+    byte_offset += MPI::file_write_at_all(
+                     file, name.c_str(), functions_header.name_length,
                      byte_offset + MPI::rank() * functions_header.name_length * sizeof( char ),
                      MPI::size() * functions_header.name_length );
 
     byte_offset += MPI::file_write_at_all( file, values.data(), values.size(),
                      byte_offset + functions_header.offset[i][0] * sizeof( real ),
-                     func[i].first->vector().size() );
+                     f->second->vector().size() );
 #else
-    uint local_size = func[i].first->vector().local_size();
+    uint local_size = f->second->vector().local_size();
     file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
     file.write( static_cast< char * >( values.data(),
-               func[i].first->vector().local_size() * sizeof( real ) ) );
+               f->second->vector().local_size() * sizeof( real ) ) );
 #endif
   }
 }
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::write( stream_t file, offset_t & byte_offset,
-                        LabelList< GenericVector > & vec )
+void Checkpoint::write( stream_t file, offset_t & byte_offset, VectorMap & vec )
 {
   dolfin_assert( byte_offset == chkp_header.offset_vectors );
 
@@ -629,19 +618,21 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset,
     file.write( static_cast< char * >( &vectors_header.count ), sizeof( uint ) );
 #endif
 
-  for ( uint i = 0; i < vec.size(); ++i )
+  uint i = 0;
+  for ( VectorMap::iterator v = vec.begin(); v != vec.end(); ++v, ++i )
   {
     Array< real > values( vectors_header.offset[i][1] );
-    vec[i].first->get( values.data() );
+    v->second->get( values.data() );
 
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_write_at_all( file, vectors_header.offset[i].data(),
                      3, byte_offset + MPI::rank() * 3 * sizeof( uint ),
                      MPI::size() * 3 );
 
-    vec[i].second.resize( vectors_header.name_length, '?' );
+    std::string name( v->first );
+    name.resize( vectors_header.name_length, '?' );
     byte_offset += MPI::file_write_at_all(
-                     file, vec[i].second.c_str(), vectors_header.name_length,
+                     file, name.c_str(), vectors_header.name_length,
                      byte_offset + MPI::rank() * vectors_header.name_length * sizeof( char ),
                      MPI::size() * vectors_header.name_length );
 
@@ -651,7 +642,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset,
 #else
     uint local_size = it->first->local_size();
     file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
-    file.write( static_cast< char * >( values.data(), vec[i].first->local_size() * sizeof( real ) ) );
+    file.write( static_cast< char * >( values.data(), v->second->local_size() * sizeof( real ) ) );
 #endif
   }
 }

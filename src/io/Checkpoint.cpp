@@ -3,17 +3,14 @@
 
 #include <dolfin/io/Checkpoint.h>
 
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
-#include <dolfin/main/MPI.h>
-#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/ParameterSystem.h>
 
-#include <fstream>
 #include <sstream>
-#include <string>
 
 namespace dolfin
 {
@@ -43,7 +40,6 @@ namespace dolfin
 
 Checkpoint::Checkpoint()
   : n_( 0 )
-  , byte_offset( 0 )
 {
 }
 
@@ -59,6 +55,7 @@ void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
                         LabelList< Function > & func,
                         LabelList< GenericVector > & vec )
 {
+  filename = build_filename( filename );
   message( "Writing checkpoint (%s %d) at time %g",
            filename.c_str(), n_, t );
 
@@ -67,15 +64,10 @@ void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
   uint        param_size  = parameters.size() * sizeof( char );
   chkp_header.offset_mesh = param_size;
 
-  MeshHeader      mesh_header;
-  FunctionsHeader functions_header;
-  VectorsHeader   vectors_header;
-
-  fill_headers( t, mesh, mesh_header,
-                func, functions_header, vec, vectors_header );
+  fill_headers( t, mesh, func, vec );
 
 #ifndef ENABLE_MPIIO
-  stream_t file = stream_t( get_filename( filename ), std::ofstream::binary );
+  stream_t file = stream_t( filename, std::ofstream::binary );
 
   // write header
   file.write( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
@@ -85,23 +77,22 @@ void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
   file.write( static_cast< char * >( parameters.c_str() ), param_size );
 #else
   stream_t file = MPI_File();
-  MPI::file_open( file, get_filename( filename ),
-                  MPI_MODE_WRONLY | MPI_MODE_CREATE );
+  MPI::file_open( file, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
 
   // write header
-  byte_offset = MPI::file_write_all( file, chkp_header, sizeof( CheckpointHeader ) );
+  offset_t byte_offset = MPI::file_write_all( file, chkp_header,
+                                              sizeof( CheckpointHeader ) );
+
+  dolfin_assert( byte_offset == chkp_header.offset_psystem );
 
   // write ParameterSystem
   byte_offset += MPI::file_write_all( file, param_size );
   byte_offset += MPI::file_write_all( file, parameters.c_str()[0], param_size );
 #endif
 
-  write_mesh( file, byte_offset, mesh, mesh_header );
-  write_func( file, byte_offset, func, functions_header );
-  write_vect( file, byte_offset, vec, vectors_header );
-
-  // increment checkpoint id
-  n_++;
+  write( file, byte_offset, mesh );
+  write( file, byte_offset, func );
+  write( file, byte_offset, vec );
 
   close_file( file );
 }
@@ -110,15 +101,17 @@ void Checkpoint::write( std::string filename, real const t, Mesh & mesh,
 
 void Checkpoint::load_parametersystem( std::string filename )
 {
-  stream_t file = open_file( filename );
+  stream_t file = load_file( filename );
 
-  uint param_size = 0;
+  offset_t byte_offset = chkp_header.offset_psystem;
+  uint     param_size  = 0;
 
 #ifdef ENABLE_MPIIO
   // load ParameterSystem
-  byte_offset += MPI::file_read_all( file, param_size );
+  byte_offset += MPI::file_read_at_all( file, param_size, byte_offset );
   Array< char > p( param_size / sizeof( char ) );
-  byte_offset += MPI::file_read_all( file, p[0], param_size );
+  byte_offset += MPI::file_read_at_all( file, &p[0],
+                                        param_size, byte_offset, param_size );
 #else
   // load ParameterSystem
   file.read( static_cast< char * >( &param_size ), sizeof( uint ) );
@@ -126,24 +119,24 @@ void Checkpoint::load_parametersystem( std::string filename )
   file.read( static_cast< char * >( p.data() ), param_size );
 #endif
 
-  message( "Restarting from time %g", chkp_header.time );
   ParameterSystem::parameters.deserialize( std::string( p.data(), p.size() ) );
+  message( "Checkpoint: Loaded ParameterSystem from time %g", chkp_header.time );
+
+  close_file( file );
 }
 
 //-----------------------------------------------------------------------------
 
 void Checkpoint::load( std::string filename, Mesh & mesh )
 {
-  stream_t file = open_file( filename );
+  stream_t file = load_file( filename );
 
-  Checkpoint::offset_t byte_offset = chkp_header.offset_mesh;
-
-  MeshHeader mesh_header;
+  offset_t byte_offset = chkp_header.offset_mesh;
 
   // load header
 #ifdef ENABLE_MPIIO
   MPI::file_read_at_all( file, mesh_header,
-                     byte_offset + MPI::rank() * sizeof( MeshHeader ) );
+                         byte_offset + MPI::rank() * sizeof( MeshHeader ) );
   byte_offset += MPI::size() * sizeof( MeshHeader );
 #else
   file.read( ( char * ) &mesh_header, sizeof( MeshHeader ) );
@@ -235,6 +228,8 @@ void Checkpoint::load( std::string filename, Mesh & mesh )
   editor.close();
   swap( mesh, _mesh );
 
+  message( "Checkpoint: Loaded Mesh from time %g", chkp_header.time );
+
   close_file( file );
 }
 
@@ -242,12 +237,11 @@ void Checkpoint::load( std::string filename, Mesh & mesh )
 
 void Checkpoint::load( std::string filename, LabelList< Function > & func )
 {
-  stream_t file = open_file( filename );
+  stream_t file = load_file( filename );
 
   // set the correct offset
-  Checkpoint::offset_t byte_offset = chkp_header.offset_functions;
-
-  FunctionsHeader functions_header;
+  offset_t byte_offset  = chkp_header.offset_functions;
+  uint     loaded_count = 0;
 
   // read number of functions
 #ifdef ENABLE_MPIIO
@@ -264,7 +258,7 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
   for ( uint i = 0; i < functions_header.count; ++i )
   {
     functions_header.offset[i].resize( 3 );
-    // read header and name
+    // read function header and name
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, &functions_header.offset[i][0], 3,
                      byte_offset + MPI::rank() * 3 * sizeof( uint ),
@@ -313,8 +307,13 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
 
       func[index].first->vector().set( values.data() );
       func[index].first->vector().apply();
+
+      ++loaded_count;
     }
   }
+
+  message( "Checkpoint: Loaded %d Function(s) from time %g",
+           loaded_count, chkp_header.time );
 
   close_file( file );
 }
@@ -323,12 +322,11 @@ void Checkpoint::load( std::string filename, LabelList< Function > & func )
 
 void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
 {
-  stream_t file = open_file( filename );
+  stream_t file = load_file( filename );
 
   // set the correct offset
-  Checkpoint::offset_t byte_offset = chkp_header.offset_vectors;
-
-  VectorsHeader vectors_header;
+  offset_t byte_offset  = chkp_header.offset_vectors;
+  uint     loaded_count = 0;
 
   // read number of functions
 #ifdef ENABLE_MPIIO
@@ -394,106 +392,109 @@ void Checkpoint::load( std::string filename, LabelList< GenericVector > & vec )
 
       vec[index].first->set( values.data() );
       vec[index].first->apply();
+
+      ++loaded_count;
     }
   }
+
+  message( "Checkpoint: Loaded %d Vector(s) from time %g",
+           loaded_count, chkp_header.time );
 
   close_file( file );
 }
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::fill_headers( real const t,
-                               Mesh & mesh, MeshHeader & mesh_header,
+real Checkpoint::restart_time() const
+{
+  return chkp_header.time;
+}
+
+//-----------------------------------------------------------------------------
+
+void Checkpoint::fill_headers( real const t, Mesh & mesh,
                                LabelList< Function > & func,
-                               FunctionsHeader & functions_header,
-                               LabelList< GenericVector > & vec,
-                               VectorsHeader & vectors_header )
+                               LabelList< GenericVector > & vec )
 {
   // mesh header
-  {
-    mesh_header.num_coords    = mesh.size( 0 ) * mesh.geometry_dimension();
-    mesh_header.num_entities  = mesh.type().num_entities( 0 );
-    mesh_header.num_centities = mesh.num_cells() * mesh_header.num_entities;
-    mesh_header.type          = mesh.type().cellType();
-    mesh_header.tdim          = mesh.topology_dimension();
-    mesh_header.gdim          = mesh.geometry_dimension();
-    mesh_header.num_vertices  = mesh.size( 0 );
-    mesh_header.num_cells     = mesh.num_cells();
-    mesh_header.num_ghosts    = mesh.topology().num_ghost( 0 );
+  mesh_header.num_coords    = mesh.size( 0 ) * mesh.geometry_dimension();
+  mesh_header.num_entities  = mesh.type().num_entities( 0 );
+  mesh_header.num_centities = mesh.num_cells() * mesh_header.num_entities;
+  mesh_header.type          = mesh.type().cellType();
+  mesh_header.tdim          = mesh.topology_dimension();
+  mesh_header.gdim          = mesh.geometry_dimension();
+  mesh_header.num_vertices  = mesh.size( 0 );
+  mesh_header.num_cells     = mesh.num_cells();
+  mesh_header.num_ghosts    = mesh.topology().num_ghost( 0 );
 
 #ifdef ENABLE_MPIIO
-    uint local_data[4] = { mesh_header.num_coords,
-                           mesh_header.num_centities,
-                           mesh_header.num_vertices,
-                           ( 2 * mesh_header.num_ghosts ) };
+  uint local_data[4] = { mesh_header.num_coords,
+                         mesh_header.num_centities,
+                         mesh_header.num_vertices,
+                         ( 2 * mesh_header.num_ghosts ) };
 
-    memset( &mesh_header.offsets[0], 0, 4 * sizeof( uint ) );
-    MPI::exscan_sum( &local_data[0], &mesh_header.offsets[0], 4 );
+  memset( &mesh_header.offsets[0], 0, 4 * sizeof( uint ) );
+  MPI::exscan_sum( &local_data[0], &mesh_header.offsets[0], 4 );
 
-    memset( &mesh_header.disp[0], 0, 4 * sizeof( uint ) );
-    MPI::all_reduce< MPI::sum >( local_data, mesh_header.disp, 4 );
+  memset( &mesh_header.disp[0], 0, 4 * sizeof( uint ) );
+  MPI::all_reduce< MPI::sum >( local_data, mesh_header.disp, 4 );
 #endif
-  }
 
   // functions header
+  functions_header.offset.resize( func.size() );
+  functions_header.names.resize( func.size() );
+
+  // fill header
+  functions_header.count = func.size();
+  functions_header.total_offset = MPI::size() * sizeof( uint );
+
+  for ( uint i = 0; i < func.size(); ++i )
   {
-    functions_header.offset.resize( func.size() );
-    functions_header.names.resize( func.size() );
+    Function * f = func[i].first;
+    functions_header.offset[i].resize( 3 );
+    functions_header.offset[i][0] = f->vector().offset();
+    functions_header.offset[i][1] = f->vector().local_size();
+    functions_header.offset[i][2] = f->vector().size();
+    functions_header.names.push_back( func[i].second );
 
-    // fill header
-    functions_header.count = func.size();
-    functions_header.total_offset = MPI::size() * sizeof( uint );
-
-    for ( uint i = 0; i < func.size(); ++i )
-    {
-      Function * f = func[i].first;
-      functions_header.offset[i].resize( 3 );
-      functions_header.offset[i][0] = f->vector().offset();
-      functions_header.offset[i][1] = f->vector().local_size();
-      functions_header.offset[i][2] = f->vector().size();
-      functions_header.names.push_back( func[i].second );
-
-      // header offset
-      functions_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
+    // header offset
+    functions_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
                               + functions_header.name_length * sizeof( char ) );
 
-      // function offset
-      functions_header.total_offset+= functions_header.offset[i][2]
-                                       * sizeof( real );
-    }
+    // function offset
+    functions_header.total_offset+= functions_header.offset[i][2]
+                                     * sizeof( real );
   }
 
   // vectors header
+  vectors_header.offset.resize( func.size() );
+  vectors_header.names.resize( 0 );
+
+  // fill header
+  vectors_header.count = vec.size();
+  vectors_header.total_offset = MPI::size() * sizeof( uint );
+
+  for ( uint i = 0; i < vec.size(); ++i )
   {
-    vectors_header.offset.resize( func.size() );
-    vectors_header.names.resize( 0 );
+    GenericVector * f = vec[i].first;
+    vectors_header.offset[i].resize( 3 );
+    vectors_header.offset[i][0] = f->offset();
+    vectors_header.offset[i][1] = f->local_size();
+    vectors_header.offset[i][2] = f->size();
+    vectors_header.names.push_back( vec[i].second );
 
-    // fill header
-    vectors_header.count = vec.size();
-    vectors_header.total_offset = MPI::size() * sizeof( uint );
+    // header offset
+    vectors_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
+                              + vectors_header.name_length * sizeof( char ) );
 
-    for ( uint i = 0; i < vec.size(); ++i )
-    {
-      GenericVector * f = vec[i].first;
-      vectors_header.offset[i].resize( 3 );
-      vectors_header.offset[i][0] = f->offset();
-      vectors_header.offset[i][1] = f->local_size();
-      vectors_header.offset[i][2] = f->size();
-      vectors_header.names.push_back( vec[i].second );
-
-      // header offset
-      vectors_header.total_offset += MPI::size() * ( 3 * sizeof( uint )
-                                + vectors_header.name_length * sizeof( char ) );
-
-      // vector offset
-      vectors_header.total_offset += vectors_header.offset[i][2]
-                                     * sizeof( real );
-    }
+    // vector offset
+    vectors_header.total_offset += vectors_header.offset[i][2]
+                                   * sizeof( real );
   }
 
   // checkpoint header
   chkp_header.time = t;
-  chkp_header.offset_psystem   = sizeof( Checkpoint::CheckpointHeader );
+  chkp_header.offset_psystem   = sizeof( CheckpointHeader );
   chkp_header.offset_mesh     += chkp_header.offset_psystem + sizeof( uint );
   chkp_header.offset_functions = chkp_header.offset_mesh
                                  + MPI::size() * sizeof( MeshHeader )
@@ -508,12 +509,13 @@ void Checkpoint::fill_headers( real const t,
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::write_mesh( stream_t file, offset_t & byte_offset,
-                             Mesh & mesh, MeshHeader & mesh_header )
+void Checkpoint::write( stream_t file, offset_t & byte_offset, Mesh & mesh )
 {
+  dolfin_assert( byte_offset == chkp_header.offset_mesh );
+
 #ifdef ENABLE_MPIIO
   MPI::file_write_at_all( file, mesh_header,
-                     byte_offset + MPI::rank() * sizeof( MeshHeader ) );
+                          byte_offset + MPI::rank() * sizeof( MeshHeader ) );
   byte_offset += MPI::size() * sizeof( MeshHeader );
 
   byte_offset += MPI::file_write_at_all(
@@ -574,10 +576,11 @@ void Checkpoint::write_mesh( stream_t file, offset_t & byte_offset,
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::write_func( stream_t file, offset_t & byte_offset,
-                             LabelList< Function > & func,
-                             FunctionsHeader & functions_header )
+void Checkpoint::write( stream_t file, offset_t & byte_offset,
+                        LabelList< Function > & func )
 {
+  dolfin_assert( byte_offset == chkp_header.offset_functions );
+
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_write_at_all( file, &functions_header.count, 1,
                      byte_offset + MPI::rank() * sizeof( uint ), MPI::size() );
@@ -614,10 +617,11 @@ void Checkpoint::write_func( stream_t file, offset_t & byte_offset,
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::write_vect( stream_t file, offset_t & byte_offset,
-                             LabelList< GenericVector > & vec,
-                             VectorsHeader & vectors_header )
+void Checkpoint::write( stream_t file, offset_t & byte_offset,
+                        LabelList< GenericVector > & vec )
 {
+  dolfin_assert( byte_offset == chkp_header.offset_vectors );
+
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_write_at_all( file, &vectors_header.count, 1,
                      byte_offset + MPI::rank() * sizeof( uint ), MPI::size() );
@@ -654,44 +658,47 @@ void Checkpoint::write_vect( stream_t file, offset_t & byte_offset,
 
 //-----------------------------------------------------------------------------
 
-std::string Checkpoint::get_filename( std::string filebasename )
+std::string Checkpoint::build_filename( std::string filename )
 {
   // if the input filename contains the extension, remove it
-  if ( filebasename.rfind( ".chkp" ) == filebasename.size() - 5 )
-    filebasename.resize( filebasename.size() - 5 );
+  if ( filename.rfind( ".chkp" ) == filename.size() - 5 )
+    filename.resize( filename.size() - 5 );
 
   // build filename
-  std::ostringstream filename;
-  filename << filebasename << n_;
+  std::ostringstream filename_;
+  filename_ << filename << n_++;
 
 #ifndef ENABLE_MPIIO
   if ( MPI::size() > 1 )
-    filename << "_" << MPI::rank();
+    filename_ << "_" << MPI::rank();
 #endif
 
-  filename << ".chkp";
+  filename_ << ".chkp";
 
-  return filename.str();
+  return filename_.str();
 }
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::stream_t Checkpoint::open_file( std::string filebasename )
+Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
 {
+  // if the input filename contains the extension, remove it
+  if ( filename.rfind( ".chkp" ) != filename.size() - 5 )
+    filename = filename + ".chkp";
+
 #ifdef ENABLE_MPIIO
   stream_t file = MPI_File();
-  MPI::file_open( file, get_filename( filebasename ), MPI_MODE_RDONLY );
+  MPI::file_open( file, filename, MPI_MODE_RDONLY );
 
   // load header
-  byte_offset = MPI::file_read_all(
-                  file, chkp_header, sizeof( CheckpointHeader ) );
+  MPI::file_read_all( file, chkp_header, sizeof( CheckpointHeader ) );
 #else
-  stream_t file = stream_t( get_filename( filebasename ), std::ofstream::binary );
+  stream_t file = stream_t( filename, std::ifstream::binary );
 
   // load header
-  file.read( static_cast< char * >( &chkp_header ),
-               sizeof( CheckpointHeader ) );
+  file.read( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
 #endif
+
   return file;
 }
 

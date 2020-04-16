@@ -100,6 +100,8 @@ public:
   ///
   real time() const;
 
+  ///
+  void reset_counter();
 private:
   void fill_headers( real const t, Mesh & mesh,
                      FunctionMap & func, VectorMap & vec );

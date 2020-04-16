@@ -408,6 +408,13 @@ real Checkpoint::time() const
 
 //-----------------------------------------------------------------------------
 
+void Checkpoint::reset_counter()
+{
+  n_ = 0;
+}
+
+//-----------------------------------------------------------------------------
+
 void Checkpoint::fill_headers( real const t, Mesh & mesh,
                                FunctionMap & func, VectorMap & vec )
 {

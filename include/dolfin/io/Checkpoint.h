@@ -33,9 +33,15 @@ public:
   typedef long long     offset_t;
 #endif
 
+  static uint32_t const NAME_LENGTH = 20;
+
   struct CheckpointHeader
   {
-    real     time;
+    double   time;
+    uint32_t pe_size;
+    uint32_t num_meshes;
+    uint32_t num_functions;
+    uint32_t num_vectors;
     offset_t offset_psystem;
     offset_t offset_mesh;
     offset_t offset_functions;
@@ -45,31 +51,33 @@ public:
   struct MeshHeader
   {
     CellType::Type type;
-    uint tdim;
-    uint gdim;
-    uint num_vertices;
-    uint num_cells;
-    uint num_entities;
-    uint num_centities;
-    uint num_coords;
-    uint num_ghosts;
+    uint32_t tdim;
+    uint32_t gdim;
+    uint32_t num_vertices;
+    uint32_t num_cells;
+    uint32_t num_entities;
+    uint32_t num_centities;
+    uint32_t num_coords;
+    uint32_t num_ghosts;
   #ifdef ENABLE_MPIIO
-    uint offsets[4];
-    uint disp[4];
+    uint32_t offsets[4];
+    uint32_t disp[4];
   #endif
   };
 
-  struct FunctionsHeader
+  struct FunctionHeader
   {
-    uint                   count;
-    Checkpoint::offset_t   total_offset;
-    Array< Array< uint > > offset;
-    Array< std::string >   names;
-
-    static uint const name_length = 20;
+    uint32_t dim;
+    uint32_t size;
+    uint32_t offset[3];
+    char     name[NAME_LENGTH];
   };
 
-  typedef FunctionsHeader VectorsHeader;
+  struct VectorHeader
+  {
+    uint32_t offset[3];
+    char     name[NAME_LENGTH];
+  };
 
 public:
   ///
@@ -102,8 +110,9 @@ public:
 
   ///
   void reset_counter();
+
 private:
-  void fill_headers( real const t, Mesh & mesh,
+  void fill_headers( real const t, uint param_size, Mesh & mesh,
                      FunctionMap & func, VectorMap & vec );
 
   void write( stream_t file, offset_t & byte_offset, Mesh & mesh );
@@ -119,10 +128,10 @@ private:
 private:
   uint n_;
 
-  CheckpointHeader chkp_header;
-  MeshHeader       mesh_header;
-  FunctionsHeader  functions_header;
-  VectorsHeader    vectors_header;
+  CheckpointHeader        chkp_header;
+  Array< MeshHeader >     mesh_header;
+  Array< FunctionHeader > functions_header;
+  Array< VectorHeader >   vectors_header;
 };
 
 }

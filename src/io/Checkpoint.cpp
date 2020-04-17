@@ -140,65 +140,66 @@ void Checkpoint::load( std::string filename, Mesh & mesh )
   stream_t file = load_file( filename );
 
   offset_t byte_offset = chkp_header.offset_mesh;
+  mesh_header.resize( chkp_header.num_meshes );
 
   if ( chkp_header.pe_size != MPI::size() )
     error( "Checkpoint::load(Mesh): PE size does not match (%u != %u)",
            chkp_header.pe_size, MPI::size() );
 
-  for ( uint i = 0; i < mesh_header.size(); ++i )
+  for ( uint m = 0; m < mesh_header.size(); ++m )
   {
     // load header
 #ifdef ENABLE_MPIIO
-    MPI::file_read_at_all( file, mesh_header[i],
+    MPI::file_read_at_all( file, mesh_header[m],
                            byte_offset + MPI::rank() * sizeof( MeshHeader ) );
     byte_offset += MPI::size() * sizeof( MeshHeader );
 #else
-    file.read( ( char * ) &mesh_header[i], sizeof( MeshHeader ) );
+    file.read( ( char * ) &mesh_header[m], sizeof( MeshHeader ) );
 #endif
 
     Mesh _mesh;
-    MeshEditor editor( _mesh, mesh_header[i].type, mesh_header[i].gdim );
-    editor.init_vertices( mesh_header[i].num_vertices );
+    MeshEditor editor( _mesh, mesh_header[m].type, mesh_header[m].gdim );
+    editor.init_vertices( mesh_header[m].num_vertices );
 
     // load coords
     {
-      Array< real > coords( mesh_header[i].num_coords, 0.0 );
+      Array< real > coords( mesh_header[m].num_coords, 0.0 );
 
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_read_at_all(
-                       file, coords.data(), mesh_header[i].num_coords,
-                       byte_offset + mesh_header[i].offsets[0] * sizeof( real ),
-                       mesh_header[i].disp[0] );
+                       file, coords.data(), mesh_header[m].num_coords,
+                       byte_offset + mesh_header[m].offsets[0] * sizeof( real ),
+                       mesh_header[m].disp[0] );
  #else
-     file.read( ( char * ) coords, ( mesh_header[i].num_coords ) * sizeof( real ) );
+      file.read( ( char * ) coords, ( mesh_header[m].num_coords ) * sizeof( real ) );
  #endif
 
-      for ( uint i = 0; i < mesh_header[i].num_coords; i += mesh_header[i].gdim )
+      for ( uint i = 0; i < mesh_header[m].num_coords; i += mesh_header[m].gdim )
       {
-        editor.add_vertex( i / mesh_header[i].gdim, coords.data() + i );
+        editor.add_vertex( i / mesh_header[m].gdim, coords.data() + i );
       }
     }
 
     // load cells
     {
-      editor.init_cells( mesh_header[i].num_cells );
-      Array< uint > cells( mesh_header[i].num_centities, 0 );
+      editor.init_cells( mesh_header[m].num_cells );
+      Array< uint > cells( mesh_header[m].num_centities, 0 );
 
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_read_at_all(
-                       file, cells.data(), mesh_header[i].num_centities,
-                       byte_offset + mesh_header[i].offsets[1] * sizeof( uint ),
-                       mesh_header[i].disp[1] );
+                       file, cells.data(), mesh_header[m].num_centities,
+                       byte_offset + mesh_header[m].offsets[1] * sizeof( uint ),
+                       mesh_header[m].disp[1] );
 #else
-     file.read( ( char * ) cells, ( mesh_header[i].num_centities ) * sizeof( uint ) );
+      file.read( ( char * ) cells, ( mesh_header[m].num_centities ) * sizeof( uint ) );
 #endif
 
       Array< uint > v;
       uint ci = 0;
-      for ( uint i = 0; i < mesh_header[i].num_centities; i += mesh_header[i].num_entities )
+      for ( uint i = 0; i < mesh_header[m].num_centities; i += mesh_header[m].num_entities )
       {
         v.clear();
-        for ( uint j = 0; j < mesh_header[i].num_entities; ++j )
+        for ( uint j = 0; j < mesh_header[m].num_entities; ++j )
         {
           v.push_back( cells[i + j] );
         }
@@ -211,25 +212,25 @@ void Checkpoint::load( std::string filename, Mesh & mesh )
       Array< uint > mapping( _mesh.size( 0 ) );
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_read_at_all(
-                       file, mapping.data(), mesh_header[i].num_vertices,
-                       byte_offset + mesh_header[i].offsets[2] * sizeof( uint ),
-                       mesh_header[i].disp[2] );
+                       file, mapping.data(), mesh_header[m].num_vertices,
+                       byte_offset + mesh_header[m].offsets[2] * sizeof( uint ),
+                       mesh_header[m].disp[2] );
 #else
-      file.read( ( char * ) mapping.data(), mesh_header[i].num_vertices * sizeof( uint ) );
+     file.read( ( char * ) mapping.data(), mesh_header[m].num_vertices * sizeof( uint ) );
 #endif
       for ( VertexIterator v( _mesh ); !v.end(); ++v )
         _mesh.distdata()[0].set_map( v->index(), mapping[v->index()] );
 
-      Array< uint > ghosts( 2 * mesh_header[i].num_ghosts );
+      Array< uint > ghosts( 2 * mesh_header[m].num_ghosts );
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_read_at_all(
-                       file, ghosts.data(), 2 * mesh_header[i].num_ghosts,
-                       byte_offset + mesh_header[i].offsets[3] * sizeof( uint ),
-                       mesh_header[i].disp[3] );
+                       file, ghosts.data(), 2 * mesh_header[m].num_ghosts,
+                       byte_offset + mesh_header[m].offsets[3] * sizeof( uint ),
+                       mesh_header[m].disp[3] );
 #else
-      file.read( ( char * ) ghosts.data(), 2 * mesh_header[i].num_ghosts * sizeof( uint ) );
+      file.read( ( char * ) ghosts.data(), 2 * mesh_header[m].num_ghosts * sizeof( uint ) );
 #endif
-      for ( uint i = 0; i < 2 * mesh_header[i].num_ghosts; i += 2 )
+      for ( uint i = 0; i < 2 * mesh_header[m].num_ghosts; i += 2 )
       {
         _mesh.distdata()[0].set_ghost( ghosts[i], ghosts[i + 1] );
       }
@@ -503,30 +504,30 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, Mesh & mesh )
   dolfin_assert( byte_offset == chkp_header.offset_mesh );
 
 #ifdef ENABLE_MPIIO
-  for( uint i = 0; i < mesh_header.size(); ++i )
+  for( uint m = 0; m < mesh_header.size(); ++m )
   {
-    MPI::file_write_at_all( file, mesh_header[i],
+    MPI::file_write_at_all( file, mesh_header[m],
                             byte_offset + MPI::rank() * sizeof( MeshHeader ) );
     byte_offset += MPI::size() * sizeof( MeshHeader );
 
     byte_offset += MPI::file_write_at_all(
-                     file, mesh.geometry().coordinates(), mesh_header[i].num_coords,
-                     byte_offset + mesh_header[i].offsets[0] * sizeof( real ),
-                     mesh_header[i].disp[0] );
+                     file, mesh.geometry().coordinates(), mesh_header[m].num_coords,
+                     byte_offset + mesh_header[m].offsets[0] * sizeof( real ),
+                     mesh_header[m].disp[0] );
 
     Array< uint > cell_data;
     for ( uint c1 = 0; c1 < mesh.cells().size(); ++c1 )
       cell_data.append( mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
 
     byte_offset += MPI::file_write_at_all(
-                     file, cell_data.data(), mesh_header[i].num_centities,
-                     byte_offset + mesh_header[i].offsets[1] * sizeof( uint ),
-                     mesh_header[i].disp[1] );
+                     file, cell_data.data(), mesh_header[m].num_centities,
+                     byte_offset + mesh_header[m].offsets[1] * sizeof( uint ),
+                     mesh_header[m].disp[1] );
 #else
-    file.write( static_cast< char * >( &mesh_header[i], sizeof( MeshHeader ) ) );
+    file.write( static_cast< char * >( &mesh_header[m], sizeof( MeshHeader ) ) );
     file.write( static_cast< char * >( mesh.geometry().coordinates(),
-               mesh_header[i].num_coords * sizeof( real ) ) );
-    file.write( static_cast< char * >( mesh.cells(), mesh_header[i].num_centities * sizeof( uint ) ) );
+               mesh_header[m].num_coords * sizeof( real ) ) );
+    file.write( static_cast< char * >( mesh.cells(), mesh_header[m].num_centities * sizeof( uint ) ) );
 #endif
 
     if ( MPI::size() > 1 )
@@ -539,14 +540,14 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, Mesh & mesh )
 
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_write_at_all(
-                       file, mapping.data(), mesh_header[i].num_vertices,
-                       byte_offset + mesh_header[i].offsets[2] * sizeof( uint ),
-                       mesh_header[i].disp[2] );
+                       file, mapping.data(), mesh_header[m].num_vertices,
+                       byte_offset + mesh_header[m].offsets[2] * sizeof( uint ),
+                       mesh_header[m].disp[2] );
 #else
-      file.write( static_cast< char * >( mapping.data(), mesh_header[i].num_vertices * sizeof( uint ) ) );
+      file.write( static_cast< char * >( mapping.data(), mesh_header[m].num_vertices * sizeof( uint ) ) );
 #endif
 
-      Array< uint > ghosts( 2 * mesh_header[i].num_ghosts );
+      Array< uint > ghosts( 2 * mesh_header[m].num_ghosts );
       uint * gp     = &ghosts[0];
       for ( GhostIterator g( mesh.distdata()[0] ); g.valid(); ++g )
       {
@@ -556,11 +557,11 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, Mesh & mesh )
 
 #ifdef ENABLE_MPIIO
       byte_offset += MPI::file_write_at_all(
-                       file, ghosts.data(), 2 * mesh_header[i].num_ghosts,
-                       byte_offset + mesh_header[i].offsets[3] * sizeof( uint ),
-                       mesh_header[i].disp[3] );
+                       file, ghosts.data(), 2 * mesh_header[m].num_ghosts,
+                       byte_offset + mesh_header[m].offsets[3] * sizeof( uint ),
+                       mesh_header[m].disp[3] );
 #else
-      file.write( static_cast< char * >( ghosts.data(), 2 * mesh_header[i].num_ghosts * sizeof( uint ) ) );
+      file.write( static_cast< char * >( ghosts.data(), 2 * mesh_header[m].num_ghosts * sizeof( uint ) ) );
 #endif
     }
   }

@@ -111,19 +111,22 @@ public:
   void load_parametersystem( std::string filename );
 
   ///
-  void load( std::string filename, MeshMap & meshes );
+  void load( std::string filename, MeshMap const & meshes );
 
   ///
-  void load( std::string filename, FunctionMap & func );
+  void load( std::string filename, FunctionMap const & func );
 
   ///
-  void load( std::string filename, VectorMap & vec );
+  void load( std::string filename, VectorMap const & vec );
 
   ///
   real time() const;
 
   ///
   void reset_counter();
+
+  ///
+  CheckpointHeader const & get_header() const;
 
 private:
   void fill_headers( real const t, uint param_size, MeshMap & meshes,

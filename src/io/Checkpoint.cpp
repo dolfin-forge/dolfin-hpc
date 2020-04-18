@@ -135,7 +135,7 @@ void Checkpoint::load_parametersystem( std::string filename )
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::load( std::string filename, MeshMap & meshes )
+void Checkpoint::load( std::string filename, MeshMap const & meshes )
 {
   stream_t file = load_file( filename );
 
@@ -161,7 +161,7 @@ void Checkpoint::load( std::string filename, MeshMap & meshes )
     // find out if we 'requested' this function in the FunctionMap
     std::string name( mesh_header[m].name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
-    MeshMap::iterator m_ = meshes.find( name );
+    MeshMap::const_iterator m_ = meshes.find( name );
 
     if ( m_ != meshes.end() )
     {
@@ -262,7 +262,7 @@ void Checkpoint::load( std::string filename, MeshMap & meshes )
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::load( std::string filename, FunctionMap & func )
+void Checkpoint::load( std::string filename, FunctionMap const & func )
 {
   stream_t file = load_file( filename );
 
@@ -300,7 +300,7 @@ void Checkpoint::load( std::string filename, FunctionMap & func )
     // find out if we 'requested' this function in the FunctionMap
     std::string name( functions_header[i].name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
-    FunctionMap::iterator f = func.find( name );
+    FunctionMap::const_iterator f = func.find( name );
 
     if ( f != func.end() )
     {
@@ -321,7 +321,7 @@ void Checkpoint::load( std::string filename, FunctionMap & func )
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::load( std::string filename, VectorMap & vec )
+void Checkpoint::load( std::string filename, VectorMap const & vec )
 {
   stream_t file = load_file( filename );
 
@@ -359,7 +359,7 @@ void Checkpoint::load( std::string filename, VectorMap & vec )
     // find out if we 'requested' this function in the VectorMap
     std::string name( vectors_header[i].name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
-    VectorMap::iterator v = vec.find( name );
+    VectorMap::const_iterator v = vec.find( name );
 
     if ( v != vec.end() )
     {
@@ -395,6 +395,13 @@ real Checkpoint::time() const
 void Checkpoint::reset_counter()
 {
   n_ = 0;
+}
+
+//-----------------------------------------------------------------------------
+
+Checkpoint::CheckpointHeader const & Checkpoint::get_header() const
+{
+  return chkp_header;
 }
 
 //-----------------------------------------------------------------------------

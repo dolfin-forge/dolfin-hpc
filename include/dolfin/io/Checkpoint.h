@@ -22,6 +22,7 @@ class Function;
 class Checkpoint
 {
 public:
+  typedef std::map< std::string, Mesh * >          MeshMap;
   typedef std::map< std::string, Function * >      FunctionMap;
   typedef std::map< std::string, GenericVector * > VectorMap;
 
@@ -37,6 +38,9 @@ public:
 
   struct CheckpointHeader
   {
+    CheckpointHeader();
+    void disp();
+
     double   time;
     uint32_t pe_size;
     uint32_t num_meshes;
@@ -50,6 +54,9 @@ public:
 
   struct MeshHeader
   {
+    MeshHeader();
+    void disp();
+
     CellType::Type type;
     uint32_t tdim;
     uint32_t gdim;
@@ -59,14 +66,18 @@ public:
     uint32_t num_centities;
     uint32_t num_coords;
     uint32_t num_ghosts;
+    char     name[NAME_LENGTH];
   #ifdef ENABLE_MPIIO
     uint32_t offsets[4];
-    uint32_t disp[4];
+    uint32_t displacement[4];
   #endif
   };
 
   struct FunctionHeader
   {
+    FunctionHeader();
+    void disp();
+
     uint32_t dim;
     uint32_t size;
     uint32_t offset[3];
@@ -75,6 +86,9 @@ public:
 
   struct VectorHeader
   {
+    VectorHeader();
+    void disp();
+
     uint32_t offset[3];
     char     name[NAME_LENGTH];
   };
@@ -87,7 +101,7 @@ public:
   ~Checkpoint();
 
   ///
-  void write( std::string filename, real const t, Mesh & mesh,
+  void write( std::string filename, real const t, MeshMap & meshes,
               FunctionMap & func, VectorMap & vec );
 
   ///
@@ -97,7 +111,7 @@ public:
   void load_parametersystem( std::string filename );
 
   ///
-  void load( std::string filename, Mesh & mesh );
+  void load( std::string filename, MeshMap & meshes );
 
   ///
   void load( std::string filename, FunctionMap & func );
@@ -112,10 +126,10 @@ public:
   void reset_counter();
 
 private:
-  void fill_headers( real const t, uint param_size, Mesh & mesh,
+  void fill_headers( real const t, uint param_size, MeshMap & meshes,
                      FunctionMap & func, VectorMap & vec );
 
-  void write( stream_t file, offset_t & byte_offset, Mesh & mesh );
+  void write( stream_t file, offset_t & byte_offset, MeshMap & meshes );
 
   void write( stream_t file, offset_t & byte_offset, FunctionMap & func );
 

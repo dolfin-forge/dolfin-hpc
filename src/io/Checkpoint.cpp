@@ -100,6 +100,52 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
 void Checkpoint::load_header( std::string filename )
 {
   stream_t file = load_file( filename );
+
+  // load mesh headers
+  {
+    offset_t byte_offset = chkp_header.offset_mesh;
+    mesh_header.resize( chkp_header.num_meshes );
+
+    for ( uint m = 0; m < mesh_header.size(); ++m )
+    {
+      MPI::file_read_at_all( file, mesh_header[m], byte_offset );
+      byte_offset += chkp_header.pe_size * sizeof( MeshHeader );
+      byte_offset += sizeof( real ) * mesh_header[m].displacement[0];
+      byte_offset += sizeof( uint ) * mesh_header[m].displacement[1];
+      if ( chkp_header.pe_size > 1 )
+      {
+        byte_offset += sizeof( uint ) * mesh_header[m].displacement[2];
+        byte_offset += sizeof( uint ) * mesh_header[m].displacement[3];
+      }
+    }
+  }
+
+  // load function headers
+  {
+    offset_t byte_offset  = chkp_header.offset_functions;
+    functions_header.resize( chkp_header.num_functions );
+
+    for ( uint i = 0; i < functions_header.size(); ++i )
+    {
+      MPI::file_read_at_all( file, functions_header[i], byte_offset );
+      byte_offset += chkp_header.pe_size * sizeof( FunctionHeader );
+      byte_offset += sizeof( real ) * functions_header[i].offset[2];
+    }
+  }
+
+  // load vector headers
+  {
+    offset_t byte_offset  = chkp_header.offset_vectors;
+    vectors_header.resize( chkp_header.num_vectors );
+
+    for ( uint i = 0; i < vectors_header.size(); ++i )
+    {
+      MPI::file_read_at_all( file, vectors_header[i], byte_offset );
+      byte_offset += MPI::size() * sizeof( VectorHeader );
+      byte_offset += sizeof( real ) * vectors_header[i].offset[2];
+    }
+  }
+
   close_file( file );
 }
 
@@ -252,6 +298,17 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
       swap( *( m_->second ), _mesh );
       ++loaded_count;
     }
+    else
+    {
+      // skip this mesh
+      byte_offset += sizeof( real ) * mesh_header[m].displacement[0];
+      byte_offset += sizeof( uint ) * mesh_header[m].displacement[1];
+      if ( MPI::size() > 1 )
+      {
+        byte_offset += sizeof( uint ) * mesh_header[m].displacement[2];
+        byte_offset += sizeof( uint ) * mesh_header[m].displacement[3];
+      }
+    }
   }
 
   message( 1, "Checkpoint: Loaded %d Mesh(es) from time %g",
@@ -402,6 +459,27 @@ void Checkpoint::reset_counter()
 Checkpoint::CheckpointHeader const & Checkpoint::get_header() const
 {
   return chkp_header;
+}
+
+//-----------------------------------------------------------------------------
+
+Array< Checkpoint::MeshHeader > const & Checkpoint::get_mesh_header() const
+{
+  return mesh_header;
+}
+
+//-----------------------------------------------------------------------------
+
+Array< Checkpoint::FunctionHeader > const & Checkpoint::get_function_header() const
+{
+  return functions_header;
+}
+
+//-----------------------------------------------------------------------------
+
+Array< Checkpoint::VectorHeader > const & Checkpoint::get_vector_header() const
+{
+  return vectors_header;
 }
 
 //-----------------------------------------------------------------------------
@@ -732,20 +810,20 @@ Checkpoint::CheckpointHeader::CheckpointHeader()
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::CheckpointHeader::disp()
+void Checkpoint::CheckpointHeader::disp() const
 {
-    begin("");
-    header( "CheckpointHeader" );
-    message( "time:             %e", time );
-    message( "pe_size:          %u", pe_size );
-    message( "num_meshes:       %u", num_meshes );
-    message( "num_functions:    %u", num_functions );
-    message( "num_vectors:      %u", num_vectors );
-    message( "offset_psystem:   %d", offset_psystem );
-    message( "offset_mesh:      %d", offset_mesh );
-    message( "offset_functions: %d", offset_functions );
-    message( "offset_vectors:   %d", offset_vectors );
-    end();
+  begin("");
+  header( "CheckpointHeader" );
+  message( "time:             %e", time );
+  message( "pe_size:          %u", pe_size );
+  message( "num_meshes:       %u", num_meshes );
+  message( "num_functions:    %u", num_functions );
+  message( "num_vectors:      %u", num_vectors );
+  message( "offset_psystem:   %d", offset_psystem );
+  message( "offset_mesh:      %d", offset_mesh );
+  message( "offset_functions: %d", offset_functions );
+  message( "offset_vectors:   %d", offset_vectors );
+  end();
 }
 
 //-----------------------------------------------------------------------------
@@ -769,8 +847,9 @@ Checkpoint::MeshHeader::MeshHeader()
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::MeshHeader::disp()
+void Checkpoint::MeshHeader::disp() const
 {
+  std::string name_( name, NAME_LENGTH );
   begin("");
   header( "MeshHeader" );
   message( "type:          %u", type );
@@ -782,6 +861,7 @@ void Checkpoint::MeshHeader::disp()
   message( "num_centities: %u", num_centities );
   message( "num_coords:    %u", num_coords );
   message( "num_ghosts:    %u", num_ghosts );
+  message( "name:          %s", name_.substr( 0, name_.find( '?' ) ).c_str() );
 #ifdef ENABLE_MPIIO
   message( "offset: {%u,%u,%u,%u}",
            offsets[0], offsets[1], offsets[2], offsets[3] );
@@ -802,14 +882,15 @@ Checkpoint::FunctionHeader::FunctionHeader()
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::FunctionHeader::disp()
+void Checkpoint::FunctionHeader::disp() const
 {
+  std::string name_( name, NAME_LENGTH );
   begin("");
   header( "FunctionHeader" );
   message( "dim:    %u", dim );
   message( "size:   %u", size );
   message( "offset: {%u,%u,%u}", offset[0], offset[1], offset[2] );
-  message( "name:   %u", name );
+  message( "name:   %s", name_.substr( 0, name_.find( '?' ) ).c_str() );
   end();
 }
 
@@ -822,12 +903,13 @@ Checkpoint::VectorHeader::VectorHeader()
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::VectorHeader::disp()
+void Checkpoint::VectorHeader::disp() const
 {
+  std::string name_( name, NAME_LENGTH );
   begin("");
   header( "VectorHeader" );
   message( "offset: {%u,%u,%u}", offset[0], offset[1], offset[2] );
-  message( "name:   %u", name );
+  message( "name:   %s", name_.substr( 0, name_.find( '?' ) ).c_str() );
   end();
 }
 

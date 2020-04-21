@@ -39,7 +39,7 @@ public:
   struct CheckpointHeader
   {
     CheckpointHeader();
-    void disp();
+    void disp() const;
 
     double   time;
     uint32_t pe_size;
@@ -55,7 +55,7 @@ public:
   struct MeshHeader
   {
     MeshHeader();
-    void disp();
+    void disp() const;
 
     CellType::Type type;
     uint32_t tdim;
@@ -76,7 +76,7 @@ public:
   struct FunctionHeader
   {
     FunctionHeader();
-    void disp();
+    void disp() const;
 
     uint32_t dim;
     uint32_t size;
@@ -87,7 +87,7 @@ public:
   struct VectorHeader
   {
     VectorHeader();
-    void disp();
+    void disp() const;
 
     uint32_t offset[3];
     char     name[NAME_LENGTH];
@@ -126,7 +126,10 @@ public:
   void reset_counter();
 
   ///
-  CheckpointHeader const & get_header() const;
+  CheckpointHeader        const & get_header() const;
+  Array< MeshHeader >     const & get_mesh_header() const;
+  Array< FunctionHeader > const & get_function_header() const;
+  Array< VectorHeader >   const & get_vector_header() const;
 
 private:
   void fill_headers( real const t, uint param_size, MeshMap & meshes,

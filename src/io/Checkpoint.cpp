@@ -779,8 +779,6 @@ Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
   file.read( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
 #endif
 
-  n_ = dolfin_get< uint >( "checkpoint_id" );
-
   return file;
 }
 

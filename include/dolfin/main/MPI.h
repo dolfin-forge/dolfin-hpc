@@ -34,9 +34,11 @@ class MPI
 public:
 
 #ifdef HAVE_MPI
-  typedef MPI_Comm  Communicator;
+  typedef MPI_Comm   Communicator;
+  typedef MPI_Offset offset_t;
 #else
   typedef int       Communicator;
+  typedef long long offset_t;
 #endif
 
   /*
@@ -146,44 +148,44 @@ public:
                          MPI_Info info = MPI_INFO_NULL );
 
   template< typename T >
-  static uint file_read_all( MPI_File & file, T & element,
-                             MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_read_all( MPI_File & file,
-                             T & element, uint const size,
-                             MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_read_at_all( MPI_File & file, T * elements,
-                                uint const count, MPI_Offset offset,
-                                uint const global_count = 0,
-                                MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_read_at_all( MPI_File & file, T & element,
-                                MPI_Offset offset,
-                                MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_write_all( MPI_File & file, T const & element,
-                              MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_write_all( MPI_File & file,
-                              T const & element, uint const size,
-                              MPI_Status * status = MPI_STATUS_IGNORE );
-
-  template< typename T >
-  static uint file_write_at_all( MPI_File & file, T const * elements,
-                                 uint const count, MPI_Offset offset,
-                                 uint const global_count = 0,
+  static offset_t file_read_all( MPI_File & file, T & element,
                                  MPI_Status * status = MPI_STATUS_IGNORE );
 
   template< typename T >
-  static uint file_write_at_all( MPI_File & file, T const & element,
-                                 MPI_Offset offset,
+  static offset_t file_read_all( MPI_File & file,
+                                 T & element, uint const size,
                                  MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_read_at_all( MPI_File & file, T * elements,
+                                    uint const count, offset_t offset,
+                                    uint const global_count = 0,
+                                    MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_read_at_all( MPI_File & file, T & element,
+                                    offset_t offset,
+                                    MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_write_all( MPI_File & file, T const & element,
+                                  MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_write_all( MPI_File & file,
+                                  T const & element, uint const size,
+                                  MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_write_at_all( MPI_File & file, T const * elements,
+                                     uint const count, offset_t offset,
+                                     uint const global_count = 0,
+                                     MPI_Status * status = MPI_STATUS_IGNORE );
+
+  template< typename T >
+  static offset_t file_write_at_all( MPI_File & file, T const & element,
+                                     offset_t offset,
+                                     MPI_Status * status = MPI_STATUS_IGNORE );
 
   template< typename T >
   static void exscan_sum( T const * send, T * recv, int count,
@@ -357,92 +359,92 @@ inline int MPI::sendrecv( Array< T > &   sendbuf,
 //-----------------------------------------------------------------------------
 
 template< typename T >
-uint MPI::file_read_all( MPI_File & file, T & element, MPI_Status * status)
+MPI::offset_t MPI::file_read_all( MPI_File & file, T & element, MPI_Status * status )
 {
   check_error( MPI_File_read_all( file,
                                   static_cast< void * >( &element ),
                                   1, MPI_type< T >::value, status ) );
-    return sizeof( T );
+    return static_cast< offset_t >( sizeof( T ) );
 }
 
 template< typename T >
-uint MPI::file_read_all( MPI_File & file, T & element,
+MPI::offset_t MPI::file_read_all( MPI_File & file, T & element,
                          uint const size, MPI_Status * status)
 {
   check_error( MPI_File_read_all( file,
                                   static_cast< void * >( &element ),
                                   size, MPI_BYTE, status ) );
-    return size;
+    return static_cast< offset_t >( size );
 }
 
 //-----------------------------------------------------------------------------
 
 template< typename T >
-uint MPI::file_read_at_all( MPI_File & file, T * elements, uint const count,
-                            MPI_Offset offset, uint const global_count,
-                            MPI_Status * status )
+MPI::offset_t MPI::file_read_at_all( MPI_File & file, T * elements, uint const count,
+                                     offset_t offset, uint const global_count,
+                                     MPI_Status * status )
 {
   dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_read_at_all( file, offset,
                                      static_cast< void * >( elements ),
                                      count, MPI_type< T >::value, status ) );
-  return global_count * sizeof( T );
+  return static_cast< offset_t >( global_count * sizeof( T ) );
 }
 
 template< typename T >
-uint MPI::file_read_at_all( MPI_File & file, T & element,
-                            MPI_Offset offset, MPI_Status * status )
+MPI::offset_t MPI::file_read_at_all( MPI_File & file, T & element,
+                                     offset_t offset, MPI_Status * status )
 {
   check_error( MPI_File_read_at_all( file, offset,
                                      static_cast< void * >( &element ),
                                      sizeof(T), MPI_BYTE, status ) );
-  return sizeof( T );
+  return static_cast< offset_t >( sizeof( T ) );
 }
 
 //-----------------------------------------------------------------------------
 
 template< typename T >
-uint MPI::file_write_all( MPI_File & file, T const & element,
-                          MPI_Status * status )
+MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
+                                   MPI_Status * status )
 {
   check_error( MPI_File_write_all( file,
                                    static_cast< void const * >( &element ),
                                    1, MPI_type< T >::value, status ) );
-    return sizeof( T );
+    return static_cast< offset_t >( sizeof( T ) );
 }
 
 template< typename T >
-uint MPI::file_write_all( MPI_File & file, T const & element, uint const size,
-                          MPI_Status * status )
+MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
+                                   uint const size, MPI_Status * status )
 {
   check_error( MPI_File_write_all( file,
                                    static_cast< void const * >( &element ),
                                    size, MPI_BYTE, status ) );
-    return size;
+    return static_cast< offset_t >( size );
 }
 
 //-----------------------------------------------------------------------------
 
 template< typename T >
-uint MPI::file_write_at_all( MPI_File & file, T const * elements,
-                             uint const count, MPI_Offset offset,
-                             uint const global_count, MPI_Status * status )
+MPI::offset_t MPI::file_write_at_all( MPI_File & file, T const * elements,
+                                  uint const count, offset_t offset,
+                                  uint const global_count, MPI_Status * status )
 {
   dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_write_at_all( file, offset,
                                       static_cast< void const * >( elements ),
                                       count, MPI_type< T >::value, status ) );
-  return global_count * sizeof( T );
+  return static_cast< offset_t >( global_count * sizeof( T ) );
 }
 
 template< typename T >
-uint MPI::file_write_at_all( MPI_File & file, T const & element,
-                             MPI_Offset offset, MPI_Status * status )
+MPI::offset_t MPI::file_write_at_all( MPI_File & file, T const & element,
+                                      offset_t offset, MPI_Status * status )
 {
   check_error( MPI_File_write_at_all( file, offset,
                                       static_cast< void const * >( &element ),
                                       sizeof(T), MPI_BYTE, status ) );
-  return sizeof( T );
+  return static_cast< offset_t >( sizeof( T ) );
 }
 
 //-----------------------------------------------------------------------------

@@ -803,8 +803,7 @@ void VTKFile::vtuNameUpdate(const int counter)
   filestart.assign(filename, 0, filename.rfind("."));
 
   fileid << counter;
-  newfilename << filestart << fileid.str() << "_" << PE::rank()
-              << ".vtu";
+  newfilename << filestart << fileid.str() << "_" << PE::rank() << ".vtu";
   vtu_filename = newfilename.str();
 
   // Make sure file is empty
@@ -814,18 +813,16 @@ void VTKFile::vtuNameUpdate(const int counter)
 //----------------------------------------------------------------------------
 void VTKFile::pvtuNameUpdate(const int counter)
 {
-  std::string filestart, extension;
+  std::string filestart;
   std::ostringstream fileid, newfilename;
 
   fileid.fill('0');
   fileid.width(6);
 
-  filestart.assign(filename, 0, filename.find("."));
-  extension.assign(filename, filename.find("."), filename.size());
+  filestart.assign(filename, 0, filename.rfind("."));
 
   fileid << counter;
   newfilename << filestart << fileid.str() << ".pvtu";
-
   pvtu_filename = newfilename.str();
 
   // Make sure file is empty

@@ -55,8 +55,8 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
   dolfin_set( "checkpoint_time", t );
 
   filename = build_filename( filename );
-  message( "Writing checkpoint (%s %d) at time %g",
-           filename.c_str(), n_, t );
+  message( "Writing checkpoint (name = %s, id = %d) at time %g",
+           filename.c_str(), n_ - 1, t );
 
   // deserialize ParameterSystem
   std::string parameters  = ParameterSystem::parameters.serialize();
@@ -778,6 +778,8 @@ Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
   // load header
   file.read( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
 #endif
+
+  n_ = dolfin_get< uint >( "checkpoint_id" );
 
   return file;
 }

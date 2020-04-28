@@ -31,8 +31,6 @@ namespace dolfin
  * 5b. Vector
  */
 
-// TODO seekp() for non MPIIO functions
-
 //-----------------------------------------------------------------------------
 
 Checkpoint::Checkpoint()
@@ -65,14 +63,15 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
   fill_headers( t, param_size, meshes, func, vec );
 
 #ifndef ENABLE_MPIIO
-  stream_t file = stream_t( filename, std::ofstream::binary );
+  error("Checkpointing is only implemented with MPI I/O enabled.");
+  // stream_t file = stream_t( filename, std::ofstream::binary );
 
-  // write header
-  file.write( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
+  // // write header
+  // file.write( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
 
-  // write ParameterSystem
-  file.write( static_cast< char * >( &param_size ), sizeof( uint ) );
-  file.write( static_cast< char * >( parameters.c_str() ), param_size );
+  // // write ParameterSystem
+  // file.write( static_cast< char * >( &param_size ), sizeof( uint ) );
+  // file.write( static_cast< char * >( parameters.c_str() ), param_size );
 #else
   stream_t file = MPI_File();
   MPI::file_open( file, filename, MPI_MODE_WRONLY | MPI_MODE_CREATE );
@@ -165,10 +164,11 @@ void Checkpoint::load_parametersystem( std::string filename )
   byte_offset += MPI::file_read_at_all( file, &p[0],
                                         param_size, byte_offset, param_size );
 #else
+  error("Checkpointing is only implemented with MPI I/O enabled.");
   // load ParameterSystem
-  file.read( static_cast< char * >( &param_size ), sizeof( uint ) );
-  Array< char > p( param_size / sizeof( char ) );
-  file.read( static_cast< char * >( p.data() ), param_size );
+  // file.read( static_cast< char * >( &param_size ), sizeof( uint ) );
+  // Array< char > p( param_size / sizeof( char ) );
+  // file.read( static_cast< char * >( p.data() ), param_size );
 #endif
 
   ParameterSystem::parameters.deserialize( std::string( p.data(), p.size() ) );
@@ -201,7 +201,8 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                            byte_offset + MPI::rank() * sizeof( MeshHeader ) );
     byte_offset += MPI::size() * sizeof( MeshHeader );
 #else
-    file.read( ( char * ) &mesh_header[m], sizeof( MeshHeader ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // file.read( ( char * ) &mesh_header[m], sizeof( MeshHeader ) );
 #endif
 
     // find out if we 'requested' this function in the FunctionMap
@@ -225,7 +226,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                          byte_offset + mesh_header[m].offsets[0] * sizeof( real ),
                          mesh_header[m].displacement[0] );
  #else
-        file.read( ( char * ) coords, ( mesh_header[m].num_coords ) * sizeof( real ) );
+        // file.read( ( char * ) coords, ( mesh_header[m].num_coords ) * sizeof( real ) );
  #endif
 
         for ( uint i = 0; i < mesh_header[m].num_coords; i += mesh_header[m].gdim )
@@ -245,7 +246,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                          byte_offset + mesh_header[m].offsets[1] * sizeof( uint ),
                          mesh_header[m].displacement[1] );
 #else
-       file.read( ( char * ) cells, ( mesh_header[m].num_centities ) * sizeof( uint ) );
+       // file.read( ( char * ) cells, ( mesh_header[m].num_centities ) * sizeof( uint ) );
 #endif
 
         Array< uint > v;
@@ -270,7 +271,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                          byte_offset + mesh_header[m].offsets[2] * sizeof( uint ),
                          mesh_header[m].displacement[2] );
 #else
-       file.read( ( char * ) mapping.data(), mesh_header[m].num_vertices * sizeof( uint ) );
+       // file.read( ( char * ) mapping.data(), mesh_header[m].num_vertices * sizeof( uint ) );
 #endif
         for ( VertexIterator v( _mesh ); !v.end(); ++v )
           _mesh.distdata()[0].set_map( v->index(), mapping[v->index()] );
@@ -282,7 +283,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                          byte_offset + mesh_header[m].offsets[3] * sizeof( uint ),
                          mesh_header[m].displacement[3] );
 #else
-       file.read( ( char * ) ghosts.data(), 2 * mesh_header[m].num_ghosts * sizeof( uint ) );
+       // file.read( ( char * ) ghosts.data(), 2 * mesh_header[m].num_ghosts * sizeof( uint ) );
 #endif
         for ( uint i = 0; i < 2 * mesh_header[m].num_ghosts; i += 2 )
         {
@@ -341,7 +342,8 @@ void Checkpoint::load( std::string filename, FunctionMap const & func )
                            byte_offset + MPI::rank() * sizeof( FunctionHeader ) );
     byte_offset += MPI::size() * sizeof( FunctionHeader );
 #else
-    file.read( ( char * ) &functions_header[i].offset[1], sizeof( uint ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // file.read( ( char * ) &functions_header[i].offset[1], sizeof( uint ) );
 #endif
 
     // load data
@@ -351,7 +353,7 @@ void Checkpoint::load( std::string filename, FunctionMap const & func )
                      byte_offset + functions_header[i].offset[0] * sizeof( real ),
                      functions_header[i].offset[2] );
 #else
-    file.read( ( char * ) values.data(), functions_header[i].offset[1] * sizeof( real ) );
+    // file.read( ( char * ) values.data(), functions_header[i].offset[1] * sizeof( real ) );
 #endif
 
     // find out if we 'requested' this function in the FunctionMap
@@ -400,7 +402,8 @@ void Checkpoint::load( std::string filename, VectorMap const & vec )
                            byte_offset + MPI::rank() * sizeof( VectorHeader ) );
     byte_offset += MPI::size() * sizeof( VectorHeader );
 #else
-    file.read( ( char * ) &vectors_header.offset[i][1], sizeof( uint ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // file.read( ( char * ) &vectors_header.offset[i][1], sizeof( uint ) );
 #endif
 
     // load data
@@ -410,7 +413,7 @@ void Checkpoint::load( std::string filename, VectorMap const & vec )
                      byte_offset + vectors_header[i].offset[0] * sizeof( real ),
                      vectors_header[i].offset[2] );
 #else
-    file.read( ( char * ) values.data(), vectors_header[i].offset[1] * sizeof( real ) );
+    // file.read( ( char * ) values.data(), vectors_header[i].offset[1] * sizeof( real ) );
 #endif
 
     // find out if we 'requested' this function in the VectorMap
@@ -629,10 +632,11 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
                      hdr.num_centities,
                      byte_offset + hdr.offsets[1] * sizeof( uint ), hdr.displacement[1] );
 #else
-    file.write( static_cast< char * >( &hdr, sizeof( MeshHeader ) ) );
-    file.write( static_cast< char * >( mesh.geometry().coordinates(),
-               hdr.num_coords * sizeof( real ) ) );
-    file.write( static_cast< char * >( mesh.cells(), hdr.num_centities * sizeof( uint ) ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // file.write( static_cast< char * >( &hdr, sizeof( MeshHeader ) ) );
+    // file.write( static_cast< char * >( mesh.geometry().coordinates(),
+    //            hdr.num_coords * sizeof( real ) ) );
+    // file.write( static_cast< char * >( mesh.cells(), hdr.num_centities * sizeof( uint ) ) );
 #endif
 
     if ( MPI::size() > 1 )
@@ -647,7 +651,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
       byte_offset += MPI::file_write_at_all( file, mapping.data(), hdr.num_vertices,
                        byte_offset + hdr.offsets[2] * sizeof( uint ), hdr.displacement[2] );
 #else
-      file.write( static_cast< char * >( mapping.data(), hdr.num_vertices * sizeof( uint ) ) );
+      // file.write( static_cast< char * >( mapping.data(), hdr.num_vertices * sizeof( uint ) ) );
 #endif
 
       Array< uint > ghosts( 2 * hdr.num_ghosts );
@@ -662,7 +666,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
       byte_offset += MPI::file_write_at_all( file, ghosts.data(), 2 * hdr.num_ghosts,
                        byte_offset + hdr.offsets[3] * sizeof( uint ), hdr.displacement[3] );
 #else
-      file.write( static_cast< char * >( ghosts.data(), 2 * hdr.num_ghosts * sizeof( uint ) ) );
+      // file.write( static_cast< char * >( ghosts.data(), 2 * hdr.num_ghosts * sizeof( uint ) ) );
 #endif
     }
   }
@@ -694,10 +698,11 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset,
                      byte_offset + functions_header[i].offset[0] * sizeof( real ),
                      functions_header[i].offset[2] );
 #else
-    uint local_size = f->second->vector().local_size();
-    file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
-    file.write( static_cast< char * >( values.data(),
-               f->second->vector().local_size() * sizeof( real ) ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // uint local_size = f->second->vector().local_size();
+    // file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
+    // file.write( static_cast< char * >( values.data(),
+    //            f->second->vector().local_size() * sizeof( real ) ) );
 #endif
   }
 }
@@ -727,9 +732,10 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, VectorMap & vec )
                      byte_offset + vectors_header[i].offset[0] * sizeof( real ),
                      vectors_header[i].offset[2] );
 #else
-    uint local_size = it->first->local_size();
-    file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
-    file.write( static_cast< char * >( values.data(), v->second->local_size() * sizeof( real ) ) );
+    error("Checkpointing is only implemented with MPI I/O enabled.");
+    // uint local_size = it->first->local_size();
+    // file.write( static_cast< char * >( &local_size, sizeof( uint ) ) );
+    // file.write( static_cast< char * >( values.data(), v->second->local_size() * sizeof( real ) ) );
 #endif
   }
 }
@@ -748,8 +754,9 @@ std::string Checkpoint::build_filename( std::string filename )
   filename_ << filename << n_++;
 
 #ifndef ENABLE_MPIIO
-  if ( MPI::size() > 1 )
-    filename_ << "_" << MPI::rank();
+  error("Checkpointing is only implemented with MPI I/O enabled.");
+  // if ( MPI::size() > 1 )
+  //   filename_ << "_" << MPI::rank();
 #endif
 
   filename_ << ".chkp";
@@ -773,10 +780,11 @@ Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
   // load header
   MPI::file_read_all( file, chkp_header, sizeof( CheckpointHeader ) );
 #else
-  stream_t file = stream_t( filename, std::ifstream::binary );
+  error("Checkpointing is only implemented with MPI I/O enabled.");
+  // stream_t file = stream_t( filename, std::ifstream::binary );
 
-  // load header
-  file.read( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
+  // // load header
+  // file.read( static_cast< char * >( &chkp_header ), sizeof( CheckpointHeader ) );
 #endif
 
   return file;
@@ -789,7 +797,8 @@ void Checkpoint::close_file( stream_t & file )
 #ifdef ENABLE_MPIIO
   MPI::file_close( file );
 #else
-  file.close();
+  error("Checkpointing is only implemented with MPI I/O enabled.");
+  // file.close();
 #endif
 }
 

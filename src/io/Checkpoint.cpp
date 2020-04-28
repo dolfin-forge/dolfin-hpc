@@ -12,6 +12,8 @@
 
 #include <sstream>
 
+uint32_t const CHECKPOINT_MAGIC = 0xDEADC0DE;
+
 namespace dolfin
 {
 
@@ -246,7 +248,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
                          byte_offset + mesh_header[m].offsets[1] * sizeof( uint ),
                          mesh_header[m].displacement[1] );
 #else
-       // file.read( ( char * ) cells, ( mesh_header[m].num_centities ) * sizeof( uint ) );
+       // file.read( ( char * ) cells, ( mesh_header[m].nuchkp_headerchkp_headerm_centities ) * sizeof( uint ) );
 #endif
 
         Array< uint > v;
@@ -581,6 +583,7 @@ void Checkpoint::fill_headers( real const t, uint param_size, MeshMap & meshes,
 
   // checkpoint header
   chkp_header.time          = t;
+  chkp_header.magic         = CHECKPOINT_MAGIC;
   chkp_header.pe_size       = MPI::size();
   chkp_header.num_meshes    = meshes.size();
   chkp_header.num_functions = func.size();
@@ -779,6 +782,9 @@ Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
 
   // load header
   MPI::file_read_all( file, chkp_header, sizeof( CheckpointHeader ) );
+
+  if ( chkp_header.magic != CHECKPOINT_MAGIC )
+    error( "File \"%s\" does not seem to contain a checkpoint!", filename.c_str() );
 #else
   error("Checkpointing is only implemented with MPI I/O enabled.");
   // stream_t file = stream_t( filename, std::ifstream::binary );
@@ -824,6 +830,7 @@ void Checkpoint::CheckpointHeader::disp() const
   begin("");
   header( "CheckpointHeader" );
   message( "time:             %e", time );
+  message( "magic:            %X", magic );
   message( "pe_size:          %u", pe_size );
   message( "num_meshes:       %u", num_meshes );
   message( "num_functions:    %u", num_functions );

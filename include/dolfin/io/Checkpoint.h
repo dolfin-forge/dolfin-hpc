@@ -42,6 +42,7 @@ public:
     void disp() const;
 
     double   time;
+    uint32_t magic;
     uint32_t pe_size;
     uint32_t num_meshes;
     uint32_t num_functions;

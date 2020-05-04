@@ -34,7 +34,7 @@ public:
   typedef long long     offset_t;
 #endif
 
-  static uint32_t const NAME_LENGTH = 20;
+  static uint32_t const NAME_LENGTH = 256;
 
   struct CheckpointHeader
   {

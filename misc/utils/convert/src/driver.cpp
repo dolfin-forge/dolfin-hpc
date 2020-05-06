@@ -38,7 +38,6 @@ int main(int argc, char * argv [])
        (input_fname.rfind(".xml") + std::string(".xml").size() == len)) ||
       ((input_fname.rfind(".xml.gz") != std::string::npos) &&
        (input_fname.rfind(".xml.gz") + std::string(".xml.gz").size() == len))) {
-    std::cout << "Reading DOLFIN XML \n";
     mesh = new DOLFINxml();
   }
   else
@@ -46,8 +45,6 @@ int main(int argc, char * argv [])
     std::cerr << "Unkown mesh type\n";
     return -1;
   }
-
-  std::string fname("apa.bin");
 
   mesh->load_mesh(input_fname);
 

@@ -1,116 +1,85 @@
 /*
- * ----------------------------------------------------------------------------
- * "THE BEER-WARE LICENSE" (Revision 42):
- * <njansson@kth.se> wrote this file. As long as you retain this notice you
- * can do whatever you want with this stuff. If we meet some day, and you think
- * this stuff is worth it, you can buy me a beer in return Niclas Jansson
- * ----------------------------------------------------------------------------
+ * Copyright (C) 2003-2008 Anders Logg.
+ * Licensed under the GNU LGPL Version 2.1.
+ *
+ * Based on the old XMLFile, XMLObject and XMLMesh classes in DOLFIN HPC
+ * Refactored by Niclas Jansson, 2020
  */
 
 #ifndef DOLFIN_CONVERT_XML_MESH_H
 #define DOLFIN_CONVERT_XML_MESH_H
 
-#include <cstdlib>
-#include <cstring>
 #include <Mesh.h>
-#include <libxml/xmlreader.h>
+#include <libxml/parser.h>
 
-struct DOLFINxml : public Mesh
+class DOLFINxml : public Mesh
 {
+public:
+  DOLFINxml() : Mesh(),
+		state(ROOT),
+		vp(NULL),
+		cp(NULL),
+		parsed_vertices(0),
+		parsed_cells(0) {}
 
-  DOLFINxml() : Mesh() {};
-		
+  void load_mesh(std::string& filename);
 
-  void load_mesh(std::string& filename) {
-    /* TODO rewrite as a SAX parser */
-    xmlTextReaderPtr xml_reader = xmlNewTextReaderFilename(filename.c_str());
-    if (xml_reader == NULL)
-      throw std::runtime_error( "Failed to open file \"" + filename + "\"" );    
+  void start_element(const xmlChar *name, const xmlChar **atrs);
+  void end_element(const xmlChar *name);
 
-    for (int i = 0; i < 3; i++)
-      xmlTextReaderRead(xml_reader);    
-    parse_header(xml_reader);
+private:
 
-    for (int i = 0; i < 2; i++)
-      xmlTextReaderRead(xml_reader);
-    parse_vertices(xml_reader);
-    
-    for (int i = 0; i < 2; i++)
-      xmlTextReaderRead(xml_reader);
-    parse_cells(xml_reader);
+  enum sax_state {ROOT, MESH, VERTICES, CELLS};
+  sax_state state;
 
-    xmlFreeTextReader(xml_reader);
-  }
-  
-  void parse_header(xmlTextReaderPtr xml_reader) {
+  double *vp;
+  uint32_t *cp;
 
+  uint32_t parsed_vertices;
+  uint32_t parsed_cells;
 
-    
-    gdim = atoi((const char *)xmlTextReaderGetAttribute(xml_reader,
-							(const xmlChar *)"dim"));
-    const char *ctype = (const char *)
-      xmlTextReaderGetAttribute(xml_reader, (const xmlChar *) "celltype");
-    
-    if (strcmp(ctype, "triangle") == 0) cell_type = 2;
-    else if (strcmp(ctype, "tetrahedron") == 0) cell_type = 3;
+  template <class T> T read(const xmlChar * s) { return T();};
 
+  template <>
+  const char * read(const xmlChar *s) {
+    return reinterpret_cast<const char *>(s);
   }
 
-  void parse_vertices(xmlTextReaderPtr xml_reader) {
-
-    num_vertices = atoi((const char *)
-			xmlTextReaderGetAttribute(xml_reader,
-						  (const xmlChar *) "size"));
-    vertices = new double[num_vertices * gdim];
-    double *dp = &vertices[0];
-    xmlTextReaderRead(xml_reader);
-    xmlTextReaderRead(xml_reader);
-    for (int i = 0 ; i < num_vertices;
-	 xmlTextReaderRead(xml_reader),
-	   xmlTextReaderRead(xml_reader), i++) {
-      *(dp++) = atof((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "x"));
-      *(dp++) = atof((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "y"));
-      if ( gdim == 3)
-	*(dp++) = atof((const char *)
-		       xmlTextReaderGetAttribute(xml_reader,
-						 (const xmlChar *) "z"));      
-    }
-    std::cout << "Found " << num_vertices << " vertices\n";
+  template <>
+  double read(const xmlChar *s) {
+    return strtod(reinterpret_cast<const char *>(s), NULL);
   }
 
-  void parse_cells(xmlTextReaderPtr xml_reader) {
+  template <>
+  uint32_t read(const xmlChar *s) {
+    uint32_t value = strtol(reinterpret_cast<const char *>(s), NULL, 0);
+    return value;
+  }
 
-    num_cells = atoi((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "size"));
-    cells = new uint32_t[num_cells * ( cell_type + 1)];
-    uint32_t *dp = &cells[0];
-    xmlTextReaderRead(xml_reader);    
-    xmlTextReaderRead(xml_reader);    
-    for (int i = 0 ; i < num_cells;
-	 xmlTextReaderRead(xml_reader),
-	   xmlTextReaderRead(xml_reader), i++) {
-      *(dp++) = atoi((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "v0"));
-      *(dp++) = atoi((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "v1"));
-      *(dp++) = atoi((const char *)
-		     xmlTextReaderGetAttribute(xml_reader,
-					       (const xmlChar *) "v2"));
-      if (cell_type == 3)
-	*(dp++) = atoi((const char *)
-		       xmlTextReaderGetAttribute(xml_reader,
-						 (const xmlChar *)"v3"));           
-    }
-    std::cout << "Found " << num_cells << " cells\n";
-	
+  template <class T>
+  T parse(const xmlChar* name, const xmlChar** attrs, const char * label) {
+     if (attrs == NULL) {
+       throw std::runtime_error("Missing attribute");
+     }
+     for (uint32_t i = 0; attrs[i] != NULL; ++i) {
+       if (xmlStrcasecmp(attrs[i], (xmlChar *) label) == 0) {
+	 if (attrs[i + 1] == NULL) {
+	   throw std::runtime_error("Missing value for an attribute");
+	 }
+	 return read<T>(attrs[i + 1]);
+       }
+     }
+     throw std::runtime_error("Missing attribute");
+     return T();
   }
 };
+
+/*
+ * SAX callback functions
+ */
+void sax_start_document(void *ctx);
+void sax_end_document(void *ctx);
+void sax_start_element(void *ctx, const xmlChar *name, const xmlChar **attrs);
+void sax_end_element(void *ctx, const xmlChar *name);
 
 #endif

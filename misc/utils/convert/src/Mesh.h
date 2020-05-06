@@ -10,6 +10,9 @@
 #ifndef DOLFIN_CONVERT_MESH_H
 #define DOLFIN_CONVERT_MESH_H
 
+#include <cstdlib>
+#include <string>
+
 struct Mesh
 {
 

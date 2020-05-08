@@ -15,40 +15,40 @@ endif
 
 dist_data_DATA = regen.sh
 
-EXTRA_DIST = data/meshes/aneurysm.bim\
+EXTRA_DIST = data/meshes/aneurysm.bin\
              data/meshes/README\
-             data/meshes/snake_hole.bim\
-             data/meshes/circle.bim\
-             data/meshes/cylinder.bim\
-             data/meshes/dolfin-1.bim\
-             data/meshes/dolfin-2.bim\
-             data/meshes/gear.bim\
-             data/meshes/meshbc.bim\
-             data/meshes/slit.bim\
-             data/meshes/snake.bim\
-             data/meshes/tetmesh-1.bim\
-             data/meshes/sphere.bim\
-             data/meshes/tetmesh_24_8_8.bim\
-             data/meshes/tetmesh-16.bim\
-             data/meshes/tetmesh-4.bim\
-             data/meshes/tetmesh-8.bim\
-             data/meshes/tetmesh_backward_facing_step_32_8_8.bim\
-             data/meshes/tetmesh_LES_10_2_7.bim\
-             data/meshes/tetmesh_bluff_body_32_8_8.bim\
-             data/meshes/tetrahedron.bim\
-             data/meshes/torso.bim\
-             data/meshes/triangle.bim\
-             data/meshes/trimesh-1.bim\
-             data/meshes/trimesh-128.bim\
-             data/meshes/trimesh-16.bim\
-             data/meshes/trimesh-2.bim\
-             data/meshes/trimesh-32.bim\
-             data/meshes/trimesh-4.bim\
-             data/meshes/trimesh-64.bim\
-             data/meshes/trimesh-8.bim\
-             data/meshes/two_particles.bim\
-             data/meshes/unstruct-trimesh-1.bim\
-             data/meshes/unstruct-trimesh-2.bim\
+             data/meshes/snake_hole.bin\
+             data/meshes/circle.bin\
+             data/meshes/cylinder.bin\
+             data/meshes/dolfin-1.bin\
+             data/meshes/dolfin-2.bin\
+             data/meshes/gear.bin\
+             data/meshes/meshbc.bin\
+             data/meshes/slit.bin\
+             data/meshes/snake.bin\
+             data/meshes/tetmesh-1.bin\
+             data/meshes/sphere.bin\
+             data/meshes/tetmesh_24_8_8.bin\
+             data/meshes/tetmesh-16.bin\
+             data/meshes/tetmesh-4.bin\
+             data/meshes/tetmesh-8.bin\
+             data/meshes/tetmesh_backward_facing_step_32_8_8.bin\
+             data/meshes/tetmesh_LES_10_2_7.bin\
+             data/meshes/tetmesh_bluff_body_32_8_8.bin\
+             data/meshes/tetrahedron.bin\
+             data/meshes/torso.bin\
+             data/meshes/triangle.bin\
+             data/meshes/trimesh-1.bin\
+             data/meshes/trimesh-128.bin\
+             data/meshes/trimesh-16.bin\
+             data/meshes/trimesh-2.bin\
+             data/meshes/trimesh-32.bin\
+             data/meshes/trimesh-4.bin\
+             data/meshes/trimesh-64.bin\
+             data/meshes/trimesh-8.bin\
+             data/meshes/two_particles.bin\
+             data/meshes/unstruct-trimesh-1.bin\
+             data/meshes/unstruct-trimesh-2.bin\
              demo/function/Makefile\
              demo/function/Projection.ufl\
              demo/function/Projection.h\
@@ -57,17 +57,17 @@ EXTRA_DIST = data/meshes/aneurysm.bim\
              demo/insitu/poisson/main.cpp\
              demo/insitu/poisson/Poisson.ufl\
              demo/insitu/poisson/Poisson.h\
-             demo/insitu/poisson/UnitSquareMesh_32x32.bim\
+             demo/insitu/poisson/UnitSquareMesh_32x32.bin\
              demo/insitu/poisson/poisson.session\
              demo/insitu/convection-diffusion/Makefile\
              demo/insitu/convection-diffusion/main.cpp\
              demo/insitu/convection-diffusion/ConvectionDiffusion.ufl\
              demo/insitu/convection-diffusion/ConvectionDiffusion.h\
-             demo/insitu/convection-diffusion/UnitSquareMesh_32x32.bim\
+             demo/insitu/convection-diffusion/UnitSquareMesh_32x32.bin\
              demo/mesh/refinement/Makefile\
              demo/mesh/refinement/main.cpp\
-             demo/mesh/meshfunction/mesh2D.bim\
-             demo/mesh/meshfunction/meshfunction.bim\
+             demo/mesh/meshfunction/mesh2D.bin\
+             demo/mesh/meshfunction/meshfunction.bin\
              demo/mesh/meshfunction/Makefile\
              demo/mesh/meshfunction/main.cpp\
              demo/mesh/subdomains/Makefile\

@@ -38,10 +38,10 @@ private:
   uint32_t parsed_vertices;
   uint32_t parsed_cells;
 
-  template <class T> T read(const xmlChar * s) { return T();};
+  template <class T> T read(const xmlChar * s) { printf("NEJ!\n"); return T();};
 
   template <>
-  const char * read(const xmlChar *s) {
+   const char * read(const xmlChar *s) {
     return reinterpret_cast<const char *>(s);
   }
 
@@ -52,8 +52,7 @@ private:
 
   template <>
   uint32_t read(const xmlChar *s) {
-    uint32_t value = strtol(reinterpret_cast<const char *>(s), NULL, 0);
-    return value;
+    return (uint32_t) atoi(reinterpret_cast<const char *>(s));
   }
 
   template <class T>

@@ -9,6 +9,8 @@ AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
 CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
 LIBS="$XML_LIBS $LIBS"
 
+AC_C_BIGENDIAN
+
 AC_CONFIG_FILES([Makefile\
 		 src/Makefile])
 

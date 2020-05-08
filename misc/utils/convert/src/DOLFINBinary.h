@@ -39,7 +39,16 @@ void write_dolfin_binary(Mesh *mesh, std::string& filename)
     throw std::runtime_error( "Failed to open file \"" + filename + "\"" );
 
   BinaryFileHeader hdr;
+  
   hdr.magic = BINARY_MAGIC;
+  hdr.pe_size = 1;
+  hdr.type = BINARY_MESH_DATA;
+#ifdef HAVE_BIG_ENDIAN
+  hdr.bendian = 1;
+#else
+  hdr.bendian = 0;
+#endif
+
   
   /* Write Header */
   fp.write(reinterpret_cast<const char*>(&hdr), sizeof(BinaryFileHeader));

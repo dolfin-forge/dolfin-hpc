@@ -16,6 +16,8 @@
 #include <zoltan_cpp.h>
 #endif
 
+#include <cstdlib>
+
 namespace dolfin
 {
 
@@ -72,6 +74,12 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
 {
   if (count_ == 0 )
   {
+    char const * verbosity = std::getenv( "DOLFIN_VERBOSE" );
+    if ( verbosity != NULL )
+    {
+      verbose( std::atoi( verbosity ) );
+    }
+
 #ifdef HAVE_MPI
     SubSystemsManager::MPI::init(argc, argv, n);
 #else

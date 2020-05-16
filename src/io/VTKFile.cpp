@@ -81,7 +81,7 @@ void VTKFile::operator<<(Mesh& mesh)
   // Increase the number of times we have saved the mesh
   ++counter;
 
-  message(1, "Saved mesh %s (%s) to file %s in VTK format.",
+  message(1, "VTKFile: Saved mesh %s (%s) to file %s in VTK format.",
           mesh.name().c_str(), mesh.label().c_str(), filename.c_str());
 }
 //----------------------------------------------------------------------------
@@ -188,7 +188,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Increase the number of times we have saved the function
   ++counter;
 
-  message(1, "Saved %d %s to file %s in VTK format.", f.size(),
+  message(1, "VTKFile: Saved %d %s to file %s in VTK format.", f.size(),
 	  (f.size() > 1 ? "functions" : "function"),
 	  filename.c_str());
 
@@ -923,8 +923,8 @@ template<class T>
     // Increase the number of times we have saved the mesh function
     ++counter;
 
-    message(1, "Saved mesh function %d times.", counter);
-    message(1, "Saved mesh function ( %s ) to file %s in VTK format.",
+    message(1, "VTKFile: Saved mesh function %d times.", counter);
+    message(1, "VTKFile: Saved mesh function ( %s ) to file %s in VTK format.",
             mesh.label().c_str(), filename.c_str());
   }
 //-----------------------------------------------------------------------------

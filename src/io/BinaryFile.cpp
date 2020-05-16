@@ -214,7 +214,8 @@ void BinaryFile::operator<<(GenericVector& x)
 
   delete[] values;
 
-  message(1, "Saved vector to file %s in binary format.", filename.c_str());
+  message(1, "BinaryFile: Saved vector to file %s in binary format.",
+          filename.c_str());
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(Function & f)
@@ -950,7 +951,8 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   }
 
-  message(1, "Saved mesh to file %s in binary format.", filename.c_str());
+  message(1, "BinaryFile: Saved mesh to file %s in binary format.",
+          filename.c_str());
 }
 //----------------------------------------------------------------------------
 void BinaryFile::nameUpdate(const int counter)
@@ -1209,23 +1211,23 @@ bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
 
   if (hdr.magic == BINARY_MAGIC_V2)
   {
-    message(1, "Loading Binary File format version 2");
+    message(1, "BinaryFile: Loading Binary File format version 2");
     version_ = 2;
   }
   else if (hdr.magic == BINARY_MAGIC_V1)
   {
-    message(1, "Loading Binary File format version 1");
+    message(1, "BinaryFile: Loading Binary File format version 1");
     version_ = 1;
   }
   else if (bswap(hdr.magic) == BINARY_MAGIC_V2)
   {
-    message(1, "Loading Binary File format version 2 (endian conversion)");
+    message(1, "BinaryFile: Loading Binary File format version 2 (endian conversion)");
     version_ = 2;
     byteswap = true;
   }
   else if (bswap(hdr.magic) == BINARY_MAGIC_V1)
   {
-    message(1, "Loading Binary File format version 1 (endian conversion)");
+    message(1, "BinaryFile: Loading Binary File format version 1 (endian conversion)");
     version_ = 1;
     byteswap = true;
   }

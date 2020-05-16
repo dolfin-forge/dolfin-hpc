@@ -76,7 +76,7 @@ bool SubDomain::close(real const x, real const xref) const
 template <class Entity>
 void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
 {
-  message(1, "Computing sub domain markers for sub domain %d.", index);
+  message(1, "SubDomain: Computing markers for sub domain %d.", index);
 
   Mesh& mesh = sub_domains.mesh();
 

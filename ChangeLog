@@ -1,6 +1,7 @@
 0.9.1-hpc [2020-03-24]
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
    those can be installed from bitbucket.org/adaptivesimulations
+ - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable
  - added '--enable-opt-basis' for optimized ffc evaluate_basis functions
  - removed XML support
  - removed PETSc signal handling by default

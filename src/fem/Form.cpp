@@ -98,7 +98,7 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
   // Check that all coefficients have valid value dimensions
   for (uint i = 0; i < coefficients.size(); ++i)
   {
-    message(1, "Checking coefficient %d:", i);
+    message(1, "Form: Checking coefficient %d:", i);
     if (coefficients[i] == NULL)
     {
       error("Got NULL pointer as coefficient %d labeled as '%s'.", i,
@@ -122,8 +122,8 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
     {
       uint coef_rank = coefficients[i]->rank();
       uint fe_rank = fe->value_rank();
-      message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank,
-              coef_rank);
+      message(1, "Form: Coefficient rank: expected  = %d, provided = %d, ",
+              fe_rank, coef_rank);
       if (fe_rank != coef_rank)
       {
         error(

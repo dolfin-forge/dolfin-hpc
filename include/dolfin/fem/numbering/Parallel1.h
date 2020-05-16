@@ -234,7 +234,7 @@ public:
     }
     delete[] recvbuf;
 
-    message(1, "Remaining ghost dofs %u", ufc_ghosts.size());
+    message(1, "Parallel1Numbering: Remaining ghost dofs %u", ufc_ghosts.size());
 
     //---
 

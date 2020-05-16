@@ -200,7 +200,7 @@ void assembleCells(GenericTensor& A,
     return;
   }
 
-  message(1,"Assembler : cells");
+  message(1,"Assembler: cells");
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
@@ -265,7 +265,7 @@ void assembleExteriorFacets(GenericTensor& A,
     return;
   }
 
-  message(1,"Assembler : exterior facets");
+  message(1,"Assembler: exterior facets");
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
@@ -344,7 +344,7 @@ void assembleInteriorFacets(GenericTensor& A,
     return;
   }
 
-  message(1,"Assembler : interior facets");
+  message(1,"Assembler: interior facets");
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();

@@ -23,6 +23,15 @@ nobase_pkginclude_HEADERS = \
 				common/Tokenized.h\
 				common/types.h\
 				common/Variable.h\
+				common/parallel_hashmap/btree.h\
+				common/parallel_hashmap/meminfo.h\
+				common/parallel_hashmap/phmap.h\
+				common/parallel_hashmap/phmap_base.h\
+				common/parallel_hashmap/phmap_bits.h\
+				common/parallel_hashmap/phmap_config.h\
+				common/parallel_hashmap/phmap_dump.h\
+				common/parallel_hashmap/phmap_fwd_decl.h\
+				common/parallel_hashmap/phmap_utils.h\
 				config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\

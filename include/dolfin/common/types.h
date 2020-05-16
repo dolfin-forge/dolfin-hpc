@@ -29,6 +29,8 @@
 #include <set>
 #endif
 
+#include <dolfin/common/parallel_hashmap/phmap.h>
+
 #include <climits>
 #include <cfloat>
 #include <stdint.h>
@@ -83,6 +85,17 @@ namespace dolfin
 #define _map std::map
 #define _set std::set
 #endif
+
+#undef _map
+#undef _set
+
+template< typename T1, typename T2 >
+using _map = phmap::flat_hash_map< T1, T2 >;
+
+template< typename T >
+using _set = phmap::flat_hash_set< T >;
+
+
 //-----------------------------------------------------------------------------
 
 /// Facility to compare arrays

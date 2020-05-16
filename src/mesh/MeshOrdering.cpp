@@ -15,7 +15,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 void MeshOrdering::order( Mesh & mesh )
 {
-	message( 1, "Ordering mesh entities..." );
+	message( 1, "MeshOrdering: Ordering mesh entities..." );
 
 	// Get cell type
 	const CellType & cell_type = mesh.type();

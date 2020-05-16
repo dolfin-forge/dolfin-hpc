@@ -160,9 +160,9 @@ void MappedManifold::init()
   editor.close();
 
   //
-  message(1, "Computed reference manifold with %d cell and %d vertices.",
+  message(1, "MappedManifold: Computed reference manifold with %d cell and %d vertices.",
           mm_cell_count, mm_vertex_count);
-  message(1, "Generated sets of %8d G facets, %8d H facets, %8d I facet",
+  message(1, "MappedManifold: Generated sets of %8d G facets, %8d H facets, %8d I facet",
           facetsG_.size(), facetsH_.size(), facetsI_.size());
 }
 //-----------------------------------------------------------------------------

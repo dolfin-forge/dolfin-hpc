@@ -21,7 +21,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
                                    Mesh& mesh, UFC& ufc,
                                    DofMapSet const& dof_map_set)
 {
-  message(1, "SparsityPatternBuilder : build");
+  message(1, "SparsityPatternBuilder: build");
   tic();
 
   // Initialise sparsity pattern

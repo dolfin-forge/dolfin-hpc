@@ -51,7 +51,8 @@ DofMap::DofMap(DofMap const& dofmap, uint i) :
     hash_(make_hash(mesh(), *ufc_dofmap_)),
     periodic_dofmap_(NULL)
 {
-  message(1, "Extracted dof map for subspace: %s", ufc_dofmap_->signature());
+  message(1, "DofMap: Extracted dof map for subspace: %s",
+          ufc_dofmap_->signature());
 
   init();
 }
@@ -67,8 +68,9 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
 {
   // Check that dof map has not be re-ordered
   offset = offset_;
-  message(1, "Extracted dof map for sub system: %s", ufc_dofmap_->signature());
-  message(1, "Offset for sub system: %d", offset);
+  message(1, "DofMap: Extracted dof map for sub system: %s",
+          ufc_dofmap_->signature());
+  message(1, "DofMap: Offset for sub system: %d", offset);
 
   // Reset offset
   offset_ = 0;
@@ -123,9 +125,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
   // Recursively extract sub dof map
   ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
                                                       local_offset);
-  message(1, "Extracted ufc dof map for sub system: %s",
+  message(1, "DofMap: Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
-  message(1, "Local offset for sub system: %d", local_offset);
+  message(1, "DofMap: Local offset for sub system: %d", local_offset);
 
   return sub_dofmap;
 }
@@ -140,9 +142,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
   // Recursively extract sub dof map
   ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
                                                       local_offset);
-  message(1, "Extracted ufc dof map for sub system: %s",
+  message(1, "DofMap: Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
-  message(1, "Local offset for sub system: %d", local_offset);
+  message(1, "DofMap: Local offset for sub system: %d", local_offset);
 
   return sub_dofmap;
 }
@@ -204,9 +206,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
 void DofMap::init()
 {
   // Build the DOLFIN dofmap
-  message(1, "DofMap : init dofmap for signature:\n %s", this->signature());
+  message(1, "DofMap: init dofmap for signature:\n %s", this->signature());
   numbering_->build();
-  message(1, "DofMap : offset = %u; size = %u", numbering_->offset(),
+  message(1, "DofMap: offset = %u; size = %u", numbering_->offset(),
           numbering_->size());
 
   // Information for mixed elements

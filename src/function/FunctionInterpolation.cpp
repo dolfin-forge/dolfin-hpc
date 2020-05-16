@@ -39,7 +39,7 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
   {
-    error("Interpolation between functions with different value shape");
+    error("FunctionInterpolation: Interpolation between functions with different value shape");
   }
   else
   {
@@ -88,7 +88,7 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
 void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
                                           Function& F1)
 {
-  message(1, "Function interpolation on same mesh");
+  message(1, "FunctionInterpolation: interpolation on same mesh");
   dolfin_assert(F0.mesh() == F1.mesh());
 
   //
@@ -143,7 +143,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
 void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
                                           Function& F1)
 {
-  message(1, "Function interpolation on non-matching meshes");
+  message(1, "FunctionInterpolation: interpolation on non-matching meshes");
   dolfin_assert(F0.mesh() != F1.mesh());
 
   Mesh& M0 = F0.mesh();

@@ -101,8 +101,8 @@ void TimeSeries::eval(real t)
     real w0 = (t1_ - t) / (t1_ - t0_);
     real w1 = (t - t0_) / (t1_ - t0_);
 
-    message(1, "S0: t = %8f ; sample = %6d; w0 = %8f", t0_, idx0, w0);
-    message(1, "S1: t = %8f ; sample = %6d; w1 = %8f", t1_, idx1, w1);
+    message(1, "TimeSeries S0: t = %8f ; sample = %6d; w0 = %8f", t0_, idx0, w0);
+    message(1, "TimeSeries S1: t = %8f ; sample = %6d; w1 = %8f", t1_, idx1, w1);
     // Compute interpolated value for each entry
     for (uint i = 0; i < value_size_; ++i)
     {

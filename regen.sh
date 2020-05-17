@@ -32,3 +32,7 @@ automake -a
 echo "Deleting autom4te.cache directory"
 rm -r autom4te.cache
 
+echo "Running autoreconf for all utilities"
+autoreconf -i ./misc/utils/convert/
+
+echo "Done"

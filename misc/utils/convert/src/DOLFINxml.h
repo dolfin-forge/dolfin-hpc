@@ -38,7 +38,7 @@ private:
   uint32_t parsed_vertices;
   uint32_t parsed_cells;
 
-  template <class T> T read(const xmlChar * s) { printf("NEJ!\n"); return T();};
+  template <class T> T read(const xmlChar * s) {return T();};
 
   template <>
    const char * read(const xmlChar *s) {

@@ -1,4 +1,4 @@
-0.9.1-hpc [2020-03-24]
+0.9.1-hpc [2020-05-XX]
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
    those can be installed from bitbucket.org/adaptivesimulations
  - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable
@@ -11,6 +11,7 @@
  - Fixed tic/toc counters
  - Fixed regression in I/O interface (short filenames)
  - Various bugs and portability fixes
+ - Added new C++ based mesh converter (DOLFIN XML -> DOLFIN BINARY)
 0.9.0-hpc [2020-02-05]
  - Move to UFL
  - Support for Quad/Hex elements

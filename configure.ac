@@ -85,6 +85,10 @@ AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
 		     [Compile with support for Zoltan]),
 		     [with_zoltan=${withval}],[with_zoltan=no])
 
+AC_ARG_WITH(convert, AC_HELP_STRING([--with-convert],
+		     [Build external mesh converter tool]),
+		     [with_convert=${withval}],[with_convert=no])
+
 
 if test "x${enable_function_cache}" = xyes; then
    AC_DEFINE(ENABLE_FUNCTION_CACHE, [1],
@@ -403,6 +407,13 @@ if test -n "$DOXYGEN"; then
   AC_CHECK_PROGS([DOXYGEN_DEPS], [dot])
 fi
 AM_CONDITIONAL([ENABLE_DOXYGEN], [test -n "$DOXYGEN_DEPS"])
+
+AM_CONDITIONAL([ENABLE_MESH_CONVERTER], false)
+# Configure external mesh converting tool
+if test "x${with_convert}" != xno; then
+   AC_CONFIG_SUBDIRS(./misc/utils/convert/)
+   AM_CONDITIONAL([ENABLE_MESH_CONVERTER], true)
+fi
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\

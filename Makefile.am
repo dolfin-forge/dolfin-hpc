@@ -13,6 +13,10 @@ if ENABLE_DOXYGEN
 SUBDIRS += doc/progr_reference
 endif
 
+if ENABLE_MESH_CONVERTER
+SUBDIRS += misc/utils/convert
+endif
+
 dist_data_DATA = regen.sh
 
 EXTRA_DIST = data/meshes/aneurysm.bin\

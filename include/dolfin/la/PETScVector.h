@@ -16,9 +16,6 @@
 
 #include <petscvec.h>
 
-#include <set>
-#include <map>
-
 namespace dolfin
 {
 
@@ -73,7 +70,8 @@ public:
   void init(uint N, bool distributed);
 
   /// Initialize ghost entries
-  void init_ghosted(uint n, std::set<uint>& indices, std::map<uint, uint>& map);
+  void init_ghosted(uint n, _ordered_set<uint>& indices,
+                    _ordered_map<uint, uint>& map);
 
   /// Return size of vector
   uint size() const;
@@ -175,9 +173,9 @@ private:
   bool is_ghosted_;
 
 #if (sun || __sun)
-  typedef std::map<int, int> GhostMapping;
+  typedef _ordered_map<int, int> GhostMapping;
 #else
-  typedef std::map<const int, int> GhostMapping;
+  typedef _ordered_map<const int, int> GhostMapping;
 #endif
   GhostMapping mapping_;
 

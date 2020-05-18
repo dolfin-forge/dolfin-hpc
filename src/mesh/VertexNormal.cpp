@@ -13,9 +13,6 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 
-
-#include <map>
-
 namespace dolfin
 {
 

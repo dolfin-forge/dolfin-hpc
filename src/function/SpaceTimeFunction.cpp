@@ -94,11 +94,11 @@ void SpaceTimeFunction::eval()
   }
 
   real const t = this->clock();
-  std::map<real, std::string>::iterator it1;
+  _ordered_map<real, std::string>::iterator it1;
   it1 = samples_.upper_bound(t);
   if (it1 == samples_.end())   { --it1; }
   if (it1 == samples_.begin()) { ++it1; }
-  std::map<real, std::string>::iterator it0;
+  _ordered_map<real, std::string>::iterator it0;
   it0 = it1; --it0;
 
   // Do not reload twice
@@ -150,7 +150,7 @@ void SpaceTimeFunction::save(Function const& function)
 void SpaceTimeFunction::disp() const
 {
   section("SpaceTimeFunction");
-  for (std::map<real, std::string>::const_iterator it = samples_.begin();
+  for (_ordered_map<real, std::string>::const_iterator it = samples_.begin();
        it != samples_.end(); ++it)
   {
     message("%.16e : %s", it->first, it->second.c_str());

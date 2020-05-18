@@ -14,9 +14,6 @@
 
 #include <petscmat.h>
 
-#include <map>
-#include <set>
-
 namespace dolfin
 {
 
@@ -162,7 +159,7 @@ private:
   void init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow);
 
   ///
-  void getrows_offproc(std::set<uint> const& rows);
+  void getrows_offproc(_ordered_set<uint> const& rows);
 
   // Print info
   void print(MatInfo const& info) const;
@@ -179,7 +176,7 @@ private:
   PetscInt rstart_;
   PetscInt rend_;
 
-  std::map<int, int> mapping_;
+  _ordered_map<int, int> mapping_;
 
 };
 

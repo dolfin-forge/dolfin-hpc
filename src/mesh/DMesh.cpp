@@ -218,7 +218,7 @@ void DMesh::exp(Mesh& mesh)
     // Remove deleted vertices from global list
     if (vdeleted_)
     {
-      for (std::set<DVertex *>::iterator it(vertices.begin());
+      for (_ordered_set<DVertex *>::iterator it(vertices.begin());
            it != vertices.end(); ++it)
       {
         if ((*it)->deleted) { delete (*it); vertices.erase(it); }

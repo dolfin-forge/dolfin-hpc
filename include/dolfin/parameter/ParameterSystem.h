@@ -8,8 +8,6 @@
 
 #include <dolfin/log/log.h>
 
-#include <map>
-
 namespace dolfin
 {
 
@@ -17,7 +15,7 @@ namespace dolfin
 /// implemented as a set of (key, value) pairs. Supported value
 /// types are bool, int, unit, real, and string.
 
-class ParameterSystem : private std::map< std::string, Parameter * >
+class ParameterSystem : private _ordered_map< std::string, Parameter * >
 {
 public:
   /// Singleton instance of global parameter database

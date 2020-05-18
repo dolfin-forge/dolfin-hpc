@@ -20,9 +20,6 @@
 
 #include <janpack/vec.h>
 
-#include <set>
-#include <map>
-
 namespace dolfin
 {
 
@@ -65,8 +62,8 @@ namespace dolfin
     void init(uint N, bool distributed);
 
     ///
-    void init_ghosted(uint n, std::set<uint>& indices,
-		      std::map<uint, uint>& map);
+    void init_ghosted(uint n, _ordered_set<uint>& indices,
+		      _ordered_map<uint, uint>& map);
 
     /// Return size of vector
     uint size() const;
@@ -169,9 +166,9 @@ namespace dolfin
 
     //    Array<int> ghost_indices;
 #if (sun || __sun)
-    std::map<int, int> mapping;
+    _ordered_map<int, int> mapping;
 #else
-    std::map<const int, int> mapping;
+    _ordered_map<const int, int> mapping;
 #endif
 
 

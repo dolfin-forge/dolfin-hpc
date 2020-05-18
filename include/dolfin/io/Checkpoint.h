@@ -9,7 +9,6 @@
 #include <dolfin/mesh/CellType.h>
 
 #include <fstream>
-#include <map>
 #include <string>
 
 namespace dolfin
@@ -22,9 +21,9 @@ class Function;
 class Checkpoint
 {
 public:
-  typedef std::map< std::string, Mesh * >          MeshMap;
-  typedef std::map< std::string, Function * >      FunctionMap;
-  typedef std::map< std::string, GenericVector * > VectorMap;
+  typedef _ordered_map< std::string, Mesh * >          MeshMap;
+  typedef _ordered_map< std::string, Function * >      FunctionMap;
+  typedef _ordered_map< std::string, GenericVector * > VectorMap;
 
 #ifdef ENABLE_MPIIO
   typedef MPI_File   stream_t;

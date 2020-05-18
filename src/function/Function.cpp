@@ -23,7 +23,6 @@
 #include <dolfin/la/Vector.h>
 
 #include <algorithm>
-#include <set>
 
 namespace dolfin
 {
@@ -690,7 +689,7 @@ void Function::InitializeGhosts()
 {
   if(!mesh_->is_distributed()) return;
 
-  std::set<uint> indices;
+  _ordered_set<uint> indices;
 
   for (CellIterator cell(*mesh_); !cell.end(); ++cell)
   {
@@ -706,7 +705,7 @@ void Function::InitializeGhosts()
     }
 
   }
-  std::map<uint, uint> map = dofmap_->get_map();
+  _ordered_map<uint, uint> map = dofmap_->get_map();
   dolfin_assert(map.size() == 0);
 
   X_->init_ghosted(indices.size(), indices, map);
@@ -721,7 +720,7 @@ void Function::InitializeGhosts()
   data_cache_ = new real[indices.size()];
 
   uint i = 0;
-  std::set<uint>::iterator it;
+  _ordered_set<uint>::iterator it;
   for (it = indices.begin(); it != indices.end(); it++)
   {
     indices_[i] = *it;

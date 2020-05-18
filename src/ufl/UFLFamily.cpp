@@ -187,7 +187,7 @@ dolfin::uint Family::degree_max() const
 }
 
 //-----------------------------------------------------------------------------
-std::set<Domain::Type> Family::domains() const
+dolfin::_ordered_set<Domain::Type> Family::domains() const
 {
   return def_.domains;
 }

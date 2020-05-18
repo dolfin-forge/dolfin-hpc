@@ -6,12 +6,10 @@
 #ifndef __DOLFIN_SLIPBC_H
 #define __DOLFIN_SLIPBC_H
 
-#include "BoundaryCondition.h"
-#include "NodeNormal.h"
+#include <dolfin/fem/BoundaryCondition.h>
+#include <dolfin/fem/NodeNormal.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Vector.h>
-
-#include <set>
 
 namespace dolfin
 {
@@ -79,7 +77,7 @@ private:
   bool As_local;
 
   // Local data structures for assembly
-  std::set<uint> row_indices;
+  _ordered_set<uint> row_indices;
   Array<real> a[3]; // local lhs extracted from A
   Array<real> a_slip_row[3]; // local lhs row after slip enforcement
   Array<uint> a_col_indices[3]; // non-zero indices per row

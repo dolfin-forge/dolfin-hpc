@@ -163,7 +163,7 @@ private:
     return lookup<V, E>().end();
   }
 
-  typedef std::map<key, data_array *>  Store;
+  typedef _ordered_map<key, data_array *>  Store;
   typedef std::pair<key, data_array *> Item;
 
   Mesh& M_;

@@ -6,13 +6,14 @@
 #ifndef __DOLFIN_DOF_MAP_SET_H
 #define __DOLFIN_DOF_MAP_SET_H
 
-#include <map>
-#include <vector>
-#include <string>
-#include <ufc.h>
+#include <dolfin/fem/DofMap.h>
 
 #include <dolfin/common/types.h>
-#include "DofMap.h"
+
+#include <ufc.h>
+
+#include <string>
+#include <vector>
 
 namespace dolfin
 {

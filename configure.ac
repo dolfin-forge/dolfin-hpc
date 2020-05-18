@@ -81,6 +81,10 @@ AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis],
 		     [Compile with support for ParMETIS]),
 		     [with_parmetis=${withval}],[with_parmetis=no])
 
+AC_ARG_WITH(phmap, AC_HELP_STRING([--with-phmap],
+         [Compile with support for parallel hashmap (https://git.io/JfE2p)]),
+         [with_phmap=${withval}],[with_phmap=no])
+
 AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
 		     [Compile with support for Zoltan]),
 		     [with_zoltan=${withval}],[with_zoltan=no])
@@ -262,6 +266,13 @@ if test "x${with_gts}" = xyes; then
    LIBS="$LIBS $gts_LIBS"
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
+
+#if test "x${with_phmap}" != xno; then
+#   CPPFLAGS="$CPPFLAGS $PHMAP_CPPFLAGS"
+#   AC_DEFINE(HAVE_PARALLEL_HASH_MAP,[1],[Define if parallel hash map is present])
+#fi
+
+AX_PHMAP
 
 found_la_backend="no"
 
@@ -473,22 +484,23 @@ Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:
 
-  MPI: ${enable_mpi}
-  MPI I/O: ${enable_mpiio}
-  OpenMP: ${enable_openmp}
-  PETSc: ${with_petsc}
-  JANPACK: ${with_janpack}
-  GTS: ${with_gts}
-  ParMETIS: ${with_parmetis}
-  Zoltan: ${with_zoltan}
-  libsim: ${with_libsim}
-  Function cache: ${enable_function_cache}
-  Optimize P1: ${enable_optimize_p1}
-  Unordered containers: ${found_unordered_containers}
-  Compressed VTK: ${enable_zlib}
-  Quadrature: ${enable_quad}
+  MPI:                         ${enable_mpi}
+  MPI I/O:                     ${enable_mpiio}
+  OpenMP:                      ${enable_openmp}
+  PETSc:                       ${with_petsc}
+  JANPACK:                     ${with_janpack}
+  GTS:                         ${with_gts}
+  ParMETIS:                    ${with_parmetis}
+  Zoltan:                      ${with_zoltan}
+  libsim:                      ${with_libsim}
+  Function cache:              ${enable_function_cache}
+  Optimize P1:                 ${enable_optimize_p1}
+  Unordered containers:        ${found_unordered_containers}
+  Compressed VTK:              ${enable_zlib}
+  Quadrature:                  ${enable_quad}
+  Parallel Hash Map:           ${have_phmap_h}
   Basis function optimization: ${enable_opt_basis}
-  CHECK support: ${enable_check}
+  CHECK support:               ${enable_check}
 
 ---------------------------------------------------------
 "

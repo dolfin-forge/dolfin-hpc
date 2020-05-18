@@ -7,7 +7,6 @@
 #include <dolfin/common/types.h>
 #include <dolfin/ufl/UFLrepr.h>
 
-#include <map>
 #include <string>
 
 namespace ufl
@@ -30,7 +29,7 @@ namespace dolfin
 
 class FunctionSpaceMap
 {
-  typedef std::map<std::string, ufl::repr> Container;
+  typedef _ordered_map<std::string, ufl::repr> Container;
   typedef std::pair<std::string, ufl::repr> Item;
 
 public:

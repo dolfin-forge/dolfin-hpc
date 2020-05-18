@@ -6,8 +6,6 @@
 
 #include <dolfin/common/types.h>
 
-#include <map>
-
 namespace dolfin
 {
 

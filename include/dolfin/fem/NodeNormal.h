@@ -20,9 +20,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/parameter/parameters.h>
 
-#include <map>
-
-
 namespace dolfin
 {
 

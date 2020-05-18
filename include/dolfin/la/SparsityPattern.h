@@ -9,9 +9,6 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 
-#include <map>
-#include <set>
-
 namespace dolfin
 {
 
@@ -109,16 +106,16 @@ private:
 
   /// Diagonal portion: submatrix such that row and column
   /// indices are in-range
-  std::set<uint> * d_entries_;
+  _ordered_set<uint> * d_entries_;
   uint d_count_;
 
   /// Off-diagonal portion: entries such that only column indices are off-range
-  std::set<uint> * o_entries_;
+  _ordered_set<uint> * o_entries_;
   uint o_count_;
 
   /// Additionally provide data structure to store remote entries i,e such that
   /// row indices are not in-range
-  std::map<uint, std::set<uint> > r_entries_;
+  _ordered_map<uint, _ordered_set<uint> > r_entries_;
 
 };
 

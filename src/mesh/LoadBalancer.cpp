@@ -16,7 +16,7 @@
 
 using namespace dolfin;
 
-std::map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
+_ordered_map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
 
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
@@ -880,7 +880,7 @@ void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&,
 //-----------------------------------------------------------------------------
 MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
 {
-  std::map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
   if (it == s_.end())
   {
     MeshValues<uint, Cell> * v = new MeshValues<uint, Cell>(mesh, PE::rank());
@@ -892,7 +892,7 @@ MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool LoadBalancer::clear(Mesh& mesh)
 {
-  std::map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
   if (it != s_.end())
   {
     delete it->second;

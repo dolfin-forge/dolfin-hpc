@@ -344,7 +344,7 @@ void PETScMatrix::getrow(uint row, Array<uint>& columns,
             row, rstart_, rend_);
     }
 
-    std::map<int, int>::const_iterator it = mapping_.find(row);
+    _ordered_map<int, int>::const_iterator it = mapping_.find(row);
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
     columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)),
                    reinterpret_cast<uint*>(const_cast<int*>(cols + ncols)));
@@ -353,7 +353,7 @@ void PETScMatrix::getrow(uint row, Array<uint>& columns,
   }
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
+void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
 {
   if (!is_distributed_)
   {
@@ -366,7 +366,7 @@ void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
   mapping_.clear();
 
   uint i = 0;
-  for (std::set<uint>::const_iterator it = rows.begin(); it != rows.end(); ++it)
+  for (_ordered_set<uint>::const_iterator it = rows.begin(); it != rows.end(); ++it)
   {
     if (*it < static_cast<uint>(rstart_) && *it >= static_cast<uint>(rend_))
     {

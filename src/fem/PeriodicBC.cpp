@@ -20,7 +20,6 @@
 #include <dolfin/fem/UFCCell.h>
 
 #include <vector>
-#include <map>
 
 namespace dolfin
 {
@@ -78,8 +77,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   uint const tdim = mesh().geometry_dimension();
 
   // Table of mappings from coordinates to dofs
-  std::map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
-  typedef std::map<std::vector<real>, std::pair<int, int>, lt_coordinate>::iterator iterator;
+  _ordered_map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
+  typedef _ordered_map<std::vector<real>, std::pair<int, int>, lt_coordinate>::iterator iterator;
   std::vector<real> xx(gdim);
 
   // Array used for mapping coordinates

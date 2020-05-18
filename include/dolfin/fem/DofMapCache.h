@@ -10,7 +10,6 @@
 
 #include <ufc.h>
 
-#include <map>
 #include <string>
 
 namespace dolfin
@@ -38,14 +37,14 @@ class DofMapCache
   };
 
 #if __SUNPRO_CC
-  typedef std::map<std::string, token_t > container_t;
+  typedef _ordered_map<std::string, token_t > container_t;
   typedef std::pair<std::string, token_t> item_t;
-  typedef std::map<DofMap *, std::string > rlist_t;
+  typedef _ordered_map<DofMap *, std::string > rlist_t;
   typedef std::pair<DofMap *, std::string> ritem_t;
 #else
-  typedef std::map<std::string const, token_t> container_t;
+  typedef _ordered_map<std::string const, token_t> container_t;
   typedef std::pair<std::string const, token_t> item_t;
-  typedef std::map<DofMap *, std::string const> rlist_t;
+  typedef _ordered_map<DofMap *, std::string const> rlist_t;
   typedef std::pair<DofMap *, std::string const> ritem_t;
 #endif
 

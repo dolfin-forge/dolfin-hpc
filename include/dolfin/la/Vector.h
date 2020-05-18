@@ -91,7 +91,8 @@ public:
     vector_->init(N, distributed);
   }
 
-  void init_ghosted(uint n, std::set<uint>& indices, std::map<uint, uint>& map)
+  void init_ghosted(uint n, _ordered_set<uint>& indices,
+                    _ordered_map<uint, uint>& map)
   {
     vector_->init_ghosted(n, indices, map);
   }

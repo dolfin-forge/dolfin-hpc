@@ -76,7 +76,7 @@ public:
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  virtual std::map<dolfin::uint, dolfin::uint> const& symmetry() const = 0;
+  virtual dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry() const = 0;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index

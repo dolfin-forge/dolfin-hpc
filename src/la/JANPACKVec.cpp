@@ -13,8 +13,6 @@
 #include <dolfin/common/Array.h>
 
 #include <cstring>
-#include <set>
-#include <map>
 
 using namespace dolfin;
 
@@ -214,8 +212,8 @@ JANPACKVec& JANPACKVec::operator*= (const GenericVector& x)
 
   const JANPACKVec& v = x.down_cast<JANPACKVec>();
   dolfin_assert(v.x_);
-  
-  jp_vec_pwmul(const_cast<jp_vec_type *>(x_), 
+
+  jp_vec_pwmul(const_cast<jp_vec_type *>(x_),
 	       const_cast<jp_vec_type *>(x_), const_cast<jp_vec_type *>(v.x_));
 
   return *this;
@@ -260,7 +258,7 @@ real JANPACKVec::inner(const GenericVector& y) const
   dolfin_assert(v.x_);
 
   real a;
-  a = jp_vec_dot(const_cast<jp_vec_type *>(x_), 
+  a = jp_vec_dot(const_cast<jp_vec_type *>(x_),
 		 const_cast<jp_vec_type *>(v.x_));
 
   return a;
@@ -295,23 +293,23 @@ void JANPACKVec::pointwise(const GenericVector& x, VectorPointwiseOp op) const
 {
   const JANPACKVec& v = x.down_cast<JANPACKVec>();
   dolfin_assert(v.x_);
-  
+
   switch(op)
   {
   case pw_min:
-    jp_vec_pwmin(const_cast<jp_vec_type *>(x_), 
+    jp_vec_pwmin(const_cast<jp_vec_type *>(x_),
 		 const_cast<jp_vec_type *>(x_), const_cast<jp_vec_type *>(v.x_));
     break;
   case pw_max:
-    jp_vec_pwmax(const_cast<jp_vec_type *>(x_), 
+    jp_vec_pwmax(const_cast<jp_vec_type *>(x_),
 		 const_cast<jp_vec_type *>(x_), const_cast<jp_vec_type *>(v.x_));
     break;
   case pw_mult:
-    jp_vec_pwmul(const_cast<jp_vec_type *>(x_), 
+    jp_vec_pwmul(const_cast<jp_vec_type *>(x_),
 		 const_cast<jp_vec_type *>(x_), const_cast<jp_vec_type *>(v.x_));
     break;
   case pw_div:
-    jp_vec_pwdiv(const_cast<jp_vec_type *>(x_), 
+    jp_vec_pwdiv(const_cast<jp_vec_type *>(x_),
 		 const_cast<jp_vec_type *>(x_), const_cast<jp_vec_type *>(v.x_));
     break;
   default:
@@ -330,8 +328,8 @@ jp_vec_type *JANPACKVec::vec() const
   return const_cast<jp_vec_type *>(x_);
 }
 //-----------------------------------------------------------------------------
-void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
-			       std::map<uint, uint>& map)
+void JANPACKVec::init_ghosted(uint n, _ordered_set<uint>& indices,
+			       _ordered_map<uint, uint>& map)
 {
 
   if ( is_ghosted )
@@ -341,7 +339,7 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
   jp_vec_range(x_, range);
 
   Array<uint32_t> ghost_indices;
-  std::set<uint32_t>::iterator sit;
+  _ordered_set<uint32_t>::iterator sit;
   for(sit = indices.begin(); sit != indices.end(); ++sit) {
     if( *sit < (uint32_t) range[0] || *sit >= (uint32_t) range[1] ) {
       ghost_indices.push_back((uint32_t) *sit);

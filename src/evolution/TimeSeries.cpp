@@ -60,8 +60,8 @@ void TimeSeries::eval(real t)
   if (!data_values_.empty())
   {
     // Find element in U_files so that element < t
-    std::map<real, uint>::iterator it1;
-    std::map<real, uint>::iterator it0;
+    _ordered_map<real, uint>::iterator it1;
+    _ordered_map<real, uint>::iterator it0;
 
     // Select it1 such that the time t1 is just after t
     it1 = discrete_times_.upper_bound(t);

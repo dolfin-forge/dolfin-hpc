@@ -39,7 +39,7 @@ CoefficientBase::CoefficientBase(std::string const& name, Cell const& cell,
 //-----------------------------------------------------------------------------
 CoefficientBase::CoefficientBase(
     std::string const& name, Cell const& cell, ValueArray const&,
-    std::map<dolfin::uint, dolfin::uint> const&, dolfin::uint const& c) :
+    dolfin::_ordered_map<dolfin::uint, dolfin::uint> const&, dolfin::uint const& c) :
     Expression(name),
     finite_element_(
         new TensorElement(Family::R, cell, 0, cell.geometric_dimension())),
@@ -367,7 +367,7 @@ void VectorConstant::display() const
 //-----------------------------------------------------------------------------
 TensorConstant::TensorConstant(
     Cell const& cell, ValueArray const& shape,
-    std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& c) :
+    dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& c) :
     CoefficientBase("TensorConstant", cell, shape, symmetry, c),
     repr_(*this, finite_element_->cell(), /*finite_element_.value_shape(),
      finite_element_.symmetry(),*/

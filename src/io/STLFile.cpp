@@ -1,13 +1,13 @@
 // Copyright (C) 2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/io/STLFile.h>
+
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/byteswap.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 #include <fstream>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/io/STLFile.h>
-#include <dolfin/common/byteswap.h>
-#include <set>
 
 namespace dolfin
 {
@@ -49,7 +49,7 @@ void STLFile::operator>>(Mesh& mesh)
   uint ntri = 0;
   uint index[3];
   struct stl_vertex V;
-  std::set<stl_vertex> vertices;
+  _ordered_set<stl_vertex> vertices;
 
   std::ifstream fp(filename.c_str(), std::ifstream::binary);
   fp.read((char *) &hdr, 80 * sizeof(char));
@@ -103,7 +103,7 @@ void STLFile::operator>>(Mesh& mesh)
   }
 
   editor.init_vertices(vertices.size());
-  for (std::set<stl_vertex>::iterator it = vertices.begin();
+  for (_ordered_set<stl_vertex>::iterator it = vertices.begin();
        it != vertices.end(); ++it)
   {
     editor.add_vertex(it->index, &it->v[0]);

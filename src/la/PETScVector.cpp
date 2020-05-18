@@ -12,9 +12,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
 
-#include <set>
-#include <map>
-
 namespace dolfin
 {
 
@@ -426,7 +423,7 @@ void PETScVector::pointwise(const GenericVector& x, VectorPointwiseOp op) const
   default:
     error("Unknown operator");
   }
-    
+
 }
 //-----------------------------------------------------------------------------
 void PETScVector::disp(uint) const
@@ -448,8 +445,8 @@ Vec PETScVector::vec() const
   return x_;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::init_ghosted(uint, std::set<uint>& indices,
-                               std::map<uint, uint>& map)
+void PETScVector::init_ghosted(uint, _ordered_set<uint>& indices,
+                               _ordered_map<uint, uint>& map)
 {
   if (!is_distributed_)
   {
@@ -496,7 +493,7 @@ void PETScVector::init_ghosted(uint, std::set<uint>& indices,
 
   Array<int> ghost_indices;
   int num_ghost = local_size;
-  std::set<uint>::iterator sit;
+  _ordered_set<uint>::iterator sit;
   for (sit = indices.begin(); sit != indices.end(); ++sit)
   {
     if (*sit < (uint) low || *sit >= (uint) high)

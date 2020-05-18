@@ -26,7 +26,6 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
 
-#include <map>
 #include <memory>
 
 namespace dolfin

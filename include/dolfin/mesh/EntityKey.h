@@ -272,7 +272,7 @@ struct hash<dolfin::EntityKey>
 
 } /* namespace std */
 
-#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
+#elif HAVE_PARALLEL_HASH_MAP || (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
 
 namespace std
 {

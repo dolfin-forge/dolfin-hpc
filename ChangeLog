@@ -3,6 +3,7 @@
    those can be installed from bitbucket.org/adaptivesimulations
  - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable
  - added '--enable-opt-basis' for optimized ffc evaluate_basis functions
+ - added '--with-phmap=DIR' for fast map/set implementation (https://git.io/JfE2p)
  - removed XML support
  - removed PETSc signal handling by default
  - added support for vtk files and paraview >= 5.8.0

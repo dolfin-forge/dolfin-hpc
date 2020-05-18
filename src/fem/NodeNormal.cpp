@@ -134,10 +134,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;
-  facets_data.reserve( boundary.num_vertices() );
   // Maps dofs to facet global indices
   _map<uint, NodeData *> nodes_data;
-  nodes_data.reserve( boundary.num_cells() );
 
   //[facet, nb_nodes, [node indices]]
   Array< Array<uint> > u_sendbuf( pe_size );
@@ -269,7 +267,6 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     if (!ghost_nodes.empty())
     {
       _set<uint> adjs;
-      adjs.reserve( pe_size );
       for (VertexIterator v(facet); !v.end(); ++v)
       {
         if(v->is_shared())
@@ -402,7 +399,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   Function nn;
   Array< real > nnblock;
 
-  if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+  if ( dolfin_get< bool >( "NodeNormal dump types" ) == true )
   {
     nn = basis[0];
     nn = 100;
@@ -455,7 +452,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // Copy dof indices to array for vector block set.
     std::copy(n_data->dofs.begin(),n_data->dofs.end(), dofs.data() + node_dofs );
 
-    if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+    if ( dolfin_get< bool >( "NodeNormal dump types" ) == true )
     {
       nnblock[offset+0] = node_type;
       nnblock[offset+1] = node_id;
@@ -469,7 +466,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     }
   }
 
-  if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+  if ( dolfin_get< bool >( "NodeNormal dump types" ) == true )
   {
     GenericVector& v = nn.vector();
     v.set( nnblock.data(), num_boundary_dofs, dofs.data() );

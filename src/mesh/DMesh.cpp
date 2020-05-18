@@ -194,7 +194,6 @@ DMesh::~DMesh()
 void DMesh::exp(Mesh& mesh)
 {
   _map<long, uint> new_global;
-  new_global.reserve( mesh.num_vertices() );
   {
     // Remove deleted cells from global list
     if (cdeleted_)

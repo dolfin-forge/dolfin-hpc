@@ -125,7 +125,6 @@ void VertexNormal::computeNormal(Mesh& mesh)
   BoundaryMesh& boundary = mesh.exterior_boundary();
 
   VertexDataMap vdmap;
-  vdmap.reserve( boundary.num_vertices() );
 #ifdef HAVE_MPI
   int rank = dolfin::MPI::rank();
 #endif

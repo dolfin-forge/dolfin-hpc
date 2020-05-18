@@ -87,6 +87,7 @@ ParameterSystem::ParameterSystem()
   //--- Node Normals ---
   set( "NodeNormal alpha", DOLFIN_PI / 2. );
   set( "NodeNormal restricted", false );
+  set( "NodeNormal dump types", false );
 }
 
 //-----------------------------------------------------------------------------

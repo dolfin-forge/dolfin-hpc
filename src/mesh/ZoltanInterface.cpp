@@ -249,7 +249,6 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   }
   uint *recv_buff = new uint[max_recv];
   uint *send_buff = new uint[max_recv];
-  facet_cell_map.reserve( max_recv );
 
   for (int j = 1; j < (int) pe_size; ++j)
   {

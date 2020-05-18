@@ -196,7 +196,6 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
   DofMap const& dof_map = space.dofmap();
   uint * cell_dofs = new uint[dof_map.local_dimension()];
   ScratchSpace scratch(space, sub_system);
-  boundary_values.reserve( entities_->size() );
   for (Array<uint>::const_iterator it = entities_->begin();
        it != entities_->end();)
   {

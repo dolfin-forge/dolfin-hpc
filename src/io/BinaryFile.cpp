@@ -749,7 +749,6 @@ void BinaryFile::operator>>(Mesh& mesh)
 
       // Exchange data
       _map<uint, uint> new_owner;
-      new_owner.reserve( buff_size );
       for (uint i = 1; i < pe_size; ++i)
       {
         int src = (pe_rank - i + pe_size) % pe_size;

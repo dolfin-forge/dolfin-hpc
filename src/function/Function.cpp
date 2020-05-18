@@ -715,7 +715,6 @@ void Function::InitializeGhosts()
   delete[] data_cache_;
   delete cache_mapping_;
   cache_mapping_ = new _map<uint, uint>;
-  cache_mapping_.reserve( indices.size() );
 
   indices_ = new uint[indices.size()];
   data_cache_ = new real[indices.size()];

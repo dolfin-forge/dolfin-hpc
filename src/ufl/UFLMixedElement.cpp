@@ -89,7 +89,7 @@ bool MixedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& MixedElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& MixedElement::symmetry() const
 {
   return symmetry_;
 }

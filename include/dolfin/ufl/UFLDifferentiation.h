@@ -11,8 +11,6 @@
 #include <dolfin/ufl/UFLTuple.h>
 #include <dolfin/ufl/UFLVariable.h>
 
-#include <map>
-
 namespace ufl
 {
 

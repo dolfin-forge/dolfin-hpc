@@ -6,8 +6,6 @@
 
 #include <dolfin/common/types.h>
 
-#include <map>
-
 namespace dolfin
 {
 
@@ -70,7 +68,7 @@ private:
   uint max_local_dimension_;
 
   /// Map of G dofs to the offset and count in the arrays
-  typedef std::map<uint, uint> OffsetMap;
+  typedef _ordered_map<uint, uint> OffsetMap;
   OffsetMap Goffsets_;
   uint * Gindices_;
   real * Gxcoords_;

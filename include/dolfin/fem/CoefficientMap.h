@@ -6,13 +6,12 @@
 
 #include <dolfin/fem/Coefficient.h>
 
-#include <map>
 #include <string>
 
 namespace dolfin
 {
 
-class CoefficientMap : public std::map<std::string, Coefficient *>
+class CoefficientMap : public _ordered_map<std::string, Coefficient *>
 {
 public:
   /// Check if coefficient label is in the map

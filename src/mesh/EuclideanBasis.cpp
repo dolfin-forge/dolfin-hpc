@@ -3,8 +3,6 @@
 
 #include <dolfin/math/basic.h>
 
-#include <set>
-
 namespace dolfin
 {
 
@@ -22,9 +20,9 @@ uint EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
   //--- Determine vertex type by discriminating surfaces ----------------
   Array<Point> nS;
   Array<real> wS;
-  std::set<uint> Rnormals;
+  _ordered_set<uint> Rnormals;
   uint const num_facets = W.size();
-  std::set<uint>::iterator it = Rnormals.begin();
+  _ordered_set<uint>::iterator it = Rnormals.begin();
   real wSa = 0.0;
   for (uint i = 0; i < num_facets; ++i)
   {
@@ -45,7 +43,7 @@ uint EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
       nSx[d] = wSx * N[gdim * rfacet + d];
     }
 
-    std::set<uint> Unormals;
+    _ordered_set<uint> Unormals;
     Unormals.insert(Unormals.begin(), rfacet);
     // Loop through remaining normals indexes
     for (++it; it != Rnormals.end(); ++it)

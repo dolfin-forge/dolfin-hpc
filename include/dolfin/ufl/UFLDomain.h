@@ -8,8 +8,6 @@
 
 #include <dolfin/common/types.h>
 
-#include <map>
-#include <set>
 #include <string>
 
 namespace ufl
@@ -43,7 +41,7 @@ public:
   };
 
   ///
-  typedef std::set<Domain::Type> Set;
+  typedef dolfin::_ordered_set<Domain::Type> Set;
 
   ///
   Domain(Type const& t);
@@ -106,7 +104,7 @@ private:
 
   ///
   static std::string type_repr(Domain::Type const& t);
-  typedef std::map<Type, Definition> DefinitionList;
+  typedef dolfin::_ordered_map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
   static DefinitionList const Definitions()
   {
@@ -117,7 +115,7 @@ private:
 
   ///
   static Domain::Type repr_type(repr_t const& repr);
-  typedef std::map<repr_t, Domain::Type> MappingList;
+  typedef dolfin::_ordered_map<repr_t, Domain::Type> MappingList;
   typedef std::pair<repr_t, Domain::Type> MappingItem;
   static MappingList const Mapping()
   {

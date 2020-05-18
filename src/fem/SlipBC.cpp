@@ -18,7 +18,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <map>
 
 #if (__sgi)
 #define fmax(a,b) (a > b ? a : b) ;
@@ -78,6 +77,7 @@ void SlipBC::apply( GenericMatrix & A,
                     GenericVector & b,
                     BilinearForm const & form )
 {
+  message( "Applying SlipBC boundary conditions to linear system." );
 
   FiniteElementSpace const & fullspace = form.test_space();
 
@@ -113,7 +113,7 @@ void SlipBC::apply( GenericMatrix & A,
 
     // Initialize ghosts for rhs vector using the full space dofmap
     {
-      std::set< uint > rows;
+      _ordered_set< uint > rows;
       DofMap const &   fulldofmap = fullspace.dofmap();
       Array< uint >    celldofs( fulldofmap.local_dimension() );
 
@@ -124,7 +124,7 @@ void SlipBC::apply( GenericMatrix & A,
         rows.insert( celldofs.begin(), celldofs.end() );
       }
 
-      std::map< uint, uint > mapping;
+      _ordered_map< uint, uint > mapping;
       b.init_ghosted( rows.size(), rows, mapping );
     }
 
@@ -331,7 +331,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
           continue;
         }
 
-        // Skip the node i fthe subdomain is defined geometrically
+        // Skip the node if the subdomain is defined geometrically
         if (!sub_domain().inside(scratch.coordinates[ni_celldof0], true))
         {
           continue;
@@ -385,8 +385,8 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
   dolfin_assert(n_type > 0);
 
   // Initialize set of row indices for reordering
-  std::set<uint> row_idx = row_indices;
-  std::set<uint>::iterator it = row_idx.begin();
+  _ordered_set<uint> row_idx = row_indices;
+  _ordered_set<uint>::iterator it = row_idx.begin();
 
   //--- Fill data structures for each space coordinate ---
   Array<Function>& basis_functions = node_normal->basis();

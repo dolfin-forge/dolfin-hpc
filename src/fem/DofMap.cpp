@@ -380,7 +380,7 @@ PeriodicDofsMapping const& DofMap::periodic_mapping() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> DofMap::get_map() const
+_ordered_map<uint, uint> DofMap::get_map() const
 {
   return map_;
 }
@@ -439,8 +439,8 @@ bool DofMap::check(bool throw_error)
   }
 
   //
-  std::set<uint> shared_owned;
-  typedef std::map<uint, std::pair<uint, uint> > EntitiesDofMap;
+  _ordered_set<uint> shared_owned;
+  typedef _ordered_map<uint, std::pair<uint, uint> > EntitiesDofMap;
   EntitiesDofMap shared_owned_entities;
   Cell c0(mesh, 0);
   UFCCell ufc_cell(c0);
@@ -467,8 +467,8 @@ bool DofMap::check(bool throw_error)
     // Check that all shared facet dofs are shared
     uint const local_facet = cell.index(f);
     ufc_dofmap_->tabulate_facet_dofs(loc_entity_dofs, local_facet);
-    std::set<uint> shared_facet_dofs;
-    std::set<uint> local_facet_dofs;
+    _ordered_set<uint> shared_facet_dofs;
+    _ordered_set<uint> local_facet_dofs;
     for (uint dof = 0; dof < num_facet_dofs; ++dof)
     {
       uint gdof = cell_dofs[loc_entity_dofs[dof]];
@@ -574,7 +574,7 @@ bool DofMap::check(bool throw_error)
   else
   {
 #ifdef __SUNPRO_CC
-    for (std::set<uint>::iterator it = shared_owned.begin();
+    for (_ordered_set<uint>::iterator it = shared_owned.begin();
         it != shared_owned.end(); ++it)
     {
       sendbuf.push_back(*it);

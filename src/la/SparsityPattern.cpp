@@ -143,10 +143,10 @@ void SparsityPattern::init(uint rank, uint const * dim,
   // This data structure contains set of non-zero column for each row
   // in the process range: since this range has a given size and every
   // row has at least a non-zero entry
-  d_entries_ = new std::set<uint>[this->size(0)];
+  d_entries_ = new _ordered_set<uint>[this->size(0)];
   if (distributed_)
   {
-    o_entries_ = new std::set<uint>[this->size(0)];
+    o_entries_ = new _ordered_set<uint>[this->size(0)];
   }
 
   //
@@ -265,10 +265,10 @@ void SparsityPattern::numNonZeroPerRow(uint p_rank, uint d_nzrow[],
     uint const c1 = range_[1][p_rank + 1];
     std::fill_n(d_nzrow, r1 - r0, 0);
     std::fill_n(o_nzrow, r1 - r0, 0);
-    for (std::map<uint, std::set<uint> >::const_iterator it = r_entries_.find(
-         r0); it->first < r1; ++it)
+    for (_ordered_map<uint, _ordered_set<uint> >::const_iterator it =
+         r_entries_.find( r0); it->first < r1; ++it)
     {
-      for (std::set<uint>::const_iterator c = it->second.begin();
+      for (_ordered_set<uint>::const_iterator c = it->second.begin();
           c != it->second.end(); ++c)
       {
         if ((c0 <= *c) && (*c < c1))
@@ -352,7 +352,7 @@ void SparsityPattern::apply()
   Array<uint> * sendbuf = new Array<uint>[pe_size];
   uint owner = 0;
   uint sendmax = 0;
-  for (std::map<uint, std::set<uint> >::const_iterator it = r_entries_.begin();
+  for (_ordered_map<uint, _ordered_set<uint> >::const_iterator it = r_entries_.begin();
        it != r_entries_.end(); ++it)
   {
     // Increment owner when jumping to another range
@@ -367,7 +367,7 @@ void SparsityPattern::apply()
     // Data packet [ global index, number of entries, [ indices ] ]
     sendbuf[owner].push_back(it->first);
     sendbuf[owner].push_back(it->second.size());
-    for (std::set<uint>::const_iterator c = it->second.begin();
+    for (_ordered_set<uint>::const_iterator c = it->second.begin();
          c != it->second.end(); ++c)
     {
       sendbuf[owner].push_back(*c);

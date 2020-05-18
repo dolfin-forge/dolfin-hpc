@@ -56,7 +56,7 @@ public:
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  std::map<dolfin::uint, dolfin::uint> const& symmetry() const;
+  dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry() const;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
@@ -94,7 +94,7 @@ private:
   Cell const cell_;
   type<dolfin::uint> const degree_;
   ValueArray const value_shape_;
-  std::map<dolfin::uint, dolfin::uint> const symmetry_;
+  dolfin::_ordered_map<dolfin::uint, dolfin::uint> const symmetry_;
 
   mutable repr_t repr_;
   mutable std::string str_;

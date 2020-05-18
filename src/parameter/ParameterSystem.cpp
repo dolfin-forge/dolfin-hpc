@@ -249,7 +249,7 @@ void ParameterSystem::delete_parameter( std::string const & key )
 {
   if ( defined( key ) )
   {
-    std::map< std::string, Parameter * >::iterator p = this->find( key );
+    _ordered_map< std::string, Parameter * >::iterator p = this->find( key );
     delete p->second;
     this->erase( p );
   }

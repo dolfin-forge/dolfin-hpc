@@ -55,8 +55,8 @@ private:
 
   ///
   static MeasureData::Type repr_type(repr_t const& repr);
-  typedef std::map<repr_t, MeasureData::Type> MappingReprToType;
-  typedef std::map<MeasureData::Type, repr_t> MappingTypeToRepr;
+  typedef dolfin::_ordered_map<repr_t, MeasureData::Type> MappingReprToType;
+  typedef dolfin::_ordered_map<MeasureData::Type, repr_t> MappingTypeToRepr;
   typedef std::pair<repr_t, MeasureData::Type> MappingReprToTypeItem;
   typedef std::pair<MeasureData::Type, repr_t> MappingTypeToReprItem;
 
@@ -124,8 +124,8 @@ public:
 private:
   ///
   static MeasureDomain::Type repr_type(repr_t const& repr);
-  typedef std::map<repr_t, MeasureDomain::Type> MappingReprToType;
-  typedef std::map<MeasureDomain::Type, repr_t> MappingTypeToRepr;
+  typedef dolfin::_ordered_map<repr_t, MeasureDomain::Type> MappingReprToType;
+  typedef dolfin::_ordered_map<MeasureDomain::Type, repr_t> MappingTypeToRepr;
   typedef std::pair<repr_t, MeasureDomain::Type> MappingReprToTypeItem;
   typedef std::pair<MeasureDomain::Type, repr_t> MappingTypeToReprItem;
 

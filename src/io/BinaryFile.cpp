@@ -591,7 +591,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     // the first vertex.
     Array<atomic_cell> cells;
     Array<uint> * non_local_cells = new Array<uint>[pe_size];
-    std::set<uint> owned_vertices;
+    _ordered_set<uint> owned_vertices;
     atomic_cell cell(num_cellvertices);
     for (uint * c = cell_buffer; c !=(cell_buffer + cell_data);
          c += num_cellvertices)
@@ -679,14 +679,14 @@ void BinaryFile::operator>>(Mesh& mesh)
     // ordered such that their first vertex belongs to a rank different than the
     // current process. This is especially a problem with refined meshes which
     // are badly numbered.
-    std::set<uint> orphaned_vertices;
+    _ordered_set<uint> orphaned_vertices;
     {
       uint v0 = vdist.offset;
       uint const v1 = v0 + vdist.size;
       dolfin_assert(vdist.size >= owned_vertices.size());
       if (owned_vertices.size() < vdist.size)
       {
-        for (std::set<uint>::const_iterator it = owned_vertices.begin();
+        for (_ordered_set<uint>::const_iterator it = owned_vertices.begin();
              it != owned_vertices.end(); ++it, ++v0)
         {
           for (; v0 < (*it); ++v0) { orphaned_vertices.insert(v0); }
@@ -711,7 +711,7 @@ void BinaryFile::operator>>(Mesh& mesh)
      */
 
     uint local_vertex_index = 0;
-    for (std::set<uint>::iterator it = owned_vertices.begin();
+    for (_ordered_set<uint>::iterator it = owned_vertices.begin();
         it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
       mesh.distdata()[0].set_map(local_vertex_index, *it);
@@ -749,6 +749,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
       // Exchange data
       _map<uint, uint> new_owner;
+      new_owner.reserve( buff_size );
       for (uint i = 1; i < pe_size; ++i)
       {
         int src = (pe_rank - i + pe_size) % pe_size;

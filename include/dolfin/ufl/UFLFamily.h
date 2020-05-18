@@ -11,8 +11,6 @@
 #include <dolfin/log/log.h>
 
 #include <iomanip>
-#include <map>
-#include <set>
 #include <sstream>
 
 namespace ufl
@@ -155,7 +153,7 @@ private:
 
   ///
   static std::string type_repr(Family::Type const& t);
-  typedef std::map<Type, Definition> DefinitionList;
+  typedef dolfin::_ordered_map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
   static dolfin::uint const None = dolfin::DOLFIN_UINT_UNDEF;
   static DefinitionList const Definitions()
@@ -172,7 +170,7 @@ private:
 
   ///
   static Family::Type repr_type(repr_t const& repr);
-  typedef std::map<repr_t, Family::Type> MappingList;
+  typedef dolfin::_ordered_map<repr_t, Family::Type> MappingList;
   typedef std::pair<repr_t, Family::Type> MappingItem;
   static MappingList const& Mapping()
   {

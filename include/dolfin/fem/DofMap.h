@@ -11,8 +11,6 @@
 
 #include <ufc.h>
 
-#include <map>
-
 namespace dolfin
 {
 
@@ -218,7 +216,7 @@ public:
   //--- Debugging
 
   /// Return renumbering (used for testing)
-  std::map<uint, uint> get_map() const;
+  _ordered_map<uint, uint> get_map() const;
 
   /// Display mapping
   void disp() const;
@@ -275,7 +273,7 @@ private:
   mutable PeriodicDofsMapping * periodic_dofmap_;
 
   // Provide easy access to map for testing
-  std::map<uint, uint> map_;
+  _ordered_map<uint, uint> map_;
 
 };
 

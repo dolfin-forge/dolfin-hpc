@@ -136,7 +136,7 @@ public:
 
 private:
 
-  static std::map<Mesh *, MeshValues<uint, Cell> *> s_;
+  static _ordered_map<Mesh *, MeshValues<uint, Cell> *> s_;
 
 };
 

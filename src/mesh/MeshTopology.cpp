@@ -420,7 +420,7 @@ Connectivity const *
     Array< Array< uint > > conn( o0v );
     for ( uint e0 = 0; e0 < o0v; ++e0 )
     {
-      std::set< uint > entities;
+      _ordered_set< uint > entities;
       Array< uint > const & c0 = ( *c0v )[e0];
       uint const            d0 = c0v->degree( e0 );
       for ( uint i = 0; i < d0; ++i )
@@ -447,7 +447,7 @@ Connectivity const *
     Array< Array< uint > > conn( o0v );
     for ( uint e0 = 0; e0 < o0v; ++e0 )
     {
-      std::set< uint > entities;
+      _ordered_set< uint > entities;
       Array< uint > const & c0 = ( *c0v )[e0];
       uint const            d0 = c0v->degree( e0 );
       for ( uint i = 0; i < d0; ++i )

@@ -9,10 +9,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/EdgeKey.h>
 
-#include <vector>
 #include <list>
-#include <set>
-#include <map>
+#include <vector>
 
 namespace dolfin
 {
@@ -111,7 +109,7 @@ private:
                            Array<Propagation>& propagation, bool& empty);
 
   /// Vertices contained in the mesh
-  typedef std::set<DVertex *> VertexSet;
+  typedef _ordered_set<DVertex *> VertexSet;
   VertexSet vertices;
 
   /// Cells contained in the mesh

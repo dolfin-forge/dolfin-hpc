@@ -82,6 +82,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
     // Collect entities with a common adjacent to shared vertices
     _set<uint> adjs;
+    adjs.reserve( pe_size );
     bool * used_entities = new bool[topology.size(d)];
     std::fill_n(used_entities, topology.size(d), false);
     for (SharedIterator it(vdata); it.valid(); ++it)
@@ -150,6 +151,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     }
     uint recvmax = 0;
     MPI::all_reduce<MPI::max>(sendmax, recvmax);
+    recvmap.reserve( recvmax );
     uint * recvbuf = new uint[recvmax];
     for (uint j = 1; j < pe_size; ++j)
     {

@@ -17,12 +17,12 @@ RestrictedElement::RestrictedElement(FiniteElementSpace const& element,
     value_shape_(element.value_shape())
 {
   // Check mixed finite element definition
-  
+
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", " << domain.repr()
          << ")";
   repr_ = ssrepr.str();
-  
+
   std::stringstream ssstr;
   ssstr << "<" << element_.str() << ">|_" << domain.str() << ">";
   str_ = ssstr.str();
@@ -70,7 +70,7 @@ bool RestrictedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& RestrictedElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }

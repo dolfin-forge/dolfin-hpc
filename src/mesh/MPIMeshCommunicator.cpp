@@ -677,7 +677,7 @@ void check(Mesh& mesh)
       MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
                                    dist.comm()) );
       // Check that no duplicate global entity was added
-      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      _ordered_set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
       {
         error("Duplicate global indices for entities of dimension %u", edim);
@@ -748,7 +748,7 @@ void check(Mesh& mesh)
       MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
                                    dist.comm()) );
       // Check that no duplicate global entity was added
-      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      _ordered_set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
       {
         error("Duplicate global indices for entities of dimension %u", edim);

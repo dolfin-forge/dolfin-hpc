@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <set>
 #include <sstream>
 
 namespace dolfin

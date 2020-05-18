@@ -20,6 +20,8 @@ SharedMapping::SharedMapping(DistributedData const& data) :
 
 #if HAVE_MPI
 
+  mappings_.reserve( MPI::size() );
+
   // Collect entities by adjacent rank
   for (SharedIterator it(data); it.valid(); ++it)
   {

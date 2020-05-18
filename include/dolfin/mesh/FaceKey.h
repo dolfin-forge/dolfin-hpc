@@ -5,23 +5,21 @@
 #include <dolfin/mesh/EdgeKey.h>
 #include <dolfin/mesh/Face.h>
 
-#include <set>
-
 namespace dolfin
 {
 
-struct FaceKey : public std::set<EdgeKey>
+struct FaceKey : public _ordered_set<EdgeKey>
 {
   /// An face contains a bunch of vertices
   FaceKey() :
-      std::set<EdgeKey>(),
+      _ordered_set<EdgeKey>(),
       idx(0)
   {
   }
 
   /// An face contains a bunch of vertices
   FaceKey(Face const& f) :
-    std::set<EdgeKey>(),
+    _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
     uint const * v = f.entities(0);
@@ -34,7 +32,7 @@ struct FaceKey : public std::set<EdgeKey>
 
   /// An face contains a bunch of vertices
   FaceKey(uint n, uint const * v) :
-    std::set<EdgeKey>(),
+    _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
     for (uint i = 0; i < n; ++i)
@@ -71,7 +69,7 @@ struct FaceKey : public std::set<EdgeKey>
   inline size_t hash() const
   {
     size_t ret = 0;
-    for (std::set<EdgeKey>::const_iterator it = this->begin();
+    for (_ordered_set<EdgeKey>::const_iterator it = this->begin();
          it != this->end(); ++it)
     {
       ret = ret ^ it->hash();

@@ -16,8 +16,6 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexNormal.h>
 
-#include <map>
-
 namespace dolfin
 {
 
@@ -129,15 +127,17 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
   uint const gdim = mesh.geometry_dimension();
-  uint const pe_size = dolfin::MPI::size();
 #ifdef HAVE_MPI
-  uint const rank = dolfin::MPI::rank();
+  uint const pe_size = MPI::size();
+  uint const rank    = MPI::rank();
 #endif
 
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;
+  facets_data.reserve( boundary.num_vertices() );
   // Maps dofs to facet global indices
   _map<uint, NodeData *> nodes_data;
+  nodes_data.reserve( boundary.num_cells() );
 
   //[facet, nb_nodes, [node indices]]
   Array< Array<uint> > u_sendbuf( pe_size );
@@ -220,7 +220,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     dolfin_assert( abscmp( data->normal.norm(), 1.0, 1e-13 ) );
 
     // Set valid dofs within the current facet
-    std::set<uint> ghost_nodes;
+    _ordered_set<uint> ghost_nodes;
     dofmapN.tabulate_dofs(scratchN.dofs, scratchN.cell, cell);
     dofmapN.tabulate_facet_dofs(scratchN.facet_dofs, local_facet);
     for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
@@ -269,6 +269,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     if (!ghost_nodes.empty())
     {
       _set<uint> adjs;
+      adjs.reserve( pe_size );
       for (VertexIterator v(facet); !v.end(); ++v)
       {
         if(v->is_shared())
@@ -302,7 +303,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   if (mesh.is_distributed())
   {
 #ifdef HAVE_MPI
-    // Since an entityis shared if all it lower dimensional entities are shared
+    // Since an entity is shared if all it lower dimensional entities are shared
     // we can loop over shared vertices and stack facets. If non-matching facet
     // are send they will be eventually discarded. This does not hold if the
     // subdomain has a hole in the interior of the facet.
@@ -320,8 +321,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
     MPI::all_reduce<MPI::max>( maxsendcount, maxrecvcount, 2 );
 
-    dolfin_assert( maxrecvcount[0] > 0 );
-    dolfin_assert( maxrecvcount[1] > 0 );
+    dolfin_assert( maxrecvcount[0] >= maxsendcount[0] );
+    dolfin_assert( maxrecvcount[1] >= maxsendcount[1] );
 
     Array< uint > u_recvbuf( maxrecvcount[0] );
     Array< real > r_recvbuf( maxrecvcount[1] );
@@ -398,6 +399,16 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   // Initialize cartesian basis
   Point B[Space::MAX_DIMENSION];
 
+  Function nn;
+  Array< real > nnblock;
+
+  if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+  {
+    nn = basis[0];
+    nn = 100;
+    nnblock.resize( num_boundary_dofs );
+  }
+
   for (uint d = 0; d < Space::MAX_DIMENSION; ++d)
   {
     B[d][d] = 1.0;
@@ -444,11 +455,26 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // Copy dof indices to array for vector block set.
     std::copy(n_data->dofs.begin(),n_data->dofs.end(), dofs.data() + node_dofs );
 
+    if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+    {
+      nnblock[offset+0] = node_type;
+      nnblock[offset+1] = node_id;
+      nnblock[offset+2] = 1.0 * dofmapN.is_shared(node_id);
+    }
+
     // Copy data to block array
     for(uint d = 0; d< gdim; ++d)
     {
       std::copy(&B[d][0], &B[d][0] + gdim, block.data() + offset + d*num_boundary_dofs);
     }
+  }
+
+  if ( dolfin_get< bool >( "io_print_node_normal_types" ) == true )
+  {
+    GenericVector& v = nn.vector();
+    v.set( nnblock.data(), num_boundary_dofs, dofs.data() );
+    v.apply();
+    File( "node_normal_types.pvd" ) << nn;
   }
 
   // Set vectors, values are synchronized

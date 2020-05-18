@@ -137,7 +137,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   }
 
   //--- Setup data structures -----------------------------------------------
-  std::map<uint, uint> Gdofs_map;
+  _ordered_map<uint, uint> Gdofs_map;
   uint const num_facet_dofs = dofmap.num_facet_dofs();
   uint const max_numGdofs = num_facet_dofs * totalcardGnI;
   uint Gcount = 0;
@@ -245,7 +245,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       }
     }
 
-    for (std::map<uint, uint>::const_iterator it = Gdofs_map.begin();
+    for (_ordered_map<uint, uint>::const_iterator it = Gdofs_map.begin();
         it != Gdofs_map.end(); ++it)
     {
       if (it->first != Gdofs_indices[it->second])
@@ -304,7 +304,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
               {
                 // Find if the mapped dof is a valid G dof
                 uint dofG = dofsG[facet_dofsG[jj]];
-                std::map<uint, uint>::const_iterator itG = Gdofs_map.find(dofG);
+                _ordered_map<uint, uint>::const_iterator itG = Gdofs_map.find(dofG);
                 if(itG == Gdofs_map.end())
                 {
                   continue;
@@ -468,7 +468,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
           ++uii;
           uint const nbH = u_recvbuff[uii];
           ++uii;
-          std::map<uint, uint>::const_iterator itG = Gdofs_map.find(dof);
+          _ordered_map<uint, uint>::const_iterator itG = Gdofs_map.find(dof);
           if (itG == Gdofs_map.end())
           {
             error("No G dof %d sent from rank %d", dof, src);

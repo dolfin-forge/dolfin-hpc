@@ -65,12 +65,12 @@ private:
   void eval(real*, const real*) const {}
 
   std::string basename_;
-  std::map<real, std::string> samples_;
+  _ordered_map<real, std::string> samples_;
 
   //
   Function * W_;
-  std::map<real, std::string>::iterator it0_;
-  std::map<real, std::string>::iterator it1_;
+  _ordered_map<real, std::string>::iterator it0_;
+  _ordered_map<real, std::string>::iterator it1_;
 
 };
 

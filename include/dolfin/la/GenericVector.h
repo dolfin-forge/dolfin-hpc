@@ -11,9 +11,6 @@
 
 #include <dolfin/common/maybe_unused.h>
 
-#include <set>
-#include <map>
-
 namespace dolfin
 {
 
@@ -73,8 +70,8 @@ namespace dolfin
     virtual void init(uint N, bool distributed) = 0;
 
     /// Initialize ghost entries
-    virtual void init_ghosted(uint n, std::set<uint>& indices,
-                              std::map<uint, uint>& map) = 0;
+    virtual void init_ghosted(uint n, _ordered_set<uint>& indices,
+                              _ordered_map<uint, uint>& map) = 0;
 
     /// Return size of vector
     virtual uint size() const = 0;
@@ -118,7 +115,7 @@ namespace dolfin
     /// Return maximum value of vector
     virtual real max() const = 0;
 
-    /// Return pointwise operator op of vector and given vector x 
+    /// Return pointwise operator op of vector and given vector x
     virtual void pointwise(const GenericVector& x,
 			   VectorPointwiseOp op=pw_min) const = 0;
 

@@ -21,7 +21,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <map>
 
 namespace dolfin
 {

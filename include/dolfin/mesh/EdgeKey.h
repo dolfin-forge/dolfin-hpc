@@ -4,8 +4,6 @@
 
 #include <dolfin/mesh/Edge.h>
 
-#include <map>
-
 namespace dolfin
 {
 

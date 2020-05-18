@@ -92,7 +92,7 @@ protected:
   ///
   CoefficientBase(std::string const& name, Cell const& cell,
                   ValueArray const& shape,
-                  std::map<dolfin::uint, dolfin::uint> const& symmetry,
+                  dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry,
                   dolfin::uint const& count);
 
   ///
@@ -273,7 +273,7 @@ public:
 
   ///
   TensorConstant(Cell const& cell, ValueArray const& shape,
-                 std::map<dolfin::uint, dolfin::uint> const& symmetry,
+                 dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry,
                  dolfin::uint const& count);
 
   ///

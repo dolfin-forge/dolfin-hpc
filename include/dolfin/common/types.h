@@ -24,15 +24,14 @@
 #elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
 #include <unordered_map>
 #include <unordered_set>
-#else
-#include <map>
-#include <set>
 #endif
 
 #include <cfloat>
 #include <complex>
 #include <cstdint>
 #include <limits>
+#include <map>
+#include <set>
 
 namespace dolfin
 {
@@ -66,28 +65,60 @@ long const DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
 long const DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
 
 #if HAVE_PARALLEL_HASH_MAP
-template< typename Key, typename Value >
-using _map = phmap::flat_hash_map< Key, Value >;
-template< typename Key >
-using _set = phmap::flat_hash_set< Key >;
+
+
+template < typename Key, typename Value,
+           typename Hash  = phmap::container_internal::hash_default_hash<Key>,
+           typename Eq    = phmap::container_internal::hash_default_eq<Key>,
+           typename Alloc = std::allocator<std::pair<const Key, Value> > >
+using _map = phmap::flat_hash_map< Key, Value, Hash, Eq, Alloc >;
+
+template < typename Key,
+           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
+           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
+           typename Alloc = std::allocator< Key > >
+using _set = phmap::flat_hash_set< Key, Hash, Eq, Alloc >;
+
+template< typename Key, typename Value,
+          typename Compare = std::less<Key>,
+          typename Allocator = std::allocator<std::pair<const Key, Value> > >
+using _ordered_map = std::map< Key, Value, Compare, Allocator >;
+
+template< typename Key,
+          typename Compare = std::less<Key>,
+          typename Allocator = std::allocator<Key> >
+using _ordered_set = std::set< Key, Compare, Allocator >;
+
 #elif (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #elif (__IBMCPP__ && __IBMCPP_TR1__)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #elif __sgi
 #define _map std::hash_map
 #define _set std::hash_set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #elif ENABLE_BOOST_TR1
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
 #define _map std::unordered_map
 #define _set std::unordered_set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #else
 #define _map std::map
 #define _set std::set
+#define _ordered_map std::map
+#define _ordered_set std::set
 #endif
 
 //-----------------------------------------------------------------------------

@@ -44,7 +44,6 @@ nobase_pkginclude_HEADERS = \
 				fem/DofMapSet.h\
 				fem/DofNumbering.h\
 				fem/dolfin_fem.h\
-				fem/Equation.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\

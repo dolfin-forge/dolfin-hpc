@@ -12,7 +12,6 @@ libdolfin_fem_la_SOURCES = \
 			DofMapCache.cpp\
 			DofMapSet.cpp\
 			DofNumbering.cpp\
-			Equation.cpp\
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
 			FunctionSpaceMap.cpp\

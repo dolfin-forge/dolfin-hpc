@@ -24,7 +24,7 @@ MPI::Context MPI::ctx_;
 
 #if HAVE_MPI
 #define DOLFIN_MPI_SUBSYSTEM_INIT \
-  if (!init_) { SubSystemsManager::MPI::init(); }
+  if (!init_) { SubSystemsManager::MPI::initialized(); }
 #endif
 
 #define DOLFIN_MPI_WRN_UNIMPLEMENTED \

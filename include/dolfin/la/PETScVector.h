@@ -172,11 +172,7 @@ private:
   // True if the vector has ghost points
   bool is_ghosted_;
 
-#if (sun || __sun)
-  typedef _ordered_map<int, int> GhostMapping;
-#else
-  typedef _ordered_map<const int, int> GhostMapping;
-#endif
+  typedef _map<int, int> GhostMapping;
   GhostMapping mapping_;
 
 };

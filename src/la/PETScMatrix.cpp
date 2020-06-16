@@ -344,7 +344,7 @@ void PETScMatrix::getrow(uint row, Array<uint>& columns,
             row, rstart_, rend_);
     }
 
-    _ordered_map<int, int>::const_iterator it = mapping_.find(row);
+    _map<int, int>::const_iterator it = mapping_.find(row);
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
     columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)),
                    reinterpret_cast<uint*>(const_cast<int*>(cols + ncols)));

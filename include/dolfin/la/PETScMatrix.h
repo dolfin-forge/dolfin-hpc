@@ -176,7 +176,7 @@ private:
   PetscInt rstart_;
   PetscInt rend_;
 
-  _ordered_map<int, int> mapping_;
+  _map<int, int> mapping_;
 
 };
 

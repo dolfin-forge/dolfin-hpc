@@ -747,18 +747,6 @@ void DistributedData::renumber_global()
 
   /*
    * The following code assumes that numbering and ownership are finalized !
-   *hared_mapping_;hahared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mhared_mapping_;
-    shared_mred_mapping_;
-    shared_m
-    shared_m
    */
 
 #if HAVE_MPI

@@ -7,7 +7,6 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/fem/UFCCell.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/EuclideanBasis.h>

@@ -215,6 +215,9 @@ void refine_and_project( Mesh& mesh,
 	swap( mesh, new_mesh );
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
+
+  message("  - cells    after: %d", mesh.num_global_cells());
+  message("  - vertices after: %d", mesh.global_size(0));
 }
 //-----------------------------------------------------------------------------
 void redistribute_func( Mesh& mesh, Function const& f,
@@ -222,6 +225,8 @@ void redistribute_func( Mesh& mesh, Function const& f,
                         Array<uint> & rows_,
                         MeshValues<uint, Cell> const& distribution )
 {
+  message( 1, "Redistributing Function: %p", &f );
+
   uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
 
@@ -304,6 +309,9 @@ void redistribute_func( Mesh& mesh, Function const& f,
 //-----------------------------------------------------------------------------
 void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
 {
+  message( 1, "Projecting %u functions to function: %p",
+           f_post.size(), &projected );
+
   FiniteElementSpace const & space = projected.space();
 
   Array< real > vv ( projected.vector().local_size() );

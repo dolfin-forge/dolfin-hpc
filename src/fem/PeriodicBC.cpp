@@ -16,8 +16,6 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/fem/UFCMesh.h>
-#include <dolfin/fem/UFCCell.h>
 
 #include <vector>
 

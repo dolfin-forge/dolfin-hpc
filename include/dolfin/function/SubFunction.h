@@ -5,6 +5,8 @@
 #define __DOLFIN_SUB_FUNCTION_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/function/Function.h>
+#include <dolfin/log/log.h>
 
 namespace dolfin
 {
@@ -30,11 +32,10 @@ class SubFunction
 {
 
 public:
-
   /// Create sub function
-  SubFunction(Function& f, uint i) :
-      f_(&f),
-      i_(i)
+  SubFunction( Function & f, uint i )
+    : f_( &f )
+    , i_( i )
   {
   }
 
@@ -44,7 +45,7 @@ public:
   }
 
   /// Return global function
-  Function& function() const;
+  Function & function() const;
 
   /// Return index of the sub function
   uint index() const;
@@ -53,11 +54,10 @@ public:
   void disp() const;
 
 private:
-
   /// Create empty sub function
-  SubFunction() :
-      f_(NULL),
-      i_(0)
+  SubFunction()
+    : f_( NULL )
+    , i_( 0 )
   {
   }
 
@@ -66,8 +66,30 @@ private:
 
   // Sub function index
   uint const i_;
-
 };
+
+//-----------------------------------------------------------------------------
+inline Function & SubFunction::function() const
+{
+  return *f_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint SubFunction::index() const
+{
+  return i_;
+}
+
+//-----------------------------------------------------------------------------
+inline void SubFunction::disp() const
+{
+  section( "SubFunction" );
+  prm( "Index", this->index() );
+  function().disp();
+  end();
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

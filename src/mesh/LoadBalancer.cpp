@@ -12,7 +12,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
-#include <cstring>
+#include <string>
 
 using namespace dolfin;
 

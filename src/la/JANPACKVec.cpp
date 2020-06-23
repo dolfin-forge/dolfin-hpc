@@ -12,7 +12,7 @@
 
 #include <dolfin/common/Array.h>
 
-#include <cstring>
+#include <string>
 
 using namespace dolfin;
 

@@ -4,7 +4,6 @@
 #ifndef __DOLFIN_BOUNDARYNORMAL_H
 #define __DOLFIN_BOUNDARYNORMAL_H
 
-#include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/function/Function.h>
 
@@ -67,6 +66,23 @@ private:
   Function node_type_;
 
 };
+
+
+//-----------------------------------------------------------------------------
+inline Mesh& BoundaryNormal::mesh()
+{
+  return mesh_;
+}
+//-----------------------------------------------------------------------------
+inline BoundaryMesh& BoundaryNormal::boundary()
+{
+  return *boundary_;
+}
+//-----------------------------------------------------------------------------
+inline Array<Function>& BoundaryNormal::basis()
+{
+  return basis_;
+}
 
 }
 #endif

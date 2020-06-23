@@ -53,13 +53,6 @@ private:
 
 };
 
-//-----------------------------------------------------------------------------
-
-struct NoBilinearForm
-{
-  typedef Nil<dolfin::BilinearForm> BilinearForm;
-};
-
 //--- INLINES -----------------------------------------------------------------
 
 inline FiniteElementSpace const& BilinearForm::trial_space() const

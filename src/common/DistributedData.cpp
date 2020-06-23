@@ -11,7 +11,7 @@
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

@@ -13,21 +13,17 @@ class GenericSparsityPattern;
 class UFC;
 
 /**
- *  @class  SparsityPatternBuilder
- *
- *  @brief   This class provides functions to compute the sparsity pattern.
+ *  @brief   provides functions to compute the sparsity pattern.
  */
 
-class SparsityPatternBuilder
+namespace SparsityPatternBuilder
 {
 
-public:
+/// Build sparsity pattern
+void build( GenericSparsityPattern & sparsity_pattern, Mesh & mesh,
+            UFC & ufc, DofMapSet const & dof_map_set );
 
-  /// Build sparsity pattern
-  static void build(GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
-                    UFC& ufc, DofMapSet const& dof_map_set);
-
-};
+} // end namespace SparsityPatternBuilder
 
 } /* namespace dolfin */
 

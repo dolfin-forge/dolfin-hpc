@@ -18,9 +18,9 @@
 #include <dolfin/mesh/Point.h>
 
 #include <algorithm>
-#include <cstring>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
+#include <string>
 
 namespace dolfin
 {
@@ -586,54 +586,6 @@ void PeriodicDofsMapping::clear()
   delete[] Hxcoords_;
   Hxcoords_ = NULL;
   Idofs_.clear();
-}
-
-//-----------------------------------------------------------------------------
-uint PeriodicDofsMapping::max_local_dimension() const
-{
-  return max_local_dimension_;
-}
-
-//-----------------------------------------------------------------------------
-uint PeriodicDofsMapping::num_Gdofs() const
-{
-  return Goffsets_.size();
-}
-
-//-----------------------------------------------------------------------------
-uint PeriodicDofsMapping::num_Hdofs() const
-{
-  return Hdofs_.size();
-}
-
-//-----------------------------------------------------------------------------
-uint PeriodicDofsMapping::num_Idofs() const
-{
-  return Idofs_.size();
-}
-
-//-----------------------------------------------------------------------------
-bool PeriodicDofsMapping::is_Gdof(uint i) const
-{
-  return (Goffsets_.find(i) != Goffsets_.end());
-}
-
-//-----------------------------------------------------------------------------
-bool PeriodicDofsMapping::is_Hdof(uint i) const
-{
-  return (Hdofs_.count(i) > 0);
-}
-
-//-----------------------------------------------------------------------------
-bool PeriodicDofsMapping::is_Idof(uint i) const
-{
-  return (Idofs_.count(i) > 0);
-}
-
-//-----------------------------------------------------------------------------
-uint const * PeriodicDofsMapping::get_Gindices() const
-{
-  return Gindices_;
 }
 
 //-----------------------------------------------------------------------------

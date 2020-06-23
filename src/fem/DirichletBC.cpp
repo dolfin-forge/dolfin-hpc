@@ -19,7 +19,7 @@
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/parameter/parameters.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

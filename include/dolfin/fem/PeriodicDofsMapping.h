@@ -81,6 +81,56 @@ private:
 
 };
 
+//-----------------------------------------------------------------------------
+inline uint PeriodicDofsMapping::max_local_dimension() const
+{
+  return max_local_dimension_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint PeriodicDofsMapping::num_Gdofs() const
+{
+  return Goffsets_.size();
+}
+
+//-----------------------------------------------------------------------------
+inline uint PeriodicDofsMapping::num_Hdofs() const
+{
+  return Hdofs_.size();
+}
+
+//-----------------------------------------------------------------------------
+inline uint PeriodicDofsMapping::num_Idofs() const
+{
+  return Idofs_.size();
+}
+
+//-----------------------------------------------------------------------------
+inline bool PeriodicDofsMapping::is_Gdof(uint i) const
+{
+  return (Goffsets_.find(i) != Goffsets_.end());
+}
+
+//-----------------------------------------------------------------------------
+inline bool PeriodicDofsMapping::is_Hdof(uint i) const
+{
+  return (Hdofs_.count(i) > 0);
+}
+
+//-----------------------------------------------------------------------------
+inline bool PeriodicDofsMapping::is_Idof(uint i) const
+{
+  return (Idofs_.count(i) > 0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * PeriodicDofsMapping::get_Gindices() const
+{
+  return Gindices_;
+}
+
+//-----------------------------------------------------------------------------
+
 }
 
 #endif /* __DOLFIN_PERIODIC_DOFS_MAPPING */

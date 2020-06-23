@@ -10,7 +10,7 @@
 
 #include <ufc.h>
 
-#include <cstring>
+#include <string>
 
 namespace ufl
 {
@@ -382,6 +382,58 @@ inline ufc::finite_element* FiniteElement::create() const
   return ufc_finite_element_->create();
 }
 
+//-----------------------------------------------------------------------------
+inline bool FiniteElement::operator==( FiniteElement const & other ) const
+{
+  return ( std::strcmp( this->signature(), other.signature() ) == 0 );
+}
+
+//-----------------------------------------------------------------------------
+inline bool FiniteElement::operator!=( FiniteElement const & other ) const
+{
+  return !( *this == other );
+}
+
+//-----------------------------------------------------------------------------
+inline uint FiniteElement::value_size() const
+{
+  uint size = 1;
+  for ( uint i = 0; i < ufc_finite_element_->value_rank(); ++i )
+  {
+    size *= ufc_finite_element_->value_dimension( i );
+  }
+  return size;
+}
+
+//-----------------------------------------------------------------------------
+inline ufc::finite_element *
+  FiniteElement::create_sub_element( Array< uint > const & sub_system ) const
+{
+  return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
+}
+
+//-----------------------------------------------------------------------------
+inline Array< uint > const & FiniteElement::sub_value_dimensions( uint i ) const
+{
+  return sub_value_dims_[i];
+}
+
+//-----------------------------------------------------------------------------
+inline Array< uint > const & FiniteElement::sub_value_offsets( uint i ) const
+{
+  return sub_value_offs_[i];
+}
+
+//-----------------------------------------------------------------------------
+inline Array< ufc::finite_element const * > const &
+  FiniteElement::flatten() const
+{
+  if ( flattened_.empty() )
+  {
+    flatten( ufc_finite_element_, flattened_ );
+  }
+  return flattened_;
+}
 }
 
 #endif

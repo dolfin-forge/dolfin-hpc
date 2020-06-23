@@ -5,8 +5,8 @@
 #define __DOLFIN_PERIODIC_BC_H
 
 #include <dolfin/common/types.h>
-#include "SubSystem.h"
-#include "BoundaryCondition.h"
+#include <dolfin/fem/SubSystem.h>
+#include <dolfin/fem/BoundaryCondition.h>
 
 namespace dolfin
 {

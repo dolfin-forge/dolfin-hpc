@@ -17,7 +17,7 @@
 #include <dolfin/parameter/parameters.h>
 
 #include <cmath>
-#include <cstring>
+#include <string>
 
 #if (__sgi)
 #define fmax(a,b) (a > b ? a : b) ;

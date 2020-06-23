@@ -25,67 +25,6 @@ Form::~Form()
 }
 
 //-----------------------------------------------------------------------------
-void Form::update_dofmaps() const
-{
-  if (dof_map_set_.size() == 0)
-  {
-    dof_map_set_.update(*this, mesh_);
-  }
-}
-
-//-----------------------------------------------------------------------------
-Mesh& Form::mesh() const
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-DofMapSet& Form::dofmaps() const
-{
-  this->update_dofmaps();
-  return dof_map_set_;
-}
-
-//-----------------------------------------------------------------------------
-uint Form::coefficient_index(std::string const& name) const
-{
-  for (uint i = 0; i < this->num_coefficients(); ++i)
-  {
-    if (this->coefficient_name(i) == name)
-    {
-      return i;
-    }
-  }
-  error("Form : coefficient name was not found");
-  return 0;
-}
-
-//-----------------------------------------------------------------------------
-std::string Form::coefficient_name(uint) const
-{
-  error("Not implemented without UFL support: \n"
-        "std::string Form::coefficient_name(uint i) const");
-  return "";
-}
-
-//----------------------------------------------------------------------------
-FiniteElementSpace * Form::create_space(uint i) const
-{
-  ufc::finite_element * test_f = this->form().create_finite_element(i);
-  ufc::dofmap * test_d = this->form().create_dofmap(i);
-  // For an argument the mesh is the one passed to the form and for coefficient
-  // the mesh passed to the function.
-  return new FiniteElementSpace(dofmaps()[i].mesh(), *test_f, *test_d, true);
-}
-
-//----------------------------------------------------------------------------
-FiniteElementSpace * Form::create_coefficient_space(
-    std::string const& name) const
-{
-  return this->create_space(this->rank() + this->coefficient_index(name));
-}
-
-//-----------------------------------------------------------------------------
 bool Form::check(Array<Coefficient*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients

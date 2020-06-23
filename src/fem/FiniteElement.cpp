@@ -89,18 +89,6 @@ FiniteElement::~FiniteElement()
 }
 
 //-----------------------------------------------------------------------------
-bool FiniteElement::operator ==(FiniteElement const& other) const
-{
-  return (std::strcmp(this->signature(), other.signature()) == 0);
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElement::operator !=(FiniteElement const& other) const
-{
-  return !(*this == other);
-}
-
-//-----------------------------------------------------------------------------
 void FiniteElement::Initialize()
 {
   dolfin_assert(ufc_finite_element_);
@@ -135,24 +123,6 @@ void FiniteElement::Initialize()
       sub_value_offs_[a].push_back(0);
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-uint FiniteElement::value_size() const
-{
-  uint size = 1;
-  for (uint i = 0; i < ufc_finite_element_->value_rank(); ++i)
-  {
-    size *= ufc_finite_element_->value_dimension(i);
-  }
-  return size;
-}
-
-//-----------------------------------------------------------------------------
-ufc::finite_element*
-FiniteElement::create_sub_element(Array<uint> const& sub_system) const
-{
-  return FiniteElement::create_sub_element(*ufc_finite_element_, sub_system);
 }
 
 //-----------------------------------------------------------------------------
@@ -201,28 +171,6 @@ FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
   delete sub_element;
 
   return sub_sub_element;
-}
-
-//-----------------------------------------------------------------------------
-Array<uint> const& FiniteElement::sub_value_dimensions(uint i) const
-{
-  return sub_value_dims_[i];
-}
-
-//-----------------------------------------------------------------------------
-Array<uint> const& FiniteElement::sub_value_offsets(uint i) const
-{
-  return sub_value_offs_[i];
-}
-
-//-----------------------------------------------------------------------------
-Array<ufc::finite_element const *> const& FiniteElement::flatten() const
-{
-  if (flattened_.empty())
-  {
-    flatten(ufc_finite_element_, flattened_);
-  }
-  return flattened_;
 }
 
 //-----------------------------------------------------------------------------

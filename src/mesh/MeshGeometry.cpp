@@ -9,8 +9,8 @@
 #include <dolfin/log/log.h>
 
 #include <algorithm>
-#include <cstring>
 #include <ctime>
+#include <string>
 
 namespace dolfin
 {

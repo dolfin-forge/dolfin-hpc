@@ -35,7 +35,7 @@ typedef real_t pm_real_t;
 
 #endif
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

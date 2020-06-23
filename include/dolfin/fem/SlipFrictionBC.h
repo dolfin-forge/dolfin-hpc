@@ -8,8 +8,6 @@
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/SlipBC.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 

@@ -44,13 +44,6 @@ private:
 
 };
 
-//-----------------------------------------------------------------------------
-
-struct NoLinearForm
-{
-  typedef Nil<dolfin::LinearForm> LinearForm;
-};
-
 //--- INLINES -----------------------------------------------------------------
 
 inline FiniteElementSpace const& LinearForm::test_space() const

@@ -4,7 +4,6 @@
 #include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/mesh/Mesh.h>
 
@@ -130,60 +129,6 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
   }
 }
 //-----------------------------------------------------------------------------
-DofNumbering& DofNumbering::operator=(DofNumbering const&)
-{
-  return *this;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::offset() const
-{
-  return offset_;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::size() const
-{
-  return size_;
-}
-//-----------------------------------------------------------------------------
-uint const * DofNumbering::block() const
-{
-  if (array == NULL)
-  {
-    pretabulate(array, array_size);
-  }
-  return array;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::block_size() const
-{
-  if (array == NULL)
-  {
-    pretabulate(array, array_size);
-  }
-  return array_size;
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::init()
-{
-  DofNumbering::clear();
-  DofNumbering::init(mesh, ufc_dofmap);
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::clear()
-{
-  offset_ = 0;
-  size_ = 0;
-  array_size = 0;
-  delete [] array;
-  array = NULL;
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::set_range(uint offset, uint size)
-{
-  offset_ = offset;
-  size_ = size;
-}
-//-----------------------------------------------------------------------------
 void DofNumbering::pretabulate(uint *& array, uint& array_size) const
 {
   if (this->size_ == 0)
@@ -199,11 +144,6 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
   }
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell)
-{
-  this->tabulate_dofs(dofs, ufc_cell, *ufc_cell);
 }
 //-----------------------------------------------------------------------------
 void DofNumbering::disp() const

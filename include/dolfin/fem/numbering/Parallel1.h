@@ -14,7 +14,7 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

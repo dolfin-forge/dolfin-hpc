@@ -11,7 +11,7 @@
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/Vertex.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

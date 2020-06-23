@@ -115,7 +115,17 @@ private:
   virtual void sync(Time const& t) = 0;
 
 };
-
+//-----------------------------------------------------------------------------
+inline uint Coefficient::value_size() const
+{
+  uint size = 1;
+  for (uint i = 0; i < this->rank(); ++i)
+  {
+    size *= this->dim(i);
+  }
+  return size;
+}
+//-----------------------------------------------------------------------------
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_COEFFICIENT_H */

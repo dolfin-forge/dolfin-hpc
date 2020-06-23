@@ -7,7 +7,6 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
 
-#include <cstring>
 #include <string>
 
 namespace dolfin

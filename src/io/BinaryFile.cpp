@@ -16,13 +16,13 @@
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/main/MPI.h>
 
-#include <typeinfo>
 #include <algorithm>
-#include <cstring>
 #include <fstream>
 #include <list>
-#include <stdint.h>
 #include <stdexcept>
+#include <stdint.h>
+#include <string>
+#include <typeinfo>
 
 namespace dolfin
 {

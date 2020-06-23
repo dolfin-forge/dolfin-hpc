@@ -16,10 +16,12 @@
 namespace dolfin
 {
 
+namespace SparsityPatternBuilder
+{
+
 //-----------------------------------------------------------------------------
-void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
-                                   Mesh& mesh, UFC& ufc,
-                                   DofMapSet const& dof_map_set)
+void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
+            UFC& ufc, DofMapSet const& dof_map_set )
 {
   message(1, "SparsityPatternBuilder: build");
   tic();
@@ -137,5 +139,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   tocd(1);
 }
 //-----------------------------------------------------------------------------
+
+} // end namespace SparsityPatternBuilder
 
 } /* namespace dolfin */

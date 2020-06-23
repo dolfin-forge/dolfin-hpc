@@ -13,8 +13,6 @@
 #include <dolfin/evolution/Time.h>
 #include <dolfin/fem/SubSystem.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 
@@ -107,6 +105,28 @@ private:
   SubSystem sub_system_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline std::string const& BoundaryCondition::type() const
+{
+  return type_;
+}
+//-----------------------------------------------------------------------------
+inline Mesh& BoundaryCondition::mesh() const
+{
+  return mesh_;
+}
+//-----------------------------------------------------------------------------
+inline SubDomain const& BoundaryCondition::sub_domain() const
+{
+  return sub_domain_;
+}
+//-----------------------------------------------------------------------------
+inline SubSystem const& BoundaryCondition::sub_system() const
+{
+  return sub_system_;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

@@ -4,15 +4,14 @@
 #ifndef __DOLFIN_PETSC_VECTOR_H
 #define __DOLFIN_PETSC_VECTOR_H
 
+#include <dolfin/common/Variable.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/GenericVector.h>
+#include <dolfin/log/LogStream.h>
 
 #ifdef HAVE_PETSC
 
 #include <dolfin/la/PETScObject.h>
-#include <dolfin/la/GenericVector.h>
-#include <dolfin/common/Variable.h>
-
-#include <dolfin/log/LogStream.h>
 
 #include <petscvec.h>
 
@@ -176,6 +175,216 @@ private:
   GhostMapping mapping_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline void PETScVector::clear()
+{
+  if (x_)
+  {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
+    VecDestroy(&x_);
+#else
+    VecDestroy(x_);
+#endif
+    is_ghosted_ = false;
+    is_distributed_ = false;
+  }
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::init(uint N)
+{
+  init(N, true);
+}
+//-----------------------------------------------------------------------------
+inline PETScVector* PETScVector::copy() const
+{
+  return new PETScVector(*this);
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::set(const real* block, uint m, const uint* rows)
+{
+  dolfin_assert(x_);
+  VecSetValues(x_, static_cast<int>(m),
+               reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
+               INSERT_VALUES);
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::add(const real* block, uint m, const uint* rows)
+{
+  dolfin_assert(x_);
+  VecSetValues(x_, static_cast<int>(m),
+               reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
+               ADD_VALUES);
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::apply(FinalizeType)
+{
+
+  VecAssemblyBegin(x_);
+  VecAssemblyEnd(x_);
+
+  if (is_ghosted_)
+  {
+    VecGhostUpdateBegin(x_, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateEnd(x_, INSERT_VALUES, SCATTER_FORWARD);
+  }
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::zero()
+{
+  dolfin_assert(x_);
+  real a = 0.0;
+  VecSet(x_, a);
+}
+//-----------------------------------------------------------------------------
+inline uint PETScVector::size() const
+{
+  if(x_ == NULL) return 0;
+  int n = 0;
+  VecGetSize(x_, &n);
+  return static_cast<uint>(n);
+}
+//-----------------------------------------------------------------------------
+inline uint PETScVector::local_size() const
+{
+  dolfin_assert(x_);
+  int n = 0;
+  VecGetLocalSize(x_, &n);
+  return static_cast<uint>(n);
+}
+//-----------------------------------------------------------------------------
+inline uint PETScVector::offset() const
+{
+  dolfin_assert(x_);
+  int low, high;
+  VecGetOwnershipRange(x_, &low, &high);
+  return static_cast<uint>(low);
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator=(const GenericVector& v)
+{
+  *this = v.down_cast<PETScVector>();
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator=(PETScVector const& v)
+{
+  if (&v != this)
+  {
+    dolfin_assert(v.x_);
+    init(v.local_size(), v.is_distributed_);
+    VecCopy(v.x_, x_);
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator=(real a)
+{
+  dolfin_assert(x_);
+  VecSet(x_, a);
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator*=(const GenericVector& y)
+{
+  dolfin_assert(x_);
+  PETScVector const& v = y.down_cast<PETScVector>();
+  dolfin_assert(v.x_);
+
+  if (size() != v.size())
+  {
+    error("Vectors must have the same size for componentwise multiplication.");
+  }
+
+  VecPointwiseMult(x_, x_, v.x_);
+
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator+=(const GenericVector& x)
+{
+  this->axpy(1.0, x);
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator-=(const GenericVector& x)
+{
+  this->axpy(-1.0, x);
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator*=(const real a)
+{
+  dolfin_assert(x_);
+  VecScale(x_, a);
+
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline PETScVector& PETScVector::operator/=(const real a)
+{
+  dolfin_assert(x_);
+  dolfin_assert(a != 0.0);
+
+  const real b = 1.0 / a;
+  VecScale(x_, b);
+
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline real PETScVector::inner(const GenericVector& y) const
+{
+  dolfin_assert(x_);
+
+  PETScVector const& v = y.down_cast<PETScVector>();
+  dolfin_assert(v.x_);
+
+  real a;
+  VecDot(v.x_, x_, &a);
+
+  return a;
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::axpy(real a, const GenericVector& y)
+{
+  dolfin_assert(x_);
+
+  PETScVector const& v = y.down_cast<PETScVector>();
+  dolfin_assert(v.x_);
+
+  if (size() != v.size())
+  {
+    error("The vectors must be of the same size to apply AXPY.");
+  }
+
+  VecAXPY(x_, a, v.x_);
+}
+//-----------------------------------------------------------------------------
+inline real PETScVector::min() const
+{
+  real value = 0.0;
+
+  VecMin(x_, PETSC_NULL, &value);
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+inline real PETScVector::max() const
+{
+  real value = 0.0;
+
+  VecMax(x_, PETSC_NULL, &value);
+
+  return value;
+}
+
+//-----------------------------------------------------------------------------
+inline Vec PETScVector::vec() const
+{
+  return x_;
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

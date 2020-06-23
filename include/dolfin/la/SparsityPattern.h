@@ -119,6 +119,41 @@ private:
 
 };
 
+//-----------------------------------------------------------------------------
+inline void SparsityPattern::set_blocked()
+{
+  blocked_ = true;
+}
+//-----------------------------------------------------------------------------
+inline bool SparsityPattern::is_blocked() const
+{
+  return blocked_;
+}
+//-----------------------------------------------------------------------------
+inline bool SparsityPattern::is_distributed() const
+{
+  return distributed_;
+}
+//-----------------------------------------------------------------------------
+inline uint SparsityPattern::size( uint i ) const
+{
+  return ( local_range_[i][1] - local_range_[i][0] );
+}
+//-----------------------------------------------------------------------------
+inline void SparsityPattern::get_range( uint p_rank, uint range[] )
+{
+  dolfin_assert( distributed_ );
+  // For a serial pattern p_rank is only zero
+  std::copy( &range_[0][p_rank], &range_[0][p_rank + 1], range );
+}
+//-----------------------------------------------------------------------------
+inline uint SparsityPattern::range_size( uint p_rank ) const
+{
+  dolfin_assert( distributed_ );
+  return range_[0][p_rank + 1] - range_[0][p_rank];
+}
+//-----------------------------------------------------------------------------
+
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_SPARSITY_PATTERN_H */

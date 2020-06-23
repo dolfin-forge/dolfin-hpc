@@ -10,6 +10,7 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/SubFunction.h>
+#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/Mesh.h>

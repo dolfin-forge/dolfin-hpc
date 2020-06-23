@@ -5,7 +5,6 @@
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/system.h>
 #include <dolfin/la/PETScVector.h>
 #include <dolfin/la/PETScMatrix.h>
@@ -90,11 +89,6 @@ void PETScMatrix::clear()
 #endif
     AA_sub = NULL;
   }
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::init(uint M, uint N)
-{
-  init(M, N, true);
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N, bool distributed)
@@ -248,54 +242,6 @@ PETScMatrix* PETScMatrix::copy() const
   return mcopy;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScMatrix::size(uint dim) const
-{
-  int M = 0;
-  int N = 0;
-  MatGetSize(A, &M, &N);
-  return (dim == 0 ? M : N);
-}
-//-----------------------------------------------------------------------------
-dolfin::uint PETScMatrix::nz() const
-{
-  MatInfo info;
-  MatGetInfo(A, MAT_GLOBAL_SUM, &info);
-
-  return info.nz_used;
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::get(real* block, uint m, uint const* rows, uint n,
-                      uint const* cols) const
-{
-  dolfin_assert(A);
-  MatGetValues(A, static_cast<int>(m),
-               reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n),
-               reinterpret_cast<int*>(const_cast<uint*>(cols)), block);
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::set(real const* block, uint m, uint const* rows, uint n,
-                      uint const* cols)
-{
-  dolfin_assert(A);
-  MatSetValues(A, static_cast<int>(m),
-               reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n),
-               reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-               INSERT_VALUES);
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::add(real const* block, uint m, uint const* rows, uint n,
-                      uint const* cols)
-{
-  dolfin_assert(A);
-  MatSetValues(A, static_cast<int>(m),
-               reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n),
-               reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-               ADD_VALUES);
-}
-//-----------------------------------------------------------------------------
 real PETScMatrix::norm(std::string norm_type) const
 {
   real norm;
@@ -419,12 +365,6 @@ void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
 
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::setrow(uint row, const Array<uint>& columns,
-                         const Array<real>& values)
-{
-  set(&values[0], 1, &row, columns.size(), &columns[0]);
-}
-//-----------------------------------------------------------------------------
 void PETScMatrix::zero(uint m, uint const* rows)
 {
   IS is = 0;
@@ -514,70 +454,6 @@ real PETScMatrix::norm(const Norm type) const
   return value;
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::apply(FinalizeType finaltype)
-{
-  if (finaltype == FINALIZE)
-  {
-    MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-  }
-  else if (finaltype == FLUSH)
-  {
-    MatAssemblyBegin(A, MAT_FLUSH_ASSEMBLY);
-    MatAssemblyEnd(A, MAT_FLUSH_ASSEMBLY);
-  }
-
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::zero()
-{
-  MatZeroEntries(A);
-}
-//-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator+=(const PETScMatrix& A)
-{
-  dolfin_assert(this->A);
-  MatAXPY(this->A, 1.0, A.A, SAME_NONZERO_PATTERN);
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator*=(real a)
-{
-  dolfin_assert(A);
-  MatScale(A, a);
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator/=(real a)
-{
-  dolfin_assert(A);
-  MatScale(A, 1.0 / a);
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const GenericMatrix& PETScMatrix::operator=(const GenericMatrix& A)
-{
-  if (&A != this)
-  {
-    MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
-  }
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator=(const PETScMatrix& A)
-{
-  if (&A != this)
-  {
-    MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
-  }
-  return *this;
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::dup(GenericMatrix& A)
-{
-  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_COPY_VALUES, &this->A);
-}
-//-----------------------------------------------------------------------------
 void PETScMatrix::disp(uint) const
 {
   section("PETScMatrix");
@@ -624,11 +500,6 @@ void PETScMatrix::disp(uint) const
 LinearAlgebraFactory& PETScMatrix::factory() const
 {
   return PETScFactory::instance();
-}
-//-----------------------------------------------------------------------------
-Mat PETScMatrix::mat() const
-{
-  return A;
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::print(MatInfo const& info) const

@@ -15,35 +15,36 @@ template < class T >
 class Distributed
 {
 public:
-	//----------------------------------------------------------------------------
-	Distributed( MPI::Communicator & comm );
+  //----------------------------------------------------------------------------
+  Distributed( MPI::Communicator & comm );
 
-	Distributed( Distributed const & other );
+  Distributed( Distributed const & other );
 
-	//----------------------------------------------------------------------------
-	// access data
-	MPI::Communicator & comm();
-	uint                comm_rank() const;
-	uint                comm_size() const;
+  //----------------------------------------------------------------------------
+  // access data
+  MPI::Communicator & comm();
 
-	inline bool distributed() const;
+  inline uint comm_rank() const;
+  inline uint comm_size() const;
 
-	/// Swap instances
-	friend void swap( Distributed< T > & a, Distributed< T > & b )
-	{
-		using std::swap;
-		swap( a.comm_, b.comm_ );
-	}
+  inline bool distributed() const;
+
+  /// Swap instances
+  friend void swap( Distributed< T > & a, Distributed< T > & b )
+  {
+    using std::swap;
+    swap( a.comm_, b.comm_ );
+  }
 
 protected:
-	//----------------------------------------------------------------------------
-	virtual ~Distributed();
+  //----------------------------------------------------------------------------
+  virtual ~Distributed();
 
-	Distributed & operator=( Distributed const & other );
+  Distributed & operator=( Distributed const & other );
 
 private:
-	//----------------------------------------------------------------------------
-	MPI::Communicator comm_;
+  //----------------------------------------------------------------------------
+  MPI::Communicator comm_;
 };
 
 //------------------------------------------------------------------------------
@@ -52,14 +53,14 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
   : comm_( DOLFIN_COMM_NULL )
 {
 #if HAVE_MPI
-	/*
-	 * MPI 1.1:
-	 *  "A null handle argument is an erroneous IN argument in MPI calls"
-	 */
-	if ( comm != DOLFIN_COMM_NULL )
-		MPI::check_error( MPI_Comm_dup( comm, &comm_ ) );
+  /*
+   * MPI 1.1:
+   *  "A null handle argument is an erroneous IN argument in MPI calls"
+   */
+  if ( comm != DOLFIN_COMM_NULL )
+    MPI::check_error( MPI_Comm_dup( comm, &comm_ ) );
 #else
-	MAYBE_UNUSED( comm );
+  MAYBE_UNUSED( comm );
 #endif
 }
 
@@ -68,44 +69,44 @@ template < typename T >
 Distributed< T >::Distributed( Distributed const & other )
   : comm_( DOLFIN_COMM_NULL )
 {
-	*this = other;
+  *this = other;
 }
 //------------------------------------------------------------------------------
 template < typename T >
 MPI::Communicator & Distributed< T >::comm()
 {
-	return comm_;
+  return comm_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
-uint Distributed< T >::comm_rank() const
+inline uint Distributed< T >::comm_rank() const
 {
-	int ret = 0;
+  int ret = 0;
 #if HAVE_MPI
-	if ( comm_ != DOLFIN_COMM_NULL )
-		MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
+  if ( comm_ != DOLFIN_COMM_NULL )
+    MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
 #endif
-	return uint( ret );
+  return static_cast< uint >( ret );
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
-uint Distributed< T >::comm_size() const
+inline uint Distributed< T >::comm_size() const
 {
-	int ret = 1;
+  int ret = 1;
 #if HAVE_MPI
-	if ( comm_ != DOLFIN_COMM_NULL )
-		MPI::check_error( MPI_Comm_size( comm_, &ret ) );
+  if ( comm_ != DOLFIN_COMM_NULL )
+    MPI::check_error( MPI_Comm_size( comm_, &ret ) );
 #endif
-	return uint( ret );
+  return static_cast< uint >( ret );
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
 inline bool Distributed< T >::distributed() const
 {
-	return ( this->comm_size() > 1 );
+  return ( this->comm_size() > 1 );
 }
 
 //------------------------------------------------------------------------------
@@ -113,8 +114,8 @@ template < typename T >
 Distributed< T >::~Distributed()
 {
 #if HAVE_MPI
-	if ( comm_ != DOLFIN_COMM_NULL )
-		MPI::check_error( MPI_Comm_free( &comm_ ) );
+  if ( comm_ != DOLFIN_COMM_NULL )
+    MPI::check_error( MPI_Comm_free( &comm_ ) );
 #endif
 }
 
@@ -122,16 +123,16 @@ Distributed< T >::~Distributed()
 template < typename T >
 Distributed< T > & Distributed< T >::operator=( Distributed< T > const & other )
 {
-	if ( this != &other )
-	{
+  if ( this != &other )
+  {
 #if HAVE_MPI
-		if ( comm_ != DOLFIN_COMM_NULL )
-			MPI::check_error( MPI_Comm_free( &comm_ ) );
-		if ( other.comm_ != DOLFIN_COMM_NULL )
-			MPI::check_error( MPI_Comm_dup( other.comm_, &comm_ ) );
+    if ( comm_ != DOLFIN_COMM_NULL )
+      MPI::check_error( MPI_Comm_free( &comm_ ) );
+    if ( other.comm_ != DOLFIN_COMM_NULL )
+      MPI::check_error( MPI_Comm_dup( other.comm_, &comm_ ) );
 #endif
-	}
-	return *this;
+  }
+  return *this;
 }
 
 } /* namespace dolfin */

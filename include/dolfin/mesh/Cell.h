@@ -9,6 +9,10 @@
 #include "MeshEntity.h"
 #include "MeshEntityIterator.h"
 
+#include <dolfin/common/GhostIterator.h>
+#include <dolfin/common/OwnedIterator.h>
+#include <dolfin/common/SharedIterator.h>
+
 namespace dolfin
 {
 

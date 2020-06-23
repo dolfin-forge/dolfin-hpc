@@ -13,9 +13,11 @@ nobase_pkginclude_HEADERS = \
 				common/Distributed.h\
 				common/DistributedData.h\
 				common/dolfin_common.h\
+				common/GhostIterator.h\
 				common/Label.h\
-				common/List.h\
 				common/maybe_unused.h\
+				common/OwnedIterator.h\
+				common/SharedIterator.h\
 				common/system.h\
 				common/Test.h\
 				common/Timer.h\

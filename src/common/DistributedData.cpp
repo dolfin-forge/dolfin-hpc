@@ -3,8 +3,11 @@
 
 #include <dolfin/common/DistributedData.h>
 
-#include <dolfin/common/timing.h>
 #include <dolfin/common/AdjacentMapping.h>
+#include <dolfin/common/GhostIterator.h>
+#include <dolfin/common/OwnedIterator.h>
+#include <dolfin/common/SharedIterator.h>
+#include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
@@ -97,16 +100,6 @@ void swap( DistributedData& a, DistributedData& b )
   swap(a.cached_numbering_ , b.cached_numbering_);
   swap(a.cached_ownership_ , b.cached_ownership_);
   swap(a.shared_mapping_   , b.shared_mapping_);
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::operator==(DistributedData const&) const
-{
-  return true;
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::operator!=(DistributedData const& other) const
-{
-  return !(*this == other);
 }
 //-----------------------------------------------------------------------------
 void DistributedData::clear()
@@ -385,66 +378,6 @@ void DistributedData::assign(DistributedData const& other,
   finalized_ = true;
 }
 //-----------------------------------------------------------------------------
-bool DistributedData::empty() const
-{
-  return ( local_.empty() and global_.empty()
-           and shared_.empty() and ghost_.empty() );
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::capacity() const
-{
-  return local_.size();
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::is_finalized() const
-{
-  return finalized_;
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::offset() const
-{
-  return offset_;
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::range_size() const
-{
-  return range_size_;
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::range_is_set() const
-{
-  return range_is_set_;
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::in_range(uint global_index) const
-{
-  dolfin_assert(global_size_ > 0);
-  dolfin_assert(offset_+ range_size_ <= global_size_);
-  return (offset_ <= global_index && global_index < offset_+ range_size_);
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::off_range(uint global_index) const
-{
-  dolfin_assert(global_size_ > 0);
-  dolfin_assert(offset_+ range_size_ <= global_size_);
-  return (global_index < offset_ || offset_+ range_size_ <= global_index);
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::local_size() const
-{
-  // If local size is not known, return current size, otherwise return
-  return (cached_numbering_.empty() ? local_.size() : cached_numbering_.size());
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::global_size() const
-{
-  if (global_size_ < local_.size())
-  {
-    error("DistributedData : global size has not been set or is invalid");
-  }
-  return global_size_;
-}
-//-----------------------------------------------------------------------------
 void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
 {
   if (finalized_)
@@ -540,74 +473,6 @@ void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
   if ( cached_ownership_.empty() and (num_local > 0) )
   {
     cached_ownership_ = Array<uint>(num_local, pe_size_);
-  }
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::has_local(uint local_index) const
-{
-  if ( not cached_numbering_.empty() )
-  {
-    dolfin_assert(global_.size() == 0);
-    dolfin_assert(local_index < cached_numbering_.size());
-    return cached_numbering_[local_index] != DOLFIN_UINT_UNDEF;
-  }
-  return (global_.count(local_index) > 0);
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::get_global(uint local_index) const
-{
-  if ( not cached_numbering_.empty() )
-  {
-    dolfin_assert(global_.size() == 0);
-    dolfin_assert(local_index < cached_numbering_.size());
-    dolfin_assert(cached_numbering_[local_index] != DOLFIN_UINT_UNDEF);
-    return cached_numbering_[local_index];
-  }
-  dolfin_assert(global_.count(local_index) > 0);
-  return global_.find(local_index)->second;
-}
-//-----------------------------------------------------------------------------
-void DistributedData::get_global(uint n, uint const * local_indices,
-                                 uint * global_indices) const
-{
-  if ( not cached_numbering_.empty() )
-  {
-    dolfin_assert(global_.size() == 0);
-    for(uint i = 0; i < n; ++i)
-    {
-      dolfin_assert(local_indices[i] < cached_numbering_.size());
-      dolfin_assert(cached_numbering_[local_indices[i]] != DOLFIN_UINT_UNDEF);
-      global_indices[i] = cached_numbering_[local_indices[i]];
-    }
-  }
-  else
-  {
-    for(uint i = 0; i < n; ++i)
-    {
-      dolfin_assert(global_.count(local_indices[i]) > 0);
-      global_indices[i] = global_.find(local_indices[i])->second;
-    }
-  }
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::has_global(uint global_index) const
-{
-  return (local_.count(global_index) > 0);
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::get_local(uint global_index) const
-{
-  dolfin_assert(local_.count(global_index) > 0);
-  return local_.find(global_index)->second;
-}
-//-----------------------------------------------------------------------------
-void DistributedData::get_local(uint n, uint const * global_indices,
-                                uint * local_indices) const
-{
-  for(uint i = 0; i < n; ++i)
-  {
-    dolfin_assert(local_.count(global_indices[i]) > 0);
-    local_indices[i] =  local_.find(global_indices[i])->second;
   }
 }
 //-----------------------------------------------------------------------------
@@ -845,85 +710,6 @@ void DistributedData::renumber_global()
 
 }
 //-----------------------------------------------------------------------------
-bool DistributedData::has_adj_rank(uint rank) const
-{
-  return (adjacents_.count(rank) > 0);
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::num_adj_ranks() const
-{
-  return adjacents_.size();
-}
-//-----------------------------------------------------------------------------
-_set<uint> const& DistributedData::get_adj_ranks() const
-{
-  return adjacents_;
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::get_owner(uint local_index) const
-{
-  if ( not cached_ownership_.empty() )
-  {
-    dolfin_assert(local_index < cached_ownership_.size());
-    return (cached_ownership_[local_index] == pe_size_ ?
-              rank_ : cached_ownership_[local_index]);
-  }
-  GhostSet::const_iterator it = ghost_.find(local_index);
-  if (it == ghost_.end())
-  {
-    return rank_;
-  }
-  return it->second;
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::is_owned(uint local_index) const
-{
-  if ( not cached_ownership_.empty() )
-  {
-    dolfin_assert(local_index < cached_ownership_.size() );
-    return (cached_ownership_[local_index] == pe_size_ ||
-            cached_ownership_[local_index] == rank_);
-  }
-  return (ghost_.count(local_index) == 0);
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::is_shared(uint local_index) const
-{
-  if ( not cached_ownership_.empty() )
-  {
-    dolfin_assert(local_index < cached_ownership_.size());
-    return (cached_ownership_[local_index] < pe_size_);
-  }
-  return (shared_.count(local_index) > 0);
-}
-//-----------------------------------------------------------------------------
-bool DistributedData::is_ghost(uint local_index) const
-{
-  if ( not cached_ownership_.empty() )
-  {
-    dolfin_assert(local_index < cached_ownership_.size());
-    return (cached_ownership_[local_index] < pe_size_ &&
-            cached_ownership_[local_index] != rank_);
-  }
-  return (ghost_.count(local_index) > 0);
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::num_owned() const
-{
-  dolfin_assert(local_.size() >= ghost_.size());
-  return (local_.size() - ghost_.size());
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::num_shared() const
-{
-  return (shared_.size());
-}
-//-----------------------------------------------------------------------------
-uint DistributedData::num_ghost() const
-{
-  return (ghost_.size());
-}
-//-----------------------------------------------------------------------------
 void DistributedData::remap_ownership(Array<uint> const& mapping)
 {
   dolfin_assert(finalized_);
@@ -983,25 +769,6 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
     delete shared_mapping_;
     shared_mapping_ = NULL;
   }
-}
-//-----------------------------------------------------------------------------
-_set<uint> const& DistributedData::get_shared_adj(uint local_index) const
-{
-  dolfin_assert(shared_.count(local_index) > 0);
-  return shared_.find(local_index)->second;
-}
-//-----------------------------------------------------------------------------
-_set<uint> const* DistributedData::ptr_shared_adj(uint local_index) const
-{
-  if ( not cached_ownership_.empty() )
-  {
-    if (cached_ownership_[local_index] < pe_size_)
-      return &shared_.find(local_index)->second;
-    else
-      return NULL;
-  }
-  SharedSet::const_iterator it = shared_.find(local_index);
-  return (it == shared_.end() ? NULL : &it->second);
 }
 //-----------------------------------------------------------------------------
 void DistributedData::get_common_adj(uint n, uint const indices[],

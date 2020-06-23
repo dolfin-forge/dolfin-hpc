@@ -7,6 +7,10 @@
 #include "MeshEntity.h"
 #include "MeshEntityIterator.h"
 
+#include <dolfin/common/GhostIterator.h>
+#include <dolfin/common/OwnedIterator.h>
+#include <dolfin/common/SharedIterator.h>
+
 namespace dolfin
 {
 
@@ -62,7 +66,7 @@ public:
 class FaceIterator : public MeshEntityIterator
 {
 public:
-  
+
   FaceIterator(Mesh& mesh) : MeshEntityIterator(mesh, 2) {}
   FaceIterator(MeshEntity& entity) : MeshEntityIterator(entity, 2) {}
 

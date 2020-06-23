@@ -9,46 +9,66 @@
 namespace dolfin
 {
 
-  /// A timer can be used for timing tasks. The basic usage is
-  ///
-  ///   Timer timer("Assembling over cells");
-  ///
-  /// The timer is started at construction and timing ends
-  /// when the timer is destroyed (goes out of scope). It is
-  /// also possible to start and stop a timer explicitly by
-  ///
-  ///   timer.start();
-  ///   timer.stop();
+/// A timer can be used for timing tasks. The basic usage is
+///
+///   Timer timer("Assembling over cells");
+///
+/// The timer is started at construction and timing ends
+/// when the timer is destroyed (goes out of scope). It is
+/// also possible to start and stop a timer explicitly by
+///
+///   timer.start();
+///   timer.stop();
 
-  class Timer
+class Timer
+{
+public:
+  /// Create timer
+  Timer( std::string const & task_ )
+    : task( task_ )
+    , t( time() )
+    , stopped( false )
   {
-  public:
+  }
 
-    /// Create timer
-    Timer(std::string task) : task(task), t(time()), stopped(false) {}
+  /// Destructor
+  ~Timer()
+  {
+    if ( not stopped )
+      stop();
+  }
 
-    /// Destructor
-    ~Timer() { if (!stopped) stop(); }
+  /// Start timer
+  inline void start();
 
-    /// Start timer
-    inline void start() { t = time(); stopped = false; }
+  /// Stop timer
+  inline void stop();
 
-    /// Stop timer
-    inline void stop() { timing(task.c_str(), time() - t); stopped = true; }
+private:
+  // Name of task
+  std::string task;
 
-  private:
+  // Start time
+  real t;
 
-    // Name of task
-    std::string task;
+  // True if timer has been stopped
+  bool stopped;
+};
 
-    // Start time
-    real t;
-
-    // True if timer has been stopped
-    bool stopped;
-
-  };
-
+//-----------------------------------------------------------------------------
+inline void Timer::start()
+{
+  t       = time();
+  stopped = false;
 }
+//-----------------------------------------------------------------------------
+inline void Timer::stop()
+{
+  timing( task.c_str(), time() - t );
+  stopped = true;
+}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
 
 #endif

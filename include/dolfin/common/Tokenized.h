@@ -16,26 +16,26 @@ namespace dolfin
  *            instance with a token.
  */
 
-
 class Tokenized
 {
 
 public:
-
   ///
   virtual int token() const = 0;
 
 protected:
+  ///
+  Tokenized()
+  {
+  }
 
   ///
-  Tokenized() {}
-
-  ///
-  virtual ~Tokenized() {}
+  virtual ~Tokenized()
+  {
+  }
 
   ///
   virtual void update_token() = 0;
-
 };
 
 } /* namespace dolfin */

@@ -12,6 +12,7 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/UnitInterval.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <dolfin/dolfin.h>

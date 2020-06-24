@@ -4,6 +4,7 @@
 #include <dolfin/mesh/MeshEditor.h>
 
 #include <dolfin/log/log.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Space.h>
@@ -114,7 +115,6 @@ MeshEditor::MeshEditor(Mesh& mesh) :
     cell_index_(0),
     open_(false)
 {
-  if (mesh.empty()) { error("MeshEditor : provided mesh is empty"); }
   init(mesh, mesh.type(), mesh.space(), mesh.topology().comm());
 }
 //-----------------------------------------------------------------------------
@@ -137,7 +137,6 @@ void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space,
   {
     Mesh m(ctype, space, comm);
     swap(mesh, m);
-    dolfin_assert(!mesh.empty());
     dolfin_assert(mesh.topology_dimension() == ctype.dim());
     dolfin_assert(mesh.geometry_dimension() == space.dim());
   }

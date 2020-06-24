@@ -6,10 +6,12 @@
 #include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 

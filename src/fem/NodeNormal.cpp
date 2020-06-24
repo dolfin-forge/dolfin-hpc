@@ -9,10 +9,12 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/EuclideanBasis.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/mesh/VertexNormal.h>
 
 namespace dolfin

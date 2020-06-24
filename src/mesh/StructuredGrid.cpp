@@ -3,6 +3,7 @@
 
 #include <dolfin/mesh/StructuredGrid.h>
 
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
@@ -44,7 +45,6 @@ void StructuredGrid::init(CellType const& type)
 
   //
   uint const tdim = type.dim();
-  uint const gdim = type.space_dim();
   MeshEditor editor(*this, type);
   // Number of cells in each direction
   uint * n = new uint[tdim];

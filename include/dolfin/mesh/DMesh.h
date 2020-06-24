@@ -58,6 +58,9 @@ private:
     uint owner;	//< rank of owner
   } prop_edge;
 
+  static bool less_pair_comp( std::pair< uint, prop_edge > const & x,
+                              std::pair< uint, prop_edge > const & y );
+
   /// Pair datatype for propagation
   typedef std::pair<uint, prop_edge> Propagation;
 
@@ -127,16 +130,6 @@ private:
   typedef _map<EdgeKey<long>, DVertex*> RefinedEdges;
   RefinedEdges ref_edge;
 
-  /// Comparison operator for index/value pairs
-  struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
-  std::pair<uint, prop_edge>, bool>
-  {
-    bool operator()(std::pair<uint, prop_edge> x, std::pair<uint, prop_edge> y)
-    {
-      return x.first < y.first;
-    }
-  };
-
   /// Mesh
   Mesh& mesh_;
 
@@ -156,6 +149,13 @@ private:
   uint vdeleted_;
 
 };
+//-----------------------------------------------------------------------------
+/// Comparison operator for index/value pairs
+inline bool DMesh::less_pair_comp( std::pair< uint, prop_edge > const & x,
+                                   std::pair< uint, prop_edge > const & y )
+{
+  return x.first < y.first;
+}
 
 } /* namespace dolfin */
 

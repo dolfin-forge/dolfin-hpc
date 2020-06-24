@@ -9,7 +9,9 @@
 #include <dolfin/fem/UFC.h>
 #include <dolfin/la/GenericSparsityPattern.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/parameter/parameters.h>
 

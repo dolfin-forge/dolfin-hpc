@@ -6,29 +6,28 @@
 
 #include <dolfin/common/types.h>
 
+#include <dolfin/mesh/MeshValues.h>
+
 namespace dolfin
 {
 
 /**
- *  @class  MetisInterface
+ *  @namespace  MetisInterface
  *
- *  @brief   This class provides an interface to ParMETIS
+ *  @brief   This namespace provides an interface to ParMETIS
  *
  */
 
-class MetisInterface
+namespace MetisInterface
 {
 
-public:
-  
-  static void partitionCommonMetis(Mesh& mesh,
-                                   MeshValues<uint, Cell>& partitions,
-                                   MeshValues<uint, Cell> * weight);
+void partitionCommonMetis( Mesh &                     mesh,
+                           MeshValues< uint, Cell > & partitions,
+                           MeshValues< uint, Cell > * weight );
 
-  static void partitionGeomMetis(Mesh& mesh,
-                                 MeshValues<uint, Vertex> & partitions);
+void partitionGeomMetis( Mesh & mesh, MeshValues< uint, Vertex > & partitions );
 
-};
+} /* namespace MetisInterface */
 
 } /* namespace dolfin */
 

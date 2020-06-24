@@ -4,8 +4,8 @@
 #ifndef __DOLFIN_FACE_H
 #define __DOLFIN_FACE_H
 
-#include "MeshEntity.h"
-#include "MeshEntityIterator.h"
+#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/MeshEntityIterator.h>
 
 #include <dolfin/common/GhostIterator.h>
 #include <dolfin/common/OwnedIterator.h>
@@ -14,19 +14,23 @@
 namespace dolfin
 {
 
-  /// A Face is a MeshEntity of topological dimension 2.
+/// A Face is a MeshEntity of topological dimension 2.
 
 class FaceIterator;
 
 class Face : public MeshEntity
 {
 public:
-
   /// Constructor
-  Face(Mesh& mesh, uint index) : MeshEntity(mesh, 2, index) {}
+  Face( Mesh & mesh, uint index )
+    : MeshEntity( mesh, 2, index )
+  {
+  }
 
   /// Destructor
-  ~Face() {}
+  ~Face()
+  {
+  }
 
   /// Compute coordinates of face midpoint
   Point midpoint() const;
@@ -37,43 +41,60 @@ public:
 
   struct shared : SharedIterator
   {
-    shared(Mesh& M) : SharedIterator(M.topology().distdata()[2]) {}
-    shared(MeshTopology& T) : SharedIterator(T.distdata()[2]) {}
+    shared( Mesh & M )
+      : SharedIterator( M.topology().distdata()[2] )
+    {
+    }
+    shared( MeshTopology & T )
+      : SharedIterator( T.distdata()[2] )
+    {
+    }
   };
 
   struct ghost : GhostIterator
   {
-    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[2]) {}
-    ghost(MeshTopology& T) : GhostIterator(T.distdata()[2]) {}
+    ghost( Mesh & M )
+      : GhostIterator( M.topology().distdata()[2] )
+    {
+    }
+    ghost( MeshTopology & T )
+      : GhostIterator( T.distdata()[2] )
+    {
+    }
   };
 
   struct owned : OwnedIterator
   {
-    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[2]) {}
-    owned(MeshTopology& T) : OwnedIterator(T.distdata()[2]) {}
+    owned( Mesh & M )
+      : OwnedIterator( M.topology().distdata()[2] )
+    {
+    }
+    owned( MeshTopology & T )
+      : OwnedIterator( T.distdata()[2] )
+    {
+    }
   };
-
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Edge  lower_dimensional;
-  typedef Cell  higher_dimensional;
-
+  typedef Edge lower_dimensional;
+  typedef Cell higher_dimensional;
 };
 
-/// A FaceIterator is a MeshEntityIterator of topological dimension 2.
-
-class FaceIterator : public MeshEntityIterator
+inline Point Face::midpoint() const
 {
-public:
+  MeshGeometry const &  geometry     = this->mesh().geometry();
+  Array< uint > const & vertices     = this->entities( 0 );
+  uint const            num_vertices = this->num_entities( 0 );
 
-  FaceIterator(Mesh& mesh) : MeshEntityIterator(mesh, 2) {}
-  FaceIterator(MeshEntity& entity) : MeshEntityIterator(entity, 2) {}
-
-  inline Face& operator*() { return *operator->(); }
-  inline Face* operator->() { return static_cast<Face*>(MeshEntityIterator::operator->()); }
-
-};
+  Point p;
+  for ( uint v = 0; v < num_vertices; ++v )
+  {
+    p += geometry.point( vertices[v] );
+  }
+  p /= real( num_vertices );
+  return p;
+}
 
 } /* namespace dolfin */
 

@@ -1,18 +1,19 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/timing.h>
-#include <dolfin/math/basic.h>
-#include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
-#include <dolfin/parameter/parameters.h>
+
+#include <dolfin/common/timing.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
-
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Cell.h>
-
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/MeshValues.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PARMETIS
 #include <parmetis.h>

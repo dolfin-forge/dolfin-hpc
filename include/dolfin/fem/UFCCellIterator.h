@@ -7,6 +7,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 
 namespace dolfin
 {

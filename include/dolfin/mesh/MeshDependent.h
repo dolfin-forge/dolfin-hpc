@@ -4,12 +4,12 @@
 #ifndef __DOLFIN_MESH_DEPENDENT_H
 #define __DOLFIN_MESH_DEPENDENT_H
 
+#include <dolfin/mesh/Mesh.h>
+
 #include <string>
 
 namespace dolfin
 {
-
-class Mesh;
 
 class MeshDependent
 {
@@ -49,6 +49,37 @@ private:
   int geometry_token_;
 
 };
+
+//---------------------------------------------------------------------------
+inline Mesh& MeshDependent::mesh() const
+{
+  return *mesh_;
+}
+
+//---------------------------------------------------------------------------
+inline bool MeshDependent::invalid_mesh_topology() const
+{
+  return topology_token_ != mesh_->topology().token();
+}
+
+//---------------------------------------------------------------------------
+inline bool MeshDependent::invalid_mesh_geometry() const
+{
+  return geometry_token_ != mesh_->geometry().token();
+}
+
+//---------------------------------------------------------------------------
+inline bool MeshDependent::invalid_mesh() const
+{
+  return invalid_mesh_topology() || invalid_mesh_geometry();
+}
+
+//---------------------------------------------------------------------------
+inline void MeshDependent::update_mesh_dependency()
+{
+  topology_token_ = mesh_->topology().token();
+  geometry_token_ = mesh_->geometry().token();
+}
 
 }
 

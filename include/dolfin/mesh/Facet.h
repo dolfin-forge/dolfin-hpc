@@ -23,12 +23,16 @@ class FacetIterator;
 class Facet : public MeshEntity
 {
 public:
-
   /// Constructor
-  Facet(Mesh& mesh, uint index) : MeshEntity(mesh, mesh.type().facet_dim(), index) {}
+  Facet( Mesh & mesh, uint index )
+    : MeshEntity( mesh, mesh.type().facet_dim(), index )
+  {
+  }
 
   /// Destructor
-  ~Facet() {}
+  ~Facet()
+  {
+  }
 
   /// Compute coordinates of facet midpoint
   Point midpoint() const;
@@ -39,38 +43,57 @@ public:
 
   struct shared : SharedIterator
   {
-    shared(Mesh& M) : SharedIterator(M.topology().distdata()[M.type().facet_dim()]) {}
-    shared(MeshTopology& T) : SharedIterator(T.distdata()[T.type().facet_dim()]) {}
+    shared( Mesh & M )
+      : SharedIterator( M.topology().distdata()[M.type().facet_dim()] )
+    {
+    }
+    shared( MeshTopology & T )
+      : SharedIterator( T.distdata()[T.type().facet_dim()] )
+    {
+    }
   };
 
   struct ghost : GhostIterator
   {
-    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[M.type().facet_dim()]) {}
-    ghost(MeshTopology& T) : GhostIterator(T.distdata()[T.type().facet_dim()]) {}
+    ghost( Mesh & M )
+      : GhostIterator( M.topology().distdata()[M.type().facet_dim()] )
+    {
+    }
+    ghost( MeshTopology & T )
+      : GhostIterator( T.distdata()[T.type().facet_dim()] )
+    {
+    }
   };
 
   struct owned : OwnedIterator
   {
-    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[M.type().facet_dim()]) {}
-    owned(MeshTopology& T) : OwnedIterator(T.distdata()[T.type().facet_dim()]) {}
+    owned( Mesh & M )
+      : OwnedIterator( M.topology().distdata()[M.type().facet_dim()] )
+    {
+    }
+    owned( MeshTopology & T )
+      : OwnedIterator( T.distdata()[T.type().facet_dim()] )
+    {
+    }
   };
-
 };
 
-/// A FacetIterator is a MeshEntityIterator of topological codimension 1.
-
-class FacetIterator : public MeshEntityIterator
+//-----------------------------------------------------------------------------
+inline Point Facet::midpoint() const
 {
-public:
+  MeshGeometry const &  geometry     = this->mesh().geometry();
+  Array< uint > const & vertices     = this->entities( 0 );
+  uint const            num_vertices = this->num_entities( 0 );
 
-  FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
-  FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().type().facet_dim()) {}
-
-  inline Facet* operator->() { return static_cast<Facet*>(MeshEntityIterator::operator->()); }
-  inline Facet& operator*() { return *operator->(); }
-  inline Facet& operator[](uint i) { return static_cast<Facet&>(MeshEntityIterator::operator[](i)); }
-
-};
+  Point p;
+  for ( uint v = 0; v < num_vertices; ++v )
+  {
+    p += geometry.point( vertices[v] );
+  }
+  p /= static_cast< real >( num_vertices );
+  return p;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

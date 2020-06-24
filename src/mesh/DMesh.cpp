@@ -5,10 +5,12 @@
 
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 #include <string>
@@ -676,8 +678,7 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   }
 
-  less_pair comp;
-  std::sort(propagated.begin(), propagated.end(), comp);
+  std::sort(propagated.begin(), propagated.end(), less_pair_comp);
 
   short prop, gprop;
   prop = (empty == false);
@@ -753,8 +754,7 @@ void DMesh::propagate_hypercube(Mesh& mesh,
 
   }
 
-  less_pair comp;
-  std::sort(propagated.begin(), propagated.end(), comp);
+  std::sort(propagated.begin(), propagated.end(), less_pair_comp);
   empty = (state_size == 0);
 
   delete[] recv_buff;

@@ -10,26 +10,23 @@
 namespace dolfin
 {
 
-class Mesh;
-
 /// This class provides a set of functions to partition a Mesh
 
-class MeshPartition
+namespace MeshPartition
 {
 
-public:
+/// Partition a mesh into pe_size partitions in parallel
+void partition( MeshValues< uint, Cell > & partitions );
 
-  /// Partition a mesh into pe_size partitions in parallel
-  static void partition(MeshValues<uint, Cell>& partitions);
+/// Partition a mesh into pe_size partitions in parallel with
+/// weights on vertices on the cells
+void partition( MeshValues< uint, Cell > & partitions,
+                MeshValues< uint, Cell > & weight );
 
-  /// Partition a mesh into pe_size partitions in parallel with
-  /// weights on vertices ^H^H^H on the *fucking* *cells*
-  static void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
+/// Partition a mesh based on coordinates
+void partition_geom( MeshValues< uint, Vertex > & partitions );
 
-  /// Partition a mesh based on coordinates
-  static void partition_geom(MeshValues<uint, Vertex>& partitions);
-  
-};
+} /* namespace MeshPartition */
 
 } /* namespace dolfin */
 

@@ -168,6 +168,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/BoundingBox.h\
 				mesh/Box.h\
 				mesh/Cell.h\
+				mesh/CellIterator.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
 				mesh/Connectivity.h\
@@ -175,13 +176,17 @@ nobase_pkginclude_HEADERS = \
 				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
 				mesh/Edge.h\
+				mesh/EdgeIterator.h\
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
+				mesh/EuclideanSpace.h \
 				mesh/Face.h\
+				mesh/FaceIterator.h\
 				mesh/FaceKey.h\
 				mesh/Facet.h\
+				mesh/FacetIterator.h\
 				mesh/GeometricPredicates.h\
 				mesh/GTSInterface.h\
 				mesh/HexahedronCell.h\
@@ -232,6 +237,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
+				mesh/VertexIterator.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\
@@ -295,4 +301,3 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLValueArray.h\
 				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h
-

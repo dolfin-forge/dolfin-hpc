@@ -229,49 +229,6 @@ void MeshTopology::remap( uint d0, Array< uint > const & mapping )
   }
 }
 //-----------------------------------------------------------------------------
-MeshDistributedData & MeshTopology::distdata()
-{
-  if ( not distributed() )
-  {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
-  }
-  return distdata_;
-}
-//-----------------------------------------------------------------------------
-MeshDistributedData const & MeshTopology::distdata() const
-{
-  if ( not distributed() )
-  {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
-  }
-  return distdata_;
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::global_size( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].global_size() : this->size( dim ) );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::offset( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].offset() : 0 );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_owned( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_owned() : this->size( dim ) );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_shared( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_shared() : 0 );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_ghost( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_ghost() : 0 );
-}
-//-----------------------------------------------------------------------------
 Connectivity const * MeshTopology::entities( uint di ) const
 {
   if ( connectivity( di ) )

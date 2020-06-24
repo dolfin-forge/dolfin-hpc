@@ -1,15 +1,14 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/ZoltanInterface.h>
-#include <dolfin/parameter/parameters.h>
 
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
-
+#include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>

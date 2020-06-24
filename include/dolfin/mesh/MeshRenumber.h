@@ -26,7 +26,7 @@ namespace dolfin
 class MeshTopology;
 
 /**
- *  @class  MeshRenumber
+ *  @namesapce  MeshRenumber
  *
  *  @brief  Provides algorithms to renumber the mesh topology:
  *          - vertices and cells exist and are only renumbered with indices
@@ -37,15 +37,13 @@ class MeshTopology;
  *
  */
 
-class MeshRenumber
+namespace MeshRenumber
 {
 
-public:
+/// Renumber all mesh entities
+bool renumber(MeshTopology& topology);
 
-  /// Renumber all mesh entities
-  static bool renumber(MeshTopology& topology);
-
-};
+} /* namespace MeshRenumber */
 
 } /* namespace dolfin */
 

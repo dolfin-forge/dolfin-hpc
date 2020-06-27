@@ -56,6 +56,11 @@ public:
     clear();
   }
 
+  Cell const & cell() const
+  {
+    return *cell_;
+  }
+
 private:
 
   //

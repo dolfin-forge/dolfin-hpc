@@ -73,75 +73,137 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
                                       const PETScVector& b)
 {
   // Check dimensions
-  uint M = A.size(0);
-  uint N = A.size(1);
-  if (N != b.size())
+  uint M = A.size( 0 );
+  uint N = A.size( 1 );
+  if ( N != b.size() )
   {
-    error("Non-matching dimensions for linear system.");
+    error( "Non-matching dimensions for linear system." );
   }
 
   // Write a message
-  if ( dolfin_get<bool>("Krylov report") )
+  if ( dolfin_get< bool >( "Krylov report" ) )
   {
-    message("Solving linear system of size %d x %d (Krylov solver).", M, N);
+    message( "Solving linear system of size %d x %d (Krylov solver).", M, N );
   }
 
   // Reinitialize KSP solver if necessary
-  init(M, N);
+  init( M, N );
 
   // Reinitialize solution vector if necessary
-  x.init(b.local_size());
+  x.init( b.local_size() );
 
   // Read parameters if not done
-  if (!parameters_read) readParameters();
+  if ( !parameters_read )
+    readParameters();
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
-  KSPSetOperators(ksp, A.mat(), A.mat());
-  if ( dolfin_get<bool>("Krylov keep PC") )
-    KSPSetReusePreconditioner(ksp, PETSC_TRUE);
+  KSPSetOperators( ksp, A.mat(), A.mat() );
+  if ( dolfin_get< bool >( "Krylov keep PC" ) )
+    KSPSetReusePreconditioner( ksp, PETSC_TRUE );
 
 #else
   // Solve linear system
-  if ( dolfin_get<bool>("Krylov keep PC") )
+  if ( dolfin_get< bool >( "Krylov keep PC" ) )
   {
-    KSPSetOperators(ksp, A.mat(), A.mat(), SAME_PRECONDITIONER);
+    KSPSetOperators( ksp, A.mat(), A.mat(), SAME_PRECONDITIONER );
   }
   else
   {
-    KSPSetOperators(ksp, A.mat(), A.mat(), SAME_NONZERO_PATTERN);
+    KSPSetOperators( ksp, A.mat(), A.mat(), SAME_NONZERO_PATTERN );
   }
 #endif
 
   // FIXME: Preconditioner being set here to avoid PETSc bug with Hypre.
   //        See explanation inside PETScKrylovSolver:init().
-  if (!pc_set)
+  if ( !pc_set )
   {
     setPETScPreconditioner();
     pc_set = true;
   }
 
-  KSPSolve(ksp, b.vec(), x.vec());
+  KSPSolve( ksp, b.vec(), x.vec() );
+
+  int num_iterations = DOLFIN_INT_MAX;
 
   // Check if the solution converged
   KSPConvergedReason reason;
-  KSPGetConvergedReason(ksp, &reason);
-  if (reason < 0)
+  KSPGetConvergedReason( ksp, &reason );
+  if ( reason == KSP_CONVERGED_RTOL ) {
+    warning( "KSP_CONVERGED_RTOL residual 2-norm decreased by a factor of rtol, from 2-norm of right hand side " );
+  }
+  else if ( reason == KSP_CONVERGED_RTOL_NORMAL ) {
+    warning( "KSP_CONVERGED_RTOL_NORMAL residual 2-norm decreased by a factor of rtol, from 2-norm of right hand side " );
+  }
+  else if ( reason == KSP_CONVERGED_ATOL ) {
+    warning( "KSP_CONVERGED_ATOL residual 2-norm less than abstol " );
+  }
+  else if ( reason == KSP_CONVERGED_ATOL_NORMAL ) {
+    warning( "KSP_CONVERGED_ATOL_NORMAL residual 2-norm less than abstol " );
+  }
+  else if ( reason == KSP_CONVERGED_ITS ) {
+    warning( "KSP_CONVERGED_ITS used by the preonly preconditioner that always uses ONE iteration, or when the KSPConvergedSkip() convergence test routine is set " );
+  }
+  else if ( reason == KSP_CONVERGED_CG_NEG_CURVE ) {
+    warning( "KSP_CONVERGED_CG_NEG_CURVE returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_CG_CONSTRAINED ) {
+    warning( "KSP_CONVERGED_CG_CONSTRAINED returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_STEP_LENGTH ) {
+    warning( "KSP_CONVERGED_STEP_LENGTH returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_ITERATING ) {
+    warning( "KSP_CONVERGED_ITERATING returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_DIVERGED_ITS ) {
+ warning( "reqKSP_DIVERGED_ITS uired more than its to reach convergence " );
+  }
+  else if ( reason == KSP_DIVERGED_DTOL ) {
+    warning( "KSP_DIVERGED_DTOL residual norm increased by a factor of divtol " );
+  }
+  else if ( reason == KSP_DIVERGED_NANORINF ) {
+    warning( "KSP_DIVERGED_NANORINF residual norm became Not-a-number or Inf likely due to 0/0 " );
+  }
+  else if ( reason == KSP_DIVERGED_BREAKDOWN ) {
+    warning( "KSP_DIVERGED_BREAKDOWN generic breakdown in method " );
+  }
+  else if ( reason == KSP_DIVERGED_BREAKDOWN_BICG ) {
+    warning( "KSP_DIVERGED_BREAKDOWN_BICG Initial residual is orthogonal to preconditioned initial residual. Try a different preconditioner, or a different initial Level. " );
+  }
+  else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
   {
-    if ( dolfin_get<bool>("Krylov error on nonconvergence") )
+    warning( "KSP_DIVERGED_INDEFINITE_PC\nDivergence because of indefinite preconditioner;\n" );
+  }
+  else if ( reason == KSP_DIVERGED_NONSYMMETRIC )
+  {
+    warning( "KSP_DIVERGED_NONSYMMETRIC" );
+  }
+  else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
+  {
+    warning( "KSP_DIVERGED_INDEFINITE_PC" );
+  }
+  else if ( reason == KSP_DIVERGED_PC_FAILED )
+  {
+    warning( "KSP_DIVERGED_PC_FAILED" );
+  }
+  else if ( reason < 0 )
+  {
+    if ( dolfin_get< bool >( "Krylov error on nonconvergence" ) )
     {
-      error("Krylov solver did not converge.");
+      error( "Krylov solver did not converge." );
     }
     else
     {
-      warning("Krylov solver did not converge.");
+      warning( "Krylov solver did not converge." );
     }
   }
+  else
+  {
+    // Get the number of iterations
+    KSPGetIterationNumber( ksp, &num_iterations );
 
-  // Get the number of iterations
-  int num_iterations = 0;
-  KSPGetIterationNumber(ksp, &num_iterations);
-
-  // Report results
-  writeReport(num_iterations);
+    // Report results
+    writeReport( num_iterations );
+  }
 
   return num_iterations;
 }
@@ -189,27 +251,89 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A,
 #endif
   KSPSolve(ksp, b.vec(), x.vec());
 
+  int num_iterations = DOLFIN_INT_MAX;
+
   // Check if the solution converged
   KSPConvergedReason reason;
-  KSPGetConvergedReason(ksp, &reason);
-  if (reason < 0)
+  KSPGetConvergedReason( ksp, &reason );
+  if ( reason == KSP_CONVERGED_RTOL ) {
+    warning( "KSP_CONVERGED_RTOL residual 2-norm decreased by a factor of rtol, from 2-norm of right hand side " );
+  }
+  else if ( reason == KSP_CONVERGED_RTOL_NORMAL ) {
+    warning( "KSP_CONVERGED_RTOL_NORMAL residual 2-norm decreased by a factor of rtol, from 2-norm of right hand side " );
+  }
+  else if ( reason == KSP_CONVERGED_ATOL ) {
+    warning( "KSP_CONVERGED_ATOL residual 2-norm less than abstol " );
+  }
+  else if ( reason == KSP_CONVERGED_ATOL_NORMAL ) {
+    warning( "KSP_CONVERGED_ATOL_NORMAL residual 2-norm less than abstol " );
+  }
+  else if ( reason == KSP_CONVERGED_ITS ) {
+    warning( "KSP_CONVERGED_ITS used by the preonly preconditioner that always uses ONE iteration, or when the KSPConvergedSkip() convergence test routine is set " );
+  }
+  else if ( reason == KSP_CONVERGED_CG_NEG_CURVE ) {
+    warning( "KSP_CONVERGED_CG_NEG_CURVE returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_CG_CONSTRAINED ) {
+    warning( "KSP_CONVERGED_CG_CONSTRAINED returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_STEP_LENGTH ) {
+    warning( "KSP_CONVERGED_STEP_LENGTH returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_CONVERGED_ITERATING ) {
+    warning( "KSP_CONVERGED_ITERATING returned if the solver is not yet finished " );
+  }
+  else if ( reason == KSP_DIVERGED_ITS ) {
+ warning( "reqKSP_DIVERGED_ITS uired more than its to reach convergence " );
+  }
+  else if ( reason == KSP_DIVERGED_DTOL ) {
+    warning( "KSP_DIVERGED_DTOL residual norm increased by a factor of divtol " );
+  }
+  else if ( reason == KSP_DIVERGED_NANORINF ) {
+    warning( "KSP_DIVERGED_NANORINF residual norm became Not-a-number or Inf likely due to 0/0 " );
+  }
+  else if ( reason == KSP_DIVERGED_BREAKDOWN ) {
+    warning( "KSP_DIVERGED_BREAKDOWN generic breakdown in method " );
+  }
+  else if ( reason == KSP_DIVERGED_BREAKDOWN_BICG ) {
+    warning( "KSP_DIVERGED_BREAKDOWN_BICG Initial residual is orthogonal to preconditioned initial residual. Try a different preconditioner, or a different initial Level. " );
+  }
+  else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
   {
-    if ( dolfin_get<bool>("Krylov error on nonconvergence") )
+    warning( "KSP_DIVERGED_INDEFINITE_PC\nDivergence because of indefinite preconditioner;\n" );
+  }
+  else if ( reason == KSP_DIVERGED_NONSYMMETRIC )
+  {
+    warning( "KSP_DIVERGED_NONSYMMETRIC" );
+  }
+  else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
+  {
+    warning( "KSP_DIVERGED_INDEFINITE_PC" );
+  }
+  else if ( reason == KSP_DIVERGED_PC_FAILED )
+  {
+    warning( "KSP_DIVERGED_PC_FAILED" );
+  }
+  else if ( reason < 0 )
+  {
+    if ( dolfin_get< bool >( "Krylov error on nonconvergence" ) )
     {
-      error("Krylov solver did not converge.");
+      error( "Krylov solver did not converge." );
     }
     else
     {
-      warning("Krylov solver did not converge.");
+      warning( "Krylov solver did not converge." );
     }
   }
+  else
+  {
+    // Get the number of iterations
+    int num_iterations = 0;
+    KSPGetIterationNumber( ksp, &num_iterations );
 
-  // Get the number of iterations
-  int num_iterations = 0;
-  KSPGetIterationNumber(ksp, &num_iterations);
-
-  // Report results
-  writeReport(num_iterations);
+    // Report results
+    writeReport( num_iterations );
+  }
 
   return num_iterations;
 }

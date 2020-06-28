@@ -87,6 +87,9 @@
 /* Define if you have the Petsc library. */
 #undef HAVE_PETSC
 
+/* Define if you have the trilinos library. */
+#undef HAVE_TRILINOS
+
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 

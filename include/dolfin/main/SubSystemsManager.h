@@ -27,18 +27,19 @@ public:
   // Subsystem state mask
   enum Type
   {
-    mpi      = 1,
-    petsc    = 2,
-    petscmpi = 4,
-    janpack  = 8,
-    zoltan   = 16,
-    trilinos = 32,
-    number_of_subsystems = 64
+    mpi                  = 1,
+    petsc                = 2,
+    petscmpi             = 4,
+    janpack              = 8,
+    zoltan               = 16,
+    trilinos             = 32,
+    trilinosmpi          = 64,
+    number_of_subsystems = 128
   };
 
   //-------------------------------------------------------------------------
-  static int start( int argc = 0, char * argv[] = NULL,
-                    uint n = 0, long w_limit = 0 )
+  static int start( int  argc = 0, char * argv[]  = NULL,
+                    uint n    = 0, long   w_limit = 0 )
   {
     return SubSystemsManager::instance().initialize( argc, argv, n, w_limit );
   }
@@ -116,6 +117,27 @@ public:
   };
 
   //-------------------------------------------------------------------------
+  struct Trilinos
+  {
+    static SubSystemsManager::Type const flag = trilinos;
+
+    /// Initialize Trilinos with command-line arguments
+    static bool initialize( int argc = 0, char * argv[] = NULL );
+
+    /// Finalize Trilinos
+    static bool finalize();
+
+    ///
+    static int sema;
+  };
+
+  //-------------------------------------------------------------------------
+  struct TrilinosMPI
+  {
+    static SubSystemsManager::Type const flag = trilinosmpi;
+  };
+
+  //-------------------------------------------------------------------------
   void disp() const;
 
   //--- ALARM ---------------------------------------------------------------
@@ -126,8 +148,8 @@ public:
   }
 
 private:
-  int initialize( int argc = 0, char * argv[] = NULL,
-                  uint n = 0, long w_limit = 0 );
+  int initialize( int  argc = 0, char * argv[]  = NULL,
+                  uint n    = 0, long   w_limit = 0 );
   int finalize();
 
   // Constructor

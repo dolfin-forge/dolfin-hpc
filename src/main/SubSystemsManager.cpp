@@ -16,6 +16,18 @@
 #include <zoltan_cpp.h>
 #endif
 
+#ifdef HAVE_TRILINOS
+#include <Kokkos_Core.hpp>
+#include <Epetra_config.h>
+
+#ifdef HAVE_MPI
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+#endif
+
 #include <cstdlib>
 
 namespace dolfin
@@ -23,9 +35,10 @@ namespace dolfin
 
 //--- STATIC ------------------------------------------------------------------
 
-int SubSystemsManager::MPI::sema    = 0;
-int SubSystemsManager::PETSc::sema  = 0;
-int SubSystemsManager::Zoltan::sema = 0;
+int SubSystemsManager::MPI::sema      = 0;
+int SubSystemsManager::PETSc::sema    = 0;
+int SubSystemsManager::Zoltan::sema   = 0;
+int SubSystemsManager::Trilinos::sema = 0;
 
 //-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager()
@@ -46,7 +59,10 @@ SubSystemsManager::~SubSystemsManager()
   SubSystemsManager::finalize();
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::initialize( int argc, char * argv[], uint n, long w_limit )
+int SubSystemsManager::initialize( int    argc,
+                                   char * argv[],
+                                   uint   n,
+                                   long   w_limit )
 {
   if ( count_ == 0 )
   {
@@ -65,14 +81,22 @@ int SubSystemsManager::initialize( int argc, char * argv[], uint n, long w_limit
     SubSystemsManager::Zoltan::initialize( argc, argv );
 #endif
 
-#if !defined( HAVE_MPI ) && !defined( HAVE_PETSC ) && !defined( HAVE_ZOLTAN )
+#if !defined( HAVE_MPI ) and !defined( HAVE_PETSC ) and !defined( HAVE_ZOLTAN )
     MAYBE_UNUSED( argc );
     MAYBE_UNUSED( argv );
+#endif
+
+#ifdef HAVE_TRILINOS
+    SubSystemsManager::Trilinos::initialize( argc, argv );
 #endif
 
     // Set wall clock limit
     timer_.set_limit( w_limit );
   }
+
+  if ( verbose() > 0 )
+    this->disp();
+
   return ++count_;
 }
 //-----------------------------------------------------------------------------
@@ -87,6 +111,10 @@ int SubSystemsManager::finalize()
 
 #ifdef HAVE_PETSC
     SubSystemsManager::PETSc::finalize();
+#endif
+
+#ifdef HAVE_TRILINOS
+    SubSystemsManager::Trilinos::finalize();
 #endif
 
 #ifdef HAVE_MPI
@@ -201,8 +229,7 @@ bool SubSystemsManager::MPI::initialized()
 
 #else
 
-  error( "DOLFIN has not been configured with MPI." )
-  return false;
+  error( "DOLFIN has not been configured with MPI." ) return false;
 
 #endif /* HAVE_MPI */
 }
@@ -232,7 +259,7 @@ bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
 
 #ifdef HAVE_MPI
   // If PETSc initialized MPI, it is responsible for MPI finalization
-  if ( !mpi_init_status && MPI::initialized() )
+  if ( !mpi_init_status and MPI::initialized() )
   {
     SubSystemsManager::instance().initialize( PETScMPI::flag );
   }
@@ -265,7 +292,8 @@ bool SubSystemsManager::PETSc::finalize()
 
 #ifdef HAVE_MPI
   /// PETSc is responsible for MPI and there are still consumers
-  if ( SubSystemsManager::instance().iset( PETScMPI::flag ) && ( MPI::sema > 1 ) )
+  if ( SubSystemsManager::instance().iset( PETScMPI::flag )
+       and ( MPI::sema > 1 ) )
   {
     return false;
   }
@@ -340,6 +368,73 @@ bool SubSystemsManager::Zoltan::finalize()
   error( "DOLFIN has not been configured with Zoltan." );
 
 #endif /* HAVE_ZOLTAN */
+
+  return true;
+} //-----------------------------------------------------------------------------
+bool SubSystemsManager::Trilinos::initialize( int argc, char * argv[] )
+{
+#ifdef HAVE_TRILINOS
+  ++Trilinos::sema;
+
+  if ( SubSystemsManager::instance().iset( Trilinos::flag ) )
+  {
+    return false;
+  }
+
+#ifdef HAVE_MPI
+  // Trilinos has to be initialized after MPI
+  if ( not MPI::initialized() )
+    error( "SubsystemsManager : Trilinos has to be initialized after MPI" );
+  else
+    SubSystemsManager::instance().initialize( TrilinosMPI::flag );
+#endif
+
+  // Initialize Trilinos
+  Kokkos::initialize( argc, argv );
+  SubSystemsManager::instance().initialize( Trilinos::flag );
+
+#else
+
+  error( "DOLFIN has not been configured with Trilinos." );
+
+#endif /* HAVE_TRILINOS */
+
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool SubSystemsManager::Trilinos::finalize()
+{
+#ifdef HAVE_TRILINOS
+
+  if ( Trilinos::sema == 0 )
+  {
+    error( "SubsystemsManager : finalization but Trilinos has no consumer" );
+  }
+
+  --Trilinos::sema;
+
+  if ( Trilinos::sema > 0 )
+  {
+    return false;
+  }
+
+#ifdef HAVE_MPI
+  if ( SubSystemsManager::instance().iset( TrilinosMPI::flag )
+       and ( MPI::sema > 1 ) )
+  {
+    error( "SubsystemsManager : Trilinos has to be finalized before MPI" );
+  }
+#endif
+
+  // finalize trilinos
+  Kokkos::finalize();
+  SubSystemsManager::instance().finalize( Trilinos::flag );
+
+#else
+
+  error( "DOLFIN has not been configured with Trilinos." );
+
+#endif /* HAVE_TRILINOS */
 
   return true;
 }

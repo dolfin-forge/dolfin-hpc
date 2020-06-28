@@ -73,6 +73,10 @@ AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
            [Compile with support for PETSc linear algebra]),
            [with_petsc=${withval}],[with_petsc=no])
 
+AC_ARG_WITH(trilinos, AC_HELP_STRING([--with-trilinos],
+           [Compile with support for Trilinos linear algebra]),
+           [with_trilinos=${withval}],[with_trilinos=no])
+
 AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim],
             [Compile with support for VisIt/libsim]),
             [with_libsim=${withval}],[with_libsim=no])
@@ -292,6 +296,25 @@ if test "x${with_petsc}" != xno; then
    fi
 fi
 
+if test "x${with_trilinos}" != xno; then
+# atm we assume that the trilinos headers etc are in out PATHs
+#include /usr/include/Makefile.export.Trilinos
+   CXXFLAGS="$CXXFLAGS -pipe -fno-plt"
+   LIBS="$LIBS /usr/lib/libdl.so /usr/lib/liblapack.so /usr/lib/libblas.so \
+               -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi \
+               -lbelosxpetra -lbelostpetra -lbelosepetra -lbelos -lml -lifpack \
+               -lamesos -lgaleri-xpetra -lgaleri-epetra -laztecoo -lisorropia \
+               -lxpetra-sup -lxpetra -lthyraepetra -lthyracore -lthyratpetra \
+               -lthyraepetraext -ltrilinosss -ltpetraext -ltpetrainout \
+               -ltpetra -lkokkostsqr -ltpetraclassiclinalg -ltpetraclassic\
+               -ltpetraclassicnodeapi -lepetraext -ltriutils -lzoltan -lepetra \
+               -lrtop -lkokkoskernels -lteuchoskokkoscomm -lteuchoscomm \
+               -lteuchosparameterlist -lteuchosparser -lteuchoscore \
+               -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics \
+               -lkokkosalgorithms -lkokkoscontainers -lkokkoscore"
+   AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
+fi
+
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
    if test "${janpack_LIBS}"; then
@@ -483,6 +506,7 @@ Package features:
   MPI I/O:                     ${enable_mpiio}
   OpenMP:                      ${enable_openmp}
   PETSc:                       ${with_petsc}
+  Trilinos:                    ${with_trilinos}
   JANPACK:                     ${with_janpack}
   GTS:                         ${with_gts}
   ParMETIS:                    ${with_parmetis}

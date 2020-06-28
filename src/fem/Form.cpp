@@ -98,7 +98,8 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
   // Check that all coefficients have valid value dimensions
   for (uint i = 0; i < coefficients.size(); ++i)
   {
-    message(1, "Form: Checking coefficient %d:", i);
+    message(1, "Form: Checking coefficient %d: %s",
+            i, this->coefficient_name( i ).c_str() );
     if (coefficients[i] == NULL)
     {
       error("Got NULL pointer as coefficient %d labeled as '%s'.", i,

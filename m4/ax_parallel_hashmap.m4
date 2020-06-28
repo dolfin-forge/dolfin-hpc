@@ -10,7 +10,7 @@
 AC_DEFUN([AX_PHMAP],[
 	AC_ARG_WITH([phmap],
 	AS_HELP_STRING([--with-phmap=DIR],
-	[Directory for parallel hashmap (https://git.io/JfE2p)]),
+	[Directory for parallel hashmap: parallel_hashmap/phmap.h]),
 	[
 	if test -d "$withval"; then
 		ac_phmap_path="$withval/parallel_hashmap";
@@ -24,7 +24,7 @@ AC_DEFUN([AX_PHMAP],[
 		export CPPFLAGS
 	fi
 
-	AC_CHECK_HEADER([phmap.h],[have_phmap_h=yes],[have_phmap_h=no])
+	AC_CHECK_HEADER([parallel_hashmap/phmap.h],[have_phmap_h=yes],[have_phmap_h=no])
 	if test x"${have_phmap_h}" = xyes; then
 		AC_DEFINE(HAVE_PARALLEL_HASH_MAP,[1],[Define if parallel hash map is present])
 	else

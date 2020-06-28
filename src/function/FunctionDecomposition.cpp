@@ -19,6 +19,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Array<Function *> FunctionDecomposition::compute(Function const& F)
 {
+  message( 1, "Decomposing Function: %p", &F );
+
   Mesh& mesh = const_cast<Mesh&>(F.mesh());
 
   //TODO:

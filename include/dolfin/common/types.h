@@ -8,7 +8,7 @@
 #include <dolfin/config/dolfin_config.h>
 
 #if HAVE_PARALLEL_HASH_MAP
-#include <phmap.h>
+#include <parallel_hashmap/phmap.h>
 #elif (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
@@ -66,11 +66,10 @@ long const DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
 
 #if HAVE_PARALLEL_HASH_MAP
 
-
 template < typename Key, typename Value,
-           typename Hash  = phmap::container_internal::hash_default_hash<Key>,
-           typename Eq    = phmap::container_internal::hash_default_eq<Key>,
-           typename Alloc = std::allocator<std::pair<const Key, Value> > >
+           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
+           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
+           typename Alloc = std::allocator<std::pair< const Key, Value > > >
 using _map = phmap::flat_hash_map< Key, Value, Hash, Eq, Alloc >;
 
 template < typename Key,
@@ -80,45 +79,93 @@ template < typename Key,
 using _set = phmap::flat_hash_set< Key, Hash, Eq, Alloc >;
 
 template< typename Key, typename Value,
-          typename Compare = std::less<Key>,
-          typename Allocator = std::allocator<std::pair<const Key, Value> > >
+          typename Compare = std::less< Key >,
+          typename Allocator = std::allocator< std::pair< const Key, Value > > >
 using _ordered_map = std::map< Key, Value, Compare, Allocator >;
 
 template< typename Key,
-          typename Compare = std::less<Key>,
-          typename Allocator = std::allocator<Key> >
+          typename Compare = std::less< Key >,
+          typename Allocator = std::allocator< Key > >
 using _ordered_set = std::set< Key, Compare, Allocator >;
 
-#elif (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
-#define _map std::tr1::unordered_map
-#define _set std::tr1::unordered_set
-#define _ordered_map std::map
-#define _ordered_set std::set
-#elif (__IBMCPP__ && __IBMCPP_TR1__)
-#define _map std::tr1::unordered_map
-#define _set std::tr1::unordered_set
-#define _ordered_map std::map
-#define _ordered_set std::set
-#elif __sgi
-#define _map std::hash_map
-#define _set std::hash_set
-#define _ordered_map std::map
-#define _ordered_set std::set
-#elif ENABLE_BOOST_TR1
-#define _map std::tr1::unordered_map
-#define _set std::tr1::unordered_set
-#define _ordered_map std::map
-#define _ordered_set std::set
-#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-#define _map std::unordered_map
-#define _set std::unordered_set
-#define _ordered_map std::map
-#define _ordered_set std::set
 #else
-#define _map std::map
-#define _set std::set
-#define _ordered_map std::map
-#define _ordered_set std::set
+
+template< typename Key, typename Value,
+          typename Comp  = std::less<Key>,
+          typename Alloc = std::allocator<std::pair< const Key, Value > > >
+class _ordered_map : public std::map< Key, Value, Comp, Alloc >
+{};
+
+template< typename Key,
+          typename Comp  = std::less< Key >,
+          typename Alloc = std::allocator< Key > >
+class _ordered_set : public std::set< Key, Comp, Alloc >
+{};
+
+#if ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET ) || ENABLE_BOOST_TR1 || ( __IBMCPP__ && __IBMCPP_TR1__ )
+
+template< typename Key, typename Value,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< std::pair< const Key, Value > > >
+class _map : public std::tr1::unordered_map< Key, Value, Hash, Comp, Alloc >
+{};
+
+template< typename Key,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< Key > >
+class _set : public std::tr1::unordered_set< Key, Hash, Comp, Alloc >
+{};
+
+#elif __sgi
+
+template< typename Key, typename Value,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< std::pair< const Key, Value > > >
+class _map : public std::hash_map< Key, Value, Hash, Comp, Alloc >
+{};
+
+template< typename Key,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< Key > >
+class _set : public std::hash_set< Key, Hash, Comp, Alloc >
+{};
+
+#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
+
+template< typename Key, typename Value,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< std::pair< const Key, Value > > >
+class _map : public std::unordered_map< Key, Value, Hash, Comp, Alloc >
+{};
+
+template< typename Key,
+          typename Hash  = std::hash< Key >,
+          typename Comp  = std::equal_to< Key >,
+          typename Alloc = std::allocator< Key > >
+class _set : public std::unordered_set< Key, Hash, Comp, Alloc >
+{};
+
+#else
+
+template< typename Key, typename Value,
+          typename Comp  = std::less<Key>,
+          typename Alloc = std::allocator<std::pair< const Key, Value > > >
+class _map : public std::map< Key, Value, Comp, Alloc >
+{};
+
+template< typename Key,
+          typename Comp  = std::less< Key >,
+          typename Alloc = std::allocator< Key > >
+class _set : public std::set< Key, Comp, Alloc >
+{};
+
+#endif
+
 #endif
 
 //-----------------------------------------------------------------------------

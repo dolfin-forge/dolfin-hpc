@@ -267,11 +267,6 @@ if test "x${with_gts}" = xyes; then
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
 
-#if test "x${with_phmap}" != xno; then
-#   CPPFLAGS="$CPPFLAGS $PHMAP_CPPFLAGS"
-#   AC_DEFINE(HAVE_PARALLEL_HASH_MAP,[1],[Define if parallel hash map is present])
-#fi
-
 AX_PHMAP
 
 found_la_backend="no"

@@ -86,7 +86,7 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     if (this->enclosed(*e, e->on_boundary())) { sub_domains(*e) = index; }
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if (mesh.is_distributed())
   {
     uint const pe_size = MPI::size();

@@ -18,7 +18,7 @@ SharedMapping::SharedMapping(DistributedData const& data) :
     error("SharedMapping : distributed data is not finalized");
   }
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   // Collect entities by adjacent rank
   for (SharedIterator it(data); it.valid(); ++it)
@@ -82,7 +82,7 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   delete [] recvreq;
   delete [] sendreq;
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 
 }
 //-----------------------------------------------------------------------------

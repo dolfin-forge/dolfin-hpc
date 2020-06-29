@@ -5,7 +5,7 @@
 
 #ifdef HAVE_JANPACK
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #include <dolfin/main/MPI.h>
 #endif
 

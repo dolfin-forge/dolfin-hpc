@@ -88,7 +88,7 @@ void PETScVector::init(uint N, bool distributed)
   if (distributed && PE::size() > 1)
   {
     is_distributed_ = true;
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x_);
 #endif
   }
@@ -503,7 +503,7 @@ void PETScVector::init_ghosted(uint, _ordered_set<uint>& indices,
     }
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   VecCreateGhost(MPI::DOLFIN_COMM, local_size, size, (int) ghost_indices.size(),
                  (const int *) &ghost_indices[0], &x_);
 #endif

@@ -34,7 +34,7 @@ void dolfin_init( int    argc,
   if ( SubSystemsManager::start( argc, argv, parallel_groups, wallclock_limit )
        == 1 )
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     if ( MPI::global_rank() == 0 )
     {
       message( "Initializing DOLFIN version %s\n%s\n\nRunning on %d %s (%u %s)",

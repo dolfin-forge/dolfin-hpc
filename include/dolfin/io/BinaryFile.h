@@ -114,7 +114,7 @@ private:
   std::string bin_filename_;
 
   // Current time
-#if defined( HAVE_MPI )
+#if defined( DOLFIN_HAVE_MPI )
   real const * const t_;
 #endif
 

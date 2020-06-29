@@ -28,7 +28,7 @@ void distribute(MeshValues<uint, Vertex>& dist)
     return;
   }
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   message(1, "MPIMeshCommunicator : distribute vertices");
   tic();
@@ -160,7 +160,7 @@ void distribute(MeshValues<uint, Vertex>& dist)
   //
   tocd(1);
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 
 }
 //-----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
     return;
   }
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   message( 1, "MPIMeshCommunicator : distribute cells" );
   tic();
@@ -616,7 +616,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
 
 #else
   MAYBE_UNUSED( D );
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 template<class E>
@@ -632,7 +632,7 @@ void check(Mesh& mesh)
     error("MPIMeshCommunicator : invalid entity dimension %u", edim);
   }
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   DistributedData& dist = mesh.distdata()[edim];
   uint const pe_rank = dist.comm_rank();
@@ -812,7 +812,7 @@ void check(Mesh& mesh)
 
     delete[] sbuf;
   }
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //--- TEMPLATE INSTANTIATIONS -------------------------------------------------
 template void check<Vertex>(Mesh& Mesh);

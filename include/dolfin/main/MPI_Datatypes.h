@@ -6,14 +6,14 @@
 
 #include <dolfin/common/types.h>
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #include <mpi.h>
 #endif
 
 namespace dolfin
 {
 
-#if !defined( HAVE_MPI )
+#if !defined( DOLFIN_HAVE_MPI )
 
 typedef void * MPI_Datatype;
 

@@ -76,7 +76,7 @@
 #undef HAVE_MEMSET
 
 /* Define if you have the MPI library. */
-#undef HAVE_MPI
+#undef DOLFIN_HAVE_MPI
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP

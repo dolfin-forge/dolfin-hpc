@@ -28,7 +28,7 @@ namespace dolfin
 namespace AdaptiveRefinement
 {
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
 void redistribute_func( Mesh & mesh, Function const & f,
                         Array< real > & values_, Array< uint > & rows_,

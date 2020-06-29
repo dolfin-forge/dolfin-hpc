@@ -1,4 +1,3 @@
-#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
@@ -37,7 +36,7 @@ DOLFIN_START_TEST( test_get_set_vec )
   {
     data[i] = 0.0;
   }
-  
+
   x.get(data);
 
   for (int i = 0; i < VEC_SIZE; i++)
@@ -46,7 +45,7 @@ DOLFIN_START_TEST( test_get_set_vec )
   }
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_add_vec )
@@ -77,7 +76,7 @@ DOLFIN_START_TEST( test_add_vec )
   }
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_max_vec )
@@ -97,7 +96,7 @@ DOLFIN_START_TEST( test_max_vec )
   ck_assert(x.max() == double (VEC_SIZE - 1));
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_min_vec )
@@ -117,14 +116,14 @@ DOLFIN_START_TEST( test_min_vec )
   ck_assert(x.min() == 0.0);
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_op_assign_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
-  
+
   double *data = new double[VEC_SIZE];
 
   x = 3.1457;
@@ -136,14 +135,14 @@ DOLFIN_START_TEST( test_op_assign_vec )
   }
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_op_mul_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
-  
+
   double *data = new double[VEC_SIZE];
 
   x = 3.1457;
@@ -157,14 +156,14 @@ DOLFIN_START_TEST( test_op_mul_vec )
   }
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_op_scale_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
-  
+
   double *data = new double[VEC_SIZE];
 
   x = 3.1457;
@@ -178,7 +177,7 @@ DOLFIN_START_TEST( test_op_scale_vec )
   }
 
   delete [] data;
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_zero_vec )
@@ -189,39 +188,22 @@ DOLFIN_START_TEST( test_zero_vec )
   x = 1.0;
   x.zero();
   ck_assert(x.max() == 0);
-  
+
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-
-DOLFIN_SUITE_BEGIN(test_suite_vec, "Vector")
+#ifdef HAVE_TRILINOS
+#include <dolfin/la/TrilinosVector.h>
+DOLFIN_START_TEST( test_trilinos )
 {
-  DOLFIN_TCASE_CREATE ("init");
-  DOLFIN_TCASE_ADD(test_init_vec);
+  trilinos::Vector x;
+  // x.init(VEC_SIZE);
 
-  DOLFIN_TCASE_CREATE ("get/set");
-  DOLFIN_TCASE_ADD(test_get_set_vec);
+  // x = 1.0;
+  // x.zero();
+  // ck_assert(x.max() == 0);
 
-  DOLFIN_TCASE_CREATE ("add");
-  DOLFIN_TCASE_ADD(test_add_vec);
-
-  DOLFIN_TCASE_CREATE ("max");
-  DOLFIN_TCASE_ADD(test_max_vec);
-
-  DOLFIN_TCASE_CREATE ("min");
-  DOLFIN_TCASE_ADD(test_min_vec);
-
-  DOLFIN_TCASE_CREATE ("operator =");
-  DOLFIN_TCASE_ADD(test_op_assign_vec);
-
-  DOLFIN_TCASE_CREATE ("operator *");
-  DOLFIN_TCASE_ADD(test_op_mul_vec);
-
-  DOLFIN_TCASE_CREATE ("operator /");
-  DOLFIN_TCASE_ADD(test_op_scale_vec);
-
-  DOLFIN_TCASE_CREATE ("zero");
-  DOLFIN_TCASE_ADD(test_zero_vec);
-}
-DOLFIN_SUITE_END
+}DOLFIN_END_TEST
+#endif
+//-----------------------------------------------------------------------------
 
 #endif

@@ -58,7 +58,7 @@ void VTKFile::operator<<(Mesh& mesh)
   }
   else
   {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     if(PE::rank() == 0 && MPI::size() > 1)
     {
       warning("Writing serial mesh in a parallel run");
@@ -162,7 +162,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   }
   else
   {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     if(PE::rank() == 0 && MPI::size() > 1)
     {
       warning("Writing serial mesh in a parallel run");
@@ -571,7 +571,7 @@ void VTKFile::pvdFileWrite(uint num, bool parallel)
 
   // Remove directory path from name for pvd file
   std::string fname;
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   if (parallel)
   {
     fname.assign(pvtu_filename, filename.find_last_of("/") + 1,

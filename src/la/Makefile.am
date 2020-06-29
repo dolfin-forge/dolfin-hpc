@@ -18,5 +18,6 @@ libdolfin_la_la_SOURCES = \
 			PETScMatrix.cpp\
 			PETScPreconditioner.cpp\
 			PETScVector.cpp\
-			SparsityPattern.cpp
+			SparsityPattern.cpp\
+			TrilinosVector.cpp
 

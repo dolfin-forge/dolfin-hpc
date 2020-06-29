@@ -300,18 +300,18 @@ if test "x${with_trilinos}" != xno; then
 # atm we assume that the trilinos headers etc are in out PATHs
 #include /usr/include/Makefile.export.Trilinos
    CXXFLAGS="$CXXFLAGS -pipe -fno-plt"
-   LIBS="$LIBS /usr/lib/libdl.so /usr/lib/liblapack.so /usr/lib/libblas.so \
-               -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi \
-               -lbelosxpetra -lbelostpetra -lbelosepetra -lbelos -lml -lifpack \
-               -lamesos -lgaleri-xpetra -lgaleri-epetra -laztecoo -lisorropia \
-               -lxpetra-sup -lxpetra -lthyraepetra -lthyracore -lthyratpetra \
-               -lthyraepetraext -ltrilinosss -ltpetraext -ltpetrainout \
-               -ltpetra -lkokkostsqr -ltpetraclassiclinalg -ltpetraclassic\
-               -ltpetraclassicnodeapi -lepetraext -ltriutils -lzoltan -lepetra \
-               -lrtop -lkokkoskernels -lteuchoskokkoscomm -lteuchoscomm \
-               -lteuchosparameterlist -lteuchosparser -lteuchoscore \
-               -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics \
-               -lkokkosalgorithms -lkokkoscontainers -lkokkoscore"
+   LIBS="$LIBS -ldl -llapack -lblas"
+   LIBS="$LIBS -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi"
+   LIBS="$LIBS -lbelosxpetra -lbelostpetra -lbelosepetra -lbelos -lml -lifpack"
+   LIBS="$LIBS -lamesos -lgaleri-xpetra -lgaleri-epetra -laztecoo -lisorropia"
+   LIBS="$LIBS -lxpetra-sup -lxpetra -lthyraepetra -lthyracore -lthyratpetra"
+   LIBS="$LIBS -lthyraepetraext -ltrilinosss -ltpetraext -ltpetrainout"
+   LIBS="$LIBS -ltpetra -lkokkostsqr -ltpetraclassiclinalg -ltpetraclassic"
+   LIBS="$LIBS -ltpetraclassicnodeapi -lepetraext -ltriutils -lzoltan -lepetra"
+   LIBS="$LIBS -lrtop -lkokkoskernels -lteuchoskokkoscomm -lteuchoscomm"
+   LIBS="$LIBS -lteuchosparameterlist -lteuchosparser -lteuchoscore"
+   LIBS="$LIBS -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics"
+   LIBS="$LIBS -lkokkosalgorithms -lkokkoscontainers -lkokkoscore"
    AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
 fi
 

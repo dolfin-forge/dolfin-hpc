@@ -109,7 +109,7 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
     // Create PETSc parallel matrix with a guess for number of diagonal and
     /// number of off-diagonal non-zeroes.
     // Note that guessing too high leads to excessive memory usage.
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE,
                  PETSC_DETERMINE, 120, PETSC_NULL, 120, PETSC_NULL, &A);
@@ -178,7 +178,7 @@ void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
   // and number of off-diagonal non-zeroes (50 in this case).
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
   MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE,
                PETSC_DETERMINE, (PetscInt*) d_nzrow, PETSC_DETERMINE, (PetscInt*) o_nzrow,

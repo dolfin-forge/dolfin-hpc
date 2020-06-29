@@ -23,7 +23,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   bool renumbered = false;
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   MeshDistributedData& distdata = topology.distdata();
 
@@ -306,7 +306,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     cdata.valid_numbering = true;
   }
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 
   return renumbered;
 }

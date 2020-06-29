@@ -339,7 +339,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     // may own lower-dimensional entities on the exterior boundary.
     if(mesh.is_distributed())
     {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
       MPI_Status status;
       DistributedData const& distdata = mesh.distdata()[0];
       _set<uint> const& vadjs = distdata.get_adj_ranks();
@@ -385,7 +385,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       //
       delete [] recvbuf;
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
     }
 
     delete [] shared_vertices;

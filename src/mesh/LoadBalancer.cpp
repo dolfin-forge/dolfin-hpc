@@ -18,7 +18,7 @@ using namespace dolfin;
 
 _ordered_map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight)
 {

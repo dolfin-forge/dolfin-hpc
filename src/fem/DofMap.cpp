@@ -554,7 +554,7 @@ bool DofMap::check(bool throw_error)
   delete[] loc_entity_dofs;
   delete[] cell_dofs;
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   // Simple version
   uint rank = dolfin::MPI::rank();

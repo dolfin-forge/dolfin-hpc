@@ -431,7 +431,7 @@ void Function::interpolate_vertex_values(real* values) const
 
     if (mesh_->is_distributed())
     {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
       uint const rank = dolfin::MPI::rank();
       uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];

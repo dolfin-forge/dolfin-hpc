@@ -43,7 +43,7 @@
 #   ACTION-IF-FOUND is a list of shell commands to run if an MPI library is
 #   found, and ACTION-IF-NOT-FOUND is a list of commands to run if it is not
 #   found. If ACTION-IF-FOUND is not specified, the default action will
-#   define HAVE_MPI.
+#   define DOLFIN_HAVE_MPI.
 #
 # LICENSE
 #
@@ -183,7 +183,7 @@ if test x = x"$MPILIBS"; then
         $2
         :
 else
-        ifelse([$1],,[AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])],[$1])
+        ifelse([$1],,[AC_DEFINE(DOLFIN_HAVE_MPI,1,[Define if you have the MPI library.])],[$1])
         :
 fi
 ])dnl AX_MPI

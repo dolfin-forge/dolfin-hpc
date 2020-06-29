@@ -317,7 +317,7 @@ namespace dolfin
     {
     }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     // Parallel related callbacks for libsim
 

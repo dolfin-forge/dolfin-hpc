@@ -183,7 +183,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     _set<uint> const& setG = manifold.Gfacets();
     _set<uint> const& setH = manifold.Hfacets();
     _set<uint> const& setI = manifold.Ifacets();
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     uint const GpmOffset = Gcount;
 #endif
 
@@ -340,7 +340,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
 
     if (mesh.is_distributed())
     {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
       //--- Exchange data -----------------------------------------------------
       uint rank = dolfin::MPI::rank();
       uint pe_size = dolfin::MPI::size();

@@ -619,7 +619,7 @@ void DMesh::propagate_refinement(Mesh& mesh,
   }
 }
 //-----------------------------------------------------------------------------
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 //-----------------------------------------------------------------------------
 void DMesh::propagate_naive(Mesh& mesh,
                             Array<Propagation>& propagated, bool& empty)

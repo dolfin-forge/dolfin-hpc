@@ -5,29 +5,27 @@
 #include "Vector/Vector.h"
 #include "Matrix/Matrix.h"
 
-
-int main(void)
+//-----------------------------------------------------------------------------
+DOLFIN_SUITE_BEGIN(suite, "la")
 {
+  DOLFIN_TCASE_CREATE("Vector");
+  DOLFIN_TCASE_ADD(test_init_vec);
+  DOLFIN_TCASE_ADD(test_get_set_vec);
+  DOLFIN_TCASE_ADD(test_add_vec);
+  DOLFIN_TCASE_ADD(test_max_vec);
+  DOLFIN_TCASE_ADD(test_min_vec);
+  DOLFIN_TCASE_ADD(test_op_assign_vec);
+  DOLFIN_TCASE_ADD(test_op_mul_vec);
+  DOLFIN_TCASE_ADD(test_op_scale_vec);
+  DOLFIN_TCASE_ADD(test_zero_vec);
+  DOLFIN_TCASE_ADD(test_trilinos);
 
-  SRunner *sr;
-  int number_failed;
-
-  sr = srunner_create(test_suite_vec());
-  srunner_add_suite(sr, test_suite_mat());
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
-
-  return (number_failed == 0) ? 0 : 1;
-
+  DOLFIN_TCASE_CREATE( "Matrix" );
+  DOLFIN_TCASE_ADD(test_init_mat);
 }
-
-#else
-
-int main(void)
-{
-  fprintf(stderr, "*** Check is required for dolfin/la tests ***\n");
-  return 0;
-}
+DOLFIN_SUITE_END
+//-----------------------------------------------------------------------------
+DOLFIN_CHECK_SUITE("dolfin/la", suite)
+//-----------------------------------------------------------------------------
 
 #endif

@@ -22,7 +22,7 @@ real MPI::time_ = 0.0;
 bool MPI::init_ = false;
 MPI::Context MPI::ctx_;
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 #define DOLFIN_MPI_SUBSYSTEM_INIT \
   if (!init_) { SubSystemsManager::MPI::initialized(); }
 #endif
@@ -36,7 +36,7 @@ MPI::Context MPI::ctx_;
 //-----------------------------------------------------------------------------
 uint MPI::rank()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.rank);
 #else
@@ -47,7 +47,7 @@ uint MPI::rank()
 //-----------------------------------------------------------------------------
 uint MPI::size()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.size);
 #else
@@ -58,7 +58,7 @@ uint MPI::size()
 //-----------------------------------------------------------------------------
 uint MPI::group_id()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_idx);
 #else
@@ -69,7 +69,7 @@ uint MPI::group_id()
 //-----------------------------------------------------------------------------
 uint MPI::num_groups()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_cnt);
 #else
@@ -80,7 +80,7 @@ uint MPI::num_groups()
 //-----------------------------------------------------------------------------
 uint MPI::global_rank()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_rank);
 #else
@@ -91,7 +91,7 @@ uint MPI::global_rank()
 //-----------------------------------------------------------------------------
 uint MPI::global_size()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_size);
 #else
@@ -102,7 +102,7 @@ uint MPI::global_size()
 //-----------------------------------------------------------------------------
 void MPI::startTimer()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   time_ = MPI_Wtime();
 #else
@@ -112,7 +112,7 @@ void MPI::startTimer()
 //-----------------------------------------------------------------------------
 real MPI::stopTimer()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   return (MPI_Wtime() - time_);
 #else
@@ -123,7 +123,7 @@ real MPI::stopTimer()
 //-----------------------------------------------------------------------------
 void MPI::startTimer(real& stime)
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   stime = MPI_Wtime();
 #else
@@ -134,7 +134,7 @@ void MPI::startTimer(real& stime)
 //-----------------------------------------------------------------------------
 real MPI::stopTimer(real& stime)
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   return (MPI_Wtime() - stime);
 #else
@@ -148,7 +148,7 @@ void MPI::initComm(int ngroups)
 {
   if (init_) { return; }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   // Initialize world
   MPI::check_error( MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD) );
@@ -198,7 +198,7 @@ void MPI::initComm(int ngroups)
 //-----------------------------------------------------------------------------
 void MPI::finiComm()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM) );
   MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM_SELF) );
   MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD) );
@@ -226,7 +226,7 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 {
   // Fool-proof as the value for rank 0 is undefined according to MPI specs
   offset = 0;
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::exscan_sum( &local, &offset, 1, comm );
 #else
   MAYBE_UNUSED(local)
@@ -236,7 +236,7 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 //-----------------------------------------------------------------------------
 int MPI::check_error( int const mpi_error )
 {
-#if defined(HAVE_MPI)
+#if defined(DOLFIN_HAVE_MPI)
   switch ( mpi_error )
   {
   case MPI_SUCCESS:

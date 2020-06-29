@@ -6,7 +6,7 @@
 namespace dolfin
 {
 
-#if defined( HAVE_MPI )
+#if defined( DOLFIN_HAVE_MPI )
 
 template <>
 MPI_Datatype MPI_type< bool >::value = MPI_BYTE;

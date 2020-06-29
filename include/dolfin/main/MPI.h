@@ -4,15 +4,17 @@
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
 
+#include <dolfin/config/dolfin_config.h>
+
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI_Datatypes.h>
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #include <mpi.h>
 #endif
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #define DOLFIN_COMM_NULL  MPI_COMM_NULL
 #else
 #define DOLFIN_COMM_NULL  0
@@ -33,7 +35,7 @@ class MPI
 
 public:
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   typedef MPI_Comm   Communicator;
   typedef MPI_Offset offset_t;
 #else
@@ -221,7 +223,7 @@ typedef MPI::Communicator Comm;
 
 //-----------------------------------------------------------------------------
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
 //-----------------------------------------------------------------------------
 template<typename T>

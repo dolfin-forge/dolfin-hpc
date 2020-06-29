@@ -749,7 +749,7 @@ void DistributedData::renumber_global()
    * The following code assumes that numbering and ownership are finalized !
    */
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   message(1, "DistributedData : renumber global, local size = %u", cached_numbering_.size());
   tic();
@@ -841,7 +841,7 @@ void DistributedData::renumber_global()
 
   tocd(1);
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 
 }
 //-----------------------------------------------------------------------------
@@ -1091,7 +1091,7 @@ SharedMapping const& DistributedData::shared_mapping() const
 //-----------------------------------------------------------------------------
 void DistributedData::remap_shared_adj()
 {
- #if HAVE_MPI
+ #if DOLFIN_HAVE_MPI
   Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
@@ -1123,7 +1123,7 @@ void DistributedData::remap_shared_adj()
       }
     }
   }
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 void DistributedData::set_ghost(uint local_index, uint owner)
@@ -1168,7 +1168,7 @@ void DistributedData::disp() const
 //-----------------------------------------------------------------------------
 void DistributedData::check_shared()
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
@@ -1209,12 +1209,12 @@ void DistributedData::check_shared()
     }
   }
   delete [] buffer;
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 void DistributedData::check_ghost()
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
@@ -1269,7 +1269,7 @@ void DistributedData::check_ghost()
     }
   }
   delete [] buffer;
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 

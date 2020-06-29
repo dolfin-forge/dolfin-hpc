@@ -19,7 +19,7 @@
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/RefinementManager.h>
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #include <mpi.h>
 #endif
 

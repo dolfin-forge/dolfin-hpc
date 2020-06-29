@@ -23,7 +23,7 @@ PETScLUSolver::PETScLUSolver()
   : ksp(0), B(0), idxm(0), idxn(0)
 {
   // Set up solver environment to use only preconditioner
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if(MPI::size() > 1)
     KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else

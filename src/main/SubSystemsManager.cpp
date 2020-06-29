@@ -20,7 +20,7 @@
 #include <Kokkos_Core.hpp>
 #include <Epetra_config.h>
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 #include <Epetra_MpiComm.h>
 #else
 #include <Epetra_SerialComm.h>
@@ -67,7 +67,7 @@ int SubSystemsManager::initialize( int    argc,
   if ( count_ == 0 )
   {
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     SubSystemsManager::MPI::initialize( argc, argv, n );
 #else
     MAYBE_UNUSED( n );
@@ -81,7 +81,7 @@ int SubSystemsManager::initialize( int    argc,
     SubSystemsManager::Zoltan::initialize( argc, argv );
 #endif
 
-#if !defined( HAVE_MPI ) and !defined( HAVE_PETSC ) and !defined( HAVE_ZOLTAN )
+#if !defined( DOLFIN_HAVE_MPI ) and !defined( HAVE_PETSC ) and !defined( HAVE_ZOLTAN )
     MAYBE_UNUSED( argc );
     MAYBE_UNUSED( argv );
 #endif
@@ -117,7 +117,7 @@ int SubSystemsManager::finalize()
     SubSystemsManager::Trilinos::finalize();
 #endif
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     SubSystemsManager::MPI::finalize();
 #endif
 
@@ -142,7 +142,7 @@ void SubSystemsManager::disp() const
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::MPI::initialize( int argc, char * argv[], uint n )
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   ++MPI::sema;
   if ( SubSystemsManager::instance().iset( MPI::flag ) )
@@ -177,14 +177,14 @@ bool SubSystemsManager::MPI::initialize( int argc, char * argv[], uint n )
   MAYBE_UNUSED( argc )
   MAYBE_UNUSED( argv )
   MAYBE_UNUSED( n )
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 
   return true;
 }
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::MPI::finalize()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if ( MPI::sema == 0 )
   {
     error( "SubsystemsManager : finalization but MPI has no consumer" );
@@ -215,13 +215,13 @@ bool SubSystemsManager::MPI::finalize()
 
   error( "DOLFIN has not been configured with MPI." );
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
   return true;
 }
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::MPI::initialized()
 {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   int initialized;
   dolfin::MPI::check_error( MPI_Initialized( &initialized ) );
@@ -231,7 +231,7 @@ bool SubSystemsManager::MPI::initialized()
 
   error( "DOLFIN has not been configured with MPI." ) return false;
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
@@ -245,7 +245,7 @@ bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
     return false;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   // Get status of MPI before PETSc initialization
   bool const mpi_init_status = MPI::initialized();
 #endif
@@ -257,7 +257,7 @@ bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
   // remove PETSc Signal handling
   PetscPopSignalHandler();
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   // If PETSc initialized MPI, it is responsible for MPI finalization
   if ( !mpi_init_status and MPI::initialized() )
   {
@@ -290,7 +290,7 @@ bool SubSystemsManager::PETSc::finalize()
     return false;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   /// PETSc is responsible for MPI and there are still consumers
   if ( SubSystemsManager::instance().iset( PETScMPI::flag )
        and ( MPI::sema > 1 ) )
@@ -301,7 +301,7 @@ bool SubSystemsManager::PETSc::finalize()
 
   PetscFinalize();
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if ( SubSystemsManager::instance().iset( PETScMPI::flag ) )
     SubSystemsManager::instance().finalize( PETScMPI::flag );
 #endif
@@ -381,7 +381,7 @@ bool SubSystemsManager::Trilinos::initialize( int argc, char * argv[] )
     return false;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   // Trilinos has to be initialized after MPI
   if ( not MPI::initialized() )
     error( "SubsystemsManager : Trilinos has to be initialized after MPI" );
@@ -418,7 +418,7 @@ bool SubSystemsManager::Trilinos::finalize()
     return false;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if ( SubSystemsManager::instance().iset( TrilinosMPI::flag )
        and ( MPI::sema > 1 ) )
   {

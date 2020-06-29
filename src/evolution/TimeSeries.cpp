@@ -228,7 +228,7 @@ void TimeSeries::loadData(std::string const&)
   // Exchange data
   if (MPI::size() > 1)
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     // Value size and number of samples
     uint data_size[2];
     data_size[0] = times.size();

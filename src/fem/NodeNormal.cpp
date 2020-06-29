@@ -126,7 +126,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
   uint const gdim = mesh.geometry_dimension();
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   uint const pe_size = MPI::size();
   uint const rank    = MPI::rank();
 #endif
@@ -298,7 +298,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   //--- Exchange data for exterior facets with shared entities
   if (mesh.is_distributed())
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     // Since an entity is shared if all it lower dimensional entities are shared
     // we can loop over shared vertices and stack facets. If non-matching facet
     // are send they will be eventually discarded. This does not hold if the
@@ -378,7 +378,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
       u_sendbuf[dest].clear();
       r_sendbuf[dest].clear();
     }
-#endif // HAVE_MPI
+#endif // DOLFIN_HAVE_MPI
   }
 
   //--- Determine node type from facet normals and compute surface normals
@@ -498,7 +498,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   // Synchronize node type
   if (mesh.is_distributed())
   {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     uint const u_size = 2;
     int u_maxsendcount = 0;
     int u_maxrecvcount = 0;

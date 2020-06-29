@@ -200,7 +200,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     return;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   uint const tdim = mesh.topology_dimension();
   uint const gdim = mesh.geometry_dimension();

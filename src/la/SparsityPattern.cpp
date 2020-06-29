@@ -341,7 +341,7 @@ void SparsityPattern::apply()
 
   if (!distributed_) return;
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   message(1, "SparsityPattern : apply with %u remote rows", r_entries_.size());
   tic();

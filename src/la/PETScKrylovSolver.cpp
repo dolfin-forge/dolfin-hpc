@@ -135,30 +135,28 @@ dolfin::uint PETScKrylovSolver::solve( const PETScMatrix & A,
 
   if ( reason == KSP_DIVERGED_ITS )
   {
-    message = "KrylovSolver required more than \"its\" to reach convergence.";
+    message = "Required more than \"its\" to reach convergence.";
   }
   else if ( reason == KSP_DIVERGED_DTOL )
   {
-    message = "KrylovSolver residual norm increased by a factor of divtol.";
+    message = "Residual norm increased by a factor of divtol.";
   }
   else if ( reason == KSP_DIVERGED_NANORINF )
   {
-    message = "KrylovSolver residual norm became Not-a-number or Inf likely "
-              "due to 0/0.";
+    message = "Residual norm became Not-a-number or Inf likely due to 0/0.";
   }
   else if ( reason == KSP_DIVERGED_BREAKDOWN )
   {
-    message = "KrylovSolver generic breakdown in method.";
+    message = "Generic breakdown in method.";
   }
   else if ( reason == KSP_DIVERGED_BREAKDOWN_BICG )
   {
-    message = "KrylovSolver Initial residual is orthogonal to preconditioned "
-              "initial residual. Try a different preconditioner, or a "
-              "different initial Level. ";
+    message = "Initial residual is orthogonal to preconditioned initial residual. "
+              "Try a different preconditioner, or a different initial Level. ";
   }
   else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
   {
-    message = "KrylovSolver Divergence because of indefinite preconditioner.";
+    message = "Divergence because of indefinite preconditioner.";
   }
   else if ( reason == KSP_DIVERGED_NONSYMMETRIC )
   {
@@ -179,6 +177,7 @@ dolfin::uint PETScKrylovSolver::solve( const PETScMatrix & A,
 
   if( message != "" )
   {
+    message = "KrylovSolver did not converge.\nReason: " + message;
     if ( dolfin_get< bool >( "Krylov error on nonconvergence" ) )
     {
       error( message.c_str() );
@@ -255,30 +254,28 @@ dolfin::uint PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
 
   if ( reason == KSP_DIVERGED_ITS )
   {
-    message = "KrylovSolver required more than \"its\" to reach convergence.";
+    message = "Required more than \"its\" to reach convergence.";
   }
   else if ( reason == KSP_DIVERGED_DTOL )
   {
-    message = "KrylovSolver residual norm increased by a factor of divtol.";
+    message = "Residual norm increased by a factor of divtol.";
   }
   else if ( reason == KSP_DIVERGED_NANORINF )
   {
-    message = "KrylovSolver residual norm became Not-a-number or Inf likely "
-              "due to 0/0.";
+    message = "Residual norm became Not-a-number or Inf likely due to 0/0.";
   }
   else if ( reason == KSP_DIVERGED_BREAKDOWN )
   {
-    message = "KrylovSolver generic breakdown in method.";
+    message = "Generic breakdown in method.";
   }
   else if ( reason == KSP_DIVERGED_BREAKDOWN_BICG )
   {
-    message = "KrylovSolver Initial residual is orthogonal to preconditioned "
-              "initial residual. Try a different preconditioner, or a "
-              "different initial Level. ";
+    message = "Initial residual is orthogonal to preconditioned initial residual. "
+              "Try a different preconditioner, or a different initial Level. ";
   }
   else if ( reason == KSP_DIVERGED_INDEFINITE_PC )
   {
-    message = "KrylovSolver Divergence because of indefinite preconditioner.";
+    message = "Divergence because of indefinite preconditioner.";
   }
   else if ( reason == KSP_DIVERGED_NONSYMMETRIC )
   {
@@ -299,6 +296,7 @@ dolfin::uint PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
 
   if( message != "" )
   {
+    message = "KrylovSolver did not converge.\nReason: " + message;
     if ( dolfin_get< bool >( "Krylov error on nonconvergence" ) )
     {
       error( message.c_str() );

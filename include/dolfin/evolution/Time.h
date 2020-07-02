@@ -16,7 +16,7 @@ public:
 
   typedef std::pair<real, real> Interval;
 
-  Time(real T0 = 0.0, real T1 = 0.0);
+  Time( real T_start = 0.0, real T_end = 0.0, real T_current = 0.0 );
 
   Time(Interval I);
 

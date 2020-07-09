@@ -355,7 +355,13 @@ inline int MPI::sendrecv( Array< T > &   sendbuf,
 	                           tag,
 	                           comm );
 }
-
+//-----------------------------------------------------------------------------
+#if not defined( DEBUG )
+inline int MPI::check_error( int const mpi_error )
+{
+  return mpi_error;
+}
+#endif
 //-----------------------------------------------------------------------------
 
 template< typename T >

@@ -139,19 +139,6 @@ inline void UFCCell::init(Cell& cell)
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-#if ENABLE_P1_OPTIMIZATIONS
-  // Do no allocate edges/faces to make sure any invalid access triggers a
-  // segmentation fault
-  entity_indices[0] = new uint[cell.num_entities(0)];
-  for (uint i = 0; i < cell.num_entities(0); ++i)
-  {
-    entity_indices[0][i] = (cell.entities(0))[i];
-  }
-  for (uint d = 1; d < topological_dimension; ++d)
-  {
-    entity_indices[d] = NULL;
-  }
-#else
   // In any case store topological data in object
   for (uint d = 0; d < topological_dimension; ++d)
   {
@@ -161,7 +148,6 @@ inline void UFCCell::init(Cell& cell)
       entity_indices[d][i] = (cell.entities(d))[i];
     }
   }
-#endif
 
   /// Set vertex coordinates
   Array<uint> const & vertices = cell.entities(0);
@@ -204,6 +190,7 @@ inline void UFCCell::update(Cell& cell)
 #else
   cell.get_global_entities(entity_indices);
 #endif
+  entity_indices[topological_dimension][0] = cell.index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];

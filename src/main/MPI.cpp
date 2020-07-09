@@ -7,8 +7,8 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/SubSystemsManager.h>
 
-#include <cstring>
 #include <ctime>
+#include <string>
 
 namespace dolfin
 {

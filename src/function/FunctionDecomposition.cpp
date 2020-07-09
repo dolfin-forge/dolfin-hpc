@@ -11,8 +11,10 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {

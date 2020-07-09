@@ -4,15 +4,11 @@ libdolfin_mesh_la_SOURCES = \
 			AffineMapping.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
-			Cell.cpp\
 			CellType.cpp\
 			Connectivity.cpp\
 			DMesh.cpp\
-			Edge.cpp\
 			EquiAffineMapping.cpp\
 			EuclideanBasis.cpp\
-			Face.cpp\
-			Facet.cpp\
 			GeometricPredicates.cpp\
 			GTSInterface.cpp\
 			HexahedronCell.cpp\
@@ -37,7 +33,6 @@ libdolfin_mesh_la_SOURCES = \
 			MeshTopology.cpp\
 			MetisInterface.cpp\
 			MPIMeshCommunicator.cpp\
-			Point.cpp\
 			PointCell.cpp\
 			QuadrilateralCell.cpp\
 			Rectangle.cpp\
@@ -53,7 +48,6 @@ libdolfin_mesh_la_SOURCES = \
 			UnitInterval.cpp\
 			UnitSphere.cpp\
 			UnitSquare.cpp\
-			Vertex.cpp\
 			VertexNormal.cpp\
 			ZoltanInterface.cpp
 

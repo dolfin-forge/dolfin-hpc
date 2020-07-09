@@ -131,61 +131,7 @@ bool Connectivity::operator==( Connectivity const & other ) const
 
 	return true;
 }
-//-----------------------------------------------------------------------------
-bool Connectivity::operator!=(Connectivity const& other) const
-{
-  return not (*this == other);
-}
-//-----------------------------------------------------------------------------
-Array< Array< uint > > & Connectivity::operator()()
-{
-  return connections_;
-}
-//-----------------------------------------------------------------------------
-Array< Array< uint > > const & Connectivity::operator()() const
-{
-  return connections_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::order() const
-{
-  return order_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::entries() const
-{
-  uint entries = 0;
 
-  for ( uint e = 0; e < order_; ++e )
-    entries += connections_[e].size();
-
-  return entries;
-}
-//----------------------------------------------------------------------------
-uint Connectivity::min_degree() const
-{
-  return min_degree_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::max_degree() const
-{
-  return max_degree_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::regular() const
-{
-  return (min_degree_ == max_degree_ ? min_degree_ : 0);
-}
-//-----------------------------------------------------------------------------
-void Connectivity::set(uint entity, uint const * connections)
-{
-  dolfin_assert(entity < order_);
-  dolfin_assert(not connections_.empty() );
-  dolfin_assert( connections != NULL );
-
-  for ( uint e = 0; e < connections_[entity].size(); ++e )
-    connections_[entity][e] = connections[e];
-}
 //-----------------------------------------------------------------------------
 void Connectivity::set(Array<uint> const& connectivity)
 {

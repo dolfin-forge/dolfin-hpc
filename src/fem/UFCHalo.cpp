@@ -12,7 +12,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {

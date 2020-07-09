@@ -9,20 +9,22 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/math/LinearDistribution.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/main/MPI.h>
 
-#include <typeinfo>
 #include <algorithm>
-#include <cstring>
 #include <fstream>
 #include <list>
-#include <stdint.h>
 #include <stdexcept>
+#include <stdint.h>
+#include <string>
+#include <typeinfo>
 
 namespace dolfin
 {

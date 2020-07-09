@@ -3,24 +3,20 @@
 
 #include <dolfin/function/Function.h>
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/common/maybe_unused.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/common/types.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/fem/Form.h>
-#include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
-#include <dolfin/function/FunctionDecomposition.h>
-#include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/SubFunction.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/IntersectionDetector.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 
@@ -203,12 +199,6 @@ Function::~Function()
 }
 
 //-----------------------------------------------------------------------------
-bool Function::empty() const
-{
-  return (discrete_space_ == NULL);
-}
-
-//-----------------------------------------------------------------------------
 void Function::init(Form& form, uint i)
 {
   if(mesh_ == NULL)
@@ -270,19 +260,6 @@ void Function::clear()
   delete cache_mapping_;
   cache_mapping_ = NULL;
   renumbered_ = true;
-}
-
-//--- UFC INTERFACE -----------------------------------------------------------
-void Function::evaluate(real* values, const real* x,
-                        const ufc::cell& cell) const
-{
-  evaluate( 1, values, x, cell );
-}
-
-//--- GenericFunction ---------------------------------------------------------
-Mesh& Function::mesh() const
-{
-  return (*mesh_);
 }
 
 //-----------------------------------------------------------------------------
@@ -354,27 +331,6 @@ void Function::eval(real* values, const real* x) const
   Cell cell(*mesh_, cells[0]);
   scratch->cell.update(cell);
   evaluate(values, x, scratch->cell);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::rank() const
-{
-  dolfin_assert(element_);
-  return element_->value_rank();
-}
-
-//-----------------------------------------------------------------------------
-uint Function::dim(uint i) const
-{
-  dolfin_assert(element_);
-  return element_->value_dimension(i);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::value_size() const
-{
-  dolfin_assert(scratch);
-  return scratch->size;
 }
 
 //-----------------------------------------------------------------------------
@@ -570,104 +526,6 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 }
 
 //-----------------------------------------------------------------------------
-void Function::interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint) const
-{
-  interpolate(coefficients, cell, finite_element, dolfin_cell);
-}
-
-//-----------------------------------------------------------------------------
-GenericVector& Function::vector() const
-{
-  dolfin_assert(X_);
-  return *X_;
-}
-
-//-----------------------------------------------------------------------------
-FiniteElementSpace const& Function::space() const
-{
-  dolfin_assert(discrete_space_);
-  return *discrete_space_;
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(Expression const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(Coefficient const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(GenericFunction const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-Array<Function *> Function::decompose()
-{
-  return FunctionDecomposition::compute(*this);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::num_sub_functions() const
-{
-  dolfin_assert(element_);
-  return element_->num_sub_elements();
-}
-
-//-----------------------------------------------------------------------------
-uidx Function::block_size() const
-{
-  dolfin_assert(dofmap_);
-  return dofmap_->dofsmapping_size();
-}
-
-//-----------------------------------------------------------------------------
-real * Function::create_block() const
-{
-  dolfin_assert(dofmap_);
-  return new real[dofmap_->dofsmapping_size()];
-}
-
-//-----------------------------------------------------------------------------
-void Function::get_block(real *& values) const
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  if (!values)
-  {
-    values = new real[dofmap_->dofsmapping_size()];
-  }
-  X_->apply();
-  X_->get(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-}
-
-//-----------------------------------------------------------------------------
-void Function::set_block(real *& values)
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  X_->set(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync();
-}
-
-//-----------------------------------------------------------------------------
-void Function::add_block(real *& values)
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  X_->add(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync();
-}
-
-//-----------------------------------------------------------------------------
 void Function::InitializeVector()
 {
   if (X_->size() != dofmap_->global_dimension())
@@ -812,46 +670,6 @@ Function& Function::operator=(Function const& other)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator+=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() += other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator-=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() -= other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator*=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() *= other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::axpy(real value, Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector().axpy(value, other.vector());
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
 Function& Function::swap(Function& other)
 {
   TimeDependent::swap(other);
@@ -869,68 +687,6 @@ Function& Function::swap(Function& other)
   std::swap(this->cache_mapping_, other.cache_mapping_);
 #endif
   return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() = value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator+=(real)
-{
-  dolfin_assert(!this->empty());
-  error("Not implemented");
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator-=(real)
-{
-  dolfin_assert(!this->empty());
-  error("Not implemented");
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator*=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() *= value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator/=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() /= value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::zero()
-{
-  dolfin_assert(!this->empty());
-  this->vector().zero();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-real Function::min() const
-{
-  dolfin_assert(!this->empty());
-  return this->vector().min();
-}
-
-//-----------------------------------------------------------------------------
-real Function::max() const
-{
-  dolfin_assert(!this->empty());
-  return this->vector().max();
 }
 
 //-----------------------------------------------------------------------------

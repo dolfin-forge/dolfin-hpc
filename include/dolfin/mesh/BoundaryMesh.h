@@ -11,17 +11,16 @@
 #ifndef __DOLFIN_BOUNDARY_MESH_H
 #define __DOLFIN_BOUNDARY_MESH_H
 
+#include <dolfin/common/Array.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDependent.h>
-
-#include <dolfin/common/Array.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
 
-class Cell;
 class SubDomain;
-class Vertex;
 
 /**
  *  @class  BoundaryMesh
@@ -98,6 +97,42 @@ private:
   SubDomain const * subdomain_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline uint BoundaryMesh::facet_index(Cell const& boundary_cell) const
+{
+  dolfin_assert(&boundary_cell.mesh() == this);
+  return cell_map_[boundary_cell.index()];
+}
+//-----------------------------------------------------------------------------
+inline uint BoundaryMesh::facet_index(uint boundary_cell_index) const
+{
+  dolfin_assert(boundary_cell_index < cell_map_.size());
+  return cell_map_[boundary_cell_index];
+}
+//-----------------------------------------------------------------------------
+inline uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex) const
+{
+  dolfin_assert(&boundary_vertex.mesh() == this);
+  return vertex_map_[boundary_vertex.index()];
+}
+//-----------------------------------------------------------------------------
+inline uint BoundaryMesh::vertex_index(uint boundary_vertex_index) const
+{
+  dolfin_assert(boundary_vertex_index < vertex_map_.size());
+  return vertex_map_[boundary_vertex_index];
+}
+//-----------------------------------------------------------------------------
+inline BoundaryMesh::Type BoundaryMesh::boundary_type() const
+{
+  return type_;
+}
+//-----------------------------------------------------------------------------
+inline bool BoundaryMesh::is_boundary_of_boundary() const
+{
+  return boundary_of_boundary_;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

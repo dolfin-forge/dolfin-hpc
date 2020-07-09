@@ -6,7 +6,7 @@
 #include <dolfin/log/log.h>
 
 #include <cstdlib>
-#include <cstring>
+#include <string>
 #include <algorithm>
 
 namespace dolfin

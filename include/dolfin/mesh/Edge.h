@@ -6,9 +6,13 @@
 
 #include <dolfin/common/types.h>
 
-#include "Point.h"
 #include "MeshEntity.h"
 #include "MeshEntityIterator.h"
+#include "Point.h"
+
+#include <dolfin/common/GhostIterator.h>
+#include <dolfin/common/OwnedIterator.h>
+#include <dolfin/common/SharedIterator.h>
 
 namespace dolfin
 {
@@ -21,16 +25,15 @@ class Edge : public MeshEntity
 {
 
 public:
-
   /// Create edge on given mesh
-  Edge(Mesh& mesh, uint index) :
-      MeshEntity(mesh, 1, index)
+  Edge( Mesh & mesh, uint index )
+    : MeshEntity( mesh, 1, index )
   {
   }
 
   /// Create edge from mesh entity
-  Edge(MeshEntity& entity) :
-      MeshEntity(entity.mesh(), 1, entity.index())
+  Edge( MeshEntity & entity )
+    : MeshEntity( entity.mesh(), 1, entity.index() )
   {
   }
 
@@ -51,62 +54,71 @@ public:
 
   struct shared : SharedIterator
   {
-    shared(Mesh& M) : SharedIterator(M.topology().distdata()[1]) {}
-    shared(MeshTopology& T) : SharedIterator(T.distdata()[1]) {}
+    shared( Mesh & M )
+      : SharedIterator( M.topology().distdata()[1] )
+    {
+    }
+    shared( MeshTopology & T )
+      : SharedIterator( T.distdata()[1] )
+    {
+    }
   };
 
   struct ghost : GhostIterator
   {
-    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[1]) {}
-    ghost(MeshTopology& T) : GhostIterator(T.distdata()[1]) {}
+    ghost( Mesh & M )
+      : GhostIterator( M.topology().distdata()[1] )
+    {
+    }
+    ghost( MeshTopology & T )
+      : GhostIterator( T.distdata()[1] )
+    {
+    }
   };
 
   struct owned : OwnedIterator
   {
-    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[1]) {}
-    owned(MeshTopology& T) : OwnedIterator(T.distdata()[1]) {}
+    owned( Mesh & M )
+      : OwnedIterator( M.topology().distdata()[1] )
+    {
+    }
+    owned( MeshTopology & T )
+      : OwnedIterator( T.distdata()[1] )
+    {
+    }
   };
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Vertex  lower_dimensional;
-  typedef Face    higher_dimensional;
-
+  typedef Vertex lower_dimensional;
+  typedef Face   higher_dimensional;
 };
 
-/// An EdgeIterator is a MeshEntityIterator of topological dimension 1.
-
-class EdgeIterator : public MeshEntityIterator
+inline real Edge::length() const
 {
+  Array< uint > const & vertices = entities( 0 );
+  MeshGeometry const &  geom     = mesh_.geometry();
 
-public:
+  dolfin_assert( not vertices.empty() );
 
-  EdgeIterator(Mesh& mesh) :
-      MeshEntityIterator(mesh, 1)
-  {
-  }
+  Point const & p0 = geom.point( vertices[0] );
+  Point const & p1 = geom.point( vertices[1] );
 
-  EdgeIterator(MeshEntity& entity) :
-      MeshEntityIterator(entity, 1)
-  {
-  }
+  return p0.dist( p1 );
+}
+//-----------------------------------------------------------------------------
+inline Point Edge::midpoint() const
+{
+  Array< uint > const & vertices = entities( 0 );
+  MeshGeometry const &  geom     = mesh_.geometry();
 
-  inline Edge* operator->()
-  {
-    return static_cast<Edge*>(MeshEntityIterator::operator->());
-  }
+  dolfin_assert( not vertices.empty() );
 
-  inline Edge& operator*()
-  {
-    return *operator->();
-  }
+  Point const & p0 = geom.point( vertices[0] );
+  Point const & p1 = geom.point( vertices[1] );
 
-  inline Edge& operator[](uint i)
-  {
-    return static_cast<Edge&>(MeshEntityIterator::operator[](i));
-  }
-
-};
+  return 0.5 * ( p0 + p1 );
+}
 
 } /* namespace dolfin */
 

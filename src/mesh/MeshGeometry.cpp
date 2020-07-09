@@ -3,14 +3,14 @@
 
 #include <dolfin/mesh/MeshGeometry.h>
 
-#include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/math/basic.h>
+#include <dolfin/common/constants.h>
 #include <dolfin/log/log.h>
+#include <dolfin/math/basic.h>
 
 #include <algorithm>
-#include <cstring>
 #include <ctime>
+#include <string>
 
 namespace dolfin
 {
@@ -92,42 +92,6 @@ void swap( MeshGeometry& a, MeshGeometry& b )
   swap(a.coordinates_ , b.coordinates_);
   swap(a.abs_tol_     , b.abs_tol_);
   swap(a.timestamp_   , b.timestamp_);
-}
-//-----------------------------------------------------------------------------
-Space const& MeshGeometry::space() const
-{
-  return *space_;
-}
-//-----------------------------------------------------------------------------
-uint MeshGeometry::dim() const
-{
-  return dim_;
-}
-//-----------------------------------------------------------------------------
-uint MeshGeometry::size() const
-{
-  return size_;
-}
-//-----------------------------------------------------------------------------
-real MeshGeometry::abs_tolerance(uint dim) const
-{
-  dolfin_assert(dim <= dim_);
-  return abs_tol_[dim];
-}
-//-----------------------------------------------------------------------------
-Point MeshGeometry::point(uint n) const
-{
-  return Point(dim_, coordinates_.data() + n * dim_);
-}
-//-----------------------------------------------------------------------------
-real * MeshGeometry::coordinates()
-{
-  return coordinates_.data();
-}
-//-----------------------------------------------------------------------------
-real const * MeshGeometry::coordinates() const
-{
-  return coordinates_.data();
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::resize(uint size)
@@ -225,9 +189,8 @@ void MeshGeometry::assign(MeshGeometry const& other, Array<uint> const& mapping)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator*=(real const a)
 {
-	for ( Array< real >::iterator it = coordinates_.begin();
-	      it != coordinates_.end();
-	      ++it )
+  typedef Array< real >::iterator CoordIter;
+	for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
 		*it *= a;
   }
@@ -243,9 +206,9 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
   }
   real const b = 1.0 / a;
 
-  for ( Array< real >::iterator it = coordinates_.begin();
-        it != coordinates_.end();
-        ++it )
+  typedef Array< real >::iterator CoordIter;
+
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
     *it *= b;
   }
@@ -254,9 +217,9 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(real const a)
 {
-  for ( Array< real >::iterator it = coordinates_.begin();
-        it != coordinates_.end();
-        ++it )
+  typedef Array< real >::iterator CoordIter;
+
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
     *it += a;
   }
@@ -265,9 +228,9 @@ MeshGeometry& MeshGeometry::operator+=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(real const a)
 {
-  for ( Array< real >::iterator it = coordinates_.begin();
-        it != coordinates_.end();
-        ++it )
+  typedef Array< real >::iterator CoordIter;
+
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
     *it -= a;
   }
@@ -277,8 +240,9 @@ MeshGeometry& MeshGeometry::operator-=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(Point const& p)
 {
-  for ( Array< real >::iterator it = coordinates_.begin();
-        it != coordinates_.end(); )
+  typedef Array< real >::iterator CoordIter;
+
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
     for (uint i = 0; i < dim_; ++i)
     {
@@ -291,8 +255,9 @@ MeshGeometry& MeshGeometry::operator+=(Point const& p)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(Point const& p)
 {
-  for ( Array< real >::iterator it = coordinates_.begin();
-        it != coordinates_.end(); )
+  typedef Array< real >::iterator CoordIter;
+
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
     for (uint i = 0; i < dim_; ++i)
     {

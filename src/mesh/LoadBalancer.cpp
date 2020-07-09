@@ -7,12 +7,14 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
-#include <cstring>
+#include <string>
 
 using namespace dolfin;
 

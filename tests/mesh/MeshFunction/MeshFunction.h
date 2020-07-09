@@ -2,8 +2,14 @@
 
 #ifdef HAVE_CHECK
 
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/CellTypes.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/EdgeIterator.h>
+#include <dolfin/mesh/FaceIterator.h>
+#include <dolfin/mesh/FacetIterator.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 using namespace dolfin;
 

@@ -56,25 +56,5 @@ void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
   this->sub_system_ = defined;
 }
 //-----------------------------------------------------------------------------
-std::string const& BoundaryCondition::type() const
-{
-  return type_;
-}
-//-----------------------------------------------------------------------------
-Mesh& BoundaryCondition::mesh() const
-{
-  return mesh_;
-}
-//-----------------------------------------------------------------------------
-SubDomain const& BoundaryCondition::sub_domain() const
-{
-  return sub_domain_;
-}
-//-----------------------------------------------------------------------------
-SubSystem const& BoundaryCondition::sub_system() const
-{
-  return sub_system_;
-}
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

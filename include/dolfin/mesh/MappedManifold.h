@@ -8,9 +8,10 @@
 #define __DOLFIN_MAPPED_MANIFOLD_H
 
 #include <dolfin/common/types.h>
-
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDependent.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -85,6 +86,22 @@ private:
   Array<uint> cell_map_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline uint MappedManifold::facet_index(Cell const& boundary_cell)
+{
+  dolfin_assert(&boundary_cell.mesh() == this);
+  return cell_map_[boundary_cell.index()];
+}
+
+//-----------------------------------------------------------------------------
+inline uint MappedManifold::vertex_index(Vertex const& boundary_vertex)
+{
+  dolfin_assert(&boundary_vertex.mesh() == this);
+  return vertex_map_[boundary_vertex.index()];
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

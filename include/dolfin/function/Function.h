@@ -4,10 +4,16 @@
 #ifndef __DOLFIN_FUNCTION_H
 #define __DOLFIN_FUNCTION_H
 
-#include <dolfin/function/GenericFunction.h>
-#include <dolfin/evolution/TimeDependent.h>
-
 #include <dolfin/common/Array.h>
+#include <dolfin/evolution/TimeDependent.h>
+#include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/ScratchSpace.h>
+#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/function/FunctionDecomposition.h>
+#include <dolfin/function/FunctionInterpolation.h>
+#include <dolfin/function/GenericFunction.h>
+#include <dolfin/la/GenericVector.h>
 
 namespace ufl
 {
@@ -20,14 +26,9 @@ namespace dolfin
 {
 
 class Cell;
-class DofMap;
 class Expression;
-class FiniteElement;
-class FiniteElementSpace;
 class Form;
-class GenericVector;
 class Mesh;
-class ScratchSpace;
 class SubFunction;
 
 /**
@@ -257,6 +258,248 @@ private:
   _map<uint, uint> * cache_mapping_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline bool Function::empty() const
+{
+  return ( discrete_space_ == NULL );
+}
+
+//--- UFC INTERFACE -----------------------------------------------------------
+inline void Function::evaluate( real *            values,
+                         const real *      x,
+                         const ufc::cell & cell ) const
+{
+  evaluate( 1, values, x, cell );
+}
+
+//--- GenericFunction ---------------------------------------------------------
+inline Mesh & Function::mesh() const
+{
+  return ( *mesh_ );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Function::rank() const
+{
+  dolfin_assert( element_ );
+  return element_->value_rank();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Function::dim( uint i ) const
+{
+  dolfin_assert( element_ );
+  return element_->value_dimension( i );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Function::value_size() const
+{
+  dolfin_assert( scratch );
+  return scratch->size;
+}
+//-----------------------------------------------------------------------------
+inline void Function::interpolate( real *                      coefficients,
+                            const ufc::cell &           cell,
+                            const ufc::finite_element & finite_element,
+                            const Cell &                dolfin_cell,
+                            uint ) const
+{
+  interpolate( coefficients, cell, finite_element, dolfin_cell );
+}
+
+//-----------------------------------------------------------------------------
+inline GenericVector & Function::vector() const
+{
+  dolfin_assert( X_ );
+  return *X_;
+}
+
+//-----------------------------------------------------------------------------
+inline FiniteElementSpace const & Function::space() const
+{
+  dolfin_assert( discrete_space_ );
+  return *discrete_space_;
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::operator<<( Expression const & other )
+{
+  FunctionInterpolation::compute( other, *this );
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::operator<<( Coefficient const & other )
+{
+  FunctionInterpolation::compute( other, *this );
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::operator<<( GenericFunction const & other )
+{
+  FunctionInterpolation::compute( other, *this );
+}
+
+//-----------------------------------------------------------------------------
+inline Array< Function * > Function::decompose()
+{
+  return FunctionDecomposition::compute( *this );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Function::num_sub_functions() const
+{
+  dolfin_assert( element_ );
+  return element_->num_sub_elements();
+}
+
+//-----------------------------------------------------------------------------
+inline uidx Function::block_size() const
+{
+  dolfin_assert( dofmap_ );
+  return dofmap_->dofsmapping_size();
+}
+
+//-----------------------------------------------------------------------------
+inline real * Function::create_block() const
+{
+  dolfin_assert( dofmap_ );
+  return new real[dofmap_->dofsmapping_size()];
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::get_block( real *& values ) const
+{
+  dolfin_assert( X_ );
+  dolfin_assert( dofmap_ );
+  if ( !values )
+  {
+    values = new real[dofmap_->dofsmapping_size()];
+  }
+  X_->apply();
+  X_->get( values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping() );
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::set_block( real *& values )
+{
+  dolfin_assert( X_ );
+  dolfin_assert( dofmap_ );
+  X_->set( values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping() );
+  sync();
+}
+
+//-----------------------------------------------------------------------------
+inline void Function::add_block( real *& values )
+{
+  dolfin_assert( X_ );
+  dolfin_assert( dofmap_ );
+  X_->add( values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping() );
+  sync();
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator+=( Function const & other )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !other.empty() );
+  dolfin_assert( this->space() == other.space() );
+  this->vector() += other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator-=( Function const & other )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !other.empty() );
+  dolfin_assert( this->space() == other.space() );
+  this->vector() -= other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator*=( Function const & other )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !other.empty() );
+  dolfin_assert( this->space() == other.space() );
+  this->vector() *= other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::axpy( real value, Function const & other )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !other.empty() );
+  dolfin_assert( this->space() == other.space() );
+  this->vector().axpy( value, other.vector() );
+  return *this;
+} //-----------------------------------------------------------------------------
+inline Function & Function::operator=( real value )
+{
+  dolfin_assert( !this->empty() );
+  this->vector() = value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator+=( real )
+{
+  dolfin_assert( !this->empty() );
+  error( "Not implemented" );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator-=( real )
+{
+  dolfin_assert( !this->empty() );
+  error( "Not implemented" );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator*=( real value )
+{
+  dolfin_assert( !this->empty() );
+  this->vector() *= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::operator/=( real value )
+{
+  dolfin_assert( !this->empty() );
+  this->vector() /= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::zero()
+{
+  dolfin_assert( !this->empty() );
+  this->vector().zero();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline real Function::min() const
+{
+  dolfin_assert( !this->empty() );
+  return this->vector().min();
+}
+
+//-----------------------------------------------------------------------------
+inline real Function::max() const
+{
+  dolfin_assert( !this->empty() );
+  return this->vector().max();
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

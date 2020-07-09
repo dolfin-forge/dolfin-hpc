@@ -12,8 +12,7 @@
 #include <ostream>
 #include <iomanip>
 #include <string>
-#include <cstring>
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace dolfin
 {

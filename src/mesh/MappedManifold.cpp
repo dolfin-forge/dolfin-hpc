@@ -3,13 +3,13 @@
 
 #include <dolfin/mesh/MappedManifold.h>
 
-#include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/PeriodicSubDomain.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -26,20 +26,6 @@ MappedManifold::MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain) :
 //-----------------------------------------------------------------------------
 MappedManifold::~MappedManifold()
 {
-}
-
-//-----------------------------------------------------------------------------
-uint MappedManifold::facet_index(Cell const& boundary_cell)
-{
-  dolfin_assert(&boundary_cell.mesh() == this);
-  return cell_map_[boundary_cell.index()];
-}
-
-//-----------------------------------------------------------------------------
-uint MappedManifold::vertex_index(Vertex const& boundary_vertex)
-{
-  dolfin_assert(&boundary_vertex.mesh() == this);
-  return vertex_map_[boundary_vertex.index()];
 }
 
 //-----------------------------------------------------------------------------

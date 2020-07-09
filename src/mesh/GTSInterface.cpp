@@ -1,15 +1,18 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/mesh/GTSInterface.h>
+
+#include <dolfin/common/Array.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/common/Array.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-
-#include <dolfin/mesh/GTSInterface.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_GTS

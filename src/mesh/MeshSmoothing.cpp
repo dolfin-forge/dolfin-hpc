@@ -1,15 +1,20 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/mesh/MeshSmoothing.h>
+
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshOrdering.h>
-#include <dolfin/mesh/MeshSmoothing.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {

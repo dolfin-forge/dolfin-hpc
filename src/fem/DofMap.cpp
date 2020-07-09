@@ -5,12 +5,9 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
-#include <dolfin/fem/DofNumbering.h>
-#include <dolfin/fem/DofMapCache.h>
-#include <dolfin/fem/PeriodicDofsMapping.h>
-#include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/main/MPI.h>
@@ -84,36 +81,6 @@ DofMap::~DofMap()
   flattened_.free();
   delete numbering_;
   delete ufc_dofmap_;
-}
-
-//-----------------------------------------------------------------------------
-bool DofMap::operator ==(DofMap const& other) const
-{
-  return (this->hash() == other.hash());
-}
-
-//-----------------------------------------------------------------------------
-bool DofMap::operator !=(DofMap const& other) const
-{
-  return !(*this == other);
-}
-
-//-----------------------------------------------------------------------------
-DofMap& DofMap::acquire(Mesh& mesh, Form const& form, uint const i)
-{
-  return DofMapCache::instance().acquire(mesh, form, i);
-}
-
-//-----------------------------------------------------------------------------
-DofMap& DofMap::acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner)
-{
-  return DofMapCache::instance().acquire(mesh, dofmap, owner);
-}
-
-//-----------------------------------------------------------------------------
-void DofMap::release(DofMap& dofmap)
-{
-  return DofMapCache::instance().release(dofmap);
 }
 
 //-----------------------------------------------------------------------------
@@ -234,20 +201,6 @@ void DofMap::init()
 }
 
 //-----------------------------------------------------------------------------
-void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
-{
-  dolfin_assert(dofs != NULL);
-  numbering_->tabulate_dofs(dofs, ufc_cell, cell);
-}
-
-//-----------------------------------------------------------------------------
-void DofMap::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell) const
-{
-  dolfin_assert(dofs != NULL);
-  numbering_->tabulate_dofs(dofs, ufc_cell, *ufc_cell);
-}
-
-//-----------------------------------------------------------------------------
 Array<ufc::dofmap const *> const& DofMap::flatten() const
 {
   if (flattened_.empty())
@@ -312,12 +265,6 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
 }
 
 //-----------------------------------------------------------------------------
-bool DofMap::is_vectorizable() const
-{
-  return DofMap::can_vectorize(this->flatten());
-}
-
-//-----------------------------------------------------------------------------
 bool DofMap::can_vectorize(Array<ufc::dofmap const *> flattened)
 {
   bool ret = true;
@@ -333,74 +280,10 @@ bool DofMap::can_vectorize(Array<ufc::dofmap const *> flattened)
 }
 
 //-----------------------------------------------------------------------------
-Array<uint> const& DofMap::sub_dofmaps_dimensions() const
-{
-  return sub_dofmaps_dims_;
-}
-
-//-----------------------------------------------------------------------------
-Array<uint> const& DofMap::sub_dofmaps_offsets() const
-{
-  return sub_dofmaps_offs_;
-}
-
-//-----------------------------------------------------------------------------
 bool DofMap::renumbered() const
 {
   // FIXME:
   return (true);
-}
-
-//-----------------------------------------------------------------------------
-uint DofMap::local_size() const
-{
-  return numbering_->size();
-}
-
-//-----------------------------------------------------------------------------
-uint const * DofMap::dofsmapping() const
-{
-  return numbering_->block();
-}
-
-//-----------------------------------------------------------------------------
-uint DofMap::dofsmapping_size() const
-{
-  return numbering_->block_size();
-}
-
-//--------------------------------------------------------------------------
-PeriodicDofsMapping const& DofMap::periodic_mapping() const
-{
-  if (periodic_dofmap_ == NULL)
-  {
-    periodic_dofmap_ = new PeriodicDofsMapping(*this);
-  }
-  return *periodic_dofmap_;
-}
-
-//-----------------------------------------------------------------------------
-_ordered_map<uint, uint> DofMap::get_map() const
-{
-  return map_;
-}
-
-//-----------------------------------------------------------------------------
-bool DofMap::is_shared(uint index) const
-{
-  return numbering_->is_shared(index);
-}
-
-//-----------------------------------------------------------------------------
-bool DofMap::is_ghost(uint index) const
-{
-  return numbering_->is_ghost(index);
-}
-
-//-----------------------------------------------------------------------------
-std::string const& DofMap::hash() const
-{
-  return hash_;
 }
 
 //-----------------------------------------------------------------------------
@@ -644,18 +527,6 @@ bool DofMap::check(bool throw_error)
   MAYBE_UNUSED(throw_error);
 #endif
   return ret;
-}
-
-//-----------------------------------------------------------------------------
-std::string const DofMap::make_signature(std::string const& finite_element)
-{
-  return "FFC dofmap for " + finite_element;
-}
-
-//-----------------------------------------------------------------------------
-std::string const DofMap::make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap)
-{
-  return std::string(ufc_dofmap.signature()) + mesh.hash();
 }
 
 //-----------------------------------------------------------------------------

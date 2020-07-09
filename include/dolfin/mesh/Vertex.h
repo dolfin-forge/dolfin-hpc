@@ -4,14 +4,23 @@
 #ifndef __DOLFIN_VERTEX_H
 #define __DOLFIN_VERTEX_H
 
-#include "Point.h"
-#include "MeshEntity.h"
-#include "MeshEntityIterator.h"
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/Point.h>
+
+#include <dolfin/common/GhostIterator.h>
+#include <dolfin/common/OwnedIterator.h>
+#include <dolfin/common/SharedIterator.h>
 
 namespace dolfin
 {
 
-/// A Vertex is a MeshEntity of topological dimension 0.
+/**
+ *  @class  Vertex
+ *
+ *  @brief  A Vertex is a MeshEntity of topological dimension 0.
+ *
+ */
 
 class VertexIterator;
 
@@ -19,16 +28,15 @@ class Vertex : public MeshEntity
 {
 
 public:
-
   /// Create vertex on given mesh
-  Vertex(Mesh& mesh, uint index) :
-      MeshEntity(mesh, 0, index)
+  Vertex( Mesh & mesh, uint index )
+    : MeshEntity( mesh, 0, index )
   {
   }
 
   /// Create vertex from mesh entity
-  Vertex(MeshEntity& entity) :
-      MeshEntity(entity.mesh(), 0, entity.index())
+  Vertex( MeshEntity & entity )
+    : MeshEntity( entity.mesh(), 0, entity.index() )
   {
   }
 
@@ -38,28 +46,16 @@ public:
   }
 
   /// Return array of vertex coordinates
-  inline real* x()
-  {
-    return mesh_.geometry().x(index_);
-  }
+  inline real * x();
 
   /// Return array of vertex coordinates
-  inline const real* x() const
-  {
-    return mesh_.geometry().x(index_);
-  }
+  inline const real * x() const;
 
   /// Return vertex coordinates as a 3D point value
-  inline Point point() const
-  {
-    return mesh_.geometry().point(index_);
-  }
+  inline Point point() const;
 
   /// Return vertex coordinates as a 3D point value
-  inline Point midpoint() const
-  {
-    return mesh_.geometry().point(index_);
-  }
+  inline Point midpoint() const;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -67,62 +63,71 @@ public:
 
   struct shared : SharedIterator
   {
-    shared(Mesh& M) : SharedIterator(M.topology().distdata()[0]) {}
-    shared(MeshTopology& T) : SharedIterator(T.distdata()[0]) {}
+    shared( Mesh & M )
+      : SharedIterator( M.topology().distdata()[0] )
+    {
+    }
+    shared( MeshTopology & T )
+      : SharedIterator( T.distdata()[0] )
+    {
+    }
   };
 
   struct ghost : GhostIterator
   {
-    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[0]) {}
-    ghost(MeshTopology& T) : GhostIterator(T.distdata()[0]) {}
+    ghost( Mesh & M )
+      : GhostIterator( M.topology().distdata()[0] )
+    {
+    }
+    ghost( MeshTopology & T )
+      : GhostIterator( T.distdata()[0] )
+    {
+    }
   };
 
   struct owned : OwnedIterator
   {
-    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[0]) {}
-    owned(MeshTopology& T) : OwnedIterator(T.distdata()[0]) {}
+    owned( Mesh & M )
+      : OwnedIterator( M.topology().distdata()[0] )
+    {
+    }
+    owned( MeshTopology & T )
+      : OwnedIterator( T.distdata()[0] )
+    {
+    }
   };
 
   //--- Entity relation -------------------------------------------------------
 
   typedef Vertex lower_dimensional;
-  typedef Edge  higher_dimensional;
-
+  typedef Edge   higher_dimensional;
 };
 
-/// A VertexIterator is a MeshEntityIterator of topological dimension 0.
-
-class VertexIterator : public MeshEntityIterator
+//-----------------------------------------------------------------------------
+inline real * Vertex::x()
 {
+  return mesh_.geometry().x( index_ );
+}
 
-public:
+//-----------------------------------------------------------------------------
+inline const real * Vertex::x() const
+{
+  return mesh_.geometry().x( index_ );
+}
 
-  VertexIterator(Mesh& mesh) :
-      MeshEntityIterator(mesh, 0)
-  {
-  }
+//-----------------------------------------------------------------------------
+inline Point Vertex::point() const
+{
+  return mesh_.geometry().point( index_ );
+}
 
-  VertexIterator(MeshEntity& entity) :
-      MeshEntityIterator(entity, 0)
-  {
-  }
+//-----------------------------------------------------------------------------
+inline Point Vertex::midpoint() const
+{
+  return mesh_.geometry().point( index_ );
+}
 
-  inline Vertex* operator->()
-  {
-    return static_cast<Vertex*>(MeshEntityIterator::operator->());
-  }
-  
-  inline Vertex& operator*()
-  {
-    return *operator->();
-  }
-
-  inline Vertex& operator[](uint i)
-  {
-    return static_cast<Vertex&>(MeshEntityIterator::operator[](i));
-  }
-
-};
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

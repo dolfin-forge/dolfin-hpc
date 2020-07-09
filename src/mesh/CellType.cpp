@@ -4,16 +4,17 @@
 #include <dolfin/mesh/CellType.h>
 
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/MeshTopology.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
 #include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/IntervalCell.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/PointCell.h>
+#include <dolfin/mesh/QuadrilateralCell.h>
+#include <dolfin/mesh/TetrahedronCell.h>
+#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 

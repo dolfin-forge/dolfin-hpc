@@ -6,10 +6,13 @@
 #include <dolfin/mesh/MeshSmoother.h>
 
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshQuality.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {

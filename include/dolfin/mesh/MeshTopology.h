@@ -244,6 +244,58 @@ inline Connectivity const * MeshTopology::connectivity( uint d0, uint d1 ) const
   return C_[d0][d1];
 }
 
+//-----------------------------------------------------------------------------
+inline MeshDistributedData & MeshTopology::distdata()
+{
+  if ( not distributed() )
+  {
+    error( "MeshDistributedData : returning distributed data of serial mesh" );
+  }
+  return distdata_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshDistributedData const & MeshTopology::distdata() const
+{
+  if ( not distributed() )
+  {
+    error( "MeshDistributedData : returning distributed data of serial mesh" );
+  }
+  return distdata_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::global_size( uint dim ) const
+{
+  return ( distributed() ? distdata_[dim].global_size() : this->size( dim ) );
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::offset( uint dim ) const
+{
+  return ( distributed() ? distdata_[dim].offset() : 0 );
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_owned( uint dim ) const
+{
+  return ( distributed() ? distdata_[dim].num_owned() : this->size( dim ) );
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_shared( uint dim ) const
+{
+  return ( distributed() ? distdata_[dim].num_shared() : 0 );
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_ghost( uint dim ) const
+{
+  return ( distributed() ? distdata_[dim].num_ghost() : 0 );
+}
+
+//-----------------------------------------------------------------------------
+
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_MESH_TOPOLOGY_H */

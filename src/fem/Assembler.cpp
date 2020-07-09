@@ -12,7 +12,9 @@
 #include <dolfin/main/OpenMP.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/fem/Coefficient.h>

@@ -5,6 +5,7 @@
 #define __DOLFIN_DOF_NUMBERING_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/fem/UFCCell.h>
 
 #include <ufc.h>
 
@@ -124,6 +125,66 @@ private:
   uint size_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline DofNumbering & DofNumbering::operator=( DofNumbering const & )
+{
+  return *this;
+}
+//-----------------------------------------------------------------------------
+inline uint DofNumbering::offset() const
+{
+  return offset_;
+}
+//-----------------------------------------------------------------------------
+inline uint DofNumbering::size() const
+{
+  return size_;
+}
+//-----------------------------------------------------------------------------
+inline uint const * DofNumbering::block() const
+{
+  if ( array == NULL )
+  {
+    pretabulate( array, array_size );
+  }
+  return array;
+}
+//-----------------------------------------------------------------------------
+inline uint DofNumbering::block_size() const
+{
+  if ( array == NULL )
+  {
+    pretabulate( array, array_size );
+  }
+  return array_size;
+}
+//-----------------------------------------------------------------------------
+inline void DofNumbering::init()
+{
+  DofNumbering::clear();
+  DofNumbering::init( mesh, ufc_dofmap );
+}
+//-----------------------------------------------------------------------------
+inline void DofNumbering::clear()
+{
+  offset_    = 0;
+  size_      = 0;
+  array_size = 0;
+  delete[] array;
+  array = NULL;
+}
+//-----------------------------------------------------------------------------
+inline void DofNumbering::set_range( uint offset, uint size )
+{
+  offset_ = offset;
+  size_   = size;
+}
+//-----------------------------------------------------------------------------
+inline void DofNumbering::tabulate_dofs( uint * dofs, UFCCell const & ufc_cell )
+{
+  this->tabulate_dofs( dofs, ufc_cell, *ufc_cell );
+}
 
 } /* namespace dolfin */
 

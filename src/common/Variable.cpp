@@ -7,36 +7,39 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Variable::Variable() :
-  _name("x"), _label("data with no label")
+Variable::Variable()
+  : _name( "x" )
+  , _label( "data with no label" )
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Variable::Variable(const std::string name, const std::string label) :
-  _name(name), _label(label)
+Variable::Variable( const std::string name, const std::string label )
+  : _name( name )
+  , _label( label )
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Variable::Variable(const Variable& variable) :
-  _name(variable._name), _label(variable._label)
+Variable::Variable( const Variable & variable )
+  : _name( variable._name )
+  , _label( variable._label )
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void Variable::rename(const std::string name, const std::string label)
+void Variable::rename( const std::string name, const std::string label )
 {
-  _name = name;
+  _name  = name;
   _label = label;
 }
 //-----------------------------------------------------------------------------
-const std::string& Variable::name() const
+const std::string & Variable::name() const
 {
   return _name;
 }
 //-----------------------------------------------------------------------------
-const std::string& Variable::label() const
+const std::string & Variable::label() const
 {
   return _label;
 }

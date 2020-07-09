@@ -5,10 +5,11 @@
 
 #include <dolfin/mesh/MeshRenumber.h>
 
-#include <dolfin/mesh/MeshDistributedData.h>
-#include <dolfin/mesh/EntityKey.h>
-#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/common/SharedIterator.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/EntityKey.h>
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshTopology.h>
 
 namespace dolfin
 {

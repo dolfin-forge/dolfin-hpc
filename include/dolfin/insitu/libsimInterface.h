@@ -15,7 +15,7 @@
 #include <dolfin/config/dolfin_config.h>
 
 #include <algorithm>
-#include <cstring>
+#include <string>
 
 #ifdef HAVE_LIBSIM
 #include <VisItControlInterface_V2.h>

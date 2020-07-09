@@ -4,6 +4,7 @@
 
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/UnitInterval.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 

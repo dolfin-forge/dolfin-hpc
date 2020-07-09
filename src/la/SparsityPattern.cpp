@@ -153,21 +153,6 @@ void SparsityPattern::init(uint rank, uint const * dim,
   initialized_ = true;
 }
 //-----------------------------------------------------------------------------
-void SparsityPattern::set_blocked()
-{
-  blocked_ = true;
-}
-//-----------------------------------------------------------------------------
-bool SparsityPattern::is_blocked() const
-{
-  return blocked_;
-}
-//-----------------------------------------------------------------------------
-bool SparsityPattern::is_distributed() const
-{
-  return distributed_;
-}
-//-----------------------------------------------------------------------------
 void SparsityPattern::insert(uint const * num, uint const * const * idx)
 {
   for (uint i = 0; i < num[0]; ++i)
@@ -201,11 +186,6 @@ void SparsityPattern::insert(uint const * num, uint const * const * idx)
       }
     }
   }
-}
-//-----------------------------------------------------------------------------
-uint SparsityPattern::size(uint i) const
-{
-  return (local_range_[i][1] - local_range_[i][0]);
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
@@ -320,19 +300,6 @@ void SparsityPattern::disp() const
   end();
   message("range       : [ %8u, %8u [", local_range_[0], local_range_[1]);
   end();
-}
-//-----------------------------------------------------------------------------
-void SparsityPattern::get_range(uint p_rank, uint range[])
-{
-  dolfin_assert(distributed_);
-  // For a serial pattern p_rank is only zero
-  std::copy(&range_[0][p_rank], &range_[0][p_rank + 1], range);
-}
-//-----------------------------------------------------------------------------
-dolfin::uint SparsityPattern::range_size(uint p_rank) const
-{
-  dolfin_assert(distributed_);
-  return range_[0][p_rank + 1] - range_[0][p_rank];
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::apply()

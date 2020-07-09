@@ -5,7 +5,6 @@ libdolfin_fem_la_SOURCES = \
 			BilinearForm.cpp\
 			BoundaryCondition.cpp\
 			BoundaryNormal.cpp\
-			Coefficient.cpp\
 			CoefficientMap.cpp\
 			DirichletBC.cpp\
 			DofMap.cpp\

@@ -5,15 +5,19 @@
 
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshTopology.h>
-#include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Connectivity.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/EdgeIterator.h>
+#include <dolfin/mesh/Face.h>
+#include <dolfin/mesh/FaceIterator.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {

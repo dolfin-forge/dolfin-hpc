@@ -45,12 +45,16 @@ protected:
 private:
   //----------------------------------------------------------------------------
   MPI::Communicator comm_;
+  uint              comm_rank_;
+  uint              comm_size_;
 };
 
 //------------------------------------------------------------------------------
 template < typename T >
 Distributed< T >::Distributed( MPI::Communicator & comm )
   : comm_( DOLFIN_COMM_NULL )
+  , comm_rank_( 0 )
+  , comm_size_( 1 )
 {
 #if HAVE_MPI
   /*
@@ -58,7 +62,17 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
    *  "A null handle argument is an erroneous IN argument in MPI calls"
    */
   if ( comm != DOLFIN_COMM_NULL )
+  {
     MPI::check_error( MPI_Comm_dup( comm, &comm_ ) );
+
+    int ret = 0;
+    MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
+    comm_rank_ = static_cast< uint >( ret );
+
+    ret = 0;
+    MPI::check_error( MPI_Comm_size( comm_, &ret ) );
+    comm_size_ = static_cast< uint >( ret );
+  }
 #else
   MAYBE_UNUSED( comm );
 #endif
@@ -82,31 +96,21 @@ MPI::Communicator & Distributed< T >::comm()
 template < typename T >
 inline uint Distributed< T >::comm_rank() const
 {
-  int ret = 0;
-#if HAVE_MPI
-  if ( comm_ != DOLFIN_COMM_NULL )
-    MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
-#endif
-  return static_cast< uint >( ret );
+  return comm_rank_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
 inline uint Distributed< T >::comm_size() const
 {
-  int ret = 1;
-#if HAVE_MPI
-  if ( comm_ != DOLFIN_COMM_NULL )
-    MPI::check_error( MPI_Comm_size( comm_, &ret ) );
-#endif
-  return static_cast< uint >( ret );
+  return comm_size_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
 inline bool Distributed< T >::distributed() const
 {
-  return ( this->comm_size() > 1 );
+  return comm_size_ > 1;
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +133,17 @@ Distributed< T > & Distributed< T >::operator=( Distributed< T > const & other )
     if ( comm_ != DOLFIN_COMM_NULL )
       MPI::check_error( MPI_Comm_free( &comm_ ) );
     if ( other.comm_ != DOLFIN_COMM_NULL )
+    {
       MPI::check_error( MPI_Comm_dup( other.comm_, &comm_ ) );
+
+      int ret = 0;
+      MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
+      comm_rank_ = static_cast< uint >( ret );
+
+      ret = 0;
+      MPI::check_error( MPI_Comm_size( comm_, &ret ) );
+      comm_size_ = static_cast< uint >( ret );
+    }
 #endif
   }
   return *this;

@@ -44,6 +44,7 @@ public:
   bool defined( std::string const & key ) const;
 
   // (de)serialize ParameterSystem
+  std::string to_json() const;
   std::string serialize() const;
   void deserialize( std::string const & parameters );
 

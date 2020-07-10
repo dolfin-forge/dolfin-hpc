@@ -129,6 +129,46 @@ bool ParameterSystem::defined(std::string const& key) const
 
 //-----------------------------------------------------------------------------
 
+std::string ParameterSystem::to_json() const
+{
+  std::stringstream ss;
+  ss << "{\n";
+  bool first_line = true;
+  for ( const_iterator it = this->begin(); it != this->end(); ++it )
+  {
+    if ( not first_line )
+      ss <<",\n";
+
+    ss << "\t\"" << it->first << "\": ";
+    switch ( it->second->type() )
+    {
+      case Parameter::bool_t:
+        ss << std::boolalpha << this->get< bool >( it->first );
+        break;
+      case Parameter::int_t:
+        ss << this->get< int >( it->first );
+        break;
+      case Parameter::uint_t:
+        ss << this->get< uint >( it->first );
+        break;
+      case Parameter::real_t:
+        ss << this->get< real >( it->first );
+        break;
+      case Parameter::string_t:
+        ss << "\"" << this->get< std::string >( it->first ) << "\"";
+        break;
+      default:
+        ss << "\"Unknown Parameter Type\";";
+    }
+
+    first_line = false;
+  }
+  ss << "\n}\n";
+  return ss.str();
+}
+
+//-----------------------------------------------------------------------------
+
 std::string ParameterSystem::serialize() const
 {
   std::stringstream ss;

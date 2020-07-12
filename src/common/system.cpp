@@ -88,6 +88,7 @@ void mkdir(std::string const& dirpath)
   {
     error("Unable to create directory: '%s'", dirpath.c_str());
   }
+  message( 1, "mkdir: %s", dirpath.c_str() );
 }
 //-----------------------------------------------------------------------------
 bool stat(std::string const& dirpath)
@@ -117,6 +118,7 @@ void cd(std::string const& dirpath)
   {
     error("Unable to enter directory: '%s'", dirpath.c_str());
   }
+  message( 1, "cd: %s", dirpath.c_str() );
 #if HAVE_MPI
   MPI::check_error( MPI_Barrier(dolfin::MPI::DOLFIN_COMM) );
 #endif
@@ -130,11 +132,8 @@ void mkdircd(std::string const& dirpath)
 //-----------------------------------------------------------------------------
 void pushd(std::string const& dirpath)
 {
-  mkdir(dirpath);
-  char abspath[PATH_MAX] = { 0 };
-  ::realpath(dirpath.c_str(), abspath);
-  dirstack().push_back(abspath);
-  cd(dirpath);
+  dirstack().push_back( getcwd() );
+  mkdircd( dirpath );
 }
 //-----------------------------------------------------------------------------
 void popd()
@@ -143,8 +142,9 @@ void popd()
   {
     error("Trying to popd with empty dirstack");
   }
-  dirstack().pop_back();
+
   cd(dirstack().back());
+  dirstack().pop_back();
 }
 //-----------------------------------------------------------------------------
 void dirs(int n, std::string& dirname)
@@ -171,7 +171,7 @@ void dirs(int n, std::string& dirname)
 //-----------------------------------------------------------------------------
 Array<std::string>& dirstack()
 {
-  static Array<std::string> dirstack_(1, getcwd());
+  static Array<std::string> dirstack_;
   return dirstack_;
 }
 //-----------------------------------------------------------------------------

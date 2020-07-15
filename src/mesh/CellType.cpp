@@ -74,7 +74,7 @@ CellType* CellType::create_simplex(uint dim)
       error("Unknown simplex type for dimension: %d.", dim);
       break;
     }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 Array<CellType*> CellType::create_hypercube()
@@ -103,7 +103,7 @@ CellType* CellType::create_hypercube(uint dim)
       error("Unknown hypercube type for dimension: %d.", dim);
       break;
     }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(CellType::Type type)
@@ -127,7 +127,7 @@ CellType* CellType::create(CellType::Type type)
       break;
     }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(std::string const& type)
@@ -161,7 +161,7 @@ CellType* CellType::create(std::string const& type)
     error("Unknown cell type: \"%s\".", type.c_str());
   }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(ufl::Cell const& cell)
@@ -185,7 +185,7 @@ CellType* CellType::create(ufl::Cell const& cell)
       break;
     }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 bool CellType::intersects(MeshEntity& entity, Cell& c) const

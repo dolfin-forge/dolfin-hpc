@@ -49,7 +49,7 @@ public:
       mesh_(0),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     MeshFunction<T>::operator=(other);
   }
@@ -60,7 +60,7 @@ public:
       mesh_(0),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     MeshFunction<T>::operator=(other);
   }
@@ -74,7 +74,7 @@ public:
   ///
   bool empty() const
   {
-    return (values_ == NULL);
+    return (values_ == nullptr);
   }
 
   /// Assignment operator
@@ -235,7 +235,7 @@ public:
   /// Set all values to given value
   MeshFunction<T>& operator=(T const& value)
   {
-    dolfin_assert(!((values_ == NULL) && (size_>0)));
+    dolfin_assert(!((values_ == nullptr) && (size_>0)));
     std::fill_n(values_, size_, value);
     return *this;
   }
@@ -272,7 +272,7 @@ protected:
       mesh_(0),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     init(&mesh, dim, mesh.size(dim));
     std::fill_n(values_, size_, val);
@@ -285,7 +285,7 @@ protected:
     dim_ = dim;
     size_ = size;
     delete[] values_;
-    values_ = NULL;
+    values_ = nullptr;
     if(size_ > 0)
     {
       values_ = new T[size];

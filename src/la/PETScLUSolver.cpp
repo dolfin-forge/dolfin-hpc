@@ -207,7 +207,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
   if ( !B )
   {
     // Create matrix if it has not been created before
-    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL, &B);
+    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL &B);
     idxm = new int[M];
     idxn = new int[1];
     for (uint i = 0; i < M; i++)

@@ -507,10 +507,10 @@ inline _set< uint > const *
     if ( cached_ownership_[local_index] < pe_size_ )
       return &shared_.find( local_index )->second;
     else
-      return NULL;
+      return nullptr;
   }
   SharedSet::const_iterator it = shared_.find( local_index );
-  return ( it == shared_.end() ? NULL : &it->second );
+  return ( it == shared_.end() ? nullptr : &it->second );
 }
 //-----------------------------------------------------------------------------
 

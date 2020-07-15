@@ -62,7 +62,7 @@ DofMap& DofMapCache::acquire(Mesh& mesh, Form const& form, uint const& i)
 //-----------------------------------------------------------------------------
 DofMap& DofMapCache::acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner)
 {
-  DofMap * ret = NULL;
+  DofMap * ret = nullptr;
   std::string const h = DofMap::make_hash(mesh, dofmap);
   container_t::iterator it = cache_.find(h);
 

@@ -77,7 +77,7 @@ Condition const * Condition::create(Object::repr_t const& repr)
   {
     error("Unknown type of ufl::Condition: '" + name + "'");
   }
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------

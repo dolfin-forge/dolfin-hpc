@@ -64,7 +64,7 @@ std::string path(std::string p0, std::string const& p1, std::string const& p2)
 void glob(std::string const& pattern, Array<std::string>& matches)
 {
   glob_t match;
-  ::glob(pattern.c_str(), GLOB_ERR, NULL, &match);
+  ::glob(pattern.c_str(), GLOB_ERR, nullptr, &match);
   for (unsigned int i = 0; i < match.gl_pathc; ++i)
   {
     matches.push_back(std::string(match.gl_pathv[i]));
@@ -100,7 +100,7 @@ bool stat(std::string const& dirpath)
 std::string getcwd()
 {
   char curpath[PATH_MAX] = { 0 };
-  if (::getcwd(curpath, sizeof(curpath)) == NULL)
+  if (::getcwd(curpath, sizeof(curpath)) == nullptr)
   {
     message("Cannot get current working directory");
   }

@@ -15,18 +15,18 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern(uint rank, uint const * dim,
-                                 uint const * range /* = NULL */) :
+                                 uint const * range /* = nullptr */) :
     rank_(0),
-    dim_(NULL),
-    range_(NULL),
-    local_range_(NULL),
+    dim_(nullptr),
+    range_(nullptr),
+    local_range_(nullptr),
     initialized_(false),
     finalized_(false),
     blocked_(false),
     distributed_(false),
-    d_entries_(NULL),
+    d_entries_(nullptr),
     d_count_(0),
-    o_entries_(NULL),
+    o_entries_(nullptr),
     o_count_(0)
 {
   init(rank, dim, range);
@@ -34,16 +34,16 @@ SparsityPattern::SparsityPattern(uint rank, uint const * dim,
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern() :
     rank_(0),
-    dim_(NULL),
-    range_(NULL),
-    local_range_(NULL),
+    dim_(nullptr),
+    range_(nullptr),
+    local_range_(nullptr),
     initialized_(false),
     finalized_(false),
     blocked_(false),
     distributed_(false),
-    d_entries_(NULL),
+    d_entries_(nullptr),
     d_count_(0),
-    o_entries_(NULL),
+    o_entries_(nullptr),
     o_count_(0)
 {
   // Do nothing
@@ -59,10 +59,10 @@ void SparsityPattern::clear()
   r_entries_.clear();
   o_count_ = 0;
   delete[] o_entries_;
-  o_entries_ = NULL;
+  o_entries_ = nullptr;
   d_count_ = 0;
   delete[] d_entries_;
-  d_entries_ = NULL;
+  d_entries_ = nullptr;
   initialized_ = false;
   finalized_ = false;
   blocked_ = false;
@@ -72,16 +72,16 @@ void SparsityPattern::clear()
     delete[] range_[i];
   }
   delete[] range_;
-  range_ = NULL;
+  range_ = nullptr;
   delete[] local_range_;
-  local_range_ = NULL;
+  local_range_ = nullptr;
   delete[] dim_;
-  dim_ = NULL;
+  dim_ = nullptr;
   rank_ = 0;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::init(uint rank, uint const * dim,
-                           uint const * range /* = NULL */)
+                           uint const * range /* = nullptr */)
 {
   if (initialized_)
   {
@@ -103,7 +103,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
 
   // Set the sparsity pattern as distributed only if ranges are provided and not
   // all equal to the global dimensions
-  distributed_ = (range != NULL) && (!std::equal(dim, dim + rank, range));
+  distributed_ = (range != nullptr) && (!std::equal(dim, dim + rank, range));
   if (distributed_)
   {
     uint pe_size = dolfin::MPI::size();
@@ -206,7 +206,7 @@ void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
     nzrow[i] = d_entries_[i].size();
   }
 
-  if (o_entries_ != NULL)
+  if (o_entries_ != nullptr)
   {
     for (uint i = 0; i < num_rows; ++i)
     {

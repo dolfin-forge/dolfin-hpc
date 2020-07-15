@@ -24,8 +24,8 @@ public:
   SparsityPattern();
 
   /// Create sparsity pattern for given global dimensions and local ranges.
-  /// If range is a NULL pointer the pattern is assumed to be serial.
-  SparsityPattern(uint rank, uint const * dim, uint const * range = NULL);
+  /// If range is a nullptr pointer the pattern is assumed to be serial.
+  SparsityPattern(uint rank, uint const * dim, uint const * range = nullptr);
 
   /// Destructor
   ~SparsityPattern();
@@ -33,8 +33,8 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Initialize with given tensor rank, global dimensions and local ranges.
-  /// If range is a NULL pointer the pattern is assumed to be serial
-  void init(uint rank, uint const * dim, uint const * range = NULL);
+  /// If range is a nullptr pointer the pattern is assumed to be serial
+  void init(uint rank, uint const * dim, uint const * range = nullptr);
 
   /// Clear
   void clear();

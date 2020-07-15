@@ -37,7 +37,7 @@ public:
   /// associated time instance
   inline TimeDependent const& operator()(Time const& time) const
   {
-    if(t_ == NULL)
+    if(t_ == nullptr)
     {
       clock_ = time.clock();
     }
@@ -51,7 +51,7 @@ public:
   /// Synchronize with another time dependent object, do not expose details.
   inline TimeDependent const& operator()(TimeDependent const& other) const
   {
-    if(t_ == NULL)
+    if(t_ == nullptr)
     {
       clock_ = other.clock_;
     }
@@ -63,7 +63,7 @@ public:
   }
 
   /// Return the time associated with the instance
-  inline real clock() const { return (t_ == NULL ? clock_ : t_->clock()); }
+  inline real clock() const { return (t_ == nullptr ? clock_ : t_->clock()); }
 
 private:
 

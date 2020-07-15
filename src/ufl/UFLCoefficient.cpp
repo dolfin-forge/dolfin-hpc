@@ -99,7 +99,7 @@ CoefficientBase const* CoefficientBase::create(Object::repr_t const& repr)
     error("Unknown type of ufl::CoefficientBase: '" + name + "'");
   }
 
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------

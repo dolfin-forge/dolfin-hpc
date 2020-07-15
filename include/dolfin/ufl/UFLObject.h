@@ -357,7 +357,7 @@ inline Object const* Object::create(repr_t const&)
 //    error("Unknown type of ufl::Object: '" + name + "'");
 //  }
 
-  return NULL;
+  return nullptr;
 }
 } /* namespace ufl */
 #endif /* __DOLFIN_UFL_OBJECT_H */

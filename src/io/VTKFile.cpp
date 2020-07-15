@@ -478,7 +478,7 @@ void VTKFile::ResultsWrite(
 
     // Copy values
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3|n)^1 = (2|3|n) so ...
-    real * values = NULL;
+    real * values = nullptr;
     u->get_block(values);
     switch (value_size)
       {

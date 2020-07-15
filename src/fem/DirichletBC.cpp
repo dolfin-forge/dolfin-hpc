@@ -33,7 +33,7 @@ DirichletBC::DirichletBC(Coefficient& g, Mesh& mesh,
   BoundaryCondition("Dirichlet", mesh, sub_domain),
   g_(g),
   method_(method),
-  entities_(NULL)
+  entities_(nullptr)
 {
 }
 //-----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ DirichletBC::DirichletBC(Coefficient& g, Mesh& mesh,
   BoundaryCondition("Dirichlet", mesh, sub_domain, sub_system),
   g_(g),
   method_(method),
-  entities_(NULL)
+  entities_(nullptr)
 {
 }
 //-----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ DirichletBC::~DirichletBC()
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         BilinearForm const& form)
 {
-  apply_impl(A, b, NULL, form);
+  apply_impl(A, b, nullptr, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
@@ -72,7 +72,7 @@ void DirichletBC::apply_impl(GenericMatrix& A, GenericVector& b,
     error("DirichletBC is implemented only for identical test and trial space");
   }
 
-  if(entities_ == NULL || this->invalid_mesh())
+  if(entities_ == nullptr || this->invalid_mesh())
   {
     if ((method_ == topological) || (method_ == geometric))
     {

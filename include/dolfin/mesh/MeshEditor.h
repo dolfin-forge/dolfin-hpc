@@ -91,7 +91,7 @@ public:
     Space    * space_;
     Comm     * mcomm_;
 
-    Parameters() : ctype_(NULL), space_(NULL), mcomm_(NULL) {}
+    Parameters() : ctype_(nullptr), space_(nullptr), mcomm_(nullptr) {}
   };
 
 private:

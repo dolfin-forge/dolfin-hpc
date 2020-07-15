@@ -55,8 +55,8 @@ DistributedData::DistributedData( DistributedData const & other )
   , ghost_( other.ghost_ )
   , cached_numbering_( other.cached_numbering_ )
   , cached_ownership_( other.cached_ownership_ )
-  , shared_mapping_( ( other.shared_mapping_ == NULL )
-                       ? NULL
+  , shared_mapping_( ( other.shared_mapping_ == nullptr )
+                       ? nullptr
                        : new SharedMapping( *other.shared_mapping_ ) )
 {
 }
@@ -107,7 +107,7 @@ void DistributedData::clear()
 	if ( shared_mapping_ )
 	{
 		delete shared_mapping_;
-		shared_mapping_ = NULL;
+		shared_mapping_ = nullptr;
 	}
 	cached_ownership_ = Array< uint >();
 	cached_numbering_ = Array< uint >();
@@ -599,7 +599,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   if ( shared_mapping_ )
   {
     delete shared_mapping_;
-    shared_mapping_ = NULL;
+    shared_mapping_ = nullptr;
   }
 }
 //-----------------------------------------------------------------------------
@@ -654,10 +654,10 @@ void DistributedData::renumber_global()
     recvsize = std::max(recvsize, (uint) sendbuf[i].size());
   }
   MPI::all_reduce<MPI::max>(recvsize, recvsize, this->comm());
-  uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
-  uint * sendbck = (recvsize == 0 ? NULL : new uint[recvsize]);
+  uint * recvbuf = (recvsize == 0 ? nullptr : new uint[recvsize]);
+  uint * sendbck = (recvsize == 0 ? nullptr : new uint[recvsize]);
   uint const num_ghost = ghost_.size();
-  uint * recvbck = (num_ghost == 0 ? NULL : new uint[num_ghost]);
+  uint * recvbck = (num_ghost == 0 ? nullptr : new uint[num_ghost]);
 
   for (uint j = 1; j < pe_size_; ++j)
   {
@@ -767,7 +767,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   if ( shared_mapping_ )
   {
     delete shared_mapping_;
-    shared_mapping_ = NULL;
+    shared_mapping_ = nullptr;
   }
 }
 //-----------------------------------------------------------------------------
@@ -849,7 +849,7 @@ void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs
 //-----------------------------------------------------------------------------
 SharedMapping const& DistributedData::shared_mapping() const
 {
-  if(shared_mapping_ == NULL)
+  if(shared_mapping_ == nullptr)
   {
     shared_mapping_ = new SharedMapping(*this);
   }

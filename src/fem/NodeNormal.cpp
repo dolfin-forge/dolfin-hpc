@@ -63,7 +63,7 @@ typedef _map<uint, NodeData *>::iterator  NodeMapIterator;
 NodeNormal::NodeNormal( Mesh & mesh, Type w, real alpha )
   : BoundaryNormal( mesh )
   , mesh_( mesh )
-  , subdomain_( NULL )
+  , subdomain_( nullptr )
   , alpha_max_( alpha )
   , type_( w )
 {
@@ -169,7 +169,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // of the dofs on the facet restriction (if any) or if the facet midpoint
     // is in the subdomain.
     // Skip the facet if it does not satisfy one of these conditions.
-    if ((subdomain_ == NULL)
+    if ((subdomain_ == nullptr)
         || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {
       scratchN.cell.update(cell);
@@ -225,7 +225,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
     {
       uint dof0 = scratchN.facet_dofs[f_n];
-      if ((subdomain_ == NULL)
+      if ((subdomain_ == nullptr)
           || subdomain_->inside(scratchN.coordinates[dof0], on_boundary))
       {
         // Take global dof index of the first component as node id

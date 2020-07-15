@@ -23,7 +23,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
 {
-  DofNumbering * ret = NULL;
+  DofNumbering * ret = nullptr;
   uint const tdim = mesh.topology_dimension();
   uint const num_verts = mesh.topology().global_size(0);
   uint const num_cells = mesh.topology().global_size(tdim);
@@ -103,7 +103,7 @@ DofNumbering::DofNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
     mesh(mesh),
     ufc_dofmap(ufc_dofmap),
     array_size(0),
-    array(NULL),
+    array(nullptr),
     offset_(0),
     size_(0)
 {
@@ -118,11 +118,11 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
     mesh(other.mesh),
     ufc_dofmap(other.ufc_dofmap),
     array_size(other.array_size),
-    array(NULL),
+    array(nullptr),
     offset_(other.offset_),
     size_(other.size_)
 {
-  if (other.array != NULL)
+  if (other.array != nullptr)
   {
     array = new uint[array_size];
     std::copy(other.array, other.array + other.array_size, array);

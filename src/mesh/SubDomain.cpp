@@ -71,7 +71,7 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
       MPI::check_error( MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM,
                                    j, distdata.comm()) );
     }
-    uint * recvbuf = (recv_size ? new uint[recv_size] : NULL);
+    uint * recvbuf = (recv_size ? new uint[recv_size] : nullptr);
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (pe_rank - j + pe_size) % pe_size;

@@ -89,8 +89,8 @@ void distribute(MeshValues<uint, Vertex>& dist)
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     swap( mesh, new_mesh );
   }
-  dolfin_assert(mesh.topology().connectivity(0) == NULL);
-  dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
+  dolfin_assert(mesh.topology().connectivity(0) == nullptr);
+  dolfin_assert(mesh.topology().connectivity(tdim) == nullptr);
 
   // Exchange the vertices
   uint recvmax_v;
@@ -207,14 +207,14 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   Array< Array< real > > send_vcoords( pe_size );
 
   /// Support the same cell and vertex function as before
-  uint const             numRV = D != NULL ? D->size< real, Vertex >() : 0;
+  uint const             numRV = D != nullptr ? D->size< real, Vertex >() : 0;
   Array< Array< real > > RV( ( numRV > 0 ) ? pe_size : 0 );
   uint const             numUC =
-    D != NULL ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
+    D != nullptr ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
   Array< Array< uint > > UC( ( numUC > 0 ) ? pe_size : 0 );
 
   /// Check that only desired data is present in D
-  if ( D != NULL && ( D->size() != ( numRV + numUC ) ) )
+  if ( D != nullptr && ( D->size() != ( numRV + numUC ) ) )
   {
     error( "MPIMeshCommunicator : transferring <real, Vertex>, <bool, Cell>, "
            "and <uint, Cell> only is supported." );
@@ -524,7 +524,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   // Clear mesh using swap with new instance
   mesh = Mesh( mesh.type(), mesh.space(), comm );
 
-  dolfin_assert( mesh.topology().connectivity( 0 ) == NULL );
+  dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
 
   // NOTE: This implementation only works for homogeneous topologies
   //       Check cell data size just in case.

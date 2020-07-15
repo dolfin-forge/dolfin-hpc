@@ -15,7 +15,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -29,7 +29,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -43,7 +43,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -58,7 +58,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
                        Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -72,7 +72,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -89,7 +89,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -106,7 +106,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& co
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -195,7 +195,7 @@ void MeshEditor::add_cell(uint c, uint const * v)
   {
    error("MeshEditor : cell list full, %d cells added.", num_cells_);
   }
-  dolfin_assert(cell_vertices_ != NULL);
+  dolfin_assert(cell_vertices_ != nullptr);
   cell_vertices_->set(c, v);
   ++cell_index_;
 }

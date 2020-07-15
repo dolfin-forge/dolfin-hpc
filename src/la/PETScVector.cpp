@@ -88,7 +88,7 @@ void PETScVector::get(real* values) const
 {
 #if PETSC_VERSION_MAJOR > 2
   dolfin_assert(x_);
-  real const* data = NULL;
+  real const* data = nullptr;
   VecGetArrayRead(x_, &data);
   dolfin_assert(data);
   PetscInt n;
@@ -114,7 +114,7 @@ void PETScVector::get(real* values) const
 void PETScVector::set(real* values)
 {
   dolfin_assert(x_);
-  real* data = NULL;
+  real* data = nullptr;
   VecGetArray(x_, &data);
   dolfin_assert(data);
   PetscInt n;

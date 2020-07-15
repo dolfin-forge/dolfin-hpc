@@ -11,7 +11,7 @@ MeshEntityIterator::MeshEntityIterator(Mesh& mesh, uint dim) :
     entity_(mesh, dim, 0),
     pos_(0),
     end_(mesh.size(dim)),
-    index_(NULL)
+    index_(nullptr)
 {
 }
 //-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ MeshEntityIterator::MeshEntityIterator(MeshEntityIterator& other) :
     entity_(other.entity_.mesh(), 0, 0),
     pos_(0),
     end_(0),
-    index_(NULL)
+    index_(nullptr)
 {
   error("Illegal use of mesh entity iterator.");
 }

@@ -27,7 +27,7 @@ public:
   /// Create empty UFC cell
   UFCCell() :
       ufc::cell(),
-      cell_(NULL),
+      cell_(nullptr),
       num_vertices(0)
   {
   }
@@ -47,7 +47,7 @@ public:
       cell_(other.cell_),
       num_vertices(0)
   {
-    if (cell_ != NULL) init(*const_cast<Cell*>(cell_));
+    if (cell_ != nullptr) init(*const_cast<Cell*>(cell_));
   }
 
   /// Destructor

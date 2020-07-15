@@ -22,7 +22,7 @@ namespace dolfin
 VertexNormal::VertexNormal(VertexNormal& other) :
     mesh_(other.mesh_),
     gdim_(other.gdim_),
-    subdomain_(NULL),
+    subdomain_(nullptr),
     basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh_),
     alpha_max_(0.5 * DOLFIN_PI),
@@ -36,7 +36,7 @@ VertexNormal::VertexNormal(VertexNormal& other) :
 VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
     mesh_(mesh),
     gdim_(mesh.geometry_dimension()),
-    subdomain_(NULL),
+    subdomain_(nullptr),
     basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
@@ -80,7 +80,7 @@ void VertexNormal::getFacetData(VertexNormal::Type type, Mesh& mesh,
   {
     Facet facet(mesh, boundary.facet_index(*bcell));
 
-    if(subdomain_ != NULL && !subdomain_->inside(&bcell->midpoint()[0], true))
+    if(subdomain_ != nullptr && !subdomain_->inside(&bcell->midpoint()[0], true))
     {
       continue;
     }
@@ -224,7 +224,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
         if ( it != vdmap.end() )
         {
           // Add corresponding facet normals and weights
-          dolfin_assert( it->second != NULL );
+          dolfin_assert( it->second != nullptr );
           VertexData * vd = it->second;
           vd->facet_normals.insert( vd->facet_normals.end(), rptr,
                                     rptr + gdim * num_nc );

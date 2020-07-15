@@ -276,7 +276,7 @@ int MeshGeometry::token() const
 //-----------------------------------------------------------------------------
 void MeshGeometry::update_token()
 {
-  timestamp_ = std::time(NULL);
+  timestamp_ = std::time(nullptr);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::disp() const

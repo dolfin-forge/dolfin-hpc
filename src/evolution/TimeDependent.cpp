@@ -11,7 +11,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 TimeDependent::TimeDependent() :
     clock_(0.0),
-    t_(NULL)
+    t_(nullptr)
 {
   // Do nothing
 }

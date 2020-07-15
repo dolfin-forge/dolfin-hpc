@@ -83,8 +83,8 @@ private:
   ///
   /// An optional mapping between old and new indices is generated. The Arrays
   /// have to have the size of the old numbering
-  void number(Array<int> *old2new_cells = NULL,
-              Array<int> *old2new_vertices = NULL);
+  void number(Array<int> *old2new_cells = nullptr,
+              Array<int> *old2new_vertices = nullptr);
 
   /// Renumber global indicies to fit within the range of an unsigned int
   void renumber_glb(_map<long, uint>& new_global);

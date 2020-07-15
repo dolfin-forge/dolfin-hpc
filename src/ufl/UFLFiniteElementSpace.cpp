@@ -49,7 +49,7 @@ FiniteElementSpace * FiniteElementSpace::create(Object::repr_t const repr)
     error("Unknown type of ufl::FiniteElementSpace: '" + name + "'");
   }
   
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------

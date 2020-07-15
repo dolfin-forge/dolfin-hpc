@@ -240,10 +240,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
             edata.num_shared(), edata.num_ghost());
     }
     recvmax = edata.num_shared() - edata.num_ghost();
-    recvbuf = (recvmax == 0 ? NULL : new uint[recvmax]);
-    uint * sendbuf_back = (recvmax == 0 ? NULL : new uint[recvmax]);
+    recvbuf = (recvmax == 0 ? nullptr : new uint[recvmax]);
+    uint * sendbuf_back = (recvmax == 0 ? nullptr : new uint[recvmax]);
     uint const num_ghosts = edata.num_ghost();
-    uint * recvbuf_back = (num_ghosts == 0 ? NULL : new uint[num_ghosts]);
+    uint * recvbuf_back = (num_ghosts == 0 ? nullptr : new uint[num_ghosts]);
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;

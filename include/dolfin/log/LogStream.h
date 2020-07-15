@@ -113,8 +113,8 @@ struct __logstream : protected std::streambuf, public std::ostream
 
   /// Formatted output
   __logstream& format(char const * msg, va_list aptr,
-                      char const * pre = NULL, char const * suf = NULL,
-                      size_t * n = NULL)
+                      char const * pre = nullptr, char const * suf = nullptr,
+                      size_t * n = nullptr)
   {
     if (n)
     {

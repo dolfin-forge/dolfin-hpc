@@ -262,7 +262,7 @@ private:
 //-----------------------------------------------------------------------------
 inline bool Function::empty() const
 {
-  return ( discrete_space_ == NULL );
+  return ( discrete_space_ == nullptr );
 }
 
 //--- UFC INTERFACE -----------------------------------------------------------

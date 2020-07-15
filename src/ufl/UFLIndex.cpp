@@ -84,7 +84,7 @@ IndexBase const* IndexBase::create(Object::repr_t const& repr)
     error("Unknown type of ufl::IndexBase: '" + name + "'");
   }
 
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------

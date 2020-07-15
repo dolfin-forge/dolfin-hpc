@@ -89,12 +89,12 @@ bool onEntity(Point& p, MeshEntity& entity)
 PeriodicDofsMapping::PeriodicDofsMapping(DofMap const& dofmap) :
     dofmap_(dofmap),
     max_local_dimension_(0),
-    Gindices_(NULL),
-    Gxcoords_(NULL),
-    Hcount_(NULL),
-    Hoffsets_(NULL),
-    Hindices_(NULL),
-    Hxcoords_(NULL)
+    Gindices_(nullptr),
+    Gxcoords_(nullptr),
+    Hcount_(nullptr),
+    Hoffsets_(nullptr),
+    Hindices_(nullptr),
+    Hxcoords_(nullptr)
 {
   init(dofmap);
 }
@@ -144,10 +144,10 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   uint Gcount = 0;
   uint Hcount = 0;
   //dolfin_assert(max_numGdofs > 0);
-  uint * Gdofs_indices = NULL;
-  real * Gdofs_xcoords = NULL;
-  Array<uint> * Hdofs_indices = NULL;
-  Array<real> * Hdofs_xcoords = NULL;
+  uint * Gdofs_indices = nullptr;
+  real * Gdofs_xcoords = nullptr;
+  Array<uint> * Hdofs_indices = nullptr;
+  Array<real> * Hdofs_xcoords = nullptr;
   // Avoid allocating zero size array
   if(max_numGdofs > 0)
   {
@@ -441,13 +441,13 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       u_recvdata_maxi = 0;
       MPI::all_reduce<MPI::max>( u_recvdata_size, u_recvdata_maxi );
       delete[] u_recvbuff;
-      u_recvbuff = NULL;
+      u_recvbuff = nullptr;
       u_recvbuff = new uint[u_recvdata_maxi];
       r_recvdata_size = r_sendbuff.size();
       r_recvdata_maxi = 0;
       MPI::all_reduce<MPI::max>( r_recvdata_size, r_recvdata_maxi );
       delete[] r_recvbuff;
-      r_recvbuff = NULL;
+      r_recvbuff = nullptr;
       r_recvbuff = new real[r_recvdata_maxi];
 
       for (int j = 1; j < (int) pe_size; ++j)
@@ -574,18 +574,18 @@ void PeriodicDofsMapping::clear()
   max_local_dimension_ = 0;
   Goffsets_.clear();
   delete[] Gindices_;
-  Gindices_ = NULL;
+  Gindices_ = nullptr;
   delete[] Gxcoords_;
-  Gxcoords_ = NULL;
+  Gxcoords_ = nullptr;
   Hdofs_.clear();
   delete[] Hcount_;
-  Hcount_ = NULL;
+  Hcount_ = nullptr;
   delete[] Hoffsets_;
-  Hoffsets_ = NULL;
+  Hoffsets_ = nullptr;
   delete[] Hindices_;
-  Hindices_ = NULL;
+  Hindices_ = nullptr;
   delete[] Hxcoords_;
-  Hxcoords_ = NULL;
+  Hxcoords_ = nullptr;
   Idofs_.clear();
 }
 

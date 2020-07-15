@@ -176,7 +176,7 @@ void timing(char const * task, real t)
 //-----------------------------------------------------------------------------
 void mark(char const * msg)
 {
-  message("[%9u] %s", std::time(NULL), msg);
+  message("[%9u] %s", std::time(nullptr), msg);
 }
 
 //-----------------------------------------------------------------------------

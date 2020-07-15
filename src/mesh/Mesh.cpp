@@ -29,9 +29,9 @@ Mesh::Mesh() :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
     geometry_(EuclideanSpace(3)),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
     timestamp_(time(0))
 {
 }
@@ -41,9 +41,9 @@ Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(ctype, DOLFIN_COMM_SELF, !this->reordering()),
     geometry_(space),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
     timestamp_(time(0))
 {
 }
@@ -52,9 +52,9 @@ Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(ctype, comm, !this->reordering()),
     geometry_(space),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
     timestamp_(time(0))
 {
 }
@@ -79,9 +79,9 @@ Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
     geometry_(EuclideanSpace(3)),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
     timestamp_(time(0))
 {
   File file(filename);
@@ -94,13 +94,13 @@ Mesh::~Mesh()
   timestamp_ = 0;
 
   delete exterior_boundary_;
-  exterior_boundary_ = NULL;
+  exterior_boundary_ = nullptr;
 
   delete interior_boundary_;
-  interior_boundary_ = NULL;
+  interior_boundary_ = nullptr;
 
   delete intersection_detector_;
-  intersection_detector_ = NULL;
+  intersection_detector_ = nullptr;
 
   for (uint i = 0; i < periodic_mappings_.size(); ++i )
     delete (periodic_mappings_[i]);
@@ -172,7 +172,7 @@ void Mesh::init() const
 BoundaryMesh& Mesh::exterior_boundary()
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
+  if (exterior_boundary_ == nullptr || exterior_boundary_->invalid_mesh_topology())
   {
     if(exterior_boundary_)
     {
@@ -187,7 +187,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 BoundaryMesh& Mesh::interior_boundary()
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
+  if (interior_boundary_ == nullptr || interior_boundary_->invalid_mesh_topology())
   {
     if(interior_boundary_)
     {
@@ -202,7 +202,7 @@ BoundaryMesh& Mesh::interior_boundary()
 IntersectionDetector& Mesh::intersector()
 {
   /// @todo Improve hash logic to regenerate detector at topology change
-  if (intersection_detector_ == NULL)
+  if (intersection_detector_ == nullptr)
   {
     if(intersection_detector_)
     {

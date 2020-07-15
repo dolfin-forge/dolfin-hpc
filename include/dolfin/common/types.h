@@ -128,7 +128,7 @@ bool objptrcmp( T const * p0, T const * p1 )
   {
     return true;
   }
-  else if ( ( p0 == NULL && p1 != NULL ) || ( p0 != NULL && p1 == NULL ) )
+  else if ( ( p0 == nullptr && p1 != nullptr ) || ( p0 != nullptr && p1 == nullptr ) )
   {
     return false;
   }

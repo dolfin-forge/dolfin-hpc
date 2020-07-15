@@ -431,14 +431,14 @@ inline void DofMap::tabulate_dofs( uint *            dofs,
                                    ufc::cell const & ufc_cell,
                                    Cell const &      cell ) const
 {
-  dolfin_assert( dofs != NULL );
+  dolfin_assert( dofs != nullptr );
   numbering_->tabulate_dofs( dofs, ufc_cell, cell );
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_dofs( uint * dofs, UFCCell const & ufc_cell ) const
 {
-  dolfin_assert( dofs != NULL );
+  dolfin_assert( dofs != nullptr );
   numbering_->tabulate_dofs( dofs, ufc_cell, *ufc_cell );
 }
 
@@ -480,7 +480,7 @@ inline uint DofMap::dofsmapping_size() const
 //--------------------------------------------------------------------------
 inline PeriodicDofsMapping const & DofMap::periodic_mapping() const
 {
-  if ( periodic_dofmap_ == NULL )
+  if ( periodic_dofmap_ == nullptr )
   {
     periodic_dofmap_ = new PeriodicDofsMapping( *this );
   }

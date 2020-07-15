@@ -21,7 +21,7 @@ namespace dolfin
 SpaceTimeFunction::SpaceTimeFunction(std::string const& basename) :
     Function(),
     basename_(basename),
-    W_(NULL),
+    W_(nullptr),
     it0_(samples_.end()),
     it1_(samples_.end())
 {
@@ -31,7 +31,7 @@ SpaceTimeFunction::SpaceTimeFunction(std::string const& basename,
                                      FiniteElementSpace const& space) :
     Function(space),
     basename_(basename),
-    W_(NULL),
+    W_(nullptr),
     it0_(samples_.end()),
     it1_(samples_.end())
 {
@@ -73,7 +73,7 @@ uint SpaceTimeFunction::load()
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::eval()
 {
-  if (W_ == NULL)
+  if (W_ == nullptr)
   {
     if (this->empty())
     {

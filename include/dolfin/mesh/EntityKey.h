@@ -24,7 +24,7 @@ struct EntityKey
   ///
   EntityKey(uint D) :
       size(D),
-      indices(D ? new uint[size]() : NULL),
+      indices(D ? new uint[size]() : nullptr),
       idx(0)
   {
   }
@@ -32,7 +32,7 @@ struct EntityKey
   ///
   EntityKey(uint D, uint const * v) :
       size(D),
-      indices(D ? new uint[size] : NULL),
+      indices(D ? new uint[size] : nullptr),
       idx(0)
   {
     set(v);
@@ -41,7 +41,7 @@ struct EntityKey
   ///
   EntityKey(uint D, uint const * v, uint i) :
       size(D),
-      indices(D ? new uint[size] : NULL),
+      indices(D ? new uint[size] : nullptr),
       idx(i)
   {
     set(v);
@@ -223,7 +223,7 @@ private:
   ///
   EntityKey() :
       size(0),
-      indices(NULL),
+      indices(nullptr),
       idx(0)
   {
     error("EntityKey : default constructor disabled");

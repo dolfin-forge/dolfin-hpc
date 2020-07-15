@@ -34,7 +34,7 @@ SlipBC::SlipBC( Mesh & mesh, SubDomain const & sub_domain )
   , mesh( mesh )
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -47,7 +47,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , mesh( mesh )
   , node_normal( &normals )
   , node_normal_local( false )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -60,7 +60,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , mesh( mesh )
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -94,7 +94,7 @@ void SlipBC::apply( GenericMatrix & A,
 
   std::string const la_backend = dolfin_get<std::string>( "linear algebra backend" );
 
-  if ( As == NULL
+  if ( As == nullptr
        || As->size( 0 ) != A.size( 0 )
        || As->size( 1 ) != A.size( 1 ) )
   {

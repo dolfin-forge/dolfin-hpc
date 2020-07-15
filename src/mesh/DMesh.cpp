@@ -143,7 +143,7 @@ DMesh::DMesh(Mesh& mesh) :
   sanitize_check(mesh);
 #endif
 
-  DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
+  DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : nullptr);
 
   // Copy vertices
   for (VertexIterator v(mesh); !v.end(); ++v)
@@ -244,7 +244,7 @@ void DMesh::exp(Mesh& mesh)
   Comm& comm =  mesh.topology().comm();
   uint const pe_size = mesh.topology().comm_size();
   uint const pe_rank = mesh.topology().comm_rank();
-  DistributedData * const dist = (pe_size > 1 ? new DistributedData(comm):NULL);
+  DistributedData * const dist = (pe_size > 1 ? new DistributedData(comm):nullptr);
   uint current_vertex = 0;
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++current_vertex)
@@ -269,7 +269,7 @@ void DMesh::exp(Mesh& mesh)
       }
     }
   }
-  if ( dist != NULL )
+  if ( dist != nullptr )
   {
     dist->remap_shared_adj();
     dist->finalize();
@@ -291,7 +291,7 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-  if ( dist != NULL )
+  if ( dist != nullptr )
     swap(*dist, mesh.topology().distdata()[0]);
   mesh.topology().finalize();
 
@@ -310,8 +310,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   // Find longest edge
   real lmax = 0.0;
   long ptmax = 0;
-  DVertex * v0 = NULL;
-  DVertex * v1 = NULL;
+  DVertex * v0 = nullptr;
+  DVertex * v1 = nullptr;
   DVertex ** const vb = &dcell->vertices[0];
   DVertex ** const ve = vb + dcell->vertices.size();
   for (DVertex ** vi = vb; vi != ve; ++vi)
@@ -345,7 +345,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
   dolfin_assert(v0 != v1);
 
-  DVertex* mv = NULL;
+  DVertex* mv = nullptr;
 
   // Check if no hanging vertices remain, otherwise create hanging
   // vertex and continue refinement
@@ -434,7 +434,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     for (;;)
     {
       DCell* copp = opposite(dcell, v0, v1);
-      if (copp != NULL)
+      if (copp != nullptr)
       {
         bisect(copp, mv, v0, v1);
       }
@@ -459,7 +459,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
       if (*vi == v2) return *c;
     }
   }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 void DMesh::add_vertex(DVertex* v)
@@ -501,7 +501,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     if ((*it)->id >= numcells) break;
     if (!(*it)->deleted && (marked_ids((*it)->id)))
     {
-      bisect((*it), NULL, NULL, NULL);
+      bisect((*it), nullptr, nullptr, nullptr);
     }
   }
 
@@ -528,7 +528,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         it != propagated.end(); ++it)
     {
 
-      DVertex* mv = NULL;
+      DVertex* mv = nullptr;
       dolfin_assert(it->second.v1 != it->second.v2);
       EdgeKey<long> key(it->second.v1, it->second.v2);
       RefinedEdges::iterator re = ref_edge.find(key);
@@ -562,7 +562,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
           dolfin_assert((*ic)->vertices.size() > 0);
-          if (mv == NULL)
+          if (mv == nullptr)
           {
             mv = new DVertex();
             mv->glb_id = it->second.mv;
@@ -590,7 +590,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             dolfin_assert(v1->glb_id != v2->glb_id);
             ref_edge[EdgeKey<long>(v1->glb_id, v2->glb_id)] = mv;
           }
-          dolfin_assert((*ic) != NULL);
+          dolfin_assert((*ic) != nullptr);
           bisect((*ic), mv, v1, v2);
         }
       }

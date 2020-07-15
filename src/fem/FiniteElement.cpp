@@ -17,7 +17,7 @@ namespace dolfin
 FiniteElement::FiniteElement(ufc::finite_element const& element,
                              bool const owner) :
     ufc_finite_element_((owner ? &element : element.create())),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -25,7 +25,7 @@ FiniteElement::FiniteElement(ufc::finite_element const& element,
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufc::finite_element const& element, uint const i) :
     ufc_finite_element_(element.create_sub_element(i)),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -34,15 +34,15 @@ FiniteElement::FiniteElement(ufc::finite_element const& element, uint const i) :
 FiniteElement::FiniteElement(ufc::finite_element const& element,
                              Array<uint> const& sub_system) :
     ufc_finite_element_(FiniteElement::create_sub_element(element, sub_system)),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(CellType const&, Form& form, uint const i) :
-    ufc_finite_element_(NULL),
-    sub_value_dims_(NULL)
+    ufc_finite_element_(nullptr),
+    sub_value_dims_(nullptr)
 {
   // Check argument
   uint const num_arguments = form.rank() + form.num_coefficients();
@@ -61,7 +61,7 @@ FiniteElement::FiniteElement(CellType const&, Form& form, uint const i) :
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufl::FiniteElementSpace const& element) :
     ufc_finite_element_(ElementLibrary::create_finite_element(element.repr())),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -69,7 +69,7 @@ FiniteElement::FiniteElement(ufl::FiniteElementSpace const& element) :
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(FiniteElement const& other) :
     ufc_finite_element_(other.create()),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -85,7 +85,7 @@ FiniteElement::~FiniteElement()
   delete[] sub_value_dims_;
   delete[] sub_value_offs_;
   delete ufc_finite_element_;
-  ufc_finite_element_ = NULL;
+  ufc_finite_element_ = nullptr;
 }
 
 //-----------------------------------------------------------------------------

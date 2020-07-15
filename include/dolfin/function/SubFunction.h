@@ -56,7 +56,7 @@ public:
 private:
   /// Create empty sub function
   SubFunction()
-    : f_( NULL )
+    : f_( nullptr )
     , i_( 0 )
   {
   }

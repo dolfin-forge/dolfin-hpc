@@ -44,7 +44,7 @@ extern "C" typedef void(*CheckIntFunctionPtr)(int);
 #define DOLFIN_SUITE_BEGIN(_suite_function, _name) \
 Suite *_suite_function() \
 { \
-  Suite *s = suite_create(_name); TCase *tc = NULL;
+  Suite *s = suite_create(_name); TCase *tc = nullptr;
 
 #define DOLFIN_SUITE_END \
   return s; \

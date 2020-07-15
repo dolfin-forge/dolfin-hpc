@@ -30,13 +30,13 @@ Test::Test(int argc, char *argv[]) :
 
 //-----------------------------------------------------------------------------
 Test::Test(std::string const& dir) :
-    Startup(0, NULL),
+    Startup(0, nullptr),
     btest_(false),
     dir_(dir),
     total_(0.0),
     padding_(0)
 {
-  init(0, NULL);
+  init(0, nullptr);
   if(!dir_.empty())
   {
     pushd(dir_);

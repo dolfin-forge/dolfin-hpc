@@ -24,8 +24,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix() :
     Variable("A", "a sparse matrix"),
-    A(NULL),
-    AA_sub(NULL),
+    A(nullptr),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -35,7 +35,7 @@ PETScMatrix::PETScMatrix() :
 PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
     A(A),
-    AA_sub(NULL),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -44,8 +44,8 @@ PETScMatrix::PETScMatrix(Mat A) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
     Variable("A", "a sparse matrix"),
-    A(NULL),
-    AA_sub(NULL),
+    A(nullptr),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -55,8 +55,8 @@ PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
-    A(NULL),
-    AA_sub(NULL),
+    A(nullptr),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -87,7 +87,7 @@ void PETScMatrix::clear()
 #else
     MatDestroyMatrices(1, &AA_sub);
 #endif
-    AA_sub = NULL;
+    AA_sub = nullptr;
   }
 }
 //-----------------------------------------------------------------------------
@@ -268,8 +268,8 @@ real PETScMatrix::norm(std::string norm_type) const
 void PETScMatrix::getrow(uint row, Array<uint>& columns,
                          Array<real>& values) const
 {
-  const PetscInt *cols = NULL;
-  const PetscScalar *vals = NULL;
+  const PetscInt *cols = nullptr;
+  const PetscScalar *vals = nullptr;
   PetscInt ncols = 0;
   if (row >= static_cast<uint>(rstart_) && row < static_cast<uint>(rend_))
   {

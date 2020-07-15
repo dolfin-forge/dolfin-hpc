@@ -45,7 +45,7 @@ public:
   /// certain cell. Transformation vector and matrix can be supplied to avoid
   /// recomputation.
   Point point( Cell const & c,
-               real * matrix = NULL, real * vector = NULL ) const;
+               real * matrix = nullptr, real * vector = nullptr ) const;
 
 private:
   real _x[3];

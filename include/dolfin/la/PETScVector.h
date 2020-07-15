@@ -239,7 +239,7 @@ inline void PETScVector::zero()
 //-----------------------------------------------------------------------------
 inline uint PETScVector::size() const
 {
-  if(x_ == NULL) return 0;
+  if(x_ == nullptr) return 0;
   int n = 0;
   VecGetSize(x_, &n);
   return static_cast<uint>(n);

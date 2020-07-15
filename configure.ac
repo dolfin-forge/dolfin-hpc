@@ -37,10 +37,6 @@ AC_ARG_ENABLE(openmp, AC_HELP_STRING([--enable-openmp],
               [Compile with support for OpenMP]),
               [enable_openmp=${enableval}], [enable_openmp=no])
 
-AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
-              [Compile with support for Boost TR1 headers]),
-              [enable_boosttr1=${enableval}],[enable_boostr1=no])
-
 AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
               [Compile with support for unordered containers]),
               [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
@@ -102,11 +98,6 @@ fi
 if test "x${enable_optimize_p1}" = xyes; then
    AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1],
    [Compile with optimization for P1 elements])
-fi
-
-if test "x${enable_boosttr1}" = xyes; then
-   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
-   need_boost=yes
 fi
 
 if test "x${enable_opt_basis}" = xyes; then
@@ -175,18 +166,6 @@ fi
 PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
-
-if test "x${need_boost}" = xyes; then
-   AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-   CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-fi
-
-if test "x${enable_boosttr1}" = xyes; then
-   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
-      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
-   fi
-fi
-
 
 # Checks for libraries.
 AX_ZLIB

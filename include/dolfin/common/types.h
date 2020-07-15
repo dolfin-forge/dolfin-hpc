@@ -18,9 +18,6 @@
 #elif __sgi
 #include <hash_map>
 #include <hash_set>
-#elif ENABLE_BOOST_TR1
-#include <tr1/unordered_map.hpp>
-#include <tr1/unordered_set.hpp>
 #elif ( HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET )
 #include <unordered_map>
 #include <unordered_set>
@@ -108,7 +105,7 @@ template < typename Key,
            typename Alloc = std::allocator< Key > >
 using _ordered_set = std::set< Key, Comp, Alloc >;
 
-#if ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET ) || ENABLE_BOOST_TR1 \
+#if ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET ) \
   || ( __IBMCPP__ && __IBMCPP_TR1__ )
 
 template < typename Key,

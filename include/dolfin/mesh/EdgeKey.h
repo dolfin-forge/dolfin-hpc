@@ -74,31 +74,6 @@ struct EdgeKey : public std::pair<T, T>
 
 } /* namespace dolfin */
 
-#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET) || \
-    (__IBMCPP__ && __IBMCPP_TR1__)|| \
-    (ENABLE_BOOST_TR1)
-
-namespace std
-{
-
-namespace tr1
-{
-
-template<typename T>
-struct hash<dolfin::EdgeKey<T> >
-{
-  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
-  {
-    return e.hash();
-  }
-};
-
-} /* namespace tr1 */
-
-} /* namespace std */
-
-#elif (__sgi)
-
 namespace std
 {
 
@@ -112,23 +87,5 @@ struct hash<dolfin::EdgeKey<T> >
 };
 
 } /* namespace std */
-
-#elif HAVE_PARALLEL_HASH_MAP || (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-
-namespace std
-{
-
-template<typename T>
-struct hash<dolfin::EdgeKey<T> >
-{
-  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
-  {
-    return e.hash();
-  }
-};
-
-} /* namespace std */
-
-#endif
 
 #endif /* __DOLFIN_MESH_EDGE_KEY */

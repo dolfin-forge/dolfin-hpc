@@ -60,7 +60,7 @@ public:
     Array<ufc::dofmap const*> flattened;
     DofMap::flatten(&ufc_dofmap, flattened);
     value_size_ = flattened.size();
-    flattened.free();
+    free( flattened );
     //---
     if (ufc_dofmap.local_dimension() != value_size_)
     {

@@ -281,7 +281,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
         // dofs
         dolfin_assert(ghost_nodes.size() <= num_facet_nodes);
         u_sendbuf[*ai].push_back(ghost_nodes.size());
-        u_sendbuf[*ai].append(ghost_nodes.begin(), ghost_nodes.end());
+        append( u_sendbuf[*ai], ghost_nodes.begin(), ghost_nodes.end() );
         // global index
         u_sendbuf[*ai].push_back(data->global_index);
         // weight

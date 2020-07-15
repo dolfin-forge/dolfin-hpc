@@ -80,7 +80,7 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
 DofMap::~DofMap()
 {
   delete periodic_dofmap_;
-  flattened_.free();
+  free( flattened_ );
   delete numbering_;
   delete ufc_dofmap_;
 }

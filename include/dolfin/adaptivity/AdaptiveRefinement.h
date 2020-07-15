@@ -9,7 +9,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class Function;
 
 namespace AdaptiveRefinement

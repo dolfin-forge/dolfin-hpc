@@ -879,7 +879,7 @@ void DistributedData::remap_shared_adj()
     int dst = (pe_rank + j) % pe_size;
 
     int recvcount = MPI::sendrecv( &buffer[0], buffer.size(), dst,
-                                   recvbuf.ptr(), recvmax, src, 0, comm );
+                                   recvbuf.data(), recvmax, src, 0, comm );
 
     for (int k = 0; k < recvcount; ++k)
     {
@@ -956,7 +956,7 @@ void DistributedData::check_shared()
     int dst = (pe_rank + j) % pe_size;
 
     int recvcount = MPI::sendrecv( &buffer[dst][0], buffer[dst].size(), dst,
-                                   recvbuf.ptr(), recvmax, src, 0, comm );
+                                   recvbuf.data(), recvmax, src, 0, comm );
 
     for (int k = 0; k < recvcount; ++k)
     {
@@ -1012,7 +1012,7 @@ void DistributedData::check_ghost()
     int dst = (pe_rank + j) % pe_size;
 
     int recvcount = MPI::sendrecv( &buffer[dst][0], buffer[dst].size(), dst,
-                                   recvbuf.ptr(), recvmax, src, 0, comm );
+                                   recvbuf.data(), recvmax, src, 0, comm );
 
     for (int k = 0; k < recvcount; ++k)
     {

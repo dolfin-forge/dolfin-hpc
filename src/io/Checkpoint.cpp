@@ -630,7 +630,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
 
     Array< uint > cell_data;
     for ( uint c1 = 0; c1 < mesh.cells().size(); ++c1 )
-      cell_data.append( mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
+      append( cell_data, mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
 
     byte_offset += MPI::file_write_at_all( file, cell_data.data(),
                      hdr.num_centities,

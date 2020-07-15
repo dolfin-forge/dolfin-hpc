@@ -619,7 +619,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
       else
       {
-        non_local_cells[owner].append(c, c + num_cellvertices);
+        append( non_local_cells[owner], c, c + num_cellvertices );
       }
     }
     delete[] cell_buffer;

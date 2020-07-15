@@ -19,9 +19,6 @@ namespace dolfin
 class Mesh;
 class Cell;
 
-template<class T>
-  class Array;
-
 class GTSInterface
 {
 public:

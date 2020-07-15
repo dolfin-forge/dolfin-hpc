@@ -203,13 +203,14 @@ void Connectivity::dump() const
 //-----------------------------------------------------------------------------
 Connectivity const& Connectivity::operator>>(Array<uint>& A) const
 {
-  A.reserve( this->entries() );
-  for (uint e = 0; e < order_; ++e)
-    A.append( connections_[e].begin(), connections_[e].end() );
+  error( "Connectivity::operator>> unimplemented / deprecated" );
+  // A.reserve( this->entries() );
+  // for (uint e = 0; e < order_; ++e)
+  //   append( A, connections_[e].begin(), connections_[e].end() );
 
-  // Set stride if the graph is regular
-  if(min_degree_ == max_degree_)
-    A %= min_degree_;
+  // // Set stride if the graph is regular
+  // if(min_degree_ == max_degree_)
+  //   A %= min_degree_;
 
   return *this;
 }

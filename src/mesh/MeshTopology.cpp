@@ -304,7 +304,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
     std::swap( C_[di][0], ev );
 
     // Cleanup
-    entities_list.free();
+    free( entities_list );
     for ( uint e = 0; e < m; ++e )
     {
       delete[] entities[e];
@@ -339,7 +339,7 @@ Connectivity const * MeshTopology::transpose( uint d1, uint d0 ) const
       conn[( *c10 )[e][i]]++;
 
   Connectivity * c01 = new Connectivity( conn );
-  conn               = 0;
+  std::fill( conn.begin(), conn.end(), 0 );
 
   for ( uint e1 = 0; e1 < c10->order(); ++e1 )
   {

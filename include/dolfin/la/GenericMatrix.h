@@ -4,14 +4,13 @@
 #ifndef __DOLFIN_GENERIC_MATRIX_H
 #define __DOLFIN_GENERIC_MATRIX_H
 
-#include "GenericTensor.h"
+#include <dolfin/common/Array.h>
+#include <dolfin/la/GenericTensor.h>
 
 namespace dolfin
 {
 
 class GenericVector;
-template < class M >
-class Array;
 
 /// This class defines a common interface for matrices.
 

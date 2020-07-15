@@ -15,7 +15,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class CellType;
 struct DCell;
 struct DVertex;

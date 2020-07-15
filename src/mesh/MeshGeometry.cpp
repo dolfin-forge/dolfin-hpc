@@ -302,8 +302,9 @@ void MeshGeometry::dump() const
 //-----------------------------------------------------------------------------
 MeshGeometry const& MeshGeometry::operator>>(Array<real>& A) const
 {
-  A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);
-  A %= dim_;
+  error( "MeshGeometry::operator>> unimplemented / deprecated." );
+  // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);
+  // A %= dim_;
   return *this;
 }
 //-----------------------------------------------------------------------------

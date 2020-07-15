@@ -39,9 +39,8 @@ void MappedManifold::init()
   uint const gdim = globalmesh.geometry_dimension();
   MeshEditor editor(*this, boundary.type().cellType(),
                     boundary.geometry_dimension());
-  Array<uint> mm_vertices(boundary.size(0));
+  Array<uint> mm_vertices(boundary.size(0),boundary.size(0));
   uint const invalid_vertex_index = mm_vertices.size();
-  mm_vertices = invalid_vertex_index;
   Array<real> mm_coordinates(gdim * mm_vertices.size());
   uint const num_cell_vertices = boundary.type().num_entities(0);
   Array<uint> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);

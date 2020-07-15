@@ -13,7 +13,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class Mesh;
 struct Space;
 

@@ -68,7 +68,7 @@ void distribute(MeshValues<uint, Vertex>& dist)
     if (v->is_owned())
     {
       uint const owner = dist(*v);
-      sendbuf_vcoords[owner].append(v->x(), v->x() + gdim);
+      append(sendbuf_vcoords[owner],v->x(), v->x() + gdim);
       sendbuf_vgindex[owner].push_back(v->global_index());
     }
   }
@@ -104,11 +104,11 @@ void distribute(MeshValues<uint, Vertex>& dist)
   // Resize vertex indices
   uint const local_vgindex_size = local_vgindex.size();
   local_vgindex.resize(local_vgindex_size + recvmax_v);
-  uint * recvbuf_v = local_vgindex.ptr() + local_vgindex_size;
+  uint * recvbuf_v = local_vgindex.data() + local_vgindex_size;
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);
-  real * recvbuf_x = coords.ptr() + coords_size;
+  real * recvbuf_x = coords.data() + coords_size;
   int recv_cellsount;
   for (uint j = 1; j < pe_size; ++j)
   {
@@ -379,7 +379,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       {
         int n = MPI::sendrecv( UC[dst], dst, recv_uc, src, 3, comm );
         dolfin_assert( recvmaxUC >= ( uint ) n );
-        UC[pe_rank].append( recv_uc.data(), recv_uc.data() + n );
+        append( UC[pe_rank], recv_uc.data(), recv_uc.data() + n );
       }
 
       // Transfer vertex functions
@@ -387,7 +387,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       {
         int n = MPI::sendrecv( RV[dst], dst, recv_rv, src, 4, comm );
         dolfin_assert( recvmaxRV >= ( uint ) n );
-        RV[pe_rank].append( recv_rv.data(), recv_rv.data() + n );
+        append( RV[pe_rank], recv_rv.data(), recv_rv.data() + n );
       }
     }
 
@@ -687,7 +687,7 @@ void check(Mesh& mesh)
     }
     uint const rbuf_size = rbuf.size();
     rbuf.resize(rbuf_size + recv_max);
-    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    uint * recv_buf = rbuf.data() + rbuf_size;
     int recv_cellsount;
     for (uint j = 1; j < pe_size; ++j)
     {
@@ -758,7 +758,7 @@ void check(Mesh& mesh)
     }
     uint const rbuf_size = rbuf.size();
     rbuf.resize(rbuf_size + recv_max);
-    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    uint * recv_buf = rbuf.data() + rbuf_size;
     int recv_cellsount;
     _set<uint> recv_idx;
     for (uint j = 1; j < pe_size; ++j)

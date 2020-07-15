@@ -496,6 +496,7 @@ Package features:
   Parallel Hash Map:           ${have_phmap_h}
   Basis function optimization: ${enable_opt_basis}
   CHECK support:               ${enable_check}
+  DEBUG mode:                  ${enable_debug}
 
 ---------------------------------------------------------
 "

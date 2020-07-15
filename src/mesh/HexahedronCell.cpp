@@ -8,6 +8,7 @@
 #include <dolfin/mesh/Vertex.h>
 
 #include <algorithm>
+#include <cstring>
 
 namespace dolfin
 {

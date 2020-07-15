@@ -10,6 +10,7 @@
 
 #include <ufc.h>
 
+#include <cstring>
 #include <string>
 
 namespace ufl

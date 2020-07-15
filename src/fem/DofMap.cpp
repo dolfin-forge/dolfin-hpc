@@ -12,6 +12,8 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/main/MPI.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 

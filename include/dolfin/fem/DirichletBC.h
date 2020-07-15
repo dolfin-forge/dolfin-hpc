@@ -21,6 +21,7 @@ class FiniteElementSpace;
 class Form;
 class GenericMatrix;
 class GenericVector;
+class SetOfDirichletBC;
 
 /// The BCMethod variable may be used to specify the type of method
 /// used to identify degrees of freedom on the boundary. Available
@@ -122,6 +123,7 @@ private:
   // Boundary facets, stored as pairs (cell, local facet number)
   Array<uint> * entities_;
 
+  friend SetOfDirichletBC;
 };
 
 } /* namespace dolfin */

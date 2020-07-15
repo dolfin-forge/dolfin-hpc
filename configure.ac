@@ -37,10 +37,6 @@ AC_ARG_ENABLE(openmp, AC_HELP_STRING([--enable-openmp],
               [Compile with support for OpenMP]),
               [enable_openmp=${enableval}], [enable_openmp=no])
 
-AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
-              [Compile with support for unordered containers]),
-              [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
-
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
@@ -141,26 +137,6 @@ AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
-
-found_unordered_containers="no"
-if test "x${enable_unordered_cxx}" = xyes; then
-
-   #Ugly hack to check for C++11 unordered containers, without all c++11
-   #dependencies pulled in from "standard" m4 container macros.
-   #Note these requires correct C++11 flags to be passed through CXXFLAGS.
-   AX_CXX_HEADER_NONTR1_UNORDERED_MAP
-   AX_CXX_HEADER_NONTR1_UNORDERED_SET
-
-   if test "x${ax_cv_cxx_unordered_map}" != xyes; then
-      AX_CXX_HEADER_TR1_UNORDERED_MAP
-      AX_CXX_HEADER_TR1_UNORDERED_SET
-      if test "x${ax_cv_cxx_tr1_unordered_set}" = xyes; then
-      	 found_unordered_containers="yes"
-      fi
-   else
-      found_unordered_containers="yes"
-   fi
-fi
 
 # UFL is now default
 PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
@@ -469,7 +445,6 @@ Package features:
   libsim:                      ${with_libsim}
   Function cache:              ${enable_function_cache}
   Optimize P1:                 ${enable_optimize_p1}
-  Unordered containers:        ${found_unordered_containers}
   Compressed VTK:              ${enable_zlib}
   Quadrature:                  ${enable_quad}
   Parallel Hash Map:           ${have_phmap_h}

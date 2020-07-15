@@ -105,20 +105,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define if tr1/unordered_map is present. */
-#undef HAVE_TR1_UNORDERED_MAP
-
-/* Define if tr1/unordered_set is present. */
-#undef HAVE_TR1_UNORDERED_SET
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define if unordered_map is present. */
-#undef HAVE_UNORDERED_MAP
-
-/* Define if unordered_set is present. */
-#undef HAVE_UNORDERED_SET
 
 /* Define if parallel hash map is present. */
 #undef HAVE_PARALLEL_HASH_MAP

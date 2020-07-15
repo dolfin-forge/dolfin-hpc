@@ -9,16 +9,10 @@
 
 #if HAVE_PARALLEL_HASH_MAP
 #include <parallel_hashmap/phmap.h>
-#elif ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET )
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-#elif ( __IBMCPP__ && __IBMCPP_TR1__ )
-#include <unordered_map>
-#include <unordered_set>
 #elif __sgi
 #include <hash_map>
 #include <hash_set>
-#elif ( HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET )
+#else
 #include <unordered_map>
 #include <unordered_set>
 #endif
@@ -65,6 +59,18 @@ long const DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
 
 //-----------------------------------------------------------------------------
 
+template < typename Key,
+           typename Value,
+           typename Compare = std::less< Key >,
+           typename Allocator =
+             std::allocator< std::pair< const Key, Value > > >
+using _ordered_map = std::map< Key, Value, Compare, Allocator >;
+
+template < typename Key,
+           typename Compare   = std::less< Key >,
+           typename Allocator = std::allocator< Key > >
+using _ordered_set = std::set< Key, Compare, Allocator >;
+
 #if HAVE_PARALLEL_HASH_MAP
 
 template < typename Key,
@@ -79,47 +85,6 @@ template < typename Key,
            typename Eq    = phmap::container_internal::hash_default_eq< Key >,
            typename Alloc = std::allocator< Key > >
 using _set = phmap::flat_hash_set< Key, Hash, Eq, Alloc >;
-
-template < typename Key,
-           typename Value,
-           typename Compare = std::less< Key >,
-           typename Allocator =
-             std::allocator< std::pair< const Key, Value > > >
-using _ordered_map = std::map< Key, Value, Compare, Allocator >;
-
-template < typename Key,
-           typename Compare   = std::less< Key >,
-           typename Allocator = std::allocator< Key > >
-using _ordered_set = std::set< Key, Compare, Allocator >;
-
-#else
-
-template < typename Key,
-           typename Value,
-           typename Comp  = std::less< Key >,
-           typename Alloc = std::allocator< std::pair< const Key, Value > > >
-using _ordered_map = std::map< Key, Value, Comp, Alloc >;
-
-template < typename Key,
-           typename Comp  = std::less< Key >,
-           typename Alloc = std::allocator< Key > >
-using _ordered_set = std::set< Key, Comp, Alloc >;
-
-#if ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET ) \
-  || ( __IBMCPP__ && __IBMCPP_TR1__ )
-
-template < typename Key,
-           typename Value,
-           typename Hash  = std::hash< Key >,
-           typename Comp  = std::equal_to< Key >,
-           typename Alloc = std::allocator< std::pair< const Key, Value > > >
-using _map = std::tr1::unordered_map< Key, Value, Hash, Comp, Alloc >;
-
-template < typename Key,
-           typename Hash  = std::hash< Key >,
-           typename Comp  = std::equal_to< Key >,
-           typename Alloc = std::allocator< Key > >
-using _set = std::tr1::unordered_set< Key, Hash, Comp, Alloc >;
 
 #elif __sgi
 
@@ -136,7 +101,7 @@ template < typename Key,
            typename Alloc = std::allocator< Key > >
 using _set = std::hash_set< Key, Hash, Comp, Alloc >;
 
-#elif ( HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET )
+#else
 
 template < typename Key,
            typename Value,
@@ -150,21 +115,6 @@ template < typename Key,
            typename Comp  = std::equal_to< Key >,
            typename Alloc = std::allocator< Key > >
 using _set = std::unordered_set< Key, Hash, Comp, Alloc >;
-
-#else
-
-template < typename Key,
-           typename Value,
-           typename Comp  = std::less< Key >,
-           typename Alloc = std::allocator< std::pair< const Key, Value > > >
-using _map = std::map< Key, Value, Comp, Alloc >;
-
-template < typename Key,
-           typename Comp  = std::less< Key >,
-           typename Alloc = std::allocator< Key > >
-using _set = std::set< Key, Comp, Alloc >;
-
-#endif
 
 #endif
 

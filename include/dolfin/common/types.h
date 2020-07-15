@@ -28,34 +28,34 @@ namespace dolfin
 {
 
 // Real numbers
-typedef double real;
+using real     = double;
 
 // Unsigned integers
-typedef unsigned int uint;
+using uint     = unsigned int;
 
 // Index type (at least 64bit)
-typedef uint64_t uidx;
+using uidx     = uint64_t;
 
 // Complex numbers
-typedef std::complex< double > complex;
+using complex  = std::complex< double >;
 
 //-----------------------------------------------------------------------------
 
-uint const DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
-uint const DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
-uint const DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
+constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
+constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
+constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
 
-int const DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
-int const DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
-int const DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
+constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
+constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
+constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
 
-real const DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
-real const DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
-real const DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
+constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
+constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
+constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
 
-long const DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
-long const DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
-long const DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
+constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
+constexpr long DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
+constexpr long DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
 
 //-----------------------------------------------------------------------------
 

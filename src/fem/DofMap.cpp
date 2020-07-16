@@ -79,10 +79,10 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
 //-----------------------------------------------------------------------------
 DofMap::~DofMap()
 {
-  delete periodic_dofmap_;
-  free( flattened_ );
-  delete numbering_;
   delete ufc_dofmap_;
+  delete numbering_;
+  destruct( flattened_ );
+  delete periodic_dofmap_;
 }
 
 //-----------------------------------------------------------------------------
@@ -175,10 +175,10 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
 void DofMap::init()
 {
   // Build the DOLFIN dofmap
-  message(1, "DofMap: init dofmap for signature:\n %s", this->signature());
+  message(1, "DofMap: init dofmap for signature:\n %s", signature());
   numbering_->build();
-  message(1, "DofMap: offset = %u; size = %u", numbering_->offset(),
-          numbering_->size());
+  message(1, "DofMap: offset = %u; size = %u",
+             numbering_->offset(), numbering_->size());
 
   // Information for mixed elements
   uint const nb_sub = this->num_sub_dofmaps();

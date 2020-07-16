@@ -33,7 +33,7 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   DofMap::flatten(&ufc_dofmap, flattened);
   uint const value_size = flattened.size();
   bool const vector = DofMap::can_vectorize(flattened);
-  free( flattened );
+  destruct( flattened );
 
   // UFC dofmap should be initialized to compute the global dimension
   DofNumbering::init(mesh, ufc_dofmap);

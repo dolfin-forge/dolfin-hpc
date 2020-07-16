@@ -121,7 +121,7 @@ private:
   BCMethod method_;
 
   // Boundary facets, stored as pairs (cell, local facet number)
-  Array<uint> * entities_;
+  Array<uint> entities_;
 
   friend SetOfDirichletBC;
 };

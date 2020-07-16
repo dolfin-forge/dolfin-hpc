@@ -67,7 +67,7 @@ public:
     Array<ufc::dofmap const*> flattened;
     DofMap::flatten(&ufc_dofmap, flattened);
     value_size_ = flattened.size();
-    free( flattened );
+    destruct( flattened );
     //---
     if (ufc_dofmap.local_dimension()
         != mesh.type().num_entities(0) * value_size_)

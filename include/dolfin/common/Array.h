@@ -18,13 +18,13 @@ using Array = std::vector< T >;
 //-----------------------------------------------------------------------------
 
 template< typename T >
-inline void free( Array< T * > & array )
+void destruct( Array< T * > & objects )
 {
-  for ( T * element : array )
+  for ( T * element : objects )
     if ( element != nullptr )
       delete element;
 
-  array.clear();
+  objects.clear();
 }
 
 //-----------------------------------------------------------------------------

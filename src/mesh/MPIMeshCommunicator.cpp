@@ -644,7 +644,7 @@ void check(Mesh& mesh)
 
   // Check shared entities adjacency
   {
-    Array<uint> * sbuf = new Array<uint> [pe_size];
+    Array< Array<uint> > sbuf( pe_size );
     uint e_count = 0;
     for (typename E::shared e(mesh); e.valid(); ++e, ++e_count)
     {
@@ -724,7 +724,6 @@ void check(Mesh& mesh)
       recv_buf += recv_cellsount;
       recv_max -= recv_cellsount;
     }
-    delete[] sbuf;
   }
 
   // Check ghost entities adjacency

@@ -620,7 +620,7 @@ void DistributedData::renumber_global()
   tic();
 
   IndexMapping local_mapping;
-  Array<uint> * sendbuf = new Array<uint> [pe_size_];
+  Array< Array<uint> > sendbuf( pe_size_ );
 
   // Re-index owned entities and collect ghosted entities per owner
   dolfin_assert(local_.size() == cached_numbering_.size());
@@ -648,25 +648,20 @@ void DistributedData::renumber_global()
   // Maximum number of received entities is the number of owned shared but the
   // issue is that some previous were written in a way that does not ensure
   // appropriate setting of owned shared entities
-  uint recvsize = sendbuf[0].size();
-  for (uint i = 1; i < pe_size_; ++i)
-  {
-    recvsize = std::max(recvsize, (uint) sendbuf[i].size());
-  }
-  MPI::all_reduce<MPI::max>(recvsize, recvsize, this->comm());
-  uint * recvbuf = (recvsize == 0 ? nullptr : new uint[recvsize]);
-  uint * sendbck = (recvsize == 0 ? nullptr : new uint[recvsize]);
-  uint const num_ghost = ghost_.size();
-  uint * recvbck = (num_ghost == 0 ? nullptr : new uint[num_ghost]);
+  uint recvsize = max_array_size( sendbuf );
+  MPI::all_reduce<MPI::max>(recvsize, recvsize, comm());
+
+  Array< uint > recvbuf( recvsize );
+  Array< uint > sendbck( recvsize );
+  Array< uint > recvbck( ghost_.size() );
 
   for (uint j = 1; j < pe_size_; ++j)
   {
     int src = (rank_ - j + pe_size_) % pe_size_;
     int dst = (rank_ + j) % pe_size_;
 
-    int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                    &recvbuf[0], recvsize, src,
-                                    1, this->comm() );
+    int recv_count = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1, comm() );
+    sendbck.resize( recv_count );
 
     for (int k = 0; k < recv_count; ++k)
     {
@@ -685,10 +680,10 @@ void DistributedData::renumber_global()
       }
     }
 
-    MPI::sendrecv( &sendbck[0], recv_count, src,
-                  &recvbck[0], sendbuf[dst].size(), dst, 2, this->comm() );
+    recvbck.resize( sendbuf[dst].size() );
+    MPI::sendrecv( sendbck, src, recvbck, dst, 2, comm() );
 
-    for (uint k = 0; k < sendbuf[dst].size(); ++k)
+    for (uint k = 0; k < recvbck.size(); ++k)
     {
       uint const local_index = local_.find(sendbuf[dst][k])->second;
       dolfin_assert(local_mapping.count(recvbck[k]) == 0);
@@ -696,11 +691,6 @@ void DistributedData::renumber_global()
       local_mapping[recvbck[k]] = local_index;
     }
   }
-
-  delete[] recvbck;
-  delete[] sendbck;
-  delete[] recvbuf;
-  delete[] sendbuf;
 
   local_.swap(local_mapping);
 
@@ -859,7 +849,6 @@ SharedMapping const& DistributedData::shared_mapping() const
 void DistributedData::remap_shared_adj()
 {
  #if HAVE_MPI
-  Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
 
@@ -869,24 +858,22 @@ void DistributedData::remap_shared_adj()
     buffer.push_back(vi.global_index());
   }
 
-  uint sendtmp = buffer.size();
   uint recvmax = 0;
-  MPI::all_reduce<MPI::max>(sendtmp, recvmax, this->comm());
+  MPI::all_reduce<MPI::max,uint>(buffer.size(), recvmax, comm());
   Array<uint> recvbuf(recvmax);
   for (uint j = 1; j < pe_size; ++j)
   {
     int src = (pe_rank - j + pe_size) % pe_size;
     int dst = (pe_rank + j) % pe_size;
 
-    int recvcount = MPI::sendrecv( &buffer[0], buffer.size(), dst,
-                                   recvbuf.data(), recvmax, src, 0, comm );
+    int recvcount = MPI::sendrecv( buffer, dst, recvbuf, src, 0, comm() );
 
     for (int k = 0; k < recvcount; ++k)
     {
       if (this->has_global(recvbuf[k]))
       {
-	uint const local_index = this->get_local(recvbuf[k]);
-	this->set_shared_adj(local_index, src);
+        uint const local_index = this->get_local(recvbuf[k]);
+        this->set_shared_adj(local_index, src);
       }
     }
   }
@@ -936,11 +923,10 @@ void DistributedData::disp() const
 void DistributedData::check_shared()
 {
 #if HAVE_MPI
-  Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
 
-  Array<uint> * buffer = new Array<uint>[pe_size];
+  Array< Array<uint> > buffer( pe_size );
   for (SharedIterator vi(*this); vi.valid(); ++vi)
   {
     dolfin_assert(!vi.adj().empty());
@@ -948,15 +934,13 @@ void DistributedData::check_shared()
   }
 
   //
-  uint recvmax(this->num_shared());
-  Array<uint> recvbuf(recvmax);
+  Array<uint> recvbuf(this->num_shared());
   for (uint j = 1; j < pe_size; ++j)
   {
     int src = (pe_rank - j + pe_size) % pe_size;
     int dst = (pe_rank + j) % pe_size;
 
-    int recvcount = MPI::sendrecv( &buffer[dst][0], buffer[dst].size(), dst,
-                                   recvbuf.data(), recvmax, src, 0, comm );
+    int recvcount = MPI::sendrecv( buffer[dst], dst, recvbuf, src, 0, comm() );
 
     for (int k = 0; k < recvcount; ++k)
     {
@@ -975,18 +959,16 @@ void DistributedData::check_shared()
       }
     }
   }
-  delete [] buffer;
 #endif /* HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
 void DistributedData::check_ghost()
 {
 #if HAVE_MPI
-  Comm& comm = this->comm();
   uint const pe_rank = this->comm_rank();
   uint const pe_size = this->comm_size();
 
-  Array<uint> * buffer = new Array<uint>[pe_size];
+  Array< Array<uint> > buffer( pe_size );
   for (GhostIterator vi(*this); vi.valid(); ++vi)
   {
     dolfin_assert(!vi.adj().empty());
@@ -998,12 +980,12 @@ void DistributedData::check_ghost()
   }
 
   //
-  uint recvmax;
+  uint recvmax = 0;
   for (uint j = 0; j < pe_size; ++j)
   {
     uint s = buffer[j].size();
     MPI::check_error( MPI_Reduce(&s, &recvmax, 1, MPI_UNSIGNED, MPI_MAX, j,
-                                 comm) );
+                                 comm()) );
   }
   Array<uint> recvbuf(recvmax);
   for (uint j = 1; j < pe_size; ++j)
@@ -1011,8 +993,7 @@ void DistributedData::check_ghost()
     int src = (pe_rank - j + pe_size) % pe_size;
     int dst = (pe_rank + j) % pe_size;
 
-    int recvcount = MPI::sendrecv( &buffer[dst][0], buffer[dst].size(), dst,
-                                   recvbuf.data(), recvmax, src, 0, comm );
+    int recvcount = MPI::sendrecv( buffer[dst], dst, recvbuf, src, 0, comm() );
 
     for (int k = 0; k < recvcount; ++k)
     {
@@ -1035,7 +1016,6 @@ void DistributedData::check_ghost()
       }
     }
   }
-  delete [] buffer;
 #endif /* HAVE_MPI */
 }
 //-----------------------------------------------------------------------------

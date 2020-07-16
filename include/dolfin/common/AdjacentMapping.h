@@ -28,6 +28,9 @@ public:
   ///
   ~SharedMapping();
 
+  /// Do not allow assignment
+  SharedMapping & operator=( SharedMapping const & other ) = delete;
+
   ///
   Array< uint > const & to( uint rank ) const;
 
@@ -52,8 +55,6 @@ private:
   };
 
 private:
-  /// Do not allow assignment
-  SharedMapping & operator=( SharedMapping const & other );
 
   DistributedData const &       data_;
   _map< uint, AdjacentMapping > mappings_;

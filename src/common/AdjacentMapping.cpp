@@ -24,78 +24,68 @@ SharedMapping::SharedMapping( DistributedData const & data )
   // Collect entities by adjacent rank
   for ( SharedIterator it( data ); it.valid(); ++it )
   {
-    _set< uint > const & adjs = it.adj();
-    for ( _set< uint >::const_iterator a = adjs.begin(); a != adjs.end(); ++a )
-    {
-      mappings_[*a].send.push_back( it.global_index() );
-    }
+    for( uint const & id : it.adj() )
+      mappings_[id].send.push_back( it.global_index() );
   }
+
   dolfin_assert( mappings_.size() == data.get_adj_ranks().size() );
   send_max_ = 0;
   send_min_ = data.num_shared();
 
   //
-  uint const    rank    = dolfin::MPI::rank();
-  MPI_Request * sendreq = new MPI_Request[mappings_.size()];
-  MPI_Request * recvreq = new MPI_Request[mappings_.size()];
-  MPI_Status *  status  = new MPI_Status[mappings_.size()];
-  int           recvcount;
-  uint          i = 0;
-  for ( _map< uint, AdjacentMapping >::iterator it = mappings_.begin();
-        it != mappings_.end();
-        ++it, ++i )
+  Array< MPI_Request> sendreq( mappings_.size() );
+  Array< MPI_Request> recvreq( mappings_.size() );
+  Array< MPI_Status>  status( mappings_.size() );
+
+  uint i = 0;
+  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
   {
-    dolfin_assert( it->first != rank );
+    dolfin_assert( it.first != MPI::rank() );
+
+    AdjacentMapping & amap = it.second;
+
     // Update bounds
-    send_max_ = std::max( send_max_, ( uint ) it->second.send.size() );
-    send_min_ = std::min( send_min_, ( uint ) it->second.send.size() );
+    send_max_ = std::max( send_max_, ( uint ) amap.send.size() );
+    send_min_ = std::min( send_min_, ( uint ) amap.send.size() );
     //
-    MPI::check_error( MPI_Isend( &it->second.send[0],
-                                 it->second.send.size(),
-                                 MPI_UNSIGNED,
-                                 it->first,
-                                 0,
-                                 MPI::DOLFIN_COMM,
-                                 &sendreq[i] ) );
+    MPI::check_error( MPI_Isend( amap.send.data(), amap.send.size(),
+                                 MPI_UNSIGNED, it.first, 0,
+                                 data.comm(), &sendreq[i] ) );
     // Resize buffer
-    it->second.recv.resize( it->second.send.size() );
-    MPI::check_error( MPI_Irecv( &it->second.recv[0],
-                                 it->second.recv.size(),
-                                 MPI_UNSIGNED,
-                                 it->first,
-                                 0,
-                                 MPI::DOLFIN_COMM,
-                                 &recvreq[i] ) );
+    amap.recv.resize( amap.send.size() );
+    MPI::check_error( MPI_Irecv( amap.recv.data(), amap.recv.size(),
+                                 MPI_UNSIGNED, it.first, 0,
+                                 data.comm(), &recvreq[i] ) );
+
+    ++i;
   }
-  for ( _map< uint, AdjacentMapping >::iterator it = mappings_.begin();
-        it != mappings_.end();
-        ++it )
+
+  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
   {
-    data_.get_local(
-      it->second.send.size(), &it->second.send[0], &it->second.send[0] );
+    AdjacentMapping & amap = it.second;
+    data_.get_local( amap.send.size(), amap.send.data(), amap.send.data() );
   }
 
   MPI::check_error( MPI_Waitall( mappings_.size(), &sendreq[0], &status[0] ) );
+
   i = 0;
-  for ( _map< uint, AdjacentMapping >::iterator it = mappings_.begin();
-        it != mappings_.end();
-        ++it, ++i )
+  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
   {
+    AdjacentMapping & amap = it.second;
+    int recvcount = 0;
+
     MPI::check_error( MPI_Wait( &recvreq[i], &status[i] ) );
     MPI::check_error( MPI_Get_count( &status[i], MPI_UNSIGNED, &recvcount ) );
-    if ( uint( recvcount ) != it->second.recv.size() )
+
+    if ( static_cast< uint >( recvcount ) != amap.recv.size() )
     {
-      error(
-        "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
-        rank,
-        recvcount,
-        it->second.recv.size() );
+      error( "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
+             MPI::rank(), recvcount, amap.recv.size() );
     }
-    data_.get_local(
-      it->second.recv.size(), &it->second.recv[0], &it->second.recv[0] );
+
+    data_.get_local( amap.recv.size(), amap.recv.data(), amap.recv.data() );
+    ++i;
   }
-  delete[] recvreq;
-  delete[] sendreq;
 
 #endif /* HAVE_MPI */
 }
@@ -110,12 +100,6 @@ SharedMapping::SharedMapping( SharedMapping const & other )
 //-----------------------------------------------------------------------------
 SharedMapping::~SharedMapping()
 {
-}
-//-----------------------------------------------------------------------------
-SharedMapping & SharedMapping::operator=( SharedMapping const & )
-{
-  // Do not allow assignment
-  return *this;
 }
 //-----------------------------------------------------------------------------
 Array< uint > const & SharedMapping::to( uint rank ) const

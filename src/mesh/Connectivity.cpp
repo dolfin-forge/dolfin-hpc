@@ -4,6 +4,7 @@
 #include <dolfin/mesh/Connectivity.h>
 
 #include <dolfin/common/Array.h>
+#include <dolfin/log/log.h>
 #include <dolfin/log/LogStream.h>
 
 #include <algorithm>

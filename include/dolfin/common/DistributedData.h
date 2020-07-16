@@ -25,9 +25,9 @@ class DistributedData : public Distributed< DistributedData >
   friend class SharedIterator;
 
 public:
-  typedef _map< uint, uint >         IndexMapping;
-  typedef _map< uint, _set< uint > > SharedSet;
-  typedef _map< uint, uint >         GhostSet;
+  using IndexMapping = _map< uint, uint >;
+  using SharedSet    = _map< uint, _set< uint > >;
+  using GhostSet     = _map< uint, uint >;
 
 public:
   ///
@@ -271,8 +271,35 @@ private:
   mutable SharedMapping * shared_mapping_;
 };
 //-----------------------------------------------------------------------------
-inline bool DistributedData::operator==( DistributedData const & ) const
+inline bool DistributedData::operator==( DistributedData const & other ) const
 {
+  if ( rank_ != other.rank_ )
+    return false;
+
+  if ( pe_size_ != other.pe_size_ )
+    return false;
+
+  if ( range_is_set_ != other.range_is_set_ )
+    return false;
+
+  if ( offset_ != other.offset_ )
+    return false;
+
+  if ( range_size_ != other.range_size_ )
+    return false;
+
+  if ( global_size_ != other.global_size_ )
+    return false;
+
+  if ( finalized_ != other.finalized_ )
+    return false;
+
+  if ( cached_numbering_ != other.cached_numbering_ )
+    return false;
+
+  if ( cached_ownership_ != other.cached_ownership_ )
+    return false;
+
   return true;
 }
 //-----------------------------------------------------------------------------

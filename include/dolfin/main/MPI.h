@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI_Datatypes.h>

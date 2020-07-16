@@ -5,11 +5,8 @@
 #define __DOLFIN_ARRAY_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/log/log.h>
-#include <dolfin/log/LogStream.h>
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 namespace dolfin
@@ -17,6 +14,8 @@ namespace dolfin
 
 template< typename T >
 using Array = std::vector< T >;
+
+//-----------------------------------------------------------------------------
 
 template< typename T >
 inline void free( Array< T * > & array )
@@ -27,6 +26,8 @@ inline void free( Array< T * > & array )
 
   array.clear();
 }
+
+//-----------------------------------------------------------------------------
 
 template < typename T, typename Iterator >
 inline void append( Array< T > & array, Iterator begin, Iterator end )
@@ -39,6 +40,17 @@ inline void append( Array< T > & array, Iterator begin, Iterator end )
 #else
  array.insert( array.end(), begin, end );
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline uint max_array_size( Array< Array< T > > const & arrays )
+{
+    return std::max_element( arrays.begin(), arrays.end(),
+                             []( Array< T > const & a, Array< T > const & b ) {
+                               return a.size() < b.size();
+                             } )->size();
 }
 
 //-----------------------------------------------------------------------------

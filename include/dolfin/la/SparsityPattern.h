@@ -6,6 +6,7 @@
 
 #include <dolfin/la/GenericSparsityPattern.h>
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 

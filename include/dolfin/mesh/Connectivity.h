@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 

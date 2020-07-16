@@ -391,7 +391,7 @@ void Function::interpolate_vertex_values(real* values) const
       uint const rank = dolfin::MPI::rank();
       uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
-      Array<real> * sendbuf = new Array<real> [pe_size];
+      Array< Array<real> > sendbuf( pe_size );
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
@@ -413,17 +413,16 @@ void Function::interpolate_vertex_values(real* values) const
       uint dst;
 
       //FIXME: Overallocate
-      uint recvsize = dist0.num_shared();
-      uint * recvbuf = (recvsize == 0 ? nullptr : new uint[recvsize]);
-      int recvcount;
+      Array< uint > recvbuf( dist0.num_shared() );
+      int recvcount = 0;
       for (uint j = 1; j < pe_size; ++j)
       {
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
 
-        MPI::check_error( MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(),
-                                       MPI_UNSIGNED, dst, 1,  &recvbuf[0],
-                                       recvsize, MPI_DOUBLE, src, 1,
+        MPI::check_error( MPI_Sendrecv(sendbuf[dst].data(), sendbuf[dst].size(),
+                                       MPI_UNSIGNED, dst, 1, recvbuf.data(),
+                                       recvbuf.size(), MPI_DOUBLE, src, 1,
                                        MPI::DOLFIN_COMM, &status) );
         MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
@@ -440,10 +439,6 @@ void Function::interpolate_vertex_values(real* values) const
           }
         }
       }
-
-      //
-      delete[] recvbuf;
-      delete[] sendbuf;
 #endif
     }
 

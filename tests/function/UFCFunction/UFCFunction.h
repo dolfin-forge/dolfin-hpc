@@ -41,7 +41,7 @@ DOLFIN_START_TEST( test_UFCFunction )
         }
         delete cell;
       }
-      free( cells );
+      destruct( cells );
     }
     //---
     {
@@ -63,7 +63,7 @@ DOLFIN_START_TEST( test_UFCFunction )
         }
         delete cell;
       }
-      free( cells );
+      destruct( cells );
     }
   }
 DOLFIN_END_TEST

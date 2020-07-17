@@ -21,11 +21,6 @@ OFFFile::OFFFile(std::string const filename) :
 {
 }
 //-----------------------------------------------------------------------------
-OFFFile::~OFFFile()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 void OFFFile::operator>>(Mesh& mesh)
 {
   std::ifstream off(filename.c_str());

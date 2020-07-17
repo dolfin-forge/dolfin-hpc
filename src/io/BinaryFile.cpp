@@ -19,10 +19,10 @@
 #include <dolfin/main/MPI.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <fstream>
 #include <list>
 #include <stdexcept>
-#include <stdint.h>
 #include <string>
 #include <typeinfo>
 
@@ -73,7 +73,7 @@ typedef struct atomic_cell
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile("Binary", filename),
 #if defined( HAVE_MPI )
-    t_(0),
+    t_( nullptr ),
 #endif
     version_(BINARY_VERSION)
 {
@@ -89,11 +89,6 @@ BinaryFile::BinaryFile(const std::string filename, real const& t) :
 #if !defined( HAVE_MPI )
   MAYBE_UNUSED(t);
 #endif
-}
-//----------------------------------------------------------------------------
-BinaryFile::~BinaryFile()
-{
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 void BinaryFile::read()
@@ -310,12 +305,12 @@ void BinaryFile::operator>>(LabelList<Function>& f)
   }
 
   BinaryFunctionHeader f_hdr;
-  for (LabelList<Function>::iterator it = f.begin(); it != f.end(); it++)
+  for ( Label< Function > & fun : f )
   {
     byte_offset += MPI::file_read_at_all( fh, f_hdr, byte_offset );
     if (byteswap) bswap_func_hdr(f_hdr);
 
-    Function * u = it->first;
+    Function * u = fun.first;
 
     if (f_hdr.dim != u->value_size())
     {
@@ -323,9 +318,9 @@ void BinaryFile::operator>>(LabelList<Function>& f)
     }
 
     uint size = u->value_size() * u->mesh().topology().num_owned(0);
-    real *values = new real[size];
+    Array< real > values( size );
 
-    MPI::file_read_at_all( fh, values, size,
+    MPI::file_read_at_all( fh, values.data(), size,
                            byte_offset + u->vector().offset() * sizeof(real) );
     if(byteswap)
     {
@@ -334,8 +329,7 @@ void BinaryFile::operator>>(LabelList<Function>& f)
         values[i] = bswap(values[i]);
       }
     }
-    u->vector().set(values);
-    delete[] values;
+    u->vector().set(values.data());
 
     byte_offset += f_hdr.dim * u->mesh().global_size(0) * sizeof(real);
   }
@@ -386,27 +380,26 @@ void BinaryFile::write_function(
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
 
-  for (LabelList<Function>::iterator it = f.begin();
-      it != f.end(); it++)
+  for ( Label< Function > & fun : f )
   {
-    Function* u = it->first;
+    Function* u = fun.first;
 
-    std::string& name = it->second;
+    std::string& name = fun.second;
 
     // Get number of components
     uint const value_dim = u->value_size();
 
     // Allocate memory for function values at vertices
     uint size = mesh.size(0) * u->value_size();
-    real *values = new real[size];
+    Array< real > values( size );
     uint offset = u->vector().offset();
 
     if ((u->vector().local_size() / value_dim) != mesh.topology().num_owned(0))
     {
-      real *interp_values = new real[size];
+      Array< real > interp_values( size );
 
       // Get function values at vertices
-      u->interpolate_vertex_values(interp_values);
+      u->interpolate_vertex_values(interp_values.data());
 
       uint ii = 0;
       for (VertexIterator v(mesh); !v.end(); ++v)
@@ -419,7 +412,6 @@ void BinaryFile::write_function(
           }
         }
       }
-      delete[] interp_values;
 
       // Compute new vertex based offset
       uint num_values = value_dim * mesh.topology().num_owned(0);
@@ -428,7 +420,7 @@ void BinaryFile::write_function(
     }
     else
     {
-      u->vector().get(values);
+      u->vector().get(values.data());
     }
 
     size = value_dim * mesh.topology().num_owned(0);
@@ -441,10 +433,9 @@ void BinaryFile::write_function(
     f_hdr.t = t_ ? *t_ : counter;
 
     byte_offset += MPI::file_write_at_all( fh, f_hdr, byte_offset );
-    byte_offset += MPI::file_write_at_all( fh, values, size,
+    byte_offset += MPI::file_write_at_all( fh, values.data(), size,
                                            byte_offset + offset * sizeof(real),
                                            value_dim * mesh.global_size(0) );
-    delete[] values;
   }
 
   MPI::file_close( fh );
@@ -592,7 +583,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     // Parse cells: cells are assigned to processes based on the ownership of
     // the first vertex.
     Array<atomic_cell> cells;
-    Array<uint> * non_local_cells = new Array<uint>[pe_size];
+    Array< Array<uint> > non_local_cells( pe_size );
     _ordered_set<uint> owned_vertices;
     atomic_cell cell(num_cellvertices);
     for (uint * c = cell_buffer; c !=(cell_buffer + cell_data);
@@ -628,15 +619,11 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Send non-local cells to their owner
     {
-      uint local_max = 0;
-      for (uint i = 0; i < pe_size; ++i)
-      {
-        local_max = std::max(local_max, (uint) non_local_cells[i].size());
-      }
+      uint local_max = max_array_size( non_local_cells );
 
       uint buff_size = 0;
       MPI::all_reduce<MPI::max>(local_max, buff_size, comm);
-      uint *recv_buffer = new uint[buff_size];
+      Array< uint > recv_buffer( buff_size );
 
       // Exchange data
       for (uint i = 1; i < pe_size; ++i)
@@ -644,9 +631,8 @@ void BinaryFile::operator>>(Mesh& mesh)
         int src = (pe_rank - i + pe_size) % pe_size;
         int dst = (pe_rank + i) % pe_size;
 
-        int num_recv = MPI::sendrecv( &non_local_cells[dst][0],
-                                     non_local_cells[dst].size(), dst,
-                                     recv_buffer, buff_size, src, 1, comm );
+        int num_recv = MPI::sendrecv( non_local_cells[dst], dst,
+                                      recv_buffer, src, 1, comm );
 
         // Add received cells
         for (int j = 0; j < num_recv; j += num_cellvertices)
@@ -667,10 +653,7 @@ void BinaryFile::operator>>(Mesh& mesh)
           }
         }
       }
-      delete[] recv_buffer;
     }
-
-    delete[] non_local_cells;
 
     // The local number of vertices is now known
     uint const num_local_vertices = owned_vertices.size()
@@ -722,32 +705,26 @@ void BinaryFile::operator>>(Mesh& mesh)
     }
 
     // Sort ghost vertices by owner and clear the set (not needed anymore)
-    Array<uint> * ghosts = new Array<uint>[pe_size];
-    for (_set<uint>::iterator it = ghosted_vertices.begin();
-         it != ghosted_vertices.end(); it++)
-    {
-      ghosts[vdist.owner(*it)].push_back(*it);
-    }
+    Array< Array<uint> > ghosts( pe_size );
+    for ( uint const & gvert : ghosted_vertices )
+      ghosts[vdist.owner(gvert)].push_back(gvert);
+
     ghosted_vertices.clear();
 
     // Exchange ghost vertices coordinates
     {
-      uint local_max = 0;
-      for (uint i = 0; i < pe_size; ++i)
-      {
-        local_max = std::max(local_max, (uint) ghosts[i].size());
-      }
+      uint local_max = max_array_size( ghosts );
 
       uint buff_size = 0;
       MPI::all_reduce<MPI::max>(local_max, buff_size );
 
-      uint * recv_buffer = new uint[buff_size];
+      Array< uint > recv_buffer( buff_size );
 
-      uint *send_new_owner = new uint[buff_size];
-      uint *recv_new_owner = new uint[buff_size];
+      Array< uint > send_new_owner( buff_size );
+      Array< uint > recv_new_owner( buff_size );
 
-      real *send_buffer_coords = new real[buff_size * gdim];
-      real *recv_buffer_coords = new real[buff_size * gdim];
+      Array< real > send_buffer_coords( buff_size * gdim );
+      Array< real > recv_buffer_coords( buff_size * gdim );
 
       // Exchange data
       _map<uint, uint> new_owner;
@@ -756,16 +733,15 @@ void BinaryFile::operator>>(Mesh& mesh)
         int src = (pe_rank - i + pe_size) % pe_size;
         int dst = (pe_rank + i) % pe_size;
 
-        int num_recv = MPI::sendrecv( &ghosts[dst][0], ghosts[dst].size(), dst,
-                                      recv_buffer, buff_size, src, 1, comm );
+        int num_recv = MPI::sendrecv( ghosts[dst], dst, recv_buffer, src, 1, comm );
 
         /*
          * Check if orphaned
          * Send back global number and orphaned info
          */
 
-        real *sp = &send_buffer_coords[0];
-        uint *np = &send_new_owner[0];
+        send_new_owner.resize( num_recv );
+        send_buffer_coords.resize( num_recv * gdim );
         for (int k = 0; k < num_recv; ++k)
         {
           if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end())
@@ -774,26 +750,24 @@ void BinaryFile::operator>>(Mesh& mesh)
             {
               new_owner[recv_buffer[k]] = src;
             }
-            *(np++) = new_owner[recv_buffer[k]];
+            send_new_owner[k] = new_owner[recv_buffer[k]];
           }
           else
           {
-            *(np++) = pe_rank;
+            send_new_owner[k] = pe_rank;
           }
 
           uint const v_index = recv_buffer[k] - vdist.offset;
           for (uint l = 0; l < gdim; ++l)
           {
-            *(sp++) = vertex_buffer[(gdim * v_index) + l];
+            send_buffer_coords[k*gdim+l] = vertex_buffer[(gdim * v_index) + l];
           }
         }
 
-        MPI::sendrecv( send_new_owner, num_recv, src,
-                       recv_new_owner, buff_size, dst, 1, comm );
+        MPI::sendrecv( send_new_owner, src, recv_new_owner, dst, 1, comm );
 
-        num_recv = MPI::sendrecv( send_buffer_coords, (num_recv * gdim), src,
-                                  recv_buffer_coords, (buff_size * gdim),
-                                  dst, 1, comm );
+        num_recv = MPI::sendrecv( send_buffer_coords, src,
+                                  recv_buffer_coords, dst, 1, comm );
 
         int g_i = 0;
         for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
@@ -806,27 +780,19 @@ void BinaryFile::operator>>(Mesh& mesh)
           editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
         }
       }
-
-      delete[] recv_new_owner;
-      delete[] send_new_owner;
-      delete[] recv_buffer_coords;
-      delete[] send_buffer_coords;
-      delete[] recv_buffer;
     }
 
-    delete[] ghosts;
     delete[] vertex_buffer;
 
     // Add cell connectivities
     uint local_cell_index = 0;
-    uint * connectivity = new uint[num_cellvertices];
+    Array< uint > connectivity( num_cellvertices );
     for (Array<atomic_cell>::iterator it = cells.begin();
          it != cells.end(); ++local_cell_index, ++it)
     {
-      mesh.distdata()[0].get_local(it->size ,it->v, connectivity);
-      editor.add_cell(local_cell_index, &connectivity[0]);
+      mesh.distdata()[0].get_local(it->size ,it->v, connectivity.data());
+      editor.add_cell(local_cell_index, connectivity.data());
     }
-    delete[] connectivity;
 
     editor.close();
 

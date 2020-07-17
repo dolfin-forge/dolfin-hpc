@@ -26,7 +26,7 @@ public:
 
   STLFile(const std::string filename);
 
-  ~STLFile();
+  ~STLFile() = default;
 
   // Input
   void operator>>(Mesh& mesh);

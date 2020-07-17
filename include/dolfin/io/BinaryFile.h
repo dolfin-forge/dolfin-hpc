@@ -34,7 +34,7 @@ public:
   BinaryFile(const std::string filename, real const& t);
 
   ///
-  ~BinaryFile();
+  ~BinaryFile() = default;
 
   /// Input
   void operator>>(GenericVector& x);

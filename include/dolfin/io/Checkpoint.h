@@ -21,16 +21,16 @@ class Function;
 class Checkpoint
 {
 public:
-  typedef _ordered_map< std::string, Mesh * >          MeshMap;
-  typedef _ordered_map< std::string, Function * >      FunctionMap;
-  typedef _ordered_map< std::string, GenericVector * > VectorMap;
+  using MeshMap     = _ordered_map< std::string, Mesh * >;
+  using FunctionMap = _ordered_map< std::string, Function * >;
+  using VectorMap   = _ordered_map< std::string, GenericVector * >;
 
 #ifdef ENABLE_MPIIO
-  typedef MPI_File   stream_t;
-  typedef MPI_Offset offset_t;
+  using stream_t = MPI_File;
+  using offset_t = MPI_Offset;
 #else
-  typedef std::ofstream stream_t;
-  typedef long long     offset_t;
+  using stream_t = std::ofstream;
+  using offset_t = long long;
 #endif
 
   static uint32_t const NAME_LENGTH = 256;
@@ -98,7 +98,7 @@ public:
   Checkpoint();
 
   ///
-  ~Checkpoint();
+  ~Checkpoint() = default;
 
   ///
   void write( std::string filename, real const t, MeshMap & meshes,

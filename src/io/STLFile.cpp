@@ -37,11 +37,6 @@ STLFile::STLFile(const std::string filename) :
 {
 }
 //-----------------------------------------------------------------------------
-STLFile::~STLFile()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 void STLFile::operator>>(Mesh& mesh)
 {
   char hdr[80];

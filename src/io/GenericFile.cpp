@@ -22,11 +22,6 @@ GenericFile::GenericFile(std::string const& type, std::string const& filename) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-GenericFile::~GenericFile()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 void GenericFile::operator>>(GenericVector&)
 {
   read_not_impl("Vector");

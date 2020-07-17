@@ -15,7 +15,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexIterator.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace dolfin
 {
@@ -23,7 +23,7 @@ namespace dolfin
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename) :
     GenericFile("VTK", filename),
-    _t(0)
+    _t( nullptr )
 {
 }
 //----------------------------------------------------------------------------
@@ -31,11 +31,6 @@ VTKFile::VTKFile(const std::string filename, real const& t) :
     GenericFile("VTK", filename),
     _t(&t)
 {
-}
-//----------------------------------------------------------------------------
-VTKFile::~VTKFile()
-{
-  // Do nothing
 }
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(Mesh& mesh)

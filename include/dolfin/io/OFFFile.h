@@ -33,7 +33,7 @@ public:
   OFFFile(std::string const filename);
 
   ///
-  ~OFFFile();
+  ~OFFFile() = default;
 
   /// Input
   void operator>>(Mesh& mesh);

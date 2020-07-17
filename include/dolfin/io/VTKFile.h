@@ -30,7 +30,7 @@ public:
   VTKFile(const std::string filename, real const& t);
 
   ///
-  ~VTKFile();
+  ~VTKFile() = default;
 
   /// Write mesh
   void operator<<(Mesh& mesh);

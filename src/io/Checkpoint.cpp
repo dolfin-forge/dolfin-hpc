@@ -43,12 +43,6 @@ Checkpoint::Checkpoint()
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::~Checkpoint()
-{
-}
-
-//-----------------------------------------------------------------------------
-
 void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
                         FunctionMap & func, VectorMap & vec )
 {
@@ -108,16 +102,16 @@ void Checkpoint::load_header( std::string filename )
     offset_t byte_offset = chkp_header.offset_mesh;
     mesh_header.resize( chkp_header.num_meshes );
 
-    for ( uint m = 0; m < mesh_header.size(); ++m )
+    for ( MeshHeader & mesh_hdr : mesh_header )
     {
-      MPI::file_read_at_all( file, mesh_header[m], byte_offset );
+      MPI::file_read_at_all( file, mesh_hdr, byte_offset );
       byte_offset += chkp_header.pe_size * sizeof( MeshHeader );
-      byte_offset += sizeof( real ) * mesh_header[m].displacement[0];
-      byte_offset += sizeof( uint ) * mesh_header[m].displacement[1];
+      byte_offset += sizeof( real ) * mesh_hdr.displacement[0];
+      byte_offset += sizeof( uint ) * mesh_hdr.displacement[1];
       if ( chkp_header.pe_size > 1 )
       {
-        byte_offset += sizeof( uint ) * mesh_header[m].displacement[2];
-        byte_offset += sizeof( uint ) * mesh_header[m].displacement[3];
+        byte_offset += sizeof( uint ) * mesh_hdr.displacement[2];
+        byte_offset += sizeof( uint ) * mesh_hdr.displacement[3];
       }
     }
   }
@@ -127,11 +121,11 @@ void Checkpoint::load_header( std::string filename )
     offset_t byte_offset  = chkp_header.offset_functions;
     functions_header.resize( chkp_header.num_functions );
 
-    for ( uint i = 0; i < functions_header.size(); ++i )
+    for ( FunctionHeader & function_hdr : functions_header )
     {
-      MPI::file_read_at_all( file, functions_header[i], byte_offset );
+      MPI::file_read_at_all( file, function_hdr, byte_offset );
       byte_offset += chkp_header.pe_size * sizeof( FunctionHeader );
-      byte_offset += sizeof( real ) * functions_header[i].offset[2];
+      byte_offset += sizeof( real ) * function_hdr.offset[2];
     }
   }
 
@@ -140,11 +134,11 @@ void Checkpoint::load_header( std::string filename )
     offset_t byte_offset  = chkp_header.offset_vectors;
     vectors_header.resize( chkp_header.num_vectors );
 
-    for ( uint i = 0; i < vectors_header.size(); ++i )
+    for ( VectorHeader & vector_hdr : vectors_header )
     {
-      MPI::file_read_at_all( file, vectors_header[i], byte_offset );
+      MPI::file_read_at_all( file, vector_hdr, byte_offset );
       byte_offset += MPI::size() * sizeof( VectorHeader );
-      byte_offset += sizeof( real ) * vectors_header[i].offset[2];
+      byte_offset += sizeof( real ) * vector_hdr.offset[2];
     }
   }
 
@@ -196,68 +190,68 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
     error( "Checkpoint::load(Mesh): PE size does not match (%u != %u)",
            chkp_header.pe_size, MPI::size() );
 
-  for ( uint m = 0; m < mesh_header.size(); ++m )
+  for ( MeshHeader & mesh_hdr : mesh_header )
   {
     // load header
 #ifdef ENABLE_MPIIO
-    MPI::file_read_at_all( file, mesh_header[m],
+    MPI::file_read_at_all( file, mesh_hdr,
                            byte_offset + MPI::rank() * sizeof( MeshHeader ) );
     byte_offset += MPI::size() * sizeof( MeshHeader );
 #else
     error("Checkpointing is only implemented with MPI I/O enabled.");
-    // file.read( ( char * ) &mesh_header[m], sizeof( MeshHeader ) );
+    // file.read( ( char * ) &mesh_hdr, sizeof( MeshHeader ) );
 #endif
 
     // find out if we 'requested' this function in the FunctionMap
-    std::string name( mesh_header[m].name, NAME_LENGTH );
+    std::string name( mesh_hdr.name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
     MeshMap::const_iterator m_ = meshes.find( name );
 
     if ( m_ != meshes.end() )
     {
       Mesh _mesh;
-      MeshEditor editor( _mesh, mesh_header[m].type, mesh_header[m].gdim );
-      editor.init_vertices( mesh_header[m].num_vertices );
+      MeshEditor editor( _mesh, mesh_hdr.type, mesh_hdr.gdim );
+      editor.init_vertices( mesh_hdr.num_vertices );
 
       // load coords
       {
-        Array< real > coords( mesh_header[m].num_coords, 0.0 );
+        Array< real > coords( mesh_hdr.num_coords, 0.0 );
 
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
-                         file, coords.data(), mesh_header[m].num_coords,
-                         byte_offset + mesh_header[m].offsets[0] * sizeof( real ),
-                         mesh_header[m].displacement[0] );
+                         file, coords.data(), mesh_hdr.num_coords,
+                         byte_offset + mesh_hdr.offsets[0] * sizeof( real ),
+                         mesh_hdr.displacement[0] );
  #else
-        // file.read( ( char * ) coords, ( mesh_header[m].num_coords ) * sizeof( real ) );
+        // file.read( ( char * ) coords, ( mesh_hdr.num_coords ) * sizeof( real ) );
  #endif
 
-        for ( uint i = 0; i < mesh_header[m].num_coords; i += mesh_header[m].gdim )
+        for ( uint i = 0; i < mesh_hdr.num_coords; i += mesh_hdr.gdim )
         {
-          editor.add_vertex( i / mesh_header[m].gdim, coords.data() + i );
+          editor.add_vertex( i / mesh_hdr.gdim, coords.data() + i );
         }
       }
 
       // load cells
       {
-        editor.init_cells( mesh_header[m].num_cells );
-        Array< uint > cells( mesh_header[m].num_centities, 0 );
+        editor.init_cells( mesh_hdr.num_cells );
+        Array< uint > cells( mesh_hdr.num_centities, 0 );
 
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
-                         file, cells.data(), mesh_header[m].num_centities,
-                         byte_offset + mesh_header[m].offsets[1] * sizeof( uint ),
-                         mesh_header[m].displacement[1] );
+                         file, cells.data(), mesh_hdr.num_centities,
+                         byte_offset + mesh_hdr.offsets[1] * sizeof( uint ),
+                         mesh_hdr.displacement[1] );
 #else
-       // file.read( ( char * ) cells, ( mesh_header[m].nuchkp_headerchkp_headerm_centities ) * sizeof( uint ) );
+       // file.read( ( char * ) cells, ( mesh_hdr.nuchkp_headerchkp_headerm_centities ) * sizeof( uint ) );
 #endif
 
         Array< uint > v;
         uint ci = 0;
-        for ( uint i = 0; i < mesh_header[m].num_centities; i += mesh_header[m].num_entities )
+        for ( uint i = 0; i < mesh_hdr.num_centities; i += mesh_hdr.num_entities )
         {
           v.clear();
-          for ( uint j = 0; j < mesh_header[m].num_entities; ++j )
+          for ( uint j = 0; j < mesh_hdr.num_entities; ++j )
           {
             v.push_back( cells[i + j] );
           }
@@ -270,25 +264,25 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
         Array< uint > mapping( _mesh.size( 0 ) );
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
-                         file, mapping.data(), mesh_header[m].num_vertices,
-                         byte_offset + mesh_header[m].offsets[2] * sizeof( uint ),
-                         mesh_header[m].displacement[2] );
+                         file, mapping.data(), mesh_hdr.num_vertices,
+                         byte_offset + mesh_hdr.offsets[2] * sizeof( uint ),
+                         mesh_hdr.displacement[2] );
 #else
-       // file.read( ( char * ) mapping.data(), mesh_header[m].num_vertices * sizeof( uint ) );
+       // file.read( ( char * ) mapping.data(), mesh_hdr.num_vertices * sizeof( uint ) );
 #endif
         for ( VertexIterator v( _mesh ); !v.end(); ++v )
           _mesh.distdata()[0].set_map( v->index(), mapping[v->index()] );
 
-        Array< uint > ghosts( 2 * mesh_header[m].num_ghosts );
+        Array< uint > ghosts( 2 * mesh_hdr.num_ghosts );
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
-                         file, ghosts.data(), 2 * mesh_header[m].num_ghosts,
-                         byte_offset + mesh_header[m].offsets[3] * sizeof( uint ),
-                         mesh_header[m].displacement[3] );
+                         file, ghosts.data(), 2 * mesh_hdr.num_ghosts,
+                         byte_offset + mesh_hdr.offsets[3] * sizeof( uint ),
+                         mesh_hdr.displacement[3] );
 #else
-       // file.read( ( char * ) ghosts.data(), 2 * mesh_header[m].num_ghosts * sizeof( uint ) );
+       // file.read( ( char * ) ghosts.data(), 2 * mesh_hdr.num_ghosts * sizeof( uint ) );
 #endif
-        for ( uint i = 0; i < 2 * mesh_header[m].num_ghosts; i += 2 )
+        for ( uint i = 0; i < 2 * mesh_hdr.num_ghosts; i += 2 )
         {
           _mesh.distdata()[0].set_ghost( ghosts[i], ghosts[i + 1] );
         }
@@ -305,12 +299,12 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
     else
     {
       // skip this mesh
-      byte_offset += sizeof( real ) * mesh_header[m].displacement[0];
-      byte_offset += sizeof( uint ) * mesh_header[m].displacement[1];
+      byte_offset += sizeof( real ) * mesh_hdr.displacement[0];
+      byte_offset += sizeof( uint ) * mesh_hdr.displacement[1];
       if ( MPI::size() > 1 )
       {
-        byte_offset += sizeof( uint ) * mesh_header[m].displacement[2];
-        byte_offset += sizeof( uint ) * mesh_header[m].displacement[3];
+        byte_offset += sizeof( uint ) * mesh_hdr.displacement[2];
+        byte_offset += sizeof( uint ) * mesh_hdr.displacement[3];
       }
     }
   }
@@ -337,36 +331,36 @@ void Checkpoint::load( std::string filename, FunctionMap const & func )
   functions_header.resize( chkp_header.num_functions );
 
   // read all functions from the checkpoint
-  for ( uint i = 0; i < functions_header.size(); ++i )
+  for ( FunctionHeader & function_hdr : functions_header )
   {
 #ifdef ENABLE_MPIIO
     // load header
-    MPI::file_read_at_all( file, functions_header[i],
+    MPI::file_read_at_all( file, function_hdr,
                            byte_offset + MPI::rank() * sizeof( FunctionHeader ) );
     byte_offset += MPI::size() * sizeof( FunctionHeader );
 #else
     error("Checkpointing is only implemented with MPI I/O enabled.");
-    // file.read( ( char * ) &functions_header[i].offset[1], sizeof( uint ) );
+    // file.read( ( char * ) &function_hdr.offset[1], sizeof( uint ) );
 #endif
 
     // load data
-    Array< real > values( functions_header[i].offset[1] );
+    Array< real > values( function_hdr.offset[1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
-                     byte_offset + functions_header[i].offset[0] * sizeof( real ),
-                     functions_header[i].offset[2] );
+                     byte_offset + function_hdr.offset[0] * sizeof( real ),
+                     function_hdr.offset[2] );
 #else
-    // file.read( ( char * ) values.data(), functions_header[i].offset[1] * sizeof( real ) );
+    // file.read( ( char * ) values.data(), function_hdr.offset[1] * sizeof( real ) );
 #endif
 
     // find out if we 'requested' this function in the FunctionMap
-    std::string name( functions_header[i].name, NAME_LENGTH );
+    std::string name( function_hdr.name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
     FunctionMap::const_iterator f = func.find( name );
 
     if ( f != func.end() )
     {
-      dolfin_assert( functions_header[i].dim == f->second->value_size() );
+      dolfin_assert( function_hdr.dim == f->second->value_size() );
 
       f->second->vector().set( values.data() );
       f->second->vector().apply();
@@ -397,40 +391,40 @@ void Checkpoint::load( std::string filename, VectorMap const & vec )
   vectors_header.resize( chkp_header.num_vectors );
 
   // read all functions from the checkpoint
-  for ( uint i = 0; i < vectors_header.size(); ++i )
+  for ( VectorHeader & vector_hdr : vectors_header )
   {
 #ifdef ENABLE_MPIIO
     // load header
-    MPI::file_read_at_all( file, vectors_header[i],
+    MPI::file_read_at_all( file, vector_hdr,
                            byte_offset + MPI::rank() * sizeof( VectorHeader ) );
     byte_offset += MPI::size() * sizeof( VectorHeader );
 #else
     error("Checkpointing is only implemented with MPI I/O enabled.");
-    // file.read( ( char * ) &vectors_header.offset[i][1], sizeof( uint ) );
+    // file.read( ( char * ) &vector_hdrfset[i][1], sizeof( uint ) );
 #endif
 
     // load data
-    Array< real > values( vectors_header[i].offset[1] );
+    Array< real > values( vector_hdr.offset[1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
-                     byte_offset + vectors_header[i].offset[0] * sizeof( real ),
-                     vectors_header[i].offset[2] );
+                     byte_offset + vector_hdr.offset[0] * sizeof( real ),
+                     vector_hdr.offset[2] );
 #else
-    // file.read( ( char * ) values.data(), vectors_header[i].offset[1] * sizeof( real ) );
+    // file.read( ( char * ) values.data(), vector_hdr.offset[1] * sizeof( real ) );
 #endif
 
     // find out if we 'requested' this function in the VectorMap
-    std::string name( vectors_header[i].name, NAME_LENGTH );
+    std::string name( vector_hdr.name, NAME_LENGTH );
     name = name.substr( 0, name.find( '?' ) );
     VectorMap::const_iterator v = vec.find( name );
 
     if ( v != vec.end() )
     {
-      if ( vectors_header[i].offset[1] != v->second->local_size() )
+      if ( vector_hdr.offset[1] != v->second->local_size() )
       {
         error( "Size mismatch while reloading vectors from checkpoint:\n"
                "\tExpected : %d\n\tRead     : %d\n",
-               v->second->local_size(), vectors_header[i].offset[1] );
+               v->second->local_size(), vector_hdr.offset[1] );
       }
 
       v->second->set( values.data() );

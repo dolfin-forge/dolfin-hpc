@@ -41,7 +41,7 @@ public:
   };
 
   ///
-  typedef dolfin::_ordered_set<Domain::Type> Set;
+  using Set = dolfin::_ordered_set<Domain::Type>;
 
   ///
   Domain(Type const& t);
@@ -104,8 +104,8 @@ private:
 
   ///
   static std::string type_repr(Domain::Type const& t);
-  typedef dolfin::_ordered_map<Type, Definition> DefinitionList;
-  typedef std::pair<Type, Definition> DefinitionItem;
+  using DefinitionList = dolfin::_ordered_map<Type, Definition>;
+  using DefinitionItem = std::pair<Type, Definition>;
   static DefinitionList const Definitions()
   {
     static DefinitionList const Definitions = __init_definitions();
@@ -115,8 +115,8 @@ private:
 
   ///
   static Domain::Type repr_type(repr_t const& repr);
-  typedef dolfin::_ordered_map<repr_t, Domain::Type> MappingList;
-  typedef std::pair<repr_t, Domain::Type> MappingItem;
+  using MappingList = dolfin::_ordered_map<repr_t, Domain::Type>;
+  using MappingItem = std::pair<repr_t, Domain::Type>;
   static MappingList const Mapping()
   {
     static MappingList const Mapping = __init_mapping();

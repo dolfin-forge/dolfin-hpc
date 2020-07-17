@@ -75,7 +75,7 @@ public:
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef CellIterator iterator;
+  using iterator = CellIterator;
 
   struct shared : SharedIterator
   {
@@ -115,7 +115,7 @@ public:
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Face lower_dimensional;
+  using lower_dimensional = Face;
 };
 
 //-----------------------------------------------------------------------------

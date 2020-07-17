@@ -26,7 +26,7 @@ class Form : public ufc::form
 {
 
 public:
-  typedef CoefficientMap Coefficients;
+  using Coefficients = CoefficientMap;
 
   /// Constructor
   Form( Mesh & mesh );

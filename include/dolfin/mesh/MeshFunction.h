@@ -46,7 +46,7 @@ public:
   /// Copy constructor
   explicit
   MeshFunction(MeshFunction<T> const& other) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
       values_(nullptr)
@@ -57,7 +57,7 @@ public:
   /// Copy constructor
   template <class V>
   MeshFunction(MeshFunction<V> const& other) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
       values_(nullptr)
@@ -269,7 +269,7 @@ protected:
 
   /// Create scalar mesh function on given mesh of given dimension
   MeshFunction(Mesh& mesh, uint dim, T val = static_cast<T>(0)) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
       values_(nullptr)

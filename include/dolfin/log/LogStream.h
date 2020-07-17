@@ -46,7 +46,7 @@ private:
 template<class T>
 struct __sink
 {
-  typedef T stream;
+  using stream = T;
 
   static inline void init(stream& ss)
   {
@@ -58,7 +58,7 @@ struct __sink
 template<class Sink>
 struct __logstream : protected std::streambuf, public std::ostream
 {
-  typedef typename Sink::stream stream;
+  using stream = typename Sink::stream;
 
   __logstream(stream * ss) :
       std::streambuf(),
@@ -71,9 +71,7 @@ struct __logstream : protected std::streambuf, public std::ostream
     init(ss);
   }
 
-  ~__logstream()
-  {
-  }
+  ~__logstream() = default;
 
   ///
   inline void init(stream * ss)
@@ -382,12 +380,12 @@ private:
   std::streambuf *       sb_;
   std::ostringstream     os_;
 
-  static int const LINEWIDTH = 256;
-  static int const INDENTTAB = 2;
-  static int const INDENTMIN = 0;
-  static int const INDENTMAX = 128;
+  static constexpr uint LINEWIDTH = 256;
+  static constexpr uint INDENTTAB = 2;
+  static constexpr uint INDENTMIN = 0;
+  static constexpr uint INDENTMAX = 128;
 
-  std::streambuf::int_type overflow(std::streambuf::int_type c)
+  std::streambuf::int_type overflow(std::streambuf::int_type c) override
   {
     dolfin_assert(sb_);
     if (std::streambuf::traits_type::eq_int_type(std::streambuf::traits_type::eof(), c))
@@ -418,7 +416,7 @@ private:
 
 };
 //-----------------------------------------------------------------------------
-typedef __logstream<__sink<std::ostream> > LogStream;
+using LogStream = __logstream<__sink<std::ostream> >;
 //-----------------------------------------------------------------------------
 /// Pair output
 template<typename T, typename V>

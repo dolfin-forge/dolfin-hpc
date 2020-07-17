@@ -59,7 +59,7 @@ public:
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef VertexIterator iterator;
+  using iterator = VertexIterator;
 
   struct shared : SharedIterator
   {
@@ -99,8 +99,8 @@ public:
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Vertex lower_dimensional;
-  typedef Edge   higher_dimensional;
+  using lower_dimensional  = Vertex;
+  using higher_dimensional = Edge;
 };
 
 //-----------------------------------------------------------------------------

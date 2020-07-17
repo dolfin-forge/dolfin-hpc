@@ -206,7 +206,7 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
   }
   real const b = 1.0 / a;
 
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -217,7 +217,7 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(real const a)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -228,7 +228,7 @@ MeshGeometry& MeshGeometry::operator+=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(real const a)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -240,7 +240,7 @@ MeshGeometry& MeshGeometry::operator-=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(Point const& p)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
@@ -255,7 +255,7 @@ MeshGeometry& MeshGeometry::operator+=(Point const& p)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(Point const& p)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {

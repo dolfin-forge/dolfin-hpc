@@ -22,7 +22,7 @@ namespace dolfin
 
   public:
 
-    LUSolver() : petsc_solver(0) {}
+    LUSolver() : petsc_solver(nullptr) {}
 
     ~LUSolver()
     {

@@ -169,10 +169,10 @@ inline void UFCCell::clear()
     }
     delete[] entity_indices;
   }
-  entity_indices = 0;
+  entity_indices = nullptr;
 
   delete[] coordinates;
-  coordinates = 0;
+  coordinates = nullptr;
 
   cell_shape = ufc::interval;
   topological_dimension = 0;

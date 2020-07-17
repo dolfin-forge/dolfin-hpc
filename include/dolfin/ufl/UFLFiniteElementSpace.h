@@ -34,7 +34,7 @@ class FiniteElementSpace : public Class
 public:
 
   //
-  typedef std::vector<FiniteElementSpace const *> List;
+  using List = std::vector<const FiniteElementSpace *>;
 
   /// Stupid factory function
   static FiniteElementSpace * create(Object::repr_t const repr);

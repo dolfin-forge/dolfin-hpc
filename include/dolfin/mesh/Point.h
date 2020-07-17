@@ -378,7 +378,7 @@ inline std::ostream & operator<<( std::ostream & ss, point< D > const & p )
 
 //-----------------------------------------------------------------------------
 
-typedef class point<> Point;
+using Point = class point<>;
 
 //-----------------------------------------------------------------------------
 

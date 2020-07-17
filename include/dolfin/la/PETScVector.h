@@ -171,7 +171,7 @@ private:
   // True if the vector has ghost points
   bool is_ghosted_;
 
-  typedef _map<int, int> GhostMapping;
+  using GhostMapping = _map<int, int>;
   GhostMapping mapping_;
 
 };

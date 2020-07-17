@@ -326,7 +326,7 @@ void PETScKrylovSolver::disp() const
 void PETScKrylovSolver::init( uint M, uint N )
 {
   // Check if we need to reinitialize
-  if ( ksp != 0 && M == this->M && N == this->N )
+  if ( ksp != nullptr && M == this->M && N == this->N )
     return;
 
   // Save size of system

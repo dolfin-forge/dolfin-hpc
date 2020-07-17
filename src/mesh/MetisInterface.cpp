@@ -26,7 +26,7 @@
 typedef idx_t pm_idx_t;
 
 // (par)metis real type
-typedef real_t pm_real_t;
+using pm_real_t = real_t;
 
 #else
 #define pm_idx_t  idxtype

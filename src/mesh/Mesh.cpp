@@ -32,7 +32,7 @@ Mesh::Mesh() :
     exterior_boundary_(nullptr),
     interior_boundary_(nullptr),
     intersection_detector_(nullptr),
-    timestamp_(time(0))
+    timestamp_(time(nullptr))
 {
 }
 
@@ -44,7 +44,7 @@ Mesh::Mesh(CellType const& ctype, Space const& space) :
     exterior_boundary_(nullptr),
     interior_boundary_(nullptr),
     intersection_detector_(nullptr),
-    timestamp_(time(0))
+    timestamp_(time(nullptr))
 {
 }
 //-----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
     exterior_boundary_(nullptr),
     interior_boundary_(nullptr),
     intersection_detector_(nullptr),
-    timestamp_(time(0))
+    timestamp_(time(nullptr))
 {
 }
 //-----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ Mesh::Mesh(std::string const& filename) :
     exterior_boundary_(nullptr),
     interior_boundary_(nullptr),
     intersection_detector_(nullptr),
-    timestamp_(time(0))
+    timestamp_(time(nullptr))
 {
   File file(filename);
   file >> *this;

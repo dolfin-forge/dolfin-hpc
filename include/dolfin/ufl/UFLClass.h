@@ -95,8 +95,7 @@ protected:
 
 private:
 
-  typedef std::pair<std::pair<std::string, std::string>,
-      std::vector<Object const*> > CppProto;
+  using CppProto = std::pair<std::pair<std::string, std::string>, std::vector<const Object *> >;
 
   ///
   CppProto make_proto(repr_t repr) const;

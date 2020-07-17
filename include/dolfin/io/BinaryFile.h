@@ -68,22 +68,22 @@ public:
     BINARY_MESH_FUNCTION_DATA
   };
 
-  typedef struct
+  using BinaryFileHeader = struct
   {
     uint32_t magic;
     uint32_t bendian;
     uint32_t pe_size;
     Binary_data_t type;
-  } BinaryFileHeader;
+  };
 
 #ifdef ENABLE_MPIIO
-  typedef struct
+  using BinaryFunctionHeader = struct
   {
     uint32_t dim;
     uint32_t size;
     real t;
     char name[FNAME_LENGTH];
-  } BinaryFunctionHeader;
+  };
 #endif
 
 private:

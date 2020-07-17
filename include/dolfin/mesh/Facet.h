@@ -39,7 +39,7 @@ public:
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef FacetIterator iterator;
+  using iterator = FacetIterator;
 
   struct shared : SharedIterator
   {

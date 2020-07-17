@@ -37,7 +37,7 @@ class Object
 
 public:
 
-  typedef ufl::repr repr_t;
+  using repr_t = ufl::repr;
 
   /// __repr__
   virtual repr_t const& repr() const = 0;

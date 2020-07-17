@@ -35,11 +35,11 @@ class MPI
 public:
 
 #ifdef HAVE_MPI
-  typedef MPI_Comm   Communicator;
-  typedef MPI_Offset offset_t;
+  using Communicator = MPI_Comm;
+  using offset_t     = MPI_Offset;
 #else
-  typedef int       Communicator;
-  typedef long long offset_t;
+  typedef Communicator =int;
+  typedef offset_t     = long long;
 #endif
 
   /*
@@ -198,7 +198,7 @@ private:
   static real time_;
   static bool init_;
 
-  typedef struct {
+  using Context = struct {
     int   global_rank;
     int   global_size;
     int   group_cnt;
@@ -206,7 +206,7 @@ private:
     int   rank;
     int   size;
     int   seed;
-  } Context;
+  };
 
   static Context ctx_;
 
@@ -214,7 +214,7 @@ private:
 
 // Defines default type to MPI communication domain.
 
-typedef MPI::Communicator Comm;
+using Comm = MPI::Communicator;
 
 #define DOLFIN_COMM_WORLD MPI::DOLFIN_COMM_WORLD
 #define DOLFIN_COMM_SELF  MPI::DOLFIN_COMM_SELF

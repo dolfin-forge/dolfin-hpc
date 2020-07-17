@@ -173,7 +173,7 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();
@@ -209,7 +209,7 @@ void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();
@@ -248,7 +248,7 @@ void GTSInterface::overlap(Point const& p1, Point const& p2,
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();

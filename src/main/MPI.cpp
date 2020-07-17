@@ -155,7 +155,7 @@ void MPI::initComm(int ngroups)
   MPI::check_error( MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &ctx_.global_rank) );
   MPI::check_error( MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &ctx_.global_size) );
   MPI::check_error( MPI_Comm_dup(MPI_COMM_SELF, &MPI::DOLFIN_COMM_SELF) );
-  ctx_.seed = std::time(0) + ctx_.global_rank;
+  ctx_.seed = std::time(nullptr) + ctx_.global_rank;
 
   // Initialize group(s)
   int const wsize = ctx_.global_size;

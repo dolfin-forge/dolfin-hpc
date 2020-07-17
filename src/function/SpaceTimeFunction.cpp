@@ -150,10 +150,9 @@ void SpaceTimeFunction::save(Function const& function)
 void SpaceTimeFunction::disp() const
 {
   section("SpaceTimeFunction");
-  for (_ordered_map<real, std::string>::const_iterator it = samples_.begin();
-       it != samples_.end(); ++it)
+  for ( std::pair< real, std::string > const & sample : samples_ )
   {
-    message("%.16e : %s", it->first, it->second.c_str());
+    message("%.16e : %s", sample.first, sample.second.c_str());
   }
   end();
 }

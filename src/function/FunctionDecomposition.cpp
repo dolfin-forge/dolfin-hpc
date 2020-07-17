@@ -31,10 +31,10 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   FiniteElementSpace const& Wh = F.space();
   ScratchSpace S(Wh);
   Array<FiniteElementSpace *> spaces = Wh.flatten();
-  Array<Function *> Si;
-  for (uint s = 0; s < spaces.size(); ++s)
+  Array<Function *> Si( spaces.size(), nullptr );
+  for ( FiniteElementSpace * fespaces : spaces )
   {
-    Si.push_back(new Function(*(spaces[s])));
+    Si.push_back(new Function(*fespaces));
   }
 
   if (Wh.is_vertex_based())
@@ -83,9 +83,9 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       dof_index = mesh.distdata()[tdim].get_global(c->index());
-      for (uint i = 0; i < Si.size(); ++i)
+      for ( Function * f : Si )
       {
-        Si[i]->vector().set(&block[dofii], 1, &dof_index);
+        f->vector().set(&block[dofii], 1, &dof_index);
         ++dofii;
       }
     }
@@ -103,9 +103,9 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       //
-      for (uint i = 0; i < Si.size(); ++i)
+      for ( Function * f : Si )
       {
-        Si[i]->vector().set(&block[ii], S0.local_dimension, &celldofs[offset]);
+        f->vector().set(&block[ii], S0.local_dimension, &celldofs[offset]);
         ii += S0.local_dimension;
       }
       //
@@ -116,8 +116,8 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   else
   {
     uint ii = 0;
-    uint * offset = new uint[Si.size()];
-    uint * local_dim = new uint[Si.size()];
+    Array< uint > offset( Si.size() );
+    Array< uint > local_dim( Si.size() );
     uint const ** celldofs = new uint const *[Si.size()];
     for (uint i = 0; i < Si.size(); ++i)
     {
@@ -140,14 +140,12 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     }
     delete[] block;
     delete[] celldofs;
-    delete[] local_dim;
-    delete[] offset;
   }
 
   // Synchronize leaf functions
-  for (uint s = 0; s < Si.size(); ++s)
+  for ( Function * f : Si )
   {
-    Si[s]->sync();
+    f->sync();
   }
 
   // Cleanup

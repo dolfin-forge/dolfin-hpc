@@ -395,13 +395,12 @@ void Function::interpolate_vertex_values(real* values) const
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
-        _set<uint> const& adjs = it.adj();
-        for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)
+        for ( uint const & adj : it.adj() )
         {
-          sendbuf[*a].push_back(vertex_sumwghts[it.index()]);
+          sendbuf[adj].push_back(vertex_sumwghts[it.index()]);
           for (uint i = 0; i < scratch->size; ++i)
           {
-            sendbuf[*a].push_back(values[i * num_verts + it.index()]);
+            sendbuf[adj].push_back(values[i * num_verts + it.index()]);
           }
         }
       }

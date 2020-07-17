@@ -10,10 +10,10 @@ using namespace dolfin;
 Quadrature::Quadrature(unsigned int n)
 {
   this->n = n;
-  
+
   points = new real[n];
   weights = new real[n];
-  
+
   for (unsigned int i = 0; i < n; i++)
     weights[i] = 0;
 
@@ -24,11 +24,11 @@ Quadrature::~Quadrature()
 {
   if ( points )
     delete [] points;
-  points = 0;
-  
+  points = nullptr;
+
   if ( weights )
     delete [] weights;
-  weights = 0;
+  weights = nullptr;
 }
 //-----------------------------------------------------------------------------
 unsigned int Quadrature::size() const

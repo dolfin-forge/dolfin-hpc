@@ -22,12 +22,8 @@ namespace dolfin
 struct DCell
 {
 
-  DCell() :
-      id(0),
-      parent_id(0),
-      vertices(0),
-      deleted(false),
-      nref(0)
+  DCell()
+    : vertices(0)
   {
   }
 
@@ -50,19 +46,19 @@ struct DCell
   }
 
   /// Local index of cell
-  uint id;
+  uint id{0};
 
   /// Index of parent cell
-  int parent_id;
+  int parent_id{0};
 
   /// List of vertices spaning the cell
   std::vector<DVertex *> vertices;
 
   /// Marker for deletion
-  bool deleted;
+  bool deleted{false};
 
   /// reference number to be used for identification in bisect
-  int nref;
+  int nref{0};
 };
 //-----------------------------------------------------------------------------
 struct DVertex
@@ -74,8 +70,7 @@ struct DVertex
       glb_id(DOLFIN_LONG_MAX),
       cells(),
       p(),
-      deleted(false),
-      is_shared(false),
+      
       owner(UNDEF)
   {
   }
@@ -104,10 +99,10 @@ struct DVertex
   Point p;
 
   /// Marker for deletion
-  bool deleted;
+  bool deleted{false};
 
   /// Marker for shared vertices
-  bool is_shared;
+  bool is_shared{false};
 
   /// Rank of owning process
   uint owner;

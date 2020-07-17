@@ -30,16 +30,16 @@ public:
   FacetArea(Cell const& cell);
 
   ///
-  ~FacetArea();
+  ~FacetArea() override;
 
   ///
-  ValueArray const& shape() const;
+  ValueArray const& shape() const override;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
 private:
 

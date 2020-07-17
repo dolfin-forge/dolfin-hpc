@@ -28,8 +28,7 @@ Equation::Equation(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Equation::~Equation()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& Equation::repr() const

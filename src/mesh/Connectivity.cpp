@@ -63,9 +63,7 @@ Connectivity::Connectivity( Connectivity const & other )
 	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::~Connectivity()
-{
-}
+Connectivity::~Connectivity() = default;
 //-----------------------------------------------------------------------------
 Connectivity & Connectivity::operator=( Connectivity const & other )
 {
@@ -202,7 +200,7 @@ void Connectivity::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-Connectivity const& Connectivity::operator>>(Array<uint>& A) const
+Connectivity const& Connectivity::operator>>(Array<uint>&) const
 {
   error( "Connectivity::operator>> unimplemented / deprecated" );
   // A.reserve( this->entries() );

@@ -28,7 +28,7 @@ public:
   BilinearForm(Mesh& mesh);
 
   /// Destructor
-  ~BilinearForm();
+  ~BilinearForm() override;
 
   /// Trial space
   FiniteElementSpace const& trial_space() const;

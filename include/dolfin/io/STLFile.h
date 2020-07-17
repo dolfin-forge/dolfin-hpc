@@ -26,10 +26,10 @@ public:
 
   STLFile(const std::string filename);
 
-  ~STLFile() = default;
+  ~STLFile() override = default;
 
   // Input
-  void operator>>(Mesh& mesh);
+  void operator>>(Mesh& mesh) override;
 
 };
 

@@ -32,7 +32,7 @@ public:
   Form( Mesh & mesh );
 
   /// Destructor
-  virtual ~Form() = default;
+  ~Form() override = default;
 
   /// Return array of coefficients
   virtual Array< Coefficient * > const & coefficients() const = 0;
@@ -54,37 +54,37 @@ public:
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
-  const char * signature() const;
+  const char * signature() const override;
 
   /// Return the rank of the global tensor (r)
-  uint rank() const;
+  uint rank() const override;
 
   /// Return the number of coefficients (n)
-  uint num_coefficients() const;
+  uint num_coefficients() const override;
 
   /// Return the number of cell integrals
-  uint num_cell_integrals() const;
+  uint num_cell_integrals() const override;
 
   /// Return the number of exterior facet integrals
-  uint num_exterior_facet_integrals() const;
+  uint num_exterior_facet_integrals() const override;
 
   /// Return the number of interior facet integrals
-  uint num_interior_facet_integrals() const;
+  uint num_interior_facet_integrals() const override;
 
   /// Create a new finite element for argument function i
-  ufc::finite_element * create_finite_element( uint i ) const;
+  ufc::finite_element * create_finite_element( uint i ) const override;
 
   /// Create a new dof map for argument function i
-  ufc::dofmap * create_dofmap( uint i ) const;
+  ufc::dofmap * create_dofmap( uint i ) const override;
 
   /// Create a new cell integral on sub domain i
-  ufc::cell_integral * create_cell_integral( uint i ) const;
+  ufc::cell_integral * create_cell_integral( uint i ) const override;
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral * create_exterior_facet_integral( uint i ) const;
+  ufc::exterior_facet_integral * create_exterior_facet_integral( uint i ) const override;
 
   /// Create a new interior facet integral on sub domain i
-  ufc::interior_facet_integral * create_interior_facet_integral( uint i ) const;
+  ufc::interior_facet_integral * create_interior_facet_integral( uint i ) const override;
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 

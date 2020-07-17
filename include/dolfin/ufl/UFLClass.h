@@ -34,10 +34,10 @@ public:
   std::pair<std::string, std::string> const prefixed_name() const;
 
   /// __repr__
-  virtual repr_t const& repr() const = 0;
+  repr_t const& repr() const override = 0;
 
   /// __str__
-  virtual std::string const& str() const = 0;
+  std::string const& str() const override = 0;
 
   /// __eq__
   bool operator ==(Class const& other) const;
@@ -65,10 +65,10 @@ protected:
                  repr_t const& repr);
 
   ///
-  virtual ~Class();
+  ~Class() override;
 
   ///
-  virtual void display() const;
+  void display() const override;
 
   ///
   static std::string make_name(repr_t repr);
@@ -81,7 +81,7 @@ protected:
 
   ///
   std::vector<repr_t> make_args_repr(repr_t const& repr, bool without_pre_pos =
-                                         false) const;
+                                         false) const override;
 
   ///
   repr_t const& arg(size_t i);

@@ -37,7 +37,7 @@ public:
   DistributedData( DistributedData const & other );
 
   ///
-  ~DistributedData();
+  ~DistributedData() override;
 
   ///
   DistributedData & operator=( DistributedData const & other );
@@ -234,7 +234,7 @@ public:
 
 public:
   ///
-  bool valid_numbering;
+  bool valid_numbering{ false };
 
 private:
   /// Clear all data
@@ -244,15 +244,15 @@ private:
   uint pe_size_;
 
   //
-  bool range_is_set_;
-  uint offset_;
-  uint range_size_;
+  bool range_is_set_{ false };
+  uint offset_{ 0 };
+  uint range_size_{ 0 };
 
   //
-  uint global_size_;
+  uint global_size_{ 0 };
 
   //
-  bool finalized_;
+  bool finalized_{ false };
 
   ///
   IndexMapping global_;
@@ -268,7 +268,7 @@ private:
   Array< uint > cached_ownership_;
 
   /// Mapping created on-demand
-  mutable SharedMapping * shared_mapping_;
+  mutable SharedMapping * shared_mapping_{};
 };
 //-----------------------------------------------------------------------------
 inline bool DistributedData::operator==( DistributedData const & other ) const

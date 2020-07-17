@@ -28,9 +28,7 @@ public:
   }
 
   /// Destructor
-  ~Face()
-  {
-  }
+  ~Face() = default;
 
   /// Compute coordinates of face midpoint
   Point midpoint() const;

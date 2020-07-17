@@ -24,9 +24,8 @@ class UFCReferenceCell: public ufc::cell
 public:
 
   /// Create emtpy UFC cell
-  UFCReferenceCell() :
-      ufc::cell(),
-      num_vertices(0)
+  UFCReferenceCell()
+    : ufc::cell()
   {
   }
 
@@ -39,7 +38,7 @@ public:
   }
 
   /// Destructor
-  ~UFCReferenceCell()
+  ~UFCReferenceCell() override
   {
     clear();
   }
@@ -172,7 +171,7 @@ public:
 private:
 
   // Number of cell vertices
-  uint num_vertices;
+  uint num_vertices{0};
 
 };
 

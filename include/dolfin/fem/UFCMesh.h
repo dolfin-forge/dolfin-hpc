@@ -31,7 +31,7 @@ public:
   }
 
   /// Destructor
-  ~UFCMesh()
+  ~UFCMesh() override
   {
     delete[] num_entities;
     num_entities = nullptr;

@@ -23,7 +23,7 @@ public:
   Functional(Mesh& mesh);
 
   /// Destructor
-  ~Functional() = default;
+  ~Functional() override = default;
 
   /// Creator function
   template <class E> static inline

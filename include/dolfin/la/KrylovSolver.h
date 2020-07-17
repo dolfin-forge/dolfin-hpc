@@ -57,14 +57,14 @@ private:
 
   /// PETSc solver
 #ifdef HAVE_PETSC
-  PETScKrylovSolver * petsc_solver;
+  PETScKrylovSolver * petsc_solver{nullptr};
 #else
   int * petsc_solver;
 #endif
 #ifdef HAVE_JANPACK
   JANPACKKrylovSolver * janpack_solver;
 #else
-  int * janpack_solver;
+  int * janpack_solver{nullptr};
 #endif
 };
 

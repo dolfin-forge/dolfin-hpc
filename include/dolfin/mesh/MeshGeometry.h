@@ -36,7 +36,7 @@ public:
   MeshGeometry(MeshGeometry const& other);
 
   /// Destructor
-  ~MeshGeometry();
+  ~MeshGeometry() override;
 
   /// Assignment
   MeshGeometry & operator=(MeshGeometry const& geometry);
@@ -130,12 +130,12 @@ public:
   //--- TOKENIZED -------------------------------------------------------------
 
   /// Return token identifying the internal state of mesh geometry
-  int token() const;
+  int token() const override;
 
 private:
 
   /// Update token value
-  void update_token();
+  void update_token() override;
 
   //---------------------------------------------------------------------------
 

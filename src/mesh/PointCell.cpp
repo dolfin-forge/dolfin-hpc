@@ -27,10 +27,6 @@ PointCell::PointCell() :
 {
 }
 //-----------------------------------------------------------------------------
-PointCell::~PointCell()
-{
-}
-//-----------------------------------------------------------------------------
 void PointCell::create_reference_cell(Mesh& mesh) const
 {
   MeshEditor me(mesh, CellType::point, 1, DOLFIN_COMM_SELF);

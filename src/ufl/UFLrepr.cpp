@@ -80,8 +80,7 @@ template<class OBJ>
 
 //-----------------------------------------------------------------------------
 repr::~repr()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::string const repr::make_repr(Class const& owner, Object const& arg1)

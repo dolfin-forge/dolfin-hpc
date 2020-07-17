@@ -50,7 +50,7 @@ public:
   explicit Domain(repr_t const& repr);
 
   ///
-  ~Domain();
+  ~Domain() override;
 
   ///
   static Type type_facet(Domain::Type const& t);
@@ -77,7 +77,7 @@ public:
   bool is_undefined() const;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

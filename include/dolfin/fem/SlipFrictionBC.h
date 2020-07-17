@@ -28,7 +28,7 @@ public:
                  SubSystem const& sub_system);
 
   /// Destructor
-  ~SlipFrictionBC() = default;
+  ~SlipFrictionBC() override = default;
 
   ///
   BoundaryNormal& normal();
@@ -39,15 +39,15 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 
-  inline void sync(Time const& t) {  beta_(t); slipbc_(t); }
+  inline void sync(Time const& t) override {  beta_(t); slipbc_(t); }
 
   SlipBC slipbc_;
   Coefficient& beta_;

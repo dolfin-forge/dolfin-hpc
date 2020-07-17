@@ -27,9 +27,7 @@ public:
   }
 
   ///
-  ~SharedIterator()
-  {
-  }
+  ~SharedIterator() = default;
 
   ///
   SharedIterator & operator++();

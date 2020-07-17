@@ -126,7 +126,7 @@ private:
   int fini();
 
   // Constructor
-  SubSystemsManager();
+  SubSystemsManager() = default;
 
   // Copy constructor
   SubSystemsManager(SubSystemsManager const& other);
@@ -144,8 +144,8 @@ private:
   alarm& alarm_handler() { return timer_; }
 
   // State variable
-  int count_;
-  int state_;
+  int count_{0};
+  int state_{0};
 
   // Alarm handler
   alarm timer_;

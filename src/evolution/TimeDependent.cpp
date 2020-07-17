@@ -9,13 +9,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-TimeDependent::TimeDependent() :
-    clock_(0.0),
-    t_(nullptr)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 TimeDependent::TimeDependent(Time const& time) :
     clock_(time.clock()),
     t_(&time)

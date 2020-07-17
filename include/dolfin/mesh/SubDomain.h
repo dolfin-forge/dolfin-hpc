@@ -25,7 +25,7 @@ public:
   SubDomain();
 
   /// Destructor
-  virtual ~SubDomain();
+  virtual ~SubDomain() = default;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -61,7 +61,7 @@ protected:
 
 private:
 
-  real abstol_;
+  real abstol_{1.0e-6};
 
 };
 

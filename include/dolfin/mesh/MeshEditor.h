@@ -87,11 +87,11 @@ public:
 
   struct Parameters
   {
-    CellType * ctype_;
-    Space    * space_;
-    Comm     * mcomm_;
+    CellType * ctype_{nullptr};
+    Space    * space_{nullptr};
+    Comm     * mcomm_{nullptr};
 
-    Parameters() : ctype_(nullptr), space_(nullptr), mcomm_(nullptr) {}
+    Parameters() = default;
   };
 
 private:

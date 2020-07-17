@@ -38,9 +38,7 @@ public:
   }
 
   /// Destructor
-  ~Edge()
-  {
-  }
+  ~Edge() = default;
 
   /// Compute Euclidian length of edge
   real length() const;

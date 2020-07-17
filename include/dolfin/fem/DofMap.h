@@ -48,7 +48,7 @@ public:
   DofMap(DofMap const& dofmap, Array<uint> const& sub_system, uint& offset);
 
   /// Destructor
-  ~DofMap();
+  ~DofMap() override;
 
   /// Check if the element definitions are identical
   bool operator ==(DofMap const& other) const;
@@ -70,76 +70,76 @@ public:
 
   /// Return a string identifying the dof map
   /// UFC @since 1.1
-  char const * signature() const;
+  char const * signature() const override;
 
   /// Return true iff mesh entities of topological dimension d are needed
   /// UFC @since 1.1
-  bool needs_mesh_entities(uint d) const;
+  bool needs_mesh_entities(uint d) const override;
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
   /// UFC @since 1.1
-  bool init_mesh(const ufc::mesh& mesh);
+  bool init_mesh(const ufc::mesh& mesh) override;
 
   /// Initialize dofmap for given cell
   /// UFC @since 1.1
-  void init_cell(const ufc::mesh& m, const ufc::cell& c);
+  void init_cell(const ufc::mesh& m, const ufc::cell& c) override;
 
   /// Finish initialization of dofmap for cells
   /// UFC @since 1.1
-  void init_cell_finalize();
+  void init_cell_finalize() override;
 
   /// Return the topological dimension of the associated cell shape
   /// UFC @since 2.0
-  uint topological_dimension() const;
+  uint topological_dimension() const override;
 
   /// Return the geometric dimension of the coordinates this dof map provides
   /// UFC @since 1.1 but not implemented
-  uint geometric_dimension() const;
+  uint geometric_dimension() const override;
 
   /// Return the dimension of the global finite element function space
   /// UFC @since 1.1
-  uint global_dimension() const;
+  uint global_dimension() const override;
 
   /// Return the dimension of the local finite element function space
   /// UFC @since 1.1
-  uint local_dimension() const;
+  uint local_dimension() const override;
 
   /// Return number of facet dofs
   /// UFC @since 1.1
-  uint num_facet_dofs() const;
+  uint num_facet_dofs() const override;
 
   /// Return the number of dofs associated with each cell entity of dimension d
   /// UFC @since 1.1 but not implemented
-  uint num_entity_dofs(uint d) const;
+  uint num_entity_dofs(uint d) const override;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
   /// UFC @since 1.1, specific cell local versions are called in priority
-  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const;
+  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const override;
 
   /// Tabulate local-local facet dofs
   /// UFC @since 1.1
-  void tabulate_facet_dofs(uint* dofs, uint local_facet) const;
+  void tabulate_facet_dofs(uint* dofs, uint local_facet) const override;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
   /// UFC @since 1.1 but not implemented
-  void tabulate_entity_dofs(uint* dofs, uint d, uint i) const;
+  void tabulate_entity_dofs(uint* dofs, uint d, uint i) const override;
 
   /// Tabulate the coordinates of all dofs on a cell
   /// UFC @since 1.1
   void tabulate_coordinates(real** coordinates,
-                            const ufc::cell& ufc_cell) const;
+                            const ufc::cell& ufc_cell) const override;
 
   //// Return the number of sub dof maps (for a mixed element)
   /// UFC @since 1.1
-  uint num_sub_dofmaps() const;
+  uint num_sub_dofmaps() const override;
 
   /// Create a new dofmap for sub dof map i (for a mixed element)
   /// UFC @since 1.1
-  ufc::dofmap* create_sub_dofmap(uint i) const;
+  ufc::dofmap* create_sub_dofmap(uint i) const override;
 
   /// Create a new instance
   /// UFC @since 2.0
-  ufc::dofmap* create() const;
+  ufc::dofmap* create() const override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 

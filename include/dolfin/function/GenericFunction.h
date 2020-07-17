@@ -28,49 +28,49 @@ class GenericFunction : public Coefficient, public Variable
 public:
 
   /// Constructor
-  GenericFunction() {}
+  GenericFunction() = default;
 
   /// Destructor
-  virtual ~GenericFunction() {}
+  ~GenericFunction() override = default;
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  virtual void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const = 0;
+  void evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point
-  virtual void eval(real* values, const real* x) const = 0;
+  void eval(real* values, const real* x) const override = 0;
 
   /// Return the rank of the value space
-  virtual uint rank() const = 0;
+  uint rank() const override = 0;
 
   /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const = 0;
+  uint dim(uint i) const override = 0;
 
   // Return the value size
-  virtual uint value_size() const = 0;
+  uint value_size() const override = 0;
 
   /// Interpolate function to vertices of mesh
   virtual void interpolate_vertex_values(real* values) const = 0;
 
   /// Interpolate function to finite element space on cell
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
+  void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell) const = 0;
+                           const Cell& dolfin_cell) const override = 0;
 
   /// Interpolate function to finite element space on facet
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
+  void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const = 0;
+                           const Cell& dolfin_cell, uint facet) const override = 0;
 
   /// Synchronize
-  virtual void sync() = 0;
+  void sync() override = 0;
 
   /// Display basic information
-  virtual void disp() const = 0;
+  void disp() const override = 0;
 
   //---------------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ public:
 private:
 
   /// Time dependency hook
-  virtual void sync(Time const& t) = 0;
+  void sync(Time const& t) override = 0;
 
 };
 

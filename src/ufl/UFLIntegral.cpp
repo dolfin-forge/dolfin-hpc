@@ -41,8 +41,7 @@ MeasureData::MeasureData(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 MeasureData::~MeasureData()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::string MeasureData::type_repr(MeasureData::Type const& t)
@@ -138,8 +137,7 @@ MeasureDomain::MeasureDomain(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 MeasureDomain::~MeasureDomain()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::string MeasureDomain::type_repr(MeasureDomain::Type const& t)
@@ -197,8 +195,7 @@ Measure::Measure(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Measure::~Measure()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Measure::operands(std::string const& name) const
@@ -288,8 +285,7 @@ Integral::Integral(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Integral::~Integral()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Integral::operands(

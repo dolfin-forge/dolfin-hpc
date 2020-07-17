@@ -26,13 +26,13 @@ public:
   QuadratureScheme();
 
   ///
-  ~QuadratureScheme();
+  ~QuadratureScheme() override;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
 private:
 

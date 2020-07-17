@@ -52,7 +52,7 @@ public:
   BoundaryMesh(BoundaryMesh const& other);
 
   /// Destructor
-  ~BoundaryMesh();
+  ~BoundaryMesh() override;
 
   /// Return facet index in the mesh associated with the boundary cell
   uint facet_index(Cell const& boundary_cell) const;
@@ -73,7 +73,7 @@ public:
   bool is_boundary_of_boundary() const;
 
   /// Return if the topology should be reordered
-  virtual bool reordering() const { return false; }
+  bool reordering() const override { return false; }
 
 private:
 

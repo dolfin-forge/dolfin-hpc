@@ -29,11 +29,6 @@ StructuredGrid::StructuredGrid(CellType const& type, uint N, BoundingBox bbox) :
 }
 
 //-----------------------------------------------------------------------------
-StructuredGrid::~StructuredGrid()
-{
-}
-
-//-----------------------------------------------------------------------------
 void StructuredGrid::init(CellType const& type)
 {
   if (n_ == 0)

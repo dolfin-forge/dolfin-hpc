@@ -28,8 +28,7 @@ Sum::Sum(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Sum::~Sum()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Sum::operands(std::string const& name) const
@@ -178,8 +177,7 @@ Product::Product(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Product::~Product()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Product::operands(std::string const& name) const
@@ -375,8 +373,7 @@ Division::Division(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Division::~Division()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Division::operands(
@@ -526,8 +523,7 @@ Power::Power(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Power::~Power()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Power::operands(std::string const& name) const
@@ -675,8 +671,7 @@ Abs::Abs(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Abs::~Abs()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Abs::operands(std::string const& name) const

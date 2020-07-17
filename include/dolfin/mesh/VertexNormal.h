@@ -60,7 +60,7 @@ public:
   VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight);
 
   /// Destructor
-  ~VertexNormal();
+  ~VertexNormal() = default;
 
   ///
   Mesh& mesh();

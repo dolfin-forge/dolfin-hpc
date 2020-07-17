@@ -52,7 +52,7 @@ public:
   MeshEntityIterator(MeshEntity& entity, uint dim);
 
   /// Destructor
-  virtual ~MeshEntityIterator();
+  virtual ~MeshEntityIterator() = default;
 
   /// Step to next mesh entity (prefix increment)
   MeshEntityIterator& operator++();

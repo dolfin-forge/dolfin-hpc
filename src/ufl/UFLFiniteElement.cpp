@@ -60,8 +60,7 @@ FiniteElement::FiniteElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& FiniteElement::family() const

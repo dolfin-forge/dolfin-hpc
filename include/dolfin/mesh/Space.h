@@ -17,10 +17,10 @@ struct Space
   static uint const MAX_DIMENSION = 3;
 
   /// Constructor
-  Space() {}
+  Space() = default;
 
   /// Destructor
-  virtual ~Space() {}
+  virtual ~Space() = default;
 
   /// Equality
   bool operator==(Space const& other) const

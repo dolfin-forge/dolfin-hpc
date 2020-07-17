@@ -84,14 +84,10 @@ public:
   public:
 
     /// Constructor
-    iterator()
-    {
-    }
+    iterator() = default;
 
     /// Destructor
-    virtual ~iterator()
-    {
-    }
+    virtual ~iterator() = default;
 
     //--- INTERFACE -----------------------------------------------------------
 

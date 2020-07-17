@@ -69,8 +69,7 @@ FiniteElementSpace::FiniteElementSpace(std::string const& name, repr_t repr) :
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::~FiniteElementSpace()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 QuadratureScheme const& FiniteElementSpace::quadrature_scheme() const

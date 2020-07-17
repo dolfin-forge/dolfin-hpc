@@ -17,10 +17,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector() :
-    Variable("x", "a sparse vector"),
-    x_(nullptr),
-    is_distributed_(false),
-    is_ghosted_(false)
+    Variable("x", "a sparse vector")
+    
 {
   // Do nothing
 }

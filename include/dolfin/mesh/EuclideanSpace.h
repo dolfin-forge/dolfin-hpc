@@ -21,9 +21,7 @@ public:
   {
   }
 
-  ~EuclideanSpace()
-  {
-  }
+  ~EuclideanSpace() override = default;
 
   /// Equality
   bool operator==(EuclideanSpace const& other) const
@@ -34,18 +32,18 @@ public:
   { return dim_ != other.dim_; }
 
   /// Return dimension
-  inline uint dim() const
+  inline uint dim() const override
   {
     return dim_;
   }
 
   /// Return clone
-  inline EuclideanSpace * clone() const
+  inline EuclideanSpace * clone() const override
   {
     return Clonable<EuclideanSpace>::clone();
   }
 
-  void disp() const
+  void disp() const override
   {
     section("EuclideanSpace");
     message("dimension : %u", dim_);

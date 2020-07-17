@@ -36,10 +36,10 @@ public:
 private:
 
   // LU solver
-  LUSolver * lu_solver;
+  LUSolver * lu_solver{ nullptr };
 
   // Krylov solver
-  KrylovSolver * krylov_solver;
+  KrylovSolver * krylov_solver{ nullptr };
 
 };
 

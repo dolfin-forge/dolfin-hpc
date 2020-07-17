@@ -81,14 +81,14 @@ public:
               const SubSystem& sub_system, BCMethod method = topological);
 
   /// Destructor
-  ~DirichletBC() = default;
+  ~DirichletBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 
@@ -97,7 +97,7 @@ private:
                   BilinearForm const& form);
 
   ///
-  inline void sync(Time const& t) { g_(t); }
+  inline void sync(Time const& t) override { g_(t); }
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,

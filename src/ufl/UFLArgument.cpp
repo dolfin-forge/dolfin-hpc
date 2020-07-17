@@ -29,8 +29,7 @@ Argument::Argument(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Argument::~Argument()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Argument::operands(

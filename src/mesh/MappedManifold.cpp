@@ -24,11 +24,6 @@ MappedManifold::MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain) :
 }
 
 //-----------------------------------------------------------------------------
-MappedManifold::~MappedManifold()
-{
-}
-
-//-----------------------------------------------------------------------------
 void MappedManifold::init()
 {
   //

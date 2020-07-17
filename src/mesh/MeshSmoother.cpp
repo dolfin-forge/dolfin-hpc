@@ -24,11 +24,6 @@ MeshSmoother::MeshSmoother(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-MeshSmoother::~MeshSmoother()
-{
-}
-
-//-----------------------------------------------------------------------------
 void MeshSmoother::maph0(MeshValues<int, Cell>& cell_map,
                          MeshValues<real, Cell>& h0,
                          MeshValues<real, Cell>& subh0)

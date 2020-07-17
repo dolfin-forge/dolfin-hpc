@@ -18,7 +18,7 @@ class TimeDependent
 public:
 
   /// Constructors with internal clock
-  TimeDependent();
+  TimeDependent() = default;
 
   /// Constructors with synchronized clock
   TimeDependent(Time const& time);
@@ -68,10 +68,10 @@ public:
 private:
 
   // Internal clock
-  mutable real clock_;
+  mutable real clock_{0.0};
 
   // Pointer to the current time
-  Time const * t_;
+  Time const * t_{nullptr};
 
 };
 

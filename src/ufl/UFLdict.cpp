@@ -151,8 +151,7 @@ template<class KEY, class VALUE>
 //-----------------------------------------------------------------------------
 template<class KEY, class VALUE>
   dict<KEY, VALUE>::~dict()
-  {
-  }
+  = default;
 
 //-----------------------------------------------------------------------------
 template<class KEY, class VALUE>

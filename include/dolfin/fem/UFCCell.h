@@ -25,10 +25,8 @@ class UFCCell : public ufc::cell
 public:
 
   /// Create empty UFC cell
-  UFCCell() :
-      ufc::cell(),
-      cell_(nullptr),
-      num_vertices(0)
+  UFCCell()
+    : ufc::cell()
   {
   }
 
@@ -51,7 +49,7 @@ public:
   }
 
   /// Destructor
-  ~UFCCell()
+  ~UFCCell() override
   {
     clear();
   }
@@ -59,7 +57,7 @@ public:
 private:
 
   //
-  Cell const * cell_;
+  Cell const * cell_{nullptr};
 
 public:
 
@@ -67,7 +65,7 @@ public:
   inline Cell const& operator*() const { return *cell_; };
 
   // Number of cell vertices
-  uint num_vertices;
+  uint num_vertices{0};
 
   // Initialize UFC cell data
   void init(Cell& cell);

@@ -12,9 +12,8 @@ struct EdgeKey : public std::pair<T, T>
 {
 
   /// An edge contains a pair of vertices
-  EdgeKey() :
-      std::pair<T, T>(),
-      idx(0)
+  EdgeKey()
+    : std::pair<T, T>()
   {
   }
 
@@ -68,7 +67,7 @@ struct EdgeKey : public std::pair<T, T>
   }
 
   ///
-  uint idx;
+  uint idx{0};
 
 };
 

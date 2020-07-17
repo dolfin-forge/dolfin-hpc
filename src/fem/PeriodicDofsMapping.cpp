@@ -100,9 +100,7 @@ PeriodicDofsMapping::PeriodicDofsMapping(DofMap const& dofmap) :
 }
 
 //-----------------------------------------------------------------------------
-PeriodicDofsMapping::~PeriodicDofsMapping()
-{
-}
+PeriodicDofsMapping::~PeriodicDofsMapping() = default;
 
 //-----------------------------------------------------------------------------
 void PeriodicDofsMapping::init(DofMap const& dofmap)

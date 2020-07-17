@@ -25,8 +25,7 @@ Condition::Condition(std::string const& name, repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Condition::~Condition()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Condition const * Condition::create(Object::repr_t const& repr)
@@ -117,8 +116,7 @@ BinaryCondition::BinaryCondition(std::string const& name, repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 BinaryCondition::~BinaryCondition()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& BinaryCondition::repr() const
@@ -172,8 +170,7 @@ EQ::EQ(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 EQ::~EQ()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 NE::NE(Expression const& e1, Expression const& e2) :
@@ -189,8 +186,7 @@ NE::NE(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 NE::~NE()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 LE::LE(Expression const& e1, Expression const& e2) :
@@ -206,8 +202,7 @@ LE::LE(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 LE::~LE()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 GE::GE(Expression const& e1, Expression const& e2) :
@@ -223,8 +218,7 @@ GE::GE(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 GE::~GE()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 LT::LT(Expression const& e1, Expression const& e2) :
@@ -240,8 +234,7 @@ LT::LT(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 LT::~LT()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 GT::GT(Expression const& e1, Expression const& e2) :
@@ -257,8 +250,7 @@ GT::GT(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 GT::~GT()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 AndCondition::AndCondition(Expression const& e1, Expression const& e2) :
@@ -274,8 +266,7 @@ AndCondition::AndCondition(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 AndCondition::~AndCondition()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 OrCondition::OrCondition(Expression const& e1, Expression const& e2) :
@@ -291,8 +282,7 @@ OrCondition::OrCondition(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 OrCondition::~OrCondition()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 NotCondition::NotCondition(Expression const& e) :
@@ -314,8 +304,7 @@ NotCondition::NotCondition(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 NotCondition::~NotCondition()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& NotCondition::repr() const
@@ -383,8 +372,7 @@ Conditional::Conditional(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Conditional::~Conditional()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& Conditional::repr() const

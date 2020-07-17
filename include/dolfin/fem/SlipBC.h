@@ -35,14 +35,14 @@ public:
   SlipBC(Mesh& mesh, SubDomain const& sub_domain, SubSystem const& sub_system);
 
   /// Destructor
-  ~SlipBC();
+  ~SlipBC() override;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to non linear system
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
   BoundaryNormal& normal()
   {
@@ -51,7 +51,7 @@ public:
 
 private:
 
-  inline void sync(Time const&) { /* No-op */ }
+  inline void sync(Time const&) override { /* No-op */ }
 
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                       BilinearForm const& form, ScratchSpace& scratch);

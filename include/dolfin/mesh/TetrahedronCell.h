@@ -46,105 +46,105 @@ public:
   TetrahedronCell();
 
   ///
-  ~TetrahedronCell();
+  ~TetrahedronCell() override = default;
 
   /// Clone pattern
-  CellType * clone() const
+  CellType * clone() const override
   {
     return new TetrahedronCell( *this );
   }
 
   /// Return topological dimension of cell
-  uint dim() const;
+  uint dim() const override;
 
   /// Return number of entitites of given topological dimension
-  uint num_entities( uint dim ) const;
+  uint num_entities( uint dim ) const override;
 
   /// Return number of entities of given topological dimensions
-  uint num_entities( uint d0, uint d1 ) const;
+  uint num_entities( uint d0, uint d1 ) const override;
 
   /// Return number of vertices for entity of given topological dimension
-  uint num_vertices( uint dim ) const;
+  uint num_vertices( uint dim ) const override;
 
   /// Return orientation of the cell
-  uint orientation( Cell const & cell ) const;
+  uint orientation( Cell const & cell ) const override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( uint ** e, uint dim, uint const * v ) const;
+  void create_entities( uint ** e, uint dim, uint const * v ) const override;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1, 3-0, 3-1, 3-2)
-  void order_entities( MeshTopology & topology, uint i ) const;
+  void order_entities( MeshTopology & topology, uint i ) const override;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
-  void order_facet( uint vertices[], Facet & facet ) const;
+  void order_facet( uint vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  bool connectivity_needs_ordering( uint d0, uint d1 ) const;
+  bool connectivity_needs_ordering( uint d0, uint d1 ) const override;
 
   /// Initialize mesh connectivities required by ordering
-  void initialize_connectivities( Mesh & mesh ) const;
+  void initialize_connectivities( Mesh & mesh ) const override;
 
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Regular refinement of cell
   void
-    refine_cell( Cell & cell, MeshEditor & editor, uint & current_cell ) const;
+    refine_cell( Cell & cell, MeshEditor & editor, uint & current_cell ) const override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  uint num_refined_vertices( uint dim ) const;
+  uint num_refined_vertices( uint dim ) const override;
 
   /// Number of cells created by refinement pattern
-  uint num_refined_cells() const;
+  uint num_refined_cells() const override;
 
   //---------------------------------------------------------------------------
 
   /// Compute volume of tetrahedron
-  real volume( MeshEntity const & entity ) const;
+  real volume( MeshEntity const & entity ) const override;
 
   /// Compute diameter of tetrahedron
-  real diameter( MeshEntity const & entity ) const;
+  real diameter( MeshEntity const & entity ) const override;
 
   /// Compute circumradius of tetrahedron
-  real circumradius( MeshEntity const & entity ) const;
+  real circumradius( MeshEntity const & entity ) const override;
 
   /// Compute inradius of interval
-  real inradius( MeshEntity const & entity ) const;
+  real inradius( MeshEntity const & entity ) const override;
 
   /// Compute coordinates of midpoint
-  void midpoint( MeshEntity const & entity, real * p ) const;
+  void midpoint( MeshEntity const & entity, real * p ) const override;
 
   /// Compute of given facet with respect to the cell
-  void normal( Cell const & cell, uint facet, real * n ) const;
+  void normal( Cell const & cell, uint facet, real * n ) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  real facet_area( Cell const & cell, uint facet ) const;
+  real facet_area( Cell const & cell, uint facet ) const override;
 
   /// Check if point p intersects the entity
-  bool intersects( MeshEntity const & e, Point const & p ) const;
+  bool intersects( MeshEntity const & e, Point const & p ) const override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
   bool intersects( MeshEntity const & e,
-                   Point const & p1, Point const & p2 ) const;
+                   Point const & p1, Point const & p2 ) const override;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
   /// Create a mesh consisting of the reference cell
-  void create_reference_cell( Mesh & mesh ) const;
+  void create_reference_cell( Mesh & mesh ) const override;
 
   /// Return coordinates of vertices in the reference cell
-  real const * reference_vertex( uint i ) const;
+  real const * reference_vertex( uint i ) const override;
 
   //---------------------------------------------------------------------------
 
   /// Return description of cell type
-  std::string description() const;
+  std::string description() const override;
 
   /// Display information
-  void disp() const;
+  void disp() const override;
 
   /// Check
-  bool check( Cell & cell ) const;
+  bool check( Cell & cell ) const override;
 
 private:
   // Find local index of edge i according to ordering convention

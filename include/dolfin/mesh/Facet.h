@@ -30,9 +30,7 @@ public:
   }
 
   /// Destructor
-  ~Facet()
-  {
-  }
+  ~Facet() = default;
 
   /// Compute coordinates of facet midpoint
   Point midpoint() const;

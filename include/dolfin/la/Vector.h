@@ -45,7 +45,7 @@ public:
   }
 
   /// Destructor
-  ~Vector()
+  ~Vector() override
   {
     delete vector_;
   }
@@ -53,108 +53,108 @@ public:
   //--- Implementation of the GenericTensor interface ---
 
   /// Return copy of tensor
-  Vector * copy() const;
+  Vector * copy() const override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero();
+  void zero() override;
 
   /// Finalize assembly of tensor
-  void apply( FinalizeType finaltype = FINALIZE );
+  void apply( FinalizeType finaltype = FINALIZE ) override;
 
   /// Display tensor
-  void disp( uint precision = 2 ) const;
+  void disp( uint precision = 2 ) const override;
 
   //--- Implementation of the GenericVector interface ---
 
   /// Initialize vector of size N
-  void init( uint N );
+  void init( uint N ) override;
 
   /// Initialize vector of size N and distribute if specified
-  void init( uint N, bool distributed );
+  void init( uint N, bool distributed ) override;
 
   void init_ghosted( uint                         n,
                      _ordered_set< uint > &       indices,
-                     _ordered_map< uint, uint > & map );
+                     _ordered_map< uint, uint > & map ) override;
 
   /// Return size of vector
-  uint size() const;
+  uint size() const override;
 
   /// Return local size of vector
-  uint local_size() const;
+  uint local_size() const override;
 
   /// Return rank's offset into vector
-  uint offset() const;
+  uint offset() const override;
 
   /// Get block of values
-  void get( real * block, uint m, const uint * rows ) const;
+  void get( real * block, uint m, const uint * rows ) const override;
 
   /// Set block of values
-  void set( const real * block, uint m, const uint * rows );
+  void set( const real * block, uint m, const uint * rows ) override;
 
   /// Add block of values
-  void add( const real * block, uint m, const uint * rows );
+  void add( const real * block, uint m, const uint * rows ) override;
 
   /// Get all local values (not ghost entries)
-  void get( real * values ) const;
+  void get( real * values ) const override;
 
   /// Set all local values (not ghost entries)
-  void set( real * values );
+  void set( real * values ) override;
 
   /// Add values to each local entry (not ghost entries)
-  void add( real * values );
+  void add( real * values ) override;
 
   /// Add multiple of given vector (AXPY operation)
-  void axpy( real a, const GenericVector & x );
+  void axpy( real a, const GenericVector & x ) override;
 
   /// Return inner product with given vector
-  real inner( const GenericVector & x ) const;
+  real inner( const GenericVector & x ) const override;
 
   /// Return norm of vector
-  real norm( VectorNormType type = l2 ) const;
+  real norm( VectorNormType type = l2 ) const override;
 
   /// Return minimum value of vector
-  real min() const;
+  real min() const override;
 
   /// Return maximum value of vector
-  real max() const;
+  real max() const override;
 
   /// Return pointwise operator op of vector and given vector x
   void pointwise( const GenericVector & x,
-                  VectorPointwiseOp     op = pw_min ) const;
+                  VectorPointwiseOp     op = pw_min ) const override;
 
   /// Multiply vector by given number
-  Vector & operator*=( real a );
+  Vector & operator*=( real a ) override;
 
   /// Divide vector by given number
-  Vector & operator/=( real a );
+  Vector & operator/=( real a ) override;
 
   /// Multiply vector by given vector component-wise
-  Vector & operator*=( const GenericVector & x );
+  Vector & operator*=( const GenericVector & x ) override;
 
   /// Add given vector
-  Vector & operator+=( const GenericVector & x );
+  Vector & operator+=( const GenericVector & x ) override;
 
   /// Subtract given vector
-  Vector & operator-=( const GenericVector & x );
+  Vector & operator-=( const GenericVector & x ) override;
 
   /// Assignment operator
-  GenericVector & operator=( const GenericVector & x );
+  GenericVector & operator=( const GenericVector & x ) override;
 
   /// Assignment operator
-  Vector & operator=( real a );
+  Vector & operator=( real a ) override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory & factory() const;
+  LinearAlgebraFactory & factory() const override;
 
   //--- Special functions, intended for library use only ---
 
   /// Return concrete instance / unwrap (const)
-  GenericVector const * instance() const;
+  GenericVector const * instance() const override;
 
   /// Return concrete instance / unwrap (non-const version)
-  GenericVector * instance();
+  GenericVector * instance() override;
 
   //--- Special Vector functions ---
 

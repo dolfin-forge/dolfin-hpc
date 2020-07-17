@@ -30,32 +30,32 @@ public:
   VTKFile(const std::string filename, real const& t);
 
   ///
-  ~VTKFile() = default;
+  ~VTKFile() override = default;
 
   /// Write mesh
-  void operator<<(Mesh& mesh);
+  void operator<<(Mesh& mesh) override;
 
   /// Write mesh function containing integers
-  void operator<<(MeshFunction<int>& meshfunction);
+  void operator<<(MeshFunction<int>& meshfunction) override;
 
   /// Write mesh function containing unsigned integers
-  void operator<<(MeshFunction<uint>& meshfunction);
+  void operator<<(MeshFunction<uint>& meshfunction) override;
 
   /// Write mesh function containing doubles
-  void operator<<(MeshFunction<real>& meshfunction);
+  void operator<<(MeshFunction<real>& meshfunction) override;
 
   /// Write mesh function containing booleans
-  void operator<<(MeshFunction<bool>& meshfunction);
+  void operator<<(MeshFunction<bool>& meshfunction) override;
 
   /// Write function
-  void operator<<(Function& u);
+  void operator<<(Function& u) override;
 
   /// Write list of functions
-  void operator<<(LabelList<Function>& f);
+  void operator<<(LabelList<Function>& f) override;
 
   /// Overload GenericFile
-  void read();
-  void write();
+  void read() override;
+  void write() override;
 
   /// Compute base64 encoded stream for VTK
   template<typename T>

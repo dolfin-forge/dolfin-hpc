@@ -59,13 +59,11 @@ protected:
 
   ///
   Object()
-  {
-  }
+  = default;
 
   ///
   virtual ~Object()
-  {
-  }
+  = default;
 
   ///
   virtual void display() const = 0;

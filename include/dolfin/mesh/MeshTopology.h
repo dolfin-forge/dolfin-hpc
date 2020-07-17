@@ -65,7 +65,7 @@ public:
   MeshTopology(MeshTopology const& other);
 
   /// Destructor
-  ~MeshTopology();
+  ~MeshTopology() override;
 
   /// Swap instances
   friend void swap( MeshTopology& a, MeshTopology& b );

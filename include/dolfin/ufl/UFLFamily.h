@@ -64,7 +64,7 @@ public:
   Family(repr_t const& repr);
 
   ///
-  ~Family();
+  ~Family() override;
 
   ///
   Family::Type type() const;

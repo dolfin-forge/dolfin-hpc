@@ -214,20 +214,14 @@ struct EntityKey
     end();
   }
 
-  uint const size;
-  uint * indices;
-  uint idx;
+  uint const size{0};
+  uint * indices{nullptr};
+  uint idx{0};
 
 private:
 
   ///
-  EntityKey() :
-      size(0),
-      indices(nullptr),
-      idx(0)
-  {
-    error("EntityKey : default constructor disabled");
-  }
+  EntityKey() = delete;
 
 };
 

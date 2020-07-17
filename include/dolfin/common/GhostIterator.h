@@ -27,9 +27,7 @@ public:
   }
 
   ///
-  ~GhostIterator()
-  {
-  }
+  ~GhostIterator() = default;
 
   ///
   GhostIterator & operator++();

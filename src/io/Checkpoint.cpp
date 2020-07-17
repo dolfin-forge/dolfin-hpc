@@ -36,13 +36,6 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::Checkpoint()
-  : n_( 0 )
-{
-}
-
-//-----------------------------------------------------------------------------
-
 void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
                         FunctionMap & func, VectorMap & vec )
 {
@@ -805,21 +798,6 @@ void Checkpoint::close_file( stream_t & file )
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::CheckpointHeader::CheckpointHeader()
-  : time( 0.0 )
-  , pe_size( 0 )
-  , num_meshes( 0 )
-  , num_functions( 0 )
-  , num_vectors( 0 )
-  , offset_psystem( 0 )
-  , offset_mesh( 0 )
-  , offset_functions( 0 )
-  , offset_vectors( 0 )
-{
-}
-
-//-----------------------------------------------------------------------------
-
 void Checkpoint::CheckpointHeader::disp() const
 {
   begin("");
@@ -835,25 +813,6 @@ void Checkpoint::CheckpointHeader::disp() const
   message( "offset_functions: %d", offset_functions );
   message( "offset_vectors:   %d", offset_vectors );
   end();
-}
-
-//-----------------------------------------------------------------------------
-
-Checkpoint::MeshHeader::MeshHeader()
-  : type( CellType::point )
-  , tdim( 0 )
-  , gdim( 0 )
-  , num_vertices( 0 )
-  , num_cells( 0 )
-  , num_entities( 0 )
-  , num_centities( 0 )
-  , num_coords( 0 )
-  , num_ghosts( 0 )
-  #ifdef ENABLE_MPIIO
-  , offsets{ 0, 0, 0, 0 }
-  , displacement{ 0, 0, 0, 0 }
-  #endif
-{
 }
 
 //-----------------------------------------------------------------------------
@@ -884,15 +843,6 @@ void Checkpoint::MeshHeader::disp() const
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::FunctionHeader::FunctionHeader()
- : dim( 0 )
- , size( 0 )
- , offset{ 0, 0, 0 }
-{
-}
-
-//-----------------------------------------------------------------------------
-
 void Checkpoint::FunctionHeader::disp() const
 {
   std::string name_( name, NAME_LENGTH );
@@ -903,13 +853,6 @@ void Checkpoint::FunctionHeader::disp() const
   message( "offset: {%u,%u,%u}", offset[0], offset[1], offset[2] );
   message( "name:   %s", name_.substr( 0, name_.find( '?' ) ).c_str() );
   end();
-}
-
-//-----------------------------------------------------------------------------
-
-Checkpoint::VectorHeader::VectorHeader()
- : offset{ 0, 0, 0 }
-{
 }
 
 //-----------------------------------------------------------------------------

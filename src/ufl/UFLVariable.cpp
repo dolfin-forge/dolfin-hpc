@@ -25,8 +25,7 @@ Label::Label(repr_t const& repr) :
 }
 //-----------------------------------------------------------------------------
 Label::~Label()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Label::operands(std::string const& name) const
@@ -154,8 +153,7 @@ Variable::Variable(repr_t const& repr) :
 }
 //-----------------------------------------------------------------------------
 Variable::~Variable()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Variable::operands(

@@ -30,7 +30,7 @@ public:
   MeshEntity( Mesh & mesh, uint dim, uint index );
 
   /// Destructor
-  ~MeshEntity();
+  ~MeshEntity() = default;
 
   /// Return mesh associated with mesh entity
   Mesh & mesh();

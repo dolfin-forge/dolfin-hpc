@@ -40,7 +40,7 @@ class MeshData
   struct array : public data_array
   {
     using type = Array<MeshValues<V, E> *>; type data;
-    uint size() const { return data.size(); };
+    uint size() const override { return data.size(); };
   };
 
   //---------------------------------------------------------------------------

@@ -20,8 +20,7 @@ CellSurfaceArea::CellSurfaceArea(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 CellSurfaceArea::~CellSurfaceArea()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 ValueArray const& CellSurfaceArea::shape() const

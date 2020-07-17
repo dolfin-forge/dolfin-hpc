@@ -24,20 +24,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Function::Function() :
-    GenericFunction(),
-    TimeDependent(),
-    mesh_(nullptr),
-    discrete_space_(nullptr),
-    element_(nullptr),
-    dofmap_(nullptr),
-    scratch(nullptr),
-    X_(nullptr),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(nullptr),
-    data_cache_(nullptr),
-    cache_mapping_(nullptr)
+Function::Function()
+  : GenericFunction()
+  , TimeDependent()
 {
   // Do nothing
 }

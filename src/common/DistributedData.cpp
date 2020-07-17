@@ -19,14 +19,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 DistributedData::DistributedData( MPI::Communicator & comm )
   : Distributed< DistributedData >( comm )
-  , valid_numbering( false )
   , rank_( Distributed::comm_rank() )
   , pe_size_( Distributed::comm_size() )
-  , range_is_set_( false )
-  , offset_( 0 )
-  , range_size_( 0 )
-  , global_size_( 0 )
-  , finalized_( false )
   , global_()
   , local_()
   , adjacents_()
@@ -34,7 +28,6 @@ DistributedData::DistributedData( MPI::Communicator & comm )
   , ghost_()
   , cached_numbering_()
   , cached_ownership_()
-  , shared_mapping_()
 {
 }
 //-----------------------------------------------------------------------------

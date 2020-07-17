@@ -33,7 +33,7 @@ public:
   MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain);
 
   /// Destructor
-  ~MappedManifold();
+  ~MappedManifold() override = default;
 
   /// Return facet index in the mesh associated with the boundary cell
   uint facet_index(Cell const& boundary_cell);

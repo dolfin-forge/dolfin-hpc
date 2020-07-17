@@ -34,8 +34,7 @@ IndexBase::IndexBase(std::string const& name, repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 IndexBase::~IndexBase()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 type<dolfin::uint> const& IndexBase::count() const
@@ -142,8 +141,7 @@ Index::Index(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Index::~Index()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Index::operands(std::string const& name) const
@@ -209,8 +207,7 @@ FixedIndex::FixedIndex(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 FixedIndex::~FixedIndex()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const FixedIndex::operands(
@@ -314,8 +311,7 @@ MultiIndex::MultiIndex(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 MultiIndex::~MultiIndex()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const MultiIndex::operands(

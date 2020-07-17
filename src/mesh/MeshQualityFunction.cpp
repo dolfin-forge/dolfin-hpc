@@ -13,11 +13,6 @@ MeshQualityFunction::MeshQualityFunction(Mesh& mesh, uint p) :
 }
 
 //-----------------------------------------------------------------------------
-MeshQualityFunction::~MeshQualityFunction()
-{
-}
-
-//-----------------------------------------------------------------------------
 
 }
 

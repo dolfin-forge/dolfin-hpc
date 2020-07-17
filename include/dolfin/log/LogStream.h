@@ -71,7 +71,7 @@ struct __logstream : protected std::streambuf, public std::ostream
     init(ss);
   }
 
-  ~__logstream() = default;
+  ~__logstream() override = default;
 
   ///
   inline void init(stream * ss)
@@ -410,7 +410,7 @@ private:
   }
 
   char W_c_;
-  int  W_i_;
+  uint  W_i_;
   int  W_v_;
   char W_t_[LINEWIDTH];
 

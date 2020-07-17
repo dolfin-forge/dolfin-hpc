@@ -44,10 +44,10 @@ public:
               real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Destructor
-  ~NodeNormal() = default;
+  ~NodeNormal() override = default;
 
   /// Compute the orthogonal basis
-  void compute();
+  void compute() override;
 
   /// Returns the node type
   uint node_type(uint node_id) const;

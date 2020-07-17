@@ -22,19 +22,19 @@ public:
   }
 
   ///
-  ~RealSpaceNumbering()
+  ~RealSpaceNumbering() override
   {
     delete [] dofs_;
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const&, Cell const&) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const&, Cell const&) const override
   {
     std::copy(dofs_, dofs_ + ufc_dofmap.local_dimension(), dofs);
   }
 
   //
-  inline void build()
+  inline void build() override
   {
     DofNumbering::init();
 
@@ -51,19 +51,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint) const
+  inline bool is_shared(uint) const override
   {
     return false;
   }
 
   ///
-  inline bool is_ghost(uint) const
+  inline bool is_ghost(uint) const override
   {
     return false;
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for real space");
   }

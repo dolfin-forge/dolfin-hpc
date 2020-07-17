@@ -30,8 +30,7 @@ RestrictedElement::RestrictedElement(FiniteElementSpace const& element,
 
 //-----------------------------------------------------------------------------
 RestrictedElement::~RestrictedElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& RestrictedElement::family() const

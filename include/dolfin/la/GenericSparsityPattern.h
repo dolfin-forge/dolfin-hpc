@@ -19,14 +19,10 @@ class GenericSparsityPattern
 public:
 
   /// Constructor
-  GenericSparsityPattern()
-  {
-  }
+  GenericSparsityPattern() = default;
 
   /// Destructor
-  virtual ~GenericSparsityPattern()
-  {
-  }
+  virtual ~GenericSparsityPattern() = default;
 
   /// Initialize sparsity pattern for a generic tensor
   virtual void init(uint rank, uint const * dim, uint const * range) = 0;

@@ -25,7 +25,6 @@ public:
   /// Create empty matrix
   Matrix()
     : Variable( "A", "DOLFIN matrix" )
-    , matrix( 0 )
   {
     DefaultFactory factory;
     matrix = factory.createMatrix();
@@ -59,7 +58,7 @@ public:
   }
 
   /// Destructor
-  ~Matrix()
+  ~Matrix() override
   {
     delete matrix;
   }
@@ -68,82 +67,82 @@ public:
 
   /// Initialize zero tensor using sparsity pattern
   /// The tensor is distributed if the sparsity pattern is distributed
-  void init(const GenericSparsityPattern& sparsity_pattern);
+  void init(const GenericSparsityPattern& sparsity_pattern) override;
 
   /// Return copy of tensor
-  Matrix* copy() const;
+  Matrix* copy() const override;
 
   /// Return size of given dimension
-  uint size(uint dim) const;
+  uint size(uint dim) const override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero();
+  void zero() override;
 
   /// Finalize assembly of tensor
-  void apply(FinalizeType finaltype=FINALIZE);
+  void apply(FinalizeType finaltype=FINALIZE) override;
 
   /// Display tensor
-  void disp(uint precision=2) const;
+  void disp(uint precision=2) const override;
 
   //--- Implementation of the GenericMatrix interface ---
 
   /// Initialize M x N matrix and distribute by default
-  void init(uint M, uint N);
+  void init(uint M, uint N) override;
 
   /// Initialize M x N matrix and distribute if specified
-  void init(uint M, uint N, bool distributed);
+  void init(uint M, uint N, bool distributed) override;
 
   /// Get block of values
-  void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const;
+  void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const override;
 
   /// Set block of values
-  void set(const real* block, uint m, const uint* rows, uint n, const uint* cols);
+  void set(const real* block, uint m, const uint* rows, uint n, const uint* cols) override;
 
   /// Add block of values
-  void add(const real* block, uint m, const uint* rows, uint n, const uint* cols);
+  void add(const real* block, uint m, const uint* rows, uint n, const uint* cols) override;
 
   /// Return norm of matrix
-  double norm(std::string norm_type = "frobenius") const;
+  double norm(std::string norm_type = "frobenius") const override;
 
   /// Get non-zero values of given row
-  void getrow(uint row, Array<uint>& columns, Array<real>& values) const;
+  void getrow(uint row, Array<uint>& columns, Array<real>& values) const override;
 
   /// Set values for given row
-  void setrow(uint row, const Array<uint>& columns, const Array<real>& values);
+  void setrow(uint row, const Array<uint>& columns, const Array<real>& values) override;
 
   /// Set given rows to zero
-  void zero(uint m, const uint* rows);
+  void zero(uint m, const uint* rows) override;
 
   /// Set given rows to identity matrix
-  void ident(uint m, const uint* rows);
+  void ident(uint m, const uint* rows) override;
 
   // Matrix-vector product, y = Ax
-  void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
+  void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const override;
 
   /// Multiply matrix by given number
-  const Matrix& operator*= (real a);
+  const Matrix& operator*= (real a) override;
 
   /// Divide matrix by given number
-  const Matrix& operator/= (real a);
+  const Matrix& operator/= (real a) override;
 
   /// Assignment operator
-  const GenericMatrix& operator= (const GenericMatrix& A);
+  const GenericMatrix& operator= (const GenericMatrix& A) override;
 
   /// Get number of non-zeros in the matrix
-  uint nz() const;
+  uint nz() const override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const;
+  LinearAlgebraFactory& factory() const override;
 
   //--- Special functions, intended for library use only ---
 
   /// Return concrete instance / unwrap (const)
-  const GenericMatrix* instance() const;
+  const GenericMatrix* instance() const override;
 
   /// Return concrete instance / unwrap (non-const version)
-  GenericMatrix* instance();
+  GenericMatrix* instance() override;
 
   //--- Special Matrix functions ---
 
@@ -155,7 +154,7 @@ public:
 private:
 
   // Pointer to concrete implementation
-  GenericMatrix* matrix;
+  GenericMatrix* matrix{ 0 };
 
 };
 

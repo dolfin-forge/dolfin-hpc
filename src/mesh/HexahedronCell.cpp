@@ -52,10 +52,6 @@ HexahedronCell::HexahedronCell() :
 {
 }
 //-----------------------------------------------------------------------------
-HexahedronCell::~HexahedronCell()
-{
-}
-//-----------------------------------------------------------------------------
 void HexahedronCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges and faces

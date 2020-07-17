@@ -22,9 +22,4 @@ MeshDependent::MeshDependent(MeshDependent const&) :
 {
 }
 
-//---------------------------------------------------------------------------
-MeshDependent::~MeshDependent()
-{
-}
-
 }

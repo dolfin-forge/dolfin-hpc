@@ -20,18 +20,16 @@ class PETScFactory : public LinearAlgebraFactory
 {
 public:
   /// Destructor
-  virtual ~PETScFactory()
-  {
-  }
+  ~PETScFactory() override = default;
 
   /// Create empty matrix
-  PETScMatrix * createMatrix() const;
+  PETScMatrix * createMatrix() const override;
 
   /// Create empty vector
-  PETScVector * createVector() const;
+  PETScVector * createVector() const override;
 
   /// Create empty sparsity pattern
-  SparsityPattern * createPattern() const;
+  SparsityPattern * createPattern() const override;
 
   /// Return singleton instance
   static PETScFactory & instance()
@@ -41,9 +39,7 @@ public:
 
 private:
   /// Private Constructor
-  PETScFactory()
-  {
-  }
+  PETScFactory() = default;
 
   static PETScFactory factory;
 };

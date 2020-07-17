@@ -18,8 +18,7 @@ QuadratureScheme::QuadratureScheme() :
 
 //-----------------------------------------------------------------------------
 QuadratureScheme::~QuadratureScheme()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& QuadratureScheme::repr() const

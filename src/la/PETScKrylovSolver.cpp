@@ -35,12 +35,6 @@ int monitor( KSP, int iteration, real rnorm, void * )
 PETScKrylovSolver::PETScKrylovSolver( SolverType method, PreconditionerType pc )
   : method( method )
   , pc_petsc( pc )
-  , pc_dolfin( nullptr )
-  , ksp( nullptr )
-  , M( 0 )
-  , N( 0 )
-  , parameters_read( false )
-  , pc_set( false )
 {
   // Do nothing
 }

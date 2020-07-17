@@ -39,16 +39,16 @@ public:
   MeshQualityFunction(Mesh& mesh, uint p);
 
   //
-  ~MeshQualityFunction();
+  ~MeshQualityFunction() override = default;
 
   //
-  uint rank() const;
+  uint rank() const override;
 
   //
-  uint dim(uint i) const;
+  uint dim(uint i) const override;
 
   //
-  void evaluate(real* values, const real* x, const ufc::cell& cell) const;
+  void evaluate(real* values, const real* x, const ufc::cell& cell) const override;
 
 private:
 

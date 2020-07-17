@@ -20,47 +20,45 @@ class GenericVector : public GenericTensor
 {
 public:
   /// Destructor
-  virtual ~GenericVector()
-  {
-  }
+  ~GenericVector() override = default;
 
   //--- Implementation of the GenericTensor interface ---
 
   /// Initialize zero tensor using sparsity pattern
-  inline void init( const GenericSparsityPattern & sparsity_pattern );
+  inline void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
   /// Return copy of tensor
-  virtual GenericVector * copy() const = 0;
+  GenericVector * copy() const override = 0;
 
   /// Return tensor rank (number of dimensions)
-  uint rank() const;
+  uint rank() const override;
 
   /// Return size of given dimension
-  inline uint size( uint dim ) const;
+  inline uint size( uint dim ) const override;
 
   /// Get block of values
   inline void get( real * block,
                    const uint * num_rows,
-                   const uint * const * rows ) const;
+                   const uint * const * rows ) const override;
 
   /// Set block of values
   inline void set( const real * block,
                    const uint * num_rows,
-                   const uint * const * rows );
+                   const uint * const * rows ) override;
 
   /// Add block of values
   inline void add( const real * block,
                    const uint * num_rows,
-                   const uint * const * rows );
+                   const uint * const * rows ) override;
 
   /// Set all entries to zero and keep any sparse structure
-  virtual void zero() = 0;
+  void zero() override = 0;
 
   /// Finalize assembly of tensor
-  virtual void apply( FinalizeType finaltype = FINALIZE ) = 0;
+  void apply( FinalizeType finaltype = FINALIZE ) override = 0;
 
   /// Display tensor
-  virtual void disp( uint precision = 2 ) const = 0;
+  void disp( uint precision = 2 ) const override = 0;
 
   //--- Vector interface ---
 

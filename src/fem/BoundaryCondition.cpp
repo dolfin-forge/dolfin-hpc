@@ -30,9 +30,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::~BoundaryCondition()
-{
-}
+BoundaryCondition::~BoundaryCondition() = default;
 //-----------------------------------------------------------------------------
 void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
                               BilinearForm const& form,

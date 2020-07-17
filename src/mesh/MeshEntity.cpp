@@ -20,10 +20,6 @@ MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
 {
 }
 //-----------------------------------------------------------------------------
-MeshEntity::~MeshEntity()
-{
-}
-//-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
 {
   if( topology_.distributed() )

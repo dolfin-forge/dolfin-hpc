@@ -41,9 +41,7 @@ public:
   }
 
   /// Destructor
-  ~Vertex()
-  {
-  }
+  ~Vertex() = default;
 
   /// Return array of vertex coordinates
   inline real * x();

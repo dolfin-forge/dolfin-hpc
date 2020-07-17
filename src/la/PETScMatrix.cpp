@@ -22,13 +22,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix() :
-    Variable("A", "a sparse matrix"),
-    A(nullptr),
-    AA_sub(nullptr),
-    is_distributed_(false),
-    rstart_(0),
-    rend_(0)
+PETScMatrix::PETScMatrix()
+  : Variable("A", "a sparse matrix")
 {
 }
 //-----------------------------------------------------------------------------

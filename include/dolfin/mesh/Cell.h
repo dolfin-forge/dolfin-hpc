@@ -36,9 +36,7 @@ public:
   }
 
   /// Destructor
-  ~Cell()
-  {
-  }
+  ~Cell() = default;
 
   /// Return type of cell
   inline CellType::Type type() const;

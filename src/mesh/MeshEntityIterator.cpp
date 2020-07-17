@@ -23,10 +23,6 @@ MeshEntityIterator::MeshEntityIterator(MeshEntity& entity, uint dim) :
 {
 }
 //-----------------------------------------------------------------------------
-MeshEntityIterator::~MeshEntityIterator()
-{
-}
-//-----------------------------------------------------------------------------
 MeshEntityIterator::MeshEntityIterator(MeshEntityIterator& other) :
     entity_(other.entity_.mesh(), 0, 0),
     pos_(0),

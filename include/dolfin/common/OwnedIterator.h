@@ -33,9 +33,7 @@ public:
   }
 
   ///
-  ~OwnedIterator()
-  {
-  }
+  ~OwnedIterator() = default;
 
   ///
   OwnedIterator & operator++();

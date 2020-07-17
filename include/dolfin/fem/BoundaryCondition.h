@@ -61,7 +61,7 @@ public:
   std::string const& type() const;
 
   ///
-  Mesh& mesh() const;
+  Mesh& mesh() const override;
 
   // Sub domain
   SubDomain const& sub_domain() const;
@@ -85,12 +85,12 @@ protected:
 public:
 
   /// Destructor
-  virtual ~BoundaryCondition();
+  ~BoundaryCondition() override;
 
 private:
 
   // Default constructor
-  BoundaryCondition();
+  BoundaryCondition() = delete;
 
   // String identifier for the boundary condition type.
   std::string const type_;

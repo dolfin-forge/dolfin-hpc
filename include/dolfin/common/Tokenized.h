@@ -25,14 +25,10 @@ public:
 
 protected:
   ///
-  Tokenized()
-  {
-  }
+  Tokenized() = default;
 
   ///
-  virtual ~Tokenized()
-  {
-  }
+  virtual ~Tokenized() = default;
 
   ///
   virtual void update_token() = 0;

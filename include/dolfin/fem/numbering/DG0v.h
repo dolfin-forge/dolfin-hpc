@@ -36,13 +36,11 @@ public:
   }
 
   ///
-  ~DG0vNumbering()
-  {
-  }
+  ~DG0vNumbering() override = default;
 
   ///
   inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
-                            Cell const&) const
+                            Cell const&) const override
   {
     std::fill_n(dofs, value_size_, value_size_ * ufc_cell.index);
     for (uint k = 1; k < value_size_; ++k)
@@ -52,7 +50,7 @@ public:
   }
 
   ///
-  void build()
+  void build() override
   {
     DofNumbering::init();
     //---
@@ -97,19 +95,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint index) const
+  inline bool is_shared(uint index) const override
   {
     return (shared_.count(index) > 0);
   }
 
   ///
-  inline bool is_ghost(uint index) const
+  inline bool is_ghost(uint index) const override
   {
     return (ghosts_.count(index) > 0);
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for DG0 vector");
   }

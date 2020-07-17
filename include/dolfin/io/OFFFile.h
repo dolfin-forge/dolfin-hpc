@@ -33,10 +33,10 @@ public:
   OFFFile(std::string const filename);
 
   ///
-  ~OFFFile() = default;
+  ~OFFFile() override = default;
 
   /// Input
-  void operator>>(Mesh& mesh);
+  void operator>>(Mesh& mesh) override;
 
 private:
 

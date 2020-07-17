@@ -59,11 +59,6 @@ VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) 
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal::~VertexNormal()
-{
-}
-
-//-----------------------------------------------------------------------------
 VertexNormal& VertexNormal::operator=(VertexNormal&)
 {
   return *this;

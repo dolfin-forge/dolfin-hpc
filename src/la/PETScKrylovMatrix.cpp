@@ -31,12 +31,6 @@ namespace dolfin
 }
 
 //-----------------------------------------------------------------------------
-PETScKrylovMatrix::PETScKrylovMatrix()
-  : A( nullptr )
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 PETScKrylovMatrix::PETScKrylovMatrix(const PETScVector& x, const PETScVector& y)
   : A( nullptr )
 {

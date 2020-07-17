@@ -52,12 +52,6 @@ int SubSystemsManager::PETSc::sema  = 0;
 int SubSystemsManager::Zoltan::sema = 0;
 
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager() :
-    count_(0),
-    state_(0)
-{
-}
-//-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager(SubSystemsManager const&) :
     count_(0),
     state_(0)

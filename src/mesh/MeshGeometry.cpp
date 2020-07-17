@@ -300,7 +300,7 @@ void MeshGeometry::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-MeshGeometry const& MeshGeometry::operator>>(Array<real>& A) const
+MeshGeometry const& MeshGeometry::operator>>(Array<real>&) const
 {
   error( "MeshGeometry::operator>> unimplemented / deprecated." );
   // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);

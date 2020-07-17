@@ -49,11 +49,11 @@ namespace dolfin
     // Create dense copy of virtual matrix
     real copyToDense(const PETScKrylovMatrix& A);
 
-    KSP ksp;
+    KSP ksp{ nullptr };
 
-    Mat B;
-    int* idxm;
-    int* idxn;
+    Mat B{ nullptr };
+    int* idxm{ nullptr };
+    int* idxn{ nullptr };
 
     PETScVector e;
     PETScVector y;

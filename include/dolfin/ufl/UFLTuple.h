@@ -29,15 +29,15 @@ public:
   Tuple(repr_t const & repr);
 
   ///
-  ~Tuple();
+  ~Tuple() override;
 
   ///
-  virtual std::vector<Class const*> const operands(
-      std::string const& name) const;
+  std::vector<Class const*> const operands(
+      std::string const& name) const override;
 
   ///
-  virtual std::vector<std::vector<Class const *> > const level_operands(
-      std::vector<std::vector<Class const *> > const& operands) const;
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const override;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -45,33 +45,33 @@ public:
   virtual Tuple const * create(Object::repr_t const& repr) const;
 
   ///
-  std::vector<Expression const *> const operands() const;
+  std::vector<Expression const *> const operands() const override;
 
   ///Return the tensor shape of the expression.
-  virtual ValueArray const shape() const;
+  ValueArray const shape() const override;
 
   ///Return a tuple with the free indices (unassigned) of the expression.
-  virtual tuple<Index> const free_indices() const;
+  tuple<Index> const free_indices() const override;
 
   ///Return a dict with the free or repeated indices in the expression
   ///as keys and the dimensions of those indices as values.
-  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  dict<IndexBase, type<dolfin::uint> > const index_dimensions() const override;
 
   ///Evaluate the expression tree at the given quadrature_points
-  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+  std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
       ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-      const double * const * coordinates) const;
+      const double * const * coordinates) const override;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

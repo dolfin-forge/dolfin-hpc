@@ -16,10 +16,10 @@ namespace dolfin
     public:
 
     /// Constructor
-    LinearAlgebraFactory() {}
+    LinearAlgebraFactory() = default;
 
     /// Destructor
-    virtual ~LinearAlgebraFactory() {}
+    virtual ~LinearAlgebraFactory() = default;
 
     /// Create empty matrix
     virtual dolfin::GenericMatrix* createMatrix() const = 0;

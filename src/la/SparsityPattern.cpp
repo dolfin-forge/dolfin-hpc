@@ -32,23 +32,6 @@ SparsityPattern::SparsityPattern(uint rank, uint const * dim,
   init(rank, dim, range);
 }
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern() :
-    rank_(0),
-    dim_(nullptr),
-    range_(nullptr),
-    local_range_(nullptr),
-    initialized_(false),
-    finalized_(false),
-    blocked_(false),
-    distributed_(false),
-    d_entries_(nullptr),
-    d_count_(0),
-    o_entries_(nullptr),
-    o_count_(0)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 SparsityPattern::~SparsityPattern()
 {
   clear();

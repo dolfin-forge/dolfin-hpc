@@ -14,15 +14,15 @@ class Time
 
 public:
 
-  typedef std::pair<real, real> Interval;
+  using Interval = std::pair<real, real>;
 
   Time( real T_start = 0.0, real T_end = 0.0, real T_current = 0.0 );
 
   Time(Interval I);
 
-  Time(Time const& other);
+  Time(Time const& other) = default;
 
-  ~Time();
+  ~Time() = default;
 
   /// Operators
   inline operator real&() { return t_; }

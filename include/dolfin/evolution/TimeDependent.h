@@ -24,10 +24,10 @@ public:
   TimeDependent(Time const& time);
 
   /// Copy constructor
-  TimeDependent(TimeDependent const& other);
+  TimeDependent(TimeDependent const& other) = default;
 
   /// Destructor
-  ~TimeDependent();
+  ~TimeDependent() = default;
 
   ///
   TimeDependent& swap(TimeDependent& other);

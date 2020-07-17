@@ -23,18 +23,6 @@ TimeDependent::TimeDependent(Time const& time) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-TimeDependent::TimeDependent(TimeDependent const& other) :
-    clock_(other.clock_),
-    t_(other.t_)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-TimeDependent::~TimeDependent()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 TimeDependent& TimeDependent::swap(TimeDependent& other)
 {
   std::swap(clock_, other.clock_);

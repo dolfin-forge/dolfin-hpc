@@ -68,7 +68,7 @@ private:
   uint max_local_dimension_;
 
   /// Map of G dofs to the offset and count in the arrays
-  typedef _ordered_map<uint, uint> OffsetMap;
+  using OffsetMap = _ordered_map<uint, uint>;
   OffsetMap Goffsets_;
   uint * Gindices_;
   real * Gxcoords_;

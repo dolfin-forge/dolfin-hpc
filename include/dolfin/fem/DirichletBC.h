@@ -81,7 +81,7 @@ public:
               const SubSystem& sub_system, BCMethod method = topological);
 
   /// Destructor
-  ~DirichletBC();
+  ~DirichletBC() = default;
 
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);

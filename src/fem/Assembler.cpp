@@ -80,10 +80,11 @@ void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,
                       bool reset_tensor);
 
 //-----------------------------------------------------------------------------
-void assemble(GenericTensor& A, Form& form, bool reset_tensor)
+void assemble( GenericTensor & A, Form & form, bool reset_tensor )
 {
-OPENMP_PRAGMA( parallel )
-  assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
+  OPENMP_PRAGMA( parallel )
+  assemble( A, form, form.coefficients(), form.dofmaps(),
+            nullptr, nullptr, nullptr, reset_tensor );
 }
 //-----------------------------------------------------------------------------
 void assemble(GenericTensor& A, Form& form,
@@ -164,9 +165,9 @@ OPENMP_PRAGMA( master )
 
 
     // Update all ghost degrees of freedom
-    for (uint i = 0; i < coefficients.size(); ++i)
+    for ( Coefficient * coeff : coefficients )
     {
-      coefficients[i]->sync();
+      coeff->sync();
     }
   }
 OPENMP_PRAGMA( flush )

@@ -37,15 +37,15 @@ class DofMapCache
   };
 
 #if __SUNPRO_CC
-  typedef _ordered_map<std::string, token_t > container_t;
-  typedef std::pair<std::string, token_t> item_t;
-  typedef _ordered_map<DofMap *, std::string > rlist_t;
-  typedef std::pair<DofMap *, std::string> ritem_t;
+  using container_t = _ordered_map< std::string, token_t >;
+  using item_t      = std::pair< std::string, token_t >;
+  using rlist_t     = _ordered_map< DofMap *, std::string >;
+  using ritem_t     = std::pair< DofMap *, std::string >;
 #else
-  typedef _ordered_map<std::string const, token_t> container_t;
-  typedef std::pair<std::string const, token_t> item_t;
-  typedef _ordered_map<DofMap *, std::string const> rlist_t;
-  typedef std::pair<DofMap *, std::string const> ritem_t;
+  using container_t = _ordered_map< std::string const, token_t >;
+  using item_t      = std::pair< std::string const, token_t >;
+  using rlist_t     = _ordered_map< DofMap *, std::string const >;
+  using ritem_t     = std::pair< DofMap *, std::string const >;
 #endif
 
 public:

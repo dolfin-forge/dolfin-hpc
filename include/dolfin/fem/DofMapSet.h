@@ -6,14 +6,12 @@
 #ifndef __DOLFIN_DOF_MAP_SET_H
 #define __DOLFIN_DOF_MAP_SET_H
 
-#include <dolfin/fem/DofMap.h>
-
 #include <dolfin/common/types.h>
+#include <dolfin/fem/DofMap.h>
 
 #include <ufc.h>
 
 #include <string>
-#include <vector>
 
 namespace dolfin
 {
@@ -57,7 +55,7 @@ private:
   void ReleaseAll();
 
   // Array of dof maps for current form
-  std::vector<DofMap*> dof_map_set;
+  Array<DofMap*> dof_map_set;
 
   // Mesh
   Mesh const& mesh_;

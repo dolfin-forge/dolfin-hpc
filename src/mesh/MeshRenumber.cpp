@@ -116,10 +116,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         {
           /// @todo randomness may be harmful
           uint const vote = std::rand();
-          vdata.get_common_adj(num_entity_vertices, vertices.data(), adjs);
+          vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)
           {
-            vdata.get_global(num_entity_vertices, vertices, key.indices);
+            vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
             // NOTE: it is important to use set to copy global indices as sort
             //       is called to store indices in increasing order.
             key.set(key.indices, entity_index);

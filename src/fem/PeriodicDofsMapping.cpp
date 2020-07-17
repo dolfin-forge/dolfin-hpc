@@ -128,12 +128,10 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
 
   Array<MappedManifold *> const& manifold_list = mesh.periodic_mappings();
   uint totalcardGnI = 0;
-  for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
-      it != manifold_list.end(); ++it)
+  for ( MappedManifold * manifold : manifold_list )
   {
-   MappedManifold& manifold = *(*it);
-   _set<uint> const& setG = manifold.Gfacets();
-   _set<uint> const& setI = manifold.Ifacets();
+   _set<uint> const& setG = manifold->Gfacets();
+   _set<uint> const& setI = manifold->Ifacets();
    totalcardGnI += setG.size() - setI.size();
   }
 
@@ -193,9 +191,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     Point xG;
 
     //--- Exclude dofs located in I
-    for (_set<uint>::const_iterator it = setI.begin(); it != setI.end(); ++it)
+    for ( uint const & I : setI )
     {
-      Facet facet(mesh, *it);
+      Facet facet(mesh, I);
       Cell cell(mesh, facet.entities(tdim)[0]);
       uint facet_posI = cell.index(facet);
       ufc_cell0.update(cell);
@@ -217,9 +215,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     }
 
     //--- Collect dofs located in G to initialize data structure
-    for (_set<uint>::const_iterator it = setG.begin(); it != setG.end(); ++it)
+    for ( uint const & G : setG )
     {
-      Facet facet(mesh, *it);
+      Facet facet(mesh, G);
       Cell cell(mesh, facet.entities(tdim)[0]);
       uint facet_posG = cell.index(facet);
       ufc_cell0.update(cell);
@@ -256,9 +254,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     }
 
     //--- Collect dofs located in H and find corresponding local G facet
-    for (_set<uint>::const_iterator it = setH.begin(); it != setH.end(); ++it)
+    for ( uint const & H : setH )
     {
-      Facet facetH(mesh, *it);
+      Facet facetH(mesh, H);
       Cell cellH(mesh, facetH.entities(tdim)[0]);
       uint facet_posH = cellH.index(facetH);
       ufc_cell1.update(cellH);
@@ -284,10 +282,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
           {
             Hdofs_.insert(dofH);
             //message("dofH %8d : %1d facets", dofH, matching_facets.size() );
-            for (Array<uint>::iterator it = matching_facets.begin();
-                 it != matching_facets.end(); ++it)
+            for ( uint & match : matching_facets )
             {
-              Cell cbG(boundary, *it);
+              Cell cbG(boundary, match);
               //FIXME: Bug in intersect functions.
               //if(!onEntity(xG, cbG))
               //{
@@ -313,11 +310,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
                 uint iiG = itG->second;
                 dolfin_assert(dofG == Gdofs_indices[iiG]);
                 bool insert = true;
-                Array<uint> const& Hidx = Hdofs_indices[iiG];
-                for(Array<uint>::const_iterator it = Hidx.begin();
-                it != Hidx.end(); ++it)
+                for ( uint const & Hidx : Hdofs_indices[iiG] )
                 {
-                  if(*it == dofH)
+                  if(Hidx == dofH)
                   {
                     insert = false;
                     break;
@@ -390,10 +385,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
               u_sendbuff.push_back(0); // Reserve matching dofs
 
               _set<uint> matching;
-              for (Array<uint>::iterator it = matching_facets.begin();
-                   it != matching_facets.end(); ++it)
+              for ( uint & match : matching_facets )
               {
-                Cell cm(manifold, *it);
+                Cell cm(manifold, match);
                 //FIXME: Bug in intersect functions.
                 //if(!onEntity(xG, cm))
                 //{
@@ -669,11 +663,10 @@ void PeriodicDofsMapping::disp() const
   end();
   //
   uint maxgdim = Space::MAX_DIMENSION;
-  for (OffsetMap::const_iterator it = Goffsets_.begin(); it != Goffsets_.end();
-       ++it)
+  for ( OffsetMap::value_type const & offset : Goffsets_ )
   {
-    uint dof = it->first;
-    uint iid = it->second;
+    uint dof = offset.first;
+    uint iid = offset.second;
     std::stringstream ss;
     if (dofmap_.is_ghost(dof))
     {

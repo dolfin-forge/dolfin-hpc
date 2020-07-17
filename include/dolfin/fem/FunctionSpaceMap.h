@@ -29,10 +29,10 @@ class FunctionSpaceMap
 
 public:
   ///
-  FunctionSpaceMap();
+  FunctionSpaceMap() = default;
 
   ///
-  ~FunctionSpaceMap();
+  ~FunctionSpaceMap() = default;
 
   ///
   bool has( std::string const & label ) const;

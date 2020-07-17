@@ -56,8 +56,8 @@ struct NodeData
   }
 };
 
-typedef _map<uint, FacetData *>::iterator FacetMapIterator;
-typedef _map<uint, NodeData *>::iterator  NodeMapIterator;
+using FacetMapIterator = _map< uint, FacetData * >::iterator;
+using NodeMapIterator  = _map< uint, NodeData * >::iterator;
 
 //-----------------------------------------------------------------------------
 NodeNormal::NodeNormal( Mesh & mesh, Type w, real alpha )
@@ -79,11 +79,6 @@ NodeNormal::NodeNormal( Mesh & mesh,
   , subdomain_( &subdomain )
   , alpha_max_( alpha )
   , type_( w )
-{
-}
-
-//-----------------------------------------------------------------------------
-NodeNormal::~NodeNormal()
 {
 }
 
@@ -307,15 +302,9 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // subdomain has a hole in the interior of the facet.
 
     // Exchange values
-    int maxsendcount[2] = { 0, 0 };
-    int maxrecvcount[2] = { 0, 0 };
-
-    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
-    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
-    {
-      maxsendcount[0] = std::max( maxsendcount[0], int(u_sendbuf[*it].size()) );
-      maxsendcount[1] = std::max( maxsendcount[1], int(r_sendbuf[*it].size()) );
-    }
+    uint maxsendcount[2] = { max_array_size( u_sendbuf ),
+                             max_array_size( r_sendbuf ) };
+    uint maxrecvcount[2] = { 0, 0 };
 
     MPI::all_reduce<MPI::max>( maxsendcount, maxrecvcount, 2 );
 
@@ -362,11 +351,11 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
           std::copy(&r_recvbuf[iir+1], &r_recvbuf[iir+1] + gdim, &data->normal[0]);
 
           // Add facet to the nodes' list of adjacent facets
-          for(uint n = 0; n < valid.size(); ++n)
+          for ( NodeMapIterator & valid_it : valid )
           {
-            data->nodes.insert(valid[n]->first);
-            valid[n]->second->facets.push_back(data);
-            valid[n]->second->adjs.push_back(src);
+            data->nodes.insert(valid_it->first);
+            valid_it->second->facets.push_back(data);
+            valid_it->second->adjs.push_back(src);
           }
 
           // Add facet
@@ -423,9 +412,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // Collect facets data
     Array<real> N;
     Array<real> W;
-    for(uint i = 0; i < n_data->facets.size(); ++i)
+    for ( FacetData * f_data : n_data->facets )
     {
-      FacetData * f_data = n_data->facets[i];
       // Ghosted facets data only contains ghosted nodes
       dolfin_assert(f_data->nodes.size() <= num_facet_nodes);
       N.insert(N.end(), &f_data->normal[0], &f_data->normal[0] + gdim);
@@ -443,11 +431,10 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     n_data->node_type = node_type;// Useless if node data is not reused
     dolfin_assert(n_data->node_type > 0);
     // If the node is shared, prepare for synchronization with adjacents
-    for(Array<uint>::const_iterator ait = n_data->adjs.begin();
-    ait != n_data->adjs.end(); ++ait)
+    for ( uint const & adj : n_data->adjs )
     {
-      u_sendbuf[*ait].push_back(node_id);
-      u_sendbuf[*ait].push_back(node_type);
+      u_sendbuf[adj].push_back(node_id);
+      u_sendbuf[adj].push_back(node_type);
     }
 
     // Copy dof indices to array for vector block set.
@@ -484,16 +471,15 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   }
 
   // Cleanup facets and nodes data
-  for (FacetMapIterator it = facets_data.begin();
-  it != facets_data.end(); ++it)
+  for ( std::pair< uint, FacetData * > const & f_data : facets_data )
   {
-    delete it->second;
+    delete f_data.second;
   }
   facets_data.clear();
-  for (NodeMapIterator it = nodes_data.begin();
-  it != nodes_data.end(); ++it)
+
+  for ( std::pair< uint, NodeData * > const & n_data : nodes_data )
   {
-    delete it->second;
+    delete n_data.second;
   }
   nodes_data.clear();
 
@@ -502,13 +488,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   {
 #if HAVE_MPI
     uint const u_size = 2;
-    int u_maxsendcount = 0;
+    int u_maxsendcount = max_array_size( u_sendbuf );
     int u_maxrecvcount = 0;
-    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
-    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
-    {
-      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
-    }
     MPI::all_reduce<MPI::max>( u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
 

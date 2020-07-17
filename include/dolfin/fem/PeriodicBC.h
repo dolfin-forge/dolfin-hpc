@@ -48,7 +48,7 @@ public:
              SubSystem const& sub_system);
 
   /// Destructor
-  ~PeriodicBC();
+  ~PeriodicBC() = default;
 
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);

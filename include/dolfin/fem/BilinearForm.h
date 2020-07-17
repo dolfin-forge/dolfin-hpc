@@ -20,7 +20,7 @@ class BilinearForm : public Form
 {
 public:
 
-  typedef Form::Coefficients Coefficients;
+  using Coefficients = Form::Coefficients;
 
   static inline std::string name() { return "BilinearForm"; }
 

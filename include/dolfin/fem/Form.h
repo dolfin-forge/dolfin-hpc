@@ -32,7 +32,7 @@ public:
   Form( Mesh & mesh );
 
   /// Destructor
-  virtual ~Form();
+  virtual ~Form() = default;
 
   /// Return array of coefficients
   virtual Array< Coefficient * > const & coefficients() const = 0;

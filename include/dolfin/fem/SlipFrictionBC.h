@@ -28,7 +28,7 @@ public:
                  SubSystem const& sub_system);
 
   /// Destructor
-  ~SlipFrictionBC();
+  ~SlipFrictionBC() = default;
 
   ///
   BoundaryNormal& normal();

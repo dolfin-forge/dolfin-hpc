@@ -20,11 +20,6 @@ Form::Form(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-Form::~Form()
-{
-}
-
-//-----------------------------------------------------------------------------
 bool Form::check(Array<Coefficient*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients

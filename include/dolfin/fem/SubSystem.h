@@ -22,7 +22,7 @@ class SubSystem
 {
 public:
   /// Create empty sub system (no sub systems)
-  SubSystem();
+  SubSystem() = default;
 
   /// Create given sub system (one level)
   SubSystem( uint sub_system );

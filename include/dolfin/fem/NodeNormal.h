@@ -44,7 +44,7 @@ public:
               real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Destructor
-  ~NodeNormal();
+  ~NodeNormal() = default;
 
   /// Compute the orthogonal basis
   void compute();

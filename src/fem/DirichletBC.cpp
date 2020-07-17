@@ -47,10 +47,6 @@ DirichletBC::DirichletBC(Coefficient& g, Mesh& mesh,
 {
 }
 //-----------------------------------------------------------------------------
-DirichletBC::~DirichletBC()
-{
-}
-//-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         BilinearForm const& form)
 {

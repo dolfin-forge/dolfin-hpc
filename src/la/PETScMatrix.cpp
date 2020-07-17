@@ -312,12 +312,12 @@ void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
   mapping_.clear();
 
   uint i = 0;
-  for (_ordered_set<uint>::const_iterator it = rows.begin(); it != rows.end(); ++it)
+  for ( uint const & row : rows )
   {
-    if (*it < static_cast<uint>(rstart_) && *it >= static_cast<uint>(rend_))
+    if (row < static_cast<uint>(rstart_) && row >= static_cast<uint>(rend_))
     {
-      _rows[i] = *it;
-      mapping_[*it] = i++;
+      _rows[i] = row;
+      mapping_[row] = i++;
     }
   }
 
@@ -367,7 +367,7 @@ void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
 //-----------------------------------------------------------------------------
 void PETScMatrix::zero(uint m, uint const* rows)
 {
-  IS is = 0;
+  IS is = nullptr;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
                   reinterpret_cast<int*>(const_cast<uint*>(rows)),
@@ -388,7 +388,7 @@ void PETScMatrix::zero(uint m, uint const* rows)
 //-----------------------------------------------------------------------------
 void PETScMatrix::ident(uint m, uint const* rows)
 {
-  IS is = 0;
+  IS is = nullptr;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
                   reinterpret_cast<int*>(const_cast<uint*>(rows)),

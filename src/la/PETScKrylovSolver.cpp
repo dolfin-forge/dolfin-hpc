@@ -35,8 +35,8 @@ int monitor( KSP, int iteration, real rnorm, void * )
 PETScKrylovSolver::PETScKrylovSolver( SolverType method, PreconditionerType pc )
   : method( method )
   , pc_petsc( pc )
-  , pc_dolfin( 0 )
-  , ksp( 0 )
+  , pc_dolfin( nullptr )
+  , ksp( nullptr )
   , M( 0 )
   , N( 0 )
   , parameters_read( false )
@@ -50,7 +50,7 @@ PETScKrylovSolver::PETScKrylovSolver( SolverType            method,
   : method( method )
   , pc_petsc( default_pc )
   , pc_dolfin( &preconditioner )
-  , ksp( 0 )
+  , ksp( nullptr )
   , M( 0 )
   , N( 0 )
   , parameters_read( false )
@@ -334,7 +334,7 @@ void PETScKrylovSolver::init( uint M, uint N )
   this->N = N;
 
   // Destroy old solver environment if necessary
-  if ( ksp != 0 )
+  if ( ksp != nullptr )
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     KSPDestroy( &ksp );
 #else

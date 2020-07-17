@@ -20,7 +20,10 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 PETScLUSolver::PETScLUSolver()
-  : ksp(0), B(0), idxm(0), idxn(0)
+  : ksp( nullptr )
+  , B( nullptr )
+  , idxm( nullptr )
+  , idxn( nullptr )
 {
   // Set up solver environment to use only preconditioner
 #ifdef HAVE_MPI

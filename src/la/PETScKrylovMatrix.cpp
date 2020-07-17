@@ -21,7 +21,7 @@ namespace dolfin
 
   int usermult(Mat A, Vec x, Vec y)
   {
-    void* ctx = 0;
+    void* ctx = nullptr;
     MatShellGetContext(A, &ctx);
     PETScVector xx(x), yy(y);
     ((PETScKrylovMatrix*) ctx)->mult(xx, yy);
@@ -31,13 +31,14 @@ namespace dolfin
 }
 
 //-----------------------------------------------------------------------------
-PETScKrylovMatrix::PETScKrylovMatrix(): A(0)
+PETScKrylovMatrix::PETScKrylovMatrix()
+  : A( nullptr )
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScKrylovMatrix::PETScKrylovMatrix(const PETScVector& x, const PETScVector& y)
-  : A(0)
+  : A( nullptr )
 {
   // Create PETSc matrix
   init(x, y);
@@ -173,12 +174,12 @@ LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
 
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
-  MatType type = 0;
+  MatType type = nullptr;
 #else
-  const MatType type = 0;
+  const MatType type = nullptr;
 #endif
 #else
-  MatType type = 0;
+  MatType type = nullptr;
 #endif
   MatGetType(A.mat(), &type);
   int m = A.size(0);

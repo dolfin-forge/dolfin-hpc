@@ -177,9 +177,9 @@ void DistributedData::finalize()
       if (global_.size() > 0)
       {
         cached_numbering_ = Array<uint>( global_.size() );
-        for (GhostSet::iterator it = global_.begin(); it != global_.end(); ++it)
+        for ( IndexMapping::value_type const & index_pair : global_ )
         {
-          cached_numbering_[it->first] = it->second;
+          cached_numbering_[index_pair.first] = index_pair.second;
         }
         global_.clear();
       }
@@ -558,13 +558,14 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   // Update numbering
   dolfin_assert(global_.size() == 0);
   dolfin_assert(not cached_numbering_.empty());
-  for (IndexMapping::iterator it = local_.begin(); it != local_.end(); ++it)
+
+  for ( IndexMapping::value_type & index_pair : local_ )
   {
-    uint const new_local_index = mapping[it->second];
+    uint const new_local_index = mapping[index_pair.second];
     // map new local index to global index
-    cached_numbering_[new_local_index] = it->first;
+    cached_numbering_[new_local_index] = index_pair.first;
     // map global index to new local index
-    it->second = new_local_index;
+    index_pair.second = new_local_index;
   }
 
   // Update shared entities
@@ -721,34 +722,32 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   adjacents_ = adjs;
 
   // Update shared entities ownership
-  for (SharedSet::iterator it = shared_.begin(); it != shared_.end(); ++it)
+  for ( SharedSet::value_type & index_pair : shared_ )
   {
     // Update adjacent
     _set<uint> adj;
-    for (_set<uint>::const_iterator a = it->second.begin();
-         a != it->second.end(); ++a)
-    {
-      adj.insert(mapping[*a]);
-    }
-    it->second = adj;
+    for ( uint const & id : index_pair.second )
+      adj.insert( mapping[id] );
+
+    index_pair.second = adj;
 
     // Update cached owner
     if ( not cached_ownership_.empty() )
     {
-      cached_ownership_[it->first] = rank_;
+      cached_ownership_[index_pair.first] = rank_;
     }
   }
 
   // Update ghost entities ownership
-  for (GhostSet::iterator it = ghost_.begin(); it != ghost_.end(); ++it)
+  for ( GhostSet::value_type & index_pair : local_ )
   {
     // Update owner
-    it->second = mapping[it->second];
+    index_pair.second = mapping[index_pair.second];
 
     // Update cached owner
     if ( not cached_ownership_.empty() )
     {
-      cached_ownership_[it->first] = mapping[it->second];
+      cached_ownership_[index_pair.first] = mapping[index_pair.second];
     }
   }
 
@@ -761,7 +760,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   }
 }
 //-----------------------------------------------------------------------------
-void DistributedData::get_common_adj(uint n, uint const indices[],
+void DistributedData::get_common_adj(uint n, Array< uint > const & indices,
                                      _set<uint>& adjs) const
 {
   if (n == 0)

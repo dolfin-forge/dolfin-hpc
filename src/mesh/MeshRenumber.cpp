@@ -119,7 +119,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           vdata.get_common_adj(num_entity_vertices, vertices.data(), adjs);
           if (adjs.size() > 0)
           {
-            vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
+            vdata.get_global(num_entity_vertices, vertices, key.indices);
             // NOTE: it is important to use set to copy global indices as sort
             //       is called to store indices in increasing order.
             key.set(key.indices, entity_index);

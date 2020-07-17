@@ -9,7 +9,7 @@
 #ifdef HAVE_CHECK
 #include <check.h>
 #else
-typedef void Suite;
+using Suite = void;
 #endif
 
 #include <dolfin/common/Test.h>

@@ -23,10 +23,10 @@ public:
   SharedMapping( DistributedData const & data );
 
   ///
-  SharedMapping( SharedMapping const & other );
+  SharedMapping( SharedMapping const & other ) = default;
 
   ///
-  ~SharedMapping();
+  ~SharedMapping() = default;
 
   /// Do not allow assignment
   SharedMapping & operator=( SharedMapping const & other ) = delete;

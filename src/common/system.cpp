@@ -8,8 +8,8 @@
 
 #include <sstream>
 #include <iomanip>
-#include <limits.h>
-#include <stdlib.h>
+#include <climits>
+#include <cstdlib>
 #include <glob.h>
 #include <unistd.h>
 #include <sys/stat.h>

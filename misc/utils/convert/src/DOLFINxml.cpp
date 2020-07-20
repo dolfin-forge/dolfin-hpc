@@ -102,6 +102,21 @@ void DOLFINxml::end_element(const xmlChar *name) {
   }
 }
 
+template <>
+  const char * DOLFINxml::read(const xmlChar *s) {
+  return reinterpret_cast<const char *>(s);
+}
+
+template <>
+  double DOLFINxml::read(const xmlChar *s) {
+  return strtod(reinterpret_cast<const char *>(s), NULL);
+}
+
+template <>
+  uint32_t DOLFINxml::read(const xmlChar *s) {
+  return (uint32_t) atoi(reinterpret_cast<const char *>(s));
+}
+
 /*
  * SAX callback functions
  */

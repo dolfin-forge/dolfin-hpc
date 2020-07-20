@@ -41,21 +41,6 @@ private:
 
   template <class T> T read(const xmlChar * s) {return T();};
 
-  template <>
-   const char * read(const xmlChar *s) {
-    return reinterpret_cast<const char *>(s);
-  }
-
-  template <>
-  double read(const xmlChar *s) {
-    return strtod(reinterpret_cast<const char *>(s), NULL);
-  }
-
-  template <>
-  uint32_t read(const xmlChar *s) {
-    return (uint32_t) atoi(reinterpret_cast<const char *>(s));
-  }
-
   template <class T>
   T parse(const xmlChar* name, const xmlChar** attrs, const char * label) {
      if (attrs == NULL) {
@@ -73,6 +58,11 @@ private:
      return T();
   }
 };
+
+
+template <> const char * DOLFINxml::read(const xmlChar *s);
+template <> double DOLFINxml::read(const xmlChar *s);
+template <> uint32_t DOLFINxml::read(const xmlChar *s);
 
 /*
  * SAX callback functions

@@ -8,7 +8,7 @@
 
 #include <DOLFINxml.h>
 #include <iostream>
-
+#include <cstring>
 
 void DOLFINxml::load_mesh(std::string& filename) {
   std::cout << "Reading DOLFIN XML \n";

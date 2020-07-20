@@ -469,13 +469,13 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   }
 
   // Cleanup facets and nodes data
-  for ( std::pair< uint const, FacetData * > const & f_data : facets_data )
+  for ( std::pair< uint, FacetData * > const & f_data : facets_data )
   {
     delete f_data.second;
   }
   facets_data.clear();
 
-  for ( std::pair< uint const, NodeData * > const & n_data : nodes_data )
+  for ( std::pair< uint, NodeData * > const & n_data : nodes_data )
   {
     delete n_data.second;
   }

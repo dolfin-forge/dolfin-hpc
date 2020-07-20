@@ -150,7 +150,7 @@ void SpaceTimeFunction::save(Function const& function)
 void SpaceTimeFunction::disp() const
 {
   section("SpaceTimeFunction");
-  for ( std::pair< real const, std::string > const & sample : samples_ )
+  for ( std::pair< real, std::string > const & sample : samples_ )
   {
     message("%.16e : %s", sample.first, sample.second.c_str());
   }

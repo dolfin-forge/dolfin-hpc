@@ -29,10 +29,6 @@ IntervalCell::IntervalCell() :
 {
 }
 //-----------------------------------------------------------------------------
-IntervalCell::~IntervalCell()
-{
-}
-//-----------------------------------------------------------------------------
 void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We do not need to create any entities

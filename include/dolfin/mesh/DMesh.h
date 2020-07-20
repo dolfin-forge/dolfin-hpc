@@ -15,7 +15,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class CellType;
 struct DCell;
 struct DVertex;
@@ -62,7 +61,7 @@ private:
                               std::pair< uint, prop_edge > const & y );
 
   /// Pair datatype for propagation
-  typedef std::pair<uint, prop_edge> Propagation;
+  using Propagation = std::pair<uint, prop_edge>;
 
   /// Add a new vertex
   void add_vertex(DVertex* v);
@@ -84,8 +83,8 @@ private:
   ///
   /// An optional mapping between old and new indices is generated. The Arrays
   /// have to have the size of the old numbering
-  void number(Array<int> *old2new_cells = NULL,
-              Array<int> *old2new_vertices = NULL);
+  void number(Array<int> *old2new_cells = nullptr,
+              Array<int> *old2new_vertices = nullptr);
 
   /// Renumber global indicies to fit within the range of an unsigned int
   void renumber_glb(_map<long, uint>& new_global);
@@ -112,22 +111,22 @@ private:
                            Array<Propagation>& propagation, bool& empty);
 
   /// Vertices contained in the mesh
-  typedef _ordered_set<DVertex *> VertexSet;
+  using VertexSet = _ordered_set<DVertex *>;
   VertexSet vertices;
 
   /// Cells contained in the mesh
-  typedef std::list<DCell *> CellList;
+  using CellList = std::list<DCell *>;
   CellList cells;
 
   /// Propagation buffer
   Array<Propagation> propagate;
 
   /// Map between global number of boundary vertex to vertex
-  typedef _map<long, DVertex*> BoundaryVertices;
+  using BoundaryVertices = _map<long, DVertex *>;
   BoundaryVertices bc_dvs;
 
   /// Refined edges
-  typedef _map<EdgeKey<long>, DVertex*> RefinedEdges;
+  using RefinedEdges = _map<EdgeKey<long>, DVertex *>;
   RefinedEdges ref_edge;
 
   /// Mesh

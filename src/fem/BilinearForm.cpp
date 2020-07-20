@@ -12,8 +12,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 BilinearForm::BilinearForm(Mesh& mesh) :
     Form(mesh),
-    test_space_(NULL),
-    trial_space_(NULL)
+    test_space_(nullptr),
+    trial_space_(nullptr)
 {
 }
 

@@ -22,8 +22,7 @@ IntersectionDetector::IntersectionDetector(Mesh& mesh) :
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector::~IntersectionDetector()
-{
-}
+= default;
 //-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Array<Point> const& points,
                                    Array<uint>& cells) const

@@ -16,15 +16,15 @@ struct Clonable
   /// Clone instance
   inline T * clone() const;
 
-  /// Clone second argument into first argument if non-NULL
+  /// Clone second argument into first argument if non-nullptr
   static void clone( Clonable< T > *& p0, Clonable< T > const * p1 );
 };
 
-/// Clone if non-NULL, return NULL otherwise
+/// Clone if non-nullptr, return nullptr otherwise
 template < class CloneT >
 inline static CloneT * copyptr( CloneT const * p1 );
 
-/// Clone if non-NULL, return NULL otherwise
+/// Clone if non-nullptr, return nullptr otherwise
 template < class CloneT >
 inline static CloneT * cloneptr( CloneT const * p1 );
 
@@ -38,8 +38,8 @@ inline T * Clonable< T >::clone() const
 template < class T >
 void Clonable< T >::clone( Clonable< T > *& p0, Clonable< T > const * p1 )
 {
-  dolfin_assert( p0 == NULL );
-  if ( p1 != NULL )
+  dolfin_assert( p0 == nullptr );
+  if ( p1 != nullptr )
   {
     p0 = p1->clone();
   }
@@ -48,13 +48,13 @@ void Clonable< T >::clone( Clonable< T > *& p0, Clonable< T > const * p1 )
 template < class CloneT >
 inline static CloneT * copyptr( CloneT const * p1 )
 {
-  return ( p1 ? new CloneT( *p1 ) : NULL );
+  return ( p1 ? new CloneT( *p1 ) : nullptr );
 }
 //-----------------------------------------------------------------------------
 template < class CloneT >
 inline static CloneT * cloneptr( CloneT const * p1 )
 {
-  return ( p1 ? p1->clone() : NULL );
+  return ( p1 ? p1->clone() : nullptr );
 }
 //-----------------------------------------------------------------------------
 

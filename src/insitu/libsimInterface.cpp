@@ -78,7 +78,7 @@ int libsimInterface::initInteractive()
   if (VisItInitializeSocketAndDumpSimFile("sim",
 					  "DOLFIN HPC In-situ viz",
 					  "/tmp",
-					  NULL, NULL, NULL) != VISIT_OKAY)
+					  nullptr, nullptr, nullptr) != VISIT_OKAY)
   {
     error("VisIt/libsim socket initialization error");
   }
@@ -91,7 +91,7 @@ int libsimInterface::initInteractive()
 //-----------------------------------------------------------------------------
 int libsimInterface::setupEnv()
 {
-  char *env = NULL;
+  char *env = nullptr;
   const std::string visit_path = dolfin_get("VisIt directory");
   VisItSetDirectory((char *) visit_path.c_str());
 
@@ -110,7 +110,7 @@ int libsimInterface::setupEnv()
   {
     env = VisItGetEnvironment();
 
-    if (env == NULL)
+    if (env == nullptr)
     {
       return VISIT_ERROR;
     }
@@ -121,7 +121,7 @@ int libsimInterface::setupEnv()
     return VISIT_ERROR;
   }
 
-  if (env != NULL)
+  if (env != nullptr)
   {
     free(env);
   }

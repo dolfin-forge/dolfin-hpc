@@ -30,16 +30,14 @@ public:
   }
 
   /// Destructor
-  ~Facet()
-  {
-  }
+  ~Facet() = default;
 
   /// Compute coordinates of facet midpoint
   Point midpoint() const;
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef FacetIterator iterator;
+  using iterator = FacetIterator;
 
   struct shared : SharedIterator
   {

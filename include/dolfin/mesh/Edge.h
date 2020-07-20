@@ -38,9 +38,7 @@ public:
   }
 
   /// Destructor
-  ~Edge()
-  {
-  }
+  ~Edge() = default;
 
   /// Compute Euclidian length of edge
   real length() const;
@@ -50,7 +48,7 @@ public:
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef EdgeIterator iterator;
+  using iterator = EdgeIterator;
 
   struct shared : SharedIterator
   {
@@ -90,8 +88,8 @@ public:
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Vertex lower_dimensional;
-  typedef Face   higher_dimensional;
+  using lower_dimensional  = Vertex;
+  using higher_dimensional = Face;
 };
 
 inline real Edge::length() const

@@ -25,7 +25,7 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(false),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -37,7 +37,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(true),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -216,7 +216,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       bool const shrd = v->is_shared();
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if ((subdomain_ == NULL) || (subdomain_->inside(v->x(), bndr && !shrd)))
+        if ((subdomain_ == nullptr) || (subdomain_->inside(v->x(), bndr && !shrd)))
         {
           vertex_map_.push_back(v->index());
         }
@@ -264,7 +264,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 #endif
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if (subdomain_ != NULL)
+        if (subdomain_ != nullptr)
         {
           bool inside = false;
           for (VertexIterator v(*f); !v.end(); ++v)

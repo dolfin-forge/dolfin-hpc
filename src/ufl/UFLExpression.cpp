@@ -33,8 +33,7 @@ Expression::Expression(std::string const& name, repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Expression::~Expression()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Cell const Expression::cell() const
@@ -181,7 +180,7 @@ Expression const* Expression::create(Object::repr_t const& repr)
     error("Unknown type of ufl::Expression: '" + name + "'");
   }
   
-  return NULL;
+  return nullptr;
 }
 
 /*

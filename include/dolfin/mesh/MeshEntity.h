@@ -30,7 +30,7 @@ public:
   MeshEntity( Mesh & mesh, uint dim, uint index );
 
   /// Destructor
-  ~MeshEntity();
+  ~MeshEntity() = default;
 
   /// Return mesh associated with mesh entity
   Mesh & mesh();
@@ -202,18 +202,18 @@ inline Array< uint > const & MeshEntity::entities( uint dim ) const
 inline void MeshEntity::get_entities( uint dim, uint * indices ) const
 {
   Array< uint > const & e = topology_( tdim_, dim )[index_];
-  dolfin_assert( indices != NULL );
+  dolfin_assert( indices != nullptr );
   std::copy( e.begin(), e.end(), indices );
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshEntity::get_entities( uint ** indices ) const
 {
-  dolfin_assert( indices != NULL );
+  dolfin_assert( indices != nullptr );
   for ( uint dim = 0; dim < tdim_; ++dim )
   {
     Array< Array< uint > > const & e = topology_( tdim_, dim )();
-    dolfin_assert( indices[dim] != NULL );
+    dolfin_assert( indices[dim] != nullptr );
     std::copy( e[index_].begin(), e[index_].end(), indices[dim] );
   }
   indices[tdim_][0] = index_;
@@ -317,7 +317,7 @@ inline uint MeshEntity::owner() const
 inline _set< uint > const * MeshEntity::adjacents() const
 {
   return ( topology_.distributed() ? distdata_[tdim_].ptr_shared_adj( index_ )
-                                   : NULL );
+                                   : nullptr );
 }
 
 //-----------------------------------------------------------------------------

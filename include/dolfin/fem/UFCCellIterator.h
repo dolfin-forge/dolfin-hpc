@@ -54,9 +54,7 @@ public:
   }
 
   ///
-  ~UFCCellIterator()
-  {
-  }
+  ~UFCCellIterator() = default;
 
   inline UFCCellIterator& operator++()
   {

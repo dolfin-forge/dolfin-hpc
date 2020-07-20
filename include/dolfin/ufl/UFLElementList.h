@@ -29,7 +29,7 @@ class ElementList
   : protected dolfin::_ordered_map<Object::repr_t, FiniteElementSpace *>
 {
 
-  typedef std::pair<ufl::Object::repr_t, FiniteElementSpace *> ElementItem;
+  using ElementItem = std::pair<ufl::Object::repr_t, FiniteElementSpace *>;
 
 public:
 

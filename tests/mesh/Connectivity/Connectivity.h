@@ -47,7 +47,7 @@ void check_regular_connectivity()
     // Perform left remapping
     {
       Array<uint> L(C.order());
-      if (C.order()) range(L.data(), L.bound(), L.size() - 1, - 1);
+      if (C.order()) range(L.data(), L.data() + L.size(), L.size() - 1, - 1);
       C.remap_l(L);
       uint vj = C.order();
       for (uint vi = 0; vi < C.order(); ++vi)
@@ -64,7 +64,7 @@ void check_regular_connectivity()
     // Perform right remapping
     {
       Array<uint> R(C.entries());
-      if (C.entries()) range(R.data(), R.bound(), R.size() - 1, - 1);
+      if (C.entries()) range(R.data(), R.data() + R.size(), R.size() - 1, - 1);
       C.remap_r(R);
       for (uint vi = 0; vi < C.order(); ++vi)
       {

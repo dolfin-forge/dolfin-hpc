@@ -11,6 +11,7 @@
 
 #include <Mesh.h>
 #include <libxml/parser.h>
+#include <stdexcept>
 
 class DOLFINxml : public Mesh
 {

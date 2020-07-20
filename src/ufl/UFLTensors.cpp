@@ -53,8 +53,7 @@ ComponentTensor::ComponentTensor(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 ComponentTensor::~ComponentTensor()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const ComponentTensor::operands(

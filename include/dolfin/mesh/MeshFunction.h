@@ -46,10 +46,10 @@ public:
   /// Copy constructor
   explicit
   MeshFunction(MeshFunction<T> const& other) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     MeshFunction<T>::operator=(other);
   }
@@ -57,10 +57,10 @@ public:
   /// Copy constructor
   template <class V>
   MeshFunction(MeshFunction<V> const& other) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     MeshFunction<T>::operator=(other);
   }
@@ -74,7 +74,7 @@ public:
   ///
   bool empty() const
   {
-    return (values_ == NULL);
+    return (values_ == nullptr);
   }
 
   /// Assignment operator
@@ -235,7 +235,7 @@ public:
   /// Set all values to given value
   MeshFunction<T>& operator=(T const& value)
   {
-    dolfin_assert(!((values_ == NULL) && (size_>0)));
+    dolfin_assert(!((values_ == nullptr) && (size_>0)));
     std::fill_n(values_, size_, value);
     return *this;
   }
@@ -269,10 +269,10 @@ protected:
 
   /// Create scalar mesh function on given mesh of given dimension
   MeshFunction(Mesh& mesh, uint dim, T val = static_cast<T>(0)) :
-      mesh_(0),
+      mesh_(nullptr),
       dim_(0),
       size_(0),
-      values_(NULL)
+      values_(nullptr)
   {
     init(&mesh, dim, mesh.size(dim));
     std::fill_n(values_, size_, val);
@@ -285,7 +285,7 @@ protected:
     dim_ = dim;
     size_ = size;
     delete[] values_;
-    values_ = NULL;
+    values_ = nullptr;
     if(size_ > 0)
     {
       values_ = new T[size];

@@ -23,20 +23,16 @@ class Coefficient : public ufc::function
 public:
 
   /// Constructor
-  Coefficient()
-  {
-  }
+  Coefficient() = default;
 
   /// Destructor
-  virtual ~Coefficient()
-  {
-  }
+  ~Coefficient() override = default;
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  virtual void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const = 0;
+  void evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 

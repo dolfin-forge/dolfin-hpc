@@ -22,7 +22,8 @@ public:
 
   //----------------------------------------------------------------------------
   // access data
-  MPI::Communicator & comm();
+  MPI::Communicator &       comm();
+  MPI::Communicator const & comm() const;
 
   inline uint comm_rank() const;
   inline uint comm_size() const;
@@ -82,12 +83,20 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
 template < typename T >
 Distributed< T >::Distributed( Distributed const & other )
   : comm_( DOLFIN_COMM_NULL )
+  , comm_rank_( 0 )
+  , comm_size_( 1 )
 {
   *this = other;
 }
 //------------------------------------------------------------------------------
 template < typename T >
 MPI::Communicator & Distributed< T >::comm()
+{
+  return comm_;
+}
+//------------------------------------------------------------------------------
+template < typename T >
+MPI::Communicator const & Distributed< T >::comm() const
 {
   return comm_;
 }

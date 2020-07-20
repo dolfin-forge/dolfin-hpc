@@ -36,9 +36,7 @@ public:
   }
 
   /// Destructor
-  ~Cell()
-  {
-  }
+  ~Cell() = default;
 
   /// Return type of cell
   inline CellType::Type type() const;
@@ -75,7 +73,7 @@ public:
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef CellIterator iterator;
+  using iterator = CellIterator;
 
   struct shared : SharedIterator
   {
@@ -115,7 +113,7 @@ public:
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Face lower_dimensional;
+  using lower_dimensional = Face;
 };
 
 //-----------------------------------------------------------------------------

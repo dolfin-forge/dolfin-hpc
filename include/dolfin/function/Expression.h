@@ -43,10 +43,10 @@ public:
 protected:
 
   /// Create user-defined function
-  Expression() {}
+  Expression() = default;
 
   /// Destructor
-  virtual ~Expression() {}
+  virtual ~Expression() = default;
 
 };
 

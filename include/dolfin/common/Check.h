@@ -9,7 +9,7 @@
 #ifdef HAVE_CHECK
 #include <check.h>
 #else
-typedef void Suite;
+using Suite = void;
 #endif
 
 #include <dolfin/common/Test.h>
@@ -44,7 +44,7 @@ extern "C" typedef void(*CheckIntFunctionPtr)(int);
 #define DOLFIN_SUITE_BEGIN(_suite_function, _name) \
 Suite *_suite_function() \
 { \
-  Suite *s = suite_create(_name); TCase *tc = NULL;
+  Suite *s = suite_create(_name); TCase *tc = nullptr;
 
 #define DOLFIN_SUITE_END \
   return s; \

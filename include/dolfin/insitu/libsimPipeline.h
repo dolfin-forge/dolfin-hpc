@@ -26,11 +26,9 @@ namespace dolfin
   public:
     
 
-    libsimPipeline() 
-    {
-    }
+    libsimPipeline() = default;
 
-    ~libsimPipeline() {}
+    ~libsimPipeline() = default;
 
     /// Execute visualization pipeline
     virtual void exec(real t, uint tstep) const = 0;

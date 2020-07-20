@@ -28,16 +28,14 @@ public:
   }
 
   /// Destructor
-  ~Face()
-  {
-  }
+  ~Face() = default;
 
   /// Compute coordinates of face midpoint
   Point midpoint() const;
 
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef FaceIterator iterator;
+  using iterator = FaceIterator;
 
   struct shared : SharedIterator
   {
@@ -77,8 +75,8 @@ public:
 
   //--- Entity relation -------------------------------------------------------
 
-  typedef Edge lower_dimensional;
-  typedef Cell higher_dimensional;
+  using lower_dimensional  = Edge;
+  using higher_dimensional = Cell;
 };
 
 inline Point Face::midpoint() const

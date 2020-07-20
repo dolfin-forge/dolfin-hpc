@@ -40,9 +40,7 @@ public:
   }
 
   /// Destructor
-  ~SubFunction()
-  {
-  }
+  ~SubFunction() = default;
 
   /// Return global function
   Function & function() const;
@@ -56,16 +54,15 @@ public:
 private:
   /// Create empty sub function
   SubFunction()
-    : f_( NULL )
-    , i_( 0 )
+     
   {
   }
 
   // Pointer to discrete function
-  Function * const f_;
+  Function * const f_{ nullptr };
 
   // Sub function index
-  uint const i_;
+  uint const i_{ 0 };
 };
 
 //-----------------------------------------------------------------------------

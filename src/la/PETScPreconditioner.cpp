@@ -20,16 +20,6 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-PETScPreconditioner::PETScPreconditioner()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-PETScPreconditioner::~PETScPreconditioner()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 void PETScPreconditioner::setup(const KSP ksp, PETScPreconditioner &pc)
 {
   PC petscpc;
@@ -61,15 +51,15 @@ int PETScPreconditioner::PCCreate(PC pc)
 {
   // Initialize function pointers to 0
 
-  pc->ops->setup               = 0;
-  pc->ops->apply               = 0;
-  pc->ops->applyrichardson     = 0;
-  pc->ops->applytranspose      = 0;
-  pc->ops->applysymmetricleft  = 0;
-  pc->ops->applysymmetricright = 0;
-  pc->ops->setfromoptions      = 0;
-  pc->ops->view                = 0;
-  pc->ops->destroy             = 0;
+  pc->ops->setup               = nullptr;
+  pc->ops->apply               = nullptr;
+  pc->ops->applyrichardson     = nullptr;
+  pc->ops->applytranspose      = nullptr;
+  pc->ops->applysymmetricleft  = nullptr;
+  pc->ops->applysymmetricright = nullptr;
+  pc->ops->setfromoptions      = nullptr;
+  pc->ops->view                = nullptr;
+  pc->ops->destroy             = nullptr;
 
   // Set PETSc name of preconditioner
   PetscObjectChangeTypeName((PetscObject)pc, "DOLFIN");

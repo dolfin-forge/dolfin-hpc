@@ -144,7 +144,7 @@ inline uint DofNumbering::size() const
 //-----------------------------------------------------------------------------
 inline uint const * DofNumbering::block() const
 {
-  if ( array == NULL )
+  if ( array == nullptr )
   {
     pretabulate( array, array_size );
   }
@@ -153,7 +153,7 @@ inline uint const * DofNumbering::block() const
 //-----------------------------------------------------------------------------
 inline uint DofNumbering::block_size() const
 {
-  if ( array == NULL )
+  if ( array == nullptr )
   {
     pretabulate( array, array_size );
   }
@@ -172,7 +172,7 @@ inline void DofNumbering::clear()
   size_      = 0;
   array_size = 0;
   delete[] array;
-  array = NULL;
+  array = nullptr;
 }
 //-----------------------------------------------------------------------------
 inline void DofNumbering::set_range( uint offset, uint size )

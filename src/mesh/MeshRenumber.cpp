@@ -116,7 +116,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         {
           /// @todo randomness may be harmful
           uint const vote = std::rand();
-          vdata.get_common_adj(num_entity_vertices, vertices.data(), adjs);
+          vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)
           {
             vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
@@ -240,10 +240,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
             edata.num_shared(), edata.num_ghost());
     }
     recvmax = edata.num_shared() - edata.num_ghost();
-    recvbuf = (recvmax == 0 ? NULL : new uint[recvmax]);
-    uint * sendbuf_back = (recvmax == 0 ? NULL : new uint[recvmax]);
+    recvbuf = (recvmax == 0 ? nullptr : new uint[recvmax]);
+    uint * sendbuf_back = (recvmax == 0 ? nullptr : new uint[recvmax]);
     uint const num_ghosts = edata.num_ghost();
-    uint * recvbuf_back = (num_ghosts == 0 ? NULL : new uint[num_ghosts]);
+    uint * recvbuf_back = (num_ghosts == 0 ? nullptr : new uint[num_ghosts]);
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;

@@ -21,7 +21,7 @@ namespace dolfin
 SpaceTimeFunction::SpaceTimeFunction(std::string const& basename) :
     Function(),
     basename_(basename),
-    W_(NULL),
+    W_(nullptr),
     it0_(samples_.end()),
     it1_(samples_.end())
 {
@@ -31,7 +31,7 @@ SpaceTimeFunction::SpaceTimeFunction(std::string const& basename,
                                      FiniteElementSpace const& space) :
     Function(space),
     basename_(basename),
-    W_(NULL),
+    W_(nullptr),
     it0_(samples_.end()),
     it1_(samples_.end())
 {
@@ -73,7 +73,7 @@ uint SpaceTimeFunction::load()
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::eval()
 {
-  if (W_ == NULL)
+  if (W_ == nullptr)
   {
     if (this->empty())
     {
@@ -150,10 +150,9 @@ void SpaceTimeFunction::save(Function const& function)
 void SpaceTimeFunction::disp() const
 {
   section("SpaceTimeFunction");
-  for (_ordered_map<real, std::string>::const_iterator it = samples_.begin();
-       it != samples_.end(); ++it)
+  for ( std::pair< real, std::string > const & sample : samples_ )
   {
-    message("%.16e : %s", it->first, it->second.c_str());
+    message("%.16e : %s", sample.first, sample.second.c_str());
   }
   end();
 }

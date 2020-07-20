@@ -4,6 +4,7 @@
 #include <dolfin/mesh/Connectivity.h>
 
 #include <dolfin/common/Array.h>
+#include <dolfin/log/log.h>
 #include <dolfin/log/LogStream.h>
 
 #include <algorithm>
@@ -62,9 +63,7 @@ Connectivity::Connectivity( Connectivity const & other )
 	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::~Connectivity()
-{
-}
+Connectivity::~Connectivity() = default;
 //-----------------------------------------------------------------------------
 Connectivity & Connectivity::operator=( Connectivity const & other )
 {
@@ -201,15 +200,16 @@ void Connectivity::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-Connectivity const& Connectivity::operator>>(Array<uint>& A) const
+Connectivity const& Connectivity::operator>>(Array<uint>&) const
 {
-  A.reserve( this->entries() );
-  for (uint e = 0; e < order_; ++e)
-    A.append( connections_[e].begin(), connections_[e].end() );
+  error( "Connectivity::operator>> unimplemented / deprecated" );
+  // A.reserve( this->entries() );
+  // for (uint e = 0; e < order_; ++e)
+  //   append( A, connections_[e].begin(), connections_[e].end() );
 
-  // Set stride if the graph is regular
-  if(min_degree_ == max_degree_)
-    A %= min_degree_;
+  // // Set stride if the graph is regular
+  // if(min_degree_ == max_degree_)
+  //   A %= min_degree_;
 
   return *this;
 }

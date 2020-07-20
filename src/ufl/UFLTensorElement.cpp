@@ -36,8 +36,7 @@ TensorElement::TensorElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 TensorElement::~TensorElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& TensorElement::family() const

@@ -18,23 +18,19 @@ public:
   static LinearAlgebraFactory& factory();
 
   /// Constructor
-  DefaultFactory()
-  {
-  }
+  DefaultFactory() = default;
 
   /// Destructor
-  virtual ~DefaultFactory()
-  {
-  }
+  ~DefaultFactory() override = default;
 
   /// Create empty matrix
-  virtual GenericMatrix* createMatrix() const;
+  GenericMatrix* createMatrix() const override;
 
   /// Create empty vector
-  virtual GenericVector* createVector() const;
+  GenericVector* createVector() const override;
 
   /// Create empty sparsity pattern
-  virtual GenericSparsityPattern * createPattern() const;
+  GenericSparsityPattern * createPattern() const override;
 
 };
 

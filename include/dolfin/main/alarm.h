@@ -14,10 +14,10 @@ struct alarm
   static long const RESPITE = 300;
 
   // Constructor
-  alarm();
+  alarm() = default;
 
   // Destructor
-  ~alarm();
+  ~alarm() = default;
 
   // Signal handler
   static void action(int sig_code);

@@ -32,7 +32,7 @@ public:
   StructuredGrid(CellType const& type, uint N, BoundingBox bbox);
 
   /// Destructor
-  ~StructuredGrid();
+  ~StructuredGrid() override = default;
 
 private:
 

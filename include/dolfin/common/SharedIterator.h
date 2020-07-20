@@ -27,9 +27,7 @@ public:
   }
 
   ///
-  ~SharedIterator()
-  {
-  }
+  ~SharedIterator() = default;
 
   ///
   SharedIterator & operator++();
@@ -53,8 +51,8 @@ public:
   inline _set< uint > const & adj() const;
 
   ///
-  template < class T >
-  inline void adj_enqueue( Array< T > container[], T value ) const;
+  template < typename T >
+  inline void adj_enqueue( Array< Array< T > > & container, T const & value ) const;
 
 private:
   DistributedData const &                    distdata_;
@@ -98,8 +96,9 @@ inline _set< uint > const & SharedIterator::adj() const
   return iter_->second;
 }
 //-----------------------------------------------------------------------------
-template < class T >
-inline void SharedIterator::adj_enqueue( Array< T > container[], T value ) const
+template < typename T >
+inline void SharedIterator::adj_enqueue( Array< Array< T > > & container,
+                                         T const & value ) const
 {
   _set< uint > const & a = iter_->second;
   for ( _set< uint >::const_iterator it = a.begin(); it != a.end(); ++it )

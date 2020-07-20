@@ -27,14 +27,14 @@ namespace dolfin
   class RadauQuadrature : public GaussianQuadrature
   {
   public:
-    
+
     RadauQuadrature(unsigned int n);
 
-    void disp() const;
-    
+    void disp() const override;
+
   private:
 
-    void computePoints();
+    void computePoints() override;
 
   };
   

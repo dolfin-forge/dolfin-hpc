@@ -22,20 +22,15 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix() :
-    Variable("A", "a sparse matrix"),
-    A(NULL),
-    AA_sub(NULL),
-    is_distributed_(false),
-    rstart_(0),
-    rend_(0)
+PETScMatrix::PETScMatrix()
+  : Variable("A", "a sparse matrix")
 {
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
     A(A),
-    AA_sub(NULL),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -44,8 +39,8 @@ PETScMatrix::PETScMatrix(Mat A) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
     Variable("A", "a sparse matrix"),
-    A(NULL),
-    AA_sub(NULL),
+    A(nullptr),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -55,8 +50,8 @@ PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
-    A(NULL),
-    AA_sub(NULL),
+    A(nullptr),
+    AA_sub(nullptr),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -87,7 +82,7 @@ void PETScMatrix::clear()
 #else
     MatDestroyMatrices(1, &AA_sub);
 #endif
-    AA_sub = NULL;
+    AA_sub = nullptr;
   }
 }
 //-----------------------------------------------------------------------------
@@ -268,8 +263,8 @@ real PETScMatrix::norm(std::string norm_type) const
 void PETScMatrix::getrow(uint row, Array<uint>& columns,
                          Array<real>& values) const
 {
-  const PetscInt *cols = NULL;
-  const PetscScalar *vals = NULL;
+  const PetscInt *cols = nullptr;
+  const PetscScalar *vals = nullptr;
   PetscInt ncols = 0;
   if (row >= static_cast<uint>(rstart_) && row < static_cast<uint>(rend_))
   {
@@ -312,12 +307,12 @@ void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
   mapping_.clear();
 
   uint i = 0;
-  for (_ordered_set<uint>::const_iterator it = rows.begin(); it != rows.end(); ++it)
+  for ( uint const & row : rows )
   {
-    if (*it < static_cast<uint>(rstart_) && *it >= static_cast<uint>(rend_))
+    if (row < static_cast<uint>(rstart_) && row >= static_cast<uint>(rend_))
     {
-      _rows[i] = *it;
-      mapping_[*it] = i++;
+      _rows[i] = row;
+      mapping_[row] = i++;
     }
   }
 
@@ -367,7 +362,7 @@ void PETScMatrix::getrows_offproc(_ordered_set<uint> const& rows)
 //-----------------------------------------------------------------------------
 void PETScMatrix::zero(uint m, uint const* rows)
 {
-  IS is = 0;
+  IS is = nullptr;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
                   reinterpret_cast<int*>(const_cast<uint*>(rows)),
@@ -388,7 +383,7 @@ void PETScMatrix::zero(uint m, uint const* rows)
 //-----------------------------------------------------------------------------
 void PETScMatrix::ident(uint m, uint const* rows)
 {
-  IS is = 0;
+  IS is = nullptr;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
                   reinterpret_cast<int*>(const_cast<uint*>(rows)),

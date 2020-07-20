@@ -19,14 +19,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain() :
-    abstol_(1.0e-6)
+SubDomain::SubDomain()
 {
   // Do nothing
-}
-//-----------------------------------------------------------------------------
-SubDomain::~SubDomain()
-{
 }
 //-----------------------------------------------------------------------------
 template <class Entity>
@@ -49,7 +44,7 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     uint const pe_rank = MPI::rank();
     DistributedData& distdata = mesh.distdata()[sub_domains.dim()];
 
-    Array<uint> * sendbuf = new Array<uint> [pe_size];
+    Array< Array<uint> > sendbuf( pe_size );
 
     // Update entities to adjacent ranks.
     // The previous implementation updates only ghost to the owner, which
@@ -63,22 +58,20 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     }
 
     //
-    int send_size;
-    int recv_size;
+    int recv_size = 0;
     for (uint j = 0; j < pe_size; ++j)
     {
-      send_size = sendbuf[j].size();
+      int send_size = sendbuf[j].size();
       MPI::check_error( MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM,
                                    j, distdata.comm()) );
     }
-    uint * recvbuf = (recv_size ? new uint[recv_size] : NULL);
+    Array< uint > recvbuf( recv_size );
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (pe_rank - j + pe_size) % pe_size;
       int dst = (pe_rank + j) % pe_size;
 
-      int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                      &recvbuf[0], recv_size, src,
+      int recv_count = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src,
                                       1, distdata.comm() );
 
       for (int k = 0; k < recv_count; ++k)
@@ -86,9 +79,6 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
         sub_domains(distdata.get_local(recvbuf[k])) = index;
       }
     }
-
-    delete[] recvbuf;
-    delete[] sendbuf;
   }
 #endif
 

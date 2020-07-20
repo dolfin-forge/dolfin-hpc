@@ -67,9 +67,7 @@ public:
   }
 
   /// Destructor
-  ~point()
-  {
-  }
+  ~point() = default;
 
   /// Set coordinates for given Euclidean space dimension
   void set( real const * x, uint dim );
@@ -378,7 +376,7 @@ inline std::ostream & operator<<( std::ostream & ss, point< D > const & p )
 
 //-----------------------------------------------------------------------------
 
-typedef class point<> Point;
+using Point = class point<>;
 
 //-----------------------------------------------------------------------------
 

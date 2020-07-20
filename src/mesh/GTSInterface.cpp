@@ -25,7 +25,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 GTSInterface::GTSInterface(Mesh& mesh) :
     mesh_(mesh),
-    tree_(NULL)
+    tree_(nullptr)
 {
   if (mesh.geometry_dimension() > 3)
   {
@@ -80,7 +80,7 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p) const
   GtsBBox* bbox;
 
   real btol = dolfin_get<real>("GTS Tolerance");
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, p[0] - btol, p[1] - btol,
+  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) nullptr, p[0] - btol, p[1] - btol,
                       p[2] - btol, p[0] + btol, p[1] + btol, p[2] + btol);
 
   return bbox;
@@ -132,7 +132,7 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p1, Point const& p2) const
     z2 = p1[2];
   }
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, x1, y1, z1, x2, y2, z2);
+  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) nullptr, x1, y1, z1, x2, y2, z2);
 
   return bbox;
 
@@ -151,7 +151,7 @@ void GTSInterface::buildCellTree()
     error("GTS tree already initialized");
   }
 
-  GSList* bboxes = NULL;
+  GSList* bboxes = nullptr;
 
   for (CellIterator ci(mesh_); !ci.end(); ++ci)
   {
@@ -173,7 +173,7 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();
@@ -209,7 +209,7 @@ void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();
@@ -248,7 +248,7 @@ void GTSInterface::overlap(Point const& p1, Point const& p2,
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0, *overlaps_base;
+  GSList* overlaps = nullptr, *overlaps_base;
   uint boundedcell;
 
   CellType const& type = mesh_.type();

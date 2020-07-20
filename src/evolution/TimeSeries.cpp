@@ -254,9 +254,9 @@ void TimeSeries::loadData(std::string const&)
   }
 
   // Update discrete times
-  for (Array<real>::const_iterator it = times.begin(); it != times.end(); ++it)
+  for ( real const & time : times )
   {
-    this->addPoint(*it);  // add discrete time
+    this->addPoint(time);  // add discrete time
   }
 
   // Update number of intervals

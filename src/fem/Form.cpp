@@ -20,11 +20,6 @@ Form::Form(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-Form::~Form()
-{
-}
-
-//-----------------------------------------------------------------------------
 bool Form::check(Array<Coefficient*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients
@@ -39,15 +34,15 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
   {
     message(1, "Form: Checking coefficient %d: %s",
             i, this->coefficient_name( i ).c_str() );
-    if (coefficients[i] == NULL)
+    if (coefficients[i] == nullptr)
     {
-      error("Got NULL pointer as coefficient %d labeled as '%s'.", i,
+      error("Got nullptr pointer as coefficient %d labeled as '%s'.", i,
             this->coefficient_name(i).c_str());
     }
 
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());
     Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
-    if (fptr != NULL)
+    if (fptr != nullptr)
     {
       if(fptr->empty())
       {
@@ -142,7 +137,7 @@ void Form::init(Array<Coefficient *>& coefficients, CoefficientMap & map)
   {
     std::string name = this->coefficient_name(i);
     Coefficient * c = map[name];
-    if(c != NULL)
+    if(c != nullptr)
     {
       coefficients.push_back(map[name]);
     }
@@ -164,7 +159,7 @@ void Form::init(Array<Coefficient *>& coefficients)
   for (uint i = 0; i < this->num_coefficients(); ++i)
   {
     Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
-    if (fptr != NULL && fptr->empty())
+    if (fptr != nullptr && fptr->empty())
     {
       fptr->init(*this, this->rank() + i);
       dolfin_assert(!fptr->empty());

@@ -49,7 +49,7 @@ FiniteElementSpace * FiniteElementSpace::create(Object::repr_t const repr)
     error("Unknown type of ufl::FiniteElementSpace: '" + name + "'");
   }
   
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -69,8 +69,7 @@ FiniteElementSpace::FiniteElementSpace(std::string const& name, repr_t repr) :
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::~FiniteElementSpace()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 QuadratureScheme const& FiniteElementSpace::quadrature_scheme() const

@@ -55,11 +55,6 @@ PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-PeriodicBC::~PeriodicBC()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
                        BilinearForm const& form)
 {

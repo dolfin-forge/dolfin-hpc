@@ -24,12 +24,15 @@ AC_DEFUN([AX_PHMAP],[
 		export CPPFLAGS
 	fi
 
-	AC_CHECK_HEADER([parallel_hashmap/phmap.h],[have_phmap_h=yes],[have_phmap_h=no])
-	if test x"${have_phmap_h}" = xyes; then
-		AC_DEFINE(HAVE_PARALLEL_HASH_MAP,[1],[Define if parallel hash map is present])
-	else
-		if test -d "$ac_phmap_path"; then
-			CPPFLAGS="$CPPFLAGS_SAVED"
+	have_phmap_h=no
+	if test "x${with_phmap}" != xno; then
+		AC_CHECK_HEADER([parallel_hashmap/phmap.h],[have_phmap_h=yes],[have_phmap_h=no])
+		if test x"${have_phmap_h}" = xyes; then
+			AC_DEFINE(HAVE_PARALLEL_HASH_MAP,[1],[Define if parallel hash map is present])
+		else
+			if test -d "$ac_phmap_path"; then
+				CPPFLAGS="$CPPFLAGS_SAVED"
+			fi
 		fi
 	fi
 ])

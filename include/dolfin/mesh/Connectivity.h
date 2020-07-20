@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 
@@ -185,7 +186,7 @@ inline void Connectivity::set(uint entity, uint const * connections)
 {
   dolfin_assert(entity < order_);
   dolfin_assert(not connections_.empty() );
-  dolfin_assert( connections != NULL );
+  dolfin_assert( connections != nullptr );
 
   for ( uint e = 0; e < connections_[entity].size(); ++e )
     connections_[entity][e] = connections[e];

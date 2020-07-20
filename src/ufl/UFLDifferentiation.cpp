@@ -61,8 +61,7 @@ CoefficientDerivative::CoefficientDerivative(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 CoefficientDerivative::~CoefficientDerivative()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const CoefficientDerivative::operands(
@@ -229,8 +228,7 @@ SpatialDerivative::SpatialDerivative(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 SpatialDerivative::~SpatialDerivative()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const SpatialDerivative::operands(
@@ -401,8 +399,7 @@ VariableDerivative::VariableDerivative(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 VariableDerivative::~VariableDerivative()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const VariableDerivative::operands(
@@ -576,8 +573,7 @@ Grad::Grad(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Grad::~Grad()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Grad::operands(std::string const& name) const
@@ -713,8 +709,7 @@ Div::Div(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Div::~Div()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Div::operands(std::string const& name) const
@@ -850,8 +845,7 @@ NablaGrad::NablaGrad(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 NablaGrad::~NablaGrad()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const NablaGrad::operands(
@@ -990,8 +984,7 @@ NablaDiv::NablaDiv(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 NablaDiv::~NablaDiv()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const NablaDiv::operands(
@@ -1131,8 +1124,7 @@ Curl::Curl(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Curl::~Curl()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Curl::operands(std::string const& name) const

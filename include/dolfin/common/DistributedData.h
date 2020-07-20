@@ -25,9 +25,9 @@ class DistributedData : public Distributed< DistributedData >
   friend class SharedIterator;
 
 public:
-  typedef _map< uint, uint >         IndexMapping;
-  typedef _map< uint, _set< uint > > SharedSet;
-  typedef _map< uint, uint >         GhostSet;
+  using IndexMapping = _map< uint, uint >;
+  using SharedSet    = _map< uint, _set< uint > >;
+  using GhostSet     = _map< uint, uint >;
 
 public:
   ///
@@ -37,7 +37,7 @@ public:
   DistributedData( DistributedData const & other );
 
   ///
-  ~DistributedData();
+  ~DistributedData() override;
 
   ///
   DistributedData & operator=( DistributedData const & other );
@@ -197,8 +197,8 @@ public:
   _set< uint > const * ptr_shared_adj( uint local_index ) const;
 
   /// Return the common adjacent set to an array of shared entities
-  void
-    get_common_adj( uint n, uint const indices[], _set< uint > & adjs ) const;
+  void get_common_adj( uint n, Array< uint > const & indices,
+                       _set< uint > & adjs ) const;
 
   /// Set the entity as shared, the adjacent set is not created.
   /// If the entity is ghost then it stays that way
@@ -234,7 +234,7 @@ public:
 
 public:
   ///
-  bool valid_numbering;
+  bool valid_numbering{ false };
 
 private:
   /// Clear all data
@@ -244,15 +244,15 @@ private:
   uint pe_size_;
 
   //
-  bool range_is_set_;
-  uint offset_;
-  uint range_size_;
+  bool range_is_set_{ false };
+  uint offset_{ 0 };
+  uint range_size_{ 0 };
 
   //
-  uint global_size_;
+  uint global_size_{ 0 };
 
   //
-  bool finalized_;
+  bool finalized_{ false };
 
   ///
   IndexMapping global_;
@@ -268,11 +268,38 @@ private:
   Array< uint > cached_ownership_;
 
   /// Mapping created on-demand
-  mutable SharedMapping * shared_mapping_;
+  mutable SharedMapping * shared_mapping_{};
 };
 //-----------------------------------------------------------------------------
-inline bool DistributedData::operator==( DistributedData const & ) const
+inline bool DistributedData::operator==( DistributedData const & other ) const
 {
+  if ( rank_ != other.rank_ )
+    return false;
+
+  if ( pe_size_ != other.pe_size_ )
+    return false;
+
+  if ( range_is_set_ != other.range_is_set_ )
+    return false;
+
+  if ( offset_ != other.offset_ )
+    return false;
+
+  if ( range_size_ != other.range_size_ )
+    return false;
+
+  if ( global_size_ != other.global_size_ )
+    return false;
+
+  if ( finalized_ != other.finalized_ )
+    return false;
+
+  if ( cached_numbering_ != other.cached_numbering_ )
+    return false;
+
+  if ( cached_ownership_ != other.cached_ownership_ )
+    return false;
+
   return true;
 }
 //-----------------------------------------------------------------------------
@@ -507,10 +534,10 @@ inline _set< uint > const *
     if ( cached_ownership_[local_index] < pe_size_ )
       return &shared_.find( local_index )->second;
     else
-      return NULL;
+      return nullptr;
   }
   SharedSet::const_iterator it = shared_.find( local_index );
-  return ( it == shared_.end() ? NULL : &it->second );
+  return ( it == shared_.end() ? nullptr : &it->second );
 }
 //-----------------------------------------------------------------------------
 

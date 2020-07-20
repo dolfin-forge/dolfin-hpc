@@ -20,7 +20,6 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 PETScLUSolver::PETScLUSolver()
-  : ksp(0), B(0), idxm(0), idxn(0)
 {
   // Set up solver environment to use only preconditioner
 #ifdef HAVE_MPI
@@ -207,7 +206,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
   if ( !B )
   {
     // Create matrix if it has not been created before
-    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL, &B);
+    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL &B);
     idxm = new int[M];
     idxn = new int[1];
     for (uint i = 0; i < M; i++)

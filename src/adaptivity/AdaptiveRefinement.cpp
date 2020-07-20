@@ -51,12 +51,11 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   message("  - vertices before: %d", numvertsbefore);
 
   std::string marked_filename("marked");
-  std::string const marked_format = dolfin_get<std::string>("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get<std::string>("output_format")  == "vtk")
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
@@ -108,12 +107,11 @@ void refine_and_project( Mesh& mesh,
   }
 
   std::string marked_filename( "marked" );
-  std::string const marked_format = dolfin_get<std::string>("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get< std::string >( "output_format" ) == "vtk" )
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
@@ -362,9 +360,9 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
       }
       processed(*v) = true;
 
-      real x[3] = { v->x()[0], v->x()[1], v->x()[2] };
+      const real * x = v->x();
       real test_value = 0.0;
-      f_post[0].eval( &test_value, &x[0] );
+      f_post[0].eval( &test_value, x );
       if (test_value == std::numeric_limits<real>::infinity())
       {
         for (EdgeIterator e(*v); !e.end(); ++e)
@@ -373,10 +371,8 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
           uint const index = ( edge_v[0] != v->index() ) ? 0 : 1;
           Vertex v_e( new_mesh, edge_v[index] );
 
-          x[0] = v_e.x()[0];
-          x[1] = v_e.x()[1];
-          x[2] = v_e.x()[2];
-          f_post[0].eval( &test_value, &x[0] );
+          const real * xe = v_e.x();
+          f_post[0].eval( &test_value, xe );
 
           if (test_value != std::numeric_limits<real>::infinity())
           {

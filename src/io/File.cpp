@@ -20,7 +20,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 File::File( const std::string & filename )
-  : file_( NULL )
+  : file_( nullptr )
 {
   uint const len = filename.size();
 
@@ -63,14 +63,14 @@ File::File( const std::string & filename, Type type )
       file_ = new VTKFile( filename );
       break;
     default:
-      file_ = NULL;
+      file_ = nullptr;
       error( "Unknown file type for \"%s\".", filename.c_str() );
       break;
   }
 }
 //-----------------------------------------------------------------------------
 File::File( const std::string & filename, real const & t )
-  : file_( NULL )
+  : file_( nullptr )
 {
 
   if ( filename.rfind( ".pvd" ) != filename.npos )
@@ -83,7 +83,7 @@ File::File( const std::string & filename, real const & t )
   }
   else
   {
-    file_ = NULL;
+    file_ = nullptr;
     error( "Unknown file type for time dependent \"%s\".", filename.c_str() );
   }
 }

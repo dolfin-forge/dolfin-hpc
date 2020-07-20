@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI_Datatypes.h>
@@ -34,11 +35,11 @@ class MPI
 public:
 
 #ifdef HAVE_MPI
-  typedef MPI_Comm   Communicator;
-  typedef MPI_Offset offset_t;
+  using Communicator = MPI_Comm;
+  using offset_t     = MPI_Offset;
 #else
-  typedef int       Communicator;
-  typedef long long offset_t;
+  using Communicator = int;
+  using offset_t     = long long;
 #endif
 
   /*
@@ -143,6 +144,8 @@ public:
   /// Check for MPI errors
   static int check_error( int const mpi_error );
 
+#ifdef HAVE_MPI
+  
   static void file_open( MPI_File & file, std::string const & filename,
                          int mode, Communicator & comm = MPI::DOLFIN_COMM,
                          MPI_Info info = MPI_INFO_NULL );
@@ -187,17 +190,20 @@ public:
                                      offset_t offset,
                                      MPI_Status * status = MPI_STATUS_IGNORE );
 
+  static void file_close( MPI_File & file );
+  
+#endif
+  
   template< typename T >
   static void exscan_sum( T const * send, T * recv, int count,
                           Communicator & comm = MPI::DOLFIN_COMM  );
 
-  static void file_close( MPI_File & file );
 private:
 
   static real time_;
   static bool init_;
 
-  typedef struct {
+  using Context = struct {
     int   global_rank;
     int   global_size;
     int   group_cnt;
@@ -205,7 +211,7 @@ private:
     int   rank;
     int   size;
     int   seed;
-  } Context;
+  };
 
   static Context ctx_;
 
@@ -213,7 +219,7 @@ private:
 
 // Defines default type to MPI communication domain.
 
-typedef MPI::Communicator Comm;
+using Comm = MPI::Communicator;
 
 #define DOLFIN_COMM_WORLD MPI::DOLFIN_COMM_WORLD
 #define DOLFIN_COMM_SELF  MPI::DOLFIN_COMM_SELF

@@ -53,86 +53,86 @@ public:
   explicit PETScMatrix(Mat A);
 
   /// Destructor
-  ~PETScMatrix();
+  ~PETScMatrix() override;
 
   //--- Implementation of the GenericTensor interface ---
 
   /// Initialize zero tensor using sparsity pattern
-  void init(const GenericSparsityPattern& sparsity_pattern);
+  void init(const GenericSparsityPattern& sparsity_pattern) override;
 
   /// Return copy of tensor
-  PETScMatrix* copy() const;
+  PETScMatrix* copy() const override;
 
   /// Return size of given dimension
-  uint size(uint dim) const;
+  uint size(uint dim) const override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero();
+  void zero() override;
 
   /// Finalize assembly of tensor
-  void apply(FinalizeType final = FINALIZE);
+  void apply(FinalizeType final = FINALIZE) override;
 
   /// Display tensor
-  void disp(uint precision = 0) const;
+  void disp(uint precision = 0) const override;
 
   //--- Implementation of the GenericMatrix interface --
 
   /// Initialize matrix of local dimension M x N, distributed by default
-  void init(uint M, uint N);
+  void init(uint M, uint N) override;
 
   /// Initialize matrix of local dimension M x N, distributed if specified
-  void init(uint M, uint N, bool distributed);
+  void init(uint M, uint N, bool distributed) override;
 
   /// Get block of values
   void get(real* block, uint m, const uint* rows, uint n,
-           const uint* cols) const;
+           const uint* cols) const override;
 
   /// Set block of values
   void set(const real* block, uint m, const uint* rows, uint n,
-           const uint* cols);
+           const uint* cols) override;
 
   /// Add block of values
   void add(const real* block, uint m, const uint* rows, uint n,
-           const uint* cols);
+           const uint* cols) override;
 
   /// Return norm of matrix
-  real norm(std::string norm_type = "frobenius") const;
+  real norm(std::string norm_type = "frobenius") const override;
 
   /// Get non-zero values of given row
-  void getrow(uint row, Array<uint>& columns, Array<real>& values) const;
+  void getrow(uint row, Array<uint>& columns, Array<real>& values) const override;
 
   /// Set values for given row
-  void setrow(uint row, const Array<uint>& columns, const Array<real>& values);
+  void setrow(uint row, const Array<uint>& columns, const Array<real>& values) override;
 
   /// Set given rows to zero
-  void zero(uint m, const uint* rows);
+  void zero(uint m, const uint* rows) override;
 
   /// Set given rows to identity matrix
-  void ident(uint m, const uint* rows);
+  void ident(uint m, const uint* rows) override;
 
   /// Duplicate matrix
   void dup(GenericMatrix& A);
 
   // Matrix-vector product, y = Ax
   void mult(const GenericVector& x, GenericVector& y,
-            bool transposed = false) const;
+            bool transposed = false) const override;
 
   /// Multiply matrix by given number
-  const PETScMatrix& operator*=(real a);
+  const PETScMatrix& operator*=(real a) override;
 
   /// Divide matrix by given number
-  const PETScMatrix& operator/=(real a);
+  const PETScMatrix& operator/=(real a) override;
 
   /// Assignment operator
-  const GenericMatrix& operator=(const GenericMatrix& A);
+  const GenericMatrix& operator=(const GenericMatrix& A) override;
 
   /// Get number of non-zeros in the matrix
-  uint nz() const;
+  uint nz() const override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const;
+  LinearAlgebraFactory& factory() const override;
 
   //--- Special PETScFunctions ---
 
@@ -167,16 +167,16 @@ private:
   void print(MatInfo const& info) const;
 
   // Matrix
-  Mat A;
+  Mat A{nullptr};
 
   // Sub-matrices
-  Mat * AA_sub;
+  Mat * AA_sub{nullptr};
 
   // True if the matrix is distributed
-  bool is_distributed_;
+  bool is_distributed_{false};
 
-  PetscInt rstart_;
-  PetscInt rend_;
+  PetscInt rstart_{0};
+  PetscInt rend_{0};
 
   _map<int, int> mapping_;
 

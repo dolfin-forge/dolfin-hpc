@@ -25,10 +25,8 @@ class UFCCell : public ufc::cell
 public:
 
   /// Create empty UFC cell
-  UFCCell() :
-      ufc::cell(),
-      cell_(NULL),
-      num_vertices(0)
+  UFCCell()
+    : ufc::cell()
   {
   }
 
@@ -47,11 +45,11 @@ public:
       cell_(other.cell_),
       num_vertices(0)
   {
-    if (cell_ != NULL) init(*const_cast<Cell*>(cell_));
+    if (cell_ != nullptr) init(*const_cast<Cell*>(cell_));
   }
 
   /// Destructor
-  ~UFCCell()
+  ~UFCCell() override
   {
     clear();
   }
@@ -59,7 +57,7 @@ public:
 private:
 
   //
-  Cell const * cell_;
+  Cell const * cell_{nullptr};
 
 public:
 
@@ -67,7 +65,7 @@ public:
   inline Cell const& operator*() const { return *cell_; };
 
   // Number of cell vertices
-  uint num_vertices;
+  uint num_vertices{0};
 
   // Initialize UFC cell data
   void init(Cell& cell);
@@ -169,10 +167,10 @@ inline void UFCCell::clear()
     }
     delete[] entity_indices;
   }
-  entity_indices = 0;
+  entity_indices = nullptr;
 
   delete[] coordinates;
-  coordinates = 0;
+  coordinates = nullptr;
 
   cell_shape = ufc::interval;
   topological_dimension = 0;

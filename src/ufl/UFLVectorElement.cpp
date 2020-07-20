@@ -41,8 +41,7 @@ VectorElement::VectorElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 VectorElement::~VectorElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& VectorElement::family() const

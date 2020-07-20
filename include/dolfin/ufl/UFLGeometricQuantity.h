@@ -30,7 +30,7 @@ public:
   GeometricQuantity(std::string const& name, Cell const& cell);
 
   ///
-  ~GeometricQuantity();
+  ~GeometricQuantity() override;
 
   ///
   Cell const& cell();
@@ -39,13 +39,13 @@ public:
   virtual ValueArray const& shape() const = 0;
 
   /// __repr__
-  virtual repr_t const& repr() const = 0;
+  repr_t const& repr() const override = 0;
 
   /// __str__
-  virtual std::string const& str() const = 0;
+  std::string const& str() const override = 0;
 
   ///
-  virtual void display() const;
+  void display() const override;
 
 private:
 

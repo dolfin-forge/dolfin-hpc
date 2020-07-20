@@ -31,46 +31,43 @@ public:
   /// Create zero scalar
   Scalar()
     : GenericTensor()
-    , value( 0.0 )
   {
   }
 
   /// Destructor
-  virtual ~Scalar()
-  {
-  }
+  ~Scalar() override = default;
 
   //--- Implementation of the GenericTensor interface ---
 
   /// Initialize zero tensor using sparsity pattern
-  void init( const GenericSparsityPattern & sparsity_pattern );
+  void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
   /// Return copy of tensor
-  virtual Scalar * copy() const;
+  Scalar * copy() const override;
 
   /// Return tensor rank (number of dimensions)
-  uint rank() const;
+  uint rank() const override;
 
   /// Return size of given dimension
-  uint size( uint ) const;
+  uint size( uint ) const override;
 
   /// Get block of values
-  void get( real * block, const uint *, const uint * const * ) const;
+  void get( real * block, const uint *, const uint * const * ) const override;
 
   /// Set block of values
-  void set( const real * block, const uint *, const uint * const * );
+  void set( const real * block, const uint *, const uint * const * ) override;
 
   /// Add block of values
-  void add( const real * block, const uint *, const uint * const * );
+  void add( const real * block, const uint *, const uint * const * ) override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero();
+  void zero() override;
 
   /// Finalize assembly of tensor
-  void apply( FinalizeType );
+  void apply( FinalizeType ) override;
 
   /// Display tensor
-  void disp( uint ) const;
+  void disp( uint ) const override;
 
   //--- Scalar interface ---
 
@@ -83,14 +80,14 @@ public:
   //--- Special functions
 
   /// Return a factory for the default linear algebra backend
-  inline LinearAlgebraFactory & factory() const;
+  inline LinearAlgebraFactory & factory() const override;
 
   /// Get value
   real getval() const;
 
 private:
   // Value of scalar
-  real value;
+  real value{ 0.0 };
 };
 
 //-----------------------------------------------------------------------------

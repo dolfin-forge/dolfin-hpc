@@ -37,7 +37,7 @@ public:
 protected:
 
   ///
-  virtual ~MeshDependent();
+  virtual ~MeshDependent() = default;
 
 private:
 

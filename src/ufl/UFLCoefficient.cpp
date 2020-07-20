@@ -71,8 +71,7 @@ CoefficientBase::CoefficientBase(std::string const& name, repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 CoefficientBase::~CoefficientBase()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 CoefficientBase const* CoefficientBase::create(Object::repr_t const& repr)
@@ -99,7 +98,7 @@ CoefficientBase const* CoefficientBase::create(Object::repr_t const& repr)
     error("Unknown type of ufl::CoefficientBase: '" + name + "'");
   }
 
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -175,8 +174,7 @@ Coefficient::Coefficient(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Coefficient::~Coefficient()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Coefficient::operands(
@@ -243,8 +241,7 @@ Constant::Constant(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Constant::~Constant()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Constant::operands(
@@ -314,8 +311,7 @@ VectorConstant::VectorConstant(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 VectorConstant::~VectorConstant()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const VectorConstant::operands(
@@ -388,8 +384,7 @@ TensorConstant::TensorConstant(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 TensorConstant::~TensorConstant()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const TensorConstant::operands(

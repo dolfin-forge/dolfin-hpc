@@ -13,7 +13,6 @@
 namespace dolfin
 {
 
-template<typename T> class Array;
 class DofMapSet;
 class Facet;
 class Coefficient;

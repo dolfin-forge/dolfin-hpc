@@ -22,9 +22,9 @@ void CoefficientMap::disp() const
   message("Number of coefficients : %u", this->size());
   uint ii = 0;
   dolfin::begin("");
-  for (const_iterator it = this->begin(); it != this->end(); ++it)
+  for ( CoefficientMap::value_type const & coeff : *this )
   {
-    message("%8u : %s", ii, it->first.c_str());
+    message("%8u : %s", ii, coeff.first.c_str());
     ++ii;
   }
   end();

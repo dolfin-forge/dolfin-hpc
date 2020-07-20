@@ -10,6 +10,7 @@
 
 #include <ufc.h>
 
+#include <cstring>
 #include <string>
 
 namespace ufl
@@ -64,7 +65,7 @@ public:
   explicit FiniteElement(FiniteElement const& other);
 
   ///
-  ~FiniteElement();
+  ~FiniteElement() override;
 
   /// Check if the element definitions are identical
   bool operator ==(FiniteElement const& other) const;
@@ -75,31 +76,31 @@ public:
 
   /// Return a string identifying the finite element
   /// UFC @since 1.1
-  const char* signature() const;
+  const char* signature() const override;
 
   /// Return the cell shape
   /// UFC @since 1.1
-  ufc::shape cell_shape() const;
+  ufc::shape cell_shape() const override;
 
   /// Return the topological dimension of the cell shape
   /// UFC @since 2.1.1
-  uint topological_dimension() const;
+  uint topological_dimension() const override;
 
   /// Return the geometric dimension of the cell shape
   /// UFC @since 2.1.1
-  uint geometric_dimension() const;
+  uint geometric_dimension() const override;
 
   /// Return the dimension of the finite element function space
   /// UFC @since 1.1
-  uint space_dimension() const;
+  uint space_dimension() const override;
 
   /// Return the rank of the value space
   /// UFC @since 1.1
-  uint value_rank() const;
+  uint value_rank() const override;
 
   /// Return the dimension of the value space for axis i
   /// UFC @since 1.1
-  uint value_dimension(uint i) const;
+  uint value_dimension(uint i) const override;
 
   /// Compute mapped coordinates for evaluate_basis()
   /// UFC @since 2.2.0
@@ -107,74 +108,74 @@ public:
                                       double & Y,
                                       double & Z,
                                       const double* coordinates,
-                                      const ufc::cell& c) const;
+                                      const ufc::cell& c) const override;
 
   /// Compute mapped coordinates for evaluate_basis()
   /// UFC @since 2.2.0
   void evaluate_basis_from_coordinates(const double X,
                                        const double Y,
                                        const double Z,
-                                       double** values) const;
+                                       double** values) const override;
 
   /// Evaluate basis function i at given point in cell
   /// UFC @since 1.1
   void evaluate_basis(uint i, double* values, const double* coordinates,
-                      const ufc::cell& c) const;
+                      const ufc::cell& c) const override;
 
   /// Evaluate all basis functions at given point in cell
   /// UFC @since 1.1 but not implemented
   void evaluate_basis_all(double* values, const double* coordinates,
-                          const ufc::cell& c) const;
+                          const ufc::cell& c) const override;
 
   /// Evaluate order n derivatives of basis function i at given point in cell
   /// UFC @since 1.1
   void evaluate_basis_derivatives(uint i, uint n, double* values,
                                   const double* coordinates,
-                                  const ufc::cell& c) const;
+                                  const ufc::cell& c) const override;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   /// UFC @since 1.1 but not implemented
   void evaluate_basis_derivatives_all(uint n, double* values,
                                       const double* coordinates,
-                                      const ufc::cell& c) const;
+                                      const ufc::cell& c) const override;
 
   /// Evaluate linear functional for dof i on the function f
   /// UFC @since 1.1
-  double evaluate_dof(uint i, const ufc::function& f, const ufc::cell& c) const;
+  double evaluate_dof(uint i, const ufc::function& f, const ufc::cell& c) const override;
 
   /// Evaluate linear functionals for all dofs on the function f
   /// UFC @since 1.1 but not implemented
   void evaluate_dofs(double* values, const ufc::function& f,
-                     const ufc::cell& c) const;
+                     const ufc::cell& c) const override;
 
   /// Interpolate vertex values from dof values
   /// UFC @since 1.1
   void interpolate_vertex_values(double* vertex_values,
                                  const double* dof_values,
-                                 const ufc::cell& c) const;
+                                 const ufc::cell& c) const override;
 
 
   /// Map coordinate xhat from reference cell to coordinate x in cell
   /// UFC @since 2.1.1
   void map_from_reference_cell(double* x, const double* xhat,
-                               const ufc::cell& c) const;
+                               const ufc::cell& c) const override;
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
   /// UFC @since 2.1.1
   void map_to_reference_cell(double* xhat, const double* x,
-                             const ufc::cell& c) const;
+                             const ufc::cell& c) const override;
 
   /// Return the number of sub elements (for a mixed element)
   /// UFC @since 1.1 + FIAT + UFL
-  uint num_sub_elements() const;
+  uint num_sub_elements() const override;
 
   /// Create a new finite element for sub element i (for a mixed element)
   /// UFC @since 1.1
-  ufc::finite_element* create_sub_element(uint i) const;
+  ufc::finite_element* create_sub_element(uint i) const override;
 
   /// Create a new class instance
   /// UFC @since 2.1.1
-  ufc::finite_element* create() const;
+  ufc::finite_element* create() const override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 

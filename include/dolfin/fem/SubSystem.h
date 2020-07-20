@@ -22,7 +22,7 @@ class SubSystem
 {
 public:
   /// Create empty sub system (no sub systems)
-  SubSystem();
+  SubSystem() = default;
 
   /// Create given sub system (one level)
   SubSystem( uint sub_system );
@@ -40,7 +40,7 @@ public:
   SubSystem( SubSystem const & sub_system );
 
   /// Assignment operator
-  SubSystem const & operator=( SubSystem const & sub_system );
+  SubSystem & operator=( SubSystem const & sub_system ) = default;
 
   /// Return number of levels for nested sub system
   uint depth() const;
@@ -66,12 +66,6 @@ private:
   Array< uint > sub_system;
 };
 
-//-----------------------------------------------------------------------------
-inline SubSystem const & SubSystem::operator=( SubSystem const & sub_system )
-{
-  this->sub_system = sub_system.sub_system;
-  return *this;
-}
 //-----------------------------------------------------------------------------
 inline uint SubSystem::depth() const
 {

@@ -253,13 +253,13 @@ private:
   MeshGeometry geometry_;
 
   /// Exterior boundary mesh
-  mutable BoundaryMesh * exterior_boundary_;
+  mutable BoundaryMesh * exterior_boundary_{nullptr};
 
   /// Interior boundary mesh
-  mutable BoundaryMesh * interior_boundary_;
+  mutable BoundaryMesh * interior_boundary_{nullptr};
 
   /// Intersection detector
-  mutable IntersectionDetector * intersection_detector_;
+  mutable IntersectionDetector * intersection_detector_{nullptr};
 
   /// Periodic constraints
   mutable Array<MappedManifold *> periodic_mappings_;

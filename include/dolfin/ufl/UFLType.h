@@ -21,8 +21,7 @@ public:
 
   ///
   type<T>()
-  {
-  }
+  = default;
 
   /// Constructor with default representation for given type
   type<T>(T const& s) :
@@ -41,18 +40,17 @@ public:
   }
 
   ///
-  ~type<T>()
-  {
-  }
+  ~type<T>() override
+  = default;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  virtual void display() const;
+  void display() const override;
 
   ///
   repr_t make_repr(std::vector<Object const *> const& prototype) const;
@@ -79,7 +77,7 @@ protected:
 
   ///
   std::vector<Object::repr_t> make_args_repr(
-      repr_t const& repr, bool without_pre_pos = false) const;
+      repr_t const& repr, bool without_pre_pos = false) const override;
 
 private:
 

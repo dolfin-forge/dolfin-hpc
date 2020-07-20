@@ -21,84 +21,84 @@ class Function;
 class Checkpoint
 {
 public:
-  typedef _ordered_map< std::string, Mesh * >          MeshMap;
-  typedef _ordered_map< std::string, Function * >      FunctionMap;
-  typedef _ordered_map< std::string, GenericVector * > VectorMap;
+  using MeshMap     = _ordered_map< std::string, Mesh * >;
+  using FunctionMap = _ordered_map< std::string, Function * >;
+  using VectorMap   = _ordered_map< std::string, GenericVector * >;
 
 #ifdef ENABLE_MPIIO
-  typedef MPI_File   stream_t;
-  typedef MPI_Offset offset_t;
+  using stream_t = MPI_File;
+  using offset_t = MPI_Offset;
 #else
-  typedef std::ofstream stream_t;
-  typedef long long     offset_t;
+  using stream_t = std::ofstream;
+  using offset_t = long long;
 #endif
 
   static uint32_t const NAME_LENGTH = 256;
 
   struct CheckpointHeader
   {
-    CheckpointHeader();
+    CheckpointHeader() = default;
     void disp() const;
 
-    double   time;
+    double   time{ 0.0 };
     uint32_t magic;
-    uint32_t pe_size;
-    uint32_t num_meshes;
-    uint32_t num_functions;
-    uint32_t num_vectors;
-    offset_t offset_psystem;
-    offset_t offset_mesh;
-    offset_t offset_functions;
-    offset_t offset_vectors;
+    uint32_t pe_size{ 0 };
+    uint32_t num_meshes{ 0 };
+    uint32_t num_functions{ 0 };
+    uint32_t num_vectors{ 0 };
+    offset_t offset_psystem{ 0 };
+    offset_t offset_mesh{ 0 };
+    offset_t offset_functions{ 0 };
+    offset_t offset_vectors{ 0 };
   };
 
   struct MeshHeader
   {
-    MeshHeader();
+    MeshHeader() = default;
     void disp() const;
 
-    CellType::Type type;
-    uint32_t tdim;
-    uint32_t gdim;
-    uint32_t num_vertices;
-    uint32_t num_cells;
-    uint32_t num_entities;
-    uint32_t num_centities;
-    uint32_t num_coords;
-    uint32_t num_ghosts;
+    CellType::Type type{ CellType::point };
+    uint32_t tdim{ 0 };
+    uint32_t gdim{ 0 };
+    uint32_t num_vertices{ 0 };
+    uint32_t num_cells{ 0 };
+    uint32_t num_entities{ 0 };
+    uint32_t num_centities{ 0 };
+    uint32_t num_coords{ 0 };
+    uint32_t num_ghosts{ 0 };
     char     name[NAME_LENGTH];
   #ifdef ENABLE_MPIIO
-    uint32_t offsets[4];
-    uint32_t displacement[4];
+    uint32_t offsets[4]{ 0, 0, 0, 0 };
+    uint32_t displacement[4]{ 0, 0, 0, 0 };
   #endif
   };
 
   struct FunctionHeader
   {
-    FunctionHeader();
+    FunctionHeader() = default;
     void disp() const;
 
-    uint32_t dim;
-    uint32_t size;
-    uint32_t offset[3];
+    uint32_t dim{ 0 };
+    uint32_t size{ 0 };
+    uint32_t offset[3]{ 0, 0, 0 };
     char     name[NAME_LENGTH];
   };
 
   struct VectorHeader
   {
-    VectorHeader();
+    VectorHeader() = default;
     void disp() const;
 
-    uint32_t offset[3];
+    uint32_t offset[3]{ 0, 0, 0 };
     char     name[NAME_LENGTH];
   };
 
 public:
   ///
-  Checkpoint();
+  Checkpoint() = default;
 
   ///
-  ~Checkpoint();
+  ~Checkpoint() = default;
 
   ///
   void write( std::string filename, real const t, MeshMap & meshes,
@@ -146,7 +146,7 @@ private:
   void        close_file( stream_t & file );
 
 private:
-  uint n_;
+  uint n_{ 0 };
 
   CheckpointHeader        chkp_header;
   Array< MeshHeader >     mesh_header;

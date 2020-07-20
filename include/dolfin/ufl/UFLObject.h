@@ -37,7 +37,7 @@ class Object
 
 public:
 
-  typedef ufl::repr repr_t;
+  using repr_t = ufl::repr;
 
   /// __repr__
   virtual repr_t const& repr() const = 0;
@@ -59,13 +59,11 @@ protected:
 
   ///
   Object()
-  {
-  }
+  = default;
 
   ///
   virtual ~Object()
-  {
-  }
+  = default;
 
   ///
   virtual void display() const = 0;
@@ -357,7 +355,7 @@ inline Object const* Object::create(repr_t const&)
 //    error("Unknown type of ufl::Object: '" + name + "'");
 //  }
 
-  return NULL;
+  return nullptr;
 }
 } /* namespace ufl */
 #endif /* __DOLFIN_UFL_OBJECT_H */

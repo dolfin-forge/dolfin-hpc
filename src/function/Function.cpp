@@ -24,20 +24,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Function::Function() :
-    GenericFunction(),
-    TimeDependent(),
-    mesh_(NULL),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+Function::Function()
+  : GenericFunction()
+  , TimeDependent()
 {
   // Do nothing
 }
@@ -47,16 +36,16 @@ Function::Function(Mesh& mesh) :
     GenericFunction(),
     TimeDependent(),
     mesh_(&mesh),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
+    discrete_space_(nullptr),
+    element_(nullptr),
+    dofmap_(nullptr),
+    scratch(nullptr),
+    X_(nullptr),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Do nothing
 }
@@ -73,9 +62,9 @@ Function::Function(Form& form, uint i) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -93,9 +82,9 @@ Function::Function(FiniteElementSpace const& space) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -113,9 +102,9 @@ Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -134,9 +123,9 @@ Function::Function(SubFunction const& sub_function) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialize vector, scratch space and ghosts
   InitializeVector();
@@ -175,16 +164,16 @@ Function::Function(Function const& other) :
     GenericFunction(),
     TimeDependent(other),
     mesh_(&other.mesh()),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
+    discrete_space_(nullptr),
+    element_(nullptr),
+    dofmap_(nullptr),
+    scratch(nullptr),
+    X_(nullptr),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   if(!other.empty())
   {
@@ -201,7 +190,7 @@ Function::~Function()
 //-----------------------------------------------------------------------------
 void Function::init(Form& form, uint i)
 {
-  if(mesh_ == NULL)
+  if(mesh_ == nullptr)
   {
     const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i].mesh();
   }
@@ -223,7 +212,7 @@ void Function::init(Form& form, uint i)
 //-----------------------------------------------------------------------------
 void Function::init(FiniteElementSpace const& space)
 {
-  if(mesh_ == NULL)
+  if(mesh_ == nullptr)
   {
     const_cast<Mesh *&>(mesh_) = &space.mesh();
   }
@@ -246,19 +235,19 @@ void Function::init(FiniteElementSpace const& space)
 void Function::clear()
 {
   delete X_;
-  X_ = NULL;
+  X_ = nullptr;
   delete discrete_space_;
-  discrete_space_ = NULL;
-  element_ = NULL;
-  dofmap_ = NULL;
+  discrete_space_ = nullptr;
+  element_ = nullptr;
+  dofmap_ = nullptr;
   delete scratch;
-  scratch = NULL;
+  scratch = nullptr;
   delete[] indices_;
-  indices_ = NULL;
+  indices_ = nullptr;
   delete[] data_cache_;
-  data_cache_ = NULL;
+  data_cache_ = nullptr;
   delete cache_mapping_;
-  cache_mapping_ = NULL;
+  cache_mapping_ = nullptr;
   renumbered_ = true;
 }
 
@@ -266,8 +255,8 @@ void Function::clear()
 void Function::evaluate(uint n, real* values, const real* x,
                         const ufc::cell& cell) const
 {
-  dolfin_assert( values != NULL );
-  dolfin_assert( x != NULL );
+  dolfin_assert( values != nullptr );
+  dolfin_assert( x != nullptr );
 
   UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
 
@@ -391,17 +380,16 @@ void Function::interpolate_vertex_values(real* values) const
       uint const rank = dolfin::MPI::rank();
       uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
-      Array<real> * sendbuf = new Array<real> [pe_size];
+      Array< Array<real> > sendbuf( pe_size );
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
-        _set<uint> const& adjs = it.adj();
-        for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)
+        for ( uint const & adj : it.adj() )
         {
-          sendbuf[*a].push_back(vertex_sumwghts[it.index()]);
+          sendbuf[adj].push_back(vertex_sumwghts[it.index()]);
           for (uint i = 0; i < scratch->size; ++i)
           {
-            sendbuf[*a].push_back(values[i * num_verts + it.index()]);
+            sendbuf[adj].push_back(values[i * num_verts + it.index()]);
           }
         }
       }
@@ -413,17 +401,16 @@ void Function::interpolate_vertex_values(real* values) const
       uint dst;
 
       //FIXME: Overallocate
-      uint recvsize = dist0.num_shared();
-      uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
-      int recvcount;
+      Array< uint > recvbuf( dist0.num_shared() );
+      int recvcount = 0;
       for (uint j = 1; j < pe_size; ++j)
       {
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
 
-        MPI::check_error( MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(),
-                                       MPI_UNSIGNED, dst, 1,  &recvbuf[0],
-                                       recvsize, MPI_DOUBLE, src, 1,
+        MPI::check_error( MPI_Sendrecv(sendbuf[dst].data(), sendbuf[dst].size(),
+                                       MPI_UNSIGNED, dst, 1, recvbuf.data(),
+                                       recvbuf.size(), MPI_DOUBLE, src, 1,
                                        MPI::DOLFIN_COMM, &status) );
         MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
@@ -440,10 +427,6 @@ void Function::interpolate_vertex_values(real* values) const
           }
         }
       }
-
-      //
-      delete[] recvbuf;
-      delete[] sendbuf;
 #endif
     }
 
@@ -511,7 +494,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 
   // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
-  if (cache_mapping_ != NULL)
+  if (cache_mapping_ != nullptr)
   {
     for (uint i = 0; i < scratch->local_dimension; ++i)
     {
@@ -652,8 +635,8 @@ Function& Function::operator=(Function const& other)
     X_ = new Vector();
     renumbered_ = false;
     cache_size_ = 0;
-    indices_ = NULL;
-    data_cache_ = NULL;
+    indices_ = nullptr;
+    data_cache_ = nullptr;
     //
     InitializeVector();
   }

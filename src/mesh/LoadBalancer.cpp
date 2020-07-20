@@ -15,6 +15,7 @@
 #include <dolfin/parameter/parameters.h>
 
 #include <string>
+#include <cstring>
 
 using namespace dolfin;
 

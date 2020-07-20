@@ -40,8 +40,7 @@ EnrichedElement::EnrichedElement(List const& elements) :
 
 //-----------------------------------------------------------------------------
 EnrichedElement::~EnrichedElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& EnrichedElement::family() const

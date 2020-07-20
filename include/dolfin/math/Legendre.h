@@ -28,7 +28,7 @@ public:
   Legendre(uint n);
 
   ///
-  ~Legendre();
+  ~Legendre() = default;
 
   /// Evaluation at given point
   real operator()(real x);

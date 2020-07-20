@@ -4,14 +4,13 @@
 #ifndef __DOLFIN_GENERIC_MATRIX_H
 #define __DOLFIN_GENERIC_MATRIX_H
 
-#include "GenericTensor.h"
+#include <dolfin/common/Array.h>
+#include <dolfin/la/GenericTensor.h>
 
 namespace dolfin
 {
 
 class GenericVector;
-template < class M >
-class Array;
 
 /// This class defines a common interface for matrices.
 
@@ -19,47 +18,45 @@ class GenericMatrix : public GenericTensor
 {
 public:
   /// Destructor
-  virtual ~GenericMatrix()
-  {
-  }
+  ~GenericMatrix() override = default;
 
   //--- Implementation of the GenericTensor interface ---
 
   /// Initialize zero tensor using sparsity pattern
-  virtual void init( const GenericSparsityPattern & sparsity_pattern ) = 0;
+  void init( const GenericSparsityPattern & sparsity_pattern ) override = 0;
 
   /// Return copy of tensor
-  virtual GenericMatrix * copy() const = 0;
+  GenericMatrix * copy() const override = 0;
 
   /// Return tensor rank (number of dimensions)
-  inline uint rank() const;
+  inline uint rank() const override;
 
   /// Return size of given dimension
-  virtual uint size( uint dim ) const = 0;
+  uint size( uint dim ) const override = 0;
 
   /// Get block of values
   inline void get( real * block,
                    const uint * num_rows,
-                   const uint * const * rows ) const;
+                   const uint * const * rows ) const override;
 
   /// Set block of values
   inline void set( const real * block,
                    const uint * num_rows,
-                   const uint * const * rows );
+                   const uint * const * rows ) override;
 
   /// Add block of values
   inline void add( const real * block,
                    const uint * num_rows,
-                   const uint * const * rows );
+                   const uint * const * rows ) override;
 
   /// Set all entries to zero and keep any sparse structure
-  virtual void zero() = 0;
+  void zero() override = 0;
 
   /// Finalize assembly of tensor
-  virtual void apply( FinalizeType finaltype = FINALIZE ) = 0;
+  void apply( FinalizeType finaltype = FINALIZE ) override = 0;
 
   /// Display tensor
-  virtual void disp( uint precision = 2 ) const = 0;
+  void disp( uint precision = 2 ) const override = 0;
 
   //--- Matrix interface ---
 

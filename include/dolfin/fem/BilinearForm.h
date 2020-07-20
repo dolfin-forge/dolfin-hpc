@@ -20,7 +20,7 @@ class BilinearForm : public Form
 {
 public:
 
-  typedef Form::Coefficients Coefficients;
+  using Coefficients = Form::Coefficients;
 
   static inline std::string name() { return "BilinearForm"; }
 
@@ -28,7 +28,7 @@ public:
   BilinearForm(Mesh& mesh);
 
   /// Destructor
-  ~BilinearForm();
+  ~BilinearForm() override;
 
   /// Trial space
   FiniteElementSpace const& trial_space() const;

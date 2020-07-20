@@ -17,17 +17,15 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector() :
-    Variable("x", "a sparse vector"),
-    x_(0),
-    is_distributed_(false),
-    is_ghosted_(false)
+    Variable("x", "a sparse vector")
+    
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(uint N, bool distributed) :
     Variable("x", "a sparse vector"),
-    x_(0),
+    x_(nullptr),
     is_distributed_(false),
     is_ghosted_(false)
 {
@@ -46,7 +44,7 @@ PETScVector::PETScVector(Vec x) :
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(PETScVector const& v) :
     Variable("x", "a vector"),
-    x_(0),
+    x_(nullptr),
     is_distributed_(false),
     is_ghosted_(false)
 {
@@ -88,7 +86,7 @@ void PETScVector::get(real* values) const
 {
 #if PETSC_VERSION_MAJOR > 2
   dolfin_assert(x_);
-  real const* data = NULL;
+  real const* data = nullptr;
   VecGetArrayRead(x_, &data);
   dolfin_assert(data);
   PetscInt n;
@@ -114,7 +112,7 @@ void PETScVector::get(real* values) const
 void PETScVector::set(real* values)
 {
   dolfin_assert(x_);
-  real* data = NULL;
+  real* data = nullptr;
   VecGetArray(x_, &data);
   dolfin_assert(data);
   PetscInt n;

@@ -206,7 +206,7 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
   }
   real const b = 1.0 / a;
 
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -217,7 +217,7 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(real const a)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -228,7 +228,7 @@ MeshGeometry& MeshGeometry::operator+=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(real const a)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -240,7 +240,7 @@ MeshGeometry& MeshGeometry::operator-=(real const a)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator+=(Point const& p)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
@@ -255,7 +255,7 @@ MeshGeometry& MeshGeometry::operator+=(Point const& p)
 //-----------------------------------------------------------------------------
 MeshGeometry& MeshGeometry::operator-=(Point const& p)
 {
-  typedef Array< real >::iterator CoordIter;
+  using CoordIter = Array<real>::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
@@ -276,7 +276,7 @@ int MeshGeometry::token() const
 //-----------------------------------------------------------------------------
 void MeshGeometry::update_token()
 {
-  timestamp_ = std::time(NULL);
+  timestamp_ = std::time(nullptr);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::disp() const
@@ -300,10 +300,11 @@ void MeshGeometry::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-MeshGeometry const& MeshGeometry::operator>>(Array<real>& A) const
+MeshGeometry const& MeshGeometry::operator>>(Array<real>&) const
 {
-  A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);
-  A %= dim_;
+  error( "MeshGeometry::operator>> unimplemented / deprecated." );
+  // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);
+  // A %= dim_;
   return *this;
 }
 //-----------------------------------------------------------------------------

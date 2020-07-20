@@ -8,6 +8,7 @@
 #include <dolfin/mesh/Vertex.h>
 
 #include <algorithm>
+#include <cstring>
 
 namespace dolfin
 {
@@ -48,10 +49,6 @@ uint const HexahedronCell::FNV[6][4] =
 //-----------------------------------------------------------------------------
 HexahedronCell::HexahedronCell() :
     CellType("hexahedron", CellType::hexahedron, CellType::quadrilateral)
-{
-}
-//-----------------------------------------------------------------------------
-HexahedronCell::~HexahedronCell()
 {
 }
 //-----------------------------------------------------------------------------

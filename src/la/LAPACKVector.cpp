@@ -3,6 +3,7 @@
 
 #include <dolfin/la/LAPACKVector.h>
 
+#include <cstring>
 #include <sstream>
 
 namespace dolfin
@@ -13,7 +14,7 @@ LAPACKVector::LAPACKVector(uint M) :
     M_(M),
     values_(new double[M])
 {
-  memset(values_, 0, sizeof(double)*M_);
+  std::memset(values_, 0, sizeof(double)*M_);
 }
 
 //-----------------------------------------------------------------------------

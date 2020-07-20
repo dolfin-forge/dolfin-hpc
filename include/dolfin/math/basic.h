@@ -8,7 +8,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 
-#include <time.h>
+#include <ctime>
 #include <cstdlib>
 #include <cmath>
 #include <limits>
@@ -173,7 +173,7 @@ static inline real rand()
 {
   if (!rand_seeded)
   {
-    unsigned int s = static_cast<long int>(::time(0));
+    unsigned int s = static_cast<long int>(::time(nullptr));
     std::srand(s);
     rand_seeded = true;
   }

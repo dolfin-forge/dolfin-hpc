@@ -48,14 +48,14 @@ public:
              SubSystem const& sub_system);
 
   /// Destructor
-  ~PeriodicBC();
+  ~PeriodicBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 

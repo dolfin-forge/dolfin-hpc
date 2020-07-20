@@ -26,7 +26,7 @@
 typedef idx_t pm_idx_t;
 
 // (par)metis real type
-typedef real_t pm_real_t;
+using pm_real_t = real_t;
 
 #else
 #define pm_idx_t  idxtype
@@ -85,7 +85,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t ncells = static_cast<pm_idx_t>(mesh.num_cells());
 
   /*
-   * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-NULL
+   * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-nullptr
    * which forbids empty partitions.
    *
    */
@@ -97,7 +97,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   elmdist[rank] = ncells;
   MPI::all_gather( &ncells, 1, elmdist, 1 );
 
-  pm_idx_t *elmwgt = NULL;
+  pm_idx_t *elmwgt = nullptr;
 
   if( weight )
   {

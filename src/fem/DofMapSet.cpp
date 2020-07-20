@@ -68,10 +68,9 @@ void DofMapSet::Check(ufc::form const& form, Mesh& mesh)
 void DofMapSet::ReleaseAll()
 {
   // Release all dof maps in the cache
-  for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
-      it != dof_map_set.end(); ++it)
+  for ( DofMap * dofmap : dof_map_set )
   {
-    DofMap::release(**it);
+    DofMap::release(*dofmap);
   }
 }
 

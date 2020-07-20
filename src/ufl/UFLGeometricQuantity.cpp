@@ -15,8 +15,7 @@ GeometricQuantity::GeometricQuantity(std::string const& name, Cell const& cell) 
 
 //-----------------------------------------------------------------------------
 GeometricQuantity::~GeometricQuantity()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Cell const& GeometricQuantity::cell()

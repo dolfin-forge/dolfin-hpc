@@ -12,6 +12,8 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/main/MPI.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 
@@ -22,7 +24,7 @@ DofMap::DofMap(Mesh& mesh, ufc::form const& form, uint const i) :
     ufc_dofmap_(form.create_dofmap(i)),
     numbering_(DofNumbering::create(mesh, *ufc_dofmap_)),
     hash_(make_hash(mesh, *ufc_dofmap_)),
-    periodic_dofmap_(NULL)
+    periodic_dofmap_(nullptr)
 {
   init();
 }
@@ -34,7 +36,7 @@ DofMap::DofMap(Mesh& mesh, ufc::dofmap& dofmap, bool const owner) :
     ufc_dofmap_((owner ? &dofmap : dofmap.create())),
     numbering_(DofNumbering::create(mesh, *ufc_dofmap_)),
     hash_(make_hash(mesh, *ufc_dofmap_)),
-    periodic_dofmap_(NULL)
+    periodic_dofmap_(nullptr)
 {
   init();
 }
@@ -46,7 +48,7 @@ DofMap::DofMap(DofMap const& dofmap, uint i) :
     ufc_dofmap_(dofmap.create_sub_dofmap(i)),
     numbering_(DofNumbering::create(dofmap.mesh(), *ufc_dofmap_)),
     hash_(make_hash(mesh(), *ufc_dofmap_)),
-    periodic_dofmap_(NULL)
+    periodic_dofmap_(nullptr)
 {
   message(1, "DofMap: Extracted dof map for subspace: %s",
           ufc_dofmap_->signature());
@@ -61,7 +63,7 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
     ufc_dofmap_(dofmap.create_sub_dofmap(subsystem, offset_)),
     numbering_(DofNumbering::create(dofmap.mesh(), *ufc_dofmap_)),
     hash_(make_hash(mesh(), *ufc_dofmap_)),
-    periodic_dofmap_(NULL)
+    periodic_dofmap_(nullptr)
 {
   // Check that dof map has not be re-ordered
   offset = offset_;
@@ -77,10 +79,10 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
 //-----------------------------------------------------------------------------
 DofMap::~DofMap()
 {
-  delete periodic_dofmap_;
-  flattened_.free();
-  delete numbering_;
   delete ufc_dofmap_;
+  delete numbering_;
+  destruct( flattened_ );
+  delete periodic_dofmap_;
 }
 
 //-----------------------------------------------------------------------------
@@ -173,10 +175,10 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
 void DofMap::init()
 {
   // Build the DOLFIN dofmap
-  message(1, "DofMap: init dofmap for signature:\n %s", this->signature());
+  message(1, "DofMap: init dofmap for signature:\n %s", signature());
   numbering_->build();
-  message(1, "DofMap: offset = %u; size = %u", numbering_->offset(),
-          numbering_->size());
+  message(1, "DofMap: offset = %u; size = %u",
+             numbering_->offset(), numbering_->size());
 
   // Information for mixed elements
   uint const nb_sub = this->num_sub_dofmaps();

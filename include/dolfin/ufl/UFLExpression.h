@@ -35,7 +35,7 @@ class Expression : public Class
 public:
 
   ///
-  ~Expression();
+  ~Expression() override;
 
   ///
   static Expression const * create(Object::repr_t const& repr);
@@ -89,13 +89,13 @@ public:
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
   /// __repr__
-  virtual repr_t const& repr() const = 0;
+  repr_t const& repr() const override = 0;
 
   /// __str__
-  virtual std::string const& str() const = 0;
+  std::string const& str() const override = 0;
 
   ///
-  virtual void display() const = 0;
+  void display() const override = 0;
 
 private:
 

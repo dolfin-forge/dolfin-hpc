@@ -64,7 +64,7 @@ public:
   Function(Function const& other);
 
   /// Destructor
-  ~Function();
+  ~Function() override;
 
   //--- DEFERRED INITIALIZATION -----------------------------------------------
   // NOTE: Beware, camembert !
@@ -91,49 +91,49 @@ public:
 
   /// Evaluate function at given point in cell
   void evaluate(real* values, const real* coordinates,
-                const ufc::cell& cell) const;
+                const ufc::cell& cell) const override;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given points in cell
   void evaluate(uint n, real* values, const real* coordinates,
-                const ufc::cell& cell) const;
+                const ufc::cell& cell) const override;
 
   /// Evaluate function at given point
-  void eval(real* values, const real* x) const;
+  void eval(real* values, const real* x) const override;
 
   /// Return the rank of the value space
-  uint rank() const;
+  uint rank() const override;
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const;
+  uint dim(uint i) const override;
 
   // Return the value size
-  uint value_size() const;
+  uint value_size() const override;
 
   /// Interpolate function to vertices of mesh
-  void interpolate_vertex_values(real* values) const;
+  void interpolate_vertex_values(real* values) const override;
 
   /// Interpolate function to finite element space on cell
   void interpolate(real* coefficients, const ufc::cell& cell,
                    const ufc::finite_element& finite_element,
-                   const Cell& dolfin_cell) const;
+                   const Cell& dolfin_cell) const override;
 
   /// Interpolate function to finite element space on facet
   void interpolate(real* coefficients, const ufc::cell& cell,
                    const ufc::finite_element& finite_element,
-                   const Cell& dolfin_cell, uint facet) const;
+                   const Cell& dolfin_cell, uint facet) const override;
 
   /// Synchronize values
-  void sync();
+  void sync() override;
 
   /// Display basic information
-  void disp() const;
+  void disp() const override;
 
   //---------------------------------------------------------------------------
 
   /// Return the mesh
-  Mesh& mesh() const;
+  Mesh& mesh() const override;
 
   //---------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ public:
 private:
 
   /// Time synchronization hook
-  inline void sync(Time const& t) { TimeDependent::operator ()(t); }
+  inline void sync(Time const& t) override { TimeDependent::operator ()(t); }
 
   /// Initialize Vector
   void InitializeVector();
@@ -239,30 +239,30 @@ private:
   void InitializeGhosts();
 
   /// Mesh, only allow modification by swap or assignment
-  Mesh * const mesh_;
+  Mesh * const mesh_{nullptr};
 
   /// Discrete space
-  FiniteElementSpace * discrete_space_;
-  FiniteElement const * element_;
-  DofMap const * dofmap_;
-  ScratchSpace * scratch;
+  FiniteElementSpace * discrete_space_{nullptr};
+  FiniteElement const * element_{nullptr};
+  DofMap const * dofmap_{nullptr};
+  ScratchSpace * scratch{nullptr};
 
   /// Vector of dofs
-  GenericVector * X_;
+  GenericVector * X_{nullptr};
 
   /// Renumbered dof_map;
-  bool renumbered_;
-  uint cache_size_;
-  uint * indices_;
-  real * data_cache_;
-  _map<uint, uint> * cache_mapping_;
+  bool renumbered_{false};
+  uint cache_size_{0};
+  uint * indices_{nullptr};
+  real * data_cache_{nullptr};
+  _map<uint, uint> * cache_mapping_{nullptr};
 
 };
 
 //-----------------------------------------------------------------------------
 inline bool Function::empty() const
 {
-  return ( discrete_space_ == NULL );
+  return ( discrete_space_ == nullptr );
 }
 
 //--- UFC INTERFACE -----------------------------------------------------------

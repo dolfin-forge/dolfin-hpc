@@ -15,21 +15,18 @@ namespace dolfin
 
 #if !defined( HAVE_MPI )
 
-//-----------------------------------------------------------------------------
-
-using MPI_Datatype = void *;
+typedef void * MPI_Datatype;
 
 template < typename T >
 struct MPI_type
 {
-	static constexpr MPI_Datatype value = nullptr;
+	static MPI_Datatype value;
 };
 
-//-----------------------------------------------------------------------------
+template< typename T >
+MPI_Datatype MPI_type<T>::value = nullptr;
 
 #else
-
-//-----------------------------------------------------------------------------
 
 /**
  * @brief Get the MPI Datatype associated to the C/C++ datatype
@@ -40,46 +37,8 @@ struct MPI_type
 template < typename T >
 struct MPI_type
 {
-	static MPI_Datatype const value;
+	static MPI_Datatype value;
 };
-
-//-----------------------------------------------------------------------------
-
-extern template MPI_Datatype const MPI_type< bool >::value;
-
-//-----------------------------------------------------------------------------
-
-// signed integral types
-
-extern template MPI_Datatype const MPI_type< char >::value;
-extern template MPI_Datatype const MPI_type< signed char >::value;
-extern template MPI_Datatype const MPI_type< signed short int >::value;
-extern template MPI_Datatype const MPI_type< signed int >::value;
-extern template MPI_Datatype const MPI_type< signed long int >::value;
-extern template MPI_Datatype const MPI_type< signed long long >::value;
-
-//-----------------------------------------------------------------------------
-
-// unsigned integral types
-
-extern template MPI_Datatype const MPI_type< unsigned char >::value;
-extern template MPI_Datatype const MPI_type< unsigned short int >::value;
-extern template MPI_Datatype const MPI_type< unsigned int >::value;
-extern template MPI_Datatype const MPI_type< unsigned long int >::value;
-
-#if ( MPI_VERSION > 1 )
-extern template MPI_Datatype const MPI_type< unsigned long long >::value;
-#endif
-
-//-----------------------------------------------------------------------------
-
-// floating point types
-
-extern template MPI_Datatype const MPI_type< float >::value;
-extern template MPI_Datatype const MPI_type< double >::value;
-extern template MPI_Datatype const MPI_type< long double >::value;
-
-//-----------------------------------------------------------------------------
 
 #endif
 

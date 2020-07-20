@@ -109,6 +109,7 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
+AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 if test "x${enable_mpi}" != xno; then
    AX_MPI
    CXX="$MPICXX"

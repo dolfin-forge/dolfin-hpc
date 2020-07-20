@@ -1,4 +1,5 @@
 0.9.1-hpc [2020-05-XX]
+ - C++11 required to build DOLFIN HPC
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
    those can be installed from bitbucket.org/adaptivesimulations
  - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable

@@ -123,10 +123,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
   uint const gdim = mesh.geometry_dimension();
-#ifdef HAVE_MPI
-  uint const pe_size = MPI::size();
-  uint const rank    = MPI::rank();
-#endif
+  uint const pe_size = PE::size();
+  uint const rank    = PE::rank();
 
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;

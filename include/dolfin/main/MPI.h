@@ -38,8 +38,8 @@ public:
   using Communicator = MPI_Comm;
   using offset_t     = MPI_Offset;
 #else
-  typedef Communicator =int;
-  typedef offset_t     = long long;
+  using Communicator = int;
+  using offset_t     = long long;
 #endif
 
   /*
@@ -144,6 +144,8 @@ public:
   /// Check for MPI errors
   static int check_error( int const mpi_error );
 
+#ifdef HAVE_MPI
+  
   static void file_open( MPI_File & file, std::string const & filename,
                          int mode, Communicator & comm = MPI::DOLFIN_COMM,
                          MPI_Info info = MPI_INFO_NULL );
@@ -188,11 +190,14 @@ public:
                                      offset_t offset,
                                      MPI_Status * status = MPI_STATUS_IGNORE );
 
+  static void file_close( MPI_File & file );
+  
+#endif
+  
   template< typename T >
   static void exscan_sum( T const * send, T * recv, int count,
                           Communicator & comm = MPI::DOLFIN_COMM  );
 
-  static void file_close( MPI_File & file );
 private:
 
   static real time_;

@@ -431,6 +431,7 @@ int MPI::check_error( int const mpi_error )
   return mpi_error;
 }
 #endif // DEBUG
+#ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
 void MPI::file_open( MPI_File & file, std::string const & filename,
                     int mode, Communicator & comm, MPI_Info info )
@@ -443,5 +444,5 @@ void MPI::file_close( MPI_File & file )
   check_error( MPI_File_close( &file ) );
 }
 //-----------------------------------------------------------------------------
-
+#endif
 } /* namespace dolfin */

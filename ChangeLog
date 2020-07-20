@@ -15,6 +15,8 @@
  - Changed Connectivity interface to use Array<> instead of raw pointers
  - Fixed tic/toc counters
  - Fixed regression in I/O interface (short filenames)
+ - revived P1 optimizations
+ - revived function cache
  - Various bugs and portability fixes
  - Added new C++ based mesh converter (DOLFIN XML -> DOLFIN BINARY)
 0.9.0-hpc [2020-02-05]

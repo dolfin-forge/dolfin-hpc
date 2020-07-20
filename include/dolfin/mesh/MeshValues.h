@@ -6,11 +6,11 @@
 
 #include <dolfin/mesh/MeshFunction.h>
 
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -24,49 +24,55 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-template<class T, class E, uint N>
-struct MeshValues : public MeshFunction<T>
+template < class T, class E, uint N >
+struct MeshValues : public MeshFunction< T >
 {
   ///
-  MeshValues(Mesh& mesh, T val = static_cast<T>(0)) :
-    MeshFunction<T>(mesh, entity_dimension<E>(mesh), val)
+  MeshValues( Mesh & mesh, T val = static_cast< T >( 0 ) )
+    : MeshFunction< T >( mesh, entity_dimension< E >( mesh ), val )
   {
-    if (N > 1)
+    if ( N > 1 )
     {
-      error("MeshValues : vector values are unsupported for now.");
+      error( "MeshValues : vector values are unsupported for now." );
     }
   }
 
+  MeshValues( MeshValues< T, E, N > const & other )
+    : MeshFunction< T >( other )
+  {
+  }
+
   ///
-  template<class V>
-  MeshValues(MeshValues<V, E, N> const& other) :
-      MeshFunction<T>(other)
+  template < class V >
+  MeshValues( MeshValues< V, E, N > const & other )
+    : MeshFunction< T >( other )
   {
   }
 
   /// Equality
-  bool operator==(MeshValues<T, E, N> const& other);
+  bool operator==( MeshValues< T, E, N > const & other );
 
   /// Equality
-  bool operator!=(MeshValues<T, E, N> const& other);
+  bool operator!=( MeshValues< T, E, N > const & other );
 
   /// Return value size
   inline uint value_size();
 
   /// Assignment operator
-  MeshValues<T, E, N>& operator=(MeshValues<T, E, N> const& other);
+  MeshValues< T, E, N > & operator=( MeshValues< T, E, N > const & other );
 
   /// Assignment conversion operator
-  template <class V>
-  MeshValues<T, E, N>& operator=(MeshValues<V, E, N> const& other);
+  template < class V >
+  MeshValues< T, E, N > & operator=( MeshValues< V, E, N > const & other );
 
   /// Set all values to given value
-  inline MeshValues<T, E, N>& operator=(T const& value);
+  inline MeshValues< T, E, N > & operator=( T const & value );
 
   /// Swap operator
-  friend void swap( MeshValues<T,E,N>& a, MeshValues<T,E,N>& b )
+  friend void swap( MeshValues< T, E, N > & a, MeshValues< T, E, N > & b )
   {
-    swap( static_cast<MeshFunction<T>&>(a), static_cast<MeshFunction<T>&>(b) );
+    swap( static_cast< MeshFunction< T > & >( a ),
+          static_cast< MeshFunction< T > & >( b ) );
   }
 
   ///--- Value accessors
@@ -75,31 +81,30 @@ struct MeshValues : public MeshFunction<T>
   //       not valid until MeshFunction supports vector values.
 
   /// Return value at given entity
-  inline T& operator()(E const& entity, uint i = 0);
+  inline T & operator()( E const & entity, uint i = 0 );
 
   /// Return value at given entity
-  inline T const& operator()(E const& entity, uint i = 0) const;
+  inline T const & operator()( E const & entity, uint i = 0 ) const;
 
   /// Return value at given index;
-  inline T& operator()(uint index, uint i = 0);
+  inline T & operator()( uint index, uint i = 0 );
 
   /// Return value at given index
-  inline T const& operator()(uint index, uint i = 0) const;
+  inline T const & operator()( uint index, uint i = 0 ) const;
 
   ///--- Array accessors
 
   /// Return point to value at given entity
-  inline T * operator[](E& entity);
+  inline T * operator[]( E & entity );
 
   /// Return pointer to value at given entity
-  inline T const * operator[](E& entity) const;
+  inline T const * operator[]( E & entity ) const;
 
   /// Return point to value at given index
-  inline T * operator[](uint index);
+  inline T * operator[]( uint index );
 
   /// Return pointer to value at given index
-  inline T const * operator[](uint index) const;
-
+  inline T const * operator[]( uint index ) const;
 };
 
 //-----------------------------------------------------------------------------
@@ -235,4 +240,3 @@ inline T const * MeshValues< T, E, N >::operator[]( uint index ) const
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_MESH_VALUES_H */
-

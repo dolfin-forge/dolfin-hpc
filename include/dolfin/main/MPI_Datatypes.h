@@ -15,18 +15,21 @@ namespace dolfin
 
 #if !defined( HAVE_MPI )
 
-typedef void * MPI_Datatype;
+//-----------------------------------------------------------------------------
+
+using MPI_Datatype = void *;
 
 template < typename T >
 struct MPI_type
 {
-	static MPI_Datatype value;
+	static constexpr MPI_Datatype value = nullptr;
 };
 
-template< typename T >
-MPI_Datatype MPI_type<T>::value = nullptr;
+//-----------------------------------------------------------------------------
 
 #else
+
+//-----------------------------------------------------------------------------
 
 /**
  * @brief Get the MPI Datatype associated to the C/C++ datatype
@@ -37,7 +40,7 @@ MPI_Datatype MPI_type<T>::value = nullptr;
 template < typename T >
 struct MPI_type
 {
-	static MPI_Datatype value;
+	static MPI_Datatype const value;
 };
 
 #endif

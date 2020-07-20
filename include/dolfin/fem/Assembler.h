@@ -7,8 +7,6 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshValues.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 

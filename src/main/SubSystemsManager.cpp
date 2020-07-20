@@ -16,6 +16,8 @@
 #include <zoltan_cpp.h>
 #endif
 
+#include <cstdlib>
+
 namespace dolfin
 {
 
@@ -50,12 +52,6 @@ int SubSystemsManager::PETSc::sema  = 0;
 int SubSystemsManager::Zoltan::sema = 0;
 
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager() :
-    count_(0),
-    state_(0)
-{
-}
-//-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager(SubSystemsManager const&) :
     count_(0),
     state_(0)
@@ -72,6 +68,12 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
 {
   if (count_ == 0 )
   {
+    char const * verbosity = std::getenv( "DOLFIN_VERBOSE" );
+    if ( verbosity != nullptr )
+    {
+      verbose( std::atoi( verbosity ) );
+    }
+
 #ifdef HAVE_MPI
     SubSystemsManager::MPI::init(argc, argv, n);
 #else
@@ -226,6 +228,9 @@ bool SubSystemsManager::PETSc::init(int argc, char* argv[])
   // Initialize PETSc
   PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
   SUBSYSTEM_SET_INIT(PETSc);
+
+  // remove PETSc Signal handling
+  PetscPopSignalHandler();
 
 #ifdef HAVE_MPI
   // If PETSc initialized MPI, it is responsible for MPI finalization

@@ -38,8 +38,7 @@ Tuple::Tuple(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 Tuple::~Tuple()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Tuple::operands(std::string const& name) const

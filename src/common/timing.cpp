@@ -39,7 +39,7 @@ real tocd( uint level )
 //-----------------------------------------------------------------------------
 real time()
 {
-  return static_cast<real>( clock() ) / CLOCKS_PER_SEC;
+  return static_cast< real >( clock() ) / CLOCKS_PER_SEC;
 }
 //-----------------------------------------------------------------------------
 

@@ -13,12 +13,12 @@ Lagrange::Lagrange(unsigned int q)
 {
   this->q = q;
   n = q + 1;
-  
+
   points = new real[n];
   for (unsigned int i = 0; i < n; i++)
     points[i] = 0.0;
 
-  constants = 0;
+  constants = nullptr;
   init();
 }
 //-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ Lagrange::Lagrange(const Lagrange& p)
   for (unsigned int i = 0; i < p.n; i++)
     points[i] = p.points[i];
 
-  constants = 0;
+  constants = nullptr;
   init();
 }
 //-----------------------------------------------------------------------------
@@ -39,11 +39,11 @@ Lagrange::~Lagrange()
 {
   if ( points )
     delete [] points;
-  points = 0;
+  points = nullptr;
 
   if ( constants )
     delete [] constants;
-  constants = 0;
+  constants = nullptr;
 }
 //-----------------------------------------------------------------------------
 void Lagrange::set(unsigned int i, real x)
@@ -84,14 +84,14 @@ real Lagrange::eval(unsigned int i, real x)
   for (unsigned int j = 0; j < n; j++)
     if ( j != i )
       product *= x - points[j];
-  
+
   return product;
 }
 //-----------------------------------------------------------------------------
 real Lagrange::ddx(unsigned int i, real x)
 {
   dolfin_assert(i <= q);
-  
+
   real sum(0);
   for (unsigned int j = 0; j < n; j++) {
     if ( j != i ) {
@@ -109,10 +109,10 @@ real Lagrange::ddx(unsigned int i, real x)
 real Lagrange::dqdx(unsigned int i)
 {
   real product = constants[i];
-  
+
   for (unsigned int j = 1; j <= q; j++)
     product *= (real) j;
-  
+
   return product;
 }
 //-----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ void Lagrange::init()
   // since we don't have to check each time that the constants have been
   // computed.
 
-  if ( constants == 0 )
+  if ( constants == nullptr )
     constants = new real[n];
 
   // Compute constants

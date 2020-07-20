@@ -10,11 +10,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SubSystem::SubSystem()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 SubSystem::SubSystem(uint sub_system)
 {
   this->sub_system.push_back(sub_system);
@@ -47,29 +42,13 @@ SubSystem::SubSystem(SubSystem const& sub_system)
   this->sub_system = sub_system.sub_system;
 }
 //-----------------------------------------------------------------------------
-SubSystem const& SubSystem::operator=(SubSystem const& sub_system)
-{
-  this->sub_system = sub_system.sub_system;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-uint SubSystem::depth() const
-{
-  return sub_system.size();
-}
-//-----------------------------------------------------------------------------
-Array<uint> const& SubSystem::array() const
-{
-  return sub_system;
-}
-//-----------------------------------------------------------------------------
 std::string SubSystem::str() const
 {
   std::stringstream ss;
   ss << "[ ";
-  for (uint i = 0; i < sub_system.size(); ++i)
+  for ( uint const & sub : sub_system )
   {
-    ss << sub_system[i] << " ";
+    ss << sub << " ";
   }
   ss << "]";
   return ss.str();

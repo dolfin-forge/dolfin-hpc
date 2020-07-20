@@ -9,11 +9,13 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace dolfin
 {
@@ -21,7 +23,7 @@ namespace dolfin
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename) :
     GenericFile("VTK", filename),
-    _t(0)
+    _t( nullptr )
 {
 }
 //----------------------------------------------------------------------------
@@ -29,11 +31,6 @@ VTKFile::VTKFile(const std::string filename, real const& t) :
     GenericFile("VTK", filename),
     _t(&t)
 {
-}
-//----------------------------------------------------------------------------
-VTKFile::~VTKFile()
-{
-  // Do nothing
 }
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(Mesh& mesh)
@@ -81,7 +78,7 @@ void VTKFile::operator<<(Mesh& mesh)
   // Increase the number of times we have saved the mesh
   ++counter;
 
-  message(1, "Saved mesh %s (%s) to file %s in VTK format.",
+  message(1, "VTKFile: Saved mesh %s (%s) to file %s in VTK format.",
           mesh.name().c_str(), mesh.label().c_str(), filename.c_str());
 }
 //----------------------------------------------------------------------------
@@ -188,7 +185,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Increase the number of times we have saved the function
   ++counter;
 
-  message(1, "Saved %d %s to file %s in VTK format.", f.size(),
+  message(1, "VTKFile: Saved %d %s to file %s in VTK format.", f.size(),
 	  (f.size() > 1 ? "functions" : "function"),
 	  filename.c_str());
 
@@ -224,14 +221,14 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   // Write cell connectivity
   fprintf(fp, "<Cells>\n");
-  fprintf(fp, "<DataArray  type=\"UInt32\"  Name=\"connectivity\"  format=\"binary\">\n");
-  std::vector<uint32_t> c_data(cell_verts_block_size);
-  std::vector<uint32_t>::iterator c_entry = c_data.begin();
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\">\n");
+  std::vector<int32_t> c_data(cell_verts_block_size);
+  std::vector<int32_t>::iterator c_entry = c_data.begin();
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     for (VertexIterator v(*c); !v.end(); ++v)
     {
-      *c_entry++ = v->index();
+      *c_entry++ = static_cast<int32_t>( v->index() );
     }
   }
 
@@ -242,17 +239,17 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   fprintf(fp, "</DataArray>\n");
 
   // Write offset into connectivity array for the end of each cell
-  fprintf(fp, "<DataArray  type=\"UInt32\"  Name=\"offsets\"  format=\"binary\">\n");
-  std::vector<uint32_t>::iterator cc_entry = c_data.begin();
-
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">\n");
+  std::vector<int32_t> o_data(cell_verts_block_size);
+  std::vector<int32_t>::iterator oo_entry = o_data.begin();
   for (uint offsets = 1; offsets <= num_mesh_cells; ++offsets)
   {
-    *cc_entry++ = offsets * num_cell_verts;
+    *oo_entry++ = static_cast<int32_t>( offsets * num_cell_verts );
   }
 
-  std::stringstream base64_cc_stream;
-  encode_stream(base64_cc_stream, c_data);
-  fprintf(fp, "%s\n", base64_cc_stream.str().c_str());
+  std::stringstream base64_oo_stream;
+  encode_stream(base64_oo_stream, o_data);
+  fprintf(fp, "%s\n", base64_oo_stream.str().c_str());
   fprintf(fp, "</DataArray>\n");
 
   //Write cell type
@@ -476,7 +473,7 @@ void VTKFile::ResultsWrite(
 
     // Copy values
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3|n)^1 = (2|3|n) so ...
-    real * values = NULL;
+    real * values = nullptr;
     u->get_block(values);
     switch (value_size)
       {
@@ -621,8 +618,8 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
            << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">\n"
            << "<PUnstructuredGrid GhostLevel=\"0\">\n"
            << "<PCellData>\n"
-           << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\" />\n"
-           << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"connectivity\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"offsets\" />\n"
            << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
            << "</PCellData>\n"
            << "<PPoints>\n"
@@ -649,12 +646,9 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
 
   std::string fname;
   // Remove rank from vtu filename ( <rank>.vtu)
-  fname.assign(vtu_filename, filename.find_last_of("/") + 1,
-               vtu_filename.size() - 5);
+  fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
   for (uint i = 0; i < MPI::size(); i++)
-  {
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
-  }
 
   pvtuFile << "</PUnstructuredGrid>\n"
            << "</VTKFile>\n";
@@ -702,8 +696,8 @@ void VTKFile::pvtuFileWriteFunction(
 
   //
   pvtuFile << "<PCellData>\n"
-           << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />\n"
-           << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"connectivity\"  />\n"
+           << "<PDataArray  type=\"Int32\"  Name=\"offsets\" />\n"
            << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
            << "</PCellData>\n";
 
@@ -744,8 +738,7 @@ void VTKFile::pvtuFileWriteFunction(
   std::string fname;
 
   // Remove rank from vtu filename ( <rank>.vtu)
-  fname.assign(vtu_filename, filename.find_last_of("/") + 1,
-               vtu_filename.size() - 5);
+  fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
   for (uint i = 0; i < MPI::size(); i++)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
@@ -798,18 +791,16 @@ void VTKFile::VTKHeaderClose() const
 //----------------------------------------------------------------------------
 void VTKFile::vtuNameUpdate(const int counter)
 {
-  std::string filestart, extension;
+  std::string filestart;
   std::ostringstream fileid, newfilename;
 
   fileid.fill('0');
   fileid.width(6);
 
-  filestart.assign(filename, 0, filename.find("."));
-  extension.assign(filename, filename.find("."), filename.size());
+  filestart.assign(filename, 0, filename.rfind("."));
 
   fileid << counter;
-  newfilename << filestart << fileid.str() << "_" << PE::rank()
-              << ".vtu";
+  newfilename << filestart << fileid.str() << "_" << PE::rank() << ".vtu";
   vtu_filename = newfilename.str();
 
   // Make sure file is empty
@@ -819,18 +810,16 @@ void VTKFile::vtuNameUpdate(const int counter)
 //----------------------------------------------------------------------------
 void VTKFile::pvtuNameUpdate(const int counter)
 {
-  std::string filestart, extension;
+  std::string filestart;
   std::ostringstream fileid, newfilename;
 
   fileid.fill('0');
   fileid.width(6);
 
-  filestart.assign(filename, 0, filename.find("."));
-  extension.assign(filename, filename.find("."), filename.size());
+  filestart.assign(filename, 0, filename.rfind("."));
 
   fileid << counter;
   newfilename << filestart << fileid.str() << ".pvtu";
-
   pvtu_filename = newfilename.str();
 
   // Make sure file is empty
@@ -931,8 +920,8 @@ template<class T>
     // Increase the number of times we have saved the mesh function
     ++counter;
 
-    message(1, "Saved mesh function %d times.", counter);
-    message(1, "Saved mesh function ( %s ) to file %s in VTK format.",
+    message(1, "VTKFile: Saved mesh function %d times.", counter);
+    message(1, "VTKFile: Saved mesh function ( %s ) to file %s in VTK format.",
             mesh.label().c_str(), filename.c_str());
   }
 //-----------------------------------------------------------------------------

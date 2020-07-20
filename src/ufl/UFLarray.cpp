@@ -15,8 +15,7 @@ array::array(Object const& other, bool const unpack) :
 
 //-----------------------------------------------------------------------------
 array::~array()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Object::repr_t const& array::repr() const

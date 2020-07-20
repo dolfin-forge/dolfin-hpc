@@ -4,12 +4,11 @@
 #ifndef __DOLFIN_SCALAR_H
 #define __DOLFIN_SCALAR_H
 
-
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/parameter/parameters.h>
 #include "GenericTensor.h"
-#include <dolfin/main/MPI.h>
 #include <dolfin/common/maybe_unused.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PETSC
 #include "PETScFactory.h"
@@ -21,115 +20,187 @@
 namespace dolfin
 {
 
-  class GenericSparsityPattern;
+class GenericSparsityPattern;
 
-  /// This class represents a real-valued scalar quantity and
-  /// implements the GenericTensor interface for scalars.
+/// This class represents a real-valued scalar quantity and
+/// implements the GenericTensor interface for scalars.
 
-  class Scalar : public GenericTensor
+class Scalar : public GenericTensor
+{
+public:
+  /// Create zero scalar
+  Scalar()
+    : GenericTensor()
   {
-  public:
+  }
 
-    /// Create zero scalar
-    Scalar() : GenericTensor(), value(0.0)
-    {}
+  /// Destructor
+  ~Scalar() override = default;
 
-    /// Destructor
-    virtual ~Scalar()
-    {}
+  //--- Implementation of the GenericTensor interface ---
 
-    //--- Implementation of the GenericTensor interface ---
+  /// Initialize zero tensor using sparsity pattern
+  void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
-    /// Initialize zero tensor using sparsity pattern
-    void init(const GenericSparsityPattern& sparsity_pattern)
-    { MAYBE_UNUSED(sparsity_pattern); value = 0.0; }
+  /// Return copy of tensor
+  Scalar * copy() const override;
 
-    /// Return copy of tensor
-    virtual Scalar* copy() const
-    { Scalar* s = new Scalar(); s->value = value; return s; }
+  /// Return tensor rank (number of dimensions)
+  uint rank() const override;
 
-    /// Return tensor rank (number of dimensions)
-    uint rank() const
-    { return 0; }
+  /// Return size of given dimension
+  uint size( uint ) const override;
 
-    /// Return size of given dimension
-    uint size(uint) const
-    { error("The size() function is not available for scalars."); return 0; }
+  /// Get block of values
+  void get( real * block, const uint *, const uint * const * ) const override;
 
-    /// Get block of values
-    void get(real* block, const uint*, const uint * const *) const
-    { block[0] = value; }
+  /// Set block of values
+  void set( const real * block, const uint *, const uint * const * ) override;
 
-    /// Set block of values
-    void set(const real* block, const uint*, const uint * const *)
-    { value = block[0]; }
+  /// Add block of values
+  void add( const real * block, const uint *, const uint * const * ) override;
 
-    /// Add block of values
-    void add(const real* block, const uint*, const uint * const *)
-    { value += block[0]; }
+  /// Set all entries to zero and keep any sparse structure
+  void zero() override;
 
-    /// Set all entries to zero and keep any sparse structure
-    void zero()
-    { value = 0.0; }
+  /// Finalize assembly of tensor
+  void apply( FinalizeType ) override;
 
-    /// Finalize assembly of tensor
-    void apply(FinalizeType)
-    {
-      real tmp = value;
-      MPI::all_reduce<MPI::sum>(tmp, value);
-    }
+  /// Display tensor
+  void disp( uint ) const override;
 
+  //--- Scalar interface ---
 
-    /// Display tensor
-    void disp(uint) const
-    { prm("Scalar value", value); }
+  /// Cast to real
+  operator real() const;
 
-    //--- Scalar interface ---
+  /// Assignment from real
+  const Scalar & operator=( real value );
 
-    /// Cast to real
-    operator real() const
-    { return value; }
+  //--- Special functions
 
-    /// Assignment from real
-    const Scalar& operator= (real value)
-    { this->value = value; return *this; }
+  /// Return a factory for the default linear algebra backend
+  inline LinearAlgebraFactory & factory() const override;
 
-    //--- Special functions
+  /// Get value
+  real getval() const;
 
-    /// Return a factory for the default linear algebra backend
-    inline LinearAlgebraFactory& factory() const
-    {
+private:
+  // Value of scalar
+  real value{ 0.0 };
+};
 
-      // Get backend from parameter system
-      std::string backend = dolfin_get("linear algebra backend");
+//-----------------------------------------------------------------------------
+inline void Scalar::init( const GenericSparsityPattern & sparsity_pattern )
+{
+  MAYBE_UNUSED( sparsity_pattern );
+  value = 0.0;
+}
 
-#if (HAVE_PETSC && HAVE_JANPACK)
-      if (backend == "PETSc")
-      {
-	return PETScFactory::instance();
-      }
-      else if (backend == "JANPACK")
-      {
-	return JANPACKFactory::instance();
-      }
+//-----------------------------------------------------------------------------
+inline Scalar * Scalar::copy() const
+{
+  Scalar * s = new Scalar();
+  s->value   = value;
+  return s;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Scalar::rank() const
+{
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Scalar::size( uint ) const
+{
+  error( "The size() function is not available for scalars." );
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+inline void
+  Scalar::get( real * block, const uint *, const uint * const * ) const
+{
+  block[0] = value;
+}
+
+//-----------------------------------------------------------------------------
+inline void
+  Scalar::set( const real * block, const uint *, const uint * const * )
+{
+  value = block[0];
+}
+
+//-----------------------------------------------------------------------------
+inline void
+  Scalar::add( const real * block, const uint *, const uint * const * )
+{
+  value += block[0];
+}
+
+//-----------------------------------------------------------------------------
+inline void Scalar::zero()
+{
+  value = 0.0;
+}
+
+//-----------------------------------------------------------------------------
+inline void Scalar::apply( FinalizeType )
+{
+  real tmp = value;
+  MPI::all_reduce< MPI::sum >( tmp, value );
+}
+
+//-----------------------------------------------------------------------------
+inline void Scalar::disp( uint ) const
+{
+  prm( "Scalar value", value );
+}
+
+//-----------------------------------------------------------------------------
+inline Scalar::operator real() const
+{
+  return value;
+}
+
+//-----------------------------------------------------------------------------
+inline const Scalar & Scalar::operator=( real value )
+{
+  this->value = value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline LinearAlgebraFactory & Scalar::factory() const
+{
+  // Get backend from parameter system
+  std::string backend = dolfin_get< std::string >( "linear algebra backend" );
+
+#if ( HAVE_PETSC && HAVE_JANPACK )
+  if ( backend == "PETSc" )
+  {
+    return PETScFactory::instance();
+  }
+  else if ( backend == "JANPACK" )
+  {
+    return JANPACKFactory::instance();
+  }
 #elif HAVE_PETSC
-      return PETScFactory::instance();
+  return PETScFactory::instance();
 #elif HAVE_JANPACK
-      return JANPACKFactory::instance();
+  return JANPACKFactory::instance();
 #endif
-      error("Linear algebra backend \"" + backend + "\" not available.");
-    }
+  error( "Linear algebra backend \"" + backend + "\" not available." );
+}
 
-    /// Get value
-    real getval() const
-    { return value; }
+//-----------------------------------------------------------------------------
+inline real Scalar::getval() const
+{
+  return value;
+}
 
-  private:
-
-    // Value of scalar
-    real value;
-
-  };
+//-----------------------------------------------------------------------------
 
 }
 

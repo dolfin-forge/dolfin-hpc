@@ -10,28 +10,17 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Time::Time(real T0, real T1) :
-    T_(T0, T1),
-    sign_((T0 < T1) - (T1 < T0)),
-    t_(T0)
+Time::Time( real T_start, real T_end, real T_current )
+  : T_( T_start, T_end )
+  , sign_( ( T_start < T_end ) - ( T_end < T_start ) )
+  , t_( T_current )
 {
 }
 //-----------------------------------------------------------------------------
-Time::Time(Interval I) :
-    T_(I),
-    sign_((I.first < I.second) - (I.second < I.first)),
-    t_(I.first)
-{
-}
-//-----------------------------------------------------------------------------
-Time::Time(Time const& other) :
-    T_(other.T_),
-    sign_((T_.first < T_.second) - (T_.second < T_.first)),
-    t_(T_.first)
-{
-}
-//-----------------------------------------------------------------------------
-Time::~Time()
+Time::Time( Interval I )
+  : T_( I )
+  , sign_( ( I.first < I.second ) - ( I.second < I.first ) )
+  , t_( I.first )
 {
 }
 //-----------------------------------------------------------------------------

@@ -5,23 +5,21 @@
 #include <dolfin/mesh/EdgeKey.h>
 #include <dolfin/mesh/Face.h>
 
-#include <set>
-
 namespace dolfin
 {
 
-struct FaceKey : public std::set<EdgeKey>
+struct FaceKey : public _ordered_set<EdgeKey>
 {
   /// An face contains a bunch of vertices
   FaceKey() :
-      std::set<EdgeKey>(),
+      _ordered_set<EdgeKey>(),
       idx(0)
   {
   }
 
   /// An face contains a bunch of vertices
   FaceKey(Face const& f) :
-    std::set<EdgeKey>(),
+    _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
     uint const * v = f.entities(0);
@@ -34,7 +32,7 @@ struct FaceKey : public std::set<EdgeKey>
 
   /// An face contains a bunch of vertices
   FaceKey(uint n, uint const * v) :
-    std::set<EdgeKey>(),
+    _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
     for (uint i = 0; i < n; ++i)
@@ -71,7 +69,7 @@ struct FaceKey : public std::set<EdgeKey>
   inline size_t hash() const
   {
     size_t ret = 0;
-    for (std::set<EdgeKey>::const_iterator it = this->begin();
+    for (_ordered_set<EdgeKey>::const_iterator it = this->begin();
          it != this->end(); ++it)
     {
       ret = ret ^ it->hash();
@@ -86,31 +84,6 @@ struct FaceKey : public std::set<EdgeKey>
 
 } /* namespace dolfin */
 
-#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET) || \
-    (__IBMCPP__ && __IBMCPP_TR1__)|| \
-    (ENABLE_BOOST_TR1)
-
-namespace std
-{
-
-namespace tr1
-{
-
-template<>
-struct hash<dolfin::FaceKey>
-{
-  inline std::size_t operator()(dolfin::FaceKey const& f) const
-  {
-    return f.hash();
-  }
-};
-
-} /* namespace tr1 */
-
-} /* namespace std */
-
-#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-
 namespace std
 {
 
@@ -124,7 +97,5 @@ struct hash<dolfin::FaceKey>
 };
 
 } /* namespace std */
-
-#endif
 
 #endif /* __DOLFIN_MESH_FACE_KEY */

@@ -7,6 +7,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 
 namespace dolfin
 {
@@ -45,7 +46,7 @@ public:
 #endif
     ufc_cell_.index =
         ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-    uint const * vertices = ufc_cell_.cell_->entities(0);
+    Array<uint> const & vertices = ufc_cell_.cell_->entities(0);
     for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
     {
       ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);
@@ -53,9 +54,7 @@ public:
   }
 
   ///
-  ~UFCCellIterator()
-  {
-  }
+  ~UFCCellIterator() = default;
 
   inline UFCCellIterator& operator++()
   {
@@ -71,7 +70,7 @@ public:
 #endif
       ufc_cell_.index =
           ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-      uint const * vertices = ufc_cell_.cell_->entities(0);
+      Array<uint> const & vertices = ufc_cell_.cell_->entities(0);
       for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
       {
         ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);

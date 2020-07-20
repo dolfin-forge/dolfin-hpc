@@ -1,18 +1,19 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/timing.h>
-#include <dolfin/math/basic.h>
-#include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
-#include <dolfin/parameter/parameters.h>
+
+#include <dolfin/common/timing.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
-
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Cell.h>
-
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/MeshValues.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PARMETIS
 #include <parmetis.h>
@@ -25,7 +26,7 @@
 typedef idx_t pm_idx_t;
 
 // (par)metis real type
-typedef real_t pm_real_t;
+using pm_real_t = real_t;
 
 #else
 #define pm_idx_t  idxtype
@@ -35,7 +36,7 @@ typedef real_t pm_real_t;
 
 #endif
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {
@@ -84,7 +85,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t ncells = static_cast<pm_idx_t>(mesh.num_cells());
 
   /*
-   * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-NULL
+   * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-nullptr
    * which forbids empty partitions.
    *
    */
@@ -96,7 +97,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   elmdist[rank] = ncells;
   MPI::all_gather( &ncells, 1, elmdist, 1 );
 
-  pm_idx_t *elmwgt = NULL;
+  pm_idx_t *elmwgt = nullptr;
 
   if( weight )
   {

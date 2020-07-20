@@ -9,49 +9,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-CoefficientMap::CoefficientMap()
-{
-}
-
-//-----------------------------------------------------------------------------
-CoefficientMap::~CoefficientMap()
-{
-  map_.clear();
-}
-
-//-----------------------------------------------------------------------------
-CoefficientMap::CoefficientMap(CoefficientMap const& other)
-{
-  *this = other;
-}
-
-//-----------------------------------------------------------------------------
-CoefficientMap& CoefficientMap::operator=(CoefficientMap const& other)
-{
-  if (this == &other)
-  {
-    return *this;
-  }
-  this->map_ = other.map_;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
 bool CoefficientMap::has(std::string const& label) const
 {
-  return (map_.count(label) > 0);
-}
-
-//-----------------------------------------------------------------------------
-uint CoefficientMap::size() const
-{
-  return this->map_.size();
-}
-
-//-----------------------------------------------------------------------------
-void CoefficientMap::clear()
-{
-  map_.clear();
+  return (this->count(label) > 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -61,10 +21,10 @@ void CoefficientMap::disp() const
   // Begin indentation
   message("Number of coefficients : %u", this->size());
   uint ii = 0;
-  begin("");
-  for (Container::const_iterator it = map_.begin(); it != map_.end(); ++it)
+  dolfin::begin("");
+  for ( CoefficientMap::value_type const & coeff : *this )
   {
-    message("%8u : %s", ii, it->first.c_str());
+    message("%8u : %s", ii, coeff.first.c_str());
     ++ii;
   }
   end();

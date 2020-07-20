@@ -19,6 +19,7 @@ namespace dolfin
     asyncg,        // Gropp's asynchronous conjugate gradient method
     gmres,         // Krylov GMRES method
     bicgstab,      // Krylov stabilised biconjugate gradient squared method
+    pipebicgstab,  // Pipelined stabilised biconjugate gradient squared method
     default_solver // Default Krylov solver
   };
 
@@ -31,6 +32,8 @@ namespace dolfin
       return gmres;
     else if (type == "bicgstab")
       return bicgstab;
+    else if (type == "pipebicgstab")
+      return pipebicgstab;
     else
     {
       warning("Undefined solver type            "
@@ -57,6 +60,10 @@ namespace dolfin
     else if (type == "bicgstab")
     {
       return bicgstab;
+    }
+    else if (type == "pipebicgstab")
+    {
+      return pipebicgstab;
     }
     else if (type == "default")
     {

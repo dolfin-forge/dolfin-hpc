@@ -13,7 +13,7 @@ from ffc.fiatinterface import create_element
 from ufl import FiniteElement
 from ufl import VectorElement
 
-print "Generating Finite Element with FFC version " + FFC_VERSION
+print("Generating Finite Element with FFC version " + FFC_VERSION)
 
 # *Do* generate all functions
 OPTIONS = FFC_PARAMETERS.copy()
@@ -30,7 +30,7 @@ signatures = []
 for i in range(len(elements)):
     
     # Generate code
-    print "Compiling element %d out of %d..." % (i, len(elements))
+    print("Compiling element %d out of %d..." % (i, len(elements)))
     ufl_element = elements[i]
     nb_subelm = ufl_element.num_sub_elements()
     valuetype = ""
@@ -47,7 +47,7 @@ for i in range(len(elements)):
     
 # Generate code for elementmap.cpp
 filename = "element_library.inc"
-print "Generating file " + filename
+print("Generating file " + filename)
 file = open(filename, "w")
 file.write("// Automatically generated code mapping element and dof map signatures\n")
 file.write("// to the corresponding ufc::finite_element and ufc::dofmap classes\n")

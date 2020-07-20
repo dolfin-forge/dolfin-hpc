@@ -6,25 +6,15 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/log/log.h>
 
-#include <signal.h>
+#include <csignal>
+#include <cstdio>
 #include <sys/time.h>
-#include <stdio.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 bool alarm::WALL_CLOCK_LIMIT = false;
-
-//-----------------------------------------------------------------------------
-alarm::alarm()
-{
-}
-
-//-----------------------------------------------------------------------------
-alarm::~alarm()
-{
-}
 
 //-----------------------------------------------------------------------------
 void alarm::action(int sig_code)
@@ -42,7 +32,7 @@ void alarm::action(int sig_code)
       itv.it_value.tv_usec    = 0;
       itv.it_interval.tv_sec  = 0;
       itv.it_interval.tv_usec = 0;
-      if (setitimer(ITIMER_REAL, &itv, 0) < 0)
+      if (setitimer(ITIMER_REAL, &itv, nullptr) < 0)
       {
         perror("alarm : setitimer failed");
       }
@@ -60,7 +50,7 @@ bool alarm::set_limit(long wall_clock_limit)
     sig_param.sa_handler = alarm::action;
     sigemptyset(&sig_param.sa_mask);
     sig_param.sa_flags = SA_RESTART;
-    if (sigaction(SIGALRM, &sig_param, 0) < 0)
+    if (sigaction(SIGALRM, &sig_param, nullptr) < 0)
     {
       perror("alarm : sigaction failed");
     }
@@ -70,7 +60,7 @@ bool alarm::set_limit(long wall_clock_limit)
     itv.it_value.tv_usec    = 0;
     itv.it_interval.tv_sec  = 0;
     itv.it_interval.tv_usec = 0;
-    if (setitimer(ITIMER_REAL, &itv, 0) < 0)
+    if (setitimer(ITIMER_REAL, &itv, nullptr) < 0)
     {
       perror("alarm : setitimer failed");
     }

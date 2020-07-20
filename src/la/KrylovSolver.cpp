@@ -17,11 +17,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type) :
-    solver_type(solver_type),
-    pc_type(pc_type),
-    petsc_solver(NULL),
-    janpack_solver(NULL)
+KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type)
+  : solver_type(solver_type)
+  , pc_type(pc_type)
 {
 }
 
@@ -44,7 +42,6 @@ uint KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
     if (!petsc_solver)
     {
       petsc_solver = new PETScKrylovSolver(solver_type, pc_type);
-      petsc_solver->set("parent", *this);
     }
     return petsc_solver->solve(A.down_cast<PETScMatrix>(),
                                x.down_cast<PETScVector>(),
@@ -57,7 +54,6 @@ uint KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
     if (!janpack_solver)
     {
       janpack_solver = new JANPACKKrylovSolver(solver_type, pc_type);
-      janpack_solver->set("parent", *this);
     }
     return janpack_solver->solve(A.down_cast<JANPACKMat>(),
         x.down_cast<JANPACKVec>(),

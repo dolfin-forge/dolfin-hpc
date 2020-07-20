@@ -71,7 +71,7 @@ protected:
   /// Constructor
   MeshSmoother(Mesh& mesh);
 
-  virtual ~MeshSmoother();
+  ~MeshSmoother() override = default;
 
 };
 

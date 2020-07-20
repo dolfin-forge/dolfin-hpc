@@ -7,8 +7,6 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/CoefficientMap.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 
@@ -25,7 +23,7 @@ public:
   Functional(Mesh& mesh);
 
   /// Destructor
-  ~Functional();
+  ~Functional() override = default;
 
   /// Creator function
   template <class E> static inline
@@ -34,15 +32,6 @@ public:
     return new typename E::Functional(mesh, coefs);
   }
 
-private:
-
-};
-
-//-----------------------------------------------------------------------------
-
-struct NoFunctional
-{
-  typedef Nil<dolfin::Functional> Functional;
 };
 
 //-----------------------------------------------------------------------------

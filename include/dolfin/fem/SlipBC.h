@@ -6,12 +6,10 @@
 #ifndef __DOLFIN_SLIPBC_H
 #define __DOLFIN_SLIPBC_H
 
-#include "BoundaryCondition.h"
-#include "NodeNormal.h"
+#include <dolfin/fem/BoundaryCondition.h>
+#include <dolfin/fem/NodeNormal.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Vector.h>
-
-#include <set>
 
 namespace dolfin
 {
@@ -37,14 +35,14 @@ public:
   SlipBC(Mesh& mesh, SubDomain const& sub_domain, SubSystem const& sub_system);
 
   /// Destructor
-  ~SlipBC();
+  ~SlipBC() override;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to non linear system
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
   BoundaryNormal& normal()
   {
@@ -53,7 +51,7 @@ public:
 
 private:
 
-  inline void sync(Time const&) { /* No-op */ }
+  inline void sync(Time const&) override { /* No-op */ }
 
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                       BilinearForm const& form, ScratchSpace& scratch);
@@ -79,7 +77,7 @@ private:
   bool As_local;
 
   // Local data structures for assembly
-  std::set<uint> row_indices;
+  _ordered_set<uint> row_indices;
   Array<real> a[3]; // local lhs extracted from A
   Array<real> a_slip_row[3]; // local lhs row after slip enforcement
   Array<uint> a_col_indices[3]; // non-zero indices per row

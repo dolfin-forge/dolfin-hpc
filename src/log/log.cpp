@@ -66,15 +66,19 @@ void warning(char const * msg, ...)
 //-----------------------------------------------------------------------------
 void error(std::string msg)
 {
-  simple_output(cerr, "Error  : ", msg, "\n");
-  throw std::runtime_error("runtime error");
+  std::stringstream error_stream;
+  LogStream error_logstream(&error_stream);
+  simple_output(error_logstream, "Error  : ", msg, "\n");
+  throw std::runtime_error( error_stream.str() );
 }
 
 //-----------------------------------------------------------------------------
 void error(char const * msg, ...)
 {
-  format_output(cerr, "Error  : ", msg, "\n");
-  throw std::runtime_error("runtime error");
+  std::stringstream error_stream;
+  LogStream error_logstream(&error_stream);
+  format_output(error_logstream, "Error  : ", msg, "\n");
+  throw std::runtime_error( error_stream.str() );
 }
 
 //-----------------------------------------------------------------------------
@@ -172,7 +176,7 @@ void timing(char const * task, real t)
 //-----------------------------------------------------------------------------
 void mark(char const * msg)
 {
-  message("[%9u] %s", std::time(NULL), msg);
+  message("[%9u] %s", std::time(nullptr), msg);
 }
 
 //-----------------------------------------------------------------------------

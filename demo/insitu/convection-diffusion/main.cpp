@@ -31,7 +31,7 @@ struct FluidVelocity : public Value<FluidVelocity,2>
   void eval(real *value, const real *x) const
   {
     value[0]= 1.0*(x[1]-0.5);
-    value[1]= 1.0*(-x[0]+0.5);    
+    value[1]= 1.0*(-x[0]+0.5);
   }
 };
 
@@ -59,15 +59,15 @@ struct DirichletBoundary : public SubDomain
 // Pipeline to render the solution
 class RenderU : public libsimPipeline
 {
-public: 
+public:
 
   void exec(real t, uint step) const
   {
-    
+
     std::stringstream filename;
-    filename << "solution" << std::setfill('0') << std::setw(6) 
+    filename << "solution" << std::setfill('0') << std::setw(6)
 	     << step << ".png" << std::ends;
-    
+
     VisItAddPlot("Pseudocolor", "U_magnitude");
     VisItDrawPlots();
     VisItSaveWindow(filename.str().c_str(), 800, 600, VISIT_IMAGEFORMAT_PNG);
@@ -83,16 +83,16 @@ int main(int argc, char **argv)
   dolfin_init(argc, argv);
 
   // VisIt directory should point to the top installation dir.
-  // dolfin_set("VisIt directory","/opt/visit/2.10.0");  
+  // dolfin_set("VisIt directory","/opt/visit/2.10.0");
 
   const std::string visit_path = dolfin_get("VisIt directory");
   if (visit_path == "")
     error("Parameter 'VisIt directory' not set properly");
-  
+
   libsimInterface::init(libsimInterface::batch);
 
   // Create mesh
-  Mesh mesh("UnitSquareMesh_32x32.xml");
+  Mesh mesh("UnitSquareMesh_32x32.bin");
   mesh.refine();
   mesh.refine();
 
@@ -104,16 +104,16 @@ int main(int argc, char **argv)
   Constant alpha(0.0);
   Constant nu(0.0001);
   Constant s(0.0158);
-  Constant k(0.02);		
+  Constant k(0.02);
 
   // Add pipeline to the insitu interface
   RenderU render_u;
-  libsimInterface::addPipeline(render_u); 
+  libsimInterface::addPipeline(render_u);
 
   Analytic<DirichletFunction> u0(mesh);
   DirichletBoundary boundary;
   DirichletBC bc(u0, mesh, boundary);
-  
+
 
   ConvectionDiffusion::BilinearForm a(mesh, W, alpha, nu, s, k);
 
@@ -129,9 +129,9 @@ int main(int argc, char **argv)
   Matrix A;
   Vector b;
   a.assemble(A, true);
-  
-  KrylovSolver solver(bicgstab, bjacobi); 
-  for (uint step = 0; step < 10; step++) 
+
+  KrylovSolver solver(bicgstab, bjacobi);
+  for (uint step = 0; step < 10; step++)
   {
     L.assemble(b, step == 0);
     bc.apply(A, b, a);
@@ -145,9 +145,9 @@ int main(int argc, char **argv)
 
   dolfin_finalize();
   return 0;
-  
+
 }
-  
-  
-  
-  
+
+
+
+

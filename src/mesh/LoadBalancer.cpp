@@ -7,16 +7,19 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
+#include <string>
 #include <cstring>
 
 using namespace dolfin;
 
-std::map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
+_ordered_map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
 
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
@@ -96,7 +99,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh); D.add(cell_marker);
     message("Redistribute mesh");
@@ -107,7 +110,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -203,7 +206,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -219,7 +222,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -323,7 +326,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -344,7 +347,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -437,7 +440,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Distribute mesh according to new partition function
-  if (dolfin_get("Load balancer redistribute"))
+  if (dolfin_get<bool>("Load balancer redistribute"))
   {
     MeshData D(mesh);
     D.add(cell_marker);
@@ -453,7 +456,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     swap( LoadBalancer::partitions(mesh), partitions );
   }
 
-  if (dolfin_get("Load balancer report"))
+  if (dolfin_get<bool>("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -795,8 +798,7 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
     for (uint j = 0; j < m; j++)
       count[((Matrix[tmp[j]]) >> (8 * i)) & 0xff]++;
 
-    MPI::check_error( MPI_Allreduce(count, glb_count, 256, MPI_UNSIGNED,
-                                    MPI_SUM, MPI::DOLFIN_COMM) );
+    MPI::all_reduce<MPI::sum>( count, glb_count, 256 );
 
     offset = 0;
     for (uint j = 0; j < 256; j++)
@@ -881,7 +883,7 @@ void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&,
 //-----------------------------------------------------------------------------
 MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
 {
-  std::map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
   if (it == s_.end())
   {
     MeshValues<uint, Cell> * v = new MeshValues<uint, Cell>(mesh, PE::rank());
@@ -893,7 +895,7 @@ MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool LoadBalancer::clear(Mesh& mesh)
 {
-  std::map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
   if (it != s_.end())
   {
     delete it->second;

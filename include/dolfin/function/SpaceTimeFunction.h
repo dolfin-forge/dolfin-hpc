@@ -21,7 +21,7 @@ public:
   SpaceTimeFunction(std::string const& basename, FiniteElementSpace const& space);
 
   /// Destructor
-  ~SpaceTimeFunction();
+  ~SpaceTimeFunction() override;
 
   /// Load samples
   uint load();
@@ -36,7 +36,7 @@ public:
   void save(Function const& function);
 
   ///
-  void disp() const;
+  void disp() const override;
 
   //---------------------------------------------------------------------------
 
@@ -62,15 +62,15 @@ private:
   static void save(real st, std::string const& sname, Function& w);
 
   // overload from Function
-  void eval(real*, const real*) const {}
+  void eval(real*, const real*) const override {}
 
   std::string basename_;
-  std::map<real, std::string> samples_;
+  _ordered_map<real, std::string> samples_;
 
   //
   Function * W_;
-  std::map<real, std::string>::iterator it0_;
-  std::map<real, std::string>::iterator it1_;
+  _ordered_map<real, std::string>::iterator it0_;
+  _ordered_map<real, std::string>::iterator it1_;
 
 };
 

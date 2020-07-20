@@ -27,19 +27,17 @@ public:
   }
 
   ///
-  ~SerialNumbering()
-  {
-  }
+  ~SerialNumbering() override = default;
 
   ///
   inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
-                            Cell const&) const
+                            Cell const&) const override
   {
     ufc_dofmap.tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
   }
 
   ///
-  inline void build()
+  inline void build() override
   {
     DofNumbering::init();
     //---
@@ -53,19 +51,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint) const
+  inline bool is_shared(uint) const override
   {
     return false;
   }
 
   ///
-  inline bool is_ghost(uint) const
+  inline bool is_ghost(uint) const override
   {
     return false;
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for serial UFC backend");
   }

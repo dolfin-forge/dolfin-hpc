@@ -1,6 +1,24 @@
-0.9.0p1-hpc [2020-02-24]
+0.9.1-hpc [2020-07-20]
+ - C++11 required to build DOLFIN HPC
+ - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
+   those can be installed from bitbucket.org/adaptivesimulations
+ - Cell/Edge/Face/Facet/VertexIterators have been moved to their own header files
+ - I/O verbosity can now be controlled via DOLFIN_VERBOSE=0|1 environment variable
+ - added '--enable-opt-basis' for optimized ffc (-O) evaluate_basis functions
+ - added '--with-phmap[=DIR]' for fast map/set implementation (https://git.io/JfE2p)
+ - new Checkpoint format
+ - removed XML support
+ - removed PETSc signal handling by default
+ - PETScKrylovSolver now gives more detailed errors in case of divergence
+ - added support for vtk files and paraview >= 5.8.0
+ - cleaned up ParameterSystem, dolfin_get<> now requires a template parameter
+ - Changed Connectivity interface to use Array<> instead of raw pointers
  - Fixed tic/toc counters
  - Fixed regression in I/O interface (short filenames)
+ - revived P1 optimizations
+ - revived function cache
+ - Various bugs and portability fixes
+ - Added new C++ based mesh converter (DOLFIN XML -> DOLFIN BINARY)
 0.9.0-hpc [2020-02-05]
  - Move to UFL
  - Support for Quad/Hex elements
@@ -17,21 +35,21 @@
  - Various bugs and portability fixes
 0.8.3-hpc [2013-01-08]
  - Hybrid MPI+PGAS parallelization
- - Re-add quadrature rules (Gauss, Radau, and Lobatto) 
- - Add JANPACK AMG solver	
+ - Re-add quadrature rules (Gauss, Radau, and Lobatto)
+ - Add JANPACK AMG solver
  - Various bugs and portability fixes
 0.8.2-hpc [2011-10-08]
  - Parallel mesh smoothing
  - Add support for MPI I/O
  - New binary file format
 0.8.1-hpc [2011-02-04]
- - Revert back to an autotools based build system   
+ - Revert back to an autotools based build system
  - Add support for JANPACK
  - Hybrid MPI+OpenMP parallelization
  - Multiple data array in VTK output
  - Various bugs and portability fixes
 0.8.0-hpc [2010-06-08]
- - Added checkpoint restart 
+ - Added checkpoint restart
  - Parallel local mesh refinement (Rivara)
  - Remove uBlas dependency
  - Merge with previous HPC version (based on DOLFIN 0.7.2)
@@ -137,7 +155,7 @@
 0.6.3 [2006-10-27]
  - Move to new mesh library
  - Remove dolfin-config and move to pkg-config
- - Remove unused classes PArray, PList, Table, Tensor	
+ - Remove unused classes PArray, PList, Table, Tensor
  - Visualization of 2D solutions in OpenDX is now supported (3D supported before)
  - Add support for evaluation of functionals
  - Fix bug in Vector::sum() for uBlas vectors
@@ -189,8 +207,8 @@
  - Remove KrylovSolver::solver()
  - Fix bug in convection-diffusion demo (boundary condition for pressure), use direct solver
  - LinearPDE and NewonSolver use umfpack LU solver by default (if available) when doing direct solve
- - Set PETSc matrix type through Matrix constructor 
- - Allow linear solver and preconditioner type to be passed to NewtonSolver 
+ - Set PETSc matrix type through Matrix constructor
+ - Allow linear solver and preconditioner type to be passed to NewtonSolver
  - Fix bug in Stokes demos (wrong boundary conditions)
  - Cleanup Krylov solver
  - Remove KrylovSolver::setPreconditioner() etc. and move to constructors
@@ -203,7 +221,7 @@
 0.6.0 [2006-03-01]
  - Fix bug in XML output format (writing multiple objects)
  - Fix bug in XML matrix output format (handle zero rows)
- - Add new nonlinear PDE demo 
+ - Add new nonlinear PDE demo
  - Restructure PDE class to use envelope-letter design
  - Add precompiled finite elements for q <= 5
  - Add FiniteElementSpec and factor function for FiniteElement
@@ -229,8 +247,8 @@
  - Fix sparse matrix output format for MATLAB
  - Modify demo problem for Stokes, add exact solution and compute error
  - Change interface for boundary conditions: operator() --> eval()
- - Add two benchmark problems for the Navier-Stokes solver 	
- - Add support for 2D/3D selection in Navier-Stokes solver 
+ - Add two benchmark problems for the Navier-Stokes solver
+ - Add support for 2D/3D selection in Navier-Stokes solver
  - Move tic()/toc() to timing.h
  - Navier-Stokes solver back online
  - Make Solver a subclass of Parametrized
@@ -249,7 +267,7 @@
  - Clean out old sparse matrix code
  - Update chapter on Functions in manual
  - Use std::map to store parameters
- - Implement class KrylovSolver 
+ - Implement class KrylovSolver
  - Name change: Node --> Vertex
  - Add nonlinear solver demos
  - Add support for picking sub functions and components of functions
@@ -287,7 +305,7 @@
  - Add chapters to manual: about, log system, parameters, reference elements,
    installation, contributing, license
  - Use new template fenicsmanual.cls for manual
- - Add compiler flag -U__STRICT_ANSI__ when compiling under Cygwin 
+ - Add compiler flag -U__STRICT_ANSI__ when compiling under Cygwin
  - Add class EigenvalueSolver
 0.5.8 [2005-07-05]
  - Add new output format Paraview/VTK (Garth N. Wells)
@@ -315,7 +333,7 @@
  - Implement automatic detection of sparsity pattern from given matrix
  - Clean up homotopy solver
  - Implement automatic computation of Jacobian
- - Add support for assembly of non-square systems (Andy Terrel)	
+ - Add support for assembly of non-square systems (Andy Terrel)
  - Make ODE solver report average number of iterations
  - Make progress bar write first update at 0%
  - Initialize all values of u before solution in multi-adaptive solver,
@@ -386,7 +404,7 @@
  - Update PETSc wrappers NewVector, NewMatrix, and NewGMRES
  - Fix initialization of PETSc
  - Add mono-adaptive cG(q) and dG(q) solvers (experimental)
- - Implementation of new assebly: NewFEM, using output from FFC 
+ - Implementation of new assebly: NewFEM, using output from FFC
  - Add access to mesh for nodes, cells, faces and edges
  - Add Tecplot I/O interface; contributed by Garth N. Wells
 0.5.2 [2005-01-26]
@@ -421,7 +439,7 @@
  - New classes Preconditioner and LinearSolver
  - Bug fix for tetrahedral mesh refinement (ingelstrom)
  - Add iterators for Edge and Face on Boundary
- - Add functionality to Map: bdet() and cell() 
+ - Add functionality to Map: bdet() and cell()
  - Add connectivity face-cell and edge-cell
  - New interface for assembly: Galerkin --> FEM
  - Bug fix for PDE systems of size > 3
@@ -508,7 +526,7 @@
 0.4.4
  - Add support for 3D graphics in Octave using Open Inventor (jj)
 0.4.3
- - Stabilization of multi-adaptive solver (experimental) 
+ - Stabilization of multi-adaptive solver (experimental)
  - Improved non-support for curses (--disable-curses)
  - New class MechanicalSystem for simulating mechanical systems
  - Save debug info from primal and dual (plotslab.m)
@@ -548,10 +566,10 @@
  - Initiation of the FEniCS project
  - Change syntax of mesh files: grid -> mesh
  - Create symbolic links instead of copying files
- - Tanganyika -> ODE 
+ - Tanganyika -> ODE
  - Add Heat module
  - Grid -> Mesh
- - Move forms and mappings to separate libraries 
+ - Move forms and mappings to separate libraries
  - Fix missing include of DirectSolver.h
 0.3.12
  - Adaptive grid refinement (!)
@@ -589,7 +607,7 @@
  - Make GMRES work with user defined matrix, only mult() needed
  - GMRES now uses only one function to compute residual()
  - Change Matrix structure (a modified envelope/letter)
- - Update script checkerror.m for Poisson 
+ - Update script checkerror.m for Poisson
  - Add function dolfin_info_aptr()
  - Add cast to element pointer for iterators
  - Clean up and improve the Tensor class

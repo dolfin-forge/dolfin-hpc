@@ -5,8 +5,8 @@
 #define __DOLFIN_FORM_H
 
 #include <dolfin/common/Array.h>
-#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Coefficient.h>
+#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 
 #include <ufc.h>
@@ -26,108 +26,105 @@ class Form : public ufc::form
 {
 
 public:
-
-  typedef CoefficientMap Coefficients;
+  using Coefficients = CoefficientMap;
 
   /// Constructor
-  Form(Mesh& mesh);
+  Form( Mesh & mesh );
 
   /// Destructor
-  virtual ~Form();
+  ~Form() override = default;
 
   /// Return array of coefficients
-  virtual Array<Coefficient*> const& coefficients() const = 0;
+  virtual Array< Coefficient * > const & coefficients() const = 0;
 
   /// Return index of argument associated with the given name
-  virtual uint coefficient_index(std::string const& name) const;
+  virtual uint coefficient_index( std::string const & name ) const;
 
   /// Return name of argument associated with the given number
-  virtual std::string coefficient_name(uint i) const;
+  virtual std::string coefficient_name( uint i ) const;
 
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 
   /// Return mesh
-  Mesh& mesh() const;
+  Mesh & mesh() const;
 
   /// Return DofMapSet
-  DofMapSet& dofmaps() const;
+  DofMapSet & dofmaps() const;
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
-  const char* signature() const;
+  const char * signature() const override;
 
   /// Return the rank of the global tensor (r)
-  uint rank() const;
+  uint rank() const override;
 
   /// Return the number of coefficients (n)
-  uint num_coefficients() const;
+  uint num_coefficients() const override;
 
   /// Return the number of cell integrals
-  uint num_cell_integrals() const;
+  uint num_cell_integrals() const override;
 
   /// Return the number of exterior facet integrals
-  uint num_exterior_facet_integrals() const;
+  uint num_exterior_facet_integrals() const override;
 
   /// Return the number of interior facet integrals
-  uint num_interior_facet_integrals() const;
+  uint num_interior_facet_integrals() const override;
 
   /// Create a new finite element for argument function i
-  ufc::finite_element* create_finite_element(uint i) const;
+  ufc::finite_element * create_finite_element( uint i ) const override;
 
   /// Create a new dof map for argument function i
-  ufc::dofmap * create_dofmap(uint i) const;
+  ufc::dofmap * create_dofmap( uint i ) const override;
 
   /// Create a new cell integral on sub domain i
-  ufc::cell_integral* create_cell_integral(uint i) const;
+  ufc::cell_integral * create_cell_integral( uint i ) const override;
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral* create_exterior_facet_integral(uint i) const;
+  ufc::exterior_facet_integral * create_exterior_facet_integral( uint i ) const override;
 
   /// Create a new interior facet integral on sub domain i
-  ufc::interior_facet_integral* create_interior_facet_integral(uint i) const;
+  ufc::interior_facet_integral * create_interior_facet_integral( uint i ) const override;
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
   /// Create function space for i-th function (arguments + coefficients)
-  FiniteElementSpace * create_space(uint i) const;
+  FiniteElementSpace * create_space( uint i ) const;
 
   /// Create function space for given coefficient
-  FiniteElementSpace * create_coefficient_space(std::string const& name) const;
+  FiniteElementSpace *
+    create_coefficient_space( std::string const & name ) const;
 
   /// Check dimension and rank of coefficients
-  bool check(Array<Coefficient*> const& coefficients) const;
+  bool check( Array< Coefficient * > const & coefficients ) const;
 
   /// Check if index is valid
-  bool is_valid_index(uint i) const;
+  bool is_valid_index( uint i ) const;
 
   /// Assemble form
-  void assemble(GenericTensor& T, bool reset_tensor);
+  void assemble( GenericTensor & T, bool reset_tensor );
 
 protected:
-
   /// Return UFC form
-  virtual ufc::form const& form() const = 0;
+  virtual ufc::form const & form() const = 0;
 
   /// Assign coefficients from map to form coefficients
-  void init(Array<Coefficient *>& coefficients);
+  void init( Array< Coefficient * > & coefficients );
 
   /// Assign coefficients from map to form coefficients
-  void init(Array<Coefficient *>& coefficients, CoefficientMap const & map);
+  void init( Array< Coefficient * > & coefficients, CoefficientMap & map );
 
 private:
-
   // Mesh
-  Mesh& mesh_;
+  Mesh & mesh_;
 
   // Degree of freedom maps
   mutable DofMapSet dof_map_set_;
-
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-inline const char* Form::signature() const
+inline const char * Form::signature() const
 {
   return form().signature();
 }
@@ -163,146 +160,97 @@ inline uint Form::num_interior_facet_integrals() const
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::finite_element* Form::create_finite_element(uint i) const
+inline ufc::finite_element * Form::create_finite_element( uint i ) const
 {
-  return form().create_finite_element(i);
+  return form().create_finite_element( i );
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::dofmap * Form::create_dofmap(uint i) const
+inline ufc::dofmap * Form::create_dofmap( uint i ) const
 {
-  return form().create_dofmap(i);
+  return form().create_dofmap( i );
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::cell_integral* Form::create_cell_integral(uint i) const
+inline ufc::cell_integral * Form::create_cell_integral( uint i ) const
 {
-  return form().create_cell_integral(i);
+  return form().create_cell_integral( i );
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::exterior_facet_integral*
-Form::create_exterior_facet_integral(uint i) const
+inline ufc::exterior_facet_integral *
+  Form::create_exterior_facet_integral( uint i ) const
 {
-  return form().create_exterior_facet_integral(i);
+  return form().create_exterior_facet_integral( i );
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::interior_facet_integral*
-Form::create_interior_facet_integral(uint i) const
+inline ufc::interior_facet_integral *
+  Form::create_interior_facet_integral( uint i ) const
 {
-  return form().create_interior_facet_integral(i);
+  return form().create_interior_facet_integral( i );
 }
 
 //-----------------------------------------------------------------------------
-
-template <class T>
-struct Nil : public T
+inline void Form::update_dofmaps() const
 {
-    Nil(Mesh& mesh, typename T::Coefficients&) :
-        T(mesh)
-    {
-    }
-
-    Array<Coefficient*> const& coefficients() const
-    {
-      error(T::name() + " : undefined");
-      return c_;
-    }
-
-    ufc::form const& form() const
-    {
-      error(T::name() + " : undefined");
-      return *this;
-    }
-
-    Array<Coefficient*> c_;
-};
-
-//-----------------------------------------------------------------------------
-// Workaround convoluted UFC design that makes life impossible ...
-
-class CoefficientMap;
-
-//-----------------------------------------------------------------------------
-template<class T>
-struct UFCWrap
-{
-  typedef typename T::Coefficients Coefficients;
-
-  UFCWrap() : F_(NULL) {}
-
-  ~UFCWrap() { delete F_; }
-
-  inline T& operator *() { return *F_; }
-
-  inline T& form() { return *F_; }
-
-  /// Static creator function
-  template<class E1, class E2, class E3>
-  static inline T * create(Mesh& mesh, Coefficients& coefs)
+  if ( dof_map_set_.size() == 0 )
   {
-    switch (mesh.topology_dimension())
+    dof_map_set_.update( *this, mesh_ );
+  }
+}
+
+//-----------------------------------------------------------------------------
+inline Mesh & Form::mesh() const
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline DofMapSet & Form::dofmaps() const
+{
+  this->update_dofmaps();
+  return dof_map_set_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Form::coefficient_index( std::string const & name ) const
+{
+  for ( uint i = 0; i < this->num_coefficients(); ++i )
+  {
+    if ( this->coefficient_name( i ) == name )
     {
-      case 1:
-        return T::template create<E1>(mesh, coefs);
-        break;
-      case 2:
-        return T::template create<E2>(mesh, coefs);
-        break;
-      case 3:
-        return T::template create<E3>(mesh, coefs);
-        break;
-      default:
-        error(T::name() + " : invalid topological dimension");
-        break;
+      return i;
     }
   }
-
-  /// Creator function
-  template<class E1, class E2, class E3>
-  void instantiate(Mesh& mesh, Coefficients& coefs)
-  {
-    delete F_; F_ = UFCWrap<T>::template create<E1, E2, E3>(mesh, coefs);
-  }
-
-private:
-
-  T * F_;
-};
+  error( "Form : coefficient name was not found" );
+  return 0;
+}
 
 //-----------------------------------------------------------------------------
-
-template<class T, class E1, class E2, class E3>
-struct UFCForm
+inline std::string Form::coefficient_name( uint ) const
 {
-  typedef typename T::Coefficients Coefficients;
+  error( "Not implemented without UFL support: \n"
+         "std::string Form::coefficient_name(uint i) const" );
+  return "";
+}
 
-  UFCForm() : F_(NULL) {}
+//----------------------------------------------------------------------------
+inline FiniteElementSpace * Form::create_space( uint i ) const
+{
+  ufc::finite_element * test_f = this->form().create_finite_element( i );
+  ufc::dofmap *         test_d = this->form().create_dofmap( i );
+  // For an argument the mesh is the one passed to the form and for coefficient
+  // the mesh passed to the function.
+  return new FiniteElementSpace( dofmaps()[i].mesh(), *test_f, *test_d, true );
+}
 
-  ~UFCForm() { delete F_; }
-
-  inline T& operator *() { return *F_; }
-
-  inline T& form() { return *F_; }
-
-  void operator()(Mesh& mesh, Coefficients& coefs)
-  {
-    delete F_; F_ = UFCWrap<T>::template create<E1, E2, E3>(mesh, coefs);
-  }
-
-private:
-
-  T * F_;
-};
-
-//-----------------------------------------------------------------------------
-
-#define UFC_WRAP_DECLARE(CLASS, TYPE) \
-struct CLASS : public UFCWrap<TYPE> { void operator()(Mesh& mesh, Coefficients& coefs); };
-
-#define UFC_WRAP(CLASS, E1, E2, E3) \
-void CLASS::operator()(Mesh& mesh, Coefficients& coefs) { this->instantiate<E1, E2, E3>(mesh, coefs); }
+//----------------------------------------------------------------------------
+inline FiniteElementSpace *
+  Form::create_coefficient_space( std::string const & name ) const
+{
+  return this->create_space( this->rank() + this->coefficient_index( name ) );
+}
 
 //-----------------------------------------------------------------------------
 

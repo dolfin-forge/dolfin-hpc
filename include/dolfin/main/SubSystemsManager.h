@@ -33,7 +33,7 @@ public:
               zoltan    = 16 };
 
   //-------------------------------------------------------------------------
-  static int start(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0)
+  static int start(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0)
   {
     return SubSystemsManager::instance().init(argc, argv, n, w_limit);
   }
@@ -56,7 +56,7 @@ public:
     static SubSystemsManager::Type const flag = mpi;
 
     /// Initialize MPI
-    static bool init(int argc = 0, char* argv[] = NULL, uint n = 0);
+    static bool init(int argc = 0, char* argv[] = nullptr, uint n = 0);
 
     /// Finalize MPI
     static bool fini();
@@ -74,7 +74,7 @@ public:
     static SubSystemsManager::Type const flag = petsc;
 
     /// Initialize PETSc with command-line arguments
-    static bool init(int argc = 0, char* argv[] = NULL);
+    static bool init(int argc = 0, char* argv[] = nullptr);
 
     /// Finalize PETSc
     static bool fini();
@@ -101,7 +101,7 @@ public:
     static SubSystemsManager::Type const flag = zoltan;
 
     /// Initialize PETSc with command-line arguments
-    static bool init(int argc = 0, char* argv[] = NULL);
+    static bool init(int argc = 0, char* argv[] = nullptr);
 
     /// Finalize PETSc
     static bool fini();
@@ -122,11 +122,11 @@ public:
 
 private:
 
-  int init(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0);
+  int init(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0);
   int fini();
 
   // Constructor
-  SubSystemsManager();
+  SubSystemsManager() = default;
 
   // Copy constructor
   SubSystemsManager(SubSystemsManager const& other);
@@ -144,8 +144,8 @@ private:
   alarm& alarm_handler() { return timer_; }
 
   // State variable
-  int count_;
-  int state_;
+  int count_{0};
+  int state_{0};
 
   // Alarm handler
   alarm timer_;

@@ -21,6 +21,7 @@ class FiniteElementSpace;
 class Form;
 class GenericMatrix;
 class GenericVector;
+class SetOfDirichletBC;
 
 /// The BCMethod variable may be used to specify the type of method
 /// used to identify degrees of freedom on the boundary. Available
@@ -80,14 +81,14 @@ public:
               const SubSystem& sub_system, BCMethod method = topological);
 
   /// Destructor
-  ~DirichletBC();
+  ~DirichletBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 
@@ -96,7 +97,7 @@ private:
                   BilinearForm const& form);
 
   ///
-  inline void sync(Time const& t) { g_(t); }
+  inline void sync(Time const& t) override { g_(t); }
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,
@@ -120,8 +121,9 @@ private:
   BCMethod method_;
 
   // Boundary facets, stored as pairs (cell, local facet number)
-  Array<uint> * entities_;
+  Array<uint> entities_;
 
+  friend SetOfDirichletBC;
 };
 
 } /* namespace dolfin */

@@ -12,7 +12,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {
@@ -33,11 +33,11 @@ UFCHalo::UFCHalo(UFC& ufc, Array<Coefficient*> const& coefficients,
     rank_offsets_(),
     facet_map_(),
     r_packet_size_(0),
-    r_data0_(NULL),
-    r_data1_(NULL),
+    r_data0_(nullptr),
+    r_data1_(nullptr),
     u_packet_size_(0),
-    u_data0_(NULL),
-    u_data1_(NULL)
+    u_data0_(nullptr),
+    u_data1_(nullptr)
 {
   //
   init();
@@ -319,13 +319,13 @@ void UFCHalo::clear()
   rank_offsets_.clear();
   facet_map_.clear();
   delete[] r_data0_;
-  r_data0_ = NULL;
+  r_data0_ = nullptr;
   delete[] u_data0_;
-  u_data0_ = NULL;
+  u_data0_ = nullptr;
   delete[] r_data1_;
-  r_data1_ = NULL;
+  r_data1_ = nullptr;
   delete[] u_data1_;
-  u_data1_ = NULL;
+  u_data1_ = nullptr;
 }
 
 } /* namespace dolfin */

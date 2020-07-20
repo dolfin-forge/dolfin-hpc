@@ -11,14 +11,15 @@
 #include <dolfin/fem/SlipBC.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <cmath>
-#include <cstring>
-#include <map>
+#include <string>
 
 #if (__sgi)
 #define fmax(a,b) (a > b ? a : b) ;
@@ -33,7 +34,7 @@ SlipBC::SlipBC( Mesh & mesh, SubDomain const & sub_domain )
   , mesh( mesh )
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -46,7 +47,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , mesh( mesh )
   , node_normal( &normals )
   , node_normal_local( false )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -59,7 +60,7 @@ SlipBC::SlipBC( Mesh & mesh,
   , mesh( mesh )
   , node_normal( new NodeNormal( mesh ) )
   , node_normal_local( true )
-  , As( NULL )
+  , As( nullptr )
   , As_local( true )
 {
   // Do nothing
@@ -78,6 +79,7 @@ void SlipBC::apply( GenericMatrix & A,
                     GenericVector & b,
                     BilinearForm const & form )
 {
+  message( "Applying SlipBC boundary conditions to linear system." );
 
   FiniteElementSpace const & fullspace = form.test_space();
 
@@ -90,9 +92,9 @@ void SlipBC::apply( GenericMatrix & A,
   // bool const is_P1 = (scratch.space_dimension
   //                       == mesh.type().num_entities(0) * scratch.size);
 
-  std::string const la_backend = dolfin_get( "linear algebra backend" );
+  std::string const la_backend = dolfin_get<std::string>( "linear algebra backend" );
 
-  if ( As == NULL
+  if ( As == nullptr
        || As->size( 0 ) != A.size( 0 )
        || As->size( 1 ) != A.size( 1 ) )
   {
@@ -113,7 +115,7 @@ void SlipBC::apply( GenericMatrix & A,
 
     // Initialize ghosts for rhs vector using the full space dofmap
     {
-      std::set< uint > rows;
+      _ordered_set< uint > rows;
       DofMap const &   fulldofmap = fullspace.dofmap();
       Array< uint >    celldofs( fulldofmap.local_dimension() );
 
@@ -124,7 +126,7 @@ void SlipBC::apply( GenericMatrix & A,
         rows.insert( celldofs.begin(), celldofs.end() );
       }
 
-      std::map< uint, uint > mapping;
+      _ordered_map< uint, uint > mapping;
       b.init_ghosted( rows.size(), rows, mapping );
     }
 
@@ -216,7 +218,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
         scratch.cell.update(cell);
 
         // Find the vertex position in the cell
-        uint *cvi = cell.entities(0);
+        Array<uint> const & cvi = cell.entities(0);
         uint ci = 0;
         for (ci = 0; ci < cell.num_entities(0); ++ci)
         {
@@ -331,7 +333,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
           continue;
         }
 
-        // Skip the node i fthe subdomain is defined geometrically
+        // Skip the node if the subdomain is defined geometrically
         if (!sub_domain().inside(scratch.coordinates[ni_celldof0], true))
         {
           continue;
@@ -385,8 +387,8 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
   dolfin_assert(n_type > 0);
 
   // Initialize set of row indices for reordering
-  std::set<uint> row_idx = row_indices;
-  std::set<uint>::iterator it = row_idx.begin();
+  _ordered_set<uint> row_idx = row_indices;
+  _ordered_set<uint>::iterator it = row_idx.begin();
 
   //--- Fill data structures for each space coordinate ---
   Array<Function>& basis_functions = node_normal->basis();

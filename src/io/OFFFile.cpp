@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <set>
 #include <sstream>
 
 namespace dolfin
@@ -20,11 +19,6 @@ namespace dolfin
 OFFFile::OFFFile(std::string const filename) :
     GenericFile("OFF", filename)
 {
-}
-//-----------------------------------------------------------------------------
-OFFFile::~OFFFile()
-{
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 void OFFFile::operator>>(Mesh& mesh)

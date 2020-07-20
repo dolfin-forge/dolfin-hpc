@@ -36,8 +36,7 @@ TensorElement::TensorElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 TensorElement::~TensorElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& TensorElement::family() const
@@ -82,7 +81,7 @@ bool TensorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& TensorElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& TensorElement::symmetry() const
 {
   return symmetry_;
 }

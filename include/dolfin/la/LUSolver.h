@@ -5,7 +5,6 @@
 #define __DOLFIN_LU_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/parameter/Parametrized.h>
 #include <dolfin/common/Timer.h>
 #include "GenericMatrix.h"
 #include "GenericVector.h"
@@ -16,14 +15,14 @@
 namespace dolfin
 {
 
-  class LUSolver : public Parametrized
+  class LUSolver
   {
 
   /// LU solver for the built-in LA backends.
 
   public:
 
-    LUSolver() : petsc_solver(0) {}
+    LUSolver()  {}
 
     ~LUSolver()
     {
@@ -40,7 +39,6 @@ namespace dolfin
         if (!petsc_solver)
         {
           petsc_solver = new PETScLUSolver();
-          petsc_solver->set("parent", *this);
         }
         return petsc_solver->solve(A.down_cast<PETScMatrix>(), x.down_cast<PETScVector>(), b.down_cast<PETScVector>());
       }
@@ -67,7 +65,7 @@ namespace dolfin
 
     // PETSc Solver
 #ifdef HAVE_PETSC
-    PETScLUSolver* petsc_solver;
+    PETScLUSolver* petsc_solver{nullptr};
 #else
     int* petsc_solver;
 #endif

@@ -10,5 +10,4 @@ EXTRA_DIST = Binary/Binary.h \
              File/File.h \
              STL/STL.h \
              STL/data/mug.stl \
-      	     VTK/VTK.h \
-      	     XML/XML.h
+      	     VTK/VTK.h

@@ -5,10 +5,11 @@
 
 #include <dolfin/mesh/MeshRenumber.h>
 
-#include <dolfin/mesh/MeshDistributedData.h>
-#include <dolfin/mesh/EntityKey.h>
-#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/common/SharedIterator.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/EntityKey.h>
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshTopology.h>
 
 namespace dolfin
 {
@@ -87,7 +88,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     for (SharedIterator it(vdata); it.valid(); ++it)
     {
       dolfin_assert(it.index() < cve.order());
-      uint const * v_entities = cve(it.index());
+      Array<uint> const & v_entities = cve[it.index()];
       for (uint e = 0; e < cve.degree(it.index()); ++e)
       {
         uint const entity_index = v_entities[e];
@@ -98,7 +99,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         used_entities[entity_index] = true;
 
         // Skip entities with a non-shared vertex
-        uint const * vertices = cev(entity_index);
+        Array<uint> const & vertices = cev[entity_index];
         dolfin_assert(vertices[0] != vertices[1]);
         bool all_shared = true;
         for (uint v = 0; v < num_entity_vertices; ++v)
@@ -118,7 +119,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)
           {
-            vdata.get_global(num_entity_vertices, vertices, key.indices);
+            vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
             // NOTE: it is important to use set to copy global indices as sort
             //       is called to store indices in increasing order.
             key.set(key.indices, entity_index);
@@ -150,6 +151,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     }
     uint recvmax = 0;
     MPI::all_reduce<MPI::max>(sendmax, recvmax);
+    //recvmap.reserve( recvmax );
     uint * recvbuf = new uint[recvmax];
     for (uint j = 1; j < pe_size; ++j)
     {
@@ -238,10 +240,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
             edata.num_shared(), edata.num_ghost());
     }
     recvmax = edata.num_shared() - edata.num_ghost();
-    recvbuf = (recvmax == 0 ? NULL : new uint[recvmax]);
-    uint * sendbuf_back = (recvmax == 0 ? NULL : new uint[recvmax]);
+    recvbuf = (recvmax == 0 ? nullptr : new uint[recvmax]);
+    uint * sendbuf_back = (recvmax == 0 ? nullptr : new uint[recvmax]);
     uint const num_ghosts = edata.num_ghost();
-    uint * recvbuf_back = (num_ghosts == 0 ? NULL : new uint[num_ghosts]);
+    uint * recvbuf_back = (num_ghosts == 0 ? nullptr : new uint[num_ghosts]);
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;

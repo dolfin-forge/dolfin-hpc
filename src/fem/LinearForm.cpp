@@ -9,7 +9,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 LinearForm::LinearForm(Mesh& mesh) :
     Form(mesh),
-    test_space_(NULL)
+    test_space_(nullptr)
 {
 }
 

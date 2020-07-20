@@ -14,7 +14,7 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {
@@ -40,20 +40,18 @@ public:
   }
 
   ///
-  ~Parallel1Numbering()
-  {
-  }
+  ~Parallel1Numbering() override = default;
 
   ///
   inline void tabulate_dofs(uint* dofs, ufc::cell const&,
-                            Cell const& cell) const
+                            Cell const& cell) const override
   {
     uint const ii = ufc_dofmap.local_dimension() * cell.index();
     std::copy(&array[ii], &array[ii] + ufc_dofmap.local_dimension(), dofs);
   }
 
   ///
-  void build()
+  void build() override
   {
     DofNumbering::init();
     //---
@@ -234,7 +232,7 @@ public:
     }
     delete[] recvbuf;
 
-    message(1, "Remaining ghost dofs %u", ufc_ghosts.size());
+    message(1, "Parallel1Numbering: Remaining ghost dofs %u", ufc_ghosts.size());
 
     //---
 
@@ -254,19 +252,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint index) const
+  inline bool is_shared(uint index) const override
   {
     return (shared_.count(index) > 0);
   }
 
   ///
-  inline bool is_ghost(uint index) const
+  inline bool is_ghost(uint index) const override
   {
     return (ghosts_.count(index) > 0);
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for generic parallel vector");
   }

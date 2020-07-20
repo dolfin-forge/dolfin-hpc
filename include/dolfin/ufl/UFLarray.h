@@ -22,16 +22,16 @@ public:
   array(Object const& other, bool const unpack = false);
 
   ///
-  ~array();
+  ~array() override;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
   ///
   repr_t make_repr(std::vector<Object const *> const& prototype) const;

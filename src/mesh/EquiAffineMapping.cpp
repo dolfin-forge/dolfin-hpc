@@ -3,13 +3,13 @@
 
 #include <dolfin/mesh/EquiAffineMapping.h>
 
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/Face.h>
 
 #include <algorithm>
 
@@ -21,8 +21,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 EquiAffineMapping::EquiAffineMapping(Mesh const& mesh) :
     Mapping(),
-    J(0),
-    K(0),
+    J(nullptr),
+    K(nullptr),
     gdim_(mesh.geometry_dimension())
 {
   dolfin_assert(gdim_ <= d_);
@@ -92,7 +92,7 @@ void EquiAffineMapping::updateTriangle(Cell const& cell)
   dolfin_assert(cell.dim() == 2);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::fill(&p0[0], &p0[d_], 0.0);
   std::fill(&p1[0], &p1[d_], 0.0);
@@ -143,7 +143,7 @@ void EquiAffineMapping::updateTetrahedron(Cell const& cell)
   dolfin_assert(cell.dim() == 3);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::fill(&p0[0], &p0[d_], 0.0);
   std::fill(&p1[0], &p1[d_], 0.0);

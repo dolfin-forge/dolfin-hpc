@@ -37,7 +37,7 @@ namespace dolfin
   public:
 
     /// Constructor
-    PETScKrylovMatrix();
+    PETScKrylovMatrix() = default;
 
     /// Create a virtual matrix matching the given vectors
     PETScKrylovMatrix(const PETScVector& x, const PETScVector& y);
@@ -69,7 +69,7 @@ namespace dolfin
   private:
 
     // PETSc Mat pointer
-    Mat A;
+    Mat A{ nullptr };
 
   };
 

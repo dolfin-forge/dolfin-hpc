@@ -37,7 +37,7 @@ public:
   Form(ufc::form const& ufc_form);
 
   ///
-  ~Form();
+  ~Form() override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -71,13 +71,13 @@ public:
 
 //--- INTERFACE inherited from UFLClass -------------------------------------
 
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

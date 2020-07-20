@@ -12,7 +12,6 @@
 #include <dolfin/la/PETScPreconditioner.h>
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/SolverType.h>
-#include <dolfin/parameter/Parametrized.h>
 
 namespace dolfin
 {
@@ -26,7 +25,7 @@ class PETScKrylovMatrix;
 /// of the form Ax = b. It is a wrapper for the Krylov solvers
 /// of PETSc.
 
-class PETScKrylovSolver : public Parametrized
+class PETScKrylovSolver
 {
 public:
 
@@ -77,21 +76,21 @@ private:
   PreconditionerType pc_petsc;
 
   /// DOLFIN PETScPreconditioner
-  PETScPreconditioner* pc_dolfin;
+  PETScPreconditioner* pc_dolfin{ nullptr };
 
   /// PETSc solver pointer
-  KSP ksp;
+  KSP ksp{ nullptr };
 
   /// Size of old system (need to reinitialize when changing)
-  uint M;
-  uint N;
+  uint M{ 0 };
+  uint N{ 0 };
 
   /// True if we have read parameters
-  bool parameters_read;
+  bool parameters_read{ false };
 
   // FIXME: Required to avoid PETSc bug with Hypre. See explanation inside
   //        PETScKrylovSolver:init(). Can be removed when PETSc is patched.
-  bool pc_set;
+  bool pc_set{ false };
 };
 
 }

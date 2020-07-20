@@ -30,9 +30,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::~BoundaryCondition()
-{
-}
+BoundaryCondition::~BoundaryCondition() = default;
 //-----------------------------------------------------------------------------
 void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
                               BilinearForm const& form,
@@ -54,26 +52,6 @@ void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
   this->sub_system_ = enforced;
   apply(A, b, x, form);
   this->sub_system_ = defined;
-}
-//-----------------------------------------------------------------------------
-std::string const& BoundaryCondition::type() const
-{
-  return type_;
-}
-//-----------------------------------------------------------------------------
-Mesh& BoundaryCondition::mesh() const
-{
-  return mesh_;
-}
-//-----------------------------------------------------------------------------
-SubDomain const& BoundaryCondition::sub_domain() const
-{
-  return sub_domain_;
-}
-//-----------------------------------------------------------------------------
-SubSystem const& BoundaryCondition::sub_system() const
-{
-  return sub_system_;
 }
 //-----------------------------------------------------------------------------
 

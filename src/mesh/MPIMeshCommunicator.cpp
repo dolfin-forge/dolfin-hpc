@@ -6,10 +6,12 @@
 #include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 
@@ -66,7 +68,7 @@ void distribute(MeshValues<uint, Vertex>& dist)
     if (v->is_owned())
     {
       uint const owner = dist(*v);
-      sendbuf_vcoords[owner].append(v->x(), v->x() + gdim);
+      append(sendbuf_vcoords[owner],v->x(), v->x() + gdim);
       sendbuf_vgindex[owner].push_back(v->global_index());
     }
   }
@@ -87,8 +89,8 @@ void distribute(MeshValues<uint, Vertex>& dist)
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     swap( mesh, new_mesh );
   }
-  dolfin_assert(mesh.topology().connectivity(0) == NULL);
-  dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
+  dolfin_assert(mesh.topology().connectivity(0) == nullptr);
+  dolfin_assert(mesh.topology().connectivity(tdim) == nullptr);
 
   // Exchange the vertices
   uint recvmax_v;
@@ -102,11 +104,11 @@ void distribute(MeshValues<uint, Vertex>& dist)
   // Resize vertex indices
   uint const local_vgindex_size = local_vgindex.size();
   local_vgindex.resize(local_vgindex_size + recvmax_v);
-  uint * recvbuf_v = local_vgindex.ptr() + local_vgindex_size;
+  uint * recvbuf_v = local_vgindex.data() + local_vgindex_size;
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);
-  real * recvbuf_x = coords.ptr() + coords_size;
+  real * recvbuf_x = coords.data() + coords_size;
   int recv_cellsount;
   for (uint j = 1; j < pe_size; ++j)
   {
@@ -205,14 +207,14 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   Array< Array< real > > send_vcoords( pe_size );
 
   /// Support the same cell and vertex function as before
-  uint const             numRV = D != NULL ? D->size< real, Vertex >() : 0;
+  uint const             numRV = D != nullptr ? D->size< real, Vertex >() : 0;
   Array< Array< real > > RV( ( numRV > 0 ) ? pe_size : 0 );
   uint const             numUC =
-    D != NULL ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
+    D != nullptr ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
   Array< Array< uint > > UC( ( numUC > 0 ) ? pe_size : 0 );
 
   /// Check that only desired data is present in D
-  if ( D != NULL && ( D->size() != ( numRV + numUC ) ) )
+  if ( D != nullptr && ( D->size() != ( numRV + numUC ) ) )
   {
     error( "MPIMeshCommunicator : transferring <real, Vertex>, <bool, Cell>, "
            "and <uint, Cell> only is supported." );
@@ -377,7 +379,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       {
         int n = MPI::sendrecv( UC[dst], dst, recv_uc, src, 3, comm );
         dolfin_assert( recvmaxUC >= ( uint ) n );
-        UC[pe_rank].append( recv_uc.data(), recv_uc.data() + n );
+        append( UC[pe_rank], recv_uc.data(), recv_uc.data() + n );
       }
 
       // Transfer vertex functions
@@ -385,7 +387,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       {
         int n = MPI::sendrecv( RV[dst], dst, recv_rv, src, 4, comm );
         dolfin_assert( recvmaxRV >= ( uint ) n );
-        RV[pe_rank].append( recv_rv.data(), recv_rv.data() + n );
+        append( RV[pe_rank], recv_rv.data(), recv_rv.data() + n );
       }
     }
 
@@ -522,7 +524,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   // Clear mesh using swap with new instance
   mesh = Mesh( mesh.type(), mesh.space(), comm );
 
-  dolfin_assert( mesh.topology().connectivity( 0 ) == NULL );
+  dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
 
   // NOTE: This implementation only works for homogeneous topologies
   //       Check cell data size just in case.
@@ -642,7 +644,7 @@ void check(Mesh& mesh)
 
   // Check shared entities adjacency
   {
-    Array<uint> * sbuf = new Array<uint> [pe_size];
+    Array< Array<uint> > sbuf( pe_size );
     uint e_count = 0;
     for (typename E::shared e(mesh); e.valid(); ++e, ++e_count)
     {
@@ -677,7 +679,7 @@ void check(Mesh& mesh)
       MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
                                    dist.comm()) );
       // Check that no duplicate global entity was added
-      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      _ordered_set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
       {
         error("Duplicate global indices for entities of dimension %u", edim);
@@ -685,7 +687,7 @@ void check(Mesh& mesh)
     }
     uint const rbuf_size = rbuf.size();
     rbuf.resize(rbuf_size + recv_max);
-    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    uint * recv_buf = rbuf.data() + rbuf_size;
     int recv_cellsount;
     for (uint j = 1; j < pe_size; ++j)
     {
@@ -722,7 +724,6 @@ void check(Mesh& mesh)
       recv_buf += recv_cellsount;
       recv_max -= recv_cellsount;
     }
-    delete[] sbuf;
   }
 
   // Check ghost entities adjacency
@@ -748,7 +749,7 @@ void check(Mesh& mesh)
       MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
                                    dist.comm()) );
       // Check that no duplicate global entity was added
-      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      _ordered_set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
       {
         error("Duplicate global indices for entities of dimension %u", edim);
@@ -756,7 +757,7 @@ void check(Mesh& mesh)
     }
     uint const rbuf_size = rbuf.size();
     rbuf.resize(rbuf_size + recv_max);
-    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    uint * recv_buf = rbuf.data() + rbuf_size;
     int recv_cellsount;
     _set<uint> recv_idx;
     for (uint j = 1; j < pe_size; ++j)

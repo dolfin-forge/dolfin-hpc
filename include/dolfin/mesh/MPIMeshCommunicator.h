@@ -22,7 +22,7 @@ namespace MPIMeshCommunicator
 void distribute( MeshValues< uint, Vertex > & dist );
 
 /// Distribute mesh according to a cell-based distribution
-void distribute( MeshValues< uint, Cell > & dist, MeshData * D = NULL );
+void distribute( MeshValues< uint, Cell > & dist, MeshData * D = nullptr );
 
 /// Check mesh entity distribution
 template < class E >

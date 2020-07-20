@@ -1,16 +1,18 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <iostream>
-
-#include <dolfin/main/PE.h>
-#include <dolfin/log/log.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/Cell.h>
+
+#include <dolfin/log/log.h>
+#include <dolfin/main/PE.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
+
+#include <iostream>
 
 namespace dolfin
 {
@@ -23,7 +25,7 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(false),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -35,7 +37,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(true),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -192,40 +194,6 @@ BoundaryMesh::~BoundaryMesh()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-uint BoundaryMesh::facet_index(Cell const& boundary_cell) const
-{
-  dolfin_assert(&boundary_cell.mesh() == this);
-  return cell_map_[boundary_cell.index()];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::facet_index(uint boundary_cell_index) const
-{
-  dolfin_assert(boundary_cell_index < cell_map_.size());
-  return cell_map_[boundary_cell_index];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex) const
-{
-  dolfin_assert(&boundary_vertex.mesh() == this);
-  return vertex_map_[boundary_vertex.index()];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::vertex_index(uint boundary_vertex_index) const
-{
-  dolfin_assert(boundary_vertex_index < vertex_map_.size());
-  return vertex_map_[boundary_vertex_index];
-}
-//-----------------------------------------------------------------------------
-BoundaryMesh::Type BoundaryMesh::boundary_type() const
-{
-  return type_;
-}
-//-----------------------------------------------------------------------------
-bool BoundaryMesh::is_boundary_of_boundary() const
-{
-  return boundary_of_boundary_;
-}
-//-----------------------------------------------------------------------------
 void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 {
   uint const gdim = mesh.geometry_dimension();
@@ -248,7 +216,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       bool const shrd = v->is_shared();
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if ((subdomain_ == NULL) || (subdomain_->inside(v->x(), bndr && !shrd)))
+        if ((subdomain_ == nullptr) || (subdomain_->inside(v->x(), bndr && !shrd)))
         {
           vertex_map_.push_back(v->index());
         }
@@ -296,7 +264,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 #endif
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if (subdomain_ != NULL)
+        if (subdomain_ != nullptr)
         {
           bool inside = false;
           for (VertexIterator v(*f); !v.end(); ++v)

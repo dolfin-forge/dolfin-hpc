@@ -5,12 +5,14 @@
 
 #ifdef HAVE_PETSC
 
+#include <dolfin/la/PETScLUSolver.h>
+
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/la/PETScVector.h>
 #include <dolfin/la/PETScKrylovMatrix.h>
-#include <dolfin/la/PETScLUSolver.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <dolfin/main/MPI.h>
 
@@ -18,7 +20,6 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 PETScLUSolver::PETScLUSolver()
-  : ksp(0), B(0), idxm(0), idxn(0)
 {
   // Set up solver environment to use only preconditioner
 #ifdef HAVE_MPI
@@ -111,14 +112,11 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
       error("No support for symbolic LU on matrix type mpiaij."
 	    "Installation of MUMPS is recomended.");
 
-  // Get parameters
-  const bool report = get("LU report");
-
   // Initialize solution vector (remains untouched if dimensions match)
   x.init(A.size(1));
 
   // Write a message
-  if ( report )
+  if ( dolfin_get<bool>("LU report") )
     message("Solving linear system of size %d x %d (PETSc LU solver, %s).",
             A.size(0), A.size(1), mat_type);
 
@@ -158,13 +156,6 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
 		       PETScVector& x, const PETScVector& b)
 {
-  // Get parameters
-  const bool report = get("LU report");
-
-  //cout << "LU got matrix:\n";
-  //cout << "A = "; A.disp(false);
-  //cout << "b = "; b.disp();
-
   // Copy data to dense matrix
   const real Anorm = copyToDense(A);
 
@@ -172,7 +163,7 @@ dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
   x.init(A.size(1));
 
   // Write a message
-  if ( report )
+  if ( dolfin_get<bool>("LU report") )
     message("Solving linear system of size %d x %d (PETSc LU solver).",
 		A.size(0), A.size(1));
 
@@ -215,7 +206,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
   if ( !B )
   {
     // Create matrix if it has not been created before
-    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL, &B);
+    MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL &B);
     idxm = new int[M];
     idxn = new int[1];
     for (uint i = 0; i < M; i++)

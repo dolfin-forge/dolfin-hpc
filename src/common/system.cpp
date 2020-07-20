@@ -8,8 +8,8 @@
 
 #include <sstream>
 #include <iomanip>
-#include <limits.h>
-#include <stdlib.h>
+#include <climits>
+#include <cstdlib>
 #include <glob.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -64,7 +64,7 @@ std::string path(std::string p0, std::string const& p1, std::string const& p2)
 void glob(std::string const& pattern, Array<std::string>& matches)
 {
   glob_t match;
-  ::glob(pattern.c_str(), GLOB_ERR, NULL, &match);
+  ::glob(pattern.c_str(), GLOB_ERR, nullptr, &match);
   for (unsigned int i = 0; i < match.gl_pathc; ++i)
   {
     matches.push_back(std::string(match.gl_pathv[i]));
@@ -88,6 +88,7 @@ void mkdir(std::string const& dirpath)
   {
     error("Unable to create directory: '%s'", dirpath.c_str());
   }
+  message( 1, "mkdir: %s", dirpath.c_str() );
 }
 //-----------------------------------------------------------------------------
 bool stat(std::string const& dirpath)
@@ -99,7 +100,7 @@ bool stat(std::string const& dirpath)
 std::string getcwd()
 {
   char curpath[PATH_MAX] = { 0 };
-  if (::getcwd(curpath, sizeof(curpath)) == NULL)
+  if (::getcwd(curpath, sizeof(curpath)) == nullptr)
   {
     message("Cannot get current working directory");
   }
@@ -117,6 +118,7 @@ void cd(std::string const& dirpath)
   {
     error("Unable to enter directory: '%s'", dirpath.c_str());
   }
+  message( 1, "cd: %s", dirpath.c_str() );
 #if HAVE_MPI
   MPI::check_error( MPI_Barrier(dolfin::MPI::DOLFIN_COMM) );
 #endif
@@ -130,11 +132,8 @@ void mkdircd(std::string const& dirpath)
 //-----------------------------------------------------------------------------
 void pushd(std::string const& dirpath)
 {
-  mkdir(dirpath);
-  char abspath[PATH_MAX] = { 0 };
-  ::realpath(dirpath.c_str(), abspath);
-  dirstack().push_back(abspath);
-  cd(dirpath);
+  dirstack().push_back( getcwd() );
+  mkdircd( dirpath );
 }
 //-----------------------------------------------------------------------------
 void popd()
@@ -143,8 +142,9 @@ void popd()
   {
     error("Trying to popd with empty dirstack");
   }
-  dirstack().pop_back();
+
   cd(dirstack().back());
+  dirstack().pop_back();
 }
 //-----------------------------------------------------------------------------
 void dirs(int n, std::string& dirname)
@@ -171,7 +171,7 @@ void dirs(int n, std::string& dirname)
 //-----------------------------------------------------------------------------
 Array<std::string>& dirstack()
 {
-  static Array<std::string> dirstack_(1, getcwd());
+  static Array<std::string> dirstack_;
   return dirstack_;
 }
 //-----------------------------------------------------------------------------

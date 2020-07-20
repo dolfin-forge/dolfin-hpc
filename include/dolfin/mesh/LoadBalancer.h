@@ -17,10 +17,10 @@ class LoadBalancer
 
 public:
 
-  typedef MeshValues<real, Vertex> VertexFunction;
-  typedef MeshValues<uint, Cell> CellFunction;
-  typedef std::pair<VertexFunction *, VertexFunction *> VertexFunctionPPair;
-  typedef std::pair<CellFunction *, CellFunction *> CellFunctionPPair;
+  using VertexFunction      = MeshValues<real, Vertex>;
+  using CellFunction        = MeshValues<uint, Cell>;
+  using VertexFunctionPPair = std::pair<VertexFunction *, VertexFunction *>;
+  using CellFunctionPPair   = std::pair<CellFunction *, CellFunction *>;
 
   /// Balancing types
   enum Type
@@ -136,7 +136,7 @@ public:
 
 private:
 
-  static std::map<Mesh *, MeshValues<uint, Cell> *> s_;
+  static _ordered_map<Mesh *, MeshValues<uint, Cell> *> s_;
 
 };
 

@@ -39,7 +39,7 @@ namespace dolfin {
     bool check(unsigned int q) const;
 
     /// Display quadrature data
-    virtual void disp() const = 0;
+    void disp() const override = 0;
 
   };
   

@@ -20,9 +20,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/parameter/parameters.h>
 
-#include <map>
-
-
 namespace dolfin
 {
 
@@ -40,17 +37,17 @@ public:
 
   /// Create normal, tangents for the boundary of mesh
   NodeNormal( Mesh& mesh, Type w = unit,
-              real alpha = dolfin_get("NodeNormal alpha") );
+              real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Create normal, tangents for the boundary of mesh for given subdomain
   NodeNormal( Mesh& mesh, SubDomain const& subdomain, Type w = none,
-              real alpha = dolfin_get("NodeNormal alpha") );
+              real alpha = dolfin_get<real>("NodeNormal alpha") );
 
   /// Destructor
-  ~NodeNormal();
+  ~NodeNormal() override = default;
 
   /// Compute the orthogonal basis
-  void compute();
+  void compute() override;
 
   /// Returns the node type
   uint node_type(uint node_id) const;

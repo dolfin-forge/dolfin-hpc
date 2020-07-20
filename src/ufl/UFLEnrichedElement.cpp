@@ -40,8 +40,7 @@ EnrichedElement::EnrichedElement(List const& elements) :
 
 //-----------------------------------------------------------------------------
 EnrichedElement::~EnrichedElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& EnrichedElement::family() const
@@ -86,7 +85,7 @@ bool EnrichedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& EnrichedElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& EnrichedElement::symmetry() const
 {
   return symmetry_;
 }

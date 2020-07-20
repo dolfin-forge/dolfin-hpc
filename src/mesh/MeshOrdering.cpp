@@ -1,13 +1,11 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-01-30
-// Last changed: 2008-06-17
+
+#include <dolfin/mesh/MeshOrdering.h>
 
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshOrdering.h>
 
 namespace dolfin
 {
@@ -15,7 +13,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 void MeshOrdering::order( Mesh & mesh )
 {
-	message( 1, "Ordering mesh entities..." );
+	message( 1, "MeshOrdering: Ordering mesh entities..." );
 
 	// Get cell type
 	const CellType & cell_type = mesh.type();

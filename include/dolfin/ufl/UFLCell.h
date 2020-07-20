@@ -47,7 +47,7 @@ public:
   explicit Cell(repr_t const& repr);
 
   ///
-  ~Cell();
+  ~Cell() override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -96,13 +96,13 @@ public:
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

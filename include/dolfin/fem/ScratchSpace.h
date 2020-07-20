@@ -87,6 +87,11 @@ public:
   // Local array for basis values
   real * const basis_values;
 
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+  // Local array for all basis values
+  real ** const all_basis_values;
+#endif
+
   // Local array for coordinates
   real** const coordinates;
 

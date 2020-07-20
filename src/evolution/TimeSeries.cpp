@@ -60,8 +60,8 @@ void TimeSeries::eval(real t)
   if (!data_values_.empty())
   {
     // Find element in U_files so that element < t
-    std::map<real, uint>::iterator it1;
-    std::map<real, uint>::iterator it0;
+    _ordered_map<real, uint>::iterator it1;
+    _ordered_map<real, uint>::iterator it0;
 
     // Select it1 such that the time t1 is just after t
     it1 = discrete_times_.upper_bound(t);
@@ -101,8 +101,8 @@ void TimeSeries::eval(real t)
     real w0 = (t1_ - t) / (t1_ - t0_);
     real w1 = (t - t0_) / (t1_ - t0_);
 
-    message(1, "S0: t = %8f ; sample = %6d; w0 = %8f", t0_, idx0, w0);
-    message(1, "S1: t = %8f ; sample = %6d; w1 = %8f", t1_, idx1, w1);
+    message(1, "TimeSeries S0: t = %8f ; sample = %6d; w0 = %8f", t0_, idx0, w0);
+    message(1, "TimeSeries S1: t = %8f ; sample = %6d; w1 = %8f", t1_, idx1, w1);
     // Compute interpolated value for each entry
     for (uint i = 0; i < value_size_; ++i)
     {
@@ -254,9 +254,9 @@ void TimeSeries::loadData(std::string const&)
   }
 
   // Update discrete times
-  for (Array<real>::const_iterator it = times.begin(); it != times.end(); ++it)
+  for ( real const & time : times )
   {
-    this->addPoint(*it);  // add discrete time
+    this->addPoint(time);  // add discrete time
   }
 
   // Update number of intervals

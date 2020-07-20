@@ -13,25 +13,16 @@ namespace dolfin
 struct LinearDistribution
 {
 
-  uint global_size;
-  uint card;
-  uint rank;
-  uint L;
-  uint R;
-  uint offset;
-  uint size;
+  uint global_size{0};
+  uint card{0};
+  uint rank{0};
+  uint L{0};
+  uint R{0};
+  uint offset{0};
+  uint size{0};
 
   ///
-  LinearDistribution() :
-    global_size(0),
-    card(0),
-    rank(0),
-    L(0),
-    R(0),
-    offset(0),
-    size(0)
-  {
-  }
+  LinearDistribution() = default;
 
   ///
   LinearDistribution(uint global_size, uint card, uint rank):

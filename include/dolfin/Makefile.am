@@ -13,9 +13,11 @@ nobase_pkginclude_HEADERS = \
 				common/Distributed.h\
 				common/DistributedData.h\
 				common/dolfin_common.h\
+				common/GhostIterator.h\
 				common/Label.h\
-				common/List.h\
 				common/maybe_unused.h\
+				common/OwnedIterator.h\
+				common/SharedIterator.h\
 				common/system.h\
 				common/Test.h\
 				common/Timer.h\
@@ -44,7 +46,6 @@ nobase_pkginclude_HEADERS = \
 				fem/DofMapSet.h\
 				fem/DofNumbering.h\
 				fem/dolfin_fem.h\
-				fem/Equation.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
@@ -103,10 +104,6 @@ nobase_pkginclude_HEADERS = \
 				io/OFFFile.h\
 				io/STLFile.h\
 				io/VTKFile.h\
-				io/XMLFile.h\
-				io/XMLMesh.h\
-				io/XMLMeshFunction.h\
-				io/XMLObject.h\
 				la/AMGSolver.h\
 				la/DefaultFactory.h\
 				la/dolfin_la.h\
@@ -171,6 +168,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/BoundingBox.h\
 				mesh/Box.h\
 				mesh/Cell.h\
+				mesh/CellIterator.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
 				mesh/Connectivity.h\
@@ -178,13 +176,17 @@ nobase_pkginclude_HEADERS = \
 				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
 				mesh/Edge.h\
+				mesh/EdgeIterator.h\
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
+				mesh/EuclideanSpace.h \
 				mesh/Face.h\
+				mesh/FaceIterator.h\
 				mesh/FaceKey.h\
 				mesh/Facet.h\
+				mesh/FacetIterator.h\
 				mesh/GeometricPredicates.h\
 				mesh/GTSInterface.h\
 				mesh/HexahedronCell.h\
@@ -235,15 +237,13 @@ nobase_pkginclude_HEADERS = \
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
+				mesh/VertexIterator.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\
 				parameter/Parameter.h\
-				parameter/ParameterList.h\
 				parameter/parameters.h\
 				parameter/ParameterSystem.h\
-				parameter/ParameterValue.h\
-				parameter/Parametrized.h\
 				quadrature/dolfin_quadrature.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/GaussQuadrature.h\
@@ -301,4 +301,3 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLValueArray.h\
 				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h
-

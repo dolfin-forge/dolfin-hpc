@@ -1,6 +1,6 @@
 
 AC_PREREQ(2.59)
-AC_INIT([dolfin],[0.9.0p1-hpc])
+AC_INIT([dolfin],[0.9.1-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -37,68 +37,68 @@ AC_ARG_ENABLE(openmp, AC_HELP_STRING([--enable-openmp],
               [Compile with support for OpenMP]),
               [enable_openmp=${enableval}], [enable_openmp=no])
 
-AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
-              [Compile with support for Boost TR1 headers]),
-              [enable_boosttr1=${enableval}],[enable_boostr1=no])
-
-AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
-              [Compile with support for unordered containers]),
-              [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
-
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
 
-AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
+AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check],
               [Compile with support for unit testing, requires libcheck]),
               [enable_check=${enableval}],[enable_check=no])
 
-AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python], 
+AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python],
               [Install Python modules, requires a Python interpreter]),
               [enable_python=${enableval}],[enable_python=no])
 
-# Optional packages
-AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
-            [Compile with support for reading/writing XML data]),
-            [with_xml=${withval}],[with_xml=yes])
+AC_ARG_ENABLE(opt-basis, AC_HELP_STRING([--enable-opt-basis],
+              [Enable basis function optimization]),
+              [enable_opt_basis=${enableval}], [enable_opt_basis=no])
 
+# Optional packages
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
             [with_gts=${withval}],[with_gts=no])
 
-AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], 
+AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack],
              [Compile with support for JANPACK]),
              [with_janpack=${withval}],[with_janpack=no])
 
-AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], 
+AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
            [Compile with support for PETSc linear algebra]),
            [with_petsc=${withval}],[with_petsc=no])
 
-AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim], 
+AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim],
             [Compile with support for VisIt/libsim]),
             [with_libsim=${withval}],[with_libsim=no])
 
-AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis], 
+AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis],
 		     [Compile with support for ParMETIS]),
 		     [with_parmetis=${withval}],[with_parmetis=no])
 
-AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan], 
+AC_ARG_WITH(phmap, AC_HELP_STRING([--with-phmap],
+         [Compile with support for parallel hashmap (https://git.io/JfE2p)]),
+         [with_phmap=${withval}],[with_phmap=no])
+
+AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
 		     [Compile with support for Zoltan]),
 		     [with_zoltan=${withval}],[with_zoltan=no])
 
+AC_ARG_WITH(convert, AC_HELP_STRING([--with-convert],
+		     [Build external mesh converter tool]),
+		     [with_convert=${withval}],[with_convert=no])
+
 
 if test "x${enable_function_cache}" = xyes; then
-   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], 
+   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1],
    [Compile with local data cache in functions])
 fi
 
 if test "x${enable_optimize_p1}" = xyes; then
-   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], 
+   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1],
    [Compile with optimization for P1 elements])
 fi
 
-if test "x${enable_boosttr1}" = xyes; then
-   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
-   need_boost=yes    
+if test "x${enable_opt_basis}" = xyes; then
+   AC_DEFINE(ENABLE_EVALUATE_BASIS_FROM_COORDINATES, [1],
+   [Enable basis function optimization])
 fi
 
 # Checks for programs.
@@ -109,25 +109,29 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
+
 if test "x${enable_mpi}" != xno; then
-   AX_MPI    
+   AX_MPI
    CXX="$MPICXX"
-   LIBS="$MPILIBS $LIBS"   
+   LIBS="$MPILIBS $LIBS"
    if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       LIBS="$LIBS -lmpi++"
-   fi   
+   fi
 
    if test "x${enable_mpiio}" != xno; then
       AC_DEFINE(ENABLE_MPIIO, 1, [Compile with support for MPI I/O])
    fi
 fi
 
+# Ensure strict C++11 compliance
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      CXXFLAGS="-hnoomp $CXXFLAGS" 
+      CXXFLAGS="-hnoomp $CXXFLAGS"
    fi
 fi
 
@@ -138,55 +142,12 @@ AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
-found_unordered_containers="no"
-if test "x${enable_unordered_cxx}" = xyes; then
-
-   #Ugly hack to check for C++11 unordered containers, without all c++11
-   #dependencies pulled in from "standard" m4 container macros. 
-   #Note these requires correct C++11 flags to be passed through CXXFLAGS.
-   AX_CXX_HEADER_NONTR1_UNORDERED_MAP
-   AX_CXX_HEADER_NONTR1_UNORDERED_SET
-  
-   if test "x${ax_cv_cxx_unordered_map}" != xyes; then
-      AX_CXX_HEADER_TR1_UNORDERED_MAP
-      AX_CXX_HEADER_TR1_UNORDERED_SET
-      if test "x${ax_cv_cxx_tr1_unordered_set}" = xyes; then
-      	 found_unordered_containers="yes"
-      fi
-   else
-      found_unordered_containers="yes"	
-   fi
-fi
-
-
-
-
-
 # UFL is now default
-PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.1.4])
-CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
+CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
 
-if test "x${need_boost}" = xyes; then
-   AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-   CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-fi
-
-if test "x${enable_boosttr1}" = xyes; then
-   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
-      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
-   fi
-fi
-
-
 # Checks for libraries.
-if test "x${with_xml}" != xno; then
-   AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
-   CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
-   LIBS="$XML_LIBS $LIBS"
-   AC_DEFINE(HAVE_XML, 1, [Compile with support for reading/writing XML data])
-fi
-
 AX_ZLIB
 
 if test "${ZLIB_LIBS}"; then
@@ -228,7 +189,7 @@ found_domain_decomp="no"
    else
       if test "x${with_parmetis}" != xno; then
          AX_PARMETIS
-         if test "${PARMETIS_LIBS}"; then     
+         if test "${PARMETIS_LIBS}"; then
             LIBS="$PARMETIS_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_parmetis="yes"
@@ -236,14 +197,14 @@ found_domain_decomp="no"
 	    with_parmetis="no"
          fi
       fi
-      
+
       if test "x${with_zoltan}" != xno; then
       	 if test "x${enable_optimize_p1}" != xno; then
 	    AC_MSG_ERROR([Zoltan requires facet connectivity])
 	 fi
 
          AX_ZOLTAN
-         if test "${ZOLTAN_LIBS}"; then     
+         if test "${ZOLTAN_LIBS}"; then
             LIBS="$ZOLTAN_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_zoltan="yes"
@@ -265,17 +226,19 @@ if test "x${with_gts}" = xyes; then
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
 
+AX_PHMAP
+
 found_la_backend="no"
 
 if test "x${with_petsc}" != xno; then
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
       AX_CRAY_PETSC
-      if test "x${have_cray_petsc}" = xyes; then      
+      if test "x${have_cray_petsc}" = xyes; then
          found_la_backend="yes"
       	 with_petsc="yes"
       else
-	 with_petsc="no" 
+	 with_petsc="no"
       fi
    else
       AX_PETSC
@@ -291,9 +254,9 @@ fi
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
    if test "${janpack_LIBS}"; then
-     found_la_backend="yes"  
+     found_la_backend="yes"
    elif test "${janpack_mpi_LIBS}"; then
-     found_la_backend="yes"  
+     found_la_backend="yes"
    else
      with_janpack="no"
    fi
@@ -305,33 +268,33 @@ if test "x${found_la_backend}" != xyes; then
 fi
 
 
-if test "x${enable_quad}" = xyes; then 
+if test "x${enable_quad}" = xyes; then
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AX_CRAY_LIBSCI
       if test $have_cray_libsci = yes; then
-      	 have_lapack=yes	
+      	 have_lapack=yes
       else
 	 have_lapack=no
       fi
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
-      AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"], 
+      AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"],
                    have_lapack=no,)
-   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then 
-      AC_CHECK_LIB(sunperf,dgesv_,[have_lapack=yes, LIBS="$LIBS -lsunperf"], 
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
+      AC_CHECK_LIB(sunperf,dgesv_,[have_lapack=yes, LIBS="$LIBS -lsunperf"],
                    [have_lapack=no],)
    else
       AC_CHECK_LIB(lapack,dgesv_,
-                   [have_lapack=yes, LIBS="$LIBS -lblas -llapack"], 
+                   [have_lapack=yes, LIBS="$LIBS -lblas -llapack"],
                    [have_lapack=no], [-lblas])
-   fi 
+   fi
 
    if test $have_lapack = no; then
-      AC_CHECK_LIB(lapack,dgesv_,[have_lapack=yes, LIBS="$LIBS"], 
+      AC_CHECK_LIB(lapack,dgesv_,[have_lapack=yes, LIBS="$LIBS"],
                    have_lapack=no,)
-   fi    
+   fi
 
-  
+
    if test $have_lapack = yes; then
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
    elif test $have_lapack = no; then
@@ -387,15 +350,15 @@ AC_CHECK_FUNCS([floor memset pow sqrt])
 
 # Checks for Python
 if test "x${enable_python}" = xyes; then
-    AM_PATH_PYTHON([2.6])
+    AM_PATH_PYTHON([3.0])
     if ! ${HAVE_PYTHON}; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi
     case ${PYTHON_VERSION} in
-    2*)
+    3*)
     ;;
-    *)	
-    AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
+    *)
+    AC_MSG_ERROR([No Python3 interpreter found, module cannot be installed.])
     ;;
     esac
 fi
@@ -409,6 +372,13 @@ if test -n "$DOXYGEN"; then
   AC_CHECK_PROGS([DOXYGEN_DEPS], [dot])
 fi
 AM_CONDITIONAL([ENABLE_DOXYGEN], [test -n "$DOXYGEN_DEPS"])
+
+AM_CONDITIONAL([ENABLE_MESH_CONVERTER], false)
+# Configure external mesh converting tool
+if test "x${with_convert}" != xno; then
+   AC_CONFIG_SUBDIRS(./misc/utils/convert/)
+   AM_CONDITIONAL([ENABLE_MESH_CONVERTER], true)
+fi
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
@@ -468,21 +438,23 @@ Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:
 
-  MPI: ${enable_mpi} 
-  MPI I/O: ${enable_mpiio}
-  OpenMP: ${enable_openmp}
-  PETSc: ${with_petsc}
-  JANPACK: ${with_janpack}
-  GTS: ${with_gts}
-  ParMETIS: ${with_parmetis}
-  Zoltan: ${with_zoltan}
-  libsim: ${with_libsim}
-  Function cache: ${enable_function_cache}
-  Optimize P1: ${enable_optimize_p1}
-  Unordered containers: ${found_unordered_containers}
-  Compressed VTK: ${enable_zlib}
-  Quadrature: ${enable_quad}
-  CHECK support: ${enable_check}
+  MPI:                         ${enable_mpi}
+  MPI I/O:                     ${enable_mpiio}
+  OpenMP:                      ${enable_openmp}
+  PETSc:                       ${with_petsc}
+  JANPACK:                     ${with_janpack}
+  GTS:                         ${with_gts}
+  ParMETIS:                    ${with_parmetis}
+  Zoltan:                      ${with_zoltan}
+  libsim:                      ${with_libsim}
+  Function cache:              ${enable_function_cache}
+  Optimize P1:                 ${enable_optimize_p1}
+  Compressed VTK:              ${enable_zlib}
+  Quadrature:                  ${enable_quad}
+  Parallel Hash Map:           ${have_phmap_h}
+  Basis function optimization: ${enable_opt_basis}
+  CHECK support:               ${enable_check}
+  DEBUG mode:                  ${enable_debug}
 
 ---------------------------------------------------------
 "
@@ -491,9 +463,9 @@ echo \
 "  Python modules will be installed in:
 
         ${pythondir}
-        
+
   with \${prefix} = ${prefix} .
-  
+
   Do not forget to set the PYTHONPATH variable.
 ---------------------------------------------------------
 "

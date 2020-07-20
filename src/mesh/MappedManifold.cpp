@@ -3,13 +3,13 @@
 
 #include <dolfin/mesh/MappedManifold.h>
 
-#include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/PeriodicSubDomain.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -24,25 +24,6 @@ MappedManifold::MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain) :
 }
 
 //-----------------------------------------------------------------------------
-MappedManifold::~MappedManifold()
-{
-}
-
-//-----------------------------------------------------------------------------
-uint MappedManifold::facet_index(Cell const& boundary_cell)
-{
-  dolfin_assert(&boundary_cell.mesh() == this);
-  return cell_map_[boundary_cell.index()];
-}
-
-//-----------------------------------------------------------------------------
-uint MappedManifold::vertex_index(Vertex const& boundary_vertex)
-{
-  dolfin_assert(&boundary_vertex.mesh() == this);
-  return vertex_map_[boundary_vertex.index()];
-}
-
-//-----------------------------------------------------------------------------
 void MappedManifold::init()
 {
   //
@@ -53,9 +34,8 @@ void MappedManifold::init()
   uint const gdim = globalmesh.geometry_dimension();
   MeshEditor editor(*this, boundary.type().cellType(),
                     boundary.geometry_dimension());
-  Array<uint> mm_vertices(boundary.size(0));
+  Array<uint> mm_vertices(boundary.size(0),boundary.size(0));
   uint const invalid_vertex_index = mm_vertices.size();
-  mm_vertices = invalid_vertex_index;
   Array<real> mm_coordinates(gdim * mm_vertices.size());
   uint const num_cell_vertices = boundary.type().num_entities(0);
   Array<uint> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);
@@ -160,9 +140,9 @@ void MappedManifold::init()
   editor.close();
 
   //
-  message(1, "Computed reference manifold with %d cell and %d vertices.",
+  message(1, "MappedManifold: Computed reference manifold with %d cell and %d vertices.",
           mm_cell_count, mm_vertex_count);
-  message(1, "Generated sets of %8d G facets, %8d H facets, %8d I facet",
+  message(1, "MappedManifold: Generated sets of %8d G facets, %8d H facets, %8d I facet",
           facetsG_.size(), facetsH_.size(), facetsI_.size());
 }
 //-----------------------------------------------------------------------------

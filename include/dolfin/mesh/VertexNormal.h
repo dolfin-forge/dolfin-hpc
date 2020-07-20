@@ -21,7 +21,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <map>
 
 namespace dolfin
 {
@@ -61,7 +60,7 @@ public:
   VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight);
 
   /// Destructor
-  ~VertexNormal();
+  ~VertexNormal() = default;
 
   ///
   Mesh& mesh();

@@ -12,6 +12,7 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/UnitInterval.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <dolfin/dolfin.h>
@@ -149,7 +150,7 @@ DOLFIN_START_TEST( test_BinaryFile_Poisson )
       //------------------------------------------------------------------------
 
       // Create mesh
-      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
       UnitSquare mesh(32,32);
 
       // Create coefficients
@@ -182,20 +183,14 @@ DOLFIN_START_TEST( test_BinaryFile_Poisson )
 
       u.disp();
 
-      {
-        BinaryFile fo("u.bin");
-        fo << u;
-      }
+      BinaryFile("u.bin") << u;
 
       message("vector l2  norm: %e", u.vector().norm());
       message("vector inf norm: %e", u.vector().max());
 
       Function v(a.trial_space());
 
-      {
-        BinaryFile fi("u000000.bin");
-        fi >> v;
-      }
+      BinaryFile("u000000.bin") >> v;
     }
   }
 DOLFIN_END_TEST
@@ -210,7 +205,7 @@ DOLFIN_START_TEST( test_BinaryFile_Function )
       // FiniteElementSpace Vh0(m0, DG0);
       // Function U0(Vh0);
 
-      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
       ufl::Family f(ufl::Family::CG);
       ufl::Domain dom(ufl::Domain::triangle);
       ufl::Cell cell(dom);

@@ -9,19 +9,23 @@
 #include <dolfin/fem/UFC.h>
 #include <dolfin/la/GenericSparsityPattern.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/parameter/parameters.h>
 
 namespace dolfin
 {
 
-//-----------------------------------------------------------------------------
-void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
-                                   Mesh& mesh, UFC& ufc,
-                                   DofMapSet const& dof_map_set)
+namespace SparsityPatternBuilder
 {
-  message(1, "SparsityPatternBuilder : build");
+
+//-----------------------------------------------------------------------------
+void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
+            UFC& ufc, DofMapSet const& dof_map_set )
+{
+  message(1, "SparsityPatternBuilder: build");
   tic();
 
   // Initialise sparsity pattern
@@ -35,8 +39,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   }
 
   // JANPACK doesn't need any sparsity pattern information
-  std::string la_backend = dolfin_get("linear algebra backend");
-  if(la_backend == "JANPACK")
+  if( dolfin_get<std::string>("linear algebra backend") == "JANPACK" )
   {
     tocd(1);
     return;
@@ -138,5 +141,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   tocd(1);
 }
 //-----------------------------------------------------------------------------
+
+} // end namespace SparsityPatternBuilder
 
 } /* namespace dolfin */

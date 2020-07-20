@@ -9,18 +9,15 @@
 
 // Forward declarations
 struct _GtsBBox;
-typedef _GtsBBox GtsBBox;
+using GtsBBox = _GtsBBox;
 struct _GNode;
-typedef _GNode GNode;
+using GNode = _GNode;
 
 namespace dolfin
 {
 
 class Mesh;
 class Cell;
-
-template<class T>
-  class Array;
 
 class GTSInterface
 {

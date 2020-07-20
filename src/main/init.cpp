@@ -10,7 +10,7 @@
 #include <dolfin/main/SubSystemsManager.h>
 
 #include <cstdlib>
-#include <cstring>
+#include <string>
 #include <unistd.h>
 
 //-----------------------------------------------------------------------------

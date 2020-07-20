@@ -11,8 +11,10 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -39,7 +41,7 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
   {
-    error("Interpolation between functions with different value shape");
+    error("FunctionInterpolation: Interpolation between functions with different value shape");
   }
   else
   {
@@ -88,7 +90,7 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
 void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
                                           Function& F1)
 {
-  message(1, "Function interpolation on same mesh");
+  message(1, "FunctionInterpolation: interpolation on same mesh");
   dolfin_assert(F0.mesh() == F1.mesh());
 
   //
@@ -143,7 +145,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
 void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
                                           Function& F1)
 {
-  message(1, "Function interpolation on non-matching meshes");
+  message(1, "FunctionInterpolation: interpolation on non-matching meshes");
   dolfin_assert(F0.mesh() != F1.mesh());
 
   Mesh& M0 = F0.mesh();
@@ -187,14 +189,11 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   // Dofs count to be sent and received
 #if HAVE_MPI
   uint num_sendadj = 0;
-#endif
-  uint * dof1sendcount = new uint[pe_size];
-  std::memset(dof1sendcount, 0, pe_size * sizeof(uint));
-#if HAVE_MPI
   uint num_recvadj = 0;
 #endif
-  uint * dof1recvcount = new uint[pe_size];
-  std::memset(dof1recvcount, 0, pe_size * sizeof(uint));
+
+  Array< uint > dof1sendcount( pe_size, 0 );
+  Array< uint > dof1recvcount( pe_size, 0 );
 
   // Total count to be received from other ranks
   uint num_dofsF = 0;
@@ -221,7 +220,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         Cell c1(M1, v1->entities(tdim1)[0]);
         S1.cell.update(c1);
         dm1.tabulate_dofs(S1.dofs, S1.cell);
-        uint *vid = c1.entities(0);
+        Array<uint> & vid = c1.entities(0);
         uint vpos = 0;
         while (vid[vpos] != v1->index())
         {
@@ -395,19 +394,15 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     int r_maxrecvcount = u_maxrecvcount * gdim1;
 
     //
-    uint * u_recvbuf = new uint[u_maxrecvcount];
-    real * r_recvbuf = new real[r_maxrecvcount];
+    Array< uint > u_recvbuf( u_maxrecvcount );
+    Array< real > r_recvbuf( r_maxrecvcount );
     for (int j = 1; j < (int) pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;
       int dest = (rank + j) % pe_size;
 
-      int u_recvcount = MPI::sendrecv( &dofs_indicesX[0], dofs_indicesX.size(),
-                                       dest, &u_recvbuf[0], u_maxrecvcount,
-                                       src, 1 );
-      int r_recvcount = MPI::sendrecv( &dofs_xcoordsX[0], dofs_xcoordsX.size(),
-                                       dest, &r_recvbuf[0], r_maxrecvcount,
-                                       src, 1 );
+      int u_recvcount = MPI::sendrecv( dofs_indicesX, dest, u_recvbuf, src, 1 );
+      int r_recvcount = MPI::sendrecv( dofs_xcoordsX, dest, r_recvbuf, src, 1 );
 
       uint matching_dofs = 0;
       if (u_recvcount > 0)
@@ -458,8 +453,6 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       // Set number of dofs to be sent back to src
       dof1sendcount[src] = matching_dofs;
     }
-    delete[] u_recvbuf;
-    delete[] r_recvbuf;
 
     // Collect data on dofs distribution across ranks
     for (int j = 1; j < (int) pe_size; ++j)
@@ -501,12 +494,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   //--- Evaluation
 
   // Prepare requests to receive dof indices and values
-  uint * dofs_indicesF = new uint[num_dofsF];
-  real * dofs_cvaluesF = new real[num_dofsF];
+  Array< uint > dofs_indicesF( num_dofsF );
+  Array< real > dofs_cvaluesF( num_dofsF );
 #ifdef HAVE_MPI
   MPI_Status status;
-  MPI_Request * u_req_recv = new MPI_Request[num_recvadj];
-  MPI_Request * r_req_recv = new MPI_Request[num_recvadj];
+  Array< MPI_Request > u_req_recv( num_recvadj );
+  Array< MPI_Request > r_req_recv( num_recvadj );
   if (is_distributed)
   {
     uint offsetF = 0;
@@ -531,10 +524,10 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 #endif
 
   // Prepare requests to send dof indices and values
-  real * dofs_cvalues1 = new real[dofs_indices1.size()];
+  Array< real > dofs_cvalues1( dofs_indices1.size() );
 #ifdef HAVE_MPI
-  MPI_Request * u_req_send = new MPI_Request[num_sendadj];
-  MPI_Request * r_req_send = new MPI_Request[num_sendadj];
+  Array< MPI_Request > u_req_send( num_sendadj );
+  Array< MPI_Request > r_req_send( num_sendadj );
   if (is_distributed)
   {
     uint offset1 = 0;
@@ -627,20 +620,6 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   // Set foreign dofs values
   F1.vector().set(&dofs_cvaluesF[0], num_dofsF, &dofs_indicesF[0]);
   F1.sync();
-
-  // Cleanup
-  delete[] dof1sendcount;
-  delete[] dofs_cvalues1;
-  delete[] dof1recvcount;
-  delete[] dofs_cvaluesF;
-  delete[] dofs_indicesF;
-
-#if HAVE_MPI
-  delete[] u_req_send;
-  delete[] r_req_send;
-  delete[] u_req_recv;
-  delete[] r_req_recv;
-#endif
 }
 
 //-----------------------------------------------------------------------------

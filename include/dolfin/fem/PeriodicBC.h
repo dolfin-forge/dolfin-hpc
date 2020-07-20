@@ -5,8 +5,8 @@
 #define __DOLFIN_PERIODIC_BC_H
 
 #include <dolfin/common/types.h>
-#include "SubSystem.h"
-#include "BoundaryCondition.h"
+#include <dolfin/fem/SubSystem.h>
+#include <dolfin/fem/BoundaryCondition.h>
 
 namespace dolfin
 {
@@ -48,14 +48,14 @@ public:
              SubSystem const& sub_system);
 
   /// Destructor
-  ~PeriodicBC();
+  ~PeriodicBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 

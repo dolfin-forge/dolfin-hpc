@@ -52,7 +52,7 @@ public:
   CellType(std::string const& name, CellType::Type cell_type, CellType::Type facet_type);
 
   /// Destructor
-  virtual ~CellType();
+  ~CellType() override;
 
   /// Clone pattern
   virtual CellType* clone() const = 0;
@@ -115,17 +115,17 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Return the cell type to which the pattern applies
-  bool pattern_applies(Cell& cell) const;
+  bool pattern_applies(Cell& cell) const override;
 
   /// Refine cell uniformly
-  virtual void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const = 0;
+  void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const override = 0;
 
   /// Number of cells created by refinement pattern
-  virtual uint num_refined_cells() const = 0;
+  uint num_refined_cells() const override = 0;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  virtual uint num_refined_vertices(uint dim) const = 0;
+  uint num_refined_vertices(uint dim) const override = 0;
 
   //---------------------------------------------------------------------------
 

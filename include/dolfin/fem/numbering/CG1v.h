@@ -11,7 +11,7 @@
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/Vertex.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {
@@ -40,12 +40,10 @@ public:
   }
 
   ///
-  ~CG1vNumbering()
-  {
-  }
+  ~CG1vNumbering() override = default;
 
   /// Tabulate dofs on cell
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const override
   {
     for (uint k = 0; k < value_size_; ++k)
     {
@@ -60,14 +58,14 @@ public:
   }
 
   /// Build dofmap
-  void build()
+  void build() override
   {
     DofNumbering::init();
     //---
     Array<ufc::dofmap const*> flattened;
     DofMap::flatten(&ufc_dofmap, flattened);
     value_size_ = flattened.size();
-    flattened.free();
+    destruct( flattened );
     //---
     if (ufc_dofmap.local_dimension()
         != mesh.type().num_entities(0) * value_size_)
@@ -106,19 +104,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint index) const
+  inline bool is_shared(uint index) const override
   {
     return (shared_.count(index) > 0);
   }
 
   ///
-  inline bool is_ghost(uint index) const
+  inline bool is_ghost(uint index) const override
   {
     return (ghosts_.count(index) > 0);
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for CG1 vector");
   }

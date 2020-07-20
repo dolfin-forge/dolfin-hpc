@@ -13,7 +13,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class Mesh;
 struct Space;
 
@@ -37,7 +36,7 @@ public:
   MeshGeometry(MeshGeometry const& other);
 
   /// Destructor
-  ~MeshGeometry();
+  ~MeshGeometry() override;
 
   /// Assignment
   MeshGeometry & operator=(MeshGeometry const& geometry);
@@ -131,12 +130,12 @@ public:
   //--- TOKENIZED -------------------------------------------------------------
 
   /// Return token identifying the internal state of mesh geometry
-  int token() const;
+  int token() const override;
 
 private:
 
   /// Update token value
-  void update_token();
+  void update_token() override;
 
   //---------------------------------------------------------------------------
 
@@ -165,37 +164,81 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline real* MeshGeometry::x(uint n)
+inline real * MeshGeometry::x( uint n )
 {
-  dolfin_assert(n < size_);
+  dolfin_assert( n < size_ );
   return coordinates_.data() + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
-inline real const * MeshGeometry::x(uint n) const
+inline real const * MeshGeometry::x( uint n ) const
 {
-  dolfin_assert(n < size_);
+  dolfin_assert( n < size_ );
   return coordinates_.data() + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshGeometry::set(uint n, real const * x)
+inline void MeshGeometry::set( uint n, real const * x )
 {
-  dolfin_assert(n < size_);
-  std::copy(x, x + dim_, coordinates_.data() + n * dim_);
+  dolfin_assert( n < size_ );
+  std::copy( x, x + dim_, coordinates_.data() + n * dim_ );
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshGeometry::get(uint n, real * x) const
+inline void MeshGeometry::get( uint n, real * x ) const
 {
-  dolfin_assert(n < size_);
-  real const * xn = coordinates_.data() + n * dim_; std::copy(xn, xn + dim_, x);
+  dolfin_assert( n < size_ );
+  real const * xn = coordinates_.data() + n * dim_;
+  std::copy( xn, xn + dim_, x );
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshGeometry::set(real const * x)
+inline void MeshGeometry::set( real const * x )
 {
-  std::copy(x, x + dim_ * size_, coordinates_.data());
+  std::copy( x, x + dim_ * size_, coordinates_.data() );
+}
+
+//-----------------------------------------------------------------------------
+inline Space const & MeshGeometry::space() const
+{
+  return *space_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshGeometry::dim() const
+{
+  return dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshGeometry::size() const
+{
+  return size_;
+}
+
+//-----------------------------------------------------------------------------
+inline real MeshGeometry::abs_tolerance( uint dim ) const
+{
+  dolfin_assert( dim <= dim_ );
+  return abs_tol_[dim];
+}
+
+//-----------------------------------------------------------------------------
+inline Point MeshGeometry::point( uint n ) const
+{
+  return Point( dim_, coordinates_.data() + n * dim_ );
+}
+
+//-----------------------------------------------------------------------------
+inline real * MeshGeometry::coordinates()
+{
+  return coordinates_.data();
+}
+
+//-----------------------------------------------------------------------------
+inline real const * MeshGeometry::coordinates() const
+{
+  return coordinates_.data();
 }
 
 //-----------------------------------------------------------------------------

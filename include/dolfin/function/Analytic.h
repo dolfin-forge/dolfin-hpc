@@ -6,6 +6,7 @@
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {

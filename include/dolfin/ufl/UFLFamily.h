@@ -11,8 +11,6 @@
 #include <dolfin/log/log.h>
 
 #include <iomanip>
-#include <map>
-#include <set>
 #include <sstream>
 
 namespace ufl
@@ -66,7 +64,7 @@ public:
   Family(repr_t const& repr);
 
   ///
-  ~Family();
+  ~Family() override;
 
   ///
   Family::Type type() const;
@@ -155,8 +153,8 @@ private:
 
   ///
   static std::string type_repr(Family::Type const& t);
-  typedef std::map<Type, Definition> DefinitionList;
-  typedef std::pair<Type, Definition> DefinitionItem;
+  using DefinitionList = dolfin::_ordered_map<Type, Definition>;
+  using DefinitionItem = std::pair<Type, Definition>;
   static dolfin::uint const None = dolfin::DOLFIN_UINT_UNDEF;
   static DefinitionList const Definitions()
   {
@@ -172,8 +170,8 @@ private:
 
   ///
   static Family::Type repr_type(repr_t const& repr);
-  typedef std::map<repr_t, Family::Type> MappingList;
-  typedef std::pair<repr_t, Family::Type> MappingItem;
+  using MappingList = dolfin::_ordered_map<repr_t, Family::Type>;
+  using MappingItem = std::pair<repr_t, Family::Type>;
   static MappingList const& Mapping()
   {
     static MappingList const mapping = __init_mapping();

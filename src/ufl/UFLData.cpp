@@ -28,8 +28,7 @@ Data::Data(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Data::~Data()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Data::operands(std::string const& name) const

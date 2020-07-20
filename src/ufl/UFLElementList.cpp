@@ -26,7 +26,7 @@ ElementList::~ElementList()
 
 //-----------------------------------------------------------------------------
 ElementList::ElementList(ElementList const &other) :
-  std::map<Object::repr_t, FiniteElementSpace *>( other)
+  dolfin::_ordered_map<Object::repr_t, FiniteElementSpace *>( other)
 {
   this->clear();
   for (ElementList::const_iterator it = other.begin(); it != other.end(); ++it)
@@ -56,7 +56,7 @@ FiniteElementSpace const * ElementList::first() const
   it_ = this->begin();
   if (this->empty())
   {
-    return NULL;
+    return nullptr;
   }
   return it_->second;
 }
@@ -68,7 +68,7 @@ FiniteElementSpace const * ElementList::next() const
   {
     ++it_;
   }
-  return (it_ == this->end()) ? NULL : it_->second;
+  return (it_ == this->end()) ? nullptr : it_->second;
 }
 
 //-----------------------------------------------------------------------------

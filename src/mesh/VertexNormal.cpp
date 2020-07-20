@@ -7,14 +7,13 @@
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/EuclideanBasis.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
-
-
-#include <map>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -23,7 +22,7 @@ namespace dolfin
 VertexNormal::VertexNormal(VertexNormal& other) :
     mesh_(other.mesh_),
     gdim_(other.gdim_),
-    subdomain_(NULL),
+    subdomain_(nullptr),
     basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh_),
     alpha_max_(0.5 * DOLFIN_PI),
@@ -37,7 +36,7 @@ VertexNormal::VertexNormal(VertexNormal& other) :
 VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
     mesh_(mesh),
     gdim_(mesh.geometry_dimension()),
-    subdomain_(NULL),
+    subdomain_(nullptr),
     basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
@@ -60,11 +59,6 @@ VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) 
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal::~VertexNormal()
-{
-}
-
-//-----------------------------------------------------------------------------
 VertexNormal& VertexNormal::operator=(VertexNormal&)
 {
   return *this;
@@ -81,7 +75,7 @@ void VertexNormal::getFacetData(VertexNormal::Type type, Mesh& mesh,
   {
     Facet facet(mesh, boundary.facet_index(*bcell));
 
-    if(subdomain_ != NULL && !subdomain_->inside(&bcell->midpoint()[0], true))
+    if(subdomain_ != nullptr && !subdomain_->inside(&bcell->midpoint()[0], true))
     {
       continue;
     }
@@ -132,8 +126,8 @@ void VertexNormal::computeNormal(Mesh& mesh)
   int rank = dolfin::MPI::rank();
 #endif
   int pe_size = dolfin::MPI::size();
-  Array<uint> * u_sendbuff = new Array<uint> [pe_size];
-  Array<real> * r_sendbuff = new Array<real> [pe_size];
+  Array< Array<uint> > u_sendbuff( pe_size );
+  Array< Array<real> > r_sendbuff( pe_size );
 
   //--- Collect shared data ---------------------------------------------------
   if (mesh.is_distributed())
@@ -184,62 +178,54 @@ void VertexNormal::computeNormal(Mesh& mesh)
     }
 
     // Exchange data
-    uint src;
-    uint dest;
-    uint const u_size = 2;
-    int u_recvcount = 0;
-    int u_sendcount = 0;
-    int r_sendcount = 0;
-    int u_maxsendcount = 0;
-    int u_maxrecvcount = 0;
-    int r_maxsendcount = 0;
-    int r_maxrecvcount = 0;
-    _set<uint> const& adjs = ddv.get_adj_ranks();
-    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+    int maxsendcount[2] = {0, 0};
+    int maxrecvcount[2] = {0, 0};
+
+    _set<uint> const & adjs = ddv.get_adj_ranks();
+    for ( _set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it )
     {
-      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
-      r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
+      maxsendcount[0] = std::max(maxsendcount[0], int(u_sendbuff[*it].size()));
+      maxsendcount[1] = std::max(maxsendcount[1], int(r_sendbuff[*it].size()));
     }
-    dolfin_assert((uint) u_maxsendcount <= u_size && mesh.topology().num_ghost(0));
-    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
-    dolfin_assert(u_maxrecvcount > 0);
-    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
-    dolfin_assert(r_maxrecvcount > 0);
+    dolfin_assert( ( uint ) maxsendcount[0] <= 2
+                   and mesh.topology().num_ghost( 0 ) );
+
+    MPI::all_reduce< MPI::max >( maxsendcount, maxrecvcount, 2 );
+
+    dolfin_assert( maxrecvcount[0] > 0 );
+    dolfin_assert( maxrecvcount[1] > 0 );
 
     // For each process
-    uint * u_recvbuff = new uint[u_maxrecvcount];
-    real * r_recvbuff = new real[r_maxrecvcount];
-    for (int j = 1; j < pe_size; ++j)
+    Array< uint > u_recvbuff( maxrecvcount[0] );
+    Array< real > r_recvbuff( maxrecvcount[1] );
+    for ( int j = 1; j < pe_size; ++j )
     {
-      src = (rank - j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
+      uint src  = ( rank - j + pe_size ) % pe_size;
+      uint dest = ( rank + j ) % pe_size;
 
-      u_sendcount = u_sendbuff[dest].size();
-      u_recvcount = MPI::sendrecv( &u_sendbuff[dest][0], u_sendcount, dest,
-                                   &u_recvbuff[0], u_maxrecvcount, src, 1 );
+      int u_recvcount = MPI::sendrecv( u_sendbuff[dest], dest,
+                                       u_recvbuff, src, 1 );
 
-      r_sendcount = r_sendbuff[dest].size();
-      MPI::sendrecv( &r_sendbuff[dest][0], r_sendcount, dest,
-                     &r_recvbuff[0], r_maxrecvcount, src, 1 );
+      MPI::sendrecv( r_sendbuff[dest], dest, r_recvbuff, src, 1 );
 
       real * rptr = &r_recvbuff[0];
-      for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
+      for ( int iiu = 0; iiu < u_recvcount; iiu += 2 )
       {
         uint const glb_id = u_recvbuff[iiu];
-        dolfin_assert(glb_id < mesh.global_size(0));
+        dolfin_assert( glb_id < mesh.global_size( 0 ) );
         uint const num_nc = u_recvbuff[iiu + 1];
 
-        VertexDataMap::iterator it = vdmap.find(glb_id);
-        if (it != vdmap.end())
+        VertexDataMap::iterator it = vdmap.find( glb_id );
+        if ( it != vdmap.end() )
         {
           // Add corresponding facet normals and weights
-          dolfin_assert(it->second != NULL);
+          dolfin_assert( it->second != nullptr );
           VertexData * vd = it->second;
-          vd->facet_normals.insert(vd->facet_normals.end(), rptr,
-                                   rptr + gdim * num_nc);
+          vd->facet_normals.insert( vd->facet_normals.end(), rptr,
+                                    rptr + gdim * num_nc );
           rptr += gdim * num_nc;
-          vd->facet_weights.insert(vd->facet_weights.end(), rptr,
-                                   rptr + num_nc);
+          vd->facet_weights.insert( vd->facet_weights.end(), rptr,
+                                    rptr + num_nc );
           rptr += num_nc;
         }
       }
@@ -248,8 +234,6 @@ void VertexNormal::computeNormal(Mesh& mesh)
       u_sendbuff[dest].clear();
       r_sendbuff[dest].clear();
     }
-    delete[] u_recvbuff;
-    delete[] r_recvbuff;
 #endif
   }
 
@@ -320,76 +304,64 @@ void VertexNormal::computeNormal(Mesh& mesh)
     }
   }
 
-  if (mesh.is_distributed())
+  if ( mesh.is_distributed() )
   {
 #ifdef HAVE_MPI
 
-    DistributedData const& ddv = mesh.distdata()[0];
+    DistributedData const & ddv = mesh.distdata()[0];
 
     // Exchange data
-    uint src;
-    uint dest;
-    uint const u_size = 2;
-    int u_recvcount = 0;
-    int u_sendcount = 0;
-    int r_sendcount = 0;
-    int u_maxsendcount = 0;
-    int u_maxrecvcount = 0;
-    int r_maxsendcount = 0;
-    int r_maxrecvcount = 0;
-    _set<uint> const& adjs = ddv.get_adj_ranks();
-    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+    int maxsendcount[2] = {0, 0};
+    int maxrecvcount[2] = {0, 0};
+
+    _set<uint> const & adjs = ddv.get_adj_ranks();
+    for ( _set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it )
     {
-      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
-      r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
+      maxsendcount[0] = std::max(maxsendcount[0], int(u_sendbuff[*it].size()));
+      maxsendcount[1] = std::max(maxsendcount[1], int(r_sendbuff[*it].size()));
     }
-    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
-    dolfin_assert(u_maxrecvcount > 0);
-    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
-    dolfin_assert(r_maxrecvcount > 0);
+
+    MPI::all_reduce< MPI::max >( maxsendcount, maxrecvcount, 2 );
+
+    dolfin_assert( maxrecvcount[0] > 0 );
+    dolfin_assert( maxrecvcount[1] > 0 );
 
     // For each process
-    uint * u_recvbuff = new uint[u_maxrecvcount];
-    real * r_recvbuff = new real[r_maxrecvcount];
-    for (int j = 1; j < pe_size; ++j)
+    Array< uint > u_recvbuff( maxrecvcount[0] );
+    Array< real > r_recvbuff( maxrecvcount[1] );
+
+    for ( int j = 1; j < pe_size; ++j )
     {
-      src = (rank - j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
+      uint src  = ( rank - j + pe_size ) % pe_size;
+      uint dest = ( rank + j ) % pe_size;
 
-      u_sendcount = u_sendbuff[dest].size();
-      u_recvcount = MPI::sendrecv( &u_sendbuff[dest][0], u_sendcount, dest,
-                                   &u_recvbuff[0], u_maxrecvcount, src, 1 );
+      int u_recvcount = MPI::sendrecv( u_sendbuff[dest], dest,
+                                       u_recvbuff, src, 1 );
 
-      r_sendcount = r_sendbuff[dest].size();
-      MPI::sendrecv( &r_sendbuff[dest][0], r_sendcount, dest,
-                     &r_recvbuff[0], r_maxrecvcount, src, 1 );
+      MPI::sendrecv( r_sendbuff[dest], dest, r_recvbuff, src, 1 );
 
       //
       uint iir = 0;
-      for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
+      for ( int iiu = 0; iiu < u_recvcount; iiu += 2 )
       {
-        dolfin_assert(ddv.has_global(u_recvbuff[iiu]));
-        uint const local_index = ddv.get_local(u_recvbuff[iiu]);
-        dolfin_assert(ddv.is_ghost(local_index));
-        vertex_type_(local_index) = u_recvbuff[iiu + 1];
-        for (uint e = 0; e < gdim; ++e)
+        dolfin_assert( ddv.has_global( u_recvbuff[iiu] ) );
+        uint const local_index = ddv.get_local( u_recvbuff[iiu] );
+        dolfin_assert( ddv.is_ghost( local_index ) );
+        vertex_type_( local_index ) = u_recvbuff[iiu + 1];
+        for ( uint e = 0; e < gdim; ++e )
         {
-          for (uint d = 0; d < gdim; ++d)
+          for ( uint d = 0; d < gdim; ++d )
           {
-            basis(e, d)(local_index) = r_recvbuff[iir];
+            basis( e, d )( local_index ) = r_recvbuff[iir];
             ++iir;
           }
         }
       }
     }
-    delete[] u_recvbuff;
-    delete[] r_recvbuff;
 #endif
   }
 
   // Cleanup
-  delete[] u_sendbuff;
-  delete[] r_sendbuff;
   for (VertexDataMap::iterator it = vdmap.begin(); it != vdmap.end(); ++it)
   {
     delete it->second;
@@ -399,4 +371,3 @@ void VertexNormal::computeNormal(Mesh& mesh)
 //-----------------------------------------------------------------------------
 
 }
-

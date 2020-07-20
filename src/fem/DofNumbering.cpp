@@ -4,7 +4,6 @@
 #include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/mesh/Mesh.h>
 
@@ -24,7 +23,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
 {
-  DofNumbering * ret = NULL;
+  DofNumbering * ret = nullptr;
   uint const tdim = mesh.topology_dimension();
   uint const num_verts = mesh.topology().global_size(0);
   uint const num_cells = mesh.topology().global_size(tdim);
@@ -34,7 +33,7 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   DofMap::flatten(&ufc_dofmap, flattened);
   uint const value_size = flattened.size();
   bool const vector = DofMap::can_vectorize(flattened);
-  flattened.free();
+  destruct( flattened );
 
   // UFC dofmap should be initialized to compute the global dimension
   DofNumbering::init(mesh, ufc_dofmap);
@@ -42,28 +41,28 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   // Real
   if (ufc_dofmap.global_dimension() == ufc_dofmap.local_dimension())
   {
-    message(1, "DofNumbering : create RealSpaceNumbering for %s",
+    message(1, "DofNumbering: create RealSpaceNumbering for %s",
             ufc_dofmap.signature());
     ret = new RealSpaceNumbering(mesh, ufc_dofmap);
   }
   // CG1s
   else if (ufc_dofmap.global_dimension() == num_verts)
   {
-    message(1, "DofNumbering : create CG1sNumbering for %s",
+    message(1, "DofNumbering: create CG1sNumbering for %s",
             ufc_dofmap.signature());
     ret = new CG1sNumbering(mesh, ufc_dofmap);
   }
   // DG0s
   else if (ufc_dofmap.global_dimension() == num_cells)
   {
-    message(1, "DofNumbering : create DG0sNumbering for %s",
+    message(1, "DofNumbering: create DG0sNumbering for %s",
             ufc_dofmap.signature());
     ret = new DG0sNumbering(mesh, ufc_dofmap);
   }
   // DG0v
   else if (vector && ufc_dofmap.global_dimension() == value_size * num_cells)
   {
-    message(1, "DofNumbering : create DG0vNumbering for %s",
+    message(1, "DofNumbering: create DG0vNumbering for %s",
             ufc_dofmap.signature());
     ret = new DG0vNumbering(mesh, ufc_dofmap);
   }
@@ -72,28 +71,28 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     // Generic parallel for scalar
     if (value_size == 1)
     {
-      message(1, "DofNumbering : create Parallel0Numbering for %s",
+      message(1, "DofNumbering: create Parallel0Numbering for %s",
               ufc_dofmap.signature());
       ret = new Parallel0Numbering(mesh, ufc_dofmap);
     }
     // CG1v
     else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
     {
-      message(1, "DofNumbering : create CG1vNumbering for %s",
+      message(1, "DofNumbering: create CG1vNumbering for %s",
               ufc_dofmap.signature());
       ret = new CG1vNumbering(mesh, ufc_dofmap);
     }
     // Generic parallel for value rank > 0
     else
     {
-      message(1, "DofNumbering : create Parallel1Numbering for %s",
+      message(1, "DofNumbering: create Parallel1Numbering for %s",
               ufc_dofmap.signature());
       ret = new Parallel1Numbering(mesh, ufc_dofmap);
     }
   }
   else
   {
-    message(1, "DofNumbering : create SerialNumbering for %s",
+    message(1, "DofNumbering: create SerialNumbering for %s",
             ufc_dofmap.signature());
     ret = new SerialNumbering(mesh, ufc_dofmap);
   }
@@ -104,7 +103,7 @@ DofNumbering::DofNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
     mesh(mesh),
     ufc_dofmap(ufc_dofmap),
     array_size(0),
-    array(NULL),
+    array(nullptr),
     offset_(0),
     size_(0)
 {
@@ -119,69 +118,15 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
     mesh(other.mesh),
     ufc_dofmap(other.ufc_dofmap),
     array_size(other.array_size),
-    array(NULL),
+    array(nullptr),
     offset_(other.offset_),
     size_(other.size_)
 {
-  if (other.array != NULL)
+  if (other.array != nullptr)
   {
     array = new uint[array_size];
     std::copy(other.array, other.array + other.array_size, array);
   }
-}
-//-----------------------------------------------------------------------------
-DofNumbering& DofNumbering::operator=(DofNumbering const&)
-{
-  return *this;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::offset() const
-{
-  return offset_;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::size() const
-{
-  return size_;
-}
-//-----------------------------------------------------------------------------
-uint const * DofNumbering::block() const
-{
-  if (array == NULL)
-  {
-    pretabulate(array, array_size);
-  }
-  return array;
-}
-//-----------------------------------------------------------------------------
-uint DofNumbering::block_size() const
-{
-  if (array == NULL)
-  {
-    pretabulate(array, array_size);
-  }
-  return array_size;
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::init()
-{
-  DofNumbering::clear();
-  DofNumbering::init(mesh, ufc_dofmap);
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::clear()
-{
-  offset_ = 0;
-  size_ = 0;
-  array_size = 0;
-  delete [] array;
-  array = NULL;
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::set_range(uint offset, uint size)
-{
-  offset_ = offset;
-  size_ = size;
 }
 //-----------------------------------------------------------------------------
 void DofNumbering::pretabulate(uint *& array, uint& array_size) const
@@ -199,11 +144,6 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
   }
-}
-//-----------------------------------------------------------------------------
-void DofNumbering::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell)
-{
-  this->tabulate_dofs(dofs, ufc_cell, *ufc_cell);
 }
 //-----------------------------------------------------------------------------
 void DofNumbering::disp() const
@@ -256,7 +196,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     ufc_dofmap.init_cell_finalize();
   }
 
-  message(1, "DofNumbering : initialized UFC dofmap with global dimension %u",
+  message(1, "DofNumbering: initialized UFC dofmap with global dimension %u",
           ufc_dofmap.global_dimension());
 }
 //-----------------------------------------------------------------------------

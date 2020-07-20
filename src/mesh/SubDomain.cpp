@@ -5,7 +5,11 @@
 
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/EdgeIterator.h>
+#include <dolfin/mesh/FaceIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/MeshEntityIterator.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
@@ -15,68 +19,15 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain() :
-    abstol_(1.0e-6)
+SubDomain::SubDomain()
 {
   // Do nothing
-}
-//-----------------------------------------------------------------------------
-SubDomain::~SubDomain()
-{
-}
-//-----------------------------------------------------------------------------
-template <>
-bool SubDomain::enclosed(Vertex& entity, bool on_boundary) const
-{
-  return inside(entity.x(), on_boundary);
-}
-//-----------------------------------------------------------------------------
-template <class Entity>
-bool SubDomain::enclosed(Entity& entity, bool on_boundary) const
-{
-  for (VertexIterator v(entity); !v.end(); ++v)
-  {
-    if (!this->inside(v->x(), on_boundary))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-//-----------------------------------------------------------------------------
-template <>
-bool SubDomain::overlap(Vertex& entity, bool on_boundary) const
-{
-  return inside(entity.x(), on_boundary);
-}
-//-----------------------------------------------------------------------------
-template <class Entity>
-bool SubDomain::overlap(Entity& entity, bool on_boundary) const
-{
-  for (VertexIterator v(entity); !v.end(); ++v)
-  {
-    if (this->inside(v->x(), on_boundary))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-//-----------------------------------------------------------------------------
-bool SubDomain::close(real const x, real const xref, real const abstol) const
-{
-  return (std::fabs(x - xref) < abstol);
-}
-//-----------------------------------------------------------------------------
-bool SubDomain::close(real const x, real const xref) const
-{
-  return (std::fabs(x - xref) < abstol_);
 }
 //-----------------------------------------------------------------------------
 template <class Entity>
 void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
 {
-  message(1, "Computing sub domain markers for sub domain %d.", index);
+  message(1, "SubDomain: Computing markers for sub domain %d.", index);
 
   Mesh& mesh = sub_domains.mesh();
 
@@ -93,7 +44,7 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     uint const pe_rank = MPI::rank();
     DistributedData& distdata = mesh.distdata()[sub_domains.dim()];
 
-    Array<uint> * sendbuf = new Array<uint> [pe_size];
+    Array< Array<uint> > sendbuf( pe_size );
 
     // Update entities to adjacent ranks.
     // The previous implementation updates only ghost to the owner, which
@@ -107,22 +58,20 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     }
 
     //
-    int send_size;
-    int recv_size;
+    int recv_size = 0;
     for (uint j = 0; j < pe_size; ++j)
     {
-      send_size = sendbuf[j].size();
+      int send_size = sendbuf[j].size();
       MPI::check_error( MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM,
                                    j, distdata.comm()) );
     }
-    uint * recvbuf = (recv_size ? new uint[recv_size] : NULL);
+    Array< uint > recvbuf( recv_size );
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (pe_rank - j + pe_size) % pe_size;
       int dst = (pe_rank + j) % pe_size;
 
-      int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                      &recvbuf[0], recv_size, src,
+      int recv_count = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src,
                                       1, distdata.comm() );
 
       for (int k = 0; k < recv_count; ++k)
@@ -130,9 +79,6 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
         sub_domains(distdata.get_local(recvbuf[k])) = index;
       }
     }
-
-    delete[] recvbuf;
-    delete[] sendbuf;
   }
 #endif
 

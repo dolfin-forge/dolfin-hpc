@@ -34,19 +34,17 @@ public:
   }
 
   ///
-  ~CG1sNumbering()
-  {
-  }
+  ~CG1sNumbering() override = default;
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const override
   {
     std::copy(ufc_cell.entity_indices[0],
               ufc_cell.entity_indices[0] + cell.num_entities(0), dofs);
   }
 
   ///
-  inline void build()
+  inline void build() override
   {
     DofNumbering::init();
     //---
@@ -78,19 +76,19 @@ public:
   }
 
   ///
-  inline bool is_shared(uint index) const
+  inline bool is_shared(uint index) const override
   {
     return (shared_.count(index) > 0);
   }
 
   ///
-  inline bool is_ghost(uint index) const
+  inline bool is_ghost(uint index) const override
   {
     return (ghosts_.count(index) > 0);
   }
 
   ///
-  inline std::string description() const
+  inline std::string description() const override
   {
     return std::string("Dof numbering for CG1 scalar");
   }

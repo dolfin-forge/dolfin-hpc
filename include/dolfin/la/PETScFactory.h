@@ -8,41 +8,41 @@
 
 #ifdef HAVE_PETSC
 
-#include "PETScMatrix.h"
-#include "PETScVector.h"
-#include "SparsityPattern.h"
-#include "LinearAlgebraFactory.h"
+#include <dolfin/la/LinearAlgebraFactory.h>
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/SparsityPattern.h>
 
 namespace dolfin
 {
 
-  class PETScFactory : public LinearAlgebraFactory
+class PETScFactory : public LinearAlgebraFactory
+{
+public:
+  /// Destructor
+  ~PETScFactory() override = default;
+
+  /// Create empty matrix
+  PETScMatrix * createMatrix() const override;
+
+  /// Create empty vector
+  PETScVector * createVector() const override;
+
+  /// Create empty sparsity pattern
+  SparsityPattern * createPattern() const override;
+
+  /// Return singleton instance
+  static PETScFactory & instance()
   {
-  public:
+    return factory;
+  }
 
-    /// Destructor
-    virtual ~PETScFactory() {}
+private:
+  /// Private Constructor
+  PETScFactory() = default;
 
-    /// Create empty matrix
-    PETScMatrix* createMatrix() const;
-
-    /// Create empty vector
-    PETScVector* createVector() const;
-
-    /// Create empty sparsity pattern 
-    SparsityPattern* createPattern() const;
-
-    /// Return singleton instance
-    static PETScFactory& instance() 
-    { return factory; }
-
-  private:
-
-    /// Private Constructor
-    PETScFactory() {}
-    static PETScFactory factory;
-
-  };
+  static PETScFactory factory;
+};
 
 }
 

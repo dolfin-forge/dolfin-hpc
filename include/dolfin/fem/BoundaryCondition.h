@@ -13,8 +13,6 @@
 #include <dolfin/evolution/Time.h>
 #include <dolfin/fem/SubSystem.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 
@@ -63,7 +61,7 @@ public:
   std::string const& type() const;
 
   ///
-  Mesh& mesh() const;
+  Mesh& mesh() const override;
 
   // Sub domain
   SubDomain const& sub_domain() const;
@@ -87,12 +85,12 @@ protected:
 public:
 
   /// Destructor
-  virtual ~BoundaryCondition();
+  ~BoundaryCondition() override;
 
 private:
 
   // Default constructor
-  BoundaryCondition();
+  BoundaryCondition() = delete;
 
   // String identifier for the boundary condition type.
   std::string const type_;
@@ -107,6 +105,28 @@ private:
   SubSystem sub_system_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline std::string const& BoundaryCondition::type() const
+{
+  return type_;
+}
+//-----------------------------------------------------------------------------
+inline Mesh& BoundaryCondition::mesh() const
+{
+  return mesh_;
+}
+//-----------------------------------------------------------------------------
+inline SubDomain const& BoundaryCondition::sub_domain() const
+{
+  return sub_domain_;
+}
+//-----------------------------------------------------------------------------
+inline SubSystem const& BoundaryCondition::sub_system() const
+{
+  return sub_system_;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

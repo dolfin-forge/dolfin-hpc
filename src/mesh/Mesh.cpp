@@ -4,17 +4,16 @@
 #include <dolfin/mesh/Mesh.h>
 
 #include <dolfin/io/File.h>
-#include <dolfin/main/PE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/IntersectionDetector.h>
+#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshPartition.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/UniformRefinement.h>
-#include <dolfin/parameter/parameters.h>
 
 #include <fstream>
 #include <sstream>
@@ -29,11 +28,8 @@ namespace dolfin
 Mesh::Mesh() :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
-    geometry_(EuclideanSpace(3)),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
+    geometry_(EuclideanSpace(3)),    
+    timestamp_(time(nullptr))
 {
 }
 
@@ -42,10 +38,10 @@ Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(ctype, DOLFIN_COMM_SELF, !this->reordering()),
     geometry_(space),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
+    timestamp_(time(nullptr))
 {
 }
 //-----------------------------------------------------------------------------
@@ -53,10 +49,10 @@ Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(ctype, comm, !this->reordering()),
     geometry_(space),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
+    timestamp_(time(nullptr))
 {
 }
 //-----------------------------------------------------------------------------
@@ -80,10 +76,10 @@ Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
     geometry_(EuclideanSpace(3)),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
+    exterior_boundary_(nullptr),
+    interior_boundary_(nullptr),
+    intersection_detector_(nullptr),
+    timestamp_(time(nullptr))
 {
   File file(filename);
   file >> *this;
@@ -95,13 +91,13 @@ Mesh::~Mesh()
   timestamp_ = 0;
 
   delete exterior_boundary_;
-  exterior_boundary_ = NULL;
+  exterior_boundary_ = nullptr;
 
   delete interior_boundary_;
-  interior_boundary_ = NULL;
+  interior_boundary_ = nullptr;
 
   delete intersection_detector_;
-  intersection_detector_ = NULL;
+  intersection_detector_ = nullptr;
 
   for (uint i = 0; i < periodic_mappings_.size(); ++i )
     delete (periodic_mappings_[i]);
@@ -131,80 +127,32 @@ Mesh const & Mesh::operator=( Mesh const & other )
 //-----------------------------------------------------------------------------
 bool Mesh::operator ==(Mesh const& other) const
 {
-  if (!(topology_ == other.topology_))
+  if ( not ( topology_ == other.topology_ ) )
   {
     return false;
   }
-  if (!(geometry_ == other.geometry_))
+
+  if ( not ( geometry_ == other.geometry_ ) )
   {
     return false;
   }
+
+  if ( not ( exterior_boundary_ == other.exterior_boundary_ ) )
+  {
+    return false;
+  }
+
+  if ( not ( interior_boundary_ == other.interior_boundary_ ) )
+  {
+    return false;
+  }
+
+  if ( not ( intersection_detector_ == other.intersection_detector_ ) )
+  {
+    return false;
+  }
+
   return true;
-}
-//-----------------------------------------------------------------------------
-bool Mesh::operator !=(Mesh const& other) const
-{
-  return !(*this == other);
-}
-//-----------------------------------------------------------------------------
-bool Mesh::empty() const
-{
-  return false;//(topology_ == NULL && geometry_ == NULL);
-}
-//-----------------------------------------------------------------------------
-CellType const& Mesh::type() const
-{
-  return topology_.type();
-}
-//-----------------------------------------------------------------------------
-MeshTopology& Mesh::topology()
-{
-  return topology_;
-}
-//-----------------------------------------------------------------------------
-MeshTopology const& Mesh::topology() const
-{
-  return topology_;
-}
-//-----------------------------------------------------------------------------
-uint Mesh::topology_dimension() const
-{
-  return topology_.dim();
-}
-//-----------------------------------------------------------------------------
-uint Mesh::size(uint dim) const
-{
-  return topology_.size(dim);
-}
-//-----------------------------------------------------------------------------
-uint Mesh::num_vertices() const
-{
-  return topology_.size(0);
-}
-//-----------------------------------------------------------------------------
-uint Mesh::num_cells() const
-{
-  return topology_.size(topology_.dim());
-}
-//-----------------------------------------------------------------------------
-uint* Mesh::cells()
-{
-  return topology_(topology_.dim(), 0)();
-}
-//-----------------------------------------------------------------------------
-uint const * Mesh::cells() const
-{
-  return topology_(topology_.dim(), 0)();
-}
-//-----------------------------------------------------------------------------
-void Mesh::init(uint dim) const
-{
-  topology_.size(dim);
-}
-//-----------------------------------------------------------------------------
-void Mesh::init(uint d0, uint d1) const
-{
-  topology_(d0, d1).order();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -221,7 +169,7 @@ void Mesh::init() const
 BoundaryMesh& Mesh::exterior_boundary()
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
+  if (exterior_boundary_ == nullptr || exterior_boundary_->invalid_mesh_topology())
   {
     if(exterior_boundary_)
     {
@@ -236,7 +184,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 BoundaryMesh& Mesh::interior_boundary()
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
+  if (interior_boundary_ == nullptr || interior_boundary_->invalid_mesh_topology())
   {
     if(interior_boundary_)
     {
@@ -248,70 +196,10 @@ BoundaryMesh& Mesh::interior_boundary()
   return *interior_boundary_;
 }
 //-----------------------------------------------------------------------------
-bool Mesh::serial_io() const
-{
-  return (PE::size() == 1) || dolfin_get("Mesh read in serial");
-}
-//-----------------------------------------------------------------------------
-bool Mesh::parallel_io() const
-{
-  return !this->serial_io();
-}
-//-----------------------------------------------------------------------------
-bool Mesh::is_distributed() const
-{
-  return topology().distributed();
-}
-//-----------------------------------------------------------------------------
-MeshDistributedData& Mesh::distdata()
-{
-  return topology().distdata();
-}
-//-----------------------------------------------------------------------------
-MeshDistributedData const& Mesh::distdata() const
-{
-  return topology().distdata();
-}
-//-----------------------------------------------------------------------------
-uint Mesh::global_size(uint dim) const
-{
-  return topology_.global_size(dim);
-}
-//-----------------------------------------------------------------------------
-uint Mesh::num_global_vertices() const
-{
-  return topology_.global_size(0);
-}
-//-----------------------------------------------------------------------------
-uint Mesh::num_global_cells() const
-{
-  return topology_.global_size(topology_.dim());
-}
-//-----------------------------------------------------------------------------
-Space const& Mesh::space() const
-{
-  return geometry_.space();
-}
-//-----------------------------------------------------------------------------
-MeshGeometry& Mesh::geometry()
-{
-  return geometry_;
-}
-//-----------------------------------------------------------------------------
-MeshGeometry const& Mesh::geometry() const
-{
-  return geometry_;
-}
-//-----------------------------------------------------------------------------
-uint Mesh::geometry_dimension() const
-{
-  return geometry_.dim();
-}
-//-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
 {
   /// @todo Improve hash logic to regenerate detector at topology change
-  if (intersection_detector_ == NULL)
+  if (intersection_detector_ == nullptr)
   {
     if(intersection_detector_)
     {
@@ -373,7 +261,7 @@ void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
 //-----------------------------------------------------------------------------
 void Mesh::refine()
 {
-  UniformRefinement R; R(*this);
+  UniformRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const
@@ -417,30 +305,24 @@ std::string const Mesh::hash() const
 void Mesh::disp() const
 {
   section("Mesh");
-  if (this->empty())
+  section("Topology");
+  message("distributed : %u", topology_.distributed());
+  if(this->is_distributed())
   {
-    message("Empty");
+    message("cells    : local = %12u ; global = %12u",
+            this->num_cells(), this->num_global_cells());
+    message("vertices : local = %12u ; global = %12u",
+            this->num_vertices(), this->num_global_vertices());
   }
   else
   {
-    section("Topology");
-    message("distributed : %u", topology_.distributed());
-    if(this->is_distributed())
-    {
-      message("cells    : local = %12u ; global = %12u",
-              this->num_cells(), this->num_global_cells());
-      message("vertices : local = %12u ; global = %12u",
-              this->num_vertices(), this->num_global_vertices());
-    }
-    else
-    {
-      message("cells    : %12u", this->num_cells());
-      message("vertices : %12u", this->num_vertices());
-    }
-    end();
+    message("cells    : %12u", this->num_cells());
+    message("vertices : %12u", this->num_vertices());
   }
   end();
+  end();
 }
+
 //-----------------------------------------------------------------------------
 void Mesh::check() const
 {

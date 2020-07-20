@@ -47,8 +47,7 @@ Indexed::Indexed(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 Indexed::~Indexed()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const Indexed::operands(std::string const& name) const

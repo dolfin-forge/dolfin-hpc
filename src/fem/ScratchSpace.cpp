@@ -31,6 +31,9 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
     values(new real[size]),
     coefficients(new real[space_dimension]),
     basis_values(new real[space_dimension]),
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+    all_basis_values(new real*[space_dimension]),
+#endif
     coordinates(new real*[local_dimension]),
     owner_(false)
 {
@@ -56,6 +59,9 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
     values(new real[size]),
     coefficients(new real[space_dimension]),
     basis_values(new real[space_dimension]),
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+    all_basis_values(new real*[space_dimension]),
+#endif
     coordinates(new real*[local_dimension]),
     owner_(true)
 {
@@ -67,20 +73,23 @@ ScratchSpace::ScratchSpace(ScratchSpace const& other) :
     mesh(other.mesh),
     cell(other.cell),
     offset(0),
-    finite_element(NULL),
-    dof_map(NULL),
+    finite_element(nullptr),
+    dof_map(nullptr),
     size(0),
     space_dimension(0),
     local_dimension(0),
     num_sub_elements(0),
     topological_dimension(0),
     geometric_dimension(0),
-    dofs(NULL),
-    facet_dofs(NULL),
-    values(NULL),
-    coefficients(NULL),
-    basis_values(NULL),
-    coordinates(NULL),
+    dofs(nullptr),
+    facet_dofs(nullptr),
+    values(nullptr),
+    coefficients(nullptr),
+    basis_values(nullptr),
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+    all_basis_values(nullptr),
+#endif
+    coordinates(nullptr),
     owner_(false)
 {
   error("ScratchSpace::ScratchSpace(ScratchSpace const& other)");
@@ -104,6 +113,14 @@ ScratchSpace::~ScratchSpace()
     delete dof_map;
     delete finite_element;
   }
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+  for ( uint i = 0; i < space_dimension; ++i )
+  {
+    if ( all_basis_values[i] != nullptr )
+      delete[] all_basis_values[i];
+  }
+  delete[] all_basis_values;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -128,6 +145,15 @@ void ScratchSpace::init()
     coordinates[i] = new real[Space::MAX_DIMENSION];
     std::fill_n(coordinates[i],  Space::MAX_DIMENSION, 0.0);
   }
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+  // Initialize local array for dof coordinates
+  for (uint i = 0; i < space_dimension; ++i)
+  {
+    // Using same storage size as a Point
+    all_basis_values[i] = new real[Space::MAX_DIMENSION];
+    std::fill_n(all_basis_values[i],  Space::MAX_DIMENSION, 0.0);
+  }
+#endif
 }
 
 } /* namespace dolfin */

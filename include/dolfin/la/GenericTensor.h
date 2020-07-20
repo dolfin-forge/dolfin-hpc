@@ -26,7 +26,7 @@ namespace dolfin
   public:
 
     /// Destructor
-    virtual ~GenericTensor() {}
+    virtual ~GenericTensor() = default;
 
     //--- Basic GenericTensor interface ---
 

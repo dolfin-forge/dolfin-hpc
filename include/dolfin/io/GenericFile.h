@@ -23,7 +23,7 @@ namespace dolfin
   public:
 
     GenericFile(std::string const& type, std::string const& filename);
-    virtual ~GenericFile();
+    virtual ~GenericFile() = default;
 
     // Input
 

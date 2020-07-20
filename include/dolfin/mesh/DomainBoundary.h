@@ -34,7 +34,7 @@ public:
   }
 
   /// Return true for points on the boundary
-  bool inside(const real* x, bool on_boundary) const
+  bool inside(const real* /* x */, bool on_boundary) const
   {
     return on_boundary;
   }

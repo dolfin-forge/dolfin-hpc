@@ -32,56 +32,56 @@ public:
   explicit VectorElement(repr_t const& repr);
 
   ///
-  ~VectorElement();
+  ~VectorElement() override;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Return finite element family type
-  Family const& family() const;
+  Family const& family() const override;
 
   /// Return the metatype of the finite element (C++ only)
-  Family::Type metatype() const;
+  Family::Type metatype() const override;
 
   /// Return cell of finite element
-  Cell const& cell() const;
+  Cell const& cell() const override;
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
-  type<dolfin::uint> const& degree() const;
+  type<dolfin::uint> const& degree() const override;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
-  ValueArray const& value_shape() const;
+  ValueArray const& value_shape() const override;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
-  bool is_cellwise_constant() const;
+  bool is_cellwise_constant() const override;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  std::map<dolfin::uint, dolfin::uint> const& symmetry() const;
+  dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry() const override;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
   std::pair<ValueArray, ValueArray> extract_subelement_component(
-      ValueArray const& i) const;
+      ValueArray const& i) const override;
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
   std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
-      ValueArray const& i) const;
+      ValueArray const& i) const override;
 
   /// Return number of sub elements
-  dolfin::uint num_sub_elements() const;
+  dolfin::uint num_sub_elements() const override;
 
   /// Return list of sub elements
-  List const& sub_elements() const;
+  List const& sub_elements() const override;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
 protected:
 
@@ -91,7 +91,7 @@ protected:
   FiniteElement const sub_element_;
   type<dolfin::uint> const dim_;
   ValueArray const value_shape_;  // Not implemented
-  std::map<dolfin::uint, dolfin::uint> const symmetry_;  // Not implemented
+  dolfin::_ordered_map<dolfin::uint, dolfin::uint> const symmetry_;  // Not implemented
 
   List const sub_elements_;
 

@@ -19,14 +19,12 @@ class Test : public Startup
 
   struct Args
   {
-    uint debug_level;
+    uint debug_level{0};
     std::string mesh_file;
-    bool benchmark;
+    bool benchmark{false};
 
-    Args() :
-        debug_level(0),
-        mesh_file(""),
-        benchmark(false)
+    Args()
+      : mesh_file("")
     {
     }
   };
@@ -49,7 +47,7 @@ public:
   void end();
 
   ///
-  ~Test();
+  ~Test() override;
 
   Args args;
 
@@ -60,11 +58,11 @@ private:
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  bool btest_;
+  bool btest_{false};
   std::string const dir_;
   Array<std::pair<std::string, real> > timings_;
-  real total_;
-  uint padding_;
+  real total_{0.0};
+  uint padding_{0};
 
 };
 

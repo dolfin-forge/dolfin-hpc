@@ -12,12 +12,14 @@
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
-
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 
 #include <algorithm>
 #include <fstream>
@@ -49,19 +51,18 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   message("  - vertices before: %d", numvertsbefore);
 
   std::string marked_filename("marked");
-  std::string const marked_format = dolfin_get("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get<std::string>("output_format")  == "vtk")
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
 
   File( marked_filename ) << cell_marker;
 
-  if ( dolfin_get("adapt_algorithm") == "rivara")
+  if ( dolfin_get<std::string>("adapt_algorithm") == "rivara")
   {
     RivaraRefinement::refine(mesh, cell_marker);
   }
@@ -83,7 +84,7 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 }
 //-----------------------------------------------------------------------------
 void refine_and_project( Mesh& mesh,
-                         Array<Function *> const& functions,
+                         FunctionMapping const& functions,
                          MeshValues<bool, Cell>& cell_marker)
 {
   dolfin_set("Load balancer redistribute", false);
@@ -91,7 +92,7 @@ void refine_and_project( Mesh& mesh,
   message("  - cells    before: %d", mesh.num_global_cells());
   message("  - vertices before: %d", mesh.global_size(0));
 
-  std::string const refine_type = dolfin_get("adapt_algorithm");
+  std::string const refine_type = dolfin_get<std::string>("adapt_algorithm");
   if (refine_type == "simple")
   {
     LoadBalancer::balance(mesh, cell_marker);
@@ -106,12 +107,11 @@ void refine_and_project( Mesh& mesh,
   }
 
   std::string marked_filename( "marked" );
-  std::string const marked_format = dolfin_get("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get< std::string >( "output_format" ) == "vtk" )
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
@@ -126,7 +126,8 @@ void refine_and_project( Mesh& mesh,
 
   for (uint f = 0; f < functions.size(); ++f )
   {
-    uint const num_sub = functions[f]->space().element().num_sub_elements();
+    Function * func = functions[f].second;
+    uint const num_sub = func->space().element().num_sub_elements();
 
     if (num_sub == 0)
     {
@@ -134,10 +135,10 @@ void refine_and_project( Mesh& mesh,
     }
 
     // make sure data is synchronized
-    functions[f]->vector().apply();
+    func->vector().apply();
 
     // decompose function
-    coarse[f] = FunctionDecomposition::compute(*functions[f]);
+    coarse[f] = FunctionDecomposition::compute(*func);
 
     dolfin_assert( num_sub <= coarse[f].size() );
 
@@ -167,11 +168,9 @@ void refine_and_project( Mesh& mesh,
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.topology().renumber();
 
-  mkdir( "../scratch" );
-
   for (uint f = 0; f < functions.size(); ++f )
   {
-    FiniteElementSpace const& space = functions[f]->space();
+    FiniteElementSpace const& space = functions[f].second->space();
     uint const num_sub = space.element().num_sub_elements();
 
     Array<Function> post;
@@ -193,14 +192,15 @@ void refine_and_project( Mesh& mesh,
     Function proj(projected_space);
     AdaptiveRefinement::project(new_mesh, post, proj);
 
-    std::stringstream p_filename;
 #ifdef ENABLE_MPIIO
-    p_filename << "../scratch/projected_" << f << ".bin";
+    std::string const filename = "projected_" + functions[f].first + ".bin";
 #else
-    p_filename << "../scratch/projected_" << f << "_" << MPI::rank() << ".bin";
+    std::stringstream pf;
+    pf << "projected_" << functions[f].first << "_" << MPI::rank() << ".bin";
+    std::string const filename = pf.str();
 #endif
-    File p_file(p_filename.str());
-    p_file << proj.vector();
+
+    File( filename ) << proj.vector();
   }
 
   // cleanup coarse functions
@@ -216,6 +216,9 @@ void refine_and_project( Mesh& mesh,
 	swap( mesh, new_mesh );
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
+
+  message("  - cells    after: %d", mesh.num_global_cells());
+  message("  - vertices after: %d", mesh.global_size(0));
 }
 //-----------------------------------------------------------------------------
 void redistribute_func( Mesh& mesh, Function const& f,
@@ -223,6 +226,8 @@ void redistribute_func( Mesh& mesh, Function const& f,
                         Array<uint> & rows_,
                         MeshValues<uint, Cell> const& distribution )
 {
+  message( 1, "Redistributing Function: %p", &f );
+
   uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
 
@@ -305,6 +310,9 @@ void redistribute_func( Mesh& mesh, Function const& f,
 //-----------------------------------------------------------------------------
 void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
 {
+  message( 1, "Projecting %u functions to function: %p",
+           f_post.size(), &projected );
+
   FiniteElementSpace const & space = projected.space();
 
   Array< real > vv ( projected.vector().local_size() );
@@ -316,8 +324,8 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
   projected.vector().zero();
   projected.sync();
 
-  real gts_tol = dolfin_get("GTS Tolerance");
-  real geom_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
+  real gts_tol = dolfin_get<real>("GTS Tolerance");
+  real geom_tol = dolfin_get<real>("Geometrical Tolerance Tetrahedron");
 
   dolfin_set("GTS Tolerance", 1e-10);
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);
@@ -337,7 +345,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
     for (VertexIterator v(*c); !v.end(); ++v)
     {
       uint ci   = 0;
-      uint *cvi = c->entities(0);
+      Array<uint> const & cvi = c->entities(0);
       for (; ci < c->num_entities(0); ci++)
       {
         if (cvi[ci] == v->index())
@@ -352,21 +360,19 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
       }
       processed(*v) = true;
 
-      real x[3] = { v->x()[0], v->x()[1], v->x()[2] };
+      const real * x = v->x();
       real test_value = 0.0;
-      f_post[0].eval( &test_value, &x[0] );
+      f_post[0].eval( &test_value, x );
       if (test_value == std::numeric_limits<real>::infinity())
       {
         for (EdgeIterator e(*v); !e.end(); ++e)
         {
-          uint const *edge_v = e->entities(0);
+          Array<uint> const & edge_v = e->entities(0);
           uint const index = ( edge_v[0] != v->index() ) ? 0 : 1;
           Vertex v_e( new_mesh, edge_v[index] );
 
-          x[0] = v_e.x()[0];
-          x[1] = v_e.x()[1];
-          x[2] = v_e.x()[2];
-          f_post[0].eval( &test_value, &x[0] );
+          const real * xe = v_e.x();
+          f_post[0].eval( &test_value, xe );
 
           if (test_value != std::numeric_limits<real>::infinity())
           {

@@ -9,7 +9,7 @@
 // generated with VMTK (http://villacamozzi.marionegri.it/~luca/vmtk/).
 
 #include <dolfin.h>
-#include "ufc2/Poisson.h"
+#include "ufc1/Poisson.h"
 
 using namespace dolfin;
 
@@ -30,7 +30,7 @@ struct DirichletBoundary : public SubDomain
 int main()
 {
   // Create mesh and finite element
-  Mesh mesh("../../../../data/meshes/aneurysm.xml.gz");
+  Mesh mesh("../../../data/meshes/aneurysm.bin");
 
   // Define variational problem
   Constant f(0.0);

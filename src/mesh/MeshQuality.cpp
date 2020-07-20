@@ -3,9 +3,11 @@
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <cmath>
 

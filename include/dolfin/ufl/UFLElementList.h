@@ -6,7 +6,6 @@
 
 #include <dolfin/ufl/UFLObject.h>
 
-#include <map>
 #include <string>
 
 namespace ufl
@@ -26,10 +25,11 @@ namespace ufl
 
 class FiniteElementSpace;
 
-class ElementList : protected std::map<Object::repr_t, FiniteElementSpace *>
+class ElementList
+  : protected dolfin::_ordered_map<Object::repr_t, FiniteElementSpace *>
 {
 
-  typedef std::pair<ufl::Object::repr_t, FiniteElementSpace *> ElementItem;
+  using ElementItem = std::pair<ufl::Object::repr_t, FiniteElementSpace *>;
 
 public:
 

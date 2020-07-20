@@ -3,46 +3,30 @@
 
 #include <dolfin/function/Function.h>
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/common/maybe_unused.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/common/types.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/fem/Form.h>
-#include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
-#include <dolfin/function/FunctionDecomposition.h>
-#include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/SubFunction.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/IntersectionDetector.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
-#include <set>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Function::Function() :
-    GenericFunction(),
-    TimeDependent(),
-    mesh_(NULL),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+Function::Function()
+  : GenericFunction()
+  , TimeDependent()
 {
   // Do nothing
 }
@@ -52,16 +36,16 @@ Function::Function(Mesh& mesh) :
     GenericFunction(),
     TimeDependent(),
     mesh_(&mesh),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
+    discrete_space_(nullptr),
+    element_(nullptr),
+    dofmap_(nullptr),
+    scratch(nullptr),
+    X_(nullptr),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Do nothing
 }
@@ -78,9 +62,9 @@ Function::Function(Form& form, uint i) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -98,9 +82,9 @@ Function::Function(FiniteElementSpace const& space) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -118,9 +102,9 @@ Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialise function
   InitializeVector();
@@ -139,9 +123,9 @@ Function::Function(SubFunction const& sub_function) :
     X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   // Initialize vector, scratch space and ghosts
   InitializeVector();
@@ -180,16 +164,16 @@ Function::Function(Function const& other) :
     GenericFunction(),
     TimeDependent(other),
     mesh_(&other.mesh()),
-    discrete_space_(NULL),
-    element_(NULL),
-    dofmap_(NULL),
-    scratch(NULL),
-    X_(NULL),
+    discrete_space_(nullptr),
+    element_(nullptr),
+    dofmap_(nullptr),
+    scratch(nullptr),
+    X_(nullptr),
     renumbered_(false),
     cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL),
-    cache_mapping_(NULL)
+    indices_(nullptr),
+    data_cache_(nullptr),
+    cache_mapping_(nullptr)
 {
   if(!other.empty())
   {
@@ -204,15 +188,9 @@ Function::~Function()
 }
 
 //-----------------------------------------------------------------------------
-bool Function::empty() const
-{
-  return (discrete_space_ == NULL);
-}
-
-//-----------------------------------------------------------------------------
 void Function::init(Form& form, uint i)
 {
-  if(mesh_ == NULL)
+  if(mesh_ == nullptr)
   {
     const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i].mesh();
   }
@@ -234,7 +212,7 @@ void Function::init(Form& form, uint i)
 //-----------------------------------------------------------------------------
 void Function::init(FiniteElementSpace const& space)
 {
-  if(mesh_ == NULL)
+  if(mesh_ == nullptr)
   {
     const_cast<Mesh *&>(mesh_) = &space.mesh();
   }
@@ -257,55 +235,29 @@ void Function::init(FiniteElementSpace const& space)
 void Function::clear()
 {
   delete X_;
-  X_ = NULL;
+  X_ = nullptr;
   delete discrete_space_;
-  discrete_space_ = NULL;
-  element_ = NULL;
-  dofmap_ = NULL;
+  discrete_space_ = nullptr;
+  element_ = nullptr;
+  dofmap_ = nullptr;
   delete scratch;
-  scratch = NULL;
+  scratch = nullptr;
   delete[] indices_;
-  indices_ = NULL;
+  indices_ = nullptr;
   delete[] data_cache_;
-  data_cache_ = NULL;
+  data_cache_ = nullptr;
   delete cache_mapping_;
-  cache_mapping_ = NULL;
+  cache_mapping_ = nullptr;
   renumbered_ = true;
-}
-
-//--- UFC INTERFACE -----------------------------------------------------------
-void Function::evaluate(real* values, const real* x,
-                        const ufc::cell& cell) const
-{
-  UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
-
-  // Get expansion coefficients on cell
-  dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
-  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
-
-  // Compute linear combination
-  std::fill_n(values, scratch->size, 0.0);
-  for (uint i = 0; i < element_->space_dimension(); ++i)
-  {
-    //FIXME: Idiotic
-    element_->evaluate_basis(i, scratch->basis_values, x, *ufc_cell);
-    for (uint j = 0; j < scratch->size; ++j)
-    {
-      values[j] += scratch->coefficients[i] * scratch->basis_values[j];
-    }
-  }
-}
-
-//--- GenericFunction ---------------------------------------------------------
-Mesh& Function::mesh() const
-{
-  return (*mesh_);
 }
 
 //-----------------------------------------------------------------------------
 void Function::evaluate(uint n, real* values, const real* x,
                         const ufc::cell& cell) const
 {
+  dolfin_assert( values != nullptr );
+  dolfin_assert( x != nullptr );
+
   UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
 
   // Get expansion coefficients on cell
@@ -314,6 +266,23 @@ void Function::evaluate(uint n, real* values, const real* x,
   std::fill_n(values, n * scratch->size, 0.0);
   for (uint q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
   {
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+    dolfin_assert( scratch->size <= Space::MAX_DIMENSION );
+    dolfin_assert( element_->space_dimension() <= scratch->space_dimension );
+
+    real coord[Space::MAX_DIMENSION];
+
+    element_->evaluate_basis_map_coordinates( coord[0], coord[1], coord[2],
+                                              x, *ufc_cell );
+
+    element_->evaluate_basis_from_coordinates( coord[0], coord[1], coord[2],
+                                               scratch->all_basis_values );
+
+    // Compute linear combination
+    for (uint i = 0; i < element_->space_dimension(); ++i)
+      for (uint j = 0; j < scratch->size; ++j)
+        values[j] += scratch->coefficients[i] * scratch->all_basis_values[i][j];
+#else
     // Compute linear combination
     for (uint i = 0; i < element_->space_dimension(); ++i)
     {
@@ -324,6 +293,7 @@ void Function::evaluate(uint n, real* values, const real* x,
         values[j] += scratch->coefficients[i] * scratch->basis_values[j];
       }
     }
+#endif
   }
 }
 
@@ -350,27 +320,6 @@ void Function::eval(real* values, const real* x) const
   Cell cell(*mesh_, cells[0]);
   scratch->cell.update(cell);
   evaluate(values, x, scratch->cell);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::rank() const
-{
-  dolfin_assert(element_);
-  return element_->value_rank();
-}
-
-//-----------------------------------------------------------------------------
-uint Function::dim(uint i) const
-{
-  dolfin_assert(element_);
-  return element_->value_dimension(i);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::value_size() const
-{
-  dolfin_assert(scratch);
-  return scratch->size;
 }
 
 //-----------------------------------------------------------------------------
@@ -431,17 +380,16 @@ void Function::interpolate_vertex_values(real* values) const
       uint const rank = dolfin::MPI::rank();
       uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
-      Array<real> * sendbuf = new Array<real> [pe_size];
+      Array< Array<real> > sendbuf( pe_size );
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
-        _set<uint> const& adjs = it.adj();
-        for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)
+        for ( uint const & adj : it.adj() )
         {
-          sendbuf[*a].push_back(vertex_sumwghts[it.index()]);
+          sendbuf[adj].push_back(vertex_sumwghts[it.index()]);
           for (uint i = 0; i < scratch->size; ++i)
           {
-            sendbuf[*a].push_back(values[i * num_verts + it.index()]);
+            sendbuf[adj].push_back(values[i * num_verts + it.index()]);
           }
         }
       }
@@ -453,17 +401,16 @@ void Function::interpolate_vertex_values(real* values) const
       uint dst;
 
       //FIXME: Overallocate
-      uint recvsize = dist0.num_shared();
-      uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
-      int recvcount;
+      Array< uint > recvbuf( dist0.num_shared() );
+      int recvcount = 0;
       for (uint j = 1; j < pe_size; ++j)
       {
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
 
-        MPI::check_error( MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(),
-                                       MPI_UNSIGNED, dst, 1,  &recvbuf[0],
-                                       recvsize, MPI_DOUBLE, src, 1,
+        MPI::check_error( MPI_Sendrecv(sendbuf[dst].data(), sendbuf[dst].size(),
+                                       MPI_UNSIGNED, dst, 1, recvbuf.data(),
+                                       recvbuf.size(), MPI_DOUBLE, src, 1,
                                        MPI::DOLFIN_COMM, &status) );
         MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
@@ -480,10 +427,6 @@ void Function::interpolate_vertex_values(real* values) const
           }
         }
       }
-
-      //
-      delete[] recvbuf;
-      delete[] sendbuf;
 #endif
     }
 
@@ -551,7 +494,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 
   // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
-  if (cache_mapping_ != NULL)
+  if (cache_mapping_ != nullptr)
   {
     for (uint i = 0; i < scratch->local_dimension; ++i)
     {
@@ -563,104 +506,6 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 #endif
 
   X_->get(coefficients, scratch->local_dimension, scratch->dofs);
-}
-
-//-----------------------------------------------------------------------------
-void Function::interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint) const
-{
-  interpolate(coefficients, cell, finite_element, dolfin_cell);
-}
-
-//-----------------------------------------------------------------------------
-GenericVector& Function::vector() const
-{
-  dolfin_assert(X_);
-  return *X_;
-}
-
-//-----------------------------------------------------------------------------
-FiniteElementSpace const& Function::space() const
-{
-  dolfin_assert(discrete_space_);
-  return *discrete_space_;
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(Expression const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(Coefficient const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-void Function::operator<<(GenericFunction const& other)
-{
-  FunctionInterpolation::compute(other, *this);
-}
-
-//-----------------------------------------------------------------------------
-Array<Function *> Function::decompose()
-{
-  return FunctionDecomposition::compute(*this);
-}
-
-//-----------------------------------------------------------------------------
-uint Function::num_sub_functions() const
-{
-  dolfin_assert(element_);
-  return element_->num_sub_elements();
-}
-
-//-----------------------------------------------------------------------------
-uidx Function::block_size() const
-{
-  dolfin_assert(dofmap_);
-  return dofmap_->dofsmapping_size();
-}
-
-//-----------------------------------------------------------------------------
-real * Function::create_block() const
-{
-  dolfin_assert(dofmap_);
-  return new real[dofmap_->dofsmapping_size()];
-}
-
-//-----------------------------------------------------------------------------
-void Function::get_block(real *& values) const
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  if (!values)
-  {
-    values = new real[dofmap_->dofsmapping_size()];
-  }
-  X_->apply();
-  X_->get(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-}
-
-//-----------------------------------------------------------------------------
-void Function::set_block(real *& values)
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  X_->set(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync();
-}
-
-//-----------------------------------------------------------------------------
-void Function::add_block(real *& values)
-{
-  dolfin_assert(X_);
-  dolfin_assert(dofmap_);
-  X_->add(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync();
 }
 
 //-----------------------------------------------------------------------------
@@ -685,7 +530,7 @@ void Function::InitializeGhosts()
 {
   if(!mesh_->is_distributed()) return;
 
-  std::set<uint> indices;
+  _ordered_set<uint> indices;
 
   for (CellIterator cell(*mesh_); !cell.end(); ++cell)
   {
@@ -701,7 +546,7 @@ void Function::InitializeGhosts()
     }
 
   }
-  std::map<uint, uint> map = dofmap_->get_map();
+  _ordered_map<uint, uint> map = dofmap_->get_map();
   dolfin_assert(map.size() == 0);
 
   X_->init_ghosted(indices.size(), indices, map);
@@ -716,7 +561,7 @@ void Function::InitializeGhosts()
   data_cache_ = new real[indices.size()];
 
   uint i = 0;
-  std::set<uint>::iterator it;
+  _ordered_set<uint>::iterator it;
   for (it = indices.begin(); it != indices.end(); it++)
   {
     indices_[i] = *it;
@@ -790,8 +635,8 @@ Function& Function::operator=(Function const& other)
     X_ = new Vector();
     renumbered_ = false;
     cache_size_ = 0;
-    indices_ = NULL;
-    data_cache_ = NULL;
+    indices_ = nullptr;
+    data_cache_ = nullptr;
     //
     InitializeVector();
   }
@@ -804,46 +649,6 @@ Function& Function::operator=(Function const& other)
   *X_ = *other.X_;
   this->sync();
 
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator+=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() += other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator-=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() -= other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator*=(Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector() *= other.vector();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::axpy(real value, Function const& other)
-{
-  dolfin_assert(!this->empty());
-  dolfin_assert(!other.empty());
-  dolfin_assert(this->space() == other.space());
-  this->vector().axpy(value, other.vector());
   return *this;
 }
 
@@ -865,68 +670,6 @@ Function& Function::swap(Function& other)
   std::swap(this->cache_mapping_, other.cache_mapping_);
 #endif
   return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() = value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator+=(real)
-{
-  dolfin_assert(!this->empty());
-  error("Not implemented");
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator-=(real)
-{
-  dolfin_assert(!this->empty());
-  error("Not implemented");
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator*=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() *= value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::operator/=(real value)
-{
-  dolfin_assert(!this->empty());
-  this->vector() /= value;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-Function& Function::zero()
-{
-  dolfin_assert(!this->empty());
-  this->vector().zero();
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-real Function::min() const
-{
-  dolfin_assert(!this->empty());
-  return this->vector().min();
-}
-
-//-----------------------------------------------------------------------------
-real Function::max() const
-{
-  dolfin_assert(!this->empty());
-  return this->vector().max();
 }
 
 //-----------------------------------------------------------------------------

@@ -20,8 +20,7 @@ FacetArea::FacetArea(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 FacetArea::~FacetArea()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 ValueArray const& FacetArea::shape() const

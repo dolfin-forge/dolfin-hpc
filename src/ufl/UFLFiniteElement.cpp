@@ -60,8 +60,7 @@ FiniteElement::FiniteElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& FiniteElement::family() const
@@ -100,7 +99,7 @@ bool FiniteElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
 {
   return symmetry_;
 }

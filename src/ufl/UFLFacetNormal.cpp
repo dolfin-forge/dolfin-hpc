@@ -21,8 +21,7 @@ FacetNormal::FacetNormal(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 FacetNormal::~FacetNormal()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 ValueArray const& FacetNormal::shape() const

@@ -2,6 +2,7 @@
 
 #ifdef HAVE_CHECK
 
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/CellTypes.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>

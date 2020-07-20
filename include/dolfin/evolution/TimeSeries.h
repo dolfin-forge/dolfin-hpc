@@ -8,7 +8,6 @@
 #include <dolfin/common/Array.h>
 
 #include <fstream>
-#include <map>
 
 namespace dolfin
 {
@@ -73,7 +72,7 @@ private:
   std::pair<real, real> data_timespan_;
   uint num_intervals_;
 
-  std::map<real, uint> discrete_times_;
+  _ordered_map<real, uint> discrete_times_;
   real t0_;
   real t1_;
   uint index_;

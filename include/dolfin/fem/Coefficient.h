@@ -23,20 +23,16 @@ class Coefficient : public ufc::function
 public:
 
   /// Constructor
-  Coefficient()
-  {
-  }
+  Coefficient() = default;
 
   /// Destructor
-  virtual ~Coefficient()
-  {
-  }
+  ~Coefficient() override = default;
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  virtual void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const = 0;
+  void evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -115,7 +111,17 @@ private:
   virtual void sync(Time const& t) = 0;
 
 };
-
+//-----------------------------------------------------------------------------
+inline uint Coefficient::value_size() const
+{
+  uint size = 1;
+  for (uint i = 0; i < this->rank(); ++i)
+  {
+    size *= this->dim(i);
+  }
+  return size;
+}
+//-----------------------------------------------------------------------------
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_COEFFICIENT_H */

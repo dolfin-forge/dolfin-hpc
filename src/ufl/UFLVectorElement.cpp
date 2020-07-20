@@ -41,8 +41,7 @@ VectorElement::VectorElement(repr_t const& repr) :
 
 //-----------------------------------------------------------------------------
 VectorElement::~VectorElement()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 Family const& VectorElement::family() const
@@ -87,7 +86,7 @@ bool VectorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const& VectorElement::symmetry() const
+dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& VectorElement::symmetry() const
 {
   return symmetry_;
 }

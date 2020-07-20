@@ -4,6 +4,4 @@ libdolfin_function_la_SOURCES = \
 				Function.cpp\
 				FunctionDecomposition.cpp\
 				FunctionInterpolation.cpp\
-				SpaceTimeFunction.cpp\
-				SubFunction.cpp\
-				UFCFunction.cpp
+				SpaceTimeFunction.cpp

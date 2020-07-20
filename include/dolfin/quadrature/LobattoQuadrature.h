@@ -28,11 +28,11 @@ namespace dolfin
     
     LobattoQuadrature(unsigned int n);
 
-    void disp() const;
+    void disp() const override;
 
   private:
 
-    void computePoints();
+    void computePoints() override;
     
   };
   

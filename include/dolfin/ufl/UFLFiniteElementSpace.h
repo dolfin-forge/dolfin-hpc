@@ -34,13 +34,13 @@ class FiniteElementSpace : public Class
 public:
 
   //
-  typedef std::vector<FiniteElementSpace const *> List;
+  using List = std::vector<const FiniteElementSpace *>;
 
   /// Stupid factory function
   static FiniteElementSpace * create(Object::repr_t const repr);
 
   ///
-  virtual ~FiniteElementSpace();
+  ~FiniteElementSpace() override;
 
   /// Return quadrature scheme of finite element
   QuadratureScheme const& quadrature_scheme() const;
@@ -76,7 +76,7 @@ public:
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  virtual std::map<dolfin::uint, dolfin::uint> const& symmetry() const = 0;
+  virtual dolfin::_ordered_map<dolfin::uint, dolfin::uint> const& symmetry() const = 0;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
@@ -109,13 +109,13 @@ public:
   /// TODO: Unimplemented
 
   /// __repr__
-  virtual repr_t const& repr() const = 0;
+  repr_t const& repr() const override = 0;
 
   /// __str__
-  virtual std::string const& str() const = 0;
+  std::string const& str() const override = 0;
 
   ///
-  virtual void display() const;
+  void display() const override;
 
 protected:
 

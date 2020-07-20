@@ -1,14 +1,17 @@
-0.9.1-hpc [2020-05-XX]
+0.9.1-hpc [2020-07-20]
  - C++11 required to build DOLFIN HPC
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
    those can be installed from bitbucket.org/adaptivesimulations
- - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable
- - added '--enable-opt-basis' for optimized ffc evaluate_basis functions
- - added '--with-phmap=DIR' for fast map/set implementation (https://git.io/JfE2p)
+ - Cell/Edge/Face/Facet/VertexIterators have been moved to their own header files
+ - I/O verbosity can now be controlled via DOLFIN_VERBOSE=0|1 environment variable
+ - added '--enable-opt-basis' for optimized ffc (-O) evaluate_basis functions
+ - added '--with-phmap[=DIR]' for fast map/set implementation (https://git.io/JfE2p)
+ - new Checkpoint format
  - removed XML support
  - removed PETSc signal handling by default
+ - PETScKrylovSolver now gives more detailed errors in case of divergence
  - added support for vtk files and paraview >= 5.8.0
- - cleaned up ParameterSystem dolfin_get not requires a template parameter
+ - cleaned up ParameterSystem, dolfin_get<> now requires a template parameter
  - Changed Connectivity interface to use Array<> instead of raw pointers
  - Fixed tic/toc counters
  - Fixed regression in I/O interface (short filenames)

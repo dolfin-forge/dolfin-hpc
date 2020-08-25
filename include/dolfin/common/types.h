@@ -75,14 +75,14 @@ using _ordered_set = std::set< Key, Compare, Allocator >;
 
 template < typename Key,
            typename Value,
-           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
-           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
+           typename Hash  = phmap::priv::hash_default_hash< Key >,
+           typename Eq    = phmap::priv::hash_default_eq< Key >,
            typename Alloc = std::allocator< std::pair< const Key, Value > > >
 using _map = phmap::flat_hash_map< Key, Value, Hash, Eq, Alloc >;
 
 template < typename Key,
-           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
-           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
+           typename Hash  = phmap::priv::hash_default_hash< Key >,
+           typename Eq    = phmap::priv::hash_default_eq< Key >,
            typename Alloc = std::allocator< Key > >
 using _set = phmap::flat_hash_set< Key, Hash, Eq, Alloc >;
 

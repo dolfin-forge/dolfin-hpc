@@ -31,7 +31,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   FiniteElementSpace const& Wh = F.space();
   ScratchSpace S(Wh);
   Array<FiniteElementSpace *> spaces = Wh.flatten();
-  Array<Function *> Si( spaces.size(), nullptr );
+  Array<Function *> Si;
   for ( FiniteElementSpace * fespaces : spaces )
   {
     Si.push_back(new Function(*fespaces));

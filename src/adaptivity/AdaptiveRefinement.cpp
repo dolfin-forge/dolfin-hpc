@@ -160,7 +160,8 @@ void refine_and_project( Mesh& mesh,
   MPIMeshCommunicator::distribute( partitions, &D );
 
   // global renumbering is not necessary
-  mesh.distdata()[0].valid_numbering = true;
+  if ( MPI::size() > 1 )
+    mesh.distdata()[0].valid_numbering = true;
 
   // refine the mesh and keep a copy of the original / coarse mesh,
   // needed in the coarse functions

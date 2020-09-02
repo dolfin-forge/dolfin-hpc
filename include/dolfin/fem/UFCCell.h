@@ -132,7 +132,7 @@ inline void UFCCell::init(Cell& cell)
   // Set entity indices
   entity_indices = new uint*[topological_dimension + 1];
   entity_indices[topological_dimension] = new uint[1];
-  entity_indices[topological_dimension][0] = cell.index();
+  entity_indices[topological_dimension][0] = cell.global_index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
@@ -188,7 +188,7 @@ inline void UFCCell::update(Cell& cell)
 #else
   cell.get_global_entities(entity_indices);
 #endif
-  entity_indices[topological_dimension][0] = cell.index();
+  entity_indices[topological_dimension][0] = cell.global_index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];

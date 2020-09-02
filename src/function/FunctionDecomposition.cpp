@@ -59,7 +59,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
         }
         if (!v->is_ghost() && !marked(*v))
         {
-          uint dof_index = mesh.distdata()[0].get_global(v->index());
+          uint dof_index = v->global_index();
           for (uint i = 0; i < Si.size(); ++i)
           {
             Si[i]->vector().set(&block[offset + i * numcellnodes + ci], 1,
@@ -79,10 +79,9 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     uint dof_index = 0;
     real * block = F.create_block();
     F.get_block(block);
-    uint const tdim = mesh.topology_dimension();
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      dof_index = mesh.distdata()[tdim].get_global(c->index());
+      dof_index = c->global_index();
       for ( Function * f : Si )
       {
         f->vector().set(&block[dofii], 1, &dof_index);

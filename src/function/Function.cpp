@@ -308,7 +308,7 @@ void Function::eval(real* values, const real* x) const
   {
     if (!mesh_->is_distributed())
     {
-      error("Unable to evaluate function at given point (not inside domain).");
+      warning("Unable to evaluate function at given point (not inside domain).");
     }
 
     for (uint j = 0; j < scratch->size; ++j)

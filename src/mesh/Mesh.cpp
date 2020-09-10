@@ -28,7 +28,7 @@ namespace dolfin
 Mesh::Mesh() :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     topology_(TetrahedronCell(), DOLFIN_COMM,!this->reordering()),
-    geometry_(EuclideanSpace(3)),    
+    geometry_(EuclideanSpace(3)),
     timestamp_(time(nullptr))
 {
 }

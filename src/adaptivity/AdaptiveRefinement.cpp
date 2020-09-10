@@ -43,12 +43,12 @@ void project( Mesh & new_mesh, Array<Function> & f_post, Function & projected );
 //-----------------------------------------------------------------------------
 void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 {
-  message("Adaptive refinement");
+  section("Adaptive refinement");
 
   uint const numcellsbefore = mesh.num_global_cells();
   uint const numvertsbefore = mesh.global_size(0);
-  message("  - cells    before: %d", numcellsbefore);
-  message("  - vertices before: %d", numvertsbefore);
+  message("Cells    (before): %d", numcellsbefore);
+  message("Vertices (before): %d", numvertsbefore);
 
   std::string marked_filename("marked");
   if ( dolfin_get<std::string>("output_format")  == "vtk")
@@ -77,9 +77,10 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   uint const numvertsafter = mesh.global_size(0);
   dolfin_assert(numvertsafter >= numvertsbefore);
 
-  message("  - cells    after: %d", numcellsafter);
-  message("  - vertices after: %d", numvertsafter);
+  message("Cells    (after): %d", numcellsafter);
+  message("Vertices (after): %d", numvertsafter);
 
+  end();
   skip();
 }
 //-----------------------------------------------------------------------------
@@ -87,10 +88,11 @@ void refine_and_project( Mesh& mesh,
                          FunctionMapping const& functions,
                          MeshValues<bool, Cell>& cell_marker)
 {
+  section( "Adaptive refinement (with projection)" );
+  message( "Cells    (before): %d", mesh.num_global_cells() );
+  message( "Vertices (before): %d", mesh.global_size( 0 ) );
+
   dolfin_set("Load balancer redistribute", false);
-  message("Adaptive refinement (with projection)");
-  message("  - cells    before: %d", mesh.num_global_cells());
-  message("  - vertices before: %d", mesh.global_size(0));
 
   std::string const refine_type = dolfin_get<std::string>("adapt_algorithm");
   if (refine_type == "simple")
@@ -218,8 +220,11 @@ void refine_and_project( Mesh& mesh,
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
 
-  message("  - cells    after: %d", mesh.num_global_cells());
-  message("  - vertices after: %d", mesh.global_size(0));
+  message("Cells    (after): %d", mesh.num_global_cells());
+  message("Vertices (after): %d", mesh.global_size(0));
+
+  end();
+  skip();
 }
 //-----------------------------------------------------------------------------
 void redistribute_func( Mesh& mesh, Function const& f,

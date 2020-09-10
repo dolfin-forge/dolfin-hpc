@@ -1,3 +1,5 @@
+0.9.2-hpc [2020-09-xx]
+ - bugfixes
 0.9.1-hpc [2020-07-20]
  - C++11 required to build DOLFIN HPC
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc

@@ -159,6 +159,9 @@ void BinaryFile::operator>>(GenericVector& x)
   x.init(size);
   x.set(values);
   delete[] values;
+
+  message(1, "BinaryFile: Read vector from file %s in binary format.",
+          filename.c_str());
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(GenericVector& x)
@@ -265,6 +268,10 @@ void BinaryFile::operator>>(Function & f)
 
       MPI::file_close( fh );
 
+
+      message(1, "BinaryFile: Read function from file %s in binary format.",
+             filename.c_str());
+
       return;
     }
 
@@ -333,6 +340,10 @@ void BinaryFile::operator>>(LabelList<Function>& f)
 
     byte_offset += f_hdr.dim * u->mesh().global_size(0) * sizeof(real);
   }
+
+
+  message(1, "BinaryFile: Read functions from file %s in binary format.",
+          filename.c_str());
 
   MPI::file_close( fh );
 
@@ -441,6 +452,10 @@ void BinaryFile::write_function(
   MPI::file_close( fh );
 
   counter++;
+
+
+  message(1, "BinaryFile: Saved function to file %s in binary format.",
+          bin_filename_.c_str());
 #else
   MAYBE_UNUSED(f);
   error("MPI I/O is required to save functions in Binary.");
@@ -801,6 +816,9 @@ void BinaryFile::operator>>(Mesh& mesh)
 #endif
 
   }
+
+  message(1, "BinaryFile: Read Mesh from file %s in binary format.",
+          filename.c_str());
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
@@ -1018,13 +1036,16 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
   uint offset = 0;
   MPI::exscan_sum( &local_size, &offset, 1 );
-  MPI::file_write_at_all( fh, values, local_size * sizeof(real),
+  MPI::file_write_at_all( fh, values, local_size,
                           byte_offset + offset * sizeof(real) );
   MPI::file_close( fh );
 
   counter++;
 
   delete[] values;
+
+  message(1, "BinaryFile: Saved MeshFunction to file %s in binary format.",
+          bin_filename_.c_str());
 
 #else
   MAYBE_UNUSED(meshfunction);
@@ -1088,7 +1109,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
   uint offset = 0;
   MPI::exscan_sum( &local_size, &offset, 1 );
-  MPI::file_read_at_all( fh, values, local_size * sizeof(real),
+  MPI::file_read_at_all( fh, values, local_size,
                          byte_offset + offset * sizeof(real) );
   if(byteswap)
   {
@@ -1163,6 +1184,9 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   MPI::file_close( fh );
 
   delete[] values;
+
+  message(1, "BinaryFile: Read MesHFunction from file %s in binary format.",
+          filename.c_str());
 
 #else
   MAYBE_UNUSED(meshfunction);

@@ -68,7 +68,7 @@ public:
   real remaining_normalized() const;
 
   /// Display current time
-  void show() const;
+  void show( std::string const info = "" ) const;
 
   /// Display basic information
   void disp() const;

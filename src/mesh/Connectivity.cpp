@@ -174,8 +174,13 @@ void Connectivity::remap_l(Array<uint> const& map)
 void Connectivity::remap_r(Array<uint> const& map)
 {
   for (uint e = 0; e < order_; ++e)
+  {
     for ( uint i = 0; i < degree(e); ++i )
+    {
+      dolfin_assert( connections_[e][i] < map.size() );
       connections_[e][i] = map[connections_[e][i]];
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 void Connectivity::disp() const

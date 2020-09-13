@@ -217,6 +217,7 @@ void MeshEditor::close()
   // Finalize topology and geometry
   mesh_.topology().finalize();
   mesh_.geometry().finalize();
+  mesh_.extent_update();
   // Clear data
   clear();
 }

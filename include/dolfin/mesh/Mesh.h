@@ -66,11 +66,8 @@ public:
   /// Create empty mesh
   Mesh();
 
-  /// Constructor from cell type and space
-  Mesh(CellType const& ctype, Space const& space);
-
   /// Constructor from cell type, space, and communicator
-  Mesh(CellType const& ctype, Space const& space, Comm& comm);
+  Mesh(CellType const& ctype, Space const& space, Comm& comm = DOLFIN_COMM_SELF );
 
   /// Copy constructor
   Mesh(Mesh const& mesh);
@@ -96,6 +93,17 @@ public:
 
   /// Return mesh space
   Space const& space() const;
+
+  /// Return a Point describing the minimum extent of the mesh
+  /// this point might not be part of the mesh itself
+  Point const & extent_min() const;
+
+  /// Return a Point describing the maximum extent of the mesh
+  /// this point might not be part of the mesh itself
+  Point const & extent_max() const;
+
+  /// update the mesh extent
+  void extent_update();
 
   //--- TOPOLOGY --------------------------------------------------------------
 
@@ -264,6 +272,9 @@ private:
   /// Periodic constraints
   mutable Array<MappedManifold *> periodic_mappings_;
 
+  Point extent_min_;
+  Point extent_max_;
+
   int timestamp_;
 };
 
@@ -409,6 +420,18 @@ inline MeshGeometry const & Mesh::geometry() const
 inline uint Mesh::geometry_dimension() const
 {
   return geometry_.dim();
+}
+
+//-----------------------------------------------------------------------------
+inline Point const & Mesh::extent_min() const
+{
+  return extent_min_;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const & Mesh::extent_max() const
+{
+  return extent_max_;
 }
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------

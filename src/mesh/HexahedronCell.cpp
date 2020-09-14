@@ -189,15 +189,8 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
           Array< uint > const & edge_vertices = topology(1, 0)[cell_edges[k]];
 
           // Check if the jth vertex of facet i is non-incident on edge k
-#if __SUNPRO_CC
-          int n1 = 0;
-          std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                     facet_vertices[j], n1);
-          if (!n1)
-#else
           if (!std::count(edge_vertices.data(), edge_vertices.data() + 2,
                           facet_vertices[j]))
-#endif
           {
             // Swap facet numbers
             uint tmp = cell_edges[m];
@@ -235,20 +228,10 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
         Array< uint > const & edge_vertices = topology(1, 0)[cell_edges[k]];
 
         // Check if the ith and jth vertex of the cell are non-incident on edge k
-#if __SUNPRO_CC
-        int n1 = 0;
-        int n2 = 0;
-        std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                   cell_vertices[v0], n1);
-        std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                   cell_vertices[v1], n2);
-        if (!n1 && !n2 )
-#else
         if (!std::count(edge_vertices.data(), edge_vertices.data() + 2,
                         cell_vertices[v0])
          && !std::count(edge_vertices.data(), edge_vertices.data() + 2,
                         cell_vertices[v1]))
-#endif
         {
           // Swap edge numbers
           uint tmp = cell_edges[m];
@@ -285,21 +268,6 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
         Array< uint > const & facet_vertices = topology(2, 0)[cell_facets[k]];
 
         // Check if the ith vertex of the cell is non-incident on facet j
-#if __SUNPRO_CC
-        int n1 = 0;
-        int n2 = 0;
-        int n3 = 0;
-        int n4 = 0;
-        std::count(facet_vertices.data(), facet_vertices.data() + 4,
-                   cell_vertices[v0], n1);
-        std::count(facet_vertices.data(), facet_vertices.data() + 4,
-                   cell_vertices[v1], n2);
-        std::count(facet_vertices.data(), facet_vertices.data() + 4,
-                   cell_vertices[v2], n3);
-        std::count(facet_vertices.data(), facet_vertices.data() + 4,
-                   cell_vertices[v3], n4);
-        if (!n1 && !n2 && !n3 && !n4)
-#else
         if (!std::count(facet_vertices.data(), facet_vertices.data() + 4,
                         cell_vertices[v0])
          && !std::count(facet_vertices.data(), facet_vertices.data() + 4,
@@ -308,7 +276,6 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
                         cell_vertices[v2])
          && !std::count(facet_vertices.data(), facet_vertices.data() + 4,
                         cell_vertices[v3]))
-#endif
         {
           // Swap facet numbers
           uint tmp = cell_facets[m];

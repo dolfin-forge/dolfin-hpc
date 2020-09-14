@@ -106,20 +106,10 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
         Array<uint> const & edge_vertices = topology(1, 0)[cell_edges[k]];
 
         // Check if the ith and jth vertex of the cell are non-incident on edge k
-#if __SUNPRO_CC
-        int n1 = 0;
-        int n2 = 0;
-        std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                   cell_vertices[v0], n1);
-        std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                   cell_vertices[v1], n2);
-        if (!n1 && !n2 )
-#else
         if (!std::count(edge_vertices.data(), edge_vertices.data() + 2,
                         cell_vertices[v0])
          && !std::count(edge_vertices.data(), edge_vertices.data() + 2,
                         cell_vertices[v1]))
-#endif
         {
           // Swap edge numbers
           uint tmp = cell_edges[m];

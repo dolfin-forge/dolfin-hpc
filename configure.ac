@@ -310,7 +310,7 @@ fi
 if test "x${enable_check}" = xyes; then
    PKG_CHECK_EXISTS([check],[have_check=yes],[have_check=no])
    if test "x${have_check}" = xyes; then
-      PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+      PKG_CHECK_MODULES([CHECK], [check >= 0.12.0])
       AC_DEFINE(HAVE_CHECK,[1],[Have CHECK library])
    else
       AC_MSG_ERROR([CHECK not found, needed for unit testing])

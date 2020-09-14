@@ -249,7 +249,7 @@ inline MeshDistributedData & MeshTopology::distdata()
 {
   if ( not distributed() )
   {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
+    error( "MeshTopology : returning distributed data of serial mesh" );
   }
   return distdata_;
 }
@@ -259,7 +259,7 @@ inline MeshDistributedData const & MeshTopology::distdata() const
 {
   if ( not distributed() )
   {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
+    error( "MeshTopology : returning distributed data of serial mesh" );
   }
   return distdata_;
 }

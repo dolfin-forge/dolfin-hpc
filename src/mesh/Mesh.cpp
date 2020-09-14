@@ -27,7 +27,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 
 Mesh::Mesh()
-  : Mesh( TetrahedronCell(), EuclideanSpace( 3 ), DOLFIN_COMM_SELF )
+  : Mesh( TetrahedronCell(), EuclideanSpace( 3 ), DOLFIN_COMM )
 {
 }
 
@@ -69,7 +69,7 @@ Mesh::Mesh( Mesh const & other )
 //-----------------------------------------------------------------------------
 
 Mesh::Mesh( std::string const & filename )
-  : Mesh( TetrahedronCell(), EuclideanSpace( 3 ), DOLFIN_COMM )
+  : Mesh()
 {
   File( filename ) >> *this;
   this->distribute();
@@ -158,8 +158,6 @@ void Mesh::extent_update()
 {
   Point min_( DOLFIN_REAL_MAX, DOLFIN_REAL_MAX, DOLFIN_REAL_MAX );
   Point max_( DOLFIN_REAL_MIN, DOLFIN_REAL_MIN, DOLFIN_REAL_MIN );
-
-  this->init();
 
   for ( VertexIterator v( *this ); not v.end(); ++v )
   {
@@ -385,7 +383,7 @@ void Mesh::disp() const
   end();
   section( "Extent" );
   message( "Min: [%f, %f, %f]", extent_min_[0], extent_min_[1], extent_min_[2] );
-  message( "Max: [%f, %f, %f]", extent_min_[0], extent_min_[1], extent_min_[2] );
+  message( "Max: [%f, %f, %f]", extent_max_[0], extent_max_[1], extent_max_[2] );
   end();
 }
 

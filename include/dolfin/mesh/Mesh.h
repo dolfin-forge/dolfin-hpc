@@ -67,7 +67,7 @@ public:
   Mesh();
 
   /// Constructor from cell type, space, and communicator
-  Mesh(CellType const& ctype, Space const& space, Comm& comm = DOLFIN_COMM_SELF );
+  Mesh(CellType const& ctype, Space const& space, Comm& comm = DOLFIN_COMM );
 
   /// Copy constructor
   Mesh(Mesh const& mesh);

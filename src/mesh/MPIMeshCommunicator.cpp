@@ -564,6 +564,8 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   mesh.geometry().assign( local_vcoords );
   mesh.geometry().finalize();
 
+  mesh.extent_update();
+
   // Recreate mesh functions
   if ( not UC.empty() )
   {

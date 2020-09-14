@@ -176,15 +176,8 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
     {
       open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);
       close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);
-#ifdef __SUNPRO_CC
-      n_open_delimiters[i] = 0;
-      n_close_delimiters[i] = 0;
-      std::count(str.begin(), it, open_delimiters[i], n_open_delimiters[i]);
-      std::count(str.begin(), it, close_delimiters[i], n_close_delimiters[i]);
-#else
       n_open_delimiters[i] = std::count(str.begin(), it, open_delimiters[i]);
       n_close_delimiters[i] = std::count(str.begin(), it, close_delimiters[i]);
-#endif
     }
 
     bool equal_number_open_close = true;
@@ -194,17 +187,10 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
 
     open_pos = *std::min_element(open_delimiter_positions.begin(),
                                  open_delimiter_positions.end());
-#ifdef __SUNPRO_CC
-    dolfin::uint index = 0;
-    std::distance(open_delimiter_positions.begin(),
-        std::find(open_delimiter_positions.begin(),
-            open_delimiter_positions.end(), open_pos), index);
-#else
     dolfin::uint index = std::distance(
         open_delimiter_positions.begin(),
         std::find(open_delimiter_positions.begin(),
                   open_delimiter_positions.end(), open_pos));
-#endif
     close_pos = close_delimiter_positions[index];
 
     // Take into account of

@@ -169,7 +169,7 @@ DOLFIN_START_TEST( test_Connectivity )
       ck_assert_uint_eq(C[0][0], 3);
       ck_assert_uint_eq(C[0][1], 4);
 #endif
-      Array<uint> R(4);
+      Array<uint> R(5);
       R[0] = 4; R[1] = 3; R[2] = 2; R[3] = 1; R[4] = 0;
       C.remap_r(R);
 #if CHECK_MAJOR_VERSION == 0 && \

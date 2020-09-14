@@ -13,7 +13,7 @@ AC_DEFUN([AX_PHMAP],[
 	[Directory for parallel hashmap: parallel_hashmap/phmap.h]),
 	[
 	if test -d "$withval"; then
-		ac_phmap_path="$withval/parallel_hashmap";
+		ac_phmap_path="$withval/";
 		PHMAP_CPPFLAGS="-I$ac_phmap_path"
 	fi
 	],)

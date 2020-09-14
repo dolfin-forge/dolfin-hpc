@@ -103,15 +103,8 @@ void TriangleCell::order_entities(MeshTopology& topology, uint i) const
         Array<uint> const & edge_vertices = topology(1, 0)[cell_edges[j]];
 
         // Check if the ith vertex of the cell is non-incident with edge j
-#if __SUNPRO_CC
-        int n1 = 0;
-        std::count(edge_vertices.data(), edge_vertices.data() + 2,
-                   cell_vertices[i], n1);
-        if ( n1 == 0)
-#else
         if (std::count(edge_vertices.data(), edge_vertices.data() + 2,
                        cell_vertices[i]) == 0)
-#endif
         {
           // Swap edge numbers
           uint tmp = cell_edges[i];

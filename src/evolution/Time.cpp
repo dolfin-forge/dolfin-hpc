@@ -93,11 +93,16 @@ real Time::remaining_normalized() const
   return std::fabs(T_.second - t_)/std::fabs(T_.second - T_.first);
 }
 //-----------------------------------------------------------------------------
-void Time::show() const
+void Time::show( std::string const info ) const
 {
   real const p = 100.0 * this->elapsed() / (sign_ == 0 ? 1.0 : this->measure());
+
+  std::string const nfo = info.substr( 0, std::min( 36ul, info.size() ) );
+  std::string const len = std::to_string( 48 - nfo.size() );
+  std::string const msg = "t = %-" + len + ".6e %s [ %6.2f ]";
+
   message("----------------------------------------------------------------");
-  message("t = %-49.6e [ %6.2f ]", t_, p);
+  message( msg.c_str(), t_, nfo.c_str(), p );
   message("----------------------------------------------------------------");
 }
 //-----------------------------------------------------------------------------

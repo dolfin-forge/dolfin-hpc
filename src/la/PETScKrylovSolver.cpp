@@ -160,7 +160,11 @@ dolfin::uint PETScKrylovSolver::solve( const PETScMatrix & A,
   {
     message = "KSP_DIVERGED_INDEFINITE_PC";
   }
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 10
   else if ( reason == KSP_DIVERGED_PC_FAILED )
+#else
+  else if ( reason == KSP_DIVERGED_PCSETUP_FAILED )
+#endif
   {
     message = "KSP_DIVERGED_PC_FAILED";
   }
@@ -279,7 +283,11 @@ dolfin::uint PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
   {
     message = "KSP_DIVERGED_INDEFINITE_PC";
   }
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 10
   else if ( reason == KSP_DIVERGED_PC_FAILED )
+#else
+  else if ( reason == KSP_DIVERGED_PCSETUP_FAILED )
+#endif
   {
     message = "KSP_DIVERGED_PC_FAILED";
   }

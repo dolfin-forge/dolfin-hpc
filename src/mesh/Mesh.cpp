@@ -73,7 +73,6 @@ Mesh::Mesh( std::string const & filename )
 {
   File( filename ) >> *this;
   this->distribute();
-  this->extent_update();
 }
 
 //-----------------------------------------------------------------------------

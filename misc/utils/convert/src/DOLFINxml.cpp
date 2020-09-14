@@ -62,12 +62,14 @@ void DOLFINxml::start_element(const xmlChar *name, const xmlChar **attrs) {
     }
     break;
   case CELLS:
+  {
     static const char * const vertex_attr[8] =
       { "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7" };
     for (int i = 0; i < (cell_type + 1); i++) 
       *(cp++) = parse<uint32_t>(name, attrs, vertex_attr[i]);
     parsed_cells++;
     break;
+  }
   default:
     break;
   }

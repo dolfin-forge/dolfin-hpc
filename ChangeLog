@@ -1,3 +1,4 @@
+0.9.3-hpc [202X-XX-XX]
 0.9.2-hpc [2020-09-14]
  - Mesh now stores the min/max extents of the current mesh
  - fixed reading and writing MeshFunctions/MeshValues

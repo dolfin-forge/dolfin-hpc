@@ -145,7 +145,7 @@ public:
   static int check_error( int const mpi_error );
 
 #ifdef HAVE_MPI
-  
+
   static void file_open( MPI_File & file, std::string const & filename,
                          int mode, Communicator & comm = MPI::DOLFIN_COMM,
                          MPI_Info info = MPI_INFO_NULL );
@@ -191,9 +191,11 @@ public:
                                      MPI_Status * status = MPI_STATUS_IGNORE );
 
   static void file_close( MPI_File & file );
-  
+
+  static void check_file_status( int const mpi_error );
+
 #endif
-  
+
   template< typename T >
   static void exscan_sum( T const * send, T * recv, int count,
                           Communicator & comm = MPI::DOLFIN_COMM  );

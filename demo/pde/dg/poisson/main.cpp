@@ -26,53 +26,58 @@ using namespace dolfin;
 // Source term
 struct Source : public Value< Source, 1 >
 {
-	void eval( real * values, const real * x ) const
-	{
-		real dx   = x[0] - 0.5;
-		real dy   = x[1] - 0.5;
-		values[0] = 500.0 * exp( -( dx * dx + dy * dy ) / 0.02 );
-	}
+  void eval( real * values, const real * x ) const
+  {
+    real dx   = x[0] - 0.5;
+    real dy   = x[1] - 0.5;
+    values[0] = 500.0 * exp( -( dx * dx + dy * dy ) / 0.02 );
+  }
 };
 
 int main()
 {
-	// Create mesh
-	UnitSquare mesh( 64, 64 );
 
-	// Create functions
-	Analytic< Source > f( mesh );
+  dolfin_init();
+  
+  // Create mesh
+  UnitSquare mesh( 64, 64 );
 
-	// Define PDE
-	Poisson::BilinearForm a( mesh );
-	Poisson::LinearForm   L( mesh, f );
+  // Create functions
+  Analytic< Source > f( mesh );
 
-	// Solve PDE
-	Function u( a.trial_space() );
-	Matrix   A;
-	Vector   b;
-	a.assemble( A, true );
-	L.assemble( b, true );
+  // Define PDE
+  Poisson::BilinearForm a( mesh );
+  Poisson::LinearForm   L( mesh, f );
 
-	KrylovSolver solver( bicgstab, bjacobi );
+  // Solve PDE
+  Function u( a.trial_space() );
+  Matrix   A;
+  Vector   b;
+  a.assemble( A, true );
+  L.assemble( b, true );
 
-	solver.solve( A, u.vector(), b );
-	u.sync();
+  KrylovSolver solver( bicgstab, bjacobi );
 
-	// Project solution onto continuous basis for post-processing
-	P1Projection::BilinearForm a_proj( mesh );
-	P1Projection::LinearForm   L_proj( mesh, u );
-	Function                   u_proj( a_proj.trial_space() );
+  solver.solve( A, u.vector(), b );
+  u.sync();
 
-	Matrix A_proj;
-	Vector b_proj;
-	a_proj.assemble( A_proj, true );
-	L_proj.assemble( b_proj, true );
-	solver.solve( A_proj, u_proj.vector(), b_proj );
-	u_proj.sync();
+  // Project solution onto continuous basis for post-processing
+  P1Projection::BilinearForm a_proj( mesh );
+  P1Projection::LinearForm   L_proj( mesh, u );
+  Function                   u_proj( a_proj.trial_space() );
 
-	// Save solution to file
-	File file( "poisson.pvd" );
-	file << u_proj;
+  Matrix A_proj;
+  Vector b_proj;
+  a_proj.assemble( A_proj, true );
+  L_proj.assemble( b_proj, true );
+  solver.solve( A_proj, u_proj.vector(), b_proj );
+  u_proj.sync();
 
-	return 0;
+  // Save solution to file
+  File file( "poisson.pvd" );
+  file << u_proj;
+
+  dolfin_finalize();
+  
+  return 0;
 }

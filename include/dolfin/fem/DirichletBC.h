@@ -76,6 +76,10 @@ public:
   DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               BCMethod method = topological);
 
+  /// Create boundary condition for multiple coefficients and sub domains
+  DirichletBC( Array< std::pair< Coefficient & , SubDomain const & > > conds,
+               Mesh& mesh, BCMethod method = topological);
+
   /// Create sub system boundary condition for sub domain
   DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               const SubSystem& sub_system, BCMethod method = topological);
@@ -97,7 +101,11 @@ private:
                   BilinearForm const& form);
 
   ///
-  inline void sync(Time const& t) override { g_(t); }
+  inline void sync(Time const& t) override
+  {
+    for ( uint c = 0; c < conditions.size(); ++c )
+      conditions[c].first(t);
+  }
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,
@@ -114,16 +122,14 @@ private:
                           FiniteElementSpace const& space,
                           SubSystem const& sub_system);
 
-  // The function
-  Coefficient& g_;
+  // array of coefficient-subdomain pairs
+  Array< std::pair< Coefficient & , SubDomain const & > > conditions;
 
   // Search method
   BCMethod method_;
 
-  // Boundary facets, stored as pairs (cell, local facet number)
+  // Boundary facets, stored as triplets (cell, local facet number, #condition)
   Array<uint> entities_;
-
-  friend SetOfDirichletBC;
 };
 
 } /* namespace dolfin */

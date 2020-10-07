@@ -191,8 +191,21 @@ public:
   /// Component-wise multiplication, error if empty or space mismatch
   Function& operator*=(Function const& other);
 
-  /// AXPY
-  Function& axpy(real value, Function const& other);
+  /// Add multiple of given vector (y=a*x+y)
+  Function& axpy( real a, const Function & x );
+
+  /// Add multiple of given vector (y=a*x+b*y)
+  Function& axpby( real a, const Function & x,
+                   real b );
+
+  /// Add multiple of given vector (w=a*x+y)
+  Function& waxpy( real a, const Function & x,
+                           const Function & y );
+
+  /// Add multiple of given vector (z=a*x+b*y+c*z)
+  Function& axpbypcz( real a, const Function & x,
+                      real b, const Function & y,
+                      real c );
 
   /// Assignment to a real value, error if empty
   Function& operator=(real value);
@@ -430,14 +443,54 @@ inline Function & Function::operator*=( Function const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::axpy( real value, Function const & other )
+inline Function & Function::axpy( real a, const Function & x )
 {
   dolfin_assert( !this->empty() );
-  dolfin_assert( !other.empty() );
-  dolfin_assert( this->space() == other.space() );
-  this->vector().axpy( value, other.vector() );
+  dolfin_assert( !x.empty() );
+  dolfin_assert( this->space() == x.space() );
+  this->vector().axpy( a, x.vector() );
   return *this;
-} //-----------------------------------------------------------------------------
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::axpby( real a, const Function & x,
+                                   real b )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !x.empty() );
+  dolfin_assert( this->space() == x.space() );
+  this->vector().axpby( a, x.vector(), b );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::waxpy( real a, const Function & x,
+                                           const Function & y )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !x.empty() );
+  dolfin_assert( !y.empty() );
+  dolfin_assert( this->space() == x.space() );
+  dolfin_assert( this->space() == y.space() );
+  this->vector().waxpy( a, x.vector(), y.vector() );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Function & Function::axpbypcz( real a, const Function & x,
+                                      real b, const Function & y,
+                                      real c )
+{
+  dolfin_assert( !this->empty() );
+  dolfin_assert( !x.empty() );
+  dolfin_assert( !y.empty() );
+  dolfin_assert( this->space() == x.space() );
+  dolfin_assert( this->space() == y.space() );
+  this->vector().axpbypcz( a, x.vector(), b, y.vector(), c );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
 inline Function & Function::operator=( real value )
 {
   dolfin_assert( !this->empty() );

@@ -99,8 +99,21 @@ public:
   /// Add values to each entry
   void add(real* values) override;
 
-  /// Add multiple of given vector (AXPY operation)
-  void axpy(real a, const GenericVector& x) override;
+  /// Add multiple of given vector (y=a*x+y)
+  void axpy( real a, const GenericVector & x ) override;
+
+  /// Add multiple of given vector (y=a*x+b*y)
+  void axpby( real a, const GenericVector & x,
+              real b ) override;
+
+  /// Add multiple of given vector (w=a*x+y)
+  void waxpy( real a, const GenericVector & x,
+                      const GenericVector & y ) override;
+
+  /// Add multiple of given vector (z=a*x+b*y+c*z)
+  void axpbypcz( real a, const GenericVector & x,
+                 real b, const GenericVector & y,
+                 real c ) override;
 
   /// Return inner product with given vector
   real inner(const GenericVector& v) const override;
@@ -345,19 +358,73 @@ inline real PETScVector::inner(const GenericVector& y) const
   return a;
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::axpy(real a, const GenericVector& y)
+inline void PETScVector::axpy( real a, const GenericVector & x )
 {
-  dolfin_assert(x_);
+  dolfin_assert( x_ );
 
-  PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x_);
+  PETScVector const & v = x.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
 
-  if (size() != v.size())
+  if ( size() != v.size() )
   {
-    error("The vectors must be of the same size to apply AXPY.");
+    error( "The vectors must be of the same size to apply AXPY." );
   }
 
-  VecAXPY(x_, a, v.x_);
+  VecAXPY( x_, a, v.x_ );
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::axpby( real a, const GenericVector & x, real b )
+{
+  dolfin_assert( x_ );
+
+  PETScVector const & v = x.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
+
+  if ( size() != v.size() )
+  {
+    error( "The vectors must be of the same size to apply AXPBY." );
+  }
+
+  VecAXPBY( x_, a, b, v.x_ );
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::waxpy( real a, const GenericVector & x,
+                                        const GenericVector & y )
+{
+  dolfin_assert( x_ );
+
+  PETScVector const & v = x.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
+
+  PETScVector const & u = y.down_cast< PETScVector >();
+  dolfin_assert( u.x_ );
+
+  if ( size() != v.size() or size() != u.size() )
+  {
+    error( "The vectors must be of the same size to apply WAXPY." );
+  }
+
+  VecWAXPY( x_, a, v.x_, u.x_ );
+}
+//-----------------------------------------------------------------------------
+inline void PETScVector::axpbypcz( real a, const GenericVector & x,
+                                   real b, const GenericVector & y,
+                                   real c )
+{
+  dolfin_assert( x_ );
+
+  PETScVector const & v = x.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
+
+  PETScVector const & u = y.down_cast< PETScVector >();
+  dolfin_assert( u.x_ );
+
+  if ( size() != v.size() or size() != u.size() )
+  {
+    error( "The vectors must be of the same size to apply VecAXPBYPCZ." );
+  }
+
+  VecAXPBYPCZ( x_, a, b, c, v.x_, u.x_ );
 }
 //-----------------------------------------------------------------------------
 inline real PETScVector::min() const

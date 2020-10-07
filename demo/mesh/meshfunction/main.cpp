@@ -12,6 +12,8 @@ using namespace dolfin;
 
 int main()
 {
+  dolfin_init();
+
   // Read mesh from file
   Mesh mesh("mesh2D.bin");
 
@@ -21,4 +23,8 @@ int main()
 
   // Write mesh function to file
   File("meshfunction_out.pvd") << mv;
+
+  dolfin_finalize();
+
+  return 0;
 }

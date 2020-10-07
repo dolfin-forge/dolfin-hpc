@@ -8,43 +8,49 @@ using namespace dolfin;
 
 int main()
 {
-	for ( unsigned int j = 0; j < 2; ++j )
-	{
-		// Create mesh of unit square
-		UnitSquare mesh( 10, 10 );
+  dolfin_init();
 
-		File f_mesh( ( j == 0 ) ? "simple.pvd" : "rivara.pvd" );
+  for ( unsigned int j = 0; j < 2; ++j )
+  {
+    // Create mesh of unit square
+    UnitSquare mesh( 10, 10 );
 
-		f_mesh << mesh;
+    File f_mesh( ( j == 0 ) ? "simple.pvd" : "rivara.pvd" );
 
-		// Uniform refinement
-		mesh.refine();
-		f_mesh << mesh;
+    f_mesh << mesh;
 
-		// Refine mesh close to x = (0.5, 0.5)
-		Point p( 0.5, 0.5 );
-		for ( unsigned int i = 0; i < 5; ++i )
-		{
-			// Mark cells for refinement
-			MeshValues< bool, Cell > cell_markers( mesh );
-			cell_markers = false;
-			for ( CellIterator c( mesh ); !c.end(); ++c )
-			{
-				if ( c->midpoint().dist( p ) < 0.1 )
-					cell_markers( *c ) = true;
-			}
+    // Uniform refinement
+    mesh.refine();
+    f_mesh << mesh;
 
-			// Refine mesh
-			if ( j == 0 )
-				mesh.refine();
-			else
-				RivaraRefinement::refine( mesh, cell_markers );
+    // Refine mesh close to x = (0.5, 0.5)
+    Point p( 0.5, 0.5 );
+    for ( unsigned int i = 0; i < 5; ++i )
+    {
+      // Mark cells for refinement
+      MeshValues< bool, Cell > cell_markers( mesh );
+      cell_markers = false;
+      for ( CellIterator c( mesh ); !c.end(); ++c )
+      {
+        if ( c->midpoint().dist( p ) < 0.1 )
+          cell_markers( *c ) = true;
+      }
 
-			// // Smooth mesh
-			MeshSmoothing::smooth( mesh );
+      // Refine mesh
+      if ( j == 0 )
+        mesh.refine();
+      else
+        RivaraRefinement::refine( mesh, cell_markers );
 
-			f_mesh << mesh;
-		}
-	}
-	return 0;
+      // Smooth mesh
+      MeshSmoothing::smooth( mesh );
+
+      f_mesh << mesh;
+    }
+  }
+
+  dolfin_finalize();
+
+  return 0;
 }
+

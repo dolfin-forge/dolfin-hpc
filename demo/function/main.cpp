@@ -29,6 +29,8 @@ struct DirichletBoundary : public SubDomain
 //------------------------------------------------------------------------------
 int main()
 {
+  dolfin_init();
+
   // Create mesh and a point in the mesh
   UnitCube mesh(8, 8, 8);
   real x[3] = {0.3, 0.3, 0.3};
@@ -67,4 +69,8 @@ int main()
   // Evaluate discrete function g (projection of f)
   g.eval(g_values, x);
   message("g(x) = %g", g_values[0]);
+
+  dolfin_finalize();
+
+  return 0;
 }

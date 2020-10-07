@@ -14,6 +14,8 @@ using namespace dolfin;
 
 int main()
 {
+  dolfin_init();
+
   // Sub domain for no-slip (everything except inflow and outflow)
   class Noslip : public SubDomain
   {
@@ -64,4 +66,9 @@ int main()
 
   // Save sub domains to file
   File("subdomains.bin") << sub_domains;
+
+  dolfin_finalize();
+
+  return 0;
 }
+

@@ -103,8 +103,21 @@ public:
   /// Add values to each local entry (not ghost entries)
   void add( real * values ) override;
 
-  /// Add multiple of given vector (AXPY operation)
+  /// Add multiple of given vector (y=a*x+y)
   void axpy( real a, const GenericVector & x ) override;
+
+  /// Add multiple of given vector (y=a*x+b*y)
+  void axpby( real a, const GenericVector & x,
+              real b ) override;
+
+  /// Add multiple of given vector (w=a*x+y)
+  void waxpy( real a, const GenericVector & x,
+                      const GenericVector & y ) override;
+
+  /// Add multiple of given vector (z=a*x+b*y+c*z)
+  void axpbypcz( real a, const GenericVector & x,
+                 real b, const GenericVector & y,
+                 real c ) override;
 
   /// Return inner product with given vector
   real inner( const GenericVector & x ) const override;
@@ -268,6 +281,28 @@ inline void Vector::add( real * values )
 inline void Vector::axpy( real a, const GenericVector & x )
 {
   vector_->axpy( a, x );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::axpby( real a, const GenericVector & x,
+                           real b )
+{
+  vector_->axpby( a, x, b );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::waxpy( real a, const GenericVector & x,
+                                   const GenericVector & y )
+{
+  vector_->waxpy( a, x, y );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::axpbypcz( real a, const GenericVector & x,
+                              real b, const GenericVector & y,
+                              real c )
+{
+  vector_->axpbypcz( a, x, b, y, c );
 }
 
 //-----------------------------------------------------------------------------

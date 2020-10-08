@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <string>
+#include <cstring>
 
 #ifdef HAVE_LIBSIM
 #include <VisItControlInterface_V2.h>

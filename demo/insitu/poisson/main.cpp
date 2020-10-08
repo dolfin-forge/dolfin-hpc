@@ -131,7 +131,7 @@ int main(int argc, char **argv)
   // VisIt directory should point to the top installation dir.
   // dolfin_set("VisIt directory","/opt/visit/2.10.0");
 
-  const std::string visit_path = dolfin_get("VisIt directory");
+  const std::string visit_path = dolfin_get<std::string>("VisIt directory");
   if (visit_path == "")
     error("Parameter 'VisIt directory' not set properly");
 

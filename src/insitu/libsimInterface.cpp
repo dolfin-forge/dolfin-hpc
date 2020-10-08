@@ -92,7 +92,7 @@ int libsimInterface::initInteractive()
 int libsimInterface::setupEnv()
 {
   char *env = nullptr;
-  const std::string visit_path = dolfin_get("VisIt directory");
+  const std::string visit_path = dolfin_get<std::string>("VisIt directory");
   VisItSetDirectory((char *) visit_path.c_str());
 
 #ifdef HAVE_MPI

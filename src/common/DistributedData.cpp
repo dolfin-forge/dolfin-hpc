@@ -850,8 +850,8 @@ void DistributedData::remap_shared_adj()
     buffer.push_back(vi.global_index());
   }
 
-  uint recvmax = 0;
-  MPI::all_reduce<MPI::max,uint>(buffer.size(), recvmax, comm());
+  uint recvmax = buffer.size();
+  MPI::all_reduce_in_place<MPI::max>( recvmax, comm() );
   Array<uint> recvbuf(recvmax);
   for (uint j = 1; j < pe_size; ++j)
   {

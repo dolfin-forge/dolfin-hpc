@@ -199,8 +199,8 @@ public:
       }
     }
     ufc_shared.clear();
-    uint local_size = sendbuf.size();
-    MPI::all_reduce<MPI::max>( local_size, max_recv );
+    max_recv = sendbuf.size();
+    MPI::all_reduce_in_place<MPI::max>( max_recv );
     uint * recvbuf = new uint[max_recv];
     for (uint j = 1; j < pe_size; ++j)
     {

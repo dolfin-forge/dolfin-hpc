@@ -388,9 +388,8 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   {
 #ifdef HAVE_MPI
 
-    int u_maxrecvcount = 0;
-    int u_localcount = dofs_indicesX.size();
-    MPI::all_reduce<MPI::max>( u_localcount, u_maxrecvcount );
+    int u_maxrecvcount = dofs_indicesX.size();
+    MPI::all_reduce_in_place<MPI::max>( u_maxrecvcount );
     int r_maxrecvcount = u_maxrecvcount * gdim1;
 
     //

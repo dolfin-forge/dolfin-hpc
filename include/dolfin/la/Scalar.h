@@ -148,8 +148,7 @@ inline void Scalar::zero()
 //-----------------------------------------------------------------------------
 inline void Scalar::apply( FinalizeType )
 {
-  real tmp = value;
-  MPI::all_reduce< MPI::sum >( tmp, value );
+  MPI::all_reduce_in_place< MPI::sum >( value );
 }
 
 //-----------------------------------------------------------------------------

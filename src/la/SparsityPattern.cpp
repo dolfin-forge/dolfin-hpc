@@ -319,9 +319,8 @@ void SparsityPattern::apply()
     sendbuf[owner].push_back(it->second.size());
     append( sendbuf[owner], it->second.begin(), it->second.end() );
   }
-  sendmax = std::max(sendmax, (uint) sendbuf[owner].size());
-  uint recvmax = 0;
-  MPI::all_reduce<MPI::max>(sendmax, recvmax);
+  uint recvmax = std::max(sendmax, (uint) sendbuf[owner].size());
+  MPI::all_reduce_in_place<MPI::max>( recvmax );
   if (recvmax == 0)
   {
     return;

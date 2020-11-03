@@ -429,15 +429,13 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       }
 
       //
-      u_recvdata_size = u_sendbuff.size();
-      u_recvdata_maxi = 0;
-      MPI::all_reduce<MPI::max>( u_recvdata_size, u_recvdata_maxi );
+      u_recvdata_maxi = u_sendbuff.size();
+      MPI::all_reduce_in_place<MPI::max>( u_recvdata_maxi );
       delete[] u_recvbuff;
       u_recvbuff = nullptr;
       u_recvbuff = new uint[u_recvdata_maxi];
-      r_recvdata_size = r_sendbuff.size();
-      r_recvdata_maxi = 0;
-      MPI::all_reduce<MPI::max>( r_recvdata_size, r_recvdata_maxi );
+      r_recvdata_maxi = r_sendbuff.size();
+      MPI::all_reduce_in_place<MPI::max>( r_recvdata_maxi );
       delete[] r_recvbuff;
       r_recvbuff = nullptr;
       r_recvbuff = new real[r_recvdata_maxi];

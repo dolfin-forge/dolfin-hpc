@@ -131,9 +131,8 @@ public:
     // Decide ownership of "shared" dofs
     uint src;
     uint dst;
-    uint max_recv;
-    uint local_size = sendbuf.size();
-    MPI::all_reduce<MPI::max>(local_size, max_recv);
+    uint max_recv = sendbuf.size();
+    MPI::all_reduce_in_place<MPI::max>( max_recv );
     uint *recvbuf = new uint[max_recv];
     for (uint j = 1; j < pe_size; ++j)
     {
@@ -210,8 +209,8 @@ public:
       }
     }
     ufc_shared.clear();
-    local_size = sendbuf.size();
-    MPI::all_reduce<MPI::max>(local_size, max_recv);
+    max_recv = sendbuf.size();
+    MPI::all_reduce_in_place<MPI::max>( max_recv );
     recvbuf = new uint[max_recv];
     _set<uint> new_ghosts;
     for (uint j = 1; j < pe_size; ++j)

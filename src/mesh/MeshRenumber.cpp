@@ -79,12 +79,11 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     uint const num_entity_vertices = cev.max_degree();
     EntityKey key(num_entity_vertices);
     _map<EntityKey, uint> entity_map;
-    Array<uint> * sendbuf = new Array<uint> [pe_size];
+    Array< Array<uint> > sendbuf ( pe_size );
 
     // Collect entities with a common adjacent to shared vertices
     _set<uint> adjs;
-    bool * used_entities = new bool[topology.size(d)];
-    std::fill_n(used_entities, topology.size(d), false);
+    Array< bool > used_entities( topology.size(d), false);
     for (SharedIterator it(vdata); it.valid(); ++it)
     {
       dolfin_assert(it.index() < cve.order());
@@ -139,27 +138,20 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         }
       }
     }
-    delete [] used_entities;
 
     // Exchange data to mark which entities are shared
     _map<uint,uint> recvmap;
 
-    uint sendmax = sendbuf[0].size();
-    for (uint j = 1; j < pe_size; ++j)
-    {
-      sendmax = std::max(sendmax, (uint) sendbuf[j].size());
-    }
-    uint recvmax = 0;
-    MPI::all_reduce<MPI::max>(sendmax, recvmax);
+    uint recvmax = max_array_size( sendbuf );
+    MPI::all_reduce_in_place<MPI::max>( recvmax );
     //recvmap.reserve( recvmax );
-    uint * recvbuf = new uint[recvmax];
+    Array< uint > recvbuf( recvmax );
     for (uint j = 1; j < pe_size; ++j)
     {
       uint src = (rank - j + pe_size) % pe_size;
       uint dst = (rank + j) % pe_size;
 
-      int recvcount = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                     &recvbuf[0], recvmax, src, 1 );
+      int recvcount = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1 );
 
       for (int k = 0; k < recvcount; k+=(2 + num_entity_vertices))
       {
@@ -205,13 +197,12 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     }
 
     // Cleanup
-    delete[] recvbuf;
-    delete[] sendbuf;
     entity_map.clear();
 
     // Exchange ghost entities
-    sendbuf = new Array<uint>[pe_size];
-    Array<uint> * ghostid = new Array<uint>[pe_size];
+    sendbuf.clear();
+    sendbuf.resize( pe_size );
+    Array< Array<uint> > ghostid( pe_size );
     edata.set_range(cev.order() - edata.num_ghost());
     uint current_index = edata.offset();
     for(uint i = 0; i < cev.order(); ++i)
@@ -240,17 +231,16 @@ bool MeshRenumber::renumber(MeshTopology& topology)
             edata.num_shared(), edata.num_ghost());
     }
     recvmax = edata.num_shared() - edata.num_ghost();
-    recvbuf = (recvmax == 0 ? nullptr : new uint[recvmax]);
-    uint * sendbuf_back = (recvmax == 0 ? nullptr : new uint[recvmax]);
-    uint const num_ghosts = edata.num_ghost();
-    uint * recvbuf_back = (num_ghosts == 0 ? nullptr : new uint[num_ghosts]);
+    recvbuf.clear();
+    recvbuf.resize( recvmax );
+    Array< uint > sendbuf_back( recvmax );
+    Array< uint > recvbuf_back( edata.num_ghost() );
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;
       int dst = (rank + j) % pe_size;
 
-      int recvcount = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                     &recvbuf[0], recvmax, src, 1 );
+      int recvcount = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1 );
 
       for (int k = 0; k < recvcount; ++k)
       {
@@ -278,12 +268,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         edata.set_map(ghostid[dst][k], recvbuf_back[k]);
       }
     }
-
-    delete[] recvbuf_back;
-    delete[] sendbuf_back;
-    delete[] recvbuf;
-    delete[] ghostid;
-    delete[] sendbuf;
 
     //
     edata.finalize();

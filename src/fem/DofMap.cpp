@@ -469,11 +469,10 @@ bool DofMap::check(bool throw_error)
 #endif
   }
 
-  int recv_count = sendbuf.size();
-  int maxrev_count = 0;
-  MPI::all_reduce<MPI::max>( recv_count, maxrev_count );
+  int maxrev_count = sendbuf.size();
+  MPI::all_reduce_in_place<MPI::max>( maxrev_count );
   dolfin_assert(maxrev_count > 0);
-  uint * recvbuf = new uint[maxrev_count];
+  Array< uint > recvbuf( maxrev_count );
 
   _set<uint> owned_more;
   for (uint p = 1; p < pe_size; ++p)
@@ -482,8 +481,7 @@ bool DofMap::check(bool throw_error)
     int dest = (rank + p) % pe_size;
 
     //
-    recv_count = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dest,
-                                recvbuf, maxrev_count, src, 0);
+    int recv_count = MPI::sendrecv( sendbuf, dest, recvbuf, src, 0);
     for (uint i = 0; i < uint(recv_count);)
     {
       if (distributed_by_entities_)
@@ -524,7 +522,6 @@ bool DofMap::check(bool throw_error)
     }
   }
   ret &= owned_more.empty();
-  delete[] recvbuf;
 #else
   MAYBE_UNUSED(throw_error);
 #endif

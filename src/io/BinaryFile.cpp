@@ -634,10 +634,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Send non-local cells to their owner
     {
-      uint local_max = max_array_size( non_local_cells );
-
-      uint buff_size = 0;
-      MPI::all_reduce<MPI::max>(local_max, buff_size, comm);
+      uint buff_size = max_array_size( non_local_cells );
+      MPI::all_reduce_in_place<MPI::max>( buff_size, comm );
       Array< uint > recv_buffer( buff_size );
 
       // Exchange data
@@ -728,10 +726,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Exchange ghost vertices coordinates
     {
-      uint local_max = max_array_size( ghosts );
-
-      uint buff_size = 0;
-      MPI::all_reduce<MPI::max>(local_max, buff_size );
+      uint buff_size = max_array_size( ghosts );
+      MPI::all_reduce_in_place<MPI::max>( buff_size );
 
       Array< uint > recv_buffer( buff_size );
 

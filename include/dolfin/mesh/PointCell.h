@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_POINT_CELL_H
 #define __DOLFIN_POINT_CELL_H
 
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>

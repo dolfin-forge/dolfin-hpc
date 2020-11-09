@@ -262,7 +262,6 @@ void DirichletBC::computeBCGeometric( _map< uint, real > & boundary_values,
   }
 
   // Initialize facets, needed for geometric search
-  uint const gdim      = mesh().geometry_dimension();
   uint const facet_dim = mesh().type().facet_dim();
 
   // Iterate over facets
@@ -302,7 +301,7 @@ void DirichletBC::computeBCGeometric( _map< uint, real > & boundary_values,
         for ( uint i = 0; i < scratch.local_dimension; ++i )
         {
           // Copy coordinates to node Point
-          xdof.set( &scratch.coordinates[i][0], gdim );
+          xdof.set( scratch.coordinates[i] );
           // Check if the coordinates are on current facet and thus on
           // boundary
           if ( !facet_type->intersects( facet, xdof ) )

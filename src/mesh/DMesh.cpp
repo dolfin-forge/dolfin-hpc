@@ -3,6 +3,7 @@
 
 #include <dolfin/mesh/DMesh.h>
 
+#include <dolfin/common/constants.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellIterator.h>

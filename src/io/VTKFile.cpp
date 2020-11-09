@@ -647,7 +647,10 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
   std::string fname;
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
-  for (uint i = 0; i < MPI::size(); i++)
+  if ( fname.rfind( "/" ) != std::string::npos )
+    fname = fname.substr( fname.rfind( "/" ) + 1, std::string::npos );
+
+  for (uint i = 0; i < MPI::size(); ++i)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
   pvtuFile << "</PUnstructuredGrid>\n"
@@ -739,7 +742,10 @@ void VTKFile::pvtuFileWriteFunction(
 
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
-  for (uint i = 0; i < MPI::size(); i++)
+  if ( fname.rfind( "/" ) != std::string::npos )
+    fname = fname.substr( fname.rfind( "/" ) + 1, std::string::npos );
+
+  for (uint i = 0; i < MPI::size(); ++i)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
   pvtuFile << "</PUnstructuredGrid>\n"

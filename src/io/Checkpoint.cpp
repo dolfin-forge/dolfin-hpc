@@ -449,6 +449,14 @@ void Checkpoint::reset_counter()
 
 //-----------------------------------------------------------------------------
 
+void Checkpoint::increment_counter()
+{
+  ++n_;
+  message( 1, "Checkpoint: incremented checkpoint id to: %d", n_ );
+}
+
+//-----------------------------------------------------------------------------
+
 Checkpoint::CheckpointHeader const & Checkpoint::get_header() const
 {
   return chkp_header;

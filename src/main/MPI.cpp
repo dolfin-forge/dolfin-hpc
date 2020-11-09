@@ -454,7 +454,7 @@ void MPI::check_file_status( int const mpi_error )
   {
   case MPI_ERR_FILE:
    error( "Invalid file handle" );
-
+    break;
   case MPI_ERR_AMODE:
    error( "Error related to the amode passed to MPI_FILE_OPEN" );
     break;
@@ -473,22 +473,23 @@ void MPI::check_file_status( int const mpi_error )
     break;
   case MPI_ERR_BAD_FILE:
    error( "Invalid file name (e.g., path name too long)" );
-
+    break;
   case MPI_ERR_ACCESS:
    error( "Permission denied" );
-
+    break;
   case MPI_ERR_NO_SPACE:
    error( "Not enough space" );
-
+    break;
   case MPI_ERR_QUOTA:
    error( "Quota exceeded" );
-
+    break;
   case MPI_ERR_READ_ONLY:
    error( "Read-only file or file system" );
-
+    break;
   case MPI_ERR_FILE_IN_USE:
    error( "File operation could not be completed, as the file is currently \
            open by some process" );
+    break;
   case MPI_ERR_IO:
    error( "Other I/O error" );
    default:

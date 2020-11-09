@@ -1,16 +1,10 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-// This class is now reimplemented in terms of a template.
-// Additionally it specifies a MAX_SIZE public attribute to avoid the madness of
-// having half of the classes with 2 or 3 hard-coded as dimension.
-
 #ifndef __DOLFIN_POINT_H
 #define __DOLFIN_POINT_H
 
-#include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Space.h>
 
 #include <iostream>
@@ -18,357 +12,379 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+class point;
+
+using Point = class point< Space::MAX_DIMENSION >;
+
+//-----------------------------------------------------------------------------
+
 /// A point represents a point in R^d with coordinates x, y, z, or,
 /// alternatively, a vector in R^d, supporting standard operations
 /// like the norm, distances, scalar and vector products etc.
 
-template < uint D = Space::MAX_DIMENSION >
-class point
+template < uint dim >
+class point : public std::array< real, dim >
 {
 public:
-  static uint const MAX_SIZE = Space::MAX_DIMENSION;
+  static uint const MAX_SIZE = dim;
 
-  /// Create a point at (x, y, z)
-  point( const real x = 0.0, const real y = 0.0, const real z = 0.0 )
-  {
-    x_[0] = x;
-
-    if ( D > 1 )
-      x_[1] = y;
-
-    if ( D > 2 )
-      x_[2] = z;
-  }
-
-  /// Create a point at given coordinates
-  point( real const * x )
-  {
-    std::copy( x, x + D, x_ );
-  }
-
-  /// Create a point at given coordinates in R^d
-  point( uint d, real const * x )
-  {
-    std::fill( x_, x_ + D, 0.0 );
-    std::copy( x, x + d, x_ );
-  }
+public:
+  /// default constructor
+  inline point();
 
   /// Copy constructor
-  point( point const & p )
-  {
-    std::copy( p.x_, p.x_ + D, x_ );
-  }
+  inline point( point const & other );
 
-  /// Assignment operator
-  point & operator=( point const & p )
-  {
-    std::copy( p.x_, p.x_ + D, x_ );
-    return *this;
-  }
+  /// Create a point<1> (x)
+  explicit inline point( real const x );
+
+  /// Create a point<2> (x, y)
+  explicit inline point( real const x, real const y );
+
+  /// Create a point<3> (x, y, z)
+  explicit inline point( real const x, real const y, real const z );
+
+  /// Create a point from a given coordinate
+  explicit inline point( real const * x );
 
   /// Destructor
   ~point() = default;
 
-  /// Set coordinates for given Euclidean space dimension
-  void set( real const * x, uint dim );
+  /// Assignment operator
+  inline point & operator=( point const & p );
 
-  /// Return coordinate in direction i
-  real & operator[]( uint i );
+  /// arithmetic operators
+  inline point operator+( point const & p ) const;
+  inline point operator-( point const & p ) const;
+  inline point operator*( real a ) const;
+  inline point operator/( real a ) const;
 
-  /// Return coordinate in direction i
-  real const & operator[]( uint i ) const;
+  inline point & operator+=( point const & p );
+  inline point & operator-=( point const & p );
+  inline point & operator*=( real a );
+  inline point & operator/=( real a );
 
-  /// cast operator
-  operator real *();
-
-  /// cast operator
-  operator real const *() const;
-
-  /// Addition assignment
-  point & operator+=( point const & p );
-
-  /// Addition
-  point operator+( point const & p ) const;
-
-  /// Subtraction assignment
-  point & operator-=( point const & p );
-
-  /// Subtraction
-  point operator-( point const & p ) const;
-
-  /// Scalar multiplication assignment
-  point & operator*=( real a );
-
-  /// Scalar multiplication
-  point operator*( real a ) const;
-
-  /// Scalar division assignment
-  point & operator/=( real a );
-
-  /// Scalar division
-  point operator/( real a ) const;
+  inline point & set( real * x );
 
   /// Compute distance to given point
-  real dist( point const & p ) const;
+  inline real dist( point const & p ) const;
 
   /// Compute distance to given coordinates
-  real dist( real const * x ) const;
+  inline real dist( real const * x ) const;
 
   /// Compute norm of point representing a vector from the origin
   inline real norm() const;
 
-  /// Return strong relative comparison
-  bool operator%( real a );
-
   /// Compute cross product embedded in R^3 with given vector
-  inline point< 3 > cross( point const & p ) const;
+  inline point cross( point const & p ) const;
+
+  /// Compute cross product embedded in R^3 with given coordinate vector
+  inline point cross( real const * x ) const;
 
   /// Compute dot product with given vector
   inline real dot( point const & p ) const;
+
+  /// Compute dot product with given coordinates
+  inline real dot( real const * x ) const;
 
   /// Display info
   void disp() const;
 
 private:
-  real x_[D];
+  using array_type   = typename std::array< real, dim >;
+  real * const data_ = this->data();
 };
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline void point< D >::set( real const * x, uint dim )
+
+template < uint dim >
+inline point< dim >::point()
 {
-  dolfin_assert( dim <= D );
-  std::copy( x, x + dim, x_ );
+  this->fill( 0.0 );
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real & point< D >::operator[]( uint i )
+
+template < uint dim >
+inline point< dim >::point( point const & other )
+  : array_type( other )
 {
-  dolfin_assert( i < D );
-  return x_[i];
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real const & point< D >::operator[]( uint i ) const
+
+template <>
+inline point< 1 >::point( real const x )
 {
-  dolfin_assert( i < D );
-  return x_[i];
+  data_[0] = x;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D >::operator real *()
+
+template <>
+inline point< 2 >::point( real const x, real const y )
 {
-  return &x_[0];
+  data_[0] = x;
+  data_[1] = y;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D >::operator real const *() const
+
+template <>
+inline point< 3 >::point( real const x, real const y, real const z )
 {
-  return &x_[0];
+  data_[0] = x;
+  data_[1] = y;
+  data_[2] = z;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > & point< D >::operator+=( point< D > const & p )
+
+template <>
+inline point< 1 >::point( real const * x )
 {
-  for ( size_t i = 0; i < D; ++i )
-  {
-    x_[i] += p.x_[i];
-  }
+  data_[0] = x[0];
+}
+
+//-----------------------------------------------------------------------------
+
+template <>
+inline point< 2 >::point( real const * x )
+{
+  data_[0] = x[0];
+  data_[1] = x[1];
+}
+
+//-----------------------------------------------------------------------------
+
+template <>
+inline point< 3 >::point( real const * x )
+{
+  data_[0] = x[0];
+  data_[1] = x[1];
+  data_[2] = x[2];
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline point< dim > & point< dim >::operator=( point< dim > const & p )
+{
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] = p[i];
+
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > point< D >::operator+( point< D > const & p ) const
+
+template < uint dim >
+inline point< dim > point< dim >::operator+( point< dim > const & p ) const
 {
-  return ( point( *this ) += p );
+  point tmp( *this );
+  tmp += p;
+  return tmp;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > & point< D >::operator-=( point< D > const & p )
+
+template < uint dim >
+inline point< dim > point< dim >::operator-( point< dim > const & p ) const
 {
-  for ( size_t i = 0; i < D; ++i )
-  {
-    x_[i] -= p.x_[i];
-  }
+  point tmp( *this );
+  tmp -= p;
+  return tmp;
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline point< dim > point< dim >::operator*( real a ) const
+{
+  point tmp( *this );
+  tmp *= a;
+  return tmp;
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline point< dim > point< dim >::operator/( real a ) const
+{
+  point tmp( *this );
+  tmp /= a;
+  return tmp;
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline point< dim > & point< dim >::operator+=( point< dim > const & p )
+{
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] += p.data_[i];
+
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > point< D >::operator-( point< D > const & p ) const
-{
-  return ( point( *this ) -= p );
-}
 
-//-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > & point< D >::operator*=( real a )
+template < uint dim >
+inline point< dim > & point< dim >::operator-=( point< dim > const & p )
 {
-  for ( size_t i = 0; i < D; ++i )
-  {
-    x_[i] *= a;
-  }
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] -= p.data_[i];
+
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > point< D >::operator*( real a ) const
-{
-  return ( point< D >( *this ) *= a );
-}
 
-//-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > & point< D >::operator/=( real a )
+template < uint dim >
+inline point< dim > & point< dim >::operator*=( real a )
 {
-  for ( size_t i = 0; i < D; ++i )
-  {
-    x_[i] /= a;
-  }
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] *= a;
+
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > point< D >::operator/( real a ) const
+
+template < uint dim >
+inline point< dim > & point< dim >::operator/=( real a )
 {
-  return ( point< D >( *this ) /= a );
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] /= a;
+
+  return *this;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real point< D >::dist( point< D > const & p ) const
+
+template < uint dim >
+inline point< dim > & point< dim >::set( real * x )
+{
+  for ( uint i = 0; i < dim; ++i )
+    data_[i] = x[i];
+
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline real point< dim >::dist( point< dim > const & p ) const
 {
   real d = 0.;
-  for ( uint i = 0; i < D; ++i )
-  {
-    d += ( p.x_[i] - x_[i] ) * ( p.x_[i] - x_[i] );
-  }
+
+  for ( uint i = 0; i < dim; ++i )
+    d += ( p.data_[i] - data_[i] ) * ( p.data_[i] - data_[i] );
+
   return std::sqrt( d );
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real point< D >::dist( real const * x ) const
+
+template < uint dim >
+inline real point< dim >::dist( real const * x ) const
 {
   real d = 0.;
-  for ( uint i = 0; i < D; ++i )
-  {
-    d += ( x[i] - x_[i] ) * ( x[i] - x_[i] );
-  }
+
+  for ( uint i = 0; i < dim; ++i )
+    d += ( x[i] - data_[i] ) * ( x[i] - data_[i] );
+
   return std::sqrt( d );
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real point< D >::norm() const
+
+template < uint dim >
+inline real point< dim >::norm() const
 {
   real d = 0.;
-  for ( uint i = 0; i < D; ++i )
-  {
-    d += x_[i] * x_[i];
-  }
+
+  for ( uint i = 0; i < dim; ++i )
+    d += data_[i] * data_[i];
+
   return std::sqrt( d );
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline bool point< D >::operator%( real a )
+
+template <>
+inline point< 3 > point< 3 >::cross( point const & p ) const
 {
-  return srelcmp( norm(), a, DOLFIN_EPS );
+  return point< 3 >( data_[1] * p.data_[2] - data_[2] * p.data_[1],
+                     data_[2] * p.data_[0] - data_[0] * p.data_[2],
+                     data_[0] * p.data_[1] - data_[1] * p.data_[0] );
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline real point< D >::dot( point< D > const & p ) const
+
+template <>
+inline point< 3 > point< 3 >::cross( real const * x ) const
+{
+  return point< 3 >( data_[1] * x[2] - data_[2] * x[1],
+                     data_[2] * x[0] - data_[0] * x[2],
+                     data_[0] * x[1] - data_[1] * x[0] );
+}
+
+//-----------------------------------------------------------------------------
+
+template < uint dim >
+inline real point< dim >::dot( point< dim > const & p ) const
 {
   real d = 0.;
-  for ( uint i = 0; i < D; ++i )
-  {
-    d += x_[i] * p.x_[i];
-  }
+
+  for ( uint i = 0; i < dim; ++i )
+    d += data_[i] * p.data_[i];
+
   return d;
 }
 
 //-----------------------------------------------------------------------------
+
+template < uint dim >
+inline real point< dim >::dot( real const * x ) const
+{
+  real d = 0.;
+
+  for ( uint i = 0; i < dim; ++i )
+    d += data_[i] * x[i];
+
+  return d;
+}
+
+//-----------------------------------------------------------------------------
+
 template < uint D >
 inline void point< D >::disp() const
 {
   section( "point" );
-  message(
-    "( %+e, %+e, %+e )", x_[0], ( D > 1 ? x_[1] : 0 ), ( D > 2 ? x_[2] : 0 ) );
+  message( "( %+e, %+e, %+e )",
+           data_[0], ( D > 1 ? data_[1] : 0. ), ( D > 2 ? data_[2] : 0. ) );
   end();
 }
 
 //-----------------------------------------------------------------------------
-template <>
-inline point< 3 > point< 1 >::cross( point const & ) const
-{
-  return point< 3 >();
-}
 
-//-----------------------------------------------------------------------------
-template <>
-inline point< 3 > point< 2 >::cross( point const & p ) const
-{
-  return point< 3 >( 0., 0., x_[0] * p.x_[1] - x_[1] * p.x_[0] );
-}
-
-//-----------------------------------------------------------------------------
-template <>
-inline point< 3 > point< 3 >::cross( point const & p ) const
-{
-  return point< 3 >( x_[1] * p.x_[2] - x_[2] * p.x_[1],
-                     x_[2] * p.x_[0] - x_[0] * p.x_[2],
-                     x_[0] * p.x_[1] - x_[1] * p.x_[0] );
-}
-
-//-----------------------------------------------------------------------------
-/// Determinant R^2
-inline real operator^( point< 2 > const & p, point< 2 > const & q )
-{
-  return p[0] * q[1] - p[1] * q[0];
-}
-
-//-----------------------------------------------------------------------------
-/// Determinant R^3
-inline point< 3 > operator^( point< 3 > const & p, point< 3 > const & q )
-{
-  return p.cross( q );
-}
-
-//-----------------------------------------------------------------------------
-template < uint D >
-inline point< D > operator*( real a, point< D > const & p )
+template < uint dim >
+inline point< dim > operator*( real a, point< dim > const & p )
 {
   return p * a;
 }
 
 //-----------------------------------------------------------------------------
-template < uint D >
-inline LogStream & operator<<( LogStream & ss, point< D > const & p )
-{
-  ss << "[ point x = ( " << p[0];
-  for ( uint i = 1; i < D; ++i )
-    ss << ", " << p[i];
-  ss << " ) ]";
-  return ss;
-}
 
-//-----------------------------------------------------------------------------
-template < uint D >
-inline std::ostream & operator<<( std::ostream & ss, point< D > const & p )
+template < uint dim >
+inline LogStream & operator<<( LogStream & ss, point< dim > const & p )
 {
   ss << "[ point x = ( " << p[0];
-  for ( uint i = 1; i < D; ++i )
+  for ( uint i = 1; i < dim; ++i )
     ss << ", " << p[i];
   ss << " ) ]";
   return ss;
@@ -376,7 +392,15 @@ inline std::ostream & operator<<( std::ostream & ss, point< D > const & p )
 
 //-----------------------------------------------------------------------------
 
-using Point = class point<>;
+template < uint dim >
+inline std::ostream & operator<<( std::ostream & ss, point< dim > const & p )
+{
+  ss << "[ point x = ( " << p[0];
+  for ( uint i = 1; i < dim; ++i )
+    ss << ", " << p[i];
+  ss << " ) ]";
+  return ss;
+}
 
 //-----------------------------------------------------------------------------
 

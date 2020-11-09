@@ -5,6 +5,7 @@
 #define __DOLFIN_GTS_INTERFACE_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/mesh/Point.h>
 
 // Forward declarations

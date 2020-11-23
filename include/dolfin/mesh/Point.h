@@ -7,6 +7,7 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Space.h>
 
+#include <array>
 #include <iostream>
 
 namespace dolfin

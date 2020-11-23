@@ -123,8 +123,8 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-# Ensure strict C++11 compliance
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+# Ensure strict C++14 compliance
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP

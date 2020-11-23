@@ -3,8 +3,8 @@
 
 #include <dolfin/io/STLFile.h>
 
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/byteswap.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/MeshEditor.h>
 
 #include <fstream>
@@ -16,97 +16,117 @@ namespace dolfin
 struct stl_vertex
 {
   double v[3];
-  uint index;
+  uint   index;
 
-  bool operator <(const stl_vertex& other) const
+  bool operator<( const stl_vertex & other ) const
   {
-    return ((v[0] < other.v[0])
-        || (v[0] == other.v[0]
-            && (v[1] < other.v[1] || (v[1] == other.v[1] && v[2] < other.v[2]))));
+    return ( ( v[0] < other.v[0] )
+             or ( v[0] == other.v[0]
+                  and ( v[1] < other.v[1]
+                        or ( v[1] == other.v[1] and v[2] < other.v[2] ) ) ) );
   }
 
-  bool operator ==(const stl_vertex& other) const
+  bool operator==( const stl_vertex & other ) const
   {
-    return (v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2]);
+    return ( v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2] );
   }
 };
 
 //-----------------------------------------------------------------------------
-STLFile::STLFile(const std::string filename) :
-    GenericFile("STL", filename)
+STLFile::STLFile( const std::string filename )
+  : GenericFile( "STL", filename )
+  , min( Point( -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX ) )
+  , max( Point( +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX ) )
 {
 }
 //-----------------------------------------------------------------------------
-void STLFile::operator>>(Mesh& mesh)
+void STLFile::set_min( Point const & min_ )
 {
-  char hdr[80];
+  min = min_;
+}
+//-----------------------------------------------------------------------------
+void STLFile::set_max( Point const & max_ )
+{
+  max = max_;
+}
+//-----------------------------------------------------------------------------
+void STLFile::operator>>( Mesh & mesh )
+{
+  char  hdr[80];
   float data[3];
-  uint ntri = 0;
-  uint index[3];
-  struct stl_vertex V;
-  _ordered_set<stl_vertex> vertices;
+  uint  ntri = 0;
+  uint  index[3];
 
-  std::ifstream fp(filename.c_str(), std::ifstream::binary);
-  fp.read((char *) &hdr, 80 * sizeof(char));
-  fp.read((char *) &ntri, sizeof(uint));
+  struct stl_vertex          V;
+  _ordered_set< stl_vertex > vertices;
+
+  std::ifstream fp( filename.c_str(), std::ifstream::binary );
+  fp.read( ( char * ) &hdr, 80 * sizeof( char ) );
+  fp.read( ( char * ) &ntri, sizeof( uint ) );
 
 #ifdef HAVE_BIG_ENDIAN
-  ntri = bswap(ntri);
+  ntri = bswap( ntri );
 #endif
 
-  MeshEditor editor(mesh, CellType::triangle, 3, dolfin::MPI::DOLFIN_COMM_SELF);
-  editor.init_cells(ntri);
+  MeshEditor editor(
+    mesh, CellType::triangle, 3, dolfin::MPI::DOLFIN_COMM_SELF );
+  editor.init_cells( ntri );
 
   uint v_index = 0;
   uint c_index = 0;
-  for (uint i = 0; i < ntri; i++)
+  for ( uint i = 0; i < ntri; i++ )
   {
     /* Normal */
-    fp.read((char *) &data, 3 * sizeof(float));
+    fp.read( ( char * ) &data, 3 * sizeof( float ) );
 
-    for (uint j = 0; j < 3; j++)
+    for ( uint j = 0; j < 3; j++ )
     {
       /* Vertex v1 v2 v3 */
-      fp.read((char *) &data, 3 * sizeof(float));
+      fp.read( ( char * ) &data, 3 * sizeof( float ) );
 
 #ifdef HAVE_BIG_ENDIAN
-      V.v[0] = (double) bswap(data[0]);
-      V.v[1] = (double) bswap(data[1]);
-      V.v[2] = (double) bswap(data[2]);
+      V.v[0] = static_cast< double >( bswap( data[0] ) );
+      V.v[1] = static_cast< double >( bswap( data[1] ) );
+      V.v[2] = static_cast< double >( bswap( data[2] ) );
 #else
-      V.v[0] = (double) data[0];
-      V.v[1] = (double) data[1];
-      V.v[2] = (double) data[2];
+      V.v[0] = static_cast< double >( data[0] );
+      V.v[1] = static_cast< double >( data[1] );
+      V.v[2] = static_cast< double >( data[2] );
 #endif
 
-      if (vertices.find(V) != vertices.end())
+      if (    ( V.v[0] >= min[0] and V.v[0] <= max[0] )
+           or ( V.v[1] >= min[1] and V.v[1] <= max[1] )
+           or ( V.v[2] >= min[2] and V.v[2] <= max[2] ) )
       {
-        index[j] = vertices.find(V)->index;
-      }
-      else
-      {
-        V.index = v_index++;
-        index[j] = V.index;
-        vertices.insert(V);
+        if ( vertices.find( V ) != vertices.end() )
+        {
+          index[j] = vertices.find( V )->index;
+        }
+        else
+        {
+          V.index  = v_index++;
+          index[j] = V.index;
+          vertices.insert( V );
+        }
       }
     }
 
-    editor.add_cell(c_index++, &index[0]);
+    editor.add_cell( c_index++, &index[0] );
 
     /* Aux data */
-    fp.read((char *) &hdr, 2 * sizeof(char));
+    fp.read( ( char * ) &hdr, 2 * sizeof( char ) );
   }
 
-  editor.init_vertices(vertices.size());
-  for (_ordered_set<stl_vertex>::iterator it = vertices.begin();
-       it != vertices.end(); ++it)
+  editor.init_vertices( vertices.size() );
+  for ( _ordered_set< stl_vertex >::iterator it = vertices.begin();
+        it != vertices.end();
+        ++it )
   {
-    editor.add_vertex(it->index, &it->v[0]);
+    editor.add_vertex( it->index, &it->v[0] );
   }
 
   fp.close();
   editor.close();
-
 }
 //-----------------------------------------------------------------------------
 

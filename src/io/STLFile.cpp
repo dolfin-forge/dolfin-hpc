@@ -6,6 +6,7 @@
 #include <dolfin/common/byteswap.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/main/PE.h>
 
 #include <fstream>
 
@@ -57,8 +58,9 @@ void STLFile::operator>>( Mesh & mesh )
   uint  ntri = 0;
   uint  index[3];
 
-  struct stl_vertex          V;
-  _ordered_set< stl_vertex > vertices;
+  struct stl_vertex              V[3];
+  _ordered_set< stl_vertex >     vertices;
+  Array< std::array< uint, 3 > > cells;
 
   std::ifstream fp( filename.c_str(), std::ifstream::binary );
   fp.read( ( char * ) &hdr, 80 * sizeof( char ) );
@@ -68,10 +70,6 @@ void STLFile::operator>>( Mesh & mesh )
   ntri = bswap( ntri );
 #endif
 
-  MeshEditor editor(
-    mesh, CellType::triangle, 3, dolfin::MPI::DOLFIN_COMM_SELF );
-  editor.init_cells( ntri );
-
   uint v_index = 0;
   uint c_index = 0;
   for ( uint i = 0; i < ntri; i++ )
@@ -79,42 +77,69 @@ void STLFile::operator>>( Mesh & mesh )
     /* Normal */
     fp.read( ( char * ) &data, 3 * sizeof( float ) );
 
+    // load data from file
     for ( uint j = 0; j < 3; j++ )
     {
       /* Vertex v1 v2 v3 */
       fp.read( ( char * ) &data, 3 * sizeof( float ) );
 
 #ifdef HAVE_BIG_ENDIAN
-      V.v[0] = static_cast< double >( bswap( data[0] ) );
-      V.v[1] = static_cast< double >( bswap( data[1] ) );
-      V.v[2] = static_cast< double >( bswap( data[2] ) );
+      V[j].v[0] = static_cast< double >( bswap( data[0] ) );
+      V[j].v[1] = static_cast< double >( bswap( data[1] ) );
+      V[j].v[2] = static_cast< double >( bswap( data[2] ) );
 #else
-      V.v[0] = static_cast< double >( data[0] );
-      V.v[1] = static_cast< double >( data[1] );
-      V.v[2] = static_cast< double >( data[2] );
+      V[j].v[0] = static_cast< double >( data[0] );
+      V[j].v[1] = static_cast< double >( data[1] );
+      V[j].v[2] = static_cast< double >( data[2] );
 #endif
+    }
 
-      if (    ( V.v[0] >= min[0] and V.v[0] <= max[0] )
-           or ( V.v[1] >= min[1] and V.v[1] <= max[1] )
-           or ( V.v[2] >= min[2] and V.v[2] <= max[2] ) )
+    // check if at least one of the three vertices are inside the bounding box
+    bool inside = false;
+
+    for ( uint j = 0; j < 3; j++ )
+    {
+      if (    ( V[j].v[0] >= min[0] and V[j].v[0] <= max[0] )
+           or ( V[j].v[1] >= min[1] and V[j].v[1] <= max[1] )
+           or ( V[j].v[2] >= min[2] and V[j].v[2] <= max[2] ) )
       {
-        if ( vertices.find( V ) != vertices.end() )
+        inside = true;
+      }
+    }
+
+    // add vertices and cells to the list
+    if ( inside )
+    {
+      cells.resize( cells.size() + 1 );
+
+      for ( uint j = 0; j < 3; j++ )
+      {
+        if ( vertices.find( V[j] ) != vertices.end() )
         {
-          index[j] = vertices.find( V )->index;
+          cells.back()[j] = vertices.find( V[j] )->index;
         }
         else
         {
-          V.index  = v_index++;
-          index[j] = V.index;
-          vertices.insert( V );
+          V[j].index  = v_index++;
+          cells.back()[j] = V[j].index;
+          vertices.insert( V[j] );
         }
       }
     }
 
-    editor.add_cell( c_index++, &index[0] );
-
     /* Aux data */
     fp.read( ( char * ) &hdr, 2 * sizeof( char ) );
+  }
+
+  MeshEditor editor(
+    mesh, CellType::triangle, 3, dolfin::MPI::DOLFIN_COMM_SELF );
+  editor.init_cells( cells.size() );
+
+  std::cout << "[" << PE::rank()  << "] STL: " << cells.size() << " < " << ntri << std::endl;
+
+  for ( uint i = 0; i < cells.size(); ++i )
+  {
+    editor.add_cell( c_index++, &cells[i][0] );
   }
 
   editor.init_vertices( vertices.size() );

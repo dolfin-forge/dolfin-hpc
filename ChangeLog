@@ -1,4 +1,9 @@
 0.9.3-hpc [202X-XX-XX]
+ - C++14 is now required to build DOLFIN HPC
+ - STL file reader can now only load data in a certain bounding box to reduce
+   memory usage by the GTS intersection detector
+ - VTU files no longer contain folder paths
+ - Point constructor no longer implicitly converts a real to a Point(real,0,0)
  - DirichletBC can handle multiple Coefficient/Subdomain pairs in one sweep
  - Added more BLAS functions to Function and Vector (axpby, waxpy, axpbypcz)
  - added MPI::all_reduce_in_place

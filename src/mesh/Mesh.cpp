@@ -156,8 +156,8 @@ bool Mesh::operator ==(Mesh const& other) const
 
 void Mesh::extent_update()
 {
-  Point min_( DOLFIN_REAL_MAX, DOLFIN_REAL_MAX, DOLFIN_REAL_MAX );
-  Point max_( DOLFIN_REAL_MIN, DOLFIN_REAL_MIN, DOLFIN_REAL_MIN );
+  Point min_( +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX );
+  Point max_( -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX );
 
   for ( VertexIterator v( *this ); not v.end(); ++v )
   {

@@ -100,8 +100,21 @@ public:
   /// Add values to each entry
   virtual void add( real * values ) = 0;
 
-  /// Add multiple of given vector (AXPY operation)
+  /// Add multiple of given vector (y=a*x+y)
   virtual void axpy( real a, const GenericVector & x ) = 0;
+
+  /// Add multiple of given vector (y=a*x+b*y)
+  virtual void axpby( real a, const GenericVector & x,
+                      real b ) = 0;
+
+  /// Add multiple of given vector (w=a*x+y)
+  virtual void waxpy( real a, const GenericVector & x,
+                              const GenericVector & y ) = 0;
+
+  /// Add multiple of given vector (z=a*x+b*y+c*z)
+  virtual void axpbypcz( real a, const GenericVector & x,
+                         real b, const GenericVector & y,
+                         real c ) = 0;
 
   /// Return inner product with given vector
   virtual real inner( const GenericVector & x ) const = 0;

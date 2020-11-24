@@ -154,7 +154,7 @@ void QuadrilateralCell::order_facet(uint vertices[], Facet& facet) const
   Point p0 = mesh.geometry().point(facet.entities(0)[0]);
   Point p1 = mesh.geometry().point(facet.entities(0)[1]);
   Point v = p1 - p0;
-  Point n(v[1], -v[0]);
+  Point n(v[1], -v[0], 0.0);
   if (n.dot(p0 - p) < 0.0)
   {
     std::swap(vertices[0], vertices[1]);

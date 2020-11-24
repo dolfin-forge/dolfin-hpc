@@ -447,10 +447,8 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
     }
 
     // Exchange ghost vertices
-    uint shared_count = 0;
-    MPI::all_reduce< MPI::max >( static_cast< uint >( shared_buffer.size() ),
-                                 shared_count,
-                                 comm );
+    uint shared_count = shared_buffer.size();
+    MPI::all_reduce_in_place< MPI::max >( shared_count, comm );
     Array< uint > shared( shared_count );
     Array< real > recv_buff( shared_buffer.size() * gdim );
     Array< uint > recv_buff_map( shared_buffer.size() );

@@ -16,6 +16,8 @@ using namespace dolfin;
 
 int main()
 {
+  dolfin_init();
+
   // Load reference mesh (just a simple tetrahedron)
   Mesh mesh("tetrahedron.bin");
 
@@ -49,6 +51,8 @@ int main()
 
   std::cout << "Reference mass matrix:\n";
   M0.disp();
+
+  dolfin_finalize();
 
   return 0;
 }

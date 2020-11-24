@@ -1,6 +1,6 @@
 
 AC_PREREQ(2.59)
-AC_INIT([dolfin],[0.9.2-hpc])
+AC_INIT([dolfin],[0.9.3-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -123,8 +123,8 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-# Ensure strict C++11 compliance
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
+# Ensure strict C++14 compliance
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP

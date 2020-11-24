@@ -92,6 +92,8 @@ class Right : public SubDomain
 
 int main()
 {
+  dolfin_init();
+
   // Read mesh
   Mesh mesh( "../../../data/meshes/gear.bin" );
 
@@ -138,6 +140,8 @@ int main()
   // Save solution to VTK format
   File vtk_file( "elasticity.pvd" );
   vtk_file << u;
+
+  dolfin_finalize();
 
   return 0;
 }

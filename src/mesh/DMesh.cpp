@@ -3,6 +3,7 @@
 
 #include <dolfin/mesh/DMesh.h>
 
+#include <dolfin/common/constants.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellIterator.h>
@@ -71,7 +72,7 @@ struct DVertex
       glb_id(DOLFIN_LONG_MAX),
       cells(),
       p(),
-      
+
       owner(UNDEF)
   {
   }
@@ -676,9 +677,8 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   std::sort(propagated.begin(), propagated.end(), less_pair_comp);
 
-  short prop, gprop;
-  prop = (empty == false);
-  MPI::all_reduce<MPI::sum>( prop, gprop, comm );
+  short gprop = (empty == false);
+  MPI::all_reduce_in_place<MPI::sum>( gprop, comm );
   empty = (gprop == 0);
 
   delete[] send_buff;
@@ -693,9 +693,8 @@ void DMesh::propagate_hypercube(Mesh& mesh,
   uint pe_size = mesh.topology().comm_size();
 
   // Allocate receive buffer
-  int num_prop = propagate.size() * 5;
-  int total_prop = 0;
-  MPI::all_reduce<MPI::sum>( num_prop, total_prop, comm );
+  int total_prop = propagate.size() * 5;
+  MPI::all_reduce_in_place<MPI::sum>( total_prop, comm );
 
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];

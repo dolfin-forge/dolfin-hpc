@@ -12,13 +12,27 @@ using namespace dolfin;
 template<uint D>
 void test_point()
 {
-  point<D> P;
-  for(uint i = 0; i < D; ++i) { P[i] = 1 << D; }
+  point< D > P;
+  for ( uint i = 0; i < D; ++i )
+  {
+    P[i] = 1 << D;
+  }
+
   P *= 2.0;
-  P += 6.0;
-  P -= 4.0;
+
+  point< D > tmp1;
+  tmp1.fill( 6.0 );
+  P += tmp1;
+
+  point< D > tmp2;
+  tmp2.fill( 4.0 );
+  P -= tmp2;
+
   P /= 2.0;
-  P = 1.0;
+
+  point< D > tmp3;
+  tmp3.fill( 1.0 );
+  P = tmp3;
 }
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_Point )

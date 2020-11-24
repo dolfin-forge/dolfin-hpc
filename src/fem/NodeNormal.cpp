@@ -486,9 +486,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   {
 #if HAVE_MPI
     uint const u_size = 2;
-    int u_maxsendcount = max_array_size( u_sendbuf );
-    int u_maxrecvcount = 0;
-    MPI::all_reduce<MPI::max>( u_maxsendcount, u_maxrecvcount );
+    int u_maxrecvcount = max_array_size( u_sendbuf );
+    MPI::all_reduce_in_place<MPI::max>( u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
 
     // For each process

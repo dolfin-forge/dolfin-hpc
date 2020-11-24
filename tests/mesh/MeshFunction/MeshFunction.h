@@ -59,7 +59,7 @@ void check_conversion_vertices_x0()
   QuadrilateralCell cellt;
   Mesh              cellm( cellt, EuclideanSpace( cellt.dim() ) );
   cellt.create_reference_cell(cellm);
-  cellm.geometry() -= Point(0.25, 0.25);
+  cellm.geometry() -= Point(0.25, 0.25, 0.0);
   cellm.geometry() *= 2.0;
   MeshValues<T, Vertex> M(cellm);
   for (Vertex::iterator v(M.mesh()); !v.end(); ++v)

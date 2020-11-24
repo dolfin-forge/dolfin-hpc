@@ -4,9 +4,9 @@
 #ifndef __DOLFIN_MESH_GEOMETRY_H
 #define __DOLFIN_MESH_GEOMETRY_H
 
-#include <dolfin/common/Tokenized.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/common/Clonable.h>
-
+#include <dolfin/common/Tokenized.h>
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Point.h>
 
@@ -226,7 +226,7 @@ inline real MeshGeometry::abs_tolerance( uint dim ) const
 //-----------------------------------------------------------------------------
 inline Point MeshGeometry::point( uint n ) const
 {
-  return Point( dim_, coordinates_.data() + n * dim_ );
+  return Point( coordinates_.data() + n * dim_ );
 }
 
 //-----------------------------------------------------------------------------

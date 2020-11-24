@@ -122,7 +122,8 @@ MeshEditor::~MeshEditor()
 {
   if(open_)
   {
-    error("MeshEditor : editor has not been closed before destruction");
+    warning("MeshEditor : editor has not been closed before destruction");
+    close();
   }
 }
 //-----------------------------------------------------------------------------

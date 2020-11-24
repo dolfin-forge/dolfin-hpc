@@ -126,6 +126,9 @@ public:
   void reset_counter();
 
   ///
+  void increment_counter();
+
+  ///
   CheckpointHeader        const & get_header() const;
   Array< MeshHeader >     const & get_mesh_header() const;
   Array< FunctionHeader > const & get_function_header() const;

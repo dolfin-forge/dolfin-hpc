@@ -1,4 +1,4 @@
-0.9.3-hpc [202X-XX-XX]
+0.9.3-hpc [2020-11-24]
  - C++14 is now required to build DOLFIN HPC
  - STL file reader can now only load data in a certain bounding box to reduce
    memory usage by the GTS intersection detector

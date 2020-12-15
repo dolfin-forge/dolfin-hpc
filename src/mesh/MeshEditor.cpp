@@ -4,6 +4,7 @@
 #include <dolfin/mesh/MeshEditor.h>
 
 #include <dolfin/log/log.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Space.h>
@@ -14,7 +15,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -28,7 +29,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -42,7 +43,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -57,7 +58,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
                        Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -71,7 +72,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -88,7 +89,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -105,7 +106,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& co
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh) :
     mesh_(mesh),
-    cell_vertices_(NULL),
+    cell_vertices_(nullptr),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -114,7 +115,6 @@ MeshEditor::MeshEditor(Mesh& mesh) :
     cell_index_(0),
     open_(false)
 {
-  if (mesh.empty()) { error("MeshEditor : provided mesh is empty"); }
   init(mesh, mesh.type(), mesh.space(), mesh.topology().comm());
 }
 //-----------------------------------------------------------------------------
@@ -122,7 +122,8 @@ MeshEditor::~MeshEditor()
 {
   if(open_)
   {
-    error("MeshEditor : editor has not been closed before destruction");
+    warning("MeshEditor : editor has not been closed before destruction");
+    close();
   }
 }
 //-----------------------------------------------------------------------------
@@ -137,7 +138,6 @@ void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space,
   {
     Mesh m(ctype, space, comm);
     swap(mesh, m);
-    dolfin_assert(!mesh.empty());
     dolfin_assert(mesh.topology_dimension() == ctype.dim());
     dolfin_assert(mesh.geometry_dimension() == space.dim());
   }
@@ -196,7 +196,7 @@ void MeshEditor::add_cell(uint c, uint const * v)
   {
    error("MeshEditor : cell list full, %d cells added.", num_cells_);
   }
-  dolfin_assert(cell_vertices_ != NULL);
+  dolfin_assert(cell_vertices_ != nullptr);
   cell_vertices_->set(c, v);
   ++cell_index_;
 }
@@ -218,6 +218,7 @@ void MeshEditor::close()
   // Finalize topology and geometry
   mesh_.topology().finalize();
   mesh_.geometry().finalize();
+  mesh_.extent_update();
   // Clear data
   clear();
 }

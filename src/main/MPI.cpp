@@ -7,8 +7,8 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/SubSystemsManager.h>
 
-#include <cstring>
 #include <ctime>
+#include <string>
 
 namespace dolfin
 {
@@ -155,7 +155,7 @@ void MPI::initComm(int ngroups)
   MPI::check_error( MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &ctx_.global_rank) );
   MPI::check_error( MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &ctx_.global_size) );
   MPI::check_error( MPI_Comm_dup(MPI_COMM_SELF, &MPI::DOLFIN_COMM_SELF) );
-  ctx_.seed = std::time(0) + ctx_.global_rank;
+  ctx_.seed = std::time(nullptr) + ctx_.global_rank;
 
   // Initialize group(s)
   int const wsize = ctx_.global_size;
@@ -234,6 +234,7 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 #endif
 }
 //-----------------------------------------------------------------------------
+#if defined( DEBUG )
 int MPI::check_error( int const mpi_error )
 {
 #if defined(DOLFIN_HAVE_MPI)
@@ -429,17 +430,72 @@ int MPI::check_error( int const mpi_error )
 
   return mpi_error;
 }
+#endif // DEBUG
+#ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
 void MPI::file_open( MPI_File & file, std::string const & filename,
                     int mode, Communicator & comm, MPI_Info info )
 {
-  check_error( MPI_File_open( comm, filename.c_str(), mode, info, &file ) );
+  int const error = MPI_File_open( comm, filename.c_str(), mode, info, &file );
+  check_file_status( error );
+  check_error( error );
 }
 //-----------------------------------------------------------------------------
 void MPI::file_close( MPI_File & file )
 {
-  check_error( MPI_File_close( &file ) );
+  int const error = MPI_File_close( &file );
+  check_file_status( error );
+  check_error( error );
 }
 //-----------------------------------------------------------------------------
-
+void MPI::check_file_status( int const mpi_error )
+{
+  switch ( mpi_error )
+  {
+  case MPI_ERR_FILE:
+   error( "Invalid file handle" );
+    break;
+  case MPI_ERR_AMODE:
+   error( "Error related to the amode passed to MPI_FILE_OPEN" );
+    break;
+  case MPI_ERR_UNSUPPORTED_DATAREP:
+   error( "Unsupported datarep passed to MPI_FILE_SET_VIEW" );
+    break;
+  case MPI_ERR_UNSUPPORTED_OPERATION:
+   error( "Unsupported operation, such as seeking on a file which supports \
+           sequential access only" );
+    break;
+  case MPI_ERR_NO_SUCH_FILE:
+   error( "File does not exist" );
+    break;
+  case MPI_ERR_FILE_EXISTS:
+   error( "File exists" );
+    break;
+  case MPI_ERR_BAD_FILE:
+   error( "Invalid file name (e.g., path name too long)" );
+    break;
+  case MPI_ERR_ACCESS:
+   error( "Permission denied" );
+    break;
+  case MPI_ERR_NO_SPACE:
+   error( "Not enough space" );
+    break;
+  case MPI_ERR_QUOTA:
+   error( "Quota exceeded" );
+    break;
+  case MPI_ERR_READ_ONLY:
+   error( "Read-only file or file system" );
+    break;
+  case MPI_ERR_FILE_IN_USE:
+   error( "File operation could not be completed, as the file is currently \
+           open by some process" );
+    break;
+  case MPI_ERR_IO:
+   error( "Other I/O error" );
+   default:
+    break;
+  }
+}
+//-----------------------------------------------------------------------------
+#endif
 } /* namespace dolfin */

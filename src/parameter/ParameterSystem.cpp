@@ -94,8 +94,9 @@ ParameterSystem::ParameterSystem()
 
 ParameterSystem::~ParameterSystem()
 {
-  for ( iterator it = this->begin(); it != this->end(); ++it )
-    delete it->second;
+  for ( ParameterSystem::value_type & param : *this )
+    if ( param.second != nullptr )
+      delete param.second;
 }
 
 //-----------------------------------------------------------------------------
@@ -129,29 +130,69 @@ bool ParameterSystem::defined(std::string const& key) const
 
 //-----------------------------------------------------------------------------
 
+std::string ParameterSystem::to_json() const
+{
+  std::stringstream ss;
+  ss << "{\n";
+  bool first_line = true;
+  for ( ParameterSystem::value_type const & param : *this )
+  {
+    if ( not first_line )
+      ss <<",\n";
+
+    ss << "\t\"" << param.first << "\": ";
+    switch ( param.second->type() )
+    {
+      case Parameter::bool_t:
+        ss << std::boolalpha << this->get< bool >( param.first );
+        break;
+      case Parameter::int_t:
+        ss << this->get< int >( param.first );
+        break;
+      case Parameter::uint_t:
+        ss << this->get< uint >( param.first );
+        break;
+      case Parameter::real_t:
+        ss << this->get< real >( param.first );
+        break;
+      case Parameter::string_t:
+        ss << "\"" << this->get< std::string >( param.first ) << "\"";
+        break;
+      default:
+        ss << "\"Unknown Parameter Type\";";
+    }
+
+    first_line = false;
+  }
+  ss << "\n}\n";
+  return ss.str();
+}
+
+//-----------------------------------------------------------------------------
+
 std::string ParameterSystem::serialize() const
 {
   std::stringstream ss;
   // Parameters are encoded as: "name";type;"value";
-  for ( const_iterator it = this->begin(); it != this->end(); ++it )
+  for ( ParameterSystem::value_type const & param : *this )
   {
-    ss << "\"" << it->first << "\";" << it->second->type() << ";";
-    switch ( it->second->type() )
+    ss << "\"" << param.first << "\";" << param.second->type() << ";";
+    switch ( param.second->type() )
     {
       case Parameter::bool_t:
-        ss << "\"" << std::boolalpha << this->get< bool >( it->first ) << "\";";
+        ss << "\"" << std::boolalpha << this->get< bool >( param.first ) << "\";";
         break;
       case Parameter::int_t:
-        ss << "\"" << this->get< int >( it->first ) << "\";";
+        ss << "\"" << this->get< int >( param.first ) << "\";";
         break;
       case Parameter::uint_t:
-        ss << "\"" << this->get< uint >( it->first ) << "\";";
+        ss << "\"" << this->get< uint >( param.first ) << "\";";
         break;
       case Parameter::real_t:
-        ss << "\"" << this->get< real >( it->first ) << "\";";
+        ss << "\"" << this->get< real >( param.first ) << "\";";
         break;
       case Parameter::string_t:
-        ss << "\"" << this->get< std::string >( it->first ) << "\";";
+        ss << "\"" << this->get< std::string >( param.first ) << "\";";
         break;
       default:
         ss << "\"Unknown Parameter Type\";";
@@ -216,26 +257,26 @@ void ParameterSystem::deserialize( std::string const & parameters )
 
 void ParameterSystem::disp() const
 {
-  for ( const_iterator it = this->begin(); it != this->end(); ++it )
+  for ( ParameterSystem::value_type const & param : *this )
   {
     std::stringstream ss;
-    ss << std::left << std::setw( 32 ) << it->first << " = ";
-    switch ( it->second->type() )
+    ss << std::left << std::setw( 32 ) << param.first << " = ";
+    switch ( param.second->type() )
     {
       case Parameter::bool_t:
-        ss << std::boolalpha << this->get< bool >( it->first );
+        ss << std::boolalpha << this->get< bool >( param.first );
         break;
       case Parameter::int_t:
-        ss << this->get< int >( it->first );
+        ss << this->get< int >( param.first );
         break;
       case Parameter::uint_t:
-        ss << this->get< uint >( it->first );
+        ss << this->get< uint >( param.first );
         break;
       case Parameter::real_t:
-        ss << this->get< real >( it->first );
+        ss << this->get< real >( param.first );
         break;
       case Parameter::string_t:
-        ss << this->get< std::string >( it->first );
+        ss << this->get< std::string >( param.first );
         break;
       default:
         ss << "Unknown Parameter Type";

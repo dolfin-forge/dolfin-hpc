@@ -9,27 +9,6 @@ namespace dolfin
 {
 
 /**
- *  @class  AdjacentMapping
- *
- *  @brief
- *
- */
-
-struct AdjacentMapping
-{
-  Array<uint> send;
-  Array<uint> recv;
-
-  ///
-  AdjacentMapping() :
-      send(),
-      recv()
-  {
-  }
-
-};
-
-/**
  *  @class  SharedMapping
  *
  *  @brief
@@ -40,35 +19,47 @@ class SharedMapping
 {
 
 public:
+  ///
+  SharedMapping( DistributedData const & data );
 
   ///
-  SharedMapping(DistributedData const& data);
+  SharedMapping( SharedMapping const & other ) = default;
 
   ///
-  SharedMapping(SharedMapping const& other);
+  ~SharedMapping() = default;
+
+  /// Do not allow assignment
+  SharedMapping & operator=( SharedMapping const & other ) = delete;
 
   ///
-  ~SharedMapping();
+  Array< uint > const & to( uint rank ) const;
 
   ///
-  Array<uint> const& to(uint rank) const;
-
-  ///
-  Array<uint> const& from(uint rank) const;
+  Array< uint > const & from( uint rank ) const;
 
   ///
   void disp() const;
 
 private:
+  struct AdjacentMapping
+  {
+    Array< uint > send;
+    Array< uint > recv;
 
-  /// Do not allow assignment
-  SharedMapping& operator=(SharedMapping const& other);
+    ///
+    AdjacentMapping()
+      : send()
+      , recv()
+    {
+    }
+  };
 
-  DistributedData const& data_;
-  _map<uint, AdjacentMapping> mappings_;
-  uint send_min_;
-  uint send_max_;
+private:
 
+  DistributedData const &       data_;
+  _map< uint, AdjacentMapping > mappings_;
+  uint                          send_min_;
+  uint                          send_max_;
 };
 
 } /* namespace dolfin */

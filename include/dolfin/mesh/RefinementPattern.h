@@ -26,7 +26,7 @@ class RefinementPattern
 public:
 
   ///
-  RefinementPattern() {};
+  RefinementPattern() = default;
 
   ///--- INTERFACE ------------------------------------------------------------
 
@@ -54,7 +54,7 @@ public:
 protected:
 
   ///
-  virtual ~RefinementPattern() {};
+  virtual ~RefinementPattern() = default;
 
 };
 

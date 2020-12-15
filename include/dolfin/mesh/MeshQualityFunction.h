@@ -6,8 +6,8 @@
 #ifndef MESH_QUALITY_FUNCTION_H
 #define MESH_QUALITY_FUNCTION_H
 
+#include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/Function.h>
-
 #include <dolfin/mesh/MeshQuality.h>
 
 namespace dolfin
@@ -39,22 +39,46 @@ public:
   MeshQualityFunction(Mesh& mesh, uint p);
 
   //
-  ~MeshQualityFunction();
+  ~MeshQualityFunction() override = default;
 
   //
-  uint rank() const;
+  uint rank() const override;
 
   //
-  uint dim(uint i) const;
+  uint dim(uint i) const override;
 
   //
-  void evaluate(real* values, const real* x, const ufc::cell& cell) const;
+  void evaluate(real* values, const real* x, const ufc::cell& cell) const override;
 
 private:
 
   uint const p_;
   MeshQuality mqual_;
 };
+
+//-----------------------------------------------------------------------------
+inline uint MeshQualityFunction::rank() const
+{
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshQualityFunction::dim( uint ) const
+{
+  return 1;
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshQualityFunction::evaluate( real * values,
+                                           const real *,
+                                           const ufc::cell & cell ) const
+{
+  UFCCell const & ufc_cell = static_cast< UFCCell const & >( cell );
+  real const      qK       = mqual_.mean_ratio( *ufc_cell );
+  values[0]                = 1.0 / std::pow( qK, static_cast< real >( p_ ) );
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

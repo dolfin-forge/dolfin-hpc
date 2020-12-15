@@ -75,8 +75,7 @@ Class::Class(std::string const& pre, std::string const& pos, repr_t const& repr)
 
 //-----------------------------------------------------------------------------
 Class::~Class()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::string const Class::name() const

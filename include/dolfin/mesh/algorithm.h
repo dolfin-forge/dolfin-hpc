@@ -2,7 +2,9 @@
 #ifndef DOLFIN_MESH_ALGORITHM
 #define DOLFIN_MESH_ALGORITHM
 
-#include<dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/FacetIterator.h>
 
 namespace dolfin
 {

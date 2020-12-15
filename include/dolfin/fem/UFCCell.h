@@ -25,10 +25,8 @@ class UFCCell : public ufc::cell
 public:
 
   /// Create empty UFC cell
-  UFCCell() :
-      ufc::cell(),
-      cell_(NULL),
-      num_vertices(0)
+  UFCCell()
+    : ufc::cell()
   {
   }
 
@@ -47,11 +45,11 @@ public:
       cell_(other.cell_),
       num_vertices(0)
   {
-    if (cell_ != NULL) init(*const_cast<Cell*>(cell_));
+    if (cell_ != nullptr) init(*const_cast<Cell*>(cell_));
   }
 
   /// Destructor
-  ~UFCCell()
+  ~UFCCell() override
   {
     clear();
   }
@@ -59,7 +57,7 @@ public:
 private:
 
   //
-  Cell const * cell_;
+  Cell const * cell_{nullptr};
 
 public:
 
@@ -67,7 +65,7 @@ public:
   inline Cell const& operator*() const { return *cell_; };
 
   // Number of cell vertices
-  uint num_vertices;
+  uint num_vertices{0};
 
   // Initialize UFC cell data
   void init(Cell& cell);
@@ -134,24 +132,11 @@ inline void UFCCell::init(Cell& cell)
   // Set entity indices
   entity_indices = new uint*[topological_dimension + 1];
   entity_indices[topological_dimension] = new uint[1];
-  entity_indices[topological_dimension][0] = cell.index();
+  entity_indices[topological_dimension][0] = cell.global_index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-#if ENABLE_P1_OPTIMIZATIONS
-  // Do no allocate edges/faces to make sure any invalid access triggers a
-  // segmentation fault
-  entity_indices[0] = new uint[cell.num_entities(0)];
-  for (uint i = 0; i < cell.num_entities(0); ++i)
-  {
-    entity_indices[0][i] = (cell.entities(0))[i];
-  }
-  for (uint d = 1; d < topological_dimension; ++d)
-  {
-    entity_indices[d] = NULL;
-  }
-#else
   // In any case store topological data in object
   for (uint d = 0; d < topological_dimension; ++d)
   {
@@ -161,7 +146,6 @@ inline void UFCCell::init(Cell& cell)
       entity_indices[d][i] = (cell.entities(d))[i];
     }
   }
-#endif
 
   /// Set vertex coordinates
   Array<uint> const & vertices = cell.entities(0);
@@ -183,10 +167,10 @@ inline void UFCCell::clear()
     }
     delete[] entity_indices;
   }
-  entity_indices = 0;
+  entity_indices = nullptr;
 
   delete[] coordinates;
-  coordinates = 0;
+  coordinates = nullptr;
 
   cell_shape = ufc::interval;
   topological_dimension = 0;
@@ -204,6 +188,7 @@ inline void UFCCell::update(Cell& cell)
 #else
   cell.get_global_entities(entity_indices);
 #endif
+  entity_indices[topological_dimension][0] = cell.global_index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];

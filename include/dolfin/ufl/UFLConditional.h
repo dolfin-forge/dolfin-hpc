@@ -24,7 +24,7 @@ class Condition : public Class
 public:
 
   ///
-  ~Condition();
+  ~Condition() override;
 
   ///
   static Condition const * create(Object::repr_t const& repr);
@@ -87,18 +87,18 @@ public:
   BinaryCondition(std::string const& name, repr_t const& repr);
 
   ///
-  ~BinaryCondition();
+  ~BinaryCondition() override;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -132,7 +132,7 @@ public:
   EQ(repr_t const& repr);
 
   ///
-  ~EQ();
+  ~EQ() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -159,7 +159,7 @@ public:
   NE(repr_t const& repr);
 
   ///
-  ~NE();
+  ~NE() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -186,7 +186,7 @@ public:
   LE(repr_t const& repr);
 
   ///
-  ~LE();
+  ~LE() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -213,7 +213,7 @@ public:
   GE(repr_t const& repr);
 
   ///
-  ~GE();
+  ~GE() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -240,7 +240,7 @@ public:
   LT(repr_t const& repr);
 
   ///
-  ~LT();
+  ~LT() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -267,7 +267,7 @@ public:
   GT(repr_t const& repr);
 
   ///
-  ~GT();
+  ~GT() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -295,7 +295,7 @@ public:
   AndCondition(repr_t const& repr);
 
   ///
-  ~AndCondition();
+  ~AndCondition() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -323,7 +323,7 @@ public:
   OrCondition(repr_t const& repr);
 
   ///
-  ~OrCondition();
+  ~OrCondition() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -350,7 +350,7 @@ public:
   NotCondition(repr_t const& repr);
 
   ///
-  ~NotCondition();
+  ~NotCondition() override;
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
@@ -358,13 +358,13 @@ public:
 //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -398,7 +398,7 @@ public:
   Conditional(repr_t const& repr);
 
   ///
-  ~Conditional();
+  ~Conditional() override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -420,13 +420,13 @@ public:
 //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

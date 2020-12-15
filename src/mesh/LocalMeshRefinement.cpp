@@ -1,23 +1,23 @@
 // Copyright (C) 2006 Johan Hoffman.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/math/basic.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshTopology.h>
-#include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/MeshConnectivity.h>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/LocalMeshRefinement.h>
 
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/math/basic.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshConnectivity.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/RefinementManager.h>
+#include <dolfin/mesh/Vertex.h>
 
 #ifdef DOLFIN_HAVE_MPI
 #include <mpi.h>

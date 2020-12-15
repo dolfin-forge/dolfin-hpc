@@ -95,6 +95,8 @@ EXTRA_DIST = data/meshes/aneurysm.bin\
              demo/pde/poisson/main.cpp\
              demo/pde/poisson/Poisson.ufl\
              demo/pde/poisson/Poisson.h\
+             demo/pde/poisson/UnitSquareMesh_32x32.bin\
+             demo/pde/stokes/Stokes2D.h\
              demo/pde/stokes/taylor-hood/Makefile\
              demo/pde/stokes/taylor-hood/Stokes.ufl\
              demo/pde/stokes/taylor-hood/Stokes.h\

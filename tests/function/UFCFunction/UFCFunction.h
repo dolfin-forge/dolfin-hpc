@@ -15,7 +15,7 @@ struct MidpointDistance : public ValueSpace<>
 {
   void evaluate(real* values, const real* x, const UFCCell& cell) const
   {
-    values[0] = (*cell).midpoint().dist(Point(cell.geometric_dimension, x));
+    values[0] = (*cell).midpoint().dist(Point(x));
   }
 };
 
@@ -41,7 +41,7 @@ DOLFIN_START_TEST( test_UFCFunction )
         }
         delete cell;
       }
-      cells.free();
+      destruct( cells );
     }
     //---
     {
@@ -63,7 +63,7 @@ DOLFIN_START_TEST( test_UFCFunction )
         }
         delete cell;
       }
-      cells.free();
+      destruct( cells );
     }
   }
 DOLFIN_END_TEST

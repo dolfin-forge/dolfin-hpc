@@ -18,16 +18,16 @@ class TimeDependent
 public:
 
   /// Constructors with internal clock
-  TimeDependent();
+  TimeDependent() = default;
 
   /// Constructors with synchronized clock
   TimeDependent(Time const& time);
 
   /// Copy constructor
-  TimeDependent(TimeDependent const& other);
+  TimeDependent(TimeDependent const& other) = default;
 
   /// Destructor
-  ~TimeDependent();
+  ~TimeDependent() = default;
 
   ///
   TimeDependent& swap(TimeDependent& other);
@@ -37,7 +37,7 @@ public:
   /// associated time instance
   inline TimeDependent const& operator()(Time const& time) const
   {
-    if(t_ == NULL)
+    if(t_ == nullptr)
     {
       clock_ = time.clock();
     }
@@ -51,7 +51,7 @@ public:
   /// Synchronize with another time dependent object, do not expose details.
   inline TimeDependent const& operator()(TimeDependent const& other) const
   {
-    if(t_ == NULL)
+    if(t_ == nullptr)
     {
       clock_ = other.clock_;
     }
@@ -63,15 +63,15 @@ public:
   }
 
   /// Return the time associated with the instance
-  inline real clock() const { return (t_ == NULL ? clock_ : t_->clock()); }
+  inline real clock() const { return (t_ == nullptr ? clock_ : t_->clock()); }
 
 private:
 
   // Internal clock
-  mutable real clock_;
+  mutable real clock_{0.0};
 
   // Pointer to the current time
-  Time const * t_;
+  Time const * t_{nullptr};
 
 };
 

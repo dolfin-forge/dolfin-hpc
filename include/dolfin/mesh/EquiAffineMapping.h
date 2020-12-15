@@ -47,16 +47,16 @@ public:
   EquiAffineMapping(Mesh const& mesh);
 
   /// Destructor
-  ~EquiAffineMapping();
+  ~EquiAffineMapping() override;
 
   /// Update map for current element
-  void update(Cell const& cell);
+  void update(Cell const& cell) override;
 
   /// Map given point from the reference element
-  void map_from_reference_cell(real const * xref, real * x) const;
+  void map_from_reference_cell(real const * xref, real * x) const override;
 
   /// Map given point to the reference element
-  void map_to_reference_cell(real const * x, real * xref) const;
+  void map_to_reference_cell(real const * x, real * xref) const override;
 
   // Determinant of Jacobian of map
   real det;

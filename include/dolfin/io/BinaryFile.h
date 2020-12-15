@@ -34,31 +34,31 @@ public:
   BinaryFile(const std::string filename, real const& t);
 
   ///
-  ~BinaryFile();
+  ~BinaryFile() override = default;
 
   /// Input
-  void operator>>(GenericVector& x);
-  void operator>>(Mesh& mesh);
-  void operator>>(Function& f);
-  void operator>>(LabelList<Function>& f);
-  void operator>>(MeshFunction<bool>& meshfunction);
-  void operator>>(MeshFunction<int>& meshfunction);
-  void operator>>(MeshFunction<uint>& meshfunction);
-  void operator>>(MeshFunction<real>& meshfunction);
+  void operator>>(GenericVector& x) override;
+  void operator>>(Mesh& mesh) override;
+  void operator>>(Function& f) override;
+  void operator>>(LabelList<Function>& f) override;
+  void operator>>(MeshFunction<bool>& meshfunction) override;
+  void operator>>(MeshFunction<int>& meshfunction) override;
+  void operator>>(MeshFunction<uint>& meshfunction) override;
+  void operator>>(MeshFunction<real>& meshfunction) override;
 
   /// Output
-  void operator<<(GenericVector& x);
-  void operator<<(Mesh& mesh);
-  void operator<<(Function& u);
-  void operator<<(LabelList<Function>& f);
-  void operator<<(MeshFunction<bool>& meshfunction);
-  void operator<<(MeshFunction<int>& meshfunction);
-  void operator<<(MeshFunction<uint>& meshfunction);
-  void operator<<(MeshFunction<real>& meshfunction);
+  void operator<<(GenericVector& x) override;
+  void operator<<(Mesh& mesh) override;
+  void operator<<(Function& u) override;
+  void operator<<(LabelList<Function>& f) override;
+  void operator<<(MeshFunction<bool>& meshfunction) override;
+  void operator<<(MeshFunction<int>& meshfunction) override;
+  void operator<<(MeshFunction<uint>& meshfunction) override;
+  void operator<<(MeshFunction<real>& meshfunction) override;
 
   /// Overload GenericFile
-  void read();
-  void write();
+  void read() override;
+  void write() override;
 
   enum Binary_data_t
   {
@@ -68,22 +68,22 @@ public:
     BINARY_MESH_FUNCTION_DATA
   };
 
-  typedef struct
+  using BinaryFileHeader = struct
   {
     uint32_t magic;
     uint32_t bendian;
     uint32_t pe_size;
     Binary_data_t type;
-  } BinaryFileHeader;
+  };
 
 #ifdef ENABLE_MPIIO
-  typedef struct
+  using BinaryFunctionHeader = struct
   {
     uint32_t dim;
     uint32_t size;
     real t;
     char name[FNAME_LENGTH];
-  } BinaryFunctionHeader;
+  };
 #endif
 
 private:

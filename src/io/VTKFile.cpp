@@ -9,11 +9,13 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace dolfin
 {
@@ -21,7 +23,7 @@ namespace dolfin
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename) :
     GenericFile("VTK", filename),
-    _t(0)
+    _t( nullptr )
 {
 }
 //----------------------------------------------------------------------------
@@ -29,11 +31,6 @@ VTKFile::VTKFile(const std::string filename, real const& t) :
     GenericFile("VTK", filename),
     _t(&t)
 {
-}
-//----------------------------------------------------------------------------
-VTKFile::~VTKFile()
-{
-  // Do nothing
 }
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(Mesh& mesh)
@@ -476,7 +473,7 @@ void VTKFile::ResultsWrite(
 
     // Copy values
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3|n)^1 = (2|3|n) so ...
-    real * values = NULL;
+    real * values = nullptr;
     u->get_block(values);
     switch (value_size)
       {
@@ -650,7 +647,10 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
   std::string fname;
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
-  for (uint i = 0; i < MPI::size(); i++)
+  if ( fname.rfind( "/" ) != std::string::npos )
+    fname = fname.substr( fname.rfind( "/" ) + 1, std::string::npos );
+
+  for (uint i = 0; i < MPI::size(); ++i)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
   pvtuFile << "</PUnstructuredGrid>\n"
@@ -742,7 +742,10 @@ void VTKFile::pvtuFileWriteFunction(
 
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, 0, vtu_filename.rfind("_") + 1 );
-  for (uint i = 0; i < MPI::size(); i++)
+  if ( fname.rfind( "/" ) != std::string::npos )
+    fname = fname.substr( fname.rfind( "/" ) + 1, std::string::npos );
+
+  for (uint i = 0; i < MPI::size(); ++i)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
   pvtuFile << "</PUnstructuredGrid>\n"

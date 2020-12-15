@@ -8,6 +8,7 @@
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 
 using namespace dolfin;
 

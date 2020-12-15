@@ -4,6 +4,7 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 
@@ -127,7 +128,69 @@ private:
 
 };
 
-//--- INLINES -----------------------------------------------------------------
+//-----------------------------------------------------------------------------
+inline bool Connectivity::operator!=(Connectivity const& other) const
+{
+  return not (*this == other);
+}
+
+//-----------------------------------------------------------------------------
+inline Array< Array< uint > > & Connectivity::operator()()
+{
+  return connections_;
+}
+
+//-----------------------------------------------------------------------------
+inline Array< Array< uint > > const & Connectivity::operator()() const
+{
+  return connections_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Connectivity::order() const
+{
+  return order_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Connectivity::entries() const
+{
+  uint entries = 0;
+
+  for ( uint e = 0; e < order_; ++e )
+    entries += connections_[e].size();
+
+  return entries;
+}
+
+//----------------------------------------------------------------------------
+inline uint Connectivity::min_degree() const
+{
+  return min_degree_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Connectivity::max_degree() const
+{
+  return max_degree_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Connectivity::regular() const
+{
+  return (min_degree_ == max_degree_ ? min_degree_ : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline void Connectivity::set(uint entity, uint const * connections)
+{
+  dolfin_assert(entity < order_);
+  dolfin_assert(not connections_.empty() );
+  dolfin_assert( connections != nullptr );
+
+  for ( uint e = 0; e < connections_[entity].size(); ++e )
+    connections_[entity][e] = connections[e];
+}
 
 inline uint Connectivity::degree(uint entity) const
 {

@@ -8,7 +8,7 @@
 
 #include <DOLFINxml.h>
 #include <iostream>
-
+#include <cstring>
 
 void DOLFINxml::load_mesh(std::string& filename) {
   std::cout << "Reading DOLFIN XML \n";
@@ -62,12 +62,14 @@ void DOLFINxml::start_element(const xmlChar *name, const xmlChar **attrs) {
     }
     break;
   case CELLS:
+  {
     static const char * const vertex_attr[8] =
       { "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7" };
     for (int i = 0; i < (cell_type + 1); i++) 
       *(cp++) = parse<uint32_t>(name, attrs, vertex_attr[i]);
     parsed_cells++;
     break;
+  }
   default:
     break;
   }
@@ -100,6 +102,21 @@ void DOLFINxml::end_element(const xmlChar *name) {
   default:
     break;
   }
+}
+
+template <>
+  const char * DOLFINxml::read(const xmlChar *s) {
+  return reinterpret_cast<const char *>(s);
+}
+
+template <>
+  double DOLFINxml::read(const xmlChar *s) {
+  return strtod(reinterpret_cast<const char *>(s), NULL);
+}
+
+template <>
+  uint32_t DOLFINxml::read(const xmlChar *s) {
+  return (uint32_t) atoi(reinterpret_cast<const char *>(s));
 }
 
 /*

@@ -4,11 +4,10 @@
 #ifndef __DOLFIN_LAPACK_MATRIX_H
 #define __DOLFIN_LAPACK_MATRIX_H
 
+#include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
-#include <dolfin/log/log.h>
 
-#include <cstring>
 #include <string>
 
 namespace dolfin

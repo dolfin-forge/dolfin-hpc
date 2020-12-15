@@ -4,10 +4,13 @@
 #ifndef __DOLFIN_DOF_MAP_H
 #define __DOLFIN_DOF_MAP_H
 
-#include <dolfin/mesh/MeshDependent.h>
-
-#include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
+#include <dolfin/fem/DofMapCache.h>
+#include <dolfin/fem/DofNumbering.h>
+#include <dolfin/fem/PeriodicDofsMapping.h>
+#include <dolfin/fem/UFCCell.h>
+#include <dolfin/mesh/MeshDependent.h>
 
 #include <ufc.h>
 
@@ -15,12 +18,9 @@ namespace dolfin
 {
 
 class Cell;
-class DofNumbering;
 class Form;
-class PeriodicDofsMapping;
 class Mesh;
 class SubSytem;
-class UFCCell;
 class UFCMesh;
 
 /// This class handles the mapping of degrees of freedom.
@@ -48,7 +48,7 @@ public:
   DofMap(DofMap const& dofmap, Array<uint> const& sub_system, uint& offset);
 
   /// Destructor
-  ~DofMap();
+  ~DofMap() override;
 
   /// Check if the element definitions are identical
   bool operator ==(DofMap const& other) const;
@@ -70,76 +70,76 @@ public:
 
   /// Return a string identifying the dof map
   /// UFC @since 1.1
-  char const * signature() const;
+  char const * signature() const override;
 
   /// Return true iff mesh entities of topological dimension d are needed
   /// UFC @since 1.1
-  bool needs_mesh_entities(uint d) const;
+  bool needs_mesh_entities(uint d) const override;
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
   /// UFC @since 1.1
-  bool init_mesh(const ufc::mesh& mesh);
+  bool init_mesh(const ufc::mesh& mesh) override;
 
   /// Initialize dofmap for given cell
   /// UFC @since 1.1
-  void init_cell(const ufc::mesh& m, const ufc::cell& c);
+  void init_cell(const ufc::mesh& m, const ufc::cell& c) override;
 
   /// Finish initialization of dofmap for cells
   /// UFC @since 1.1
-  void init_cell_finalize();
+  void init_cell_finalize() override;
 
   /// Return the topological dimension of the associated cell shape
   /// UFC @since 2.0
-  uint topological_dimension() const;
+  uint topological_dimension() const override;
 
   /// Return the geometric dimension of the coordinates this dof map provides
   /// UFC @since 1.1 but not implemented
-  uint geometric_dimension() const;
+  uint geometric_dimension() const override;
 
   /// Return the dimension of the global finite element function space
   /// UFC @since 1.1
-  uint global_dimension() const;
+  uint global_dimension() const override;
 
   /// Return the dimension of the local finite element function space
   /// UFC @since 1.1
-  uint local_dimension() const;
+  uint local_dimension() const override;
 
   /// Return number of facet dofs
   /// UFC @since 1.1
-  uint num_facet_dofs() const;
+  uint num_facet_dofs() const override;
 
   /// Return the number of dofs associated with each cell entity of dimension d
   /// UFC @since 1.1 but not implemented
-  uint num_entity_dofs(uint d) const;
+  uint num_entity_dofs(uint d) const override;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
   /// UFC @since 1.1, specific cell local versions are called in priority
-  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const;
+  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const override;
 
   /// Tabulate local-local facet dofs
   /// UFC @since 1.1
-  void tabulate_facet_dofs(uint* dofs, uint local_facet) const;
+  void tabulate_facet_dofs(uint* dofs, uint local_facet) const override;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
   /// UFC @since 1.1 but not implemented
-  void tabulate_entity_dofs(uint* dofs, uint d, uint i) const;
+  void tabulate_entity_dofs(uint* dofs, uint d, uint i) const override;
 
   /// Tabulate the coordinates of all dofs on a cell
   /// UFC @since 1.1
   void tabulate_coordinates(real** coordinates,
-                            const ufc::cell& ufc_cell) const;
+                            const ufc::cell& ufc_cell) const override;
 
   //// Return the number of sub dof maps (for a mixed element)
   /// UFC @since 1.1
-  uint num_sub_dofmaps() const;
+  uint num_sub_dofmaps() const override;
 
   /// Create a new dofmap for sub dof map i (for a mixed element)
   /// UFC @since 1.1
-  ufc::dofmap* create_sub_dofmap(uint i) const;
+  ufc::dofmap* create_sub_dofmap(uint i) const override;
 
   /// Create a new instance
   /// UFC @since 2.0
-  ufc::dofmap* create() const;
+  ufc::dofmap* create() const override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
@@ -279,27 +279,58 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+inline bool DofMap::operator==( DofMap const & other ) const
+{
+  return ( this->hash() == other.hash() );
+}
+
+//-----------------------------------------------------------------------------
+inline bool DofMap::operator!=( DofMap const & other ) const
+{
+  return !( *this == other );
+}
+
+//-----------------------------------------------------------------------------
+inline DofMap & DofMap::acquire( Mesh & mesh, Form const & form, uint const i )
+{
+  return DofMapCache::instance().acquire( mesh, form, i );
+}
+
+//-----------------------------------------------------------------------------
+inline DofMap & DofMap::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+{
+  return DofMapCache::instance().acquire( mesh, dofmap, owner );
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::release( DofMap & dofmap )
+{
+  return DofMapCache::instance().release( dofmap );
+}
+
+//-----------------------------------------------------------------------------
 inline char const * DofMap::signature() const
 {
   return ufc_dofmap_->signature();
 }
 
 //-----------------------------------------------------------------------------
-inline bool DofMap::needs_mesh_entities(uint d) const
+inline bool DofMap::needs_mesh_entities( uint d ) const
 {
-  return ufc_dofmap_->needs_mesh_entities(d);
+  return ufc_dofmap_->needs_mesh_entities( d );
 }
 
 //-----------------------------------------------------------------------------
-inline bool DofMap::init_mesh(const ufc::mesh& mesh)
+inline bool DofMap::init_mesh( const ufc::mesh & mesh )
 {
-  return ufc_dofmap_->init_mesh(mesh);
+  return ufc_dofmap_->init_mesh( mesh );
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::init_cell(const ufc::mesh& m, const ufc::cell& c)
+inline void DofMap::init_cell( const ufc::mesh & m, const ufc::cell & c )
 {
-  ufc_dofmap_->init_cell(m, c);
+  ufc_dofmap_->init_cell( m, c );
 }
 
 //-----------------------------------------------------------------------------
@@ -339,35 +370,36 @@ inline uint DofMap::num_facet_dofs() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::num_entity_dofs(uint d) const
+inline uint DofMap::num_entity_dofs( uint d ) const
 {
-  return ufc_dofmap_->num_entity_dofs(d);
+  return ufc_dofmap_->num_entity_dofs( d );
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_dofs(uint* dofs, const ufc::mesh& m,
-                                  const ufc::cell& c) const
+inline void DofMap::tabulate_dofs( uint *            dofs,
+                                   const ufc::mesh & m,
+                                   const ufc::cell & c ) const
 {
-  ufc_dofmap_->tabulate_dofs(dofs, m, c);
+  ufc_dofmap_->tabulate_dofs( dofs, m, c );
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_facet_dofs(uint* dofs, uint local_facet) const
+inline void DofMap::tabulate_facet_dofs( uint * dofs, uint local_facet ) const
 {
-  ufc_dofmap_->tabulate_facet_dofs(dofs, local_facet);
+  ufc_dofmap_->tabulate_facet_dofs( dofs, local_facet );
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_entity_dofs(uint* dofs, uint d, uint i) const
+inline void DofMap::tabulate_entity_dofs( uint * dofs, uint d, uint i ) const
 {
-  ufc_dofmap_->tabulate_entity_dofs(dofs, d, i);
+  ufc_dofmap_->tabulate_entity_dofs( dofs, d, i );
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_coordinates(real** coordinates,
-                                         const ufc::cell& ufc_cell) const
+inline void DofMap::tabulate_coordinates( real **           coordinates,
+                                          const ufc::cell & ufc_cell ) const
 {
-  ufc_dofmap_->tabulate_coordinates(coordinates, ufc_cell);
+  ufc_dofmap_->tabulate_coordinates( coordinates, ufc_cell );
 }
 
 //-----------------------------------------------------------------------------
@@ -377,13 +409,13 @@ inline uint DofMap::num_sub_dofmaps() const
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::dofmap* DofMap::create_sub_dofmap(uint i) const
+inline ufc::dofmap * DofMap::create_sub_dofmap( uint i ) const
 {
-  return ufc_dofmap_->create_sub_dofmap(i);
+  return ufc_dofmap_->create_sub_dofmap( i );
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::dofmap* DofMap::create() const
+inline ufc::dofmap * DofMap::create() const
 {
   return ufc_dofmap_->create();
 }
@@ -392,6 +424,105 @@ inline ufc::dofmap* DofMap::create() const
 inline uint DofMap::macro_local_dimension() const
 {
   return 2 * ufc_dofmap_->local_dimension();
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::tabulate_dofs( uint *            dofs,
+                                   ufc::cell const & ufc_cell,
+                                   Cell const &      cell ) const
+{
+  dolfin_assert( dofs != nullptr );
+  numbering_->tabulate_dofs( dofs, ufc_cell, cell );
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::tabulate_dofs( uint * dofs, UFCCell const & ufc_cell ) const
+{
+  dolfin_assert( dofs != nullptr );
+  numbering_->tabulate_dofs( dofs, ufc_cell, *ufc_cell );
+}
+
+//-----------------------------------------------------------------------------
+inline bool DofMap::is_vectorizable() const
+{
+  return DofMap::can_vectorize( this->flatten() );
+}
+
+//-----------------------------------------------------------------------------
+inline Array< uint > const & DofMap::sub_dofmaps_dimensions() const
+{
+  return sub_dofmaps_dims_;
+}
+
+//-----------------------------------------------------------------------------
+inline Array< uint > const & DofMap::sub_dofmaps_offsets() const
+{
+  return sub_dofmaps_offs_;
+}
+//-----------------------------------------------------------------------------
+inline uint DofMap::local_size() const
+{
+  return numbering_->size();
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * DofMap::dofsmapping() const
+{
+  return numbering_->block();
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::dofsmapping_size() const
+{
+  return numbering_->block_size();
+}
+
+//--------------------------------------------------------------------------
+inline PeriodicDofsMapping const & DofMap::periodic_mapping() const
+{
+  if ( periodic_dofmap_ == nullptr )
+  {
+    periodic_dofmap_ = new PeriodicDofsMapping( *this );
+  }
+  return *periodic_dofmap_;
+}
+
+//-----------------------------------------------------------------------------
+inline _ordered_map< uint, uint > DofMap::get_map() const
+{
+  return map_;
+}
+
+//-----------------------------------------------------------------------------
+inline bool DofMap::is_shared( uint index ) const
+{
+  return numbering_->is_shared( index );
+}
+
+//-----------------------------------------------------------------------------
+inline bool DofMap::is_ghost( uint index ) const
+{
+  return numbering_->is_ghost( index );
+}
+
+//-----------------------------------------------------------------------------
+inline std::string const & DofMap::hash() const
+{
+  return hash_;
+}
+
+//-----------------------------------------------------------------------------
+inline std::string const
+  DofMap::make_signature( std::string const & finite_element )
+{
+  return "FFC dofmap for " + finite_element;
+}
+
+//-----------------------------------------------------------------------------
+inline std::string const DofMap::make_hash( Mesh &              mesh,
+                                            ufc::dofmap const & ufc_dofmap )
+{
+  return std::string( ufc_dofmap.signature() ) + mesh.hash();
 }
 
 //-----------------------------------------------------------------------------

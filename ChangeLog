@@ -1,16 +1,37 @@
-0.9.1-hpc [2020-05-XX]
+0.9.3-hpc [2020-11-24]
+ - C++14 is now required to build DOLFIN HPC
+ - STL file reader can now only load data in a certain bounding box to reduce
+   memory usage by the GTS intersection detector
+ - VTU files no longer contain folder paths
+ - Point constructor no longer implicitly converts a real to a Point(real,0,0)
+ - DirichletBC can handle multiple Coefficient/Subdomain pairs in one sweep
+ - Added more BLAS functions to Function and Vector (axpby, waxpy, axpbypcz)
+ - added MPI::all_reduce_in_place
+ - bugfixes
+0.9.2-hpc [2020-09-14]
+ - Mesh now stores the min/max extents of the current mesh
+ - fixed reading and writing MeshFunctions/MeshValues
+ - test cases now require libcheck >= 0.12.0
+ - bugfixes
+0.9.1-hpc [2020-07-20]
+ - C++11 required to build DOLFIN HPC
  - updated dependencies: UFC >= 2.2.0-hpc, FFC >= 1.1.0-hpc, UFL >= 1.1.0-hpc
    those can be installed from bitbucket.org/adaptivesimulations
- - I/O verbosity can now be controlled via DOLFIN_VERBOSE environment variable
- - added '--enable-opt-basis' for optimized ffc evaluate_basis functions
- - added '--with-phmap=DIR' for fast map/set implementation (https://git.io/JfE2p)
+ - Cell/Edge/Face/Facet/VertexIterators have been moved to their own header files
+ - I/O verbosity can now be controlled via DOLFIN_VERBOSE=0|1 environment variable
+ - added '--enable-opt-basis' for optimized ffc (-O) evaluate_basis functions
+ - added '--with-phmap[=DIR]' for fast map/set implementation (https://git.io/JfE2p)
+ - new Checkpoint format
  - removed XML support
  - removed PETSc signal handling by default
+ - PETScKrylovSolver now gives more detailed errors in case of divergence
  - added support for vtk files and paraview >= 5.8.0
- - cleaned up ParameterSystem dolfin_get not requires a template parameter
+ - cleaned up ParameterSystem, dolfin_get<> now requires a template parameter
  - Changed Connectivity interface to use Array<> instead of raw pointers
  - Fixed tic/toc counters
  - Fixed regression in I/O interface (short filenames)
+ - revived P1 optimizations
+ - revived function cache
  - Various bugs and portability fixes
  - Added new C++ based mesh converter (DOLFIN XML -> DOLFIN BINARY)
 0.9.0-hpc [2020-02-05]

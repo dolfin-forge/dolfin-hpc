@@ -96,14 +96,14 @@ dolfin::uint FormData::n_intf_elements() const
 FiniteElementSpace const * FormData::get_element(dolfin::uint i) const
 {
   std::cout << "i= " << i << " size= " << cell_elements_.size() << std::endl;
-  if (cell_elements_.size() > i) if (cell_elements_[i] != NULL) return cell_elements_[i];
+  if (cell_elements_.size() > i) if (cell_elements_[i] != nullptr) return cell_elements_[i];
 
-  if (extf_elements_.size() > i) if (extf_elements_[i] != NULL) return extf_elements_[i];
+  if (extf_elements_.size() > i) if (extf_elements_[i] != nullptr) return extf_elements_[i];
 
-  if (intf_elements_.size() > i) if (intf_elements_[i] != NULL) return intf_elements_[i];
+  if (intf_elements_.size() > i) if (intf_elements_[i] != nullptr) return intf_elements_[i];
 
   dolfin::error("Either no element present or index %d is out of range", i);
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -146,14 +146,14 @@ CoefficientBase const * FormData::get_coefficient(dolfin::uint i) const
 {
   std::cout << "i= " << i << " size= " << cell_coefficients_.size()
             << std::endl;
-  if (cell_coefficients_.size() > i) if (cell_coefficients_[i] != NULL) return cell_coefficients_[i];
+  if (cell_coefficients_.size() > i) if (cell_coefficients_[i] != nullptr) return cell_coefficients_[i];
 
-  if (extf_coefficients_.size() > i) if (extf_coefficients_[i] != NULL) return extf_coefficients_[i];
+  if (extf_coefficients_.size() > i) if (extf_coefficients_[i] != nullptr) return extf_coefficients_[i];
 
-  if (intf_coefficients_.size() > i) if (intf_coefficients_[i] != NULL) return intf_coefficients_[i];
+  if (intf_coefficients_.size() > i) if (intf_coefficients_[i] != nullptr) return intf_coefficients_[i];
 
   dolfin::error("Either no element present or index %d is out of range", i);
-  return NULL;
+  return nullptr;
 }
 
 //-----------------------------------------------------------------------------

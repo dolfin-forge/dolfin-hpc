@@ -17,7 +17,7 @@ namespace dolfin
 FiniteElement::FiniteElement(ufc::finite_element const& element,
                              bool const owner) :
     ufc_finite_element_((owner ? &element : element.create())),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -25,7 +25,7 @@ FiniteElement::FiniteElement(ufc::finite_element const& element,
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufc::finite_element const& element, uint const i) :
     ufc_finite_element_(element.create_sub_element(i)),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -34,15 +34,15 @@ FiniteElement::FiniteElement(ufc::finite_element const& element, uint const i) :
 FiniteElement::FiniteElement(ufc::finite_element const& element,
                              Array<uint> const& sub_system) :
     ufc_finite_element_(FiniteElement::create_sub_element(element, sub_system)),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(CellType const&, Form& form, uint const i) :
-    ufc_finite_element_(NULL),
-    sub_value_dims_(NULL)
+    ufc_finite_element_(nullptr),
+    sub_value_dims_(nullptr)
 {
   // Check argument
   uint const num_arguments = form.rank() + form.num_coefficients();
@@ -61,7 +61,7 @@ FiniteElement::FiniteElement(CellType const&, Form& form, uint const i) :
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufl::FiniteElementSpace const& element) :
     ufc_finite_element_(ElementLibrary::create_finite_element(element.repr())),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -69,7 +69,7 @@ FiniteElement::FiniteElement(ufl::FiniteElementSpace const& element) :
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(FiniteElement const& other) :
     ufc_finite_element_(other.create()),
-    sub_value_dims_(NULL)
+    sub_value_dims_(nullptr)
 {
   Initialize();
 }
@@ -85,19 +85,7 @@ FiniteElement::~FiniteElement()
   delete[] sub_value_dims_;
   delete[] sub_value_offs_;
   delete ufc_finite_element_;
-  ufc_finite_element_ = NULL;
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElement::operator ==(FiniteElement const& other) const
-{
-  return (std::strcmp(this->signature(), other.signature()) == 0);
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElement::operator !=(FiniteElement const& other) const
-{
-  return !(*this == other);
+  ufc_finite_element_ = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -135,24 +123,6 @@ void FiniteElement::Initialize()
       sub_value_offs_[a].push_back(0);
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-uint FiniteElement::value_size() const
-{
-  uint size = 1;
-  for (uint i = 0; i < ufc_finite_element_->value_rank(); ++i)
-  {
-    size *= ufc_finite_element_->value_dimension(i);
-  }
-  return size;
-}
-
-//-----------------------------------------------------------------------------
-ufc::finite_element*
-FiniteElement::create_sub_element(Array<uint> const& sub_system) const
-{
-  return FiniteElement::create_sub_element(*ufc_finite_element_, sub_system);
 }
 
 //-----------------------------------------------------------------------------
@@ -201,28 +171,6 @@ FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
   delete sub_element;
 
   return sub_sub_element;
-}
-
-//-----------------------------------------------------------------------------
-Array<uint> const& FiniteElement::sub_value_dimensions(uint i) const
-{
-  return sub_value_dims_[i];
-}
-
-//-----------------------------------------------------------------------------
-Array<uint> const& FiniteElement::sub_value_offsets(uint i) const
-{
-  return sub_value_offs_[i];
-}
-
-//-----------------------------------------------------------------------------
-Array<ufc::finite_element const *> const& FiniteElement::flatten() const
-{
-  if (flattened_.empty())
-  {
-    flatten(ufc_finite_element_, flattened_);
-  }
-  return flattened_;
 }
 
 //-----------------------------------------------------------------------------

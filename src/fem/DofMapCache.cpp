@@ -29,9 +29,9 @@ DofMapCache::~DofMapCache()
     warning("DofMapCache is not empty: "
             "some dof maps have not been properly released");
   }
-  for (container_t::iterator it = cache_.begin(); it != cache_.end(); ++it)
+  for ( container_t::value_type & token : cache_ )
   {
-    delete it->second.item;
+    delete token.second.item;
   }
   cache_.clear();
 }
@@ -62,7 +62,7 @@ DofMap& DofMapCache::acquire(Mesh& mesh, Form const& form, uint const& i)
 //-----------------------------------------------------------------------------
 DofMap& DofMapCache::acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner)
 {
-  DofMap * ret = NULL;
+  DofMap * ret = nullptr;
   std::string const h = DofMap::make_hash(mesh, dofmap);
   container_t::iterator it = cache_.find(h);
 
@@ -152,16 +152,16 @@ void DofMapCache::disp() const
 {
   message("Number of DofMaps in cache : %i", cache_.size());
   message("Cache :");
-  for (container_t::const_iterator it = cache_.begin(); it != cache_.end();
-      ++it)
+
+  for ( container_t::value_type const & token : cache_ )
   {
-    std::cout << std::setw(128) << it->first << " : @" << it->second.item
-              << " : " << it->second.count << std::endl;
+    std::cout << std::setw(128) << token.first << " : @" << token.second.item
+              << " : " << token.second.count << std::endl;
   }
   message("Reverse list :");
-  for (rlist_t::const_iterator it = rlist_.begin(); it != rlist_.end(); ++it)
+  for ( rlist_t::value_type const & rlist : rlist_ )
   {
-    std::cout << "@" << it->first << " : " << it->second << std::endl;
+    std::cout << "@" << rlist.first << " : " << rlist.second << std::endl;
   }
 }
 

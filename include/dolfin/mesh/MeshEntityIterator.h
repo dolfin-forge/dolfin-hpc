@@ -52,7 +52,7 @@ public:
   MeshEntityIterator(MeshEntity& entity, uint dim);
 
   /// Destructor
-  virtual ~MeshEntityIterator();
+  virtual ~MeshEntityIterator() = default;
 
   /// Step to next mesh entity (prefix increment)
   MeshEntityIterator& operator++();
@@ -123,7 +123,7 @@ inline bool MeshEntityIterator::end() const
 inline MeshEntity* MeshEntityIterator::operator->()
 {
   // WARNING: index is only updated if iterator is dereferenced
-  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
+  entity_.index_ = (index_ == nullptr) ? pos_ : (*index_)[pos_];
   return &entity_;
 }
 
@@ -131,7 +131,7 @@ inline MeshEntity* MeshEntityIterator::operator->()
 inline MeshEntity& MeshEntityIterator::operator*()
 {
   // WARNING: index is only updated if iterator is dereferenced
-  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
+  entity_.index_ = (index_ == nullptr) ? pos_ : (*index_)[pos_];
   return entity_;
 }
 
@@ -140,7 +140,7 @@ inline MeshEntity& MeshEntityIterator::operator[](uint i)
 {
   dolfin_assert(i < end_);
   pos_ = i;
-  entity_.index_ = (index_ == NULL) ? pos_ : (*index_)[pos_];
+  entity_.index_ = (index_ == nullptr) ? pos_ : (*index_)[pos_];
   return entity_;
 }
 

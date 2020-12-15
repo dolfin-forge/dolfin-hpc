@@ -9,6 +9,7 @@
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 
 namespace dolfin
 {

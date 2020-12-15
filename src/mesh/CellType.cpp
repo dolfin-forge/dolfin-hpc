@@ -4,16 +4,17 @@
 #include <dolfin/mesh/CellType.h>
 
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/MeshTopology.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
 #include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/IntervalCell.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/PointCell.h>
+#include <dolfin/mesh/QuadrilateralCell.h>
+#include <dolfin/mesh/TetrahedronCell.h>
+#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
 
@@ -73,7 +74,7 @@ CellType* CellType::create_simplex(uint dim)
       error("Unknown simplex type for dimension: %d.", dim);
       break;
     }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 Array<CellType*> CellType::create_hypercube()
@@ -102,7 +103,7 @@ CellType* CellType::create_hypercube(uint dim)
       error("Unknown hypercube type for dimension: %d.", dim);
       break;
     }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(CellType::Type type)
@@ -126,7 +127,7 @@ CellType* CellType::create(CellType::Type type)
       break;
     }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(std::string const& type)
@@ -160,7 +161,7 @@ CellType* CellType::create(std::string const& type)
     error("Unknown cell type: \"%s\".", type.c_str());
   }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(ufl::Cell const& cell)
@@ -184,7 +185,7 @@ CellType* CellType::create(ufl::Cell const& cell)
       break;
     }
 
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 bool CellType::intersects(MeshEntity& entity, Cell& c) const

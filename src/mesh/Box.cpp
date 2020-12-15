@@ -1,8 +1,10 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Box.h>
+
+#include <dolfin/mesh/EuclideanSpace.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
 {

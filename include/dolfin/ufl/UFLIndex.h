@@ -31,12 +31,12 @@ public:
 //      IndexBase(dolfin::uint const& count);
 
 ///
-  virtual std::vector<Class const*> const operands(
-      std::string const& name) const = 0;
+  std::vector<Class const*> const operands(
+      std::string const& name) const override = 0;
 
   ///
-  virtual std::vector<std::vector<Class const *> > const level_operands(
-      std::vector<std::vector<Class const *> > const& operands) const = 0;
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -47,35 +47,35 @@ public:
   type<dolfin::uint> const & count() const;
 
   ///
-  std::vector<Expression const *> const operands() const;
+  std::vector<Expression const *> const operands() const override;
 
   ///Return the tensor shape of the expression.
-  virtual ValueArray const shape() const;
+  ValueArray const shape() const override;
 
   ///Return a tuple with the free indices (unassigned) of the expression.
-  virtual tuple<Index> const free_indices() const;
+  tuple<Index> const free_indices() const override;
 
   ///Return a dict with the free or repeated indices in the expression
   ///as keys and the dimensions of those indices as values.
-  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  dict<IndexBase, type<dolfin::uint> > const index_dimensions() const override;
 
   ///Evaluate the expression tree at the given quadrature_points
-  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+  std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
       ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-      const double * const * coordinates) const;
+      const double * const * coordinates) const override;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  virtual repr_t const& repr() const = 0;
+  repr_t const& repr() const override = 0;
 
   /// __str__
-  virtual std::string const& str() const = 0;
+  std::string const& str() const override = 0;
 
   ///
-  virtual void display() const = 0;
+  void display() const override = 0;
 
 protected:
 
@@ -89,7 +89,7 @@ protected:
   IndexBase(std::string const & name, repr_t const & repr);
 
   ///
-  virtual ~IndexBase();
+  ~IndexBase() override;
 
 //    private:
 
@@ -122,15 +122,15 @@ public:
   Index(repr_t const & repr);
 
   ///
-  ~Index();
+  ~Index() override;
 
   ///
-  virtual std::vector<Class const*> const operands(
-      std::string const& name) const;
+  std::vector<Class const*> const operands(
+      std::string const& name) const override;
 
   ///
-  virtual std::vector<std::vector<Class const *> > const level_operands(
-      std::vector<std::vector<Class const *> > const& operands) const;
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -140,13 +140,13 @@ public:
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -176,15 +176,15 @@ public:
   FixedIndex(repr_t const & repr);
 
   ///
-  ~FixedIndex();
+  ~FixedIndex() override;
 
   ///
-  virtual std::vector<Class const*> const operands(
-      std::string const& name) const;
+  std::vector<Class const*> const operands(
+      std::string const& name) const override;
 
   ///
-  virtual std::vector<std::vector<Class const *> > const level_operands(
-      std::vector<std::vector<Class const *> > const& operands) const;
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -194,13 +194,13 @@ public:
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -238,15 +238,15 @@ public:
   MultiIndex(repr_t const & repr);
 
   ///
-  ~MultiIndex();
+  ~MultiIndex() override;
 
   ///
-  virtual std::vector<Class const*> const operands(
-      std::string const& name) const;
+  std::vector<Class const*> const operands(
+      std::string const& name) const override;
 
   ///
-  virtual std::vector<std::vector<Class const *> > const level_operands(
-      std::vector<std::vector<Class const *> > const& operands) const;
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const override;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -254,35 +254,35 @@ public:
   static MultiIndex const * create(Object::repr_t const& repr);
 
   ///
-  std::vector<Expression const *> const operands() const;
+  std::vector<Expression const *> const operands() const override;
 
   ///Return the tensor shape of the expression.
-  virtual ValueArray const shape() const;
+  ValueArray const shape() const override;
 
   ///Return a tuple with the free indices (unassigned) of the expression.
-  virtual tuple<Index> const free_indices() const;
+  tuple<Index> const free_indices() const override;
 
   ///Return a dict with the free or repeated indices in the expression
   ///as keys and the dimensions of those indices as values.
-  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  dict<IndexBase, type<dolfin::uint> > const index_dimensions() const override;
 
   ///Evaluate the expression tree at the given quadrature_points
-  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+  std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
       ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-      const double * const * coordinates) const;
+      const double * const * coordinates) const override;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

@@ -18,35 +18,34 @@ class Vector : public GenericVector
 {
 
 public:
-
   /// Create empty vector
-  Vector() :
-      vector_(DefaultFactory::factory().createVector())
+  Vector()
+    : vector_( DefaultFactory::factory().createVector() )
   {
   }
 
   /// Create vector of size N distributed by default
-  explicit Vector(uint N) :
-      vector_(DefaultFactory::factory().createVector())
+  explicit Vector( uint N )
+    : vector_( DefaultFactory::factory().createVector() )
   {
-    vector_->init(N);
+    vector_->init( N );
   }
 
   /// Create vector of size N distributed if specified
-  explicit Vector(uint N, bool distributed) :
-      vector_(DefaultFactory::factory().createVector())
+  explicit Vector( uint N, bool distributed )
+    : vector_( DefaultFactory::factory().createVector() )
   {
-    vector_->init(N, distributed);
+    vector_->init( N, distributed );
   }
 
   /// Copy constructor
-  explicit Vector(Vector const& x) :
-      vector_(x.vector_->copy())
+  explicit Vector( Vector const & x )
+    : vector_( x.vector_->copy() )
   {
   }
 
   /// Destructor
-  ~Vector()
+  ~Vector() override
   {
     delete vector_;
   }
@@ -54,225 +53,364 @@ public:
   //--- Implementation of the GenericTensor interface ---
 
   /// Return copy of tensor
-  Vector* copy() const
-  {
-    return new Vector(*this);
-  }
+  Vector * copy() const override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero()
-  {
-    vector_->zero();
-  }
+  void zero() override;
 
   /// Finalize assembly of tensor
-  void apply(FinalizeType finaltype = FINALIZE)
-  {
-    vector_->apply(finaltype);
-  }
+  void apply( FinalizeType finaltype = FINALIZE ) override;
 
   /// Display tensor
-  void disp(uint precision = 2) const
-  {
-    vector_->disp(precision);
-  }
+  void disp( uint precision = 2 ) const override;
 
   //--- Implementation of the GenericVector interface ---
 
   /// Initialize vector of size N
-  void init(uint N)
-  {
-    vector_->init(N);
-  }
+  void init( uint N ) override;
 
   /// Initialize vector of size N and distribute if specified
-  void init(uint N, bool distributed)
-  {
-    vector_->init(N, distributed);
-  }
+  void init( uint N, bool distributed ) override;
 
-  void init_ghosted(uint n, _ordered_set<uint>& indices,
-                    _ordered_map<uint, uint>& map)
-  {
-    vector_->init_ghosted(n, indices, map);
-  }
+  void init_ghosted( uint                         n,
+                     _ordered_set< uint > &       indices,
+                     _ordered_map< uint, uint > & map ) override;
 
   /// Return size of vector
-  uint size() const
-  {
-    return vector_->size();
-  }
+  uint size() const override;
 
   /// Return local size of vector
-  uint local_size() const
-  {
-    return vector_->local_size();
-  }
+  uint local_size() const override;
 
   /// Return rank's offset into vector
-  uint offset() const
-  {
-    return vector_->offset();
-  }
+  uint offset() const override;
 
   /// Get block of values
-  void get(real* block, uint m, const uint* rows) const
-  {
-    vector_->get(block, m, rows);
-  }
+  void get( real * block, uint m, const uint * rows ) const override;
 
   /// Set block of values
-  void set(const real* block, uint m, const uint* rows)
-  {
-    vector_->set(block, m, rows);
-  }
+  void set( const real * block, uint m, const uint * rows ) override;
 
   /// Add block of values
-  void add(const real* block, uint m, const uint* rows)
-  {
-    vector_->add(block, m, rows);
-  }
+  void add( const real * block, uint m, const uint * rows ) override;
 
   /// Get all local values (not ghost entries)
-  void get(real* values) const
-  {
-    vector_->get(values);
-  }
+  void get( real * values ) const override;
 
   /// Set all local values (not ghost entries)
-  void set(real* values)
-  {
-    vector_->set(values);
-  }
+  void set( real * values ) override;
 
   /// Add values to each local entry (not ghost entries)
-  void add(real* values)
-  {
-    vector_->add(values);
-  }
+  void add( real * values ) override;
 
-  /// Add multiple of given vector (AXPY operation)
-  void axpy(real a, const GenericVector& x)
-  {
-    vector_->axpy(a, x);
-  }
+  /// Add multiple of given vector (y=a*x+y)
+  void axpy( real a, const GenericVector & x ) override;
+
+  /// Add multiple of given vector (y=a*x+b*y)
+  void axpby( real a, const GenericVector & x,
+              real b ) override;
+
+  /// Add multiple of given vector (w=a*x+y)
+  void waxpy( real a, const GenericVector & x,
+                      const GenericVector & y ) override;
+
+  /// Add multiple of given vector (z=a*x+b*y+c*z)
+  void axpbypcz( real a, const GenericVector & x,
+                 real b, const GenericVector & y,
+                 real c ) override;
 
   /// Return inner product with given vector
-  real inner(const GenericVector& x) const
-  {
-    return vector_->inner(x);
-  }
+  real inner( const GenericVector & x ) const override;
 
   /// Return norm of vector
-  real norm(VectorNormType type = l2) const
-  {
-    return vector_->norm(type);
-  }
+  real norm( VectorNormType type = l2 ) const override;
 
   /// Return minimum value of vector
-  real min() const
-  {
-    return vector_->min();
-  }
+  real min() const override;
 
   /// Return maximum value of vector
-  real max() const
-  {
-    return vector_->max();
-  }
+  real max() const override;
 
   /// Return pointwise operator op of vector and given vector x
-  void pointwise(const GenericVector& x, VectorPointwiseOp op=pw_min) const
-  {
-    return vector_->pointwise(x, op);
-  }
+  void pointwise( const GenericVector & x,
+                  VectorPointwiseOp     op = pw_min ) const override;
 
   /// Multiply vector by given number
-  Vector& operator*=(real a)
-  {
-    *vector_ *= a;
-    return *this;
-  }
+  Vector & operator*=( real a ) override;
 
   /// Divide vector by given number
-  Vector& operator/=(real a)
-  {
-    *this *= 1.0 / a;
-    return *this;
-  }
+  Vector & operator/=( real a ) override;
 
   /// Multiply vector by given vector component-wise
-  Vector& operator*=(const GenericVector& x)
-  {
-    *vector_ *= x;
-    return *this;
-  }
+  Vector & operator*=( const GenericVector & x ) override;
 
   /// Add given vector
-  Vector& operator+=(const GenericVector& x)
-  {
-    axpy(1.0, x);
-    return *this;
-  }
+  Vector & operator+=( const GenericVector & x ) override;
 
   /// Subtract given vector
-  Vector& operator-=(const GenericVector& x)
-  {
-    axpy(-1.0, x);
-    return *this;
-  }
+  Vector & operator-=( const GenericVector & x ) override;
 
   /// Assignment operator
-  GenericVector& operator=(const GenericVector& x)
-  {
-    *vector_ = x;
-    return *this;
-  }
+  GenericVector & operator=( const GenericVector & x ) override;
 
   /// Assignment operator
-  Vector& operator=(real a)
-  {
-    *vector_ = a;
-    return *this;
-  }
+  Vector & operator=( real a ) override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const
-  {
-    return vector_->factory();
-  }
+  LinearAlgebraFactory & factory() const override;
 
   //--- Special functions, intended for library use only ---
 
   /// Return concrete instance / unwrap (const)
-  GenericVector const* instance() const
-  {
-    return vector_;
-  }
+  GenericVector const * instance() const override;
 
   /// Return concrete instance / unwrap (non-const version)
-  GenericVector* instance()
-  {
-    return vector_;
-  }
+  GenericVector * instance() override;
 
   //--- Special Vector functions ---
 
   /// Assignment operator
-  Vector& operator=(Vector const& x)
-  {
-    *vector_ = *x.vector_;
-    return *this;
-  }
+  Vector & operator=( Vector const & x );
 
 private:
-
   // Pointer to concrete implementation
   GenericVector * const vector_;
-
 };
+
+//-----------------------------------------------------------------------------
+inline Vector * Vector::copy() const
+{
+  return new Vector( *this );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::zero()
+{
+  vector_->zero();
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::apply( FinalizeType finaltype )
+{
+  vector_->apply( finaltype );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::disp( uint precision ) const
+{
+  vector_->disp( precision );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::init( uint N )
+{
+  vector_->init( N );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::init( uint N, bool distributed )
+{
+  vector_->init( N, distributed );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::init_ghosted( uint                         n,
+                                  _ordered_set< uint > &       indices,
+                                  _ordered_map< uint, uint > & map )
+{
+  vector_->init_ghosted( n, indices, map );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Vector::size() const
+{
+  return vector_->size();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Vector::local_size() const
+{
+  return vector_->local_size();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Vector::offset() const
+{
+  return vector_->offset();
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::get( real * block, uint m, const uint * rows ) const
+{
+  vector_->get( block, m, rows );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::set( const real * block, uint m, const uint * rows )
+{
+  vector_->set( block, m, rows );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::add( const real * block, uint m, const uint * rows )
+{
+  vector_->add( block, m, rows );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::get( real * values ) const
+{
+  vector_->get( values );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::set( real * values )
+{
+  vector_->set( values );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::add( real * values )
+{
+  vector_->add( values );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::axpy( real a, const GenericVector & x )
+{
+  vector_->axpy( a, x );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::axpby( real a, const GenericVector & x,
+                           real b )
+{
+  vector_->axpby( a, x, b );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::waxpy( real a, const GenericVector & x,
+                                   const GenericVector & y )
+{
+  vector_->waxpy( a, x, y );
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::axpbypcz( real a, const GenericVector & x,
+                              real b, const GenericVector & y,
+                              real c )
+{
+  vector_->axpbypcz( a, x, b, y, c );
+}
+
+//-----------------------------------------------------------------------------
+inline real Vector::inner( const GenericVector & x ) const
+{
+  return vector_->inner( x );
+}
+
+//-----------------------------------------------------------------------------
+inline real Vector::norm( VectorNormType type ) const
+{
+  return vector_->norm( type );
+}
+
+//-----------------------------------------------------------------------------
+inline real Vector::min() const
+{
+  return vector_->min();
+}
+
+//-----------------------------------------------------------------------------
+inline real Vector::max() const
+{
+  return vector_->max();
+}
+
+//-----------------------------------------------------------------------------
+inline void Vector::pointwise( const GenericVector & x,
+                               VectorPointwiseOp     op ) const
+{
+  return vector_->pointwise( x, op );
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator*=( real a )
+{
+  *vector_ *= a;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator/=( real a )
+{
+  *this *= 1.0 / a;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator*=( const GenericVector & x )
+{
+  *vector_ *= x;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator+=( const GenericVector & x )
+{
+  axpy( 1.0, x );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator-=( const GenericVector & x )
+{
+  axpy( -1.0, x );
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline GenericVector & Vector::operator=( const GenericVector & x )
+{
+  *vector_ = x;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator=( real a )
+{
+  *vector_ = a;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline LinearAlgebraFactory & Vector::factory() const
+{
+  return vector_->factory();
+}
+
+//-----------------------------------------------------------------------------
+inline GenericVector const * Vector::instance() const
+{
+  return vector_;
+}
+
+//-----------------------------------------------------------------------------
+inline GenericVector * Vector::instance()
+{
+  return vector_;
+}
+
+//-----------------------------------------------------------------------------
+inline Vector & Vector::operator=( Vector const & x )
+{
+  *vector_ = *x.vector_;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

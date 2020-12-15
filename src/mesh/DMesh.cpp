@@ -3,14 +3,18 @@
 
 #include <dolfin/mesh/DMesh.h>
 
+#include <dolfin/common/constants.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
+#include <string>
 #include <cstring>
 
 namespace dolfin
@@ -20,12 +24,8 @@ namespace dolfin
 struct DCell
 {
 
-  DCell() :
-      id(0),
-      parent_id(0),
-      vertices(0),
-      deleted(false),
-      nref(0)
+  DCell()
+    : vertices(0)
   {
   }
 
@@ -48,19 +48,19 @@ struct DCell
   }
 
   /// Local index of cell
-  uint id;
+  uint id{0};
 
   /// Index of parent cell
-  int parent_id;
+  int parent_id{0};
 
   /// List of vertices spaning the cell
   std::vector<DVertex *> vertices;
 
   /// Marker for deletion
-  bool deleted;
+  bool deleted{false};
 
   /// reference number to be used for identification in bisect
-  int nref;
+  int nref{0};
 };
 //-----------------------------------------------------------------------------
 struct DVertex
@@ -72,8 +72,7 @@ struct DVertex
       glb_id(DOLFIN_LONG_MAX),
       cells(),
       p(),
-      deleted(false),
-      is_shared(false),
+
       owner(UNDEF)
   {
   }
@@ -102,10 +101,10 @@ struct DVertex
   Point p;
 
   /// Marker for deletion
-  bool deleted;
+  bool deleted{false};
 
   /// Marker for shared vertices
-  bool is_shared;
+  bool is_shared{false};
 
   /// Rank of owning process
   uint owner;
@@ -141,7 +140,7 @@ DMesh::DMesh(Mesh& mesh) :
   sanitize_check(mesh);
 #endif
 
-  DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
+  DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : nullptr);
 
   // Copy vertices
   for (VertexIterator v(mesh); !v.end(); ++v)
@@ -242,7 +241,7 @@ void DMesh::exp(Mesh& mesh)
   Comm& comm =  mesh.topology().comm();
   uint const pe_size = mesh.topology().comm_size();
   uint const pe_rank = mesh.topology().comm_rank();
-  DistributedData * const dist = (pe_size > 1 ? new DistributedData(comm):NULL);
+  DistributedData * const dist = (pe_size > 1 ? new DistributedData(comm):nullptr);
   uint current_vertex = 0;
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++current_vertex)
@@ -267,7 +266,7 @@ void DMesh::exp(Mesh& mesh)
       }
     }
   }
-  if ( dist != NULL )
+  if ( dist != nullptr )
   {
     dist->remap_shared_adj();
     dist->finalize();
@@ -289,7 +288,7 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-  if ( dist != NULL )
+  if ( dist != nullptr )
     swap(*dist, mesh.topology().distdata()[0]);
   mesh.topology().finalize();
 
@@ -308,8 +307,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   // Find longest edge
   real lmax = 0.0;
   long ptmax = 0;
-  DVertex * v0 = NULL;
-  DVertex * v1 = NULL;
+  DVertex * v0 = nullptr;
+  DVertex * v1 = nullptr;
   DVertex ** const vb = &dcell->vertices[0];
   DVertex ** const ve = vb + dcell->vertices.size();
   for (DVertex ** vi = vb; vi != ve; ++vi)
@@ -343,7 +342,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
   dolfin_assert(v0 != v1);
 
-  DVertex* mv = NULL;
+  DVertex* mv = nullptr;
 
   // Check if no hanging vertices remain, otherwise create hanging
   // vertex and continue refinement
@@ -432,7 +431,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     for (;;)
     {
       DCell* copp = opposite(dcell, v0, v1);
-      if (copp != NULL)
+      if (copp != nullptr)
       {
         bisect(copp, mv, v0, v1);
       }
@@ -457,7 +456,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
       if (*vi == v2) return *c;
     }
   }
-  return NULL;
+  return nullptr;
 }
 //-----------------------------------------------------------------------------
 void DMesh::add_vertex(DVertex* v)
@@ -499,7 +498,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     if ((*it)->id >= numcells) break;
     if (!(*it)->deleted && (marked_ids((*it)->id)))
     {
-      bisect((*it), NULL, NULL, NULL);
+      bisect((*it), nullptr, nullptr, nullptr);
     }
   }
 
@@ -526,7 +525,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         it != propagated.end(); ++it)
     {
 
-      DVertex* mv = NULL;
+      DVertex* mv = nullptr;
       dolfin_assert(it->second.v1 != it->second.v2);
       EdgeKey<long> key(it->second.v1, it->second.v2);
       RefinedEdges::iterator re = ref_edge.find(key);
@@ -560,7 +559,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
           dolfin_assert((*ic)->vertices.size() > 0);
-          if (mv == NULL)
+          if (mv == nullptr)
           {
             mv = new DVertex();
             mv->glb_id = it->second.mv;
@@ -588,7 +587,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             dolfin_assert(v1->glb_id != v2->glb_id);
             ref_edge[EdgeKey<long>(v1->glb_id, v2->glb_id)] = mv;
           }
-          dolfin_assert((*ic) != NULL);
+          dolfin_assert((*ic) != nullptr);
           bisect((*ic), mv, v1, v2);
         }
       }
@@ -676,12 +675,10 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   }
 
-  less_pair comp;
-  std::sort(propagated.begin(), propagated.end(), comp);
+  std::sort(propagated.begin(), propagated.end(), less_pair_comp);
 
-  short prop, gprop;
-  prop = (empty == false);
-  MPI::all_reduce<MPI::sum>( prop, gprop, comm );
+  short gprop = (empty == false);
+  MPI::all_reduce_in_place<MPI::sum>( gprop, comm );
   empty = (gprop == 0);
 
   delete[] send_buff;
@@ -696,9 +693,8 @@ void DMesh::propagate_hypercube(Mesh& mesh,
   uint pe_size = mesh.topology().comm_size();
 
   // Allocate receive buffer
-  int num_prop = propagate.size() * 5;
-  int total_prop = 0;
-  MPI::all_reduce<MPI::sum>( num_prop, total_prop, comm );
+  int total_prop = propagate.size() * 5;
+  MPI::all_reduce_in_place<MPI::sum>( total_prop, comm );
 
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];
@@ -753,8 +749,7 @@ void DMesh::propagate_hypercube(Mesh& mesh,
 
   }
 
-  less_pair comp;
-  std::sort(propagated.begin(), propagated.end(), comp);
+  std::sort(propagated.begin(), propagated.end(), less_pair_comp);
   empty = (state_size == 0);
 
   delete[] recv_buff;

@@ -20,8 +20,7 @@ CellVolume::CellVolume(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 CellVolume::~CellVolume()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 ValueArray const& CellVolume::shape() const

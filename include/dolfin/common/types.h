@@ -9,19 +9,10 @@
 
 #if HAVE_PARALLEL_HASH_MAP
 #include <parallel_hashmap/phmap.h>
-#elif (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-#elif (__IBMCPP__ && __IBMCPP_TR1__)
-#include <unordered_map>
-#include <unordered_set>
 #elif __sgi
 #include <hash_map>
 #include <hash_set>
-#elif ENABLE_BOOST_TR1
-#include <tr1/unordered_map.hpp>
-#include <tr1/unordered_set.hpp>
-#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
+#else
 #include <unordered_map>
 #include <unordered_set>
 #endif
@@ -37,276 +28,113 @@ namespace dolfin
 {
 
 // Real numbers
-typedef double real;
+using real     = double;
 
 // Unsigned integers
-typedef unsigned int uint;
+using uint     = unsigned int;
 
 // Index type (at least 64bit)
-typedef uint64_t uidx;
+using uidx     = uint64_t;
 
 // Complex numbers
-typedef std::complex<double> complex;
+using complex  = std::complex< double >;
 
-uint const DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
-uint const DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
-uint const DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
+//-----------------------------------------------------------------------------
 
-int const DOLFIN_INT_MIN     = std::numeric_limits< int >::min();
-int const DOLFIN_INT_MAX     = std::numeric_limits< int >::max();
-int const DOLFIN_INT_UNDEF   = std::numeric_limits< int >::max();
+constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
+constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
+constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
 
-real const DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
-real const DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
-real const DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
+constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
+constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
+constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
 
-long const DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
-long const DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
-long const DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
+constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
+constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
+constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
+
+constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
+constexpr long DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
+constexpr long DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
+
+//-----------------------------------------------------------------------------
+
+template < typename Key,
+           typename Value,
+           typename Compare = std::less< Key >,
+           typename Allocator =
+             std::allocator< std::pair< const Key, Value > > >
+using _ordered_map = std::map< Key, Value, Compare, Allocator >;
+
+template < typename Key,
+           typename Compare   = std::less< Key >,
+           typename Allocator = std::allocator< Key > >
+using _ordered_set = std::set< Key, Compare, Allocator >;
 
 #if HAVE_PARALLEL_HASH_MAP
 
-template < typename Key, typename Value,
-           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
-           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
-           typename Alloc = std::allocator<std::pair< const Key, Value > > >
+template < typename Key,
+           typename Value,
+           typename Hash  = phmap::priv::hash_default_hash< Key >,
+           typename Eq    = phmap::priv::hash_default_eq< Key >,
+           typename Alloc = std::allocator< std::pair< const Key, Value > > >
 using _map = phmap::flat_hash_map< Key, Value, Hash, Eq, Alloc >;
 
 template < typename Key,
-           typename Hash  = phmap::container_internal::hash_default_hash< Key >,
-           typename Eq    = phmap::container_internal::hash_default_eq< Key >,
+           typename Hash  = phmap::priv::hash_default_hash< Key >,
+           typename Eq    = phmap::priv::hash_default_eq< Key >,
            typename Alloc = std::allocator< Key > >
 using _set = phmap::flat_hash_set< Key, Hash, Eq, Alloc >;
 
-template< typename Key, typename Value,
-          typename Compare = std::less< Key >,
-          typename Allocator = std::allocator< std::pair< const Key, Value > > >
-using _ordered_map = std::map< Key, Value, Compare, Allocator >;
-
-template< typename Key,
-          typename Compare = std::less< Key >,
-          typename Allocator = std::allocator< Key > >
-using _ordered_set = std::set< Key, Compare, Allocator >;
-
-#else
-
-template< typename Key, typename Value,
-          typename Comp  = std::less<Key>,
-          typename Alloc = std::allocator<std::pair< const Key, Value > > >
-class _ordered_map : public std::map< Key, Value, Comp, Alloc >
-{};
-
-template< typename Key,
-          typename Comp  = std::less< Key >,
-          typename Alloc = std::allocator< Key > >
-class _ordered_set : public std::set< Key, Comp, Alloc >
-{};
-
-#if ( HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET ) || ENABLE_BOOST_TR1 || ( __IBMCPP__ && __IBMCPP_TR1__ )
-
-template< typename Key, typename Value,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< std::pair< const Key, Value > > >
-class _map : public std::tr1::unordered_map< Key, Value, Hash, Comp, Alloc >
-{};
-
-template< typename Key,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< Key > >
-class _set : public std::tr1::unordered_set< Key, Hash, Comp, Alloc >
-{};
-
 #elif __sgi
 
-template< typename Key, typename Value,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< std::pair< const Key, Value > > >
-class _map : public std::hash_map< Key, Value, Hash, Comp, Alloc >
-{};
+template < typename Key,
+           typename Value,
+           typename Hash  = std::hash< Key >,
+           typename Comp  = std::equal_to< Key >,
+           typename Alloc = std::allocator< std::pair< const Key, Value > > >
+using _map = std::hash_map< Key, Value, Hash, Comp, Alloc >;
 
-template< typename Key,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< Key > >
-class _set : public std::hash_set< Key, Hash, Comp, Alloc >
-{};
-
-#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-
-template< typename Key, typename Value,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< std::pair< const Key, Value > > >
-class _map : public std::unordered_map< Key, Value, Hash, Comp, Alloc >
-{};
-
-template< typename Key,
-          typename Hash  = std::hash< Key >,
-          typename Comp  = std::equal_to< Key >,
-          typename Alloc = std::allocator< Key > >
-class _set : public std::unordered_set< Key, Hash, Comp, Alloc >
-{};
+template < typename Key,
+           typename Hash  = std::hash< Key >,
+           typename Comp  = std::equal_to< Key >,
+           typename Alloc = std::allocator< Key > >
+using _set = std::hash_set< Key, Hash, Comp, Alloc >;
 
 #else
 
-template< typename Key, typename Value,
-          typename Comp  = std::less<Key>,
-          typename Alloc = std::allocator<std::pair< const Key, Value > > >
-class _map : public std::map< Key, Value, Comp, Alloc >
-{};
+template < typename Key,
+           typename Value,
+           typename Hash  = std::hash< Key >,
+           typename Comp  = std::equal_to< Key >,
+           typename Alloc = std::allocator< std::pair< const Key, Value > > >
+using _map = std::unordered_map< Key, Value, Hash, Comp, Alloc >;
 
-template< typename Key,
-          typename Comp  = std::less< Key >,
-          typename Alloc = std::allocator< Key > >
-class _set : public std::set< Key, Comp, Alloc >
-{};
-
-#endif
+template < typename Key,
+           typename Hash  = std::hash< Key >,
+           typename Comp  = std::equal_to< Key >,
+           typename Alloc = std::allocator< Key > >
+using _set = std::unordered_set< Key, Hash, Comp, Alloc >;
 
 #endif
 
 //-----------------------------------------------------------------------------
 
-/// Facility to compare arrays
-template <class T> bool cmp(size_t N, T const * x0, T const * x1)
-{
-  if (x0 == x1)
-  {
-    return true;
-  }
-  else if ((x0 == NULL || x1 == NULL))
-  {
-    return false;
-  }
-  for (size_t ii = 0; ii < N; ++ii)
-  {
-    if (x0[ii] != x1[ii])
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-/// Facility to compare arrays
-template <class T> bool cmp(T const * x0b, T const * x0e, T const * x1)
-{
-  return cmp(x0e - x0b, x0b, x1);
-}
-
 /// Facility to compare object through pointers
-template<class T> bool objptrcmp(T const * p0, T const * p1)
+template < class T >
+bool objptrcmp( T const * p0, T const * p1 )
 {
-  if (p0 == p1)
+  if ( p0 == p1 )
   {
     return true;
   }
-  else if ((p0 == NULL && p1 != NULL) || (p0 != NULL && p1 == NULL))
+  else if ( ( p0 == nullptr && p1 != nullptr ) || ( p0 != nullptr && p1 == nullptr ) )
   {
     return false;
   }
-  return (*p0 == *p1);
+  return ( *p0 == *p1 );
 }
 
-/// Equivalence operator for unordered maps to be used for assertion checking
-template<class K, class V> bool operator==(_map<K,V> const& m0,
-                                           _map<K,V> const& m1)
-{
-  // The distance from begin to end should be the same
-  if (m0.size() != m1.size())
-  {
-    return false;
-  }
-  // Both groups returned by equal range have equal size and there exists
-  // a permutation such that the elements are equal two by two.
-  // In this case this is just pair comparison.
-  typename _map<K, V>::const_iterator it1;
-  for (typename _map<K, V>::const_iterator it0 = m0.begin(); it0 != m0.end();
-       ++it0)
-  {
-    it1 = m1.find(it0->first);
-    if(it1 != m1.end())
-    {
-      if(it1->second != it0->second)
-      {
-        return false;
-      }
-    }
-    else
-    {
-      return false;
-    }
-  }
-  // Alrighty
-  return true;
-}
-
-/// !Equivalence operator for unordered maps to be used for assertion checking
-template<class K, class V> bool operator!=(_map<K,V> const& m0,
-                                           _map<K,V> const& m1)
-{
-  return !(m0 == m1);
-}
-
-/// Equivalence operator for unordered maps to be used for assertion checking
-template<class T> bool operator==(_set<T> const& m0, _set<T> const& m1)
-{
-  // The distance from begin to end should be the same
-  if (m0.size() != m1.size())
-  {
-    return false;
-  }
-  // Both groups returned by equal range have equal size and there exists
-  // a permutation such that the elements are equal two by two.
-  // In this case this is just an element comparison.
-  typename _set<T>::const_iterator it1;
-  for (typename _set<T>::const_iterator it0 = m0.begin(); it0 != m0.end();
-       ++it0)
-  {
-    it1 = m1.find(*it0);
-    if(it1 != m1.end())
-    {
-      if(*it1 != *it0)
-      {
-        return false;
-      }
-    }
-    else
-    {
-      return false;
-    }
-  }
-  // Alrighty
-  return true;
-}
-
-/// !Equivalence operator for unordered maps to be used for assertion checking
-template<class T> bool operator!=(_set<T> const& m0, _set<T> const& m1)
-{
-  return !(m0 == m1);
-}
-
-/// Unordered set intersection
-template<class T>
-void intersection(_set<T> const& s0, _set<T> const& s1, _set<T>& in)
-{
-  in = s0;
-  for(_set<uint>::iterator it = in.begin(); it != in.end();)
-  {
-    if (s1.count(*it) == 0)
-    {
-      in.erase(it++);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-}
-
-}
+} // end namespace dolfin
 
 #endif

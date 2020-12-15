@@ -15,38 +15,21 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern(uint rank, uint const * dim,
-                                 uint const * range /* = NULL */) :
+                                 uint const * range /* = nullptr */) :
     rank_(0),
-    dim_(NULL),
-    range_(NULL),
-    local_range_(NULL),
+    dim_(nullptr),
+    range_(nullptr),
+    local_range_(nullptr),
     initialized_(false),
     finalized_(false),
     blocked_(false),
     distributed_(false),
-    d_entries_(NULL),
+    d_entries_(nullptr),
     d_count_(0),
-    o_entries_(NULL),
+    o_entries_(nullptr),
     o_count_(0)
 {
   init(rank, dim, range);
-}
-//-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern() :
-    rank_(0),
-    dim_(NULL),
-    range_(NULL),
-    local_range_(NULL),
-    initialized_(false),
-    finalized_(false),
-    blocked_(false),
-    distributed_(false),
-    d_entries_(NULL),
-    d_count_(0),
-    o_entries_(NULL),
-    o_count_(0)
-{
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 SparsityPattern::~SparsityPattern()
@@ -59,10 +42,10 @@ void SparsityPattern::clear()
   r_entries_.clear();
   o_count_ = 0;
   delete[] o_entries_;
-  o_entries_ = NULL;
+  o_entries_ = nullptr;
   d_count_ = 0;
   delete[] d_entries_;
-  d_entries_ = NULL;
+  d_entries_ = nullptr;
   initialized_ = false;
   finalized_ = false;
   blocked_ = false;
@@ -72,16 +55,16 @@ void SparsityPattern::clear()
     delete[] range_[i];
   }
   delete[] range_;
-  range_ = NULL;
+  range_ = nullptr;
   delete[] local_range_;
-  local_range_ = NULL;
+  local_range_ = nullptr;
   delete[] dim_;
-  dim_ = NULL;
+  dim_ = nullptr;
   rank_ = 0;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::init(uint rank, uint const * dim,
-                           uint const * range /* = NULL */)
+                           uint const * range /* = nullptr */)
 {
   if (initialized_)
   {
@@ -103,7 +86,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
 
   // Set the sparsity pattern as distributed only if ranges are provided and not
   // all equal to the global dimensions
-  distributed_ = (range != NULL) && (!std::equal(dim, dim + rank, range));
+  distributed_ = (range != nullptr) && (!std::equal(dim, dim + rank, range));
   if (distributed_)
   {
     uint pe_size = dolfin::MPI::size();
@@ -153,21 +136,6 @@ void SparsityPattern::init(uint rank, uint const * dim,
   initialized_ = true;
 }
 //-----------------------------------------------------------------------------
-void SparsityPattern::set_blocked()
-{
-  blocked_ = true;
-}
-//-----------------------------------------------------------------------------
-bool SparsityPattern::is_blocked() const
-{
-  return blocked_;
-}
-//-----------------------------------------------------------------------------
-bool SparsityPattern::is_distributed() const
-{
-  return distributed_;
-}
-//-----------------------------------------------------------------------------
 void SparsityPattern::insert(uint const * num, uint const * const * idx)
 {
   for (uint i = 0; i < num[0]; ++i)
@@ -203,11 +171,6 @@ void SparsityPattern::insert(uint const * num, uint const * const * idx)
   }
 }
 //-----------------------------------------------------------------------------
-uint SparsityPattern::size(uint i) const
-{
-  return (local_range_[i][1] - local_range_[i][0]);
-}
-//-----------------------------------------------------------------------------
 void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
 {
   if (rank_ != 2)
@@ -226,7 +189,7 @@ void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
     nzrow[i] = d_entries_[i].size();
   }
 
-  if (o_entries_ != NULL)
+  if (o_entries_ != nullptr)
   {
     for (uint i = 0; i < num_rows; ++i)
     {
@@ -322,19 +285,6 @@ void SparsityPattern::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-void SparsityPattern::get_range(uint p_rank, uint range[])
-{
-  dolfin_assert(distributed_);
-  // For a serial pattern p_rank is only zero
-  std::copy(&range_[0][p_rank], &range_[0][p_rank + 1], range);
-}
-//-----------------------------------------------------------------------------
-dolfin::uint SparsityPattern::range_size(uint p_rank) const
-{
-  dolfin_assert(distributed_);
-  return range_[0][p_rank + 1] - range_[0][p_rank];
-}
-//-----------------------------------------------------------------------------
 void SparsityPattern::apply()
 {
   finalized_ = true;
@@ -349,7 +299,7 @@ void SparsityPattern::apply()
   /// Collect entries per owner
   uint const rank = MPI::rank();
   uint const pe_size = MPI::size();
-  Array<uint> * sendbuf = new Array<uint>[pe_size];
+  Array< Array<uint> > sendbuf( pe_size );
   uint owner = 0;
   uint sendmax = 0;
   for (_ordered_map<uint, _ordered_set<uint> >::const_iterator it = r_entries_.begin();
@@ -367,15 +317,10 @@ void SparsityPattern::apply()
     // Data packet [ global index, number of entries, [ indices ] ]
     sendbuf[owner].push_back(it->first);
     sendbuf[owner].push_back(it->second.size());
-    for (_ordered_set<uint>::const_iterator c = it->second.begin();
-         c != it->second.end(); ++c)
-    {
-      sendbuf[owner].push_back(*c);
-    }
+    append( sendbuf[owner], it->second.begin(), it->second.end() );
   }
-  sendmax = std::max(sendmax, (uint) sendbuf[owner].size());
-  uint recvmax = 0;
-  MPI::all_reduce<MPI::max>(sendmax, recvmax);
+  uint recvmax = std::max(sendmax, (uint) sendbuf[owner].size());
+  MPI::all_reduce_in_place<MPI::max>( recvmax );
   if (recvmax == 0)
   {
     return;
@@ -388,14 +333,13 @@ void SparsityPattern::apply()
   uint const c1 = local_range_[1][1];
 
   /// Exchange entries and add to diagonal and off-diagonal data structures
-  uint * recvbuf = new uint[recvmax];
+  Array< uint > recvbuf( recvmax );
   for (uint j = 1; j < pe_size; ++j)
   {
     uint src = (rank - j + pe_size) % pe_size;
     uint dst = (rank + j) % pe_size;
 
-    int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
-                                    recvbuf, recvmax, src, 1 );
+    int recv_count = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1 );
 
     for (int k = 0; k < recv_count;)
     {
@@ -420,8 +364,6 @@ void SparsityPattern::apply()
       }
     }
   }
-  delete[] recvbuf;
-  delete[] sendbuf;
 
   tocd(1);
 

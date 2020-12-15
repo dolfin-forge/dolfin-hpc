@@ -18,7 +18,7 @@ namespace dolfin
 /// Unfortunately UFL is a big abstraction mess.
 /// Wrapping is needed to avoid breakage and allow proper testing.
 
-typedef ufl::Family::Type ElementType;
+using ElementType = ufl::Family::Type;
 
 struct Elements
 {

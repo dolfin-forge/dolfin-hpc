@@ -21,6 +21,7 @@ class FiniteElementSpace;
 class Form;
 class GenericMatrix;
 class GenericVector;
+class SetOfDirichletBC;
 
 /// The BCMethod variable may be used to specify the type of method
 /// used to identify degrees of freedom on the boundary. Available
@@ -75,19 +76,23 @@ public:
   DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               BCMethod method = topological);
 
+  /// Create boundary condition for multiple coefficients and sub domains
+  DirichletBC( Array< std::pair< Coefficient & , SubDomain const & > > conds,
+               Mesh& mesh, BCMethod method = topological);
+
   /// Create sub system boundary condition for sub domain
   DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               const SubSystem& sub_system, BCMethod method = topological);
 
   /// Destructor
-  ~DirichletBC();
+  ~DirichletBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form);
+             BilinearForm const& form) override;
 
 private:
 
@@ -96,7 +101,11 @@ private:
                   BilinearForm const& form);
 
   ///
-  inline void sync(Time const& t) { g_(t); }
+  inline void sync(Time const& t) override
+  {
+    for ( uint c = 0; c < conditions.size(); ++c )
+      conditions[c].first(t);
+  }
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,
@@ -113,15 +122,14 @@ private:
                           FiniteElementSpace const& space,
                           SubSystem const& sub_system);
 
-  // The function
-  Coefficient& g_;
+  // array of coefficient-subdomain pairs
+  Array< std::pair< Coefficient & , SubDomain const & > > conditions;
 
   // Search method
   BCMethod method_;
 
-  // Boundary facets, stored as pairs (cell, local facet number)
-  Array<uint> * entities_;
-
+  // Boundary facets, stored as triplets (cell, local facet number, #condition)
+  Array<uint> entities_;
 };
 
 } /* namespace dolfin */

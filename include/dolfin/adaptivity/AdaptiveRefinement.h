@@ -9,13 +9,12 @@
 namespace dolfin
 {
 
-template<class T> class Array;
 class Function;
 
 namespace AdaptiveRefinement
 {
 
-typedef Array< std::pair< std::string, Function * > > FunctionMapping;
+using FunctionMapping = Array< std::pair< std::string, Function * > >;
 
 /// Refine mesh using "simple" of "rivara" strategy
 void refine( Mesh & mesh, MeshValues< bool, Cell > & cell_marker );

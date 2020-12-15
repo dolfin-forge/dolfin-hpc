@@ -12,10 +12,13 @@
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <algorithm>
@@ -40,20 +43,19 @@ void project( Mesh & new_mesh, Array<Function> & f_post, Function & projected );
 //-----------------------------------------------------------------------------
 void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 {
-  message("Adaptive refinement");
+  section("Adaptive refinement");
 
   uint const numcellsbefore = mesh.num_global_cells();
   uint const numvertsbefore = mesh.global_size(0);
-  message("  - cells    before: %d", numcellsbefore);
-  message("  - vertices before: %d", numvertsbefore);
+  message("Cells    (before): %d", numcellsbefore);
+  message("Vertices (before): %d", numvertsbefore);
 
   std::string marked_filename("marked");
-  std::string const marked_format = dolfin_get<std::string>("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get<std::string>("output_format")  == "vtk")
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
@@ -75,9 +77,10 @@ void refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   uint const numvertsafter = mesh.global_size(0);
   dolfin_assert(numvertsafter >= numvertsbefore);
 
-  message("  - cells    after: %d", numcellsafter);
-  message("  - vertices after: %d", numvertsafter);
+  message("Cells    (after): %d", numcellsafter);
+  message("Vertices (after): %d", numvertsafter);
 
+  end();
   skip();
 }
 //-----------------------------------------------------------------------------
@@ -85,10 +88,11 @@ void refine_and_project( Mesh& mesh,
                          FunctionMapping const& functions,
                          MeshValues<bool, Cell>& cell_marker)
 {
+  section( "Adaptive refinement (with projection)" );
+  message( "Cells    (before): %d", mesh.num_global_cells() );
+  message( "Vertices (before): %d", mesh.global_size( 0 ) );
+
   dolfin_set("Load balancer redistribute", false);
-  message("Adaptive refinement (with projection)");
-  message("  - cells    before: %d", mesh.num_global_cells());
-  message("  - vertices before: %d", mesh.global_size(0));
 
   std::string const refine_type = dolfin_get<std::string>("adapt_algorithm");
   if (refine_type == "simple")
@@ -105,12 +109,11 @@ void refine_and_project( Mesh& mesh,
   }
 
   std::string marked_filename( "marked" );
-  std::string const marked_format = dolfin_get<std::string>("output_format");
-  if (marked_format == "vtk")
+  if ( dolfin_get< std::string >( "output_format" ) == "vtk" )
   {
     marked_filename += ".pvd";
   }
-  else if (marked_format == "binary")
+  else // if (output_format == "binary")
   {
     marked_filename += ".bin";
   }
@@ -159,7 +162,8 @@ void refine_and_project( Mesh& mesh,
   MPIMeshCommunicator::distribute( partitions, &D );
 
   // global renumbering is not necessary
-  mesh.distdata()[0].valid_numbering = true;
+  if ( MPI::size() > 1 )
+    mesh.distdata()[0].valid_numbering = true;
 
   // refine the mesh and keep a copy of the original / coarse mesh,
   // needed in the coarse functions
@@ -216,8 +220,11 @@ void refine_and_project( Mesh& mesh,
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
 
-  message("  - cells    after: %d", mesh.num_global_cells());
-  message("  - vertices after: %d", mesh.global_size(0));
+  message("Cells    (after): %d", mesh.num_global_cells());
+  message("Vertices (after): %d", mesh.global_size(0));
+
+  end();
+  skip();
 }
 //-----------------------------------------------------------------------------
 void redistribute_func( Mesh& mesh, Function const& f,
@@ -359,9 +366,9 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
       }
       processed(*v) = true;
 
-      real x[3] = { v->x()[0], v->x()[1], v->x()[2] };
+      const real * x = v->x();
       real test_value = 0.0;
-      f_post[0].eval( &test_value, &x[0] );
+      f_post[0].eval( &test_value, x );
       if (test_value == std::numeric_limits<real>::infinity())
       {
         for (EdgeIterator e(*v); !e.end(); ++e)
@@ -370,10 +377,8 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
           uint const index = ( edge_v[0] != v->index() ) ? 0 : 1;
           Vertex v_e( new_mesh, edge_v[index] );
 
-          x[0] = v_e.x()[0];
-          x[1] = v_e.x()[1];
-          x[2] = v_e.x()[2];
-          f_post[0].eval( &test_value, &x[0] );
+          const real * xe = v_e.x();
+          f_post[0].eval( &test_value, xe );
 
           if (test_value != std::numeric_limits<real>::infinity())
           {

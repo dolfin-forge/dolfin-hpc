@@ -29,10 +29,10 @@ namespace dolfin
   public:
 
     /// Constructor
-    PETScPreconditioner();
+    PETScPreconditioner() = default;
 
     /// Destructor
-    virtual ~PETScPreconditioner();
+    virtual ~PETScPreconditioner() = default;
 
     static void setup(const KSP ksp, PETScPreconditioner &pc);
 

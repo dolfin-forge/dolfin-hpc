@@ -47,7 +47,7 @@ public:
   dict();
 
   ///
-  ~dict();
+  ~dict() override;
 
   ///
   std::vector<Class const *> const operands(std::string const& name) const;
@@ -63,13 +63,13 @@ public:
   std::vector<std::pair<KEY const *, VALUE const *> > const& map() const;
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

@@ -1,6 +1,6 @@
 
 AC_PREREQ(2.59)
-AC_INIT([dolfin],[0.9.1-hpc])
+AC_INIT([dolfin],[0.9.3-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -36,14 +36,6 @@ AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
 AC_ARG_ENABLE(openmp, AC_HELP_STRING([--enable-openmp],
               [Compile with support for OpenMP]),
               [enable_openmp=${enableval}], [enable_openmp=no])
-
-AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
-              [Compile with support for Boost TR1 headers]),
-              [enable_boosttr1=${enableval}],[enable_boostr1=no])
-
-AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
-              [Compile with support for unordered containers]),
-              [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
 
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
@@ -108,11 +100,6 @@ if test "x${enable_optimize_p1}" = xyes; then
    [Compile with optimization for P1 elements])
 fi
 
-if test "x${enable_boosttr1}" = xyes; then
-   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
-   need_boost=yes
-fi
-
 if test "x${enable_opt_basis}" = xyes; then
    AC_DEFINE(ENABLE_EVALUATE_BASIS_FROM_COORDINATES, [1],
    [Enable basis function optimization])
@@ -126,6 +113,7 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
+
 if test "x${enable_mpi}" != xno; then
    AX_MPI
    CXX="$MPICXX"
@@ -138,6 +126,9 @@ if test "x${enable_mpi}" != xno; then
       AC_DEFINE(ENABLE_MPIIO, 1, [Compile with support for MPI I/O])
    fi
 fi
+
+# Ensure strict C++14 compliance
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
@@ -155,42 +146,10 @@ AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
-found_unordered_containers="no"
-if test "x${enable_unordered_cxx}" = xyes; then
-
-   #Ugly hack to check for C++11 unordered containers, without all c++11
-   #dependencies pulled in from "standard" m4 container macros.
-   #Note these requires correct C++11 flags to be passed through CXXFLAGS.
-   AX_CXX_HEADER_NONTR1_UNORDERED_MAP
-   AX_CXX_HEADER_NONTR1_UNORDERED_SET
-
-   if test "x${ax_cv_cxx_unordered_map}" != xyes; then
-      AX_CXX_HEADER_TR1_UNORDERED_MAP
-      AX_CXX_HEADER_TR1_UNORDERED_SET
-      if test "x${ax_cv_cxx_tr1_unordered_set}" = xyes; then
-      	 found_unordered_containers="yes"
-      fi
-   else
-      found_unordered_containers="yes"
-   fi
-fi
-
 # UFL is now default
 PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
-
-if test "x${need_boost}" = xyes; then
-   AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-   CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-fi
-
-if test "x${enable_boosttr1}" = xyes; then
-   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
-      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
-   fi
-fi
-
 
 # Checks for libraries.
 AX_ZLIB
@@ -374,7 +333,7 @@ fi
 if test "x${enable_check}" = xyes; then
    PKG_CHECK_EXISTS([check],[have_check=yes],[have_check=no])
    if test "x${have_check}" = xyes; then
-      PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+      PKG_CHECK_MODULES([CHECK], [check >= 0.12.0])
       AC_DEFINE(HAVE_CHECK,[1],[Have CHECK library])
    else
       AC_MSG_ERROR([CHECK not found, needed for unit testing])
@@ -514,12 +473,12 @@ Package features:
   libsim:                      ${with_libsim}
   Function cache:              ${enable_function_cache}
   Optimize P1:                 ${enable_optimize_p1}
-  Unordered containers:        ${found_unordered_containers}
   Compressed VTK:              ${enable_zlib}
   Quadrature:                  ${enable_quad}
   Parallel Hash Map:           ${have_phmap_h}
   Basis function optimization: ${enable_opt_basis}
   CHECK support:               ${enable_check}
+  DEBUG mode:                  ${enable_debug}
 
 ---------------------------------------------------------
 "

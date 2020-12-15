@@ -20,8 +20,7 @@ Circumradius::Circumradius(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 Circumradius::~Circumradius()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 ValueArray const& Circumradius::shape() const

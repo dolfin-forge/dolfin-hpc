@@ -5,7 +5,6 @@ libdolfin_fem_la_SOURCES = \
 			BilinearForm.cpp\
 			BoundaryCondition.cpp\
 			BoundaryNormal.cpp\
-			Coefficient.cpp\
 			CoefficientMap.cpp\
 			DirichletBC.cpp\
 			DofMap.cpp\
@@ -14,7 +13,6 @@ libdolfin_fem_la_SOURCES = \
 			DofNumbering.cpp\
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
-			FunctionSpaceMap.cpp\
 			Form.cpp\
 			Functional.cpp\
 			LinearForm.cpp\

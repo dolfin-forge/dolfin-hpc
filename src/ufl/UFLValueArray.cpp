@@ -27,8 +27,7 @@ ValueArray::ValueArray(dolfin::uint const k, dolfin::uint const i) :
 
 //-----------------------------------------------------------------------------
 ValueArray::~ValueArray()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::string ValueArray::str() const

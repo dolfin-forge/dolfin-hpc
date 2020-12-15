@@ -4,122 +4,184 @@
 #ifndef __DOLFIN_GENERIC_MATRIX_H
 #define __DOLFIN_GENERIC_MATRIX_H
 
-#include "GenericTensor.h"
+#include <dolfin/common/Array.h>
+#include <dolfin/la/GenericTensor.h>
 
 namespace dolfin
 {
 
-  class GenericVector;
-  template<class M> class Array;
+class GenericVector;
 
-  /// This class defines a common interface for matrices.
+/// This class defines a common interface for matrices.
 
-  class GenericMatrix : public GenericTensor
-  {
-  public:
+class GenericMatrix : public GenericTensor
+{
+public:
+  /// Destructor
+  ~GenericMatrix() override = default;
 
-    /// Destructor
-    virtual ~GenericMatrix() {}
+  //--- Implementation of the GenericTensor interface ---
 
-    //--- Implementation of the GenericTensor interface ---
+  /// Initialize zero tensor using sparsity pattern
+  void init( const GenericSparsityPattern & sparsity_pattern ) override = 0;
 
-    /// Initialize zero tensor using sparsity pattern
-    virtual void init(const GenericSparsityPattern& sparsity_pattern) = 0;
+  /// Return copy of tensor
+  GenericMatrix * copy() const override = 0;
 
-    /// Return copy of tensor
-    virtual GenericMatrix* copy() const = 0;
+  /// Return tensor rank (number of dimensions)
+  inline uint rank() const override;
 
-    /// Return tensor rank (number of dimensions)
-    inline uint rank() const
-    { return 2; }
+  /// Return size of given dimension
+  uint size( uint dim ) const override = 0;
 
-    /// Return size of given dimension
-    virtual uint size(uint dim) const = 0;
+  /// Get block of values
+  inline void get( real * block,
+                   const uint * num_rows,
+                   const uint * const * rows ) const override;
 
-    /// Get block of values
-    inline void get(real* block, const uint* num_rows, const uint * const * rows) const
-    { get(block, num_rows[0], rows[0], num_rows[1], rows[1]); }
+  /// Set block of values
+  inline void set( const real * block,
+                   const uint * num_rows,
+                   const uint * const * rows ) override;
 
-    /// Set block of values
-    inline void set(const real* block, const uint* num_rows, const uint * const * rows)
-    { set(block, num_rows[0], rows[0], num_rows[1], rows[1]); }
+  /// Add block of values
+  inline void add( const real * block,
+                   const uint * num_rows,
+                   const uint * const * rows ) override;
 
-    /// Add block of values
-    inline void add(const real* block, const uint* num_rows, const uint * const * rows)
-    { add(block, num_rows[0], rows[0], num_rows[1], rows[1]); }
+  /// Set all entries to zero and keep any sparse structure
+  void zero() override = 0;
 
-    /// Set all entries to zero and keep any sparse structure
-    virtual void zero() = 0;
+  /// Finalize assembly of tensor
+  void apply( FinalizeType finaltype = FINALIZE ) override = 0;
 
-    /// Finalize assembly of tensor
-    virtual void apply(FinalizeType finaltype=FINALIZE) = 0;
+  /// Display tensor
+  void disp( uint precision = 2 ) const override = 0;
 
-    /// Display tensor
-    virtual void disp(uint precision=2) const = 0;
+  //--- Matrix interface ---
 
-    //--- Matrix interface ---
+  /// Initialize M x N matrix
+  virtual void init( uint M, uint N ) = 0;
 
-    /// Initialize M x N matrix
-    virtual void init(uint M, uint N) = 0;
+  /// Initialize M x N matrix
+  virtual void init( uint M, uint N, bool distributed ) = 0;
 
-    /// Initialize M x N matrix
-    virtual void init(uint M, uint N, bool distributed) = 0;
+  /// Get block of values
+  virtual void get( real * block,
+                    uint m, const uint * rows,
+                    uint n, const uint * cols ) const = 0;
 
-    /// Get block of values
-    virtual void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const = 0;
+  /// Set block of values
+  virtual void set( const real * block,
+                    uint m, const uint * rows,
+                    uint n, const uint * cols ) = 0;
 
-    /// Set block of values
-    virtual void set(const real* block, uint m, const uint* rows, uint n, const uint* cols) = 0;
+  /// Add block of values
+  virtual void add( const real * block,
+                    uint m, const uint * rows,
+                    uint n, const uint * cols ) = 0;
 
-    /// Add block of values
-    virtual void add(const real* block, uint m, const uint* rows, uint n, const uint* cols) = 0;
+  /// Return norm of matrix
+  virtual real norm( std::string norm_type = "frobenius" ) const = 0;
 
-    /// Return norm of matrix
-    virtual real norm(std::string norm_type = "frobenius") const = 0;
+  /// Get non-zero values of given row
+  virtual void getrow( uint            row,
+                       Array< uint > & columns,
+                       Array< real > & values ) const = 0;
 
-    /// Get non-zero values of given row
-    virtual void getrow(uint row, Array<uint>& columns, Array<real>& values) const = 0;
+  /// Set values for given row
+  virtual void setrow( uint                  row,
+                       const Array< uint > & columns,
+                       const Array< real > & values ) = 0;
 
-    /// Set values for given row
-    virtual void setrow(uint row, const Array<uint>& columns, const Array<real>& values) = 0;
+  /// Set given rows to zero
+  virtual void zero( uint m, const uint * rows ) = 0;
 
-    /// Set given rows to zero
-    virtual void zero(uint m, const uint* rows) = 0;
+  /// Set given rows to identity matrix
+  virtual void ident( uint m, const uint * rows ) = 0;
 
-    /// Set given rows to identity matrix
-    virtual void ident(uint m, const uint* rows) = 0;
+  /// Matrix-vector product, y = Ax
+  virtual void mult( const GenericVector & x,
+                     GenericVector &       y,
+                     bool                  transposed = false ) const = 0;
 
-    /// Matrix-vector product, y = Ax
-    virtual void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const = 0;
+  /// Multiply matrix by given number
+  virtual const GenericMatrix & operator*=( real a ) = 0;
 
-    /// Multiply matrix by given number
-    virtual const GenericMatrix& operator*= (real a) = 0;
+  /// Divide matrix by given number
+  virtual const GenericMatrix & operator/=( real a ) = 0;
 
-    /// Divide matrix by given number
-    virtual const GenericMatrix& operator/= (real a) = 0;
+  /// Assignment operator
+  virtual const GenericMatrix & operator=( const GenericMatrix & x ) = 0;
 
-    /// Assignment operator
-    virtual const GenericMatrix& operator= (const GenericMatrix& x) = 0;
+  /// Get number of non-zeros in the matrix
+  virtual uint nz() const = 0;
 
-    /// Get number of non-zeros in the matrix
-    virtual uint nz() const = 0;
+  //--- Convenience functions ---
 
+  /// Get value of given entry
+  virtual real operator()( uint i, uint j ) const;
 
-    //--- Convenience functions ---
+  /// Get value of given entry
+  virtual real getitem( std::pair< uint, uint > ij ) const;
 
-    /// Get value of given entry
-    virtual real operator() (uint i, uint j) const
-    { real value(0); get(&value, 1, &i, 1, &j); return value; }
+  /// Set given entry to value
+  virtual void setitem( std::pair< uint, uint > ij, real value );
+};
 
-    /// Get value of given entry
-    virtual real getitem(std::pair<uint, uint> ij) const
-    { real value(0); get(&value, 1, &ij.first, 1, &ij.second); return value; }
+//-----------------------------------------------------------------------------
+inline uint GenericMatrix::rank() const
+{
+  return 2;
+}
 
-    /// Set given entry to value
-    virtual void setitem(std::pair<uint, uint> ij, real value)
-    { set(&value, 1, &ij.first, 1, &ij.second); }
+//-----------------------------------------------------------------------------
+inline void GenericMatrix::get( real * block,
+                                const uint * num_rows,
+                                const uint * const * rows ) const
+{
+  get( block, num_rows[0], rows[0], num_rows[1], rows[1] );
+}
 
-  };
+//-----------------------------------------------------------------------------
+inline void GenericMatrix::set( const real * block,
+                                const uint * num_rows,
+                                const uint * const * rows )
+{
+  set( block, num_rows[0], rows[0], num_rows[1], rows[1] );
+}
+
+//-----------------------------------------------------------------------------
+inline void GenericMatrix::add( const real * block,
+                                const uint * num_rows,
+                                const uint * const * rows )
+{
+  add( block, num_rows[0], rows[0], num_rows[1], rows[1] );
+}
+
+//-----------------------------------------------------------------------------
+inline real GenericMatrix::operator()( uint i, uint j ) const
+{
+  real value( 0 );
+  get( &value, 1, &i, 1, &j );
+  return value;
+}
+
+//-----------------------------------------------------------------------------
+inline real GenericMatrix::getitem( std::pair< uint, uint > ij ) const
+{
+  real value( 0 );
+  get( &value, 1, &ij.first, 1, &ij.second );
+  return value;
+}
+
+//-----------------------------------------------------------------------------
+inline void GenericMatrix::setitem( std::pair< uint, uint > ij, real value )
+{
+  set( &value, 1, &ij.first, 1, &ij.second );
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

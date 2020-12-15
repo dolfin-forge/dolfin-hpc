@@ -11,8 +11,10 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -30,9 +32,9 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   ScratchSpace S(Wh);
   Array<FiniteElementSpace *> spaces = Wh.flatten();
   Array<Function *> Si;
-  for (uint s = 0; s < spaces.size(); ++s)
+  for ( FiniteElementSpace * fespaces : spaces )
   {
-    Si.push_back(new Function(*(spaces[s])));
+    Si.push_back(new Function(*fespaces));
   }
 
   if (Wh.is_vertex_based())
@@ -57,7 +59,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
         }
         if (!v->is_ghost() && !marked(*v))
         {
-          uint dof_index = mesh.distdata()[0].get_global(v->index());
+          uint dof_index = v->global_index();
           for (uint i = 0; i < Si.size(); ++i)
           {
             Si[i]->vector().set(&block[offset + i * numcellnodes + ci], 1,
@@ -77,13 +79,12 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     uint dof_index = 0;
     real * block = F.create_block();
     F.get_block(block);
-    uint const tdim = mesh.topology_dimension();
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      dof_index = mesh.distdata()[tdim].get_global(c->index());
-      for (uint i = 0; i < Si.size(); ++i)
+      dof_index = c->global_index();
+      for ( Function * f : Si )
       {
-        Si[i]->vector().set(&block[dofii], 1, &dof_index);
+        f->vector().set(&block[dofii], 1, &dof_index);
         ++dofii;
       }
     }
@@ -101,9 +102,9 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       //
-      for (uint i = 0; i < Si.size(); ++i)
+      for ( Function * f : Si )
       {
-        Si[i]->vector().set(&block[ii], S0.local_dimension, &celldofs[offset]);
+        f->vector().set(&block[ii], S0.local_dimension, &celldofs[offset]);
         ii += S0.local_dimension;
       }
       //
@@ -114,8 +115,8 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   else
   {
     uint ii = 0;
-    uint * offset = new uint[Si.size()];
-    uint * local_dim = new uint[Si.size()];
+    Array< uint > offset( Si.size() );
+    Array< uint > local_dim( Si.size() );
     uint const ** celldofs = new uint const *[Si.size()];
     for (uint i = 0; i < Si.size(); ++i)
     {
@@ -138,14 +139,12 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     }
     delete[] block;
     delete[] celldofs;
-    delete[] local_dim;
-    delete[] offset;
   }
 
   // Synchronize leaf functions
-  for (uint s = 0; s < Si.size(); ++s)
+  for ( Function * f : Si )
   {
-    Si[s]->sync();
+    f->sync();
   }
 
   // Cleanup

@@ -13,8 +13,11 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/CellIterator.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <algorithm>
+#include <string>
 #include <cstring>
 
 #ifdef HAVE_LIBSIM
@@ -210,7 +213,6 @@ namespace dolfin
 				    mesh->geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);
 
-	uint *dolfin_conn = mesh->cells();
 	uint cell_type = 0;
 	switch(mesh->type().cellType())
 	  {
@@ -228,16 +230,16 @@ namespace dolfin
 	int nconn = mesh->num_cells() *
 	  (mesh->type().num_entities(0) + 1);
 	int *visit_conn = new int[nconn];
-
-	for (int *cp = &visit_conn[0], i = 0; i < mesh->num_cells(); i++)
+	int *cp = &visit_conn[0];
+	for (CellIterator c(*mesh); !c.end(); ++c)
 	{
 	  *(cp++) = cell_type;
-	  for (int j = 0; j < mesh->type().num_entities(0); j++)
+	  for (uint i = 0; i < c->num_entities(0); ++i)
 	  {
-	    *(cp++) = (int) *(dolfin_conn++);
+	    *(cp++) = c->entities(0)[i];
 	  }
 	}
-
+	
 	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1,
 				    nconn, visit_conn);
 	VisIt_UnstructuredMesh_setConnectivity(msh, mesh->num_cells(), conn);

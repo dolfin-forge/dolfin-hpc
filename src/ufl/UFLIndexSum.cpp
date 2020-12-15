@@ -39,8 +39,7 @@ IndexSum::IndexSum(repr_t const & repr) :
 
 //-----------------------------------------------------------------------------
 IndexSum::~IndexSum()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 std::vector<Class const*> const IndexSum::operands(

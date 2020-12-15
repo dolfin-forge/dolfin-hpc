@@ -36,14 +36,10 @@ public:
 protected:
 
   /// Constructor
-  Mapping()
-  {
-  }
+  Mapping() = default;
 
   /// Destructor
-  virtual ~Mapping()
-  {
-  }
+  virtual ~Mapping() = default;
 
 };
 

@@ -33,9 +33,7 @@ public:
   }
 
   /// Destructor
-  virtual ~Parameter()
-  {
-  }
+  virtual ~Parameter() = default;
 
   /// Return type of Parameter
   Type type() const
@@ -68,9 +66,7 @@ struct parameter : public Parameter
   }
 
   /// Destructor
-  ~parameter()
-  {
-  }
+  ~parameter() override = default;
 
   /// Assignment
   Parameter & set( T const & value )

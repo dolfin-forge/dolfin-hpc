@@ -4,6 +4,7 @@
 #include <dolfin/mesh/Connectivity.h>
 
 #include <dolfin/common/Array.h>
+#include <dolfin/log/log.h>
 #include <dolfin/log/LogStream.h>
 
 #include <algorithm>
@@ -62,9 +63,7 @@ Connectivity::Connectivity( Connectivity const & other )
 	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::~Connectivity()
-{
-}
+Connectivity::~Connectivity() = default;
 //-----------------------------------------------------------------------------
 Connectivity & Connectivity::operator=( Connectivity const & other )
 {
@@ -131,61 +130,7 @@ bool Connectivity::operator==( Connectivity const & other ) const
 
 	return true;
 }
-//-----------------------------------------------------------------------------
-bool Connectivity::operator!=(Connectivity const& other) const
-{
-  return not (*this == other);
-}
-//-----------------------------------------------------------------------------
-Array< Array< uint > > & Connectivity::operator()()
-{
-  return connections_;
-}
-//-----------------------------------------------------------------------------
-Array< Array< uint > > const & Connectivity::operator()() const
-{
-  return connections_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::order() const
-{
-  return order_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::entries() const
-{
-  uint entries = 0;
 
-  for ( uint e = 0; e < order_; ++e )
-    entries += connections_[e].size();
-
-  return entries;
-}
-//----------------------------------------------------------------------------
-uint Connectivity::min_degree() const
-{
-  return min_degree_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::max_degree() const
-{
-  return max_degree_;
-}
-//-----------------------------------------------------------------------------
-uint Connectivity::regular() const
-{
-  return (min_degree_ == max_degree_ ? min_degree_ : 0);
-}
-//-----------------------------------------------------------------------------
-void Connectivity::set(uint entity, uint const * connections)
-{
-  dolfin_assert(entity < order_);
-  dolfin_assert(not connections_.empty() );
-  dolfin_assert( connections != NULL );
-
-  for ( uint e = 0; e < connections_[entity].size(); ++e )
-    connections_[entity][e] = connections[e];
-}
 //-----------------------------------------------------------------------------
 void Connectivity::set(Array<uint> const& connectivity)
 {
@@ -229,8 +174,13 @@ void Connectivity::remap_l(Array<uint> const& map)
 void Connectivity::remap_r(Array<uint> const& map)
 {
   for (uint e = 0; e < order_; ++e)
+  {
     for ( uint i = 0; i < degree(e); ++i )
+    {
+      dolfin_assert( connections_[e][i] < map.size() );
       connections_[e][i] = map[connections_[e][i]];
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 void Connectivity::disp() const
@@ -255,15 +205,16 @@ void Connectivity::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-Connectivity const& Connectivity::operator>>(Array<uint>& A) const
+Connectivity const& Connectivity::operator>>(Array<uint>&) const
 {
-  A.reserve( this->entries() );
-  for (uint e = 0; e < order_; ++e)
-    A.append( connections_[e].begin(), connections_[e].end() );
+  error( "Connectivity::operator>> unimplemented / deprecated" );
+  // A.reserve( this->entries() );
+  // for (uint e = 0; e < order_; ++e)
+  //   append( A, connections_[e].begin(), connections_[e].end() );
 
-  // Set stride if the graph is regular
-  if(min_degree_ == max_degree_)
-    A %= min_degree_;
+  // // Set stride if the graph is regular
+  // if(min_degree_ == max_degree_)
+  //   A %= min_degree_;
 
   return *this;
 }

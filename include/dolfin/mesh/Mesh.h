@@ -7,10 +7,12 @@
 #include <dolfin/common/Variable.h>
 
 #include <dolfin/common/types.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <string>
 
@@ -64,11 +66,8 @@ public:
   /// Create empty mesh
   Mesh();
 
-  /// Constructor from cell type and space
-  Mesh(CellType const& ctype, Space const& space);
-
   /// Constructor from cell type, space, and communicator
-  Mesh(CellType const& ctype, Space const& space, Comm& comm);
+  Mesh(CellType const& ctype, Space const& space, Comm& comm = DOLFIN_COMM );
 
   /// Copy constructor
   Mesh(Mesh const& mesh);
@@ -89,14 +88,22 @@ public:
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;
 
-  /// Return if mesh is empty
-  bool empty() const;
-
   /// Return mesh cell type
   CellType const& type() const;
 
   /// Return mesh space
   Space const& space() const;
+
+  /// Return a Point describing the minimum extent of the mesh
+  /// this point might not be part of the mesh itself
+  Point const & extent_min() const;
+
+  /// Return a Point describing the maximum extent of the mesh
+  /// this point might not be part of the mesh itself
+  Point const & extent_max() const;
+
+  /// update the mesh extent
+  void extent_update();
 
   //--- TOPOLOGY --------------------------------------------------------------
 
@@ -254,19 +261,178 @@ private:
   MeshGeometry geometry_;
 
   /// Exterior boundary mesh
-  mutable BoundaryMesh * exterior_boundary_;
+  mutable BoundaryMesh * exterior_boundary_{nullptr};
 
   /// Interior boundary mesh
-  mutable BoundaryMesh * interior_boundary_;
+  mutable BoundaryMesh * interior_boundary_{nullptr};
 
   /// Intersection detector
-  mutable IntersectionDetector * intersection_detector_;
+  mutable IntersectionDetector * intersection_detector_{nullptr};
 
   /// Periodic constraints
   mutable Array<MappedManifold *> periodic_mappings_;
 
+  Point extent_min_;
+  Point extent_max_;
+
   int timestamp_;
 };
+
+//-----------------------------------------------------------------------------
+inline bool Mesh::operator!=( Mesh const & other ) const
+{
+  return !( *this == other );
+}
+
+//-----------------------------------------------------------------------------
+inline CellType const & Mesh::type() const
+{
+  return topology_.type();
+}
+
+//-----------------------------------------------------------------------------
+inline MeshTopology & Mesh::topology()
+{
+  return topology_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshTopology const & Mesh::topology() const
+{
+  return topology_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::topology_dimension() const
+{
+  return topology_.dim();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::size( uint dim ) const
+{
+  return topology_.size( dim );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::num_vertices() const
+{
+  return topology_.size( 0 );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::num_cells() const
+{
+  return topology_.size( topology_.dim() );
+}
+
+//-----------------------------------------------------------------------------
+inline Array< Array< uint > > & Mesh::cells()
+{
+  return topology_( topology_.dim(), 0 )();
+}
+
+//-----------------------------------------------------------------------------
+inline Array< Array< uint > > const & Mesh::cells() const
+{
+  return topology_( topology_.dim(), 0 )();
+}
+
+//-----------------------------------------------------------------------------
+inline void Mesh::init( uint dim ) const
+{
+  topology_.size( dim );
+}
+
+//-----------------------------------------------------------------------------
+inline void Mesh::init( uint d0, uint d1 ) const
+{
+  topology_( d0, d1 ).order();
+}
+
+//-----------------------------------------------------------------------------
+inline bool Mesh::serial_io() const
+{
+  return ( PE::size() == 1 ) || dolfin_get< bool >( "Mesh read in serial" );
+}
+
+//-----------------------------------------------------------------------------
+inline bool Mesh::parallel_io() const
+{
+  return !this->serial_io();
+}
+
+//-----------------------------------------------------------------------------
+inline bool Mesh::is_distributed() const
+{
+  return topology().distributed();
+}
+
+//-----------------------------------------------------------------------------
+inline MeshDistributedData & Mesh::distdata()
+{
+  return topology().distdata();
+}
+
+//-----------------------------------------------------------------------------
+inline MeshDistributedData const & Mesh::distdata() const
+{
+  return topology().distdata();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::global_size( uint dim ) const
+{
+  return topology_.global_size( dim );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::num_global_vertices() const
+{
+  return topology_.global_size( 0 );
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::num_global_cells() const
+{
+  return topology_.global_size( topology_.dim() );
+}
+
+//-----------------------------------------------------------------------------
+inline Space const & Mesh::space() const
+{
+  return geometry_.space();
+}
+
+//-----------------------------------------------------------------------------
+inline MeshGeometry & Mesh::geometry()
+{
+  return geometry_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshGeometry const & Mesh::geometry() const
+{
+  return geometry_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::geometry_dimension() const
+{
+  return geometry_.dim();
+}
+
+//-----------------------------------------------------------------------------
+inline Point const & Mesh::extent_min() const
+{
+  return extent_min_;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const & Mesh::extent_max() const
+{
+  return extent_max_;
+}
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
 

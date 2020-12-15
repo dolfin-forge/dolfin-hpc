@@ -3,6 +3,7 @@
 
 #include <dolfin/la/LAPACKMatrix.h>
 
+#include <cstring>
 #include <sstream>
 
 namespace dolfin
@@ -14,7 +15,7 @@ LAPACKMatrix::LAPACKMatrix(uint M, uint N) :
     N_(N),
     values_(new double[N * M])
 {
-  memset(values_, 0, sizeof(double)*M_*N_);
+  std::memset(values_, 0, sizeof(double)*M_*N_);
 }
 
 //-----------------------------------------------------------------------------

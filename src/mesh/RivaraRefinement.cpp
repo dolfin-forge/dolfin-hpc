@@ -1,27 +1,17 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/common/constants.h>
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/main/MPI.h>
-#include <dolfin/math/basic.h>
-
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/RivaraRefinement.h>
-#include <dolfin/parameter/parameters.h>
+
 #include <dolfin/mesh/DMesh.h>
+#include <dolfin/mesh/LoadBalancer.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-void RivaraRefinement::refine(Mesh& mesh,
-                              MeshValues<bool, Cell>& cell_marker,
-                              real tf, real tb, real ts, bool balance)
+void RivaraRefinement::refine( Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
+                               real tf, real tb, real ts, bool balance )
 {
   message("Refining simplicial mesh by recursive Rivara bisection without boundary smoothing.");
 

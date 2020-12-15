@@ -29,7 +29,7 @@ class MeshData
   enum Entity { Evertex, Eedge, Eface, Efacet, Ecell };
   template<class E> static inline Entity entity();
 
-  typedef std::pair<uint, uint> key;
+  using key = std::pair<uint, uint>;
 
   template <class V, class E>
   struct type : public key { type() : key(values<V>(), entity<E>()) {} };
@@ -39,8 +39,8 @@ class MeshData
   template <class V, class E>
   struct array : public data_array
   {
-    typedef Array<MeshValues<V, E>*> type; type data;
-    uint size() const { return data.size(); };
+    using type = Array<MeshValues<V, E> *>; type data;
+    uint size() const override { return data.size(); };
   };
 
   //---------------------------------------------------------------------------
@@ -163,8 +163,8 @@ private:
     return lookup<V, E>().end();
   }
 
-  typedef _ordered_map<key, data_array *>  Store;
-  typedef std::pair<key, data_array *> Item;
+  using Store = _ordered_map<key, data_array *>;
+  using Item  = std::pair<key, data_array *>;
 
   Mesh& M_;
   Store S_;

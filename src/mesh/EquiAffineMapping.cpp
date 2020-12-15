@@ -3,13 +3,13 @@
 
 #include <dolfin/mesh/EquiAffineMapping.h>
 
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/Face.h>
 
 #include <algorithm>
 
@@ -21,8 +21,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 EquiAffineMapping::EquiAffineMapping(Mesh const& mesh) :
     Mapping(),
-    J(0),
-    K(0),
+    J(nullptr),
+    K(nullptr),
     gdim_(mesh.geometry_dimension())
 {
   dolfin_assert(gdim_ <= d_);

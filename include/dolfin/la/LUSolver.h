@@ -22,7 +22,7 @@ namespace dolfin
 
   public:
 
-    LUSolver() : petsc_solver(0) {}
+    LUSolver()  {}
 
     ~LUSolver()
     {
@@ -65,7 +65,7 @@ namespace dolfin
 
     // PETSc Solver
 #ifdef HAVE_PETSC
-    PETScLUSolver* petsc_solver;
+    PETScLUSolver* petsc_solver{nullptr};
 #else
     int* petsc_solver;
 #endif

@@ -3,9 +3,11 @@
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 #include <cmath>
 
@@ -138,22 +140,19 @@ void MeshQuality::compute()
 //-----------------------------------------------------------------------------
 real MeshQuality::reduceMinReal(real val)
 {
-  real val_tmp = val;
-  MPI::all_reduce<MPI::min>(val_tmp, val );
+  MPI::all_reduce_in_place<MPI::min>( val );
   return val;
 }
 //-----------------------------------------------------------------------------
 real MeshQuality::reduceMaxReal(real val)
 {
-  real val_tmp = val;
-  MPI::all_reduce<MPI::max>(val_tmp, val );
+  MPI::all_reduce_in_place<MPI::max>( val );
   return val;
 }
 //-----------------------------------------------------------------------------
 real MeshQuality::reduceAvgReal(real val)
 {
-  real val_tmp = val;
-  MPI::all_reduce<MPI::min>(val_tmp, val );
+  MPI::all_reduce_in_place<MPI::min>( val );
   return val / dolfin::MPI::size();
 }
 //-----------------------------------------------------------------------------

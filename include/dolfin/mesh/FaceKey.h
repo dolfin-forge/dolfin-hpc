@@ -84,31 +84,6 @@ struct FaceKey : public _ordered_set<EdgeKey>
 
 } /* namespace dolfin */
 
-#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET) || \
-    (__IBMCPP__ && __IBMCPP_TR1__)|| \
-    (ENABLE_BOOST_TR1)
-
-namespace std
-{
-
-namespace tr1
-{
-
-template<>
-struct hash<dolfin::FaceKey>
-{
-  inline std::size_t operator()(dolfin::FaceKey const& f) const
-  {
-    return f.hash();
-  }
-};
-
-} /* namespace tr1 */
-
-} /* namespace std */
-
-#elif HAVE_PARALLEL_HASH_MAP || (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-
 namespace std
 {
 
@@ -122,7 +97,5 @@ struct hash<dolfin::FaceKey>
 };
 
 } /* namespace std */
-
-#endif
 
 #endif /* __DOLFIN_MESH_FACE_KEY */

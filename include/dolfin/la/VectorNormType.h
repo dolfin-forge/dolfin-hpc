@@ -7,9 +7,14 @@
 namespace dolfin
 {
 
-  // List of predefined norm types
+// List of predefined norm types
 
-  enum VectorNormType {l1, l2, linf};
+enum VectorNormType
+{
+  l1,
+  l2,
+  linf
+};
 
 }
 

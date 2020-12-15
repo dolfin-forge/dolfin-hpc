@@ -5,10 +5,10 @@
 
 #include <dolfin/common/Array.h>
 #include <dolfin/log/log.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
 
 #include <algorithm>
 
@@ -22,8 +22,7 @@ IntersectionDetector::IntersectionDetector(Mesh& mesh) :
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector::~IntersectionDetector()
-{
-}
+= default;
 //-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Array<Point> const& points,
                                    Array<uint>& cells) const

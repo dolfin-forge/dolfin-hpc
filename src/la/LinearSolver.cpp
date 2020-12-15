@@ -11,8 +11,6 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 LinearSolver::LinearSolver( SolverType solver_type, PreconditionerType pc_type )
-  : lu_solver( NULL )
-  , krylov_solver( NULL )
 {
   if ( solver_type == lu )
   {

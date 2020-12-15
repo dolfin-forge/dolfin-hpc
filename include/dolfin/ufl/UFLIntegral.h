@@ -36,13 +36,13 @@ public:
   MeasureData(repr_t const& repr);
 
   ///
-  ~MeasureData();
+  ~MeasureData() override;
 
   ///
   Type type() const;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -103,13 +103,13 @@ public:
   MeasureDomain(repr_t const& repr);
 
   ///
-  ~MeasureDomain();
+  ~MeasureDomain() override;
 
   ///
   Type type() const;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 
@@ -174,7 +174,7 @@ public:
 //          dolfin::uint measure_id);
 
 ///
-  ~Measure();
+  ~Measure() override;
 
   ///
   std::vector<Class const *> const operands(std::string const& name) const;
@@ -206,13 +206,13 @@ public:
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
   MeasureDomain const measure_domain_;
@@ -234,7 +234,7 @@ public:
   Integral(repr_t const & repr);
 
   ///
-  ~Integral();
+  ~Integral() override;
 
   ///
   std::vector<Class const *> const operands(std::string const& name) const;
@@ -262,13 +262,13 @@ public:
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
   /// __repr__
-  repr_t const& repr() const;
+  repr_t const& repr() const override;
 
   /// __str__
-  std::string const& str() const;
+  std::string const& str() const override;
 
   ///
-  void display() const;
+  void display() const override;
 
 private:
 

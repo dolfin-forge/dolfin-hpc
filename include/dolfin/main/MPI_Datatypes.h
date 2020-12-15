@@ -24,7 +24,7 @@ struct MPI_type
 };
 
 template< typename T >
-MPI_Datatype MPI_type<T>::value = NULL;
+MPI_Datatype MPI_type<T>::value = nullptr;
 
 #else
 

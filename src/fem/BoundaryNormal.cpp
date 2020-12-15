@@ -39,24 +39,6 @@ BoundaryNormal::~BoundaryNormal()
 }
 
 //-----------------------------------------------------------------------------
-Mesh& BoundaryNormal::mesh()
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-BoundaryMesh& BoundaryNormal::boundary()
-{
-  return *boundary_;
-}
-
-//-----------------------------------------------------------------------------
-Array<Function>& BoundaryNormal::basis()
-{
-  return basis_;
-}
-
-//-----------------------------------------------------------------------------
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
   uint gdim = space.mesh().geometry_dimension();

@@ -2,6 +2,7 @@
 
 #ifdef HAVE_CHECK
 
+#include <dolfin/log/log.h>
 #include <dolfin/log/LogStream.h>
 
 using namespace dolfin;

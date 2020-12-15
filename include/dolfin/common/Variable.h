@@ -8,27 +8,35 @@
 
 namespace dolfin
 {
-  
-  class Variable
-  {
-  public:
-    
-    Variable();
-    Variable(const std::string name, const std::string label);
-    Variable(const Variable& variable);
-    
-    void rename(const std::string name, const std::string label);
-    
-    const std::string& name()  const;
-    const std::string& label() const;
 
-  private:
-    
-    std::string _name;
-    std::string _label;
-    
-  };
-  
+class Variable
+{
+public:
+  Variable();
+  Variable( std::string const name, std::string const label );
+  Variable( const Variable & variable ) = default;
+
+  void rename( std::string const name, std::string const label );
+
+  std::string const & name() const;
+  std::string const & label() const;
+
+private:
+  std::string _name;
+  std::string _label;
+};
+
+//-----------------------------------------------------------------------------
+inline std::string const & Variable::name() const
+{
+  return _name;
 }
+//-----------------------------------------------------------------------------
+inline std::string const & Variable::label() const
+{
+  return _label;
+}
+
+} // end namespace dolfin
 
 #endif

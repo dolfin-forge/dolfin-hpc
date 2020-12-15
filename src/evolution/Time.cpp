@@ -10,28 +10,17 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Time::Time(real T0, real T1) :
-    T_(T0, T1),
-    sign_((T0 < T1) - (T1 < T0)),
-    t_(T0)
+Time::Time( real T_start, real T_end, real T_current )
+  : T_( T_start, T_end )
+  , sign_( ( T_start < T_end ) - ( T_end < T_start ) )
+  , t_( T_current )
 {
 }
 //-----------------------------------------------------------------------------
-Time::Time(Interval I) :
-    T_(I),
-    sign_((I.first < I.second) - (I.second < I.first)),
-    t_(I.first)
-{
-}
-//-----------------------------------------------------------------------------
-Time::Time(Time const& other) :
-    T_(other.T_),
-    sign_((T_.first < T_.second) - (T_.second < T_.first)),
-    t_(T_.first)
-{
-}
-//-----------------------------------------------------------------------------
-Time::~Time()
+Time::Time( Interval I )
+  : T_( I )
+  , sign_( ( I.first < I.second ) - ( I.second < I.first ) )
+  , t_( I.first )
 {
 }
 //-----------------------------------------------------------------------------
@@ -104,11 +93,16 @@ real Time::remaining_normalized() const
   return std::fabs(T_.second - t_)/std::fabs(T_.second - T_.first);
 }
 //-----------------------------------------------------------------------------
-void Time::show() const
+void Time::show( std::string const info ) const
 {
   real const p = 100.0 * this->elapsed() / (sign_ == 0 ? 1.0 : this->measure());
+
+  std::string const nfo = info.substr( 0, std::min( 36ul, info.size() ) );
+  std::string const len = std::to_string( 48 - nfo.size() );
+  std::string const msg = "t = %-" + len + ".6e %s [ %6.2f ]";
+
   message("----------------------------------------------------------------");
-  message("t = %-49.6e [ %6.2f ]", t_, p);
+  message( msg.c_str(), t_, nfo.c_str(), p );
   message("----------------------------------------------------------------");
 }
 //-----------------------------------------------------------------------------

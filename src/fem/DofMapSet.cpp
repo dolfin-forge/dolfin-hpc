@@ -50,25 +50,6 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-uint DofMapSet::size() const
-{
-  return dof_map_set.size();
-}
-
-//-----------------------------------------------------------------------------
-Mesh const& DofMapSet::mesh() const
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-DofMap& DofMapSet::operator[](uint i) const
-{
-  dolfin_assert(dof_map_set.size() > 0);dolfin_assert(i < dof_map_set.size());
-  return *dof_map_set[i];
-}
-
-//-----------------------------------------------------------------------------
 void DofMapSet::Check(ufc::form const& form, Mesh& mesh)
 {
   // Check that the form matches the mesh
@@ -87,10 +68,9 @@ void DofMapSet::Check(ufc::form const& form, Mesh& mesh)
 void DofMapSet::ReleaseAll()
 {
   // Release all dof maps in the cache
-  for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
-      it != dof_map_set.end(); ++it)
+  for ( DofMap * dofmap : dof_map_set )
   {
-    DofMap::release(**it);
+    DofMap::release(*dofmap);
   }
 }
 

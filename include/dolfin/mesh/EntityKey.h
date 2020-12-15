@@ -6,7 +6,7 @@
 #include <dolfin/log/log.h>
 
 #include <cstdlib>
-#include <cstring>
+#include <string>
 #include <algorithm>
 
 namespace dolfin
@@ -24,7 +24,7 @@ struct EntityKey
   ///
   EntityKey(uint D) :
       size(D),
-      indices(D ? new uint[size]() : NULL),
+      indices(D ? new uint[size]() : nullptr),
       idx(0)
   {
   }
@@ -32,7 +32,7 @@ struct EntityKey
   ///
   EntityKey(uint D, uint const * v) :
       size(D),
-      indices(D ? new uint[size] : NULL),
+      indices(D ? new uint[size] : nullptr),
       idx(0)
   {
     set(v);
@@ -41,7 +41,7 @@ struct EntityKey
   ///
   EntityKey(uint D, uint const * v, uint i) :
       size(D),
-      indices(D ? new uint[size] : NULL),
+      indices(D ? new uint[size] : nullptr),
       idx(i)
   {
     set(v);
@@ -214,50 +214,19 @@ struct EntityKey
     end();
   }
 
-  uint const size;
-  uint * indices;
-  uint idx;
+  uint const size{0};
+  uint * indices{nullptr};
+  uint idx{0};
 
 private:
 
   ///
-  EntityKey() :
-      size(0),
-      indices(NULL),
-      idx(0)
-  {
-    error("EntityKey : default constructor disabled");
-  }
+  EntityKey() = delete;
 
 };
 
 } /* namespace dolfin */
 
-#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET) || \
-    (__IBMCPP__ && __IBMCPP_TR1__)|| \
-    (ENABLE_BOOST_TR1)
-
-namespace std
-{
-
-namespace tr1
-{
-
-template<>
-struct hash<dolfin::EntityKey>
-{
-  inline std::size_t operator()(dolfin::EntityKey const& e) const
-  {
-    return e.hash();
-  }
-};
-
-} /* namespace tr1 */
-
-} /* namespace std */
-
-#elif (__sgi)
-
 namespace std
 {
 
@@ -271,23 +240,5 @@ struct hash<dolfin::EntityKey>
 };
 
 } /* namespace std */
-
-#elif HAVE_PARALLEL_HASH_MAP || (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
-
-namespace std
-{
-
-template<>
-struct hash<dolfin::EntityKey>
-{
-  inline std::size_t operator()(dolfin::EntityKey const& e) const
-  {
-    return e.hash();
-  }
-};
-
-} /* namespace std */
-
-#endif
 
 #endif /* __DOLFIN_MESH_ENTITY_KEY_H */

@@ -31,7 +31,7 @@ MeshTopology::MeshTopology( CellType const & type, Comm & comm, bool frozen )
 {
   FOREACH_CONNECTIVITY( i, j )
   {
-    C_[i][j] = NULL;
+    C_[i][j] = nullptr;
   }
   update_token();
 }
@@ -55,10 +55,10 @@ MeshTopology::~MeshTopology()
   FOREACH_CONNECTIVITY( i, j )
   {
     delete C_[i][j];
-    C_[i][j] = NULL;
+    C_[i][j] = nullptr;
   }
   delete type_;
-  type_ = NULL;
+  type_ = nullptr;
 }
 //-----------------------------------------------------------------------------
 void swap( MeshTopology & a, MeshTopology & b )
@@ -131,7 +131,7 @@ void MeshTopology::init( uint dim, uint nlocal, uint nglobal )
   }
 
   dolfin_assert( type_ );
-  if ( C_[dim][0] == NULL )
+  if ( C_[dim][0] == nullptr )
   {
     dolfin_assert( !C_[dim][0] );
     C_[dim][0] = new Connectivity( nlocal, type_->num_vertices( dim ) );
@@ -229,49 +229,6 @@ void MeshTopology::remap( uint d0, Array< uint > const & mapping )
   }
 }
 //-----------------------------------------------------------------------------
-MeshDistributedData & MeshTopology::distdata()
-{
-  if ( not distributed() )
-  {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
-  }
-  return distdata_;
-}
-//-----------------------------------------------------------------------------
-MeshDistributedData const & MeshTopology::distdata() const
-{
-  if ( not distributed() )
-  {
-    error( "MeshDistributedData : returning distributed data of serial mesh" );
-  }
-  return distdata_;
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::global_size( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].global_size() : this->size( dim ) );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::offset( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].offset() : 0 );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_owned( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_owned() : this->size( dim ) );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_shared( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_shared() : 0 );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::num_ghost( uint dim ) const
-{
-  return ( distributed() ? distdata_[dim].num_ghost() : 0 );
-}
-//-----------------------------------------------------------------------------
 Connectivity const * MeshTopology::entities( uint di ) const
 {
   if ( connectivity( di ) )
@@ -284,7 +241,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
    */
 
   Connectivity const * const cv = connectivity( dim_ );
-  if ( cv != NULL )
+  if ( cv != nullptr )
   {
     // Initialize local array of entities
     uint const             m = type_->num_entities( di );
@@ -334,7 +291,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
         ( *ce )[c][e] = key.idx;
       }
     }
-    dolfin_assert( C_[dim_][di] == NULL );
+    dolfin_assert( C_[dim_][di] == nullptr );
     std::swap( C_[dim_][di], ce );
 
     // Create entity -> vertices connectivities from collected entities
@@ -343,11 +300,11 @@ Connectivity const * MeshTopology::entities( uint di ) const
     {
       ev->set( e, entities_list[e]->indices );
     }
-    dolfin_assert( C_[di][0] == NULL );
+    dolfin_assert( C_[di][0] == nullptr );
     std::swap( C_[di][0], ev );
 
     // Cleanup
-    entities_list.free();
+    destruct( entities_list );
     for ( uint e = 0; e < m; ++e )
     {
       delete[] entities[e];
@@ -382,7 +339,7 @@ Connectivity const * MeshTopology::transpose( uint d1, uint d0 ) const
       conn[( *c10 )[e][i]]++;
 
   Connectivity * c01 = new Connectivity( conn );
-  conn               = 0;
+  std::fill( conn.begin(), conn.end(), 0 );
 
   for ( uint e1 = 0; e1 < c10->order(); ++e1 )
   {
@@ -523,7 +480,7 @@ Connectivity const * MeshTopology::compute( uint d0, uint d1 ) const
     reorder();
   }
 
-  if ( connectivity( d0, d1 ) == NULL )
+  if ( connectivity( d0, d1 ) == nullptr )
   {
     error( "MeshTopology: connectivity (%u, %u) not computed.", d0, d1 );
   }
@@ -610,7 +567,7 @@ void MeshTopology::disp() const
 //-----------------------------------------------------------------------------
 void MeshTopology::update_token()
 {
-  timestamp_ = std::time( NULL );
+  timestamp_ = std::time( nullptr );
 }
 //-----------------------------------------------------------------------------
 int MeshTopology::token() const

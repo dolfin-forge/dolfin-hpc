@@ -21,7 +21,7 @@ struct UFCExpression : ufc::function
 
   ///
   inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell&) const
+                       const ufc::cell&) const override
   {
     E_.eval(values, coordinates);
   }

@@ -17,11 +17,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type) :
-    solver_type(solver_type),
-    pc_type(pc_type),
-    petsc_solver(NULL),
-    janpack_solver(NULL)
+KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type)
+  : solver_type(solver_type)
+  , pc_type(pc_type)
 {
 }
 

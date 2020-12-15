@@ -6,6 +6,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshValues.h>
+#include <dolfin/mesh/VertexIterator.h>
 
 namespace dolfin
 {
@@ -24,7 +25,7 @@ public:
   SubDomain();
 
   /// Destructor
-  virtual ~SubDomain();
+  virtual ~SubDomain() = default;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -60,9 +61,64 @@ protected:
 
 private:
 
-  real abstol_;
+  real abstol_{1.0e-6};
 
 };
+
+//-----------------------------------------------------------------------------
+template <>
+inline bool SubDomain::enclosed( Vertex & entity, bool on_boundary ) const
+{
+  return inside( entity.x(), on_boundary );
+}
+
+//-----------------------------------------------------------------------------
+template < class Entity >
+inline bool SubDomain::enclosed( Entity & entity, bool on_boundary ) const
+{
+  for ( VertexIterator v( entity ); !v.end(); ++v )
+  {
+    if ( !this->inside( v->x(), on_boundary ) )
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+template <>
+inline bool SubDomain::overlap( Vertex & entity, bool on_boundary ) const
+{
+  return inside( entity.x(), on_boundary );
+}
+
+//-----------------------------------------------------------------------------
+template < class Entity >
+inline bool SubDomain::overlap( Entity & entity, bool on_boundary ) const
+{
+  for ( VertexIterator v( entity ); !v.end(); ++v )
+  {
+    if ( this->inside( v->x(), on_boundary ) )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+inline bool
+  SubDomain::close( real const x, real const xref, real const abstol ) const
+{
+  return ( std::fabs( x - xref ) < abstol );
+}
+
+//-----------------------------------------------------------------------------
+inline bool SubDomain::close( real const x, real const xref ) const
+{
+  return ( std::fabs( x - xref ) < abstol_ );
+}
 
 } /* namespace dolfin */
 

@@ -12,7 +12,9 @@
 #include <dolfin/main/OpenMP.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/fem/Coefficient.h>
@@ -78,10 +80,11 @@ void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,
                       bool reset_tensor);
 
 //-----------------------------------------------------------------------------
-void assemble(GenericTensor& A, Form& form, bool reset_tensor)
+void assemble( GenericTensor & A, Form & form, bool reset_tensor )
 {
-OPENMP_PRAGMA( parallel )
-  assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
+  OPENMP_PRAGMA( parallel )
+  assemble( A, form, form.coefficients(), form.dofmaps(),
+            nullptr, nullptr, nullptr, reset_tensor );
 }
 //-----------------------------------------------------------------------------
 void assemble(GenericTensor& A, Form& form,
@@ -90,10 +93,10 @@ void assemble(GenericTensor& A, Form& form,
   Mesh& mesh = form.mesh();
 
   // Extract cell domains
-  MeshValues<uint, Cell>* cell_domains = NULL;
+  MeshValues<uint, Cell>* cell_domains = nullptr;
 
   // Extract facet domains
-  MeshValues<uint, Facet>* facet_domains = NULL;
+  MeshValues<uint, Facet>* facet_domains = nullptr;
 
 OPENMP_PRAGMA( master )
   {
@@ -162,9 +165,9 @@ OPENMP_PRAGMA( master )
 
 
     // Update all ghost degrees of freedom
-    for (uint i = 0; i < coefficients.size(); ++i)
+    for ( Coefficient * coeff : coefficients )
     {
-      coefficients[i]->sync();
+      coeff->sync();
     }
   }
 OPENMP_PRAGMA( flush )
@@ -215,7 +218,7 @@ OPENMP_PRAGMA( for )
     Cell& cell = it[i];
 
     // Get integral for sub domain (if any)
-    if ((domains != NULL) && domains->size() > 0)
+    if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(cell);
       if (domain < ufc.form.num_cell_integrals())
@@ -288,7 +291,7 @@ OPENMP_PRAGMA( for )
     Facet& facet = it[exterior_boundary.facet_index(i)];
 
     // Get integral for sub domain (if any)
-    if ((domains != NULL) && domains->size() > 0)
+    if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(facet);
       if (domain < ufc.form.num_exterior_facet_integrals())
@@ -365,7 +368,7 @@ OPENMP_PRAGMA( for )
     Facet& facet = it[i];
 
     // Get integral for sub domain (if any)
-    if ((domains != NULL) && domains->size() > 0)
+    if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(facet);
       if (domain < ufc.form.num_interior_facet_integrals())

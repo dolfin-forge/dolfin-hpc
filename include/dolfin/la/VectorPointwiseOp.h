@@ -7,9 +7,16 @@
 namespace dolfin
 {
 
-  // List of predefined pointwise operations
+// List of predefined pointwise operations
 
-  enum VectorPointwiseOp {pw_min, pw_max, pw_mult, pw_div, pw_maxabs};
+enum VectorPointwiseOp
+{
+  pw_min,
+  pw_max,
+  pw_mult,
+  pw_div,
+  pw_maxabs
+};
 
 }
 

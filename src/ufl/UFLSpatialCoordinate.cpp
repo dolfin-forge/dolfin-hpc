@@ -20,8 +20,7 @@ SpatialCoordinate::SpatialCoordinate(Cell const& cell) :
 
 //-----------------------------------------------------------------------------
 SpatialCoordinate::~SpatialCoordinate()
-{
-}
+= default;
 
 //-----------------------------------------------------------------------------
 bool SpatialCoordinate::is_cellwise_constant()

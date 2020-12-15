@@ -1,16 +1,18 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <iostream>
-
-#include <dolfin/main/PE.h>
-#include <dolfin/log/log.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/Cell.h>
+
+#include <dolfin/log/log.h>
+#include <dolfin/main/PE.h>
+#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexIterator.h>
+
+#include <iostream>
 
 namespace dolfin
 {
@@ -23,7 +25,7 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(false),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -35,7 +37,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
     boundary_of_boundary_(true),
     cell_map_(),
     vertex_map_(),
-    subdomain_(NULL)
+    subdomain_(nullptr)
 {
   init(mesh, type);
 }
@@ -164,7 +166,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
     //
     uint const d = mesh.type().facet_dim();
     uint const num_facet_vertices = mesh.type().num_vertices(d);
-    uint * facet_vertices = new uint[num_facet_vertices];
+    Array< uint > facet_vertices( num_facet_vertices );
     for (uint i = 0; i < cell_map_.size(); ++i)
     {
       Cell c(boundary, cell_map_[i]);
@@ -173,9 +175,8 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
       {
         facet_vertices[v.pos()] = boundary_vertices[v->index()];
       }
-      editor.add_cell(i, &facet_vertices[0]);
+      editor.add_cell(i, facet_vertices.data() );
     }
-    delete[] facet_vertices;
 
     // If the mesh is distributed, set global numbering and copy the ownership
     if (mesh.is_distributed())
@@ -190,40 +191,6 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
 BoundaryMesh::~BoundaryMesh()
 {
   // Do nothing
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::facet_index(Cell const& boundary_cell) const
-{
-  dolfin_assert(&boundary_cell.mesh() == this);
-  return cell_map_[boundary_cell.index()];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::facet_index(uint boundary_cell_index) const
-{
-  dolfin_assert(boundary_cell_index < cell_map_.size());
-  return cell_map_[boundary_cell_index];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex) const
-{
-  dolfin_assert(&boundary_vertex.mesh() == this);
-  return vertex_map_[boundary_vertex.index()];
-}
-//-----------------------------------------------------------------------------
-uint BoundaryMesh::vertex_index(uint boundary_vertex_index) const
-{
-  dolfin_assert(boundary_vertex_index < vertex_map_.size());
-  return vertex_map_[boundary_vertex_index];
-}
-//-----------------------------------------------------------------------------
-BoundaryMesh::Type BoundaryMesh::boundary_type() const
-{
-  return type_;
-}
-//-----------------------------------------------------------------------------
-bool BoundaryMesh::is_boundary_of_boundary() const
-{
-  return boundary_of_boundary_;
 }
 //-----------------------------------------------------------------------------
 void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
@@ -248,7 +215,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       bool const shrd = v->is_shared();
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if ((subdomain_ == NULL) || (subdomain_->inside(v->x(), bndr && !shrd)))
+        if ((subdomain_ == nullptr) || (subdomain_->inside(v->x(), bndr && !shrd)))
         {
           vertex_map_.push_back(v->index());
         }
@@ -280,7 +247,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     vertex_map_.clear();
 
     uint const pe_size = PE::size();
-    Array<uint> * shared_vertices = new Array<uint>[pe_size];
+    Array< Array<uint> > shared_vertices( pe_size );
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)
     {
@@ -296,7 +263,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 #endif
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
-        if (subdomain_ != NULL)
+        if (subdomain_ != nullptr)
         {
           bool inside = false;
           for (VertexIterator v(*f); !v.end(); ++v)
@@ -343,13 +310,9 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       MPI_Status status;
       DistributedData const& distdata = mesh.distdata()[0];
       _set<uint> const& vadjs = distdata.get_adj_ranks();
-      uint recvmax = shared_vertices[0].size();
-      for (uint j = 1; j < pe_size; ++j)
-      {
-        recvmax = std::max(recvmax, (uint) shared_vertices[j].size());
-      }
-      MPI::all_reduce<MPI::max>(recvmax, recvmax);
-      uint * recvbuf = new uint[recvmax];
+      uint recvmax = max_array_size( shared_vertices );
+      MPI::all_reduce_in_place<MPI::max>( recvmax );
+      Array< uint > recvbuf( recvmax );
       int recvcount;
 
       _set<uint> added_vertices(vertex_map_.begin(), vertex_map_.end());
@@ -368,8 +331,8 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI::check_error( MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj),
-                                   0, MPI::DOLFIN_COMM, &status) );
+        MPI::check_error( MPI_Recv(recvbuf.data(), recvbuf.size(), MPI_UNSIGNED,
+                                   (*adj), 0, MPI::DOLFIN_COMM, &status) );
         MPI::check_error( MPI_Get_count(&status, MPI_UNSIGNED, &recvcount) );
         for(int k = 0; k < recvcount; ++k)
         {
@@ -382,13 +345,9 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
           }
         }
       }
-      //
-      delete [] recvbuf;
 
 #endif /* DOLFIN_HAVE_MPI */
     }
-
-    delete [] shared_vertices;
 
     // Create boundary vertices and cells
     MeshEditor editor(*this, mesh.type().facetType(), gdim);
@@ -400,7 +359,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     editor.init_cells(cell_map_.size());
     uint const d = mesh.type().facet_dim();
     uint const num_facet_vertices = mesh.type().num_vertices(d);
-    uint * facet_vertices = new uint[num_facet_vertices];
+    Array< uint > facet_vertices( num_facet_vertices );
     CellType const& celltype = mesh.type();
     for (uint i = 0; i < cell_map_.size(); ++i)
     {
@@ -410,10 +369,9 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
         facet_vertices[v] = boundary_vertices[facet.entities(0)[v]];
       }
       // Reorder vertices so facet is right-oriented w.r.t. facet normal
-      celltype.order_facet(&facet_vertices[0], facet);
-      editor.add_cell(i, &facet_vertices[0]);
+      celltype.order_facet(facet_vertices.data(), facet);
+      editor.add_cell(i, facet_vertices.data());
     }
-    delete [] facet_vertices;
 
     // If the mesh is distributed, set global numbering and copy the ownership
     if(mesh.is_distributed())

@@ -8,6 +8,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
@@ -50,11 +51,6 @@ PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain) :
 PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
                        SubSystem const& sub_system) :
     BoundaryCondition("Periodic", mesh, sub_domain, sub_system)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-PeriodicBC::~PeriodicBC()
 {
   // Do nothing
 }

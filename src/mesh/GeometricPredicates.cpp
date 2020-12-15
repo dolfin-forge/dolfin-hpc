@@ -1,10 +1,11 @@
 // Copyright (C) 1999 Jonathan Richard Shewchuk
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <dolfin/mesh/GeometricPredicates.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
 namespace dolfin
 {
@@ -667,7 +668,7 @@ static float uniformfloatrand()
 /*                                                                           */
 /*****************************************************************************/
 
-static int fast_expansion_sum_zeroelim(int elen, REAL *e, 
+static int fast_expansion_sum_zeroelim(int elen, REAL *e,
 				       int flen, REAL *f, REAL *h)
      /* h cannot be e or f. */
 {
@@ -1421,7 +1422,7 @@ REAL orient3d(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
   adxbdy = adx * bdy;
   bdxady = bdx * ady;
 
-  det = adz * (bdxcdy - cdxbdy) 
+  det = adz * (bdxcdy - cdxbdy)
       + bdz * (cdxady - adxcdy)
       + cdz * (adxbdy - bdxady);
 
@@ -2047,7 +2048,7 @@ REAL incircle(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
   REAL inc;
 
   FPU_ROUND_DOUBLE;
-  
+
   adx = pa[0] - pd[0];
   bdx = pb[0] - pd[0];
   cdx = pc[0] - pd[0];

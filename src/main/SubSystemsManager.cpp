@@ -66,6 +66,11 @@ int SubSystemsManager::initialize( int    argc,
 {
   if ( count_ == 0 )
   {
+    char const * verbosity = std::getenv( "DOLFIN_VERBOSE" );
+    if ( verbosity != nullptr )
+    {
+      verbose( std::atoi( verbosity ) );
+    }
 
 #ifdef DOLFIN_HAVE_MPI
     SubSystemsManager::MPI::initialize( argc, argv, n );

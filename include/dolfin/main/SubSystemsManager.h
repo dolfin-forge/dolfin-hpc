@@ -38,7 +38,7 @@ public:
   };
 
   //-------------------------------------------------------------------------
-  static int start( int  argc = 0, char * argv[]  = NULL,
+  static int start( int  argc = 0, char * argv[]  = nullptr,
                     uint n    = 0, long   w_limit = 0 )
   {
     return SubSystemsManager::instance().initialize( argc, argv, n, w_limit );
@@ -62,7 +62,7 @@ public:
     static SubSystemsManager::Type const flag = mpi;
 
     /// Initialize MPI
-    static bool initialize( int argc = 0, char * argv[] = NULL, uint n = 0 );
+    static bool initialize( int argc = 0, char * argv[] = nullptr, uint n = 0 );
 
     /// Finalize MPI
     static bool finalize();
@@ -80,7 +80,7 @@ public:
     static SubSystemsManager::Type const flag = petsc;
 
     /// Initialize PETSc with command-line arguments
-    static bool initialize( int argc = 0, char * argv[] = NULL );
+    static bool initialize( int argc = 0, char * argv[] = nullptr );
 
     /// Finalize PETSc
     static bool finalize();
@@ -107,7 +107,7 @@ public:
     static SubSystemsManager::Type const flag = zoltan;
 
     /// Initialize PETSc with command-line arguments
-    static bool initialize( int argc = 0, char * argv[] = NULL );
+    static bool initialize( int argc = 0, char * argv[] = nullptr );
 
     /// Finalize PETSc
     static bool finalize();
@@ -122,7 +122,7 @@ public:
     static SubSystemsManager::Type const flag = trilinos;
 
     /// Initialize Trilinos with command-line arguments
-    static bool initialize( int argc = 0, char * argv[] = NULL );
+    static bool initialize( int argc = 0, char * argv[] = nullptr );
 
     /// Finalize Trilinos
     static bool finalize();
@@ -148,12 +148,12 @@ public:
   }
 
 private:
-  int initialize( int  argc = 0, char * argv[]  = NULL,
+  int initialize( int  argc = 0, char * argv[]  = nullptr,
                   uint n    = 0, long   w_limit = 0 );
   int finalize();
 
   // Constructor
-  SubSystemsManager();
+  SubSystemsManager() = default;
 
   // Copy constructor
   SubSystemsManager( SubSystemsManager const & other );
@@ -183,8 +183,8 @@ private:
   }
 
   // State variable
-  int count_;
-  int state_;
+  int count_{0};
+  int state_{0};
 
   // Alarm handler
   alarm timer_;

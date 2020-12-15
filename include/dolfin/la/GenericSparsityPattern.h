@@ -9,8 +9,6 @@
 namespace dolfin
 {
 
-template<class T> class Array;
-
 /// Base class for sparsity patterns of vectors/matrices. Concrete
 /// sub classes can be used to initialize vectors and sparse
 /// matrices.
@@ -21,14 +19,10 @@ class GenericSparsityPattern
 public:
 
   /// Constructor
-  GenericSparsityPattern()
-  {
-  }
+  GenericSparsityPattern() = default;
 
   /// Destructor
-  virtual ~GenericSparsityPattern()
-  {
-  }
+  virtual ~GenericSparsityPattern() = default;
 
   /// Initialize sparsity pattern for a generic tensor
   virtual void init(uint rank, uint const * dim, uint const * range) = 0;

@@ -12,6 +12,7 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/UnitInterval.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <dolfin/dolfin.h>
@@ -182,20 +183,14 @@ DOLFIN_START_TEST( test_BinaryFile_Poisson )
 
       u.disp();
 
-      {
-        BinaryFile fo("u.bin");
-        fo << u;
-      }
+      BinaryFile("u.bin") << u;
 
       message("vector l2  norm: %e", u.vector().norm());
       message("vector inf norm: %e", u.vector().max());
 
       Function v(a.trial_space());
 
-      {
-        BinaryFile fi("u000000.bin");
-        fi >> v;
-      }
+      BinaryFile("u000000.bin") >> v;
     }
   }
 DOLFIN_END_TEST

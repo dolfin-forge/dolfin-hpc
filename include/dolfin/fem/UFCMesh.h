@@ -31,10 +31,10 @@ public:
   }
 
   /// Destructor
-  ~UFCMesh()
+  ~UFCMesh() override
   {
     delete[] num_entities;
-    num_entities = NULL;
+    num_entities = nullptr;
   }
 
   /// Create UFC mesh from DOLFIN mesh

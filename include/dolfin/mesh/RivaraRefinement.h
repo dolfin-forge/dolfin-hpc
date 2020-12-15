@@ -9,19 +9,19 @@
 
 namespace dolfin
 {
-  class Mesh;
 
-  class RivaraRefinement
-  {
-  public:
-    
-    /// Refine simplicial mesh locally by recursive edge bisection 
-    static void refine(Mesh& mesh, 
-                       MeshValues<bool, Cell>& cell_marker,
-                       real tf = 0.0, 
-                       real tb = 0.0, 
-                       real ts = 0.0,
-                       bool balance = true);
-  };
-}
+class Mesh;
+
+namespace RivaraRefinement
+{
+
+/// Refine simplicial mesh locally by recursive edge bisection
+void refine( Mesh& mesh, MeshValues< bool, Cell > & cell_marker,
+             real tf = 0.0, real tb = 0.0, real ts = 0.0,
+             bool balance = true );
+
+} // end namespce RivaraRefinement
+
+} // end namespce dolfin
+
 #endif

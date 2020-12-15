@@ -4,11 +4,10 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 
 #include <dolfin/elements/ElementLibrary.h>
-#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 
-#include <cstring>
+#include <string>
 
 namespace dolfin
 {
@@ -134,37 +133,6 @@ FiniteElementSpace::~FiniteElementSpace()
 }
 
 //-----------------------------------------------------------------------------
-bool FiniteElementSpace::operator ==(FiniteElementSpace const& other) const
-{
-  return (this->mesh() == other.mesh()) && (this->element() == other.element())
-      && (this->dofmap() == other.dofmap());
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElementSpace::operator !=(FiniteElementSpace const& other) const
-{
-  return !(*this == other);
-}
-
-//-----------------------------------------------------------------------------
-Cell& FiniteElementSpace::cell() const
-{
-  return cell_;
-}
-
-//-----------------------------------------------------------------------------
-FiniteElement const& FiniteElementSpace::element() const
-{
-  return finite_element_;
-}
-
-//-----------------------------------------------------------------------------
-DofMap const& FiniteElementSpace::dofmap() const
-{
-  return dof_map_;
-}
-
-//-----------------------------------------------------------------------------
 Array<FiniteElementSpace *> FiniteElementSpace::flatten() const
 {
   Array<FiniteElementSpace *> flt;
@@ -188,39 +156,6 @@ void FiniteElementSpace::disp() const
   prm("Finite element", this->element().signature());
   prm("Dof map"       , this->dofmap().signature());
   end();
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElementSpace::is_cellwise_defined() const
-{
-  return (mesh_.num_global_cells() * dof_map_.local_dimension())
-      == dof_map_.global_dimension();
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElementSpace::is_cellwise_constant() const
-{
-  return is_cellwise_defined()
-      && (dof_map_.local_dimension() == finite_element_.value_size());
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElementSpace::is_vertex_based() const
-{
-  /// @todo Only a particular case.
-  return (this->family() == ufl::Family::CG) && (this->degree() == 1);
-}
-
-//-----------------------------------------------------------------------------
-bool FiniteElementSpace::is_flattenable() const
-{
-  /// @todo Only a particular case.
-  uint value_size = 1;
-  for(uint i = 0; i < this->element().value_rank(); ++i)
-  {
-    value_size *= this->element().value_dimension(i);
-  }
-  return (this->element().flatten().size() == value_size);
 }
 
 //-----------------------------------------------------------------------------

@@ -20,9 +20,9 @@ void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
   const std::string method = dolfin_get<std::string>("Mesh partitioner");
 
   if (method == "parmetis")
-    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, 0);
+    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, nullptr);
   else if (method == "zoltan")
-    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, 0);
+    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, nullptr);
   else
     error("Unknown mesh partitioner");
 }

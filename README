@@ -12,7 +12,7 @@ several different architectures such as SGI Origin systems, IBM
 BlueGene/L and Cray XT6-XE6 systems.
 
 
-The package dependencies of DOLFIN HPC 0.9.1 are:
+The package dependencies of DOLFIN HPC 0.9.4 are:
 
     * ufc 2.2.0-hpc (https://bitbucket.org/adaptivesimulations/ufc2-hpc)
     * ffc 1.1.0-hpc (https://bitbucket.org/adaptivesimulations/ffc-hpc)

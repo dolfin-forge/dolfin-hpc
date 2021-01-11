@@ -8,8 +8,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/fem/Form.h>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 

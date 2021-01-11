@@ -4,10 +4,9 @@
 #ifndef __DOLFIN_GENERIC_FUNCTION_H
 #define __DOLFIN_GENERIC_FUNCTION_H
 
-#include <dolfin/fem/Coefficient.h>
 #include <dolfin/common/Variable.h>
-
-#include <ufc.h>
+#include <dolfin/fem/Coefficient.h>
+#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {

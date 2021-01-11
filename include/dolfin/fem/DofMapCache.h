@@ -7,8 +7,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Mesh.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 #include <string>
 

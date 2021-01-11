@@ -7,8 +7,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 #include <cstring>
 #include <string>

@@ -254,6 +254,8 @@ nobase_pkginclude_HEADERS = \
 				quadrature/QuadratureRule.h\
 				quadrature/RadauQuadrature.h\
 				quadrature/UFCReferenceCell.h\
+				ufc/ufc.h\
+				ufc/ufc_geometry.h\
 				ufl/dolfin_ufl.h\
 				ufl/UFL_tuple.h\
 				ufl/UFLAlgebra.h\

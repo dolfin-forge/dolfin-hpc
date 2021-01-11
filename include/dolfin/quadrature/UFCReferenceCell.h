@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_UFC_REFERENCE_CELL_H
 #define __DOLFIN_UFC_REFERENCE_CELL_H
 
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 //#include <dolfin/config/dolfin_config.h>
 //#include <dolfin/common/types.h>

@@ -4,9 +4,8 @@
 #ifndef __DOLFIN_UFC_MESH_H
 #define __DOLFIN_UFC_MESH_H
 
-#include <ufc.h>
-
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {

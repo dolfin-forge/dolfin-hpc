@@ -8,8 +8,7 @@
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/FiniteElementSpace.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 #include <string>
 

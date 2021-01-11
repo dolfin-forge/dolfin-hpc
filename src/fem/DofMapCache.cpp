@@ -9,8 +9,6 @@
 
 #include <iomanip>
 
-#include <ufc.h>
-
 namespace dolfin
 {
 

@@ -4,9 +4,8 @@
 #ifndef __DOLFIN_ELEMENT_LIBRARY_H
 #define __DOLFIN_ELEMENT_LIBRARY_H
 
+#include <dolfin/ufc/ufc.h>
 #include <dolfin/ufl/UFLElementList.h>
-
-#include <ufc.h>
 
 #include <string>
 

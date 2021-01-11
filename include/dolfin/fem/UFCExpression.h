@@ -5,8 +5,7 @@
 #define __DOLFIN_UFC_EXPRESSION_H
 
 #include <dolfin/function/Expression.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {

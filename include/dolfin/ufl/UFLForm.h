@@ -4,11 +4,10 @@
 #ifndef __DOLFIN_UFL_FORM_H
 #define __DOLFIN_UFL_FORM_H
 
+#include <dolfin/ufc/ufc.h>
 #include <dolfin/ufl/UFLFormData.h>
 #include <dolfin/ufl/UFLList.h>
 #include <dolfin/ufl/UFL_tuple.h>
-
-#include <ufc.h>
 
 namespace ufl
 {

@@ -8,8 +8,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/DofMap.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 #include <string>
 

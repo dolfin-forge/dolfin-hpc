@@ -7,8 +7,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/UFCMesh.h>
-
-#include <ufc.h>
+#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {

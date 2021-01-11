@@ -31,7 +31,7 @@ namespace dolfin
 using real     = double;
 
 // Unsigned integers
-using uint     = unsigned int;
+using uint     = std::size_t;
 
 // Index type (at least 64bit)
 using uidx     = uint64_t;

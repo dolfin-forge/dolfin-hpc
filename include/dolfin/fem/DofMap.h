@@ -74,14 +74,9 @@ public:
   /// Return the topological dimension of the associated cell shape
   uint topological_dimension() const override;
 
-  /// Return the geometric dimension of the coordinates this dof map provides
-  uint geometric_dimension() const override;
-
   /// Return the dimension of the global finite element function space
-  uint global_dimension() const override;
-
-  /// Return the dimension of the local finite element function space
-  uint local_dimension() const override;
+  uint global_dimension(
+    std::vector< uint > const & num_global_mesh_entities ) const override;
 
   /// Return number of facet dofs
   uint num_facet_dofs() const override;
@@ -101,9 +96,9 @@ public:
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
   void tabulate_entity_dofs(uint* dofs, uint d, uint i) const override;
 
-  /// Tabulate the coordinates of all dofs on a cell
-  void tabulate_coordinates(real** coordinates,
-                            const ufc::cell& ufc_cell) const override;
+  // /// Tabulate the coordinates of all dofs on a cell
+  // void tabulate_coordinates(real** coordinates,
+  //                           const ufc::cell& ufc_cell) const override;
 
   //// Return the number of sub dof maps (for a mixed element)
   uint num_sub_dofmaps() const override;
@@ -116,8 +111,9 @@ public:
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
-  /// Return the dimension of the local finite element function space
-  uint macro_local_dimension() const;
+  /// FIXME
+  // /// Return the dimension of the local finite element function space
+  // uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
   /// FIXME
@@ -303,21 +299,10 @@ inline uint DofMap::topological_dimension() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::geometric_dimension() const
+inline uint DofMap::global_dimension(
+  std::vector< std::size_t > const & num_global_mesh_entities) const
 {
-  return ufc_dofmap_->geometric_dimension();
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::global_dimension() const
-{
-  return ufc_dofmap_->global_dimension();
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::local_dimension() const
-{
-  return ufc_dofmap_->local_dimension();
+  return ufc_dofmap_->global_dimension(num_global_mesh_entities);
 }
 
 //-----------------------------------------------------------------------------
@@ -354,11 +339,11 @@ inline void DofMap::tabulate_entity_dofs( uint * dofs, uint d, uint i ) const
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_coordinates( real **           coordinates,
-                                          const ufc::cell & ufc_cell ) const
-{
-  ufc_dofmap_->tabulate_coordinates( coordinates, ufc_cell );
-}
+// inline void DofMap::tabulate_coordinates( real **           coordinates,
+//                                           const ufc::cell & ufc_cell ) const
+// {
+//   ufc_dofmap_->tabulate_coordinates( coordinates, ufc_cell );
+// }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::num_sub_dofmaps() const
@@ -379,10 +364,10 @@ inline ufc::dofmap * DofMap::create() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::macro_local_dimension() const
-{
-  return 2 * ufc_dofmap_->local_dimension();
-}
+// inline uint DofMap::macro_local_dimension() const
+// {
+//   return 2 * ufc_dofmap_->local_dimension();
+// }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_dofs( uint *            dofs,

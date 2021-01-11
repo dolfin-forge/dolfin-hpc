@@ -4,8 +4,8 @@
 #ifndef __DOLFIN_UFC_CELL_H
 #define __DOLFIN_UFC_CELL_H
 
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshDistributedData.h>
@@ -22,105 +22,125 @@ class UFCCell : public ufc::cell
   friend class UFCCellIterator;
 
 public:
-
   /// Create empty UFC cell
-  UFCCell()
-    : ufc::cell()
-  {
-  }
+  UFCCell();
 
   /// Create UFC cell from DOLFIN cell
-  UFCCell(Cell& dolfin_cell) :
-      ufc::cell(),
-      cell_(&dolfin_cell),
-      num_vertices(0)
-  {
-    init(dolfin_cell);
-  }
+  UFCCell( Cell & dolfin_cell );
 
   /// Copy constructor
-  UFCCell(UFCCell const& other) :
-      ufc::cell(),
-      cell_(other.cell_),
-      num_vertices(0)
-  {
-    if (cell_ != nullptr) init(*const_cast<Cell*>(cell_));
-  }
+  UFCCell( UFCCell const & other );
 
   /// Destructor
-  ~UFCCell() override
-  {
-    clear();
-  }
-
-private:
-
-  //
-  Cell const * cell_{nullptr};
+  ~UFCCell();
 
 public:
-
   /// Dereference operator, returns a reference to the underlying Cell
-  inline Cell const& operator*() const { return *cell_; };
-
-  // Number of cell vertices
-  uint num_vertices{0};
+  inline Cell const & operator*() const;
 
   // Initialize UFC cell data
-  void init(Cell& cell);
+  void init( Cell & cell );
 
   // Update cell entities to global indices and coordinates
-  void update(Cell& cell);
+  void update( Cell & cell );
 
   ///
-  static ufc::shape shape(CellType::Type type)
-  {
-    switch (type)
-      {
-      case CellType::interval:
-        return ufc::interval;
-        break;
-      case CellType::triangle:
-        return ufc::triangle;
-        break;
-      case CellType::tetrahedron:
-        return ufc::tetrahedron;
-        break;
-      case CellType::quadrilateral:
-        return ufc::quadrilateral;
-        break;
-      case CellType::hexahedron:
-        return ufc::hexahedron;
-        break;
-      default:
-        error("UFCCell : unknown cell type.");
-        break;
-      }
-    return ufc::interval;
-  }
+  static ufc::shape shape( CellType::Type type );
+
+  // Number of cell vertices
+  uint num_vertices { 0 };
 
 private:
+  // access to dolfin cell
+  Cell const * cell_ { nullptr };
 
   // Clear UFC cell data
   void clear();
-
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-inline void UFCCell::init(Cell& cell)
+UFCCell::UFCCell()
+  : ufc::cell()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+UFCCell::UFCCell( Cell & dolfin_cell )
+  : ufc::cell()
+  , cell_( &dolfin_cell )
+{
+  init( dolfin_cell );
+}
+
+//-----------------------------------------------------------------------------
+
+UFCCell::UFCCell( UFCCell const & other )
+  : ufc::cell()
+  , cell_( other.cell_ )
+{
+  if ( cell_ != nullptr )
+    init( *const_cast< Cell * >( cell_ ) );
+}
+
+//-----------------------------------------------------------------------------
+
+UFCCell::~UFCCell()
+{
+  clear();
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell const & UFCCell::operator*() const
+{
+  return *cell_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline ufc::shape UFCCell::shape( CellType::Type type )
+{
+  switch ( type )
+  {
+    case CellType::interval:
+      return ufc::shape::interval;
+      break;
+    case CellType::triangle:
+      return ufc::shape::triangle;
+      break;
+    case CellType::tetrahedron:
+      return ufc::shape::tetrahedron;
+      break;
+    case CellType::quadrilateral:
+      return ufc::shape::quadrilateral;
+      break;
+    case CellType::hexahedron:
+      return ufc::shape::hexahedron;
+      break;
+    default:
+      error( "UFCCell : unknown cell type." );
+      break;
+  }
+  return ufc::shape::interval;
+}
+
+//-----------------------------------------------------------------------------
+
+inline void UFCCell::init( Cell & cell )
 {
   // Clear old data
   clear();
+
+  //
+  num_vertices = cell.num_entities( 0 );
 
   // Update dolfin cell pointer
   this->cell_ = &cell;
 
   // Set cell shape
-  cell_shape = shape(cell.type());
-
-  //
-  num_vertices = cell.num_entities(0);
+  cell_shape = shape( cell.type() );
 
   // Set topological dimension
   topological_dimension = cell.dim();
@@ -129,75 +149,69 @@ inline void UFCCell::init(Cell& cell)
   geometric_dimension = cell.mesh().geometry_dimension();
 
   // Set entity indices
-  entity_indices = new uint*[topological_dimension + 1];
-  entity_indices[topological_dimension] = new uint[1];
-  entity_indices[topological_dimension][0] = cell.global_index();
+  entity_indices.resize( topological_dimension + 1 );
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
   // In any case store topological data in object
-  for (uint d = 0; d < topological_dimension; ++d)
+  for ( uint d = 0; d < topological_dimension; ++d )
   {
-    entity_indices[d] = new uint[cell.num_entities(d)];
-    for (uint i = 0; i < cell.num_entities(d); ++i)
-    {
-      entity_indices[d][i] = (cell.entities(d))[i];
-    }
+    entity_indices[d] = cell.entities( d );
   }
 
+  entity_indices[topological_dimension] =
+    std::vector< std::size_t >( 1, cell.global_index() );
+
+  /// FIXME still needed ?!
   /// Set vertex coordinates
-  Array<uint> const & vertices = cell.entities(0);
-  coordinates = new real*[num_vertices];
-  for (uint i = 0; i < num_vertices; ++i)
-  {
-    coordinates[i] = cell.mesh().geometry().x(vertices[i]);
-  }
+  // Array< uint > const & vertices = cell.entities( 0 );
+  // coordinates                    = new real *[num_vertices];
+  // for ( uint i = 0; i < num_vertices; ++i )
+  // {
+  //   coordinates[i] = cell.mesh().geometry().x( vertices[i] );
+  // }
 }
 
 //-----------------------------------------------------------------------------
+
 inline void UFCCell::clear()
 {
-  if (entity_indices)
-  {
-    for (uint i = 0; i < (topological_dimension + 1); ++i)
-    {
-      delete[] entity_indices[i];
-    }
-    delete[] entity_indices;
-  }
-  entity_indices = nullptr;
+  entity_indices.clear();
 
-  delete[] coordinates;
-  coordinates = nullptr;
+  // FIXME
+  // delete[] coordinates;
+  // coordinates = nullptr;
 
-  cell_shape = ufc::interval;
+  cell_shape            = ufc::shape::interval;
   topological_dimension = 0;
-  geometric_dimension = 0;
+  geometric_dimension   = 0;
 }
 
 //-----------------------------------------------------------------------------
-inline void UFCCell::update(Cell& cell)
+
+inline void UFCCell::update( Cell & cell )
 {
   // Update dolfin cell pointer
   this->cell_ = &cell;
 
 #if ENABLE_P1_OPTIMIZATIONS
-  cell.get_global_entities(0, entity_indices[0]);
+  cell.get_global_entities( 0, entity_indices[0].data() );
 #else
-  cell.get_global_entities(entity_indices);
+  cell.get_global_entities( entity_indices );
 #endif
   entity_indices[topological_dimension][0] = cell.global_index();
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-  /// Set vertex coordinates
-  Array<uint> const & vertices = cell.entities(0);
-  for (uint i = 0; i < num_vertices; ++i)
-  {
-    coordinates[i] = cell.mesh().geometry().x(vertices[i]);
-  }
+  /// FIXME still needed ?!
+  // /// Set vertex coordinates
+  // Array< uint > const & vertices = cell.entities( 0 );
+  // for ( uint i = 0; i < num_vertices; ++i )
+  // {
+  //   coordinates[i] = cell.mesh().geometry().x( vertices[i] );
+  // }
 }
 
 //-----------------------------------------------------------------------------

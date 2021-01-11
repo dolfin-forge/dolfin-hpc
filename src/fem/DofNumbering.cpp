@@ -4,7 +4,6 @@
 #include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/UFCMesh.h>
 #include <dolfin/mesh/Mesh.h>
 
 // For factory function
@@ -177,23 +176,6 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     {
       mesh.init(d);
     }
-  }
-
-  // Initialize UFC mesh data after entities are created since global sizes may
-  // otherwise be incorrect.
-  UFCMesh ufc_mesh(mesh);
-
-  // Initialize UFC dof map
-  if (ufc_dofmap.init_mesh(ufc_mesh))
-  {
-    CellIterator cell(mesh);
-    UFCCell ufc_cell(*cell);
-    for (; !cell.end(); ++cell)
-    {
-      ufc_cell.update(*cell);
-      ufc_dofmap.init_cell(ufc_mesh, ufc_cell);
-    }
-    ufc_dofmap.init_cell_finalize();
   }
 
   message(1, "DofNumbering: initialized UFC dofmap with global dimension %u",

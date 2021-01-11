@@ -14,7 +14,6 @@ namespace dolfin
 class Cell;
 class Mesh;
 class UFCCell;
-class UFCMesh;
 
 /**
  *  @class  DofNumbering

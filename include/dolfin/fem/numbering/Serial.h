@@ -18,11 +18,9 @@ class SerialNumbering : public DofNumbering
 {
 
 public:
-
   ///
-  SerialNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
-      DofNumbering(mesh, ufc_dofmap),
-      ufc_mesh_(mesh)
+  SerialNumbering( Mesh & mesh, ufc::dofmap & ufc_dofmap )
+    : DofNumbering( mesh, ufc_dofmap )
   {
   }
 
@@ -30,10 +28,11 @@ public:
   ~SerialNumbering() override = default;
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
-                            Cell const&) const override
+  inline void tabulate_dofs( uint *            dofs,
+                             ufc::cell const & ufc_cell,
+                             Cell const & ) const override
   {
-    ufc_dofmap.tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
+    ufc_dofmap.tabulate_dofs( dofs, ufc_cell );
   }
 
   ///
@@ -41,23 +40,32 @@ public:
   {
     DofNumbering::init();
     //---
-    if (mesh.is_distributed())
+    if ( mesh.is_distributed() )
     {
-      error("SerialNumbering : can only be used for a serial mesh");
+      error( "SerialNumbering : can only be used for a serial mesh" );
     }
     //---
-    ufc_mesh_.update();
-    set_range(0, ufc_dofmap.global_dimension());
+
+    /// FIXME (maybe?!) this was ufcmesh.update()
+    // for (uint d = 0; d <= topological_dimension; ++d)
+    // {
+    //   if (mesh->topology().connectivity(d))
+    //   {
+    //     num_entities[d] = mesh->topology().global_size(d);
+    //   }
+    // }
+
+    set_range( 0, ufc_dofmap.global_dimension() );
   }
 
   ///
-  inline bool is_shared(uint) const override
+  inline bool is_shared( uint ) const override
   {
     return false;
   }
 
   ///
-  inline bool is_ghost(uint) const override
+  inline bool is_ghost( uint ) const override
   {
     return false;
   }
@@ -65,14 +73,8 @@ public:
   ///
   inline std::string description() const override
   {
-    return std::string("Dof numbering for serial UFC backend");
+    return std::string( "Dof numbering for serial UFC backend" );
   }
-
-private:
-
-  ///
-  UFCMesh ufc_mesh_;
-
 };
 
 } /* namespace dolfin */

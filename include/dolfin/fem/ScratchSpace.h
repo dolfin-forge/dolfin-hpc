@@ -5,7 +5,6 @@
 #define __DOLFIN_SCRATCH_SPACE_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/ufc/ufc.h>
 
@@ -37,9 +36,6 @@ public:
 
   // Destructor
   ~ScratchSpace();
-
-  // UFC Mesh
-  UFCMesh mesh;
 
   // UFC Cell
   UFCCell cell;

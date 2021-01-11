@@ -67,7 +67,6 @@ public:
      * This is a naive and inefficient renumbering hastly coded, sorry...
      */
 
-    UFCMesh ufc_mesh(mesh);
     uint const tdim = mesh.topology_dimension();
     uint * dofs = new uint[ufc_dofmap.local_dimension()];
     _set<uint> owned;

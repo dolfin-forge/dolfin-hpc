@@ -20,7 +20,6 @@ class Cell;
 class Form;
 class Mesh;
 class SubSytem;
-class UFCMesh;
 
 /// This class handles the mapping of degrees of freedom.
 /// It wraps a ufc::dofmap on a specific mesh and provides
@@ -64,80 +63,55 @@ public:
   /// Release a token for the given dofmap
   static void release(DofMap& dofmap);
 
-  //--- INTERFACE -------------------------------------------------------------
-  /// @remark Exposes a subset of UFC v2.0
+  //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Return a string identifying the dof map
-  /// UFC @since 1.1
   char const * signature() const override;
 
   /// Return true iff mesh entities of topological dimension d are needed
-  /// UFC @since 1.1
   bool needs_mesh_entities(uint d) const override;
 
-  /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-  /// UFC @since 1.1
-  bool init_mesh(const ufc::mesh& mesh) override;
-
-  /// Initialize dofmap for given cell
-  /// UFC @since 1.1
-  void init_cell(const ufc::mesh& m, const ufc::cell& c) override;
-
-  /// Finish initialization of dofmap for cells
-  /// UFC @since 1.1
-  void init_cell_finalize() override;
-
   /// Return the topological dimension of the associated cell shape
-  /// UFC @since 2.0
   uint topological_dimension() const override;
 
   /// Return the geometric dimension of the coordinates this dof map provides
-  /// UFC @since 1.1 but not implemented
   uint geometric_dimension() const override;
 
   /// Return the dimension of the global finite element function space
-  /// UFC @since 1.1
   uint global_dimension() const override;
 
   /// Return the dimension of the local finite element function space
-  /// UFC @since 1.1
   uint local_dimension() const override;
 
   /// Return number of facet dofs
-  /// UFC @since 1.1
   uint num_facet_dofs() const override;
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  /// UFC @since 1.1 but not implemented
   uint num_entity_dofs(uint d) const override;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  /// UFC @since 1.1, specific cell local versions are called in priority
-  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const override;
+  void tabulate_dofs( std::size_t *                      dofs,
+                      std::vector< std::size_t > const & num_global_entities,
+                      std::vector< std::vector< std::size_t > > const &
+                        entity_indices ) const override;
 
   /// Tabulate local-local facet dofs
-  /// UFC @since 1.1
   void tabulate_facet_dofs(uint* dofs, uint local_facet) const override;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
-  /// UFC @since 1.1 but not implemented
   void tabulate_entity_dofs(uint* dofs, uint d, uint i) const override;
 
   /// Tabulate the coordinates of all dofs on a cell
-  /// UFC @since 1.1
   void tabulate_coordinates(real** coordinates,
                             const ufc::cell& ufc_cell) const override;
 
   //// Return the number of sub dof maps (for a mixed element)
-  /// UFC @since 1.1
   uint num_sub_dofmaps() const override;
 
   /// Create a new dofmap for sub dof map i (for a mixed element)
-  /// UFC @since 1.1
   ufc::dofmap* create_sub_dofmap(uint i) const override;
 
   /// Create a new instance
-  /// UFC @since 2.0
   ufc::dofmap* create() const override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
@@ -146,9 +120,11 @@ public:
   uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
+  /// FIXME
   void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
+  /// FIXME
   void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell) const;
 
   /// Extract sub dof map
@@ -321,24 +297,6 @@ inline bool DofMap::needs_mesh_entities( uint d ) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool DofMap::init_mesh( const ufc::mesh & mesh )
-{
-  return ufc_dofmap_->init_mesh( mesh );
-}
-
-//-----------------------------------------------------------------------------
-inline void DofMap::init_cell( const ufc::mesh & m, const ufc::cell & c )
-{
-  ufc_dofmap_->init_cell( m, c );
-}
-
-//-----------------------------------------------------------------------------
-inline void DofMap::init_cell_finalize()
-{
-  ufc_dofmap_->init_cell_finalize();
-}
-
-//-----------------------------------------------------------------------------
 inline uint DofMap::topological_dimension() const
 {
   return ufc_dofmap_->topological_dimension();
@@ -375,11 +333,12 @@ inline uint DofMap::num_entity_dofs( uint d ) const
 }
 
 //-----------------------------------------------------------------------------
-inline void DofMap::tabulate_dofs( uint *            dofs,
-                                   const ufc::mesh & m,
-                                   const ufc::cell & c ) const
+inline void DofMap::tabulate_dofs(
+  std::size_t *                                     dofs,
+  std::vector< std::size_t > const &                num_global_entities,
+  std::vector< std::vector< std::size_t > > const & entity_indices ) const
 {
-  ufc_dofmap_->tabulate_dofs( dofs, m, c );
+  ufc_dofmap_->tabulate_dofs( dofs, num_global_entities, entity_indices );
 }
 
 //-----------------------------------------------------------------------------

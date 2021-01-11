@@ -76,7 +76,6 @@ public:
     shared_.clear();
     ghosts_.clear();
 
-    UFCMesh ufc_mesh(mesh);
     Cell c0(mesh, 0);
     UFCCell ufc_cell(c0);
 

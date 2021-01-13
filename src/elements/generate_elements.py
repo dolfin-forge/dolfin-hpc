@@ -5,7 +5,7 @@ __date__ = "2007-04-12 -- 2008-04-13"
 __copyright__ = "Copyright (C) 2007-2008 Anders Logg"
 __license__  = "GNU LGPL Version 2.1"
 
-from ffc.constants import FFC_VERSION
+from ffc import __version__ as FFC_VERSION
 from ffc.parameters import FFC_PARAMETERS
 from ffc.compiler import compile_element
 from ffc.fiatinterface import create_element
@@ -28,7 +28,7 @@ elements = [eval(element) for element in elements.split("\n")[1:-1]]
 # Iterate over elements and compile
 signatures = []
 for i in range(len(elements)):
-    
+
     # Generate code
     print("Compiling element %d out of %d..." % (i, len(elements)))
     ufl_element = elements[i]
@@ -38,13 +38,21 @@ for i in range(len(elements)):
     if nb_subelm > 0:
         valuetype = "Vector"
         space_index = 1
-    name = "ffc_" + ufl_element.family().replace(" ","_").replace("-","_") + "_" + str(ufl_element.degree()) + "_" + str(ufl_element.cell().d) + "d" + valuetype
-    compile_element(ufl_element, name, parameters=OPTIONS)
-	
+    name = "ffc_" + ufl_element.family().replace(" ","_").replace("-","_") + "_" + str(ufl_element.degree()) + "_" + str(ufl_element.cell().geometric_dimension()) + "d" + valuetype
+    [code_h, code_c] = compile_element(elements=ufl_element, prefix=name, parameters=OPTIONS)
+
+    file_h = open( name+'.h','w' )
+    file_h.write( code_h )
+    file_h.close()
+
+    file_c = open( name+'.cpp','w' )
+    file_c.write( code_c )
+    file_c.close()
+
     # Save signatures of elements and dof maps
     # Rely on the same code snippet as in ffc.representation.py
     signatures += [(name, repr(ufl_element), "FFC dofmap for " + repr(ufl_element), space_index)]
-    
+
 # Generate code for elementmap.cpp
 filename = "element_library.inc"
 print("Generating file " + filename)

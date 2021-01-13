@@ -32,6 +32,7 @@ using real    = double;
 
 // Unsigned integers
 using uint    = std::size_t;
+using size_t  = std::size_t;
 
 // Index type (at least 64bit)
 using uidx    = uint64_t;

@@ -93,15 +93,15 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
     CellType::Type celltype = mesh().type().cellType();
     ufc::shape shape = element->cell_shape();
 
-    if (celltype == CellType::interval && shape != ufc::interval)
+    if (celltype == CellType::interval && shape != ufc::shape::interval)
     {
       error("Mesh cell type (intervals) does not match cell type of form.");
     }
-    if (celltype == CellType::triangle && shape != ufc::triangle)
+    if (celltype == CellType::triangle && shape != ufc::shape::triangle)
     {
       error("Mesh cell type (triangles) does not match cell type of form.");
     }
-    if (celltype == CellType::tetrahedron && shape != ufc::tetrahedron)
+    if (celltype == CellType::tetrahedron && shape != ufc::shape::tetrahedron)
     {
       error("Mesh cell type (tetrahedra) does not match cell type of form.");
     }

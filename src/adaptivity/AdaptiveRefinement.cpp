@@ -129,7 +129,7 @@ void refine_and_project( Mesh& mesh,
   for (uint f = 0; f < functions.size(); ++f )
   {
     Function * func = functions[f].second;
-    uint const num_sub = func->space().element().num_sub_elements();
+    uint const num_sub = func->space().element()->num_sub_elements();
 
     if (num_sub == 0)
     {
@@ -174,7 +174,7 @@ void refine_and_project( Mesh& mesh,
   for (uint f = 0; f < functions.size(); ++f )
   {
     FiniteElementSpace const& space = functions[f].second->space();
-    uint const num_sub = space.element().num_sub_elements();
+    uint const num_sub = space.element()->num_sub_elements();
 
     Array<Function> post;
     /// @todo Invalid for scalar functions due to the zero subspace assumption
@@ -323,7 +323,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
 
   Array< real > vv ( projected.vector().local_size() );
   Array< uint > indices( projected.vector().local_size() );
-  Array< uint > local_indices( projected.space().dofmap().local_dimension() );
+  Array< uint > local_indices( projected.space().dofmap().num_element_support_dofs() );
   uint i = 0;
   MeshValues<bool, Vertex> processed( new_mesh, false );
 

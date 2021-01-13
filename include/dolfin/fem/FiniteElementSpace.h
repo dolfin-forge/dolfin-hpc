@@ -48,10 +48,10 @@ public:
   FiniteElementSpace( Mesh & mesh, Form & form, uint const i );
 
   /// Create space from UFC finite element
-  explicit FiniteElementSpace( Mesh &                mesh,
-                               ufc::finite_element & element,
-                               ufc::dofmap &         dofmap,
-                               bool                  owner = false );
+  explicit FiniteElementSpace( Mesh &                      mesh,
+                               ufc::finite_element const * element,
+                               ufc::dofmap &               dofmap,
+                               bool                        owner = false );
 
   /// Create space from UFL space definition for pre-generated elements
   explicit FiniteElementSpace( Mesh &                          mesh,
@@ -83,7 +83,7 @@ public:
   Cell & cell() const; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
-  FiniteElement const & element() const;
+  FiniteElement const * element() const;
 
   /// Return the dofmap
   DofMap const & dofmap() const;
@@ -129,9 +129,9 @@ public:
   }
 
 private:
-  Mesh &              mesh_;
-  mutable Cell        cell_;
-  FiniteElement const finite_element_;
+  Mesh &                mesh_;
+  mutable Cell          cell_;
+  FiniteElement const * finite_element_;
   DofMap & dof_map_; // The dof map is owned by the DofMapCache instance.
 
   // UFL binding
@@ -139,30 +139,35 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
 inline Mesh & FiniteElementSpace::mesh() const
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline ufl::Family::Type FiniteElementSpace::family() const
 {
   return ufl_->family().type();
 }
 
 //-----------------------------------------------------------------------------
+
 inline ufl::Family::Type FiniteElementSpace::metatype() const
 {
   return ufl_->metatype();
 }
 
 //-----------------------------------------------------------------------------
+
 inline uint FiniteElementSpace::degree() const
 {
   return ufl_->degree();
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool
   FiniteElementSpace::operator==( FiniteElementSpace const & other ) const
 {
@@ -172,6 +177,7 @@ inline bool
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool
   FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const
 {
@@ -179,38 +185,55 @@ inline bool
 }
 
 //-----------------------------------------------------------------------------
+
 inline Cell & FiniteElementSpace::cell() const
 {
   return cell_;
 }
 
 //-----------------------------------------------------------------------------
-inline FiniteElement const & FiniteElementSpace::element() const
+
+inline FiniteElement const * FiniteElementSpace::element() const
 {
   return finite_element_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline DofMap const & FiniteElementSpace::dofmap() const
 {
   return dof_map_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElementSpace::is_cellwise_defined() const
 {
-  return ( mesh_.num_global_cells() * dof_map_.local_dimension() )
-         == dof_map_.global_dimension();
+  // FIXME num_entities should maybe be stored somewhere else
+  std::vector< size_t > num_entities( finite_element_->topological_dimension(),
+                                      0 );
+  for ( uint d = 0; d <= finite_element_->topological_dimension(); ++d )
+  {
+    if ( mesh_.topology().connectivity( d ) )
+    {
+      num_entities[d] = mesh_.topology().global_size( d );
+    }
+  }
+
+  return ( mesh_.num_global_cells() * dof_map_.num_element_support_dofs() )
+         == dof_map_.global_dimension( num_entities );
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElementSpace::is_cellwise_constant() const
 {
   return is_cellwise_defined()
-         && ( dof_map_.local_dimension() == finite_element_.value_size() );
+         && ( dof_map_.num_element_support_dofs() == finite_element_->value_size() );
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElementSpace::is_vertex_based() const
 {
   /// @todo Only a particular case.
@@ -218,16 +241,19 @@ inline bool FiniteElementSpace::is_vertex_based() const
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElementSpace::is_flattenable() const
 {
   /// @todo Only a particular case.
   uint value_size = 1;
-  for ( uint i = 0; i < this->element().value_rank(); ++i )
+  for ( uint i = 0; i < finite_element_->value_rank(); ++i )
   {
-    value_size *= this->element().value_dimension( i );
+    value_size *= finite_element_->value_dimension( i );
   }
-  return ( this->element().flatten().size() == value_size );
+  return ( finite_element_->flatten().size() == value_size );
 }
+
+//-----------------------------------------------------------------------------
 
 } // end namespace dolfin
 

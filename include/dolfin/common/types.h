@@ -28,16 +28,16 @@ namespace dolfin
 {
 
 // Real numbers
-using real     = double;
+using real    = double;
 
 // Unsigned integers
-using uint     = std::size_t;
+using uint    = std::size_t;
 
 // Index type (at least 64bit)
-using uidx     = uint64_t;
+using uidx    = uint64_t;
 
 // Complex numbers
-using complex  = std::complex< double >;
+using complex = std::complex< double >;
 
 //-----------------------------------------------------------------------------
 

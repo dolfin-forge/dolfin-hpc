@@ -42,7 +42,7 @@ class FiniteElement : public ufc::finite_element
 
 public:
   /// Create finite element from given coefficient space of form
-  FiniteElement( CellType const & cell, Form & form, uint const i );
+  FiniteElement( CellType const & cell, Form & form, size_t const i );
 
   /// Create finite element from UFC object
   /// Ownership of the UFC object is transfered to the instance if the boolean
@@ -51,11 +51,11 @@ public:
   FiniteElement( ufc::finite_element const & element, bool const owner );
 
   /// Create the i-th subelement of the given element
-  FiniteElement( ufc::finite_element const & element, uint const i );
+  FiniteElement( ufc::finite_element const & element, size_t const i );
 
   /// Create subelement of the given element for given subsystem
   FiniteElement( ufc::finite_element const & element,
-                 Array< uint > const &       sub_system );
+                 Array< size_t > const &     sub_system );
 
   /// Create finite element from UFL object from pregenerated element (testing)
   explicit FiniteElement( ufl::FiniteElementSpace const & finite_element );
@@ -79,19 +79,62 @@ public:
   ufc::shape cell_shape() const override;
 
   /// Return the topological dimension of the cell shape
-  uint topological_dimension() const override;
+  size_t topological_dimension() const override;
 
   /// Return the geometric dimension of the cell shape
-  uint geometric_dimension() const override;
+  size_t geometric_dimension() const override;
 
   /// Return the dimension of the finite element function space
-  uint space_dimension() const override;
+  size_t space_dimension() const override;
 
   /// Return the rank of the value space
-  uint value_rank() const override;
+  size_t value_rank() const override;
 
   /// Return the dimension of the value space for axis i
-  uint value_dimension( uint i ) const override;
+  size_t value_dimension( size_t i ) const override;
+
+  /// Return the value size
+  size_t value_size() const override;
+
+  /// Return the rank of the reference value space
+  size_t reference_value_rank() const override;
+
+  /// Return the dimension of the reference value space for axis i
+  size_t reference_value_dimension( size_t i ) const override;
+
+  /// Return the number of components of the reference value space
+  size_t reference_value_size() const override;
+
+  /// Return the maximum polynomial degree of the finite element function space
+  size_t degree() const override;
+
+  /// Return the family of the finite element function space
+  const char * family() const override;
+
+  /// Evaluate all basis functions at given point X in reference cell
+  void evaluate_reference_basis( double *       reference_values,
+                                 size_t         num_points,
+                                 double const * X ) const override;
+
+  /// Evaluate specific order derivatives of all basis functions at given point
+  /// X in reference cell
+  void evaluate_reference_basis_derivatives( double *       reference_values,
+                                             size_t         order,
+                                             size_t         num_points,
+                                             double const * X ) const override;
+  /// Transform order n derivatives (can be 0) of all basis functions
+  /// previously evaluated in points X in reference cell with given
+  /// Jacobian J and its inverse K for each point
+  void transform_reference_basis_derivatives(
+    double *       values,
+    size_t         order,
+    size_t         num_points,
+    double const * reference_values,
+    double const * X,
+    double const * J,
+    double const * detJ,
+    double const * K,
+    int            cell_orientation ) const override;
 
   /// FIXME has to be reintroduced in ffc/ufc
   // /// Compute mapped coordinates for evaluate_basis()
@@ -110,61 +153,65 @@ public:
 
   /// Evaluate basis function i at given point in cell
   void evaluate_basis(
-    uint                            i,
+    size_t                          i,
     double *                        values,
-    const double *                  x,
-    const double *                  coordinate_dofs,
+    double const *                  x,
+    double const *                  coordinate_dofs,
     int                             cell_orientation,
-    const ufc::coordinate_mapping * cm = nullptr ) const override;
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate all basis functions at given point in cell
   void evaluate_basis_all(
     double *                        values,
-    const double *                  x,
-    const double *                  coordinate_dofs,
+    double const *                  x,
+    double const *                  coordinate_dofs,
     int                             cell_orientation,
-    const ufc::coordinate_mapping * cm = nullptr ) const override;
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate order n derivatives of basis function i at given point in cell
-  void evaluate_basis_derivatives( std::size_t i,
-                                            std::size_t n,
-                                            double * values,
-                                            const double * x,
-                                            const double * coordinate_dofs,
-                                            int cell_orientation,
-                                            const ufc::coordinate_mapping * cm=nullptr
-                                             ) const override;
+  void evaluate_basis_derivatives(
+    size_t                          i,
+    size_t                          n,
+    double *                        values,
+    double const *                  x,
+    double const *                  coordinate_dofs,
+    int                             cell_orientation,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
-  void evaluate_basis_derivatives_all( std::size_t n,
-                                                double * values,
-                                                const double * x,
-                                                const double * coordinate_dofs,
-                                                int cell_orientation,
-                                                const ufc::coordinate_mapping * cm=nullptr ) const override;
+  void evaluate_basis_derivatives_all(
+    size_t                          n,
+    double *                        values,
+    double const *                  x,
+    double const *                  coordinate_dofs,
+    int                             cell_orientation,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate linear functional for dof i on the function f
-  double evaluate_dof( std::size_t i,
-                                const ufc::function& f,
-                                const double * coordinate_dofs,
-                                int cell_orientation,
-                                const ufc::cell& c,
-                                const ufc::coordinate_mapping * cm=nullptr ) const override;
+  double evaluate_dof(
+    size_t                          i,
+    ufc::function const &           f,
+    double const *                  coordinate_dofs,
+    int                             cell_orientation,
+    ufc::cell const &               c,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate linear functionals for all dofs on the function f
-  void evaluate_dofs( double * values,
-                               const ufc::function& f,
-                               const double * coordinate_dofs,
-                               int cell_orientation,
-                               const ufc::cell& c,
-                               const ufc::coordinate_mapping * cm=nullptr ) const override;
+  void evaluate_dofs(
+    double *                        values,
+    ufc::function const &           f,
+    double const *                  coordinate_dofs,
+    int                             cell_orientation,
+    ufc::cell const &               c,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Interpolate vertex values from dof values
-  void interpolate_vertex_values( double * vertex_values,
-                                           const double * dof_values,
-                                           const double * coordinate_dofs,
-                                           int cell_orientation,
-                                           const ufc::coordinate_mapping * cm=nullptr ) const override;
+  void interpolate_vertex_values(
+    double *                        vertex_values,
+    double const *                  dof_values,
+    double const *                  coordinate_dofs,
+    int                             cell_orientation,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Map coordinate xhat from reference cell to coordinate x in cell
   // void map_from_reference_cell( double *          x,
@@ -176,35 +223,35 @@ public:
   //                             const double *    x,
   //                             const ufc::cell & c ) const override;
 
+  /// Tabulate the coordinates of all dofs on a reference cell
+  void tabulate_reference_dof_coordinates(
+    double * reference_dof_coordinates ) const override;
+
   /// Return the number of sub elements (for a mixed element)
-  uint num_sub_elements() const override;
+  size_t num_sub_elements() const override;
 
   /// Create a new finite element for sub element i (for a mixed element)
-  ufc::finite_element * create_sub_element( uint i ) const override;
+  ufc::finite_element * create_sub_element( size_t i ) const override;
 
   /// Create a new class instance
   ufc::finite_element * create() const override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
-  /// FIXME
-  /// Return the value size
-  uint value_size() const;
-
   /// Recursively extract sub finite element
   static ufc::finite_element *
     create_sub_element( ufc::finite_element const & finite_element,
-                        Array< uint > const &       sub_system );
+                        Array< size_t > const &     sub_system );
 
   /// Create sub finite element of given finite element
   ufc::finite_element *
-    create_sub_element( Array< uint > const & sub_system ) const;
+    create_sub_element( Array< size_t > const & sub_system ) const;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  Array< uint > const & sub_value_dimensions( uint i ) const;
+  Array< size_t > const & sub_value_dimensions( size_t i ) const;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  Array< uint > const & sub_value_offsets( uint i ) const;
+  Array< size_t > const & sub_value_offsets( size_t i ) const;
 
   /// Get list of scalar finite elements ordered by entries
   Array< ufc::finite_element const * > const & flatten() const;
@@ -212,7 +259,7 @@ public:
   /// Create flatten representation finite element (append sub elements)
   static void flatten( ufc::finite_element const *            element,
                        Array< ufc::finite_element const * > & stack,
-                       uint                                   maxlevel );
+                       size_t                                 maxlevel );
 
   /// Create flatten representation finite element (append sub elements)
   static void flatten( ufc::finite_element const *            element,
@@ -232,56 +279,152 @@ private:
   ufc::finite_element const * ufc_finite_element_;
 
   //
-  Array< uint > * sub_value_dims_;
+  Array< size_t > * sub_value_dims_;
 
   //
-  Array< uint > * sub_value_offs_;
+  Array< size_t > * sub_value_offs_;
 
   //
   mutable Array< ufc::finite_element const * > flattened_;
 };
 
 //-----------------------------------------------------------------------------
+
 inline const char * FiniteElement::signature() const
 {
   return ufc_finite_element_->signature();
 }
 
 //-----------------------------------------------------------------------------
+
 inline ufc::shape FiniteElement::cell_shape() const
 {
   return ufc_finite_element_->cell_shape();
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::topological_dimension() const
+
+inline size_t FiniteElement::topological_dimension() const
 {
   return ufc_finite_element_->topological_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::geometric_dimension() const
+
+inline size_t FiniteElement::geometric_dimension() const
 {
   return ufc_finite_element_->geometric_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::space_dimension() const
+
+inline size_t FiniteElement::space_dimension() const
 {
   return ufc_finite_element_->space_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::value_rank() const
+
+inline size_t FiniteElement::value_rank() const
 {
   return ufc_finite_element_->value_rank();
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::value_dimension( uint i ) const
+
+inline size_t FiniteElement::value_dimension( size_t i ) const
 {
   return ufc_finite_element_->value_dimension( i );
 }
+
+//-----------------------------------------------------------------------------
+
+inline size_t FiniteElement::value_size() const
+{
+  return ufc_finite_element_->value_size();
+}
+
+size_t FiniteElement::reference_value_rank() const
+{
+  return ufc_finite_element_->reference_value_rank();
+}
+
+//-----------------------------------------------------------------------------
+
+inline size_t FiniteElement::reference_value_dimension( size_t i ) const
+{
+  return ufc_finite_element_->reference_value_dimension( i );
+}
+
+//-----------------------------------------------------------------------------
+
+inline size_t FiniteElement::reference_value_size() const
+{
+  return ufc_finite_element_->reference_value_size();
+}
+
+//-----------------------------------------------------------------------------
+
+inline size_t FiniteElement::degree() const
+{
+  return ufc_finite_element_->degree();
+}
+
+//-----------------------------------------------------------------------------
+
+inline const char * FiniteElement::family() const
+{
+  return ufc_finite_element_->family();
+}
+
+//-----------------------------------------------------------------------------
+
+inline void FiniteElement::evaluate_reference_basis( double * reference_values,
+                                                     size_t   num_points,
+                                                     double const * X ) const
+{
+  ufc_finite_element_->evaluate_reference_basis(
+    reference_values, num_points, X );
+}
+
+//-----------------------------------------------------------------------------
+
+inline void FiniteElement::evaluate_reference_basis_derivatives(
+  double *       reference_values,
+  size_t         order,
+  size_t         num_points,
+  double const * X ) const
+{
+  ufc_finite_element_->evaluate_reference_basis_derivatives(
+    reference_values, order, num_points, X );
+}
+
+//-----------------------------------------------------------------------------
+
+inline void FiniteElement::transform_reference_basis_derivatives(
+  double *       values,
+  size_t         order,
+  size_t         num_points,
+  double const * reference_values,
+  double const * X,
+  double const * J,
+  double const * detJ,
+  double const * K,
+  int            cell_orientation ) const
+{
+  ufc_finite_element_->transform_reference_basis_derivatives(
+    values,
+    order,
+    num_points,
+    reference_values,
+    X,
+    J,
+    detJ,
+    K,
+    cell_orientation );
+}
+
+//-----------------------------------------------------------------------------
 
 // /// Compute mapped coordinates for evaluate_basis()
 // inline void FiniteElement::evaluate_basis_map_coordinates(double & X,
@@ -306,100 +449,114 @@ inline uint FiniteElement::value_dimension( uint i ) const
 // }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_basis(
-  std::size_t                     i,
-  double *                        values,
-  const double *                  x,
-  const double *                  coordinate_dofs,
-  int                             cell_orientation,
-  const ufc::coordinate_mapping * cm ) const
+
+inline void
+  FiniteElement::evaluate_basis( size_t         i,
+                                 double *       values,
+                                 double const * x,
+                                 double const * coordinate_dofs,
+                                 int            cell_orientation,
+                                 ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->evaluate_basis(
     i, values, x, coordinate_dofs, cell_orientation, cm );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void
   FiniteElement::evaluate_basis_all( double *       values,
-                                     const double * x,
-                                     const double * coordinate_dofs,
+                                     double const * x,
+                                     double const * coordinate_dofs,
                                      int            cell_orientation,
-                                     const ufc::coordinate_mapping * cm ) const
+                                     ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->evaluate_basis_all(
     values, x, coordinate_dofs, cell_orientation, cm );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void FiniteElement::evaluate_basis_derivatives(
-  std::size_t                     i,
-  std::size_t                     n,
+  size_t                          i,
+  size_t                          n,
   double *                        values,
-  const double *                  x,
-  const double *                  coordinate_dofs,
+  double const *                  x,
+  double const *                  coordinate_dofs,
   int                             cell_orientation,
-  const ufc::coordinate_mapping * cm ) const
+  ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->evaluate_basis_derivatives(
     i, n, values, x, coordinate_dofs, cell_orientation, cm );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void FiniteElement::evaluate_basis_derivatives_all(
-  std::size_t                     n,
+  size_t                          n,
   double *                        values,
-  const double *                  x,
-  const double *                  coordinate_dofs,
+  double const *                  x,
+  double const *                  coordinate_dofs,
   int                             cell_orientation,
-  const ufc::coordinate_mapping * cm ) const
+  ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->evaluate_basis_derivatives_all(
     n, values, x, coordinate_dofs, cell_orientation, cm );
 }
 
 //-----------------------------------------------------------------------------
-inline double FiniteElement::evaluate_dof( std::size_t i,
-                                const ufc::function& f,
-                                const double * coordinate_dofs,
-                                int cell_orientation,
-                                const ufc::cell& c,
-                                const ufc::coordinate_mapping * cm ) const
+
+inline double FiniteElement::evaluate_dof(
+  size_t                          i,
+  ufc::function const &           f,
+  double const *                  coordinate_dofs,
+  int                             cell_orientation,
+  ufc::cell const &               c,
+  ufc::coordinate_mapping const * cm ) const
 {
-  return ufc_finite_element_->evaluate_dof( i, f, coordinate_dofs, cell_orientation, c, cm );
+  return ufc_finite_element_->evaluate_dof(
+    i, f, coordinate_dofs, cell_orientation, c, cm );
 }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_dofs( double * values,
-                               const ufc::function& f,
-                               const double * coordinate_dofs,
-                               int cell_orientation,
-                               const ufc::cell& c,
-                               const ufc::coordinate_mapping * cm ) const
+
+inline void FiniteElement::evaluate_dofs(
+  double *                        values,
+  ufc::function const &           f,
+  double const *                  coordinate_dofs,
+  int                             cell_orientation,
+  ufc::cell const &               c,
+  ufc::coordinate_mapping const * cm ) const
 {
-  ufc_finite_element_->evaluate_dofs( values, f, coordinate_dofs, cell_orientation, c, cm );
+  ufc_finite_element_->evaluate_dofs(
+    values, f, coordinate_dofs, cell_orientation, c, cm );
 }
 
 //-----------------------------------------------------------------------------
-inline void
-  FiniteElement::interpolate_vertex_values( double * vertex_values,
-                                           const double * dof_values,
-                                           const double * coordinate_dofs,
-                                           int cell_orientation,
-                                           const ufc::coordinate_mapping * cm ) const
+
+inline void FiniteElement::interpolate_vertex_values(
+  double *                        vertex_values,
+  double const *                  dof_values,
+  double const *                  coordinate_dofs,
+  int                             cell_orientation,
+  ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->interpolate_vertex_values(
     vertex_values, dof_values, coordinate_dofs, cell_orientation, cm );
 }
 
 //-----------------------------------------------------------------------------
+
 // inline void FiniteElement::map_from_reference_cell( double *          x,
 //                                                     const double *    xhat,
-//                                                     const ufc::cell & c ) const
+//                                                     const ufc::cell & c )
+//                                                     const
 // {
 //   ufc_finite_element_->map_from_reference_cell( x, xhat, c );
 // }
 
 //-----------------------------------------------------------------------------
+
 // inline void FiniteElement::map_to_reference_cell( double *          xhat,
 //                                                   const double *    x,
 //                                                   const ufc::cell & c ) const
@@ -408,66 +565,75 @@ inline void
 // }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::num_sub_elements() const
+
+inline void FiniteElement::tabulate_reference_dof_coordinates(
+  double * reference_dof_coordinates ) const
+{
+  ufc_finite_element_->tabulate_reference_dof_coordinates(
+    reference_dof_coordinates );
+}
+
+//-----------------------------------------------------------------------------
+
+inline size_t FiniteElement::num_sub_elements() const
 {
   return ufc_finite_element_->num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::finite_element * FiniteElement::create_sub_element( uint i ) const
+
+inline ufc::finite_element * FiniteElement::create_sub_element( size_t i ) const
 {
   return ufc_finite_element_->create_sub_element( i );
 }
 
 //-----------------------------------------------------------------------------
+
 inline ufc::finite_element * FiniteElement::create() const
 {
   return ufc_finite_element_->create();
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElement::operator==( FiniteElement const & other ) const
 {
   return ( std::strcmp( this->signature(), other.signature() ) == 0 );
 }
 
 //-----------------------------------------------------------------------------
+
 inline bool FiniteElement::operator!=( FiniteElement const & other ) const
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
-inline uint FiniteElement::value_size() const
-{
-  uint size = 1;
-  for ( uint i = 0; i < ufc_finite_element_->value_rank(); ++i )
-  {
-    size *= ufc_finite_element_->value_dimension( i );
-  }
-  return size;
-}
 
-//-----------------------------------------------------------------------------
 inline ufc::finite_element *
-  FiniteElement::create_sub_element( Array< uint > const & sub_system ) const
+  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const
 {
   return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > const & FiniteElement::sub_value_dimensions( uint i ) const
+
+inline Array< size_t > const &
+  FiniteElement::sub_value_dimensions( size_t i ) const
 {
   return sub_value_dims_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > const & FiniteElement::sub_value_offsets( uint i ) const
+
+inline Array< size_t > const &
+  FiniteElement::sub_value_offsets( size_t i ) const
 {
   return sub_value_offs_[i];
 }
 
 //-----------------------------------------------------------------------------
+
 inline Array< ufc::finite_element const * > const &
   FiniteElement::flatten() const
 {

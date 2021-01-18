@@ -19,22 +19,23 @@
 
 using namespace dolfin;
 
-_ordered_map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
+// FIXME check if uint -> size_t does not do anything bad here
+_ordered_map<Mesh *, MeshValues<size_t, Cell> *> LoadBalancer::s_;
 
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight)
+void LoadBalancer::balance(Mesh& mesh, MeshValues<size_t, Cell>& weight)
 {
   begin("Load balancing with cell weights");
 
   // Repartition mesh
   message("Partition");
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
   message("Process reassignment");
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
@@ -54,8 +55,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
                            real tf, real tb, real ts, Type type)
 {
   // Construct weight function
-  MeshValues<uint, Cell> weight(mesh);
-  uint w_local, w_sum, w_max;
+  MeshValues<size_t, Cell> weight(mesh);
+  size_t w_local, w_sum, w_max;
   real w_avg;
   message("Estimate load imbalance");
   weight_function(mesh, cell_marker, weight, &w_local, type);
@@ -81,11 +82,11 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   message("Process reassignment");
   process_reassignment(partitions, &max_sendrecv);
 
@@ -125,17 +126,17 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 }
 
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
+void LoadBalancer::balance(Mesh& mesh, MeshValues<size_t, Cell>& weight,
                            Array<VertexFunctionPPair>& vertex_functions)
 {
   begin("Load balancing with cell weights and vertex functions");
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
@@ -163,8 +164,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 {
 
   // Construct weight function
-  MeshValues<uint, Cell> weight(mesh);
-  uint w_local, w_sum, w_max;
+  MeshValues<size_t, Cell> weight(mesh);
+  size_t w_local, w_sum, w_max;
   real w_avg;
   weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -189,11 +190,11 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Determine if the computation gains from repartitioning/reassignment
@@ -237,18 +238,18 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 }
 
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
+void LoadBalancer::balance(Mesh& mesh, MeshValues<size_t, Cell>& weight,
                            Array<CellFunctionPPair>& cell_functions,
                            Array<VertexFunctionPPair>& vertex_functions)
 {
   begin("Load balancing with cell weights and cell/vertex functions");
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
@@ -283,8 +284,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
                            real tf, real tb, real ts, Type type)
 {
   // Construct weight function
-  MeshValues<uint, Cell> weight(mesh);
-  uint w_local, w_sum, w_max;
+  MeshValues<size_t, Cell> weight(mesh);
+  size_t w_local, w_sum, w_max;
   real w_avg;
   weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -309,11 +310,11 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Determine if the computation gains from repartitioning/reassignment
@@ -361,17 +362,17 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
+void LoadBalancer::balance(Mesh& mesh, MeshValues<size_t, Cell>& weight,
                            Array<CellFunctionPPair>& cell_functions)
 {
   begin("Load balancing with cell weights and cell functions");
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
@@ -397,8 +398,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
                            real tb, real ts, Type type)
 {
   // Construct weight function
-  MeshValues<uint, Cell> weight(mesh);
-  uint w_local, w_sum, w_max;
+  MeshValues<size_t, Cell> weight(mesh);
+  size_t w_local, w_sum, w_max;
   real w_avg;
   weight_function(mesh, cell_marker, weight, &w_local, type);
 
@@ -423,11 +424,11 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
-  MeshValues<uint, Cell> partitions(mesh);
+  MeshValues<size_t, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
-  uint max_sendrecv;
+  size_t max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Determine if the computation gains from repartitioning/reassignment
@@ -472,12 +473,12 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 //---------------------------------------------------------------------------
 void LoadBalancer::weight_function(Mesh& mesh,
                                    MeshValues<bool, Cell>& cell_marker,
-                                   MeshValues<uint, Cell>& weight,
-                                   uint* w_sum, Type type)
+                                   MeshValues<size_t, Cell>& weight,
+                                   size_t* w_sum, Type type)
 {
   // Calculated weights for the dual graph with a simulated mesh refinement
   real max, l;
-  uint index = 0;
+  size_t index = 0;
   weight = 1;
   //  *w_sum = mesh.numCells();
 
@@ -575,12 +576,12 @@ void LoadBalancer::weight_function(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
-                               MeshValues<uint, Cell>& weight, uint depth)
+                               MeshValues<size_t, Cell>& weight, size_t depth)
 {
   // weight(c.index()) = weight(c.index()) + 1;
   real l;
   real max = 0.0;
-  uint index = 0;
+  size_t index = 0;
   for (EdgeIterator e(c); !e.end(); ++e)
   {
     l = e->length();
@@ -603,52 +604,52 @@ void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
     weight_lepp(mesh, *nc, le, weight, depth);
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
-                                        uint* max_sendrecv)
+void LoadBalancer::process_reassignment(MeshFunction<size_t>& partitions,
+                                        size_t* max_sendrecv)
 {
-  uint pe_size = MPI::size();
-  uint rank = MPI::rank();
+  size_t pe_size = MPI::size();
+  size_t rank = MPI::rank();
 
   // Construct my row in the similarity matrix
-  uint *sim_row = new uint[pe_size];
-  uint *sorted_indices = new uint[pe_size];
-  memset(sim_row, 0, pe_size * sizeof(uint));
-  for (uint i = 0; i < partitions.size(); i++)
+  size_t *sim_row = new size_t[pe_size];
+  size_t *sorted_indices = new size_t[pe_size];
+  memset(sim_row, 0, pe_size * sizeof(size_t));
+  for (size_t i = 0; i < partitions.size(); i++)
     sim_row[partitions(i)]++;
 
   // Gather similarity matrix on root node
-  uint m = pe_size * pe_size;
-  uint *SiM = new uint[m]; // FIXME, this should only be needon on rank == 0
+  size_t m = pe_size * pe_size;
+  size_t *SiM = new size_t[m]; // FIXME, this should only be needon on rank == 0
   //  MPI_Gather(sim_row, pe_size, MPI_UNSIGNED,
   //	     SiM, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM);
 
   MPI::all_gather( sim_row, pe_size, SiM, pe_size );
 
-  uint *sorted = new uint[m];
+  size_t *sorted = new size_t[m];
   pradixsort_matrix(&sorted_indices[0], &SiM[0], pe_size);
   MPI::check_error( MPI_Gather(sorted_indices, pe_size, MPI_UNSIGNED, sorted,
                                pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM) );
 
-  uint *map = new uint[pe_size];
+  size_t *map = new size_t[pe_size];
 
   if (rank == 0)
   {
 
-    uint num_assigned = 0;
-    uint idx, idy;
+    size_t num_assigned = 0;
+    size_t idx, idy;
     bool *unassigned_x = new bool[pe_size];
     bool *unassigned_y = new bool[pe_size];
-    for (uint i = 0; i < pe_size; i++)
+    for (size_t i = 0; i < pe_size; i++)
     {
       unassigned_y[i] = true;
       unassigned_x[i] = true;
     }
 
-    uint tail = m;
+    size_t tail = m;
     // Greedy approximation for the MWBG problem
     while (num_assigned < pe_size)
     {
-      for (uint i = tail; i > 0; i--)
+      for (size_t i = tail; i > 0; i--)
       {
         idx = (sorted[i - 1]) / pe_size;
         idy = (sorted[i - 1]) % pe_size;
@@ -671,12 +672,12 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
   MPI::check_error( MPI_Bcast(map, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM) );
 
   // Reassign processors
-  for (uint i = 0; i < partitions.size(); i++)
+  for (size_t i = 0; i < partitions.size(); i++)
     partitions(i) = map[partitions(i)];
 
   // Calculate maximum number to send from processor
   *max_sendrecv = 0;
-  for (uint i = 0; i < pe_size; i++)
+  for (size_t i = 0; i < pe_size; i++)
     if (map[i] != rank) *max_sendrecv = std::max(*max_sendrecv, sim_row[i]);
 
   delete[] map;
@@ -687,32 +688,32 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
 }
 //-----------------------------------------------------------------------------
 bool LoadBalancer::computational_gain(Mesh& mesh,
-                                      MeshValues<uint, Cell>& weight,
-                                      MeshValues<uint, Cell>& partitions,
-                                      uint max_sendrecv, real tf, real tb,
+                                      MeshValues<size_t, Cell>& weight,
+                                      MeshValues<size_t, Cell>& partitions,
+                                      size_t max_sendrecv, real tf, real tb,
                                       real ts)
 {
-  uint pe_size = MPI::size();
+  size_t pe_size = MPI::size();
 
-  uint w_old = 0;
-  uint *tmp_w = new uint[pe_size];
-  memset(tmp_w, 0, pe_size * sizeof(uint));
+  size_t w_old = 0;
+  size_t *tmp_w = new size_t[pe_size];
+  memset(tmp_w, 0, pe_size * sizeof(size_t));
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     w_old += weight(*c);
     tmp_w[partitions(*c)] += weight(*c);
   }
 
-  uint w_new;
-  for (uint i = 0; i < pe_size; i++)
+  size_t w_new;
+  for (size_t i = 0; i < pe_size; i++)
     MPI::check_error( MPI_Reduce(&tmp_w[i], &w_new, 1, MPI_UNSIGNED, MPI_SUM, i,
                                  MPI::DOLFIN_COMM) );
 
-  uint w_oldmax, w_newmax;
+  size_t w_oldmax, w_newmax;
   MPI::all_reduce<MPI::max>( w_old, w_oldmax );
   MPI::all_reduce<MPI::max>( w_new, w_newmax );
 
-  uint tmp = max_sendrecv; // No MPI aliasing on BG/L
+  size_t tmp = max_sendrecv; // No MPI aliasing on BG/L
   MPI::all_reduce<MPI::max>( tmp, max_sendrecv );
   message("**** %d - %d = %d  w_nmax / w_omax = %f maxsr = %d ****", w_oldmax,
           w_newmax, w_oldmax - w_newmax, (real) w_newmax / (real) w_oldmax,
@@ -729,41 +730,41 @@ bool LoadBalancer::computational_gain(Mesh& mesh,
   return (comp_cost > comm_cost);
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::radixsort_matrix(uint* res, uint* Matrix, uint m, bool desc)
+void LoadBalancer::radixsort_matrix(size_t* res, size_t* Matrix, size_t m, bool desc)
 {
 
-  uint *index = new uint[m];
-  uint *tmp = new uint[m];
+  size_t *index = new size_t[m];
+  size_t *tmp = new size_t[m];
 
-  for (uint i = 0; i < m; i++)
+  for (size_t i = 0; i < m; i++)
     index[i] = i;
 
-  uint *count = new uint[256];
-  uint *map = new uint[256];
-  for (uint i = 0; i < 4; i++)
+  size_t *count = new size_t[256];
+  size_t *map = new size_t[256];
+  for (size_t i = 0; i < 4; i++)
   {
-    memcpy(tmp, index, m * sizeof(uint));
-    memset(count, 0, 256 * sizeof(uint));
-    for (uint j = 0; j < m; j++)
+    memcpy(tmp, index, m * sizeof(size_t));
+    memset(count, 0, 256 * sizeof(size_t));
+    for (size_t j = 0; j < m; j++)
       count[((Matrix[tmp[j]]) >> (8 * i)) & 0xff]++;
 
     map[0] = 0;
-    for (uint j = 1; j < 256; j++)
+    for (size_t j = 1; j < 256; j++)
       map[j] = map[j - 1] + count[j - 1];
 
-    for (uint j = 0; j < m; j++)
+    for (size_t j = 0; j < m; j++)
       index[map[((Matrix[tmp[j]]) >> (8 * i)) & 0xff]++] = tmp[j];
   }
 
   if (desc)
   {
-    uint j = m - 1;
-    for (uint i = 0; i < m; i++)
+    size_t j = m - 1;
+    for (size_t i = 0; i < m; i++)
       res[i] = index[j--];
   }
   else
   {
-    memcpy(res, index, m * sizeof(uint));
+    memcpy(res, index, m * sizeof(size_t));
   }
 
   delete[] map;
@@ -772,36 +773,36 @@ void LoadBalancer::radixsort_matrix(uint* res, uint* Matrix, uint m, bool desc)
   delete[] index;
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
+void LoadBalancer::pradixsort_matrix(size_t* res, size_t* Matrix, size_t m)
 {
 
-  uint *index = new uint[m];
-  uint *tmp = new uint[m];
+  size_t *index = new size_t[m];
+  size_t *tmp = new size_t[m];
 
-  uint rank = MPI::rank();
-  uint pe_size = MPI::size();
+  size_t rank = MPI::rank();
+  size_t pe_size = MPI::size();
 
-  uint *recvbuff = new uint[2 * pe_size];
-  Array<uint> *sendbuff = new Array<uint> [pe_size];
+  size_t *recvbuff = new size_t[2 * pe_size];
+  Array<size_t> *sendbuff = new Array<size_t> [pe_size];
 
-  for (uint i = 0; i < m; i++)
+  for (size_t i = 0; i < m; i++)
     index[i] = i + rank * pe_size;
 
-  uint *count = new uint[256];
-  uint *glb_count = new uint[256];
-  uint *map = new uint[256];
-  uint offset, glb_scan;
-  for (uint i = 0; i < 4; i++)
+  size_t *count = new size_t[256];
+  size_t *glb_count = new size_t[256];
+  size_t *map = new size_t[256];
+  size_t offset, glb_scan;
+  for (size_t i = 0; i < 4; i++)
   {
-    memcpy(tmp, index, m * sizeof(uint));
-    memset(count, 0, 256 * sizeof(uint));
-    for (uint j = 0; j < m; j++)
+    memcpy(tmp, index, m * sizeof(size_t));
+    memset(count, 0, 256 * sizeof(size_t));
+    for (size_t j = 0; j < m; j++)
       count[((Matrix[tmp[j]]) >> (8 * i)) & 0xff]++;
 
     MPI::all_reduce<MPI::sum>( count, glb_count, 256 );
 
     offset = 0;
-    for (uint j = 0; j < 256; j++)
+    for (size_t j = 0; j < 256; j++)
     {
       MPI::check_error( MPI_Scan(&count[j], &glb_scan, 1, MPI_UNSIGNED, MPI_SUM,
                                  MPI::DOLFIN_COMM) );
@@ -809,13 +810,13 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
       offset += glb_count[j];
     }
 
-    for (uint j = 0; j < 256; j++)
+    for (size_t j = 0; j < 256; j++)
       map[j]--;
 
-    for (uint j = m; j > 0; j--)
+    for (size_t j = m; j > 0; j--)
     {
-      uint glb_index = map[((Matrix[tmp[j - 1]]) >> (8 * i)) & 0xff]--;
-      uint target = floor((double) glb_index / (double) pe_size);
+      size_t glb_index = map[((Matrix[tmp[j - 1]]) >> (8 * i)) & 0xff]--;
+      size_t target = floor((double) glb_index / (double) pe_size);
       if (target != rank)
       {
         sendbuff[target].push_back(glb_index);
@@ -826,10 +827,10 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
         index[glb_index % pe_size] = tmp[j - 1];
       }
     }
-    uint src, dest;
+    size_t src, dest;
     int recv_size;
 
-    for (uint j = 1; j < pe_size; j++)
+    for (size_t j = 1; j < pe_size; j++)
     {
 
       src = (rank - j + pe_size) % pe_size;
@@ -846,9 +847,9 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
     }
   }
 
-  memcpy(res, index, m * sizeof(uint));
+  memcpy(res, index, m * sizeof(size_t));
 
-  for (uint i = 0; i < pe_size; i++)
+  for (size_t i = 0; i < pe_size; i++)
     sendbuff[i].clear();
   delete[] sendbuff;
 
@@ -863,7 +864,7 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh&, MeshValues<uint, Cell>&)
+void LoadBalancer::balance(Mesh&, MeshValues<size_t, Cell>&)
 {
   warning("Load balancing only implemented for MPI");
 }
@@ -881,12 +882,12 @@ void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&,
 //-----------------------------------------------------------------------------
 #endif
 //-----------------------------------------------------------------------------
-MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
+MeshValues<size_t, Cell>& LoadBalancer::partitions(Mesh& mesh)
 {
-  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<size_t, Cell> *>::iterator it = s_.find(&mesh);
   if (it == s_.end())
   {
-    MeshValues<uint, Cell> * v = new MeshValues<uint, Cell>(mesh, PE::rank());
+    MeshValues<size_t, Cell> * v = new MeshValues<size_t, Cell>(mesh, PE::rank());
     s_[&mesh] = v;
     return *v;
   }
@@ -895,7 +896,7 @@ MeshValues<uint, Cell>& LoadBalancer::partitions(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool LoadBalancer::clear(Mesh& mesh)
 {
-  _ordered_map<Mesh *, MeshValues<uint, Cell> *>::iterator it = s_.find(&mesh);
+  _ordered_map<Mesh *, MeshValues<size_t, Cell> *>::iterator it = s_.find(&mesh);
   if (it != s_.end())
   {
     delete it->second;

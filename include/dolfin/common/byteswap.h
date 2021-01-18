@@ -64,6 +64,23 @@ inline uint bswap( uint x )
   return eout.x;
 }
 //-----------------------------------------------------------------------------
+inline uint bswap( uint32_t x )
+{
+  union
+  {
+    unsigned int  x;
+    unsigned char b[4];
+  } ein, eout;
+
+  ein.x     = x;
+  eout.b[0] = ein.b[3];
+  eout.b[1] = ein.b[2];
+  eout.b[2] = ein.b[1];
+  eout.b[3] = ein.b[0];
+
+  return eout.x;
+}
+//-----------------------------------------------------------------------------
 inline real bswap( real x )
 {
   union

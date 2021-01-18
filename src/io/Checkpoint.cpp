@@ -512,8 +512,8 @@ void Checkpoint::fill_headers( real const t, uint param_size, MeshMap & meshes,
     name.copy( hdr.name, sizeof( hdr.name ) );
 
 #ifdef ENABLE_MPIIO
-    uint local_data[4] = { hdr.num_coords, hdr.num_centities,
-                           hdr.num_vertices, 2 * hdr.num_ghosts };
+    uint32_t local_data[4] = { hdr.num_coords, hdr.num_centities,
+                               hdr.num_vertices, 2 * hdr.num_ghosts };
 
     MPI::exscan_sum( &local_data[0], &hdr.offsets[0], 4 );
     MPI::all_reduce< MPI::sum >( local_data, hdr.displacement, 4 );

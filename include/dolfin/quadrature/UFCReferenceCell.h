@@ -53,15 +53,15 @@ public:
     switch (cell.type())
     {
       case CellType::interval:
-        cell_shape = ufc::interval;
+        cell_shape = ufc::shape::interval;
         num_vertices = 2;
         break;
       case CellType::triangle:
-        cell_shape = ufc::triangle;
+        cell_shape = ufc::shape::triangle;
         num_vertices = 3;
         break;
       case CellType::tetrahedron:
-        cell_shape = ufc::tetrahedron;
+        cell_shape = ufc::shape::tetrahedron;
         num_vertices = 4;
         break;
       default:

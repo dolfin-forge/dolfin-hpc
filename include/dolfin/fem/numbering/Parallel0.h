@@ -7,13 +7,13 @@
 #include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/common/timing.h>
-#include <dolfin/fem/UFCCellIterator.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/CellIterator.h>
 
 #include <string>
 
@@ -47,9 +47,9 @@ public:
   inline void tabulate_dofs(uint* dofs, ufc::cell const&,
                             Cell const& cell) const override
   {
-    uint const ii = ufc_dofmap.local_dimension() * cell.index();
+    uint const ii = ufc_dofmap.num_element_support_dofs() * cell.index();
     dolfin_assert(array != NULL);
-    std::copy(&array[ii], &array[ii] + ufc_dofmap.local_dimension(), dofs);
+    std::copy(&array[ii], &array[ii] + ufc_dofmap.num_element_support_dofs(), dofs);
   }
 
   ///
@@ -83,10 +83,20 @@ public:
     uint const rank = MPI::rank();
 
     uint const tdim = mesh.topology_dimension();
-    uint const local_dim = ufc_dofmap.local_dimension();
+    uint const local_dim = ufc_dofmap.num_element_support_dofs();
     uint * dofs = new uint[local_dim];
     uint const nb_facet_dofs = ufc_dofmap.num_facet_dofs();
     uint * facet_dofs = new uint[nb_facet_dofs];
+
+    // FIXME num_entities should maybe be stored somewhere else
+    std::vector< size_t > num_entities( tdim, 0 );
+    for ( uint d = 0; d <= tdim; ++d )
+    {
+      if ( mesh.topology().connectivity( d ) )
+      {
+        num_entities[d] = mesh.topology().global_size( d );
+      }
+    }
 
     // Initialize random number generator differently on each process
     // FIXME: if the ghosts are randomly generated for a given mesh then
@@ -108,7 +118,7 @@ public:
       Cell c(mesh, f.entities(tdim)[0]);
 
       ufc_cell.update(c);
-      ufc_dofmap.tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+      ufc_dofmap.tabulate_dofs(dofs, num_entities, ufc_cell.entity_indices);
       uint local_facet = c.index(f);
       ufc_dofmap.tabulate_facet_dofs(facet_dofs, local_facet);
 
@@ -162,7 +172,7 @@ public:
     for (CellIterator cell(mesh); !cell.end(); ++cell)
     {
       ufc_cell.update(*cell);
-      ufc_dofmap.tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+      ufc_dofmap.tabulate_dofs(dofs, num_entities, ufc_cell.entity_indices);
       for (uint i = 0; i < local_dim; ++i)
       {
         if (ufc_ghosts.find(dofs[i]) == ufc_ghosts.end())
@@ -182,7 +192,7 @@ public:
     delete[] dofs;
 
     // Renumber dofs
-    array_size = mesh.num_cells() * ufc_dofmap.local_dimension();
+    array_size = mesh.num_cells() * ufc_dofmap.num_element_support_dofs();
     array = new uint[array_size];
 
     uint const range = owned.size();

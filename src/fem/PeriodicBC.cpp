@@ -103,7 +103,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     space.dofmap().tabulate_dofs(scratch.dofs, scratch.cell);
 
     // Tabulate coordinates on cell
-    scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
+    scratch.finite_element->tabulate_dof_coordinates( scratch.coordinates.data(),
+                                                      scratch.cell.coordinates.data() );
 
     // Tabulate which dofs are on the facet
     scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
@@ -114,7 +115,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
       // Get dof and coordinate of dof
       uint const dof = scratch.offset + scratch.facet_dofs[i];
       int const global_dof = static_cast<int>(scratch.dofs[dof]);
-      real *& x = scratch.coordinates[scratch.facet_dofs[i]];
+      real * x = &scratch.coordinates[scratch.facet_dofs[i]*Space::MAX_DIMENSION];
 
       // Map coordinate from H to G
       for (uint j = 0; j < gdim; j++)

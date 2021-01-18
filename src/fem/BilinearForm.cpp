@@ -27,8 +27,22 @@ BilinearForm::~BilinearForm()
 //-----------------------------------------------------------------------------
 void BilinearForm::check(GenericMatrix const& A, GenericVector const& b) const
 {
-  uint const M = this->test_space().dofmap().global_dimension();
-  uint const N = this->trial_space().dofmap().global_dimension();
+  // FIXME num_entities should maybe be stored somewhere else
+  std::vector< size_t > num_entities_M(
+    this->test_space().element()->topological_dimension(), 0 );
+  std::vector< size_t > num_entities_N(
+    this->trial_space().element()->topological_dimension(), 0 );
+
+  for ( uint d = 0; d <= num_entities_M.size(); ++d )
+    if ( this->mesh().topology().connectivity( d ) )
+      num_entities_M[d] = this->mesh().topology().global_size( d );
+
+  for ( uint d = 0; d <= num_entities_N.size(); ++d )
+    if ( this->mesh().topology().connectivity( d ) )
+      num_entities_N[d] = this->mesh().topology().global_size( d );
+
+  uint const M = this->test_space().dofmap().global_dimension( num_entities_M );
+  uint const N = this->trial_space().dofmap().global_dimension( num_entities_N );
 
   if(A.size(0) != A.size(1))
   {

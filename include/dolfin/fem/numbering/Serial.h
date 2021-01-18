@@ -32,7 +32,18 @@ public:
                              ufc::cell const & ufc_cell,
                              Cell const & ) const override
   {
-    ufc_dofmap.tabulate_dofs( dofs, ufc_cell );
+    // FIXME num_entities should maybe be stored somewhere else
+    size_t const tdim = mesh.topology_dimension();
+    std::vector< size_t > num_entities( tdim, 0 );
+    for ( uint d = 0; d <= tdim; ++d )
+    {
+      if ( mesh.topology().connectivity( d ) )
+      {
+        num_entities[d] = mesh.topology().global_size( d );
+      }
+    }
+
+    ufc_dofmap.tabulate_dofs( dofs, num_entities, ufc_cell.entity_indices );
   }
 
   ///
@@ -46,16 +57,18 @@ public:
     }
     //---
 
-    /// FIXME (maybe?!) this was ufcmesh.update()
-    // for (uint d = 0; d <= topological_dimension; ++d)
-    // {
-    //   if (mesh->topology().connectivity(d))
-    //   {
-    //     num_entities[d] = mesh->topology().global_size(d);
-    //   }
-    // }
+    // FIXME num_entities should maybe be stored somewhere else
+    size_t const tdim = mesh.topology_dimension();
+    std::vector< size_t > num_entities( tdim, 0 );
+    for ( uint d = 0; d <= tdim; ++d )
+    {
+      if ( mesh.topology().connectivity( d ) )
+      {
+        num_entities[d] = mesh.topology().global_size( d );
+      }
+    }
 
-    set_range( 0, ufc_dofmap.global_dimension() );
+    set_range( 0, ufc_dofmap.global_dimension( num_entities) );
   }
 
   ///

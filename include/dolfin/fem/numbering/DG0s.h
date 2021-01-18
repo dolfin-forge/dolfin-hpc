@@ -48,10 +48,10 @@ public:
     DofNumbering::init();
     //---
     uint const tdim = mesh.topology_dimension();
-    if (ufc_dofmap.local_dimension() != 1)
+    if (ufc_dofmap.num_element_support_dofs() != 1)
     {
       error("DG0sNumbering : local dimension %u != 1",
-            ufc_dofmap.local_dimension());
+            ufc_dofmap.num_element_support_dofs());
     }
     set_range(mesh.topology().offset(tdim), mesh.topology().num_owned(tdim));
     //---

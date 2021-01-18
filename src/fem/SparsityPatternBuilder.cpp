@@ -5,6 +5,7 @@
 
 #include <dolfin/common/timing.h>
 #include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/la/GenericSparsityPattern.h>
@@ -46,7 +47,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   }
 
   // Build sparsity pattern for cell integrals
-  if (ufc.form.num_cell_integrals() != 0)
+  if (ufc.form.has_cell_integrals())
   {
     for (CellIterator cell(mesh); !cell.end(); ++cell)
     {
@@ -68,7 +69,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   // are included when tabulating dofs on all cells
 
   // Build sparsity pattern for interior facet integrals
-  if (ufc.form.num_interior_facet_integrals() != 0)
+  if (ufc.form.has_interior_facet_integrals())
   {
     uint const tdim = mesh.topology_dimension();
 
@@ -91,7 +92,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       // Tabulate dofs for each dimension on macro element
       for (uint i = 0; i < ufc.form.rank(); ++i)
       {
-        const uint offset = dof_map_set[i].local_dimension();
+        const uint offset = dof_map_set[i].num_element_support_dofs();
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i], ufc.cell0);
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1);
       }
@@ -115,7 +116,9 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
 
     if(has_facet_dofs)
     {
-      PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
+      // FIXME is this the correct space?!
+      FiniteElementSpace space( mesh, ufc.finite_elements[0], dof_map_set[0] );
+      PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping( space );
       uint local_dim[2];
       local_dim[0] = 1;
       local_dim[1] = pdm.max_local_dimension();

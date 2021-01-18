@@ -27,7 +27,7 @@ UFCHalo::UFCHalo(UFC& ufc, Array<Coefficient*> const& coefficients,
     facet1(ufc.facet1),
     macro_dofs(ufc.macro_dofs),
     ufc_(ufc),
-    mesh_(*const_cast<Mesh *>(ufc.mesh.mesh)),
+    mesh_(const_cast<Mesh&>(dof_map_set.mesh())),
     coefficients_(coefficients),
     dof_map_set_(dof_map_set),
     rank_offsets_(),
@@ -152,10 +152,11 @@ void UFCHalo::update(Facet& facet)
   uint const gdim = mesh_.geometry_dimension();
   for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
   {
-    cell0.coordinates[i] = r0;
-    r0 += gdim;
-    cell1.coordinates[i] = r1;
-    r1 += gdim;
+    for ( uint dim = 0; dim < gdim; ++dim, ++r0, ++r1 )
+    {
+      cell0.coordinates[dim*Space::MAX_DIMENSION] = *r0;
+      cell1.coordinates[dim*Space::MAX_DIMENSION] = *r1;
+    }
   }
 
   // Update UFC expansion coefficients, needs copy for the moment
@@ -240,8 +241,9 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     // TODO: implement proper serialization functions
     for (uint i = 0; i < num_cell_vertices; ++i)
     {
-      std::copy(ufc_.cell.coordinates[i], ufc_.cell.coordinates[i] + gdim,
-                r_entry);
+      std::copy( &ufc_.cell.coordinates[i * Space::MAX_DIMENSION],
+                 &ufc_.cell.coordinates[i * Space::MAX_DIMENSION] + gdim,
+                 r_entry );
       r_entry += tdim;
     }
 

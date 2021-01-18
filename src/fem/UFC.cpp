@@ -34,24 +34,24 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   }
 
   // Create cell integrals
-  cell_integrals = new ufc::cell_integral *[form.num_cell_integrals()];
-  for ( uint i = 0; i < form.num_cell_integrals(); ++i )
+  cell_integrals = new ufc::cell_integral *[form.max_cell_subdomain_id()];
+  for ( uint i = 0; i < form.max_cell_subdomain_id(); ++i )
   {
     cell_integrals[i] = form.create_cell_integral( i );
   }
 
   // Create exterior facet integrals
   exterior_facet_integrals =
-    new ufc::exterior_facet_integral *[form.num_exterior_facet_integrals()];
-  for ( uint i = 0; i < form.num_exterior_facet_integrals(); ++i )
+    new ufc::exterior_facet_integral *[form.max_exterior_facet_subdomain_id()];
+  for ( uint i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
   {
     exterior_facet_integrals[i] = form.create_exterior_facet_integral( i );
   }
 
   // Create interior facet integrals
   interior_facet_integrals =
-    new ufc::interior_facet_integral *[form.num_interior_facet_integrals()];
-  for ( uint i = 0; i < form.num_interior_facet_integrals(); ++i )
+    new ufc::interior_facet_integral *[form.max_interior_facet_subdomain_id()];
+  for ( uint i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
   {
     interior_facet_integrals[i] = form.create_interior_facet_integral( i );
   }
@@ -71,7 +71,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   uint num_entries = 1;
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    num_entries *= dofmaps[i].local_dimension();
+    num_entries *= dofmaps[i].num_element_support_dofs();
   }
   A = new real[num_entries];
   std::fill_n( A, num_entries, 0. );
@@ -80,7 +80,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   num_entries = 1;
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    num_entries *= 2 * dofmaps[i].local_dimension();
+    num_entries *= 2 * dofmaps[i].num_element_support_dofs();
   }
   macro_A = new real[num_entries];
   std::fill_n( macro_A, num_entries, 0. );
@@ -89,14 +89,14 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   local_dimensions = new uint[form.rank()];
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    local_dimensions[i] = dofmaps[i].local_dimension();
+    local_dimensions[i] = dofmaps[i].num_element_support_dofs();
   }
 
   // Initialize local dimensions for macro element
   macro_local_dimensions = new uint[form.rank()];
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    macro_local_dimensions[i] = 2 * dofmaps[i].local_dimension();
+    macro_local_dimensions[i] = 2 * dofmaps[i].num_element_support_dofs();
   }
 
   // Initialize local sizes
@@ -110,7 +110,23 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   global_dimensions = new uint[form.rank()];
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    global_dimensions[i] = dofmaps[i].global_dimension();
+    // FIXME is i the correct here?
+    ufc::finite_element * fe = form.create_finite_element( i );
+
+    // FIXME num_entities should maybe be stored somewhere else
+    std::vector< size_t > num_entities( fe->topological_dimension(),
+                                        0 );
+    for ( uint d = 0; d <= fe->topological_dimension(); ++d )
+    {
+      if ( mesh.topology().connectivity( d ) )
+      {
+        num_entities[d] = mesh.topology().global_size( d );
+      }
+    }
+
+    global_dimensions[i] = dofmaps[i].global_dimension( num_entities );
+
+    delete fe;
   }
 
   // Initialize dofs
@@ -164,21 +180,21 @@ UFC::~UFC()
   delete[] coefficient_elements;
 
   // Delete cell integrals
-  for ( uint i = 0; i < form.num_cell_integrals(); ++i )
+  for ( uint i = 0; i < form.max_cell_subdomain_id(); ++i )
   {
     delete cell_integrals[i];
   }
   delete[] cell_integrals;
 
   // Delete exterior facet integrals
-  for ( uint i = 0; i < form.num_exterior_facet_integrals(); ++i )
+  for ( uint i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
   {
     delete exterior_facet_integrals[i];
   }
   delete[] exterior_facet_integrals;
 
   // Delete interior facet integrals
-  for ( uint i = 0; i < form.num_interior_facet_integrals(); ++i )
+  for ( uint i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
   {
     delete interior_facet_integrals[i];
   }

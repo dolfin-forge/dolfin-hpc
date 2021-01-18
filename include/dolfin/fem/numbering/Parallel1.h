@@ -13,6 +13,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/CellIterator.h>
 
 #include <string>
 
@@ -46,8 +47,8 @@ public:
   inline void tabulate_dofs(uint* dofs, ufc::cell const&,
                             Cell const& cell) const override
   {
-    uint const ii = ufc_dofmap.local_dimension() * cell.index();
-    std::copy(&array[ii], &array[ii] + ufc_dofmap.local_dimension(), dofs);
+    uint const ii = ufc_dofmap.num_element_support_dofs() * cell.index();
+    std::copy(&array[ii], &array[ii] + ufc_dofmap.num_element_support_dofs(), dofs);
   }
 
   ///
@@ -68,7 +69,7 @@ public:
      */
 
     uint const tdim = mesh.topology_dimension();
-    uint * dofs = new uint[ufc_dofmap.local_dimension()];
+    uint * dofs = new uint[ufc_dofmap.num_element_support_dofs()];
     _set<uint> owned;
     _set<uint> ufc_ghosts;
     _set<uint> ufc_shared;
@@ -102,17 +103,26 @@ public:
     uint * entity_dofs = new uint[max_num_entity_dof];
     uint * facet_dofs = new uint[ufc_dofmap.num_facet_dofs()];
 
-    // Loop, baby, loop !
+    // FIXME num_entities should maybe be stored somewhere else
+    std::vector< size_t > num_entities( tdim, 0 );
+    for ( uint d = 0; d <= tdim; ++d )
+    {
+      if ( mesh.topology().connectivity( d ) )
+      {
+        num_entities[d] = mesh.topology().global_size( d );
+      }
+    }
+
     uint ii = 0;
     CellIterator cell(mesh);
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
       ufc_cell.update(*cell);
-      ufc_dofmap.tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+      ufc_dofmap.tabulate_dofs(dofs, num_entities, ufc_cell.entity_indices);
 
       // Create mapping from dof to dofmap offset
-      for (uint i = 0; i < ufc_dofmap.local_dimension(); ++i)
+      for (uint i = 0; i < ufc_dofmap.num_element_support_dofs(); ++i)
       {
         dof2index[dofs[i]].push_back(ii++);
       }
@@ -169,7 +179,7 @@ public:
     dolfin_assert(ufc_shared.size() == num_expected_shared - num_expected_ghosts);
 
     // Renumber dofs
-    array_size = mesh.num_cells() * ufc_dofmap.local_dimension();
+    array_size = mesh.num_cells() * ufc_dofmap.num_element_support_dofs();
     array = new uint[array_size];
 
     uint const range = owned.size();

@@ -120,7 +120,7 @@ void DirichletBC::apply_impl( GenericMatrix &       A,
 
   // Check compatibility of function g and the test (sub)space
   FiniteElementSpace const & space = form.trial_space();
-  ufc::finite_element * fe = space.element().create_sub_element( this->sub_system() );
+  ufc::finite_element * fe = space.element()->create_sub_element( this->sub_system() );
 
   for ( uint c = 0; c < conditions.size(); ++c )
   {
@@ -213,7 +213,7 @@ void DirichletBC::computeBCTopological( _map< uint, real > & boundary_values,
 
   // Iterate over facets
   DofMap const & dof_map = space.dofmap();
-  Array< uint >  cell_dofs( dof_map.local_dimension() );
+  Array< uint >  cell_dofs( dof_map.num_element_support_dofs() );
   ScratchSpace   scratch( space, sub_system );
   for ( Array< uint >::const_iterator it = entities_.begin();
         it != entities_.end(); )
@@ -266,7 +266,7 @@ void DirichletBC::computeBCGeometric( _map< uint, real > & boundary_values,
 
   // Iterate over facets
   DofMap const & dof_map = space.dofmap();
-  Array< uint >  cell_dofs( dof_map.local_dimension() );
+  Array< uint >  cell_dofs( dof_map.num_element_support_dofs() );
   ScratchSpace   scratch( space, sub_system );
   CellType * facet_type = mesh().type().create( mesh().type().facetType() );
   Point      xdof;
@@ -295,13 +295,14 @@ void DirichletBC::computeBCGeometric( _map< uint, real > & boundary_values,
         dof_map.tabulate_dofs( cell_dofs.data(), scratch.cell, *c );
 
         // Tabulate coordinates of dofs on cell
-        scratch.dof_map->tabulate_coordinates( scratch.coordinates, scratch.cell );
+        scratch.finite_element->tabulate_dof_coordinates(
+          scratch.coordinates.data(), scratch.cell.coordinates.data() );
 
         // Loop over all dofs on cell
         for ( uint i = 0; i < scratch.local_dimension; ++i )
         {
           // Copy coordinates to node Point
-          xdof.set( scratch.coordinates[i] );
+          xdof.set( &scratch.coordinates[i*Space::MAX_DIMENSION] );
           // Check if the coordinates are on current facet and thus on
           // boundary
           if ( !facet_type->intersects( facet, xdof ) )
@@ -334,7 +335,7 @@ void DirichletBC::computeBCPointwise( _map< uint, real > & boundary_values,
 {
   // Iterate over cells
   DofMap const & dof_map = space.dofmap();
-  Array< uint >  cell_dofs( dof_map.local_dimension() );
+  Array< uint >  cell_dofs( dof_map.num_element_support_dofs() );
   ScratchSpace   scratch( space, sub_system );
   boundary_values.reserve( entities_.size() );
 
@@ -346,8 +347,8 @@ void DirichletBC::computeBCPointwise( _map< uint, real > & boundary_values,
     dof_map.tabulate_dofs( cell_dofs.data(), scratch.cell, *cell );
 
     // Tabulate coordinates of dofs on cell
-    scratch.dof_map->tabulate_coordinates( scratch.coordinates,
-                                           scratch.cell );
+    scratch.finite_element->tabulate_dof_coordinates( scratch.coordinates.data(),
+                                                      scratch.cell.coordinates.data() );
 
     // Interpolate function only once and only on cells where necessary
     bool interpolated = false;
@@ -359,7 +360,7 @@ void DirichletBC::computeBCPointwise( _map< uint, real > & boundary_values,
       for ( uint c = conditions.size(); c > 0; --c )
       {
         // Check if the coordinates are part of the sub domain
-        if ( conditions[c - 1].second.inside( scratch.coordinates[i], true ) )
+        if ( conditions[c - 1].second.inside( &scratch.coordinates[i*Space::MAX_DIMENSION], true ) )
         {
           if ( !interpolated )
           {

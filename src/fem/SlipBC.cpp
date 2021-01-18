@@ -117,7 +117,7 @@ void SlipBC::apply( GenericMatrix & A,
     {
       _ordered_set< uint > rows;
       DofMap const &   fulldofmap = fullspace.dofmap();
-      Array< uint >    celldofs( fulldofmap.local_dimension() );
+      Array< uint >    celldofs( fulldofmap.num_element_support_dofs() );
 
       for ( CellIterator c( mesh ); !c.end(); ++c )
       {
@@ -190,7 +190,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
   {
     // Used to get the global dof indices
     DofMap const& Udofmap = form.test_space().dofmap();
-    Array< uint > fulldofs( Udofmap.local_dimension() );
+    Array< uint > fulldofs( Udofmap.num_element_support_dofs() );
 
     // If any, to get the node id
     bool const same_space = (sub_system().depth() == 0);
@@ -273,7 +273,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
   if ( boundary.num_cells() != 0  )
   {
     DofMap const& Udofmap = form.test_space().dofmap();
-    Array< uint > fulldofs( Udofmap.local_dimension() );
+    Array< uint > fulldofs( Udofmap.num_element_support_dofs() );
 
     // If any, to get the node id defined as the dof of the first normal comp.
     bool const same_space = (sub_system().depth() == 0);
@@ -300,7 +300,8 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
       Cell cell(mesh, facet.entities(gdim)[0]);
       uint const local_facet = cell.index(facet);
       scratch.cell.update(cell);
-      scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
+      scratch.finite_element->tabulate_dof_coordinates(scratch.coordinates.data(),
+                                                       scratch.cell.coordinates.data());
       // Attention, local-to-local mapping.
       scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
 
@@ -334,7 +335,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
         }
 
         // Skip the node if the subdomain is defined geometrically
-        if (!sub_domain().inside(scratch.coordinates[ni_celldof0], true))
+        if (!sub_domain().inside(&scratch.coordinates[ni_celldof0*Space::MAX_DIMENSION], true))
         {
           continue;
         }

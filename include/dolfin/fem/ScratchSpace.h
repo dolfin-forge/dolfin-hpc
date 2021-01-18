@@ -88,13 +88,14 @@ public:
 #endif
 
   // Local array for coordinates
-  real** const coordinates;
+  std::vector< real > coordinates;
 
 private:
 
   // Copy constructor
   ScratchSpace(ScratchSpace const& other);
 
+  /// FIXME this should now be present in the ufc::FE interface
   uint value_size(ufc::finite_element const& finite_element);
 
   void init();

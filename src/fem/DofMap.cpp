@@ -5,6 +5,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/CellIterator.h>
@@ -86,6 +87,20 @@ DofMap::~DofMap()
 }
 
 //-----------------------------------------------------------------------------
+
+PeriodicDofsMapping const &
+  DofMap::periodic_mapping( FiniteElementSpace const & space ) const
+{
+  dolfin_assert( space.dofmap() == *this );
+
+  if ( periodic_dofmap_ == nullptr )
+  {
+    periodic_dofmap_ = new PeriodicDofsMapping( space );
+  }
+  return *periodic_dofmap_;
+}
+
+//-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
 {
   // Reset offset
@@ -147,7 +162,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   for (uint i = 0; i < sub_system[0]; i++)
   {
     ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
-    local_offset += ufc_sub_dofmap->local_dimension();
+    local_offset += ufc_sub_dofmap->num_element_support_dofs();
     delete ufc_sub_dofmap;
   }
 
@@ -189,15 +204,15 @@ void DofMap::init()
     for (uint i = 0; i < nb_sub; ++i)
     {
       ufc::dofmap * subdm = this->create_sub_dofmap(i);
-      sub_dofmaps_dims_.push_back(subdm->local_dimension());
+      sub_dofmaps_dims_.push_back(subdm->num_element_support_dofs());
       sub_dofmaps_offs_.push_back(off);
-      off += subdm->local_dimension();
+      off += subdm->num_element_support_dofs();
       delete subdm;
     }
   }
   else
   {
-    sub_dofmaps_dims_.push_back(this->local_dimension());
+    sub_dofmaps_dims_.push_back(this->num_element_support_dofs());
     sub_dofmaps_offs_.push_back(0);
   }
 }
@@ -294,9 +309,9 @@ void DofMap::disp() const
   section("DofMap");
   begin("ufc::dofmap info");
   prm("Signature"           , ufc_dofmap_->signature());
-  prm("Global dimension"    , ufc_dofmap_->global_dimension());
-  prm("Local dimension"     , ufc_dofmap_->local_dimension());
-  prm("Geometric dimension" , ufc_dofmap_->geometric_dimension());
+  // prm("Global dimension"    , ufc_dofmap_->global_dimension( num_entities ));
+  prm("Local dimension"     , ufc_dofmap_->num_element_support_dofs());
+  // prm("Geometric dimension" , ufc_dofmap_->geometric_dimension());
   prm("Number of subdofmaps", ufc_dofmap_->num_sub_dofmaps());
   prm("Number of facet dofs", ufc_dofmap_->num_facet_dofs());
   end();
@@ -329,7 +344,7 @@ bool DofMap::check(bool throw_error)
   EntitiesDofMap shared_owned_entities;
   Cell c0(mesh, 0);
   UFCCell ufc_cell(c0);
-  uint * cell_dofs = new uint[this->local_dimension()];
+  uint * cell_dofs = new uint[this->num_element_support_dofs()];
   uint * num_entity_dofs = new uint[tdim];
   for (uint d = 0; d < tdim; ++d)
   {

@@ -47,8 +47,8 @@ public:
   {
     for (uint k = 0; k < value_size_; ++k)
     {
-      std::copy(ufc_cell.entity_indices[0],
-                ufc_cell.entity_indices[0] + cell.num_entities(0), dofs);
+      std::copy(ufc_cell.entity_indices[0].data(),
+                ufc_cell.entity_indices[0].data() + cell.num_entities(0), dofs);
       for (uint v = 0; v < cell.num_entities(0); ++v, ++dofs)
       {
         *dofs *= value_size_;
@@ -67,11 +67,11 @@ public:
     value_size_ = flattened.size();
     destruct( flattened );
     //---
-    if (ufc_dofmap.local_dimension()
+    if (ufc_dofmap.num_element_support_dofs()
         != mesh.type().num_entities(0) * value_size_)
     {
       error("CG1sNumbering : local dimension %u != %u",
-            ufc_dofmap.local_dimension(),
+            ufc_dofmap.num_element_support_dofs(),
             mesh.type().num_entities(0) * value_size_);
     }
     set_range(value_size_ * mesh.topology().offset(0),

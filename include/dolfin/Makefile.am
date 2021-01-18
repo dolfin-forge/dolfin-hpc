@@ -70,7 +70,6 @@ nobase_pkginclude_HEADERS = \
 				fem/SubSystem.h\
 				fem/UFC.h\
 				fem/UFCCell.h\
-				fem/UFCCellIterator.h\
 				fem/UFCCoefficient.h\
 				fem/UFCExpression.h\
 				fem/UFCHalo.h\

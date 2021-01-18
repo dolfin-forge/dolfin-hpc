@@ -39,8 +39,8 @@ public:
   ///
   inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const override
   {
-    std::copy(ufc_cell.entity_indices[0],
-              ufc_cell.entity_indices[0] + cell.num_entities(0), dofs);
+    std::copy(ufc_cell.entity_indices[0].data(),
+              ufc_cell.entity_indices[0].data() + cell.num_entities(0), dofs);
   }
 
   ///
@@ -48,10 +48,10 @@ public:
   {
     DofNumbering::init();
     //---
-    if (ufc_dofmap.local_dimension() != mesh.type().num_entities(0))
+    if (ufc_dofmap.num_element_support_dofs() != mesh.type().num_entities(0))
     {
       error("CG1sNumbering : local dimension %u != %u",
-            ufc_dofmap.local_dimension(), mesh.type().num_entities(0));
+            ufc_dofmap.num_element_support_dofs(), mesh.type().num_entities(0));
     }
     set_range(mesh.topology().offset(0), mesh.topology().num_owned(0));
     //---

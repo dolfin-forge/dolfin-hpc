@@ -1,32 +1,33 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/common/timing.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/fem/Assembler.h>
+#include <dolfin/fem/Coefficient.h>
+#include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/Form.h>
+#include <dolfin/fem/PeriodicDofsMapping.h>
+#include <dolfin/fem/SparsityPatternBuilder.h>
+#include <dolfin/fem/UFC.h>
+#include <dolfin/fem/UFCHalo.h>
 #include <dolfin/la/GenericTensor.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/OpenMP.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/FacetIterator.h>
-#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/fem/Coefficient.h>
-#include <dolfin/fem/Form.h>
-#include <dolfin/fem/UFC.h>
-#include <dolfin/fem/UFCHalo.h>
-#include <dolfin/fem/Assembler.h>
-#include <dolfin/fem/SparsityPatternBuilder.h>
-#include <dolfin/fem/DofMapSet.h>
-#include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/common/timing.h>
 
 #include <memory>
 
@@ -100,15 +101,15 @@ void assemble(GenericTensor& A, Form& form,
 
 OPENMP_PRAGMA( master )
   {
-    if (form.num_cell_integrals() > 0)
+    if ( form.has_cell_integrals() )
     {
       cell_domains = new MeshValues<uint, Cell>(mesh);
       (*cell_domains) = 1;
       sub_domain.mark(*cell_domains, 0);
     }
 
-    if (form.num_exterior_facet_integrals() > 0 ||
-        form.num_interior_facet_integrals() > 0)
+    if ( form.has_exterior_facet_integrals() or
+         form.has_interior_facet_integrals() )
     {
       facet_domains = new MeshValues<uint, Facet>(mesh);
       (*facet_domains) = 1;
@@ -197,7 +198,7 @@ void assembleCells(GenericTensor& A,
                               UFC& ufc,
                               MeshValues<uint, Cell> const* domains)
 {
-  if (ufc.form.num_cell_integrals() == 0)
+  if ( not ufc.form.has_cell_integrals() )
   {
     return;
   }
@@ -221,7 +222,8 @@ OPENMP_PRAGMA( for )
     if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(cell);
-      if (domain < ufc.form.num_cell_integrals())
+      // FIXME is this correct?!
+      if (domain <= ufc.form.max_cell_subdomain_id())
       {
           integral = ufc.cell_integrals[domain];
       }
@@ -247,7 +249,8 @@ OPENMP_PRAGMA( for )
     }
 
     // Tabulate cell tensor
-    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell);
+    // FIXME last argument (cell_orientation) needs an actual value
+    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell.coordinates.data(), 0);
 
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
@@ -262,7 +265,7 @@ void assembleExteriorFacets(GenericTensor& A,
                                        UFC& ufc,
                                        MeshValues<uint, Facet> const* domains)
 {
-  if (ufc.form.num_exterior_facet_integrals() == 0)
+  if ( not ufc.form.has_exterior_facet_integrals() )
   {
     return;
   }
@@ -294,7 +297,8 @@ OPENMP_PRAGMA( for )
     if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(facet);
-      if (domain < ufc.form.num_exterior_facet_integrals())
+      // FIXME is this correct?!
+      if (domain <= ufc.form.max_exterior_facet_subdomain_id())
       {
         integral = ufc.exterior_facet_integrals[domain];
       }
@@ -326,7 +330,9 @@ OPENMP_PRAGMA( for )
     }
 
     // Tabulate exterior facet tensor
-    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell, local_facet);
+    // FIXME last argument (cell_orientation) needs an actual value
+    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell.coordinates.data(),
+                              local_facet, 0);
 
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
@@ -341,7 +347,7 @@ void assembleInteriorFacets(GenericTensor& A,
                                        UFC& ufc,
                                        MeshValues<uint, Facet> const* domains)
 {
-  if (ufc.form.num_interior_facet_integrals() == 0)
+  if ( not ufc.form.has_interior_facet_integrals() )
   {
     return;
   }
@@ -371,7 +377,8 @@ OPENMP_PRAGMA( for )
     if ((domains != nullptr) && domains->size() > 0)
     {
       uint const domain = (*domains)(facet);
-      if (domain < ufc.form.num_interior_facet_integrals())
+      // FIXME is this correct?!
+      if (domain <= ufc.form.max_interior_facet_subdomain_id())
       {
         integral = ufc.interior_facet_integrals[domain];
       }
@@ -409,8 +416,11 @@ OPENMP_PRAGMA( for )
         dofmaps[d].tabulate_dofs(ufc.macro_dofs[d] + offset, ufc.cell1);
       }
 
-      integral->tabulate_tensor(ufc.macro_A, ufc.macro_w, ufc.cell0, ufc.cell1,
-                                ufc.facet0, ufc.facet1);
+      // FIXME last two arguments (cell_orientation) need an actual value
+      integral->tabulate_tensor(ufc.macro_A, ufc.macro_w,
+                                ufc.cell0.coordinates.data(),
+                                ufc.cell1.coordinates.data(),
+                                ufc.facet0, ufc.facet1, 0, 0);
 
       // Add entries to global tensor
       A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
@@ -424,8 +434,11 @@ OPENMP_PRAGMA( for )
       // and coefficients until data structures are reworked.
       halo.update(facet);
 
-      integral->tabulate_tensor(ufc.macro_A, halo.macro_w, halo.cell0,
-                                halo.cell1, halo.facet0, halo.facet1);
+      // FIXME last two arguments (cell_orientation) need an actual value
+      integral->tabulate_tensor(ufc.macro_A, halo.macro_w,
+                                halo.cell0.coordinates.data(),
+                                halo.cell1.coordinates.data(),
+                                halo.facet0, halo.facet1, 0, 0);
 
       // Add entries to global tensor
       A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
@@ -438,7 +451,7 @@ OPENMP_PRAGMA( for )
 void initializePeriodicDofs(GenericTensor& A,
                             Array<Coefficient*> const&,
                             DofMapSet const& dofmaps,
-                            UFC&,
+                            UFC& ufc,
                             MeshValues<uint, Facet> const*)
 {
   if(!dofmaps[0].mesh().has_periodic_constraint())
@@ -452,7 +465,10 @@ void initializePeriodicDofs(GenericTensor& A,
   {
     //
     Matrix& matA = static_cast<Matrix&>(A);
-    PeriodicDofsMapping const& pdm = dofmaps[0].periodic_mapping();
+    // FIXME is this the correct space?!
+    Mesh & mesh = const_cast<Mesh&>( dofmaps.mesh() );
+    FiniteElementSpace space( mesh, ufc.finite_elements[0], dofmaps[0] );
+    PeriodicDofsMapping const& pdm = dofmaps[0].periodic_mapping( space );
     real * block = new real[pdm.max_local_dimension() + 1];
     std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);
     uint irow = 0;

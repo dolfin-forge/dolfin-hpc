@@ -138,8 +138,9 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
   FiniteElementSpace const& spaceN = basis[0].space();
   DofMap const& dofmapN = spaceN.dofmap();
+  FiniteElement const & elementN = *spaceN.element();
   ScratchSpace scratchN(spaceN);
-  uint const value_size = spaceN.element().value_size();
+  uint const value_size = spaceN.element()->value_size();
   dolfin_assert(value_size == gdim);
   uint const num_facet_dofs = dofmapN.num_facet_dofs();
   uint const num_facet_nodes = num_facet_dofs / value_size;
@@ -166,7 +167,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
         || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {
       scratchN.cell.update(cell);
-      dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+      elementN.tabulate_dof_coordinates(scratchN.coordinates.data(),
+                                        scratchN.cell.coordinates.data());
     }
     else
     {
@@ -175,12 +177,13 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
       {
         // Tabulate dofs on facet restriction
         scratchN.cell.update(cell);
-        dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+        elementN.tabulate_dof_coordinates(scratchN.coordinates.data(),
+                                          scratchN.cell.coordinates.data());
         dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, fdim, local_facet);
         for (uint i = 0; i < num_restricted_facet_dofs; ++i)
         {
           uint loc_dof = scratchN.facet_dofs[i];
-          if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
+          if (subdomain_->inside(&scratchN.coordinates[loc_dof*Space::MAX_DIMENSION], on_boundary))
           {
             invalid = false;
             break;
@@ -219,7 +222,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     {
       uint dof0 = scratchN.facet_dofs[f_n];
       if ((subdomain_ == nullptr)
-          || subdomain_->inside(scratchN.coordinates[dof0], on_boundary))
+          || subdomain_->inside(&scratchN.coordinates[dof0*Space::MAX_DIMENSION], on_boundary))
       {
         // Take global dof index of the first component as node id
         uint const node_id = scratchN.dofs[dof0];
@@ -469,13 +472,13 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   }
 
   // Cleanup facets and nodes data
-  for ( std::pair< uint, FacetData * > const & f_data : facets_data )
+  for ( std::pair< uint const, FacetData * > const & f_data : facets_data )
   {
     delete f_data.second;
   }
   facets_data.clear();
 
-  for ( std::pair< uint, NodeData * > const & n_data : nodes_data )
+  for ( std::pair< uint const, NodeData * > const & n_data : nodes_data )
   {
     delete n_data.second;
   }

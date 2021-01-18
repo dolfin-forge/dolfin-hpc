@@ -48,7 +48,7 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
       {
         error("Coefficient %i is empty", i);
       }
-      else if(strcmp(fptr->space().element().signature(), fe->signature() ) != 0)
+      else if(strcmp(fptr->space().element()->signature(), fe->signature() ) != 0)
       {
         error("Mismatch of discrete space for Coefficient %i", i);
       }

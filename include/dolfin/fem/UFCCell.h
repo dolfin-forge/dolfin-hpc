@@ -19,8 +19,6 @@ namespace dolfin
 
 class UFCCell : public ufc::cell
 {
-  friend class UFCCellIterator;
-
 public:
   /// Create empty UFC cell
   UFCCell();
@@ -49,6 +47,9 @@ public:
 
   // Number of cell vertices
   uint num_vertices { 0 };
+
+  // coordinates
+  std::vector< double > coordinates;
 
 private:
   // access to dolfin cell
@@ -163,14 +164,17 @@ inline void UFCCell::init( Cell & cell )
   entity_indices[topological_dimension] =
     std::vector< std::size_t >( 1, cell.global_index() );
 
-  /// FIXME still needed ?!
   /// Set vertex coordinates
-  // Array< uint > const & vertices = cell.entities( 0 );
-  // coordinates                    = new real *[num_vertices];
-  // for ( uint i = 0; i < num_vertices; ++i )
-  // {
-  //   coordinates[i] = cell.mesh().geometry().x( vertices[i] );
-  // }
+  Array< uint > const & vertices = cell.entities( 0 );
+  coordinates.resize( num_vertices * geometric_dimension );
+
+  for ( uint i = 0; i < coordinates.size(); i += geometric_dimension )
+  {
+    double const * coords = cell.mesh().geometry().x( vertices[i] );
+
+    for ( uint c = 0; c < geometric_dimension; ++c )
+      coordinates[i+c] = coords[c];
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -178,10 +182,7 @@ inline void UFCCell::init( Cell & cell )
 inline void UFCCell::clear()
 {
   entity_indices.clear();
-
-  // FIXME
-  // delete[] coordinates;
-  // coordinates = nullptr;
+  coordinates.clear();
 
   cell_shape            = ufc::shape::interval;
   topological_dimension = 0;
@@ -205,13 +206,15 @@ inline void UFCCell::update( Cell & cell )
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-  /// FIXME still needed ?!
   // /// Set vertex coordinates
-  // Array< uint > const & vertices = cell.entities( 0 );
-  // for ( uint i = 0; i < num_vertices; ++i )
-  // {
-  //   coordinates[i] = cell.mesh().geometry().x( vertices[i] );
-  // }
+  Array< uint > const & vertices = cell.entities( 0 );
+  for ( uint i = 0; i < coordinates.size(); i += geometric_dimension )
+  {
+    double const * coords = cell.mesh().geometry().x( vertices[i] );
+
+    for ( uint c = 0; c < geometric_dimension; ++c )
+      coordinates[i+c] = coords[c];
+  }
 }
 
 //-----------------------------------------------------------------------------

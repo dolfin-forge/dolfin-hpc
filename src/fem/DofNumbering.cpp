@@ -27,6 +27,16 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   uint const num_verts = mesh.topology().global_size(0);
   uint const num_cells = mesh.topology().global_size(tdim);
 
+  // FIXME num_entities should maybe be stored somewhere else
+  std::vector< size_t > num_entities( tdim, 0 );
+  for ( uint d = 0; d <= tdim; ++d )
+  {
+    if ( mesh.topology().connectivity( d ) )
+    {
+      num_entities[d] = mesh.topology().global_size( d );
+    }
+  }
+
   ///
   Array<ufc::dofmap const*> flattened;
   DofMap::flatten(&ufc_dofmap, flattened);
@@ -38,28 +48,28 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   DofNumbering::init(mesh, ufc_dofmap);
 
   // Real
-  if (ufc_dofmap.global_dimension() == ufc_dofmap.local_dimension())
+  if (ufc_dofmap.global_dimension(num_entities) == ufc_dofmap.num_element_support_dofs())
   {
     message(1, "DofNumbering: create RealSpaceNumbering for %s",
             ufc_dofmap.signature());
     ret = new RealSpaceNumbering(mesh, ufc_dofmap);
   }
   // CG1s
-  else if (ufc_dofmap.global_dimension() == num_verts)
+  else if (ufc_dofmap.global_dimension(num_entities) == num_verts)
   {
     message(1, "DofNumbering: create CG1sNumbering for %s",
             ufc_dofmap.signature());
     ret = new CG1sNumbering(mesh, ufc_dofmap);
   }
   // DG0s
-  else if (ufc_dofmap.global_dimension() == num_cells)
+  else if (ufc_dofmap.global_dimension(num_entities) == num_cells)
   {
     message(1, "DofNumbering: create DG0sNumbering for %s",
             ufc_dofmap.signature());
     ret = new DG0sNumbering(mesh, ufc_dofmap);
   }
   // DG0v
-  else if (vector && ufc_dofmap.global_dimension() == value_size * num_cells)
+  else if (vector && ufc_dofmap.global_dimension(num_entities) == value_size * num_cells)
   {
     message(1, "DofNumbering: create DG0vNumbering for %s",
             ufc_dofmap.signature());
@@ -75,7 +85,7 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
       ret = new Parallel0Numbering(mesh, ufc_dofmap);
     }
     // CG1v
-    else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
+    else if (vector && ufc_dofmap.global_dimension(num_entities) == value_size * num_verts)
     {
       message(1, "DofNumbering: create CG1vNumbering for %s",
               ufc_dofmap.signature());
@@ -134,11 +144,11 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
   {
     error("DofNumbering::cache : numbering range is zero");
   }
-  array = new uint[mesh.num_cells() * ufc_dofmap.local_dimension()];
+  array = new uint[mesh.num_cells() * ufc_dofmap.num_element_support_dofs()];
   array_size = 0;
   CellIterator cell(mesh);
   UFCCell ufc_cell(*cell);
-  for (; !cell.end(); ++cell, array_size += ufc_dofmap.local_dimension())
+  for (; !cell.end(); ++cell, array_size += ufc_dofmap.num_element_support_dofs())
   {
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
@@ -159,10 +169,10 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   {
     error("DofNumbering::init : invalid topological dimension.");
   }
-  if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
-  {
-    error("DofNumbering::init : invalid geometrical dimension.");
-  }
+  // if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
+  // {
+  //   error("DofNumbering::init : invalid geometrical dimension.");
+  // }
   if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {
     error("DofNumbering::init : topological dimension != geometric dimension.\n"
@@ -178,8 +188,18 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     }
   }
 
+  // FIXME num_entities should maybe be stored somewhere else
+  std::vector< size_t > num_entities( ufc_dofmap.topological_dimension(), 0 );
+  for ( uint d = 0; d <= ufc_dofmap.topological_dimension(); ++d )
+  {
+    if ( mesh.topology().connectivity( d ) )
+    {
+      num_entities[d] = mesh.topology().global_size( d );
+    }
+  }
+
   message(1, "DofNumbering: initialized UFC dofmap with global dimension %u",
-          ufc_dofmap.global_dimension());
+          ufc_dofmap.global_dimension(num_entities));
 }
 //-----------------------------------------------------------------------------
 

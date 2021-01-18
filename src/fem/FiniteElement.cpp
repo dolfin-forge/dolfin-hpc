@@ -245,6 +245,37 @@ bool FiniteElement::is_vectorizable() const
 }
 
 //-----------------------------------------------------------------------------
+
+std::ostream & operator<<( std::ostream & out, ufc::shape const & s )
+{
+  switch ( s )
+  {
+    case ufc::shape::interval:
+      out << "interval";
+      break;
+    case ufc::shape::triangle:
+      out << "triangle";
+      break;
+    case ufc::shape::quadrilateral:
+      out << "quadrilateral";
+      break;
+    case ufc::shape::tetrahedron:
+      out << "tetrahedron";
+      break;
+    case ufc::shape::hexahedron:
+      out << "hexahedron";
+      break;
+    case ufc::shape::vertex:
+      out << "vertex";
+      break;
+    default:
+      out << "unknown shape";
+      break;
+  }
+
+  return out;
+}
+
 void FiniteElement::disp() const
 {
   section("FiniteElement");

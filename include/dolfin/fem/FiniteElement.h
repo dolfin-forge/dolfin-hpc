@@ -223,6 +223,12 @@ public:
   //                             const double *    x,
   //                             const ufc::cell & c ) const override;
 
+  /// Tabulate the coordinates of all dofs on a cell
+  void tabulate_dof_coordinates(
+    double *                        dof_coordinates,
+    double const *                  coordinate_dofs,
+    ufc::coordinate_mapping const * cm = nullptr ) const override;
+
   /// Tabulate the coordinates of all dofs on a reference cell
   void tabulate_reference_dof_coordinates(
     double * reference_dof_coordinates ) const override;
@@ -563,6 +569,17 @@ inline void FiniteElement::interpolate_vertex_values(
 // {
 //   ufc_finite_element_->map_to_reference_cell( xhat, x, c );
 // }
+
+//-----------------------------------------------------------------------------
+
+inline void FiniteElement::tabulate_dof_coordinates(
+  double *                        dof_coordinates,
+  double const *                  coordinate_dofs,
+  ufc::coordinate_mapping const * cm ) const
+{
+  ufc_finite_element_->tabulate_dof_coordinates(
+    dof_coordinates, coordinate_dofs, cm );
+}
 
 //-----------------------------------------------------------------------------
 

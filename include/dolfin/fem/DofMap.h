@@ -20,6 +20,7 @@ class Cell;
 class Form;
 class Mesh;
 class SubSytem;
+class FiniteElementSpace;
 
 /// This class handles the mapping of degrees of freedom.
 /// It wraps a ufc::dofmap on a specific mesh and provides
@@ -200,7 +201,7 @@ public:
   //--- Management of periodic dofs mapping
 
   /// Return local to global mapping
-  PeriodicDofsMapping const & periodic_mapping() const;
+  PeriodicDofsMapping const & periodic_mapping( FiniteElementSpace const & space ) const;
 
   //--- Dof ownership
 
@@ -508,17 +509,6 @@ inline size_t const * DofMap::dofsmapping() const
 inline size_t DofMap::dofsmapping_size() const
 {
   return numbering_->block_size();
-}
-
-//-----------------------------------------------------------------------------
-
-inline PeriodicDofsMapping const & DofMap::periodic_mapping() const
-{
-  if ( periodic_dofmap_ == nullptr )
-  {
-    periodic_dofmap_ = new PeriodicDofsMapping( *this );
-  }
-  return *periodic_dofmap_;
 }
 
 //-----------------------------------------------------------------------------

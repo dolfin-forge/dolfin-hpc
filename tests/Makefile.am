@@ -1,28 +1,24 @@
-SUBDIRS = \
-  common \
-  ufl \
-  log \
-  la \
-  elements \
-  fem \
-  function \
-  io \
-  main \
-  mesh \
-  parameter
+SUBDIRS = common \
+          elements \
+          fem \
+          function \
+          io \
+          la \
+          log \
+          main \
+          mesh \
+          parameter
 
-TESTS = \
-  common/exe \
-  ufl/exe \
-  log/exe \
-  la/exe \
-  elements/exe \
-  fem/exe \
-  function/exe \
-  io/exe \
-  main/exe \
-  mesh/exe \
-  parameter/exe
+TESTS = common/exe \
+        elements/exe \
+        fem/exe \
+        function/exe \
+        io/exe \
+        la/exe \
+        log/exe \
+        main/exe \
+        mesh/exe \
+        parameter/exe
 
 dolfin_tests.h:	Makefile
 	$(SED) -e 's|#abs_top_srcdir#|@abs_top_srcdir@|g' \

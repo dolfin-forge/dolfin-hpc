@@ -9,7 +9,6 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/RefinementPattern.h>
-#include <dolfin/ufl/UFLCell.h>
 
 #include <string>
 
@@ -180,9 +179,6 @@ public:
   /// ASSERTION: edge vertices in ascending order
   virtual bool check(Cell& cell) const = 0;
 
-  /// UFL binding
-  operator ufl::Cell const&() const { return ufl_; }
-
   //---------------------------------------------------------------------------
 
   /// Create cell type from type (factory function)
@@ -190,9 +186,6 @@ public:
 
   /// Create cell type from string (factory function)
   static CellType* create(std::string const& type);
-
-  /// Create cell type from UFL type (factory function)
-  static CellType* create(ufl::Cell const& cell);
 
   /// Create cell types
   static Array<CellType*> create_all();
@@ -217,9 +210,6 @@ protected:
   /// Convert from cell type to string
   static std::string str(CellType::Type type);
 
-  /// Convert from cell type to UFL cell type
-  static ufl::Domain::Type ufldomain(CellType::Type type);
-
   std::string const name_;
   CellType::Type const cell_type;
   CellType::Type const facet_type;
@@ -229,10 +219,6 @@ protected:
 
   /// Implementation detail after C++11 <algorithm>
   static bool is_sorted(uint const * begin, uint const * end);
-
-private:
-
-  ufl::Cell ufl_;
 
 };
 

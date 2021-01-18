@@ -11,42 +11,42 @@ namespace dolfin
 
 //--- SCALAR ------------------------------------------------------------------
 
-template<class T> struct scalar : ufl::FiniteElement
-{
-  scalar(CellType const& cell, uint const degree) :
-      ufl::FiniteElement(T::type, cell, degree)
-  {
-  }
+// template<class T> struct scalar : ufl::FiniteElement
+// {
+//   scalar(CellType const& cell, uint const degree) :
+//       ufl::FiniteElement(T::type, cell, degree)
+//   {
+//   }
 
-  static ElementType const type = T::type;
+//   static ElementType const type = T::type;
 
-  void disp() const { message("%s", this->repr().c_str()); }
-};
+//   void disp() const { message("%s", this->repr().c_str()); }
+// };
 
-using sCG = scalar<Elements::cg>;
-using sDG = scalar<Elements::dg>;
+// using sCG = scalar<Elements::cg>;
+// using sDG = scalar<Elements::dg>;
 
-//--- VECTOR ------------------------------------------------------------------
+// //--- VECTOR ------------------------------------------------------------------
 
-template<class T> struct vector : ufl::VectorElement
-{
-  vector(CellType const& cell, uint const degree, uint const dim) :
-      ufl::VectorElement(T::type, cell, degree, dim)
-  {
-  }
+// template<class T> struct vector : ufl::VectorElement
+// {
+//   vector(CellType const& cell, uint const degree, uint const dim) :
+//       ufl::VectorElement(T::type, cell, degree, dim)
+//   {
+//   }
 
-  static ElementType const type = T::type;
+//   static ElementType const type = T::type;
 
-  void disp() const { message("%s", this->repr().c_str()); }
-};
+//   void disp() const { message("%s", this->repr().c_str()); }
+// };
 
-using vCG = vector<Elements::cg>;
-using vDG = vector<Elements::dg>;
+// using vCG = vector<Elements::cg>;
+// using vDG = vector<Elements::dg>;
 
-//--- ELEMENTS ----------------------------------------------------------------
+// //--- ELEMENTS ----------------------------------------------------------------
 
-using CG = scalar<Elements::cg>;
-using DG = scalar<Elements::dg>;
+// using CG = scalar<Elements::cg>;
+// using DG = scalar<Elements::dg>;
 
 } /* namespace dolfin */
 

@@ -397,7 +397,6 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/mesh/Makefile\
                  src/parameter/Makefile\
                  src/quadrature/Makefile\
-                 src/ufl/Makefile\
                  src/dolfin.pc\
                  include/Makefile\
                  include/dolfin/Makefile])
@@ -413,15 +412,14 @@ AC_CONFIG_FILES([tests/Makefile\
                  tests/log/Makefile\
                  tests/main/Makefile\
                  tests/mesh/Makefile\
-                 tests/parameter/Makefile\
-                 tests/ufl/Makefile])
+                 tests/parameter/Makefile])
 
 # Python
 AC_CONFIG_FILES([site-packages/Makefile])
 
 # Doxygen
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
-		 doc/progr_reference/Makefile])
+                 doc/progr_reference/Makefile])
 
 AC_OUTPUT
 

@@ -108,34 +108,11 @@ public:
   /// Return whether the discrete space can be flattened to scalar elements
   bool is_flattenable() const;
 
-  //--- UFL INTERFACE ---------------------------------------------------------
-
-  /// Returns the family of the finite element
-  /// UFL + FIAT
-  ufl::Family::Type family() const;
-
-  /// Returns the degree of the finite element
-  /// UFL + FIAT
-  uint degree() const;
-
-  /// Return the metatype of the finite element
-  /// UFL C++ only
-  ufl::Family::Type metatype() const;
-
-  /// Return UFL definition of the discrete space
-  operator ufl::FiniteElementSpace const &() const
-  {
-    return *ufl_;
-  }
-
 private:
   Mesh &                mesh_;
   mutable Cell          cell_;
   FiniteElement const * finite_element_;
   DofMap & dof_map_; // The dof map is owned by the DofMapCache instance.
-
-  // UFL binding
-  ufl::FiniteElementSpace const * const ufl_;
 };
 
 //-----------------------------------------------------------------------------
@@ -143,27 +120,6 @@ private:
 inline Mesh & FiniteElementSpace::mesh() const
 {
   return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-
-inline ufl::Family::Type FiniteElementSpace::family() const
-{
-  return ufl_->family().type();
-}
-
-//-----------------------------------------------------------------------------
-
-inline ufl::Family::Type FiniteElementSpace::metatype() const
-{
-  return ufl_->metatype();
-}
-
-//-----------------------------------------------------------------------------
-
-inline uint FiniteElementSpace::degree() const
-{
-  return ufl_->degree();
 }
 
 //-----------------------------------------------------------------------------
@@ -237,7 +193,8 @@ inline bool FiniteElementSpace::is_cellwise_constant() const
 inline bool FiniteElementSpace::is_vertex_based() const
 {
   /// @todo Only a particular case.
-  return ( this->family() == ufl::Family::CG ) && ( this->degree() == 1 );
+  return ( finite_element_->family() == ElementFamilyType::CG )
+         and ( finite_element_->degree() == 1 );
 }
 
 //-----------------------------------------------------------------------------

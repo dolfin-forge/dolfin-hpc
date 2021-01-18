@@ -56,7 +56,7 @@ Function::Function(Form& form, uint i) :
     TimeDependent(),
     mesh_(&form.dofmaps()[i].mesh()),
     discrete_space_(new FiniteElementSpace(form, i)),
-    element_(&discrete_space_->element()),
+    element_(discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -76,7 +76,7 @@ Function::Function(FiniteElementSpace const& space) :
     TimeDependent(),
     mesh_(&space.mesh()),
     discrete_space_(new FiniteElementSpace(space)),
-    element_(&discrete_space_->element()),
+    element_(discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -96,7 +96,7 @@ Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
     TimeDependent(),
     mesh_(&mesh),
     discrete_space_(new FiniteElementSpace(mesh, finite_element)),
-    element_(&discrete_space_->element()),
+    element_(discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -117,7 +117,7 @@ Function::Function(SubFunction const& sub_function) :
     mesh_(&sub_function.function().mesh()),
     discrete_space_(new FiniteElementSpace(sub_function.function().space(),
                                            sub_function.index())),
-    element_(&discrete_space_->element()),
+    element_(discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -133,7 +133,7 @@ Function::Function(SubFunction const& sub_function) :
   // Copy subvector, naive implementation
   Function& gFunc = sub_function.function();
   DofMap const& gDm = gFunc.space().dofmap();
-  uint const gLocalDim = gDm.local_dimension();
+  uint const gLocalDim = gDm.num_element_support_dofs();
   uint const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
   uint const thisLocalDim = scratch->local_dimension;
 
@@ -201,7 +201,7 @@ void Function::init(Form& form, uint i)
   //
   clear();
   discrete_space_ = new FiniteElementSpace(form, i);
-  element_ = &discrete_space_->element();
+  element_ = discrete_space_->element();
   dofmap_ = &discrete_space_->dofmap();
   scratch = new ScratchSpace(*discrete_space_);
   X_ = new Vector();
@@ -223,7 +223,7 @@ void Function::init(FiniteElementSpace const& space)
   //
   clear();
   discrete_space_ = new FiniteElementSpace(space);
-  element_ = &discrete_space_->element();
+  element_ = discrete_space_->element();
   dofmap_ = &discrete_space_->dofmap();
   scratch = new ScratchSpace(*discrete_space_);
   X_ = new Vector();
@@ -266,34 +266,36 @@ void Function::evaluate(uint n, real* values, const real* x,
   std::fill_n(values, n * scratch->size, 0.0);
   for (uint q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
   {
-#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-    dolfin_assert( scratch->size <= Space::MAX_DIMENSION );
-    dolfin_assert( element_->space_dimension() <= scratch->space_dimension );
+// FIXME reintroduce this, once all other things are worked out
+// #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+//     dolfin_assert( scratch->size <= Space::MAX_DIMENSION );
+//     dolfin_assert( element_->space_dimension() <= scratch->space_dimension );
 
-    real coord[Space::MAX_DIMENSION];
+//     real coord[Space::MAX_DIMENSION];
 
-    element_->evaluate_basis_map_coordinates( coord[0], coord[1], coord[2],
-                                              x, *ufc_cell );
+//     element_->evaluate_basis_map_coordinates( coord[0], coord[1], coord[2],
+//                                               x, *ufc_cell );
 
-    element_->evaluate_basis_from_coordinates( coord[0], coord[1], coord[2],
-                                               scratch->all_basis_values );
+//     element_->evaluate_basis_from_coordinates( coord[0], coord[1], coord[2],
+//                                                scratch->all_basis_values );
 
-    // Compute linear combination
-    for (uint i = 0; i < element_->space_dimension(); ++i)
-      for (uint j = 0; j < scratch->size; ++j)
-        values[j] += scratch->coefficients[i] * scratch->all_basis_values[i][j];
-#else
+//     // Compute linear combination
+//     for (uint i = 0; i < element_->space_dimension(); ++i)
+//       for (uint j = 0; j < scratch->size; ++j)
+//         values[j] += scratch->coefficients[i] * scratch->all_basis_values[i][j];
+// #else
     // Compute linear combination
     for (uint i = 0; i < element_->space_dimension(); ++i)
     {
-      //FIXME: Idiotic
-      element_->evaluate_basis(i, scratch->basis_values, x, *ufc_cell);
+      // FIXME cell_orientation needs a correct value here
+      element_->evaluate_basis(i, scratch->basis_values, x,
+                               ufc_cell->coordinates.data(), 0);
       for (uint j = 0; j < scratch->size; ++j)
       {
         values[j] += scratch->coefficients[i] * scratch->basis_values[j];
       }
     }
-#endif
+// #endif
   }
 }
 
@@ -355,8 +357,10 @@ void Function::interpolate_vertex_values(real* values) const
 
       // Interpolate values at the vertices
       // Values are packed by vertex and not by subspace (if any)
+      // FIXME find a form, where more tha vertex_values and dof_values are used,
+      // to make sure the arguments here are correct
       element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
-                                         scratch->cell);
+                                         scratch->cell.coordinates.data(), 0);
 
       // Sum values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
@@ -461,8 +465,10 @@ void Function::interpolate_vertex_values(real* values) const
 
       // Interpolate values at the vertices
       // Values are packed by vertex and not by subspace (if any)
+      // FIXME find a form, where more tha vertex_values and dof_values are used,
+      // to make sure the arguments here are correct
       element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
-                                         scratch->cell);
+                                         scratch->cell.coordinates.data(), 0);
 
       // Copy values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
@@ -511,7 +517,18 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void Function::InitializeVector()
 {
-  if (X_->size() != dofmap_->global_dimension())
+  // FIXME num_entities should maybe be stored somewhere else
+  std::vector< size_t > num_entities( element_->topological_dimension(),
+                                      0 );
+  for ( uint d = 0; d <= element_->topological_dimension(); ++d )
+  {
+    if ( mesh_->topology().connectivity( d ) )
+    {
+      num_entities[d] = mesh_->topology().global_size( d );
+    }
+  }
+
+  if (X_->size() != dofmap_->global_dimension( num_entities ))
   {
     // Specific case in serial local_size == global_dimension
     X_->init(dofmap_->local_size());
@@ -629,7 +646,7 @@ Function& Function::operator=(Function const& other)
   {
     const_cast<Mesh *&>(mesh_) = other.mesh_;
     discrete_space_ = new FiniteElementSpace(*other.discrete_space_);
-    element_ = &discrete_space_->element();
+    element_ = discrete_space_->element();
     dofmap_ = &discrete_space_->dofmap();
     scratch = new ScratchSpace(*discrete_space_);
     X_ = new Vector();

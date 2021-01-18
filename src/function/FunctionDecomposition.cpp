@@ -90,7 +90,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     }
     delete[] block;
   }
-  else if (Wh.element().is_vectorizable())
+  else if (Wh.element()->is_vectorizable())
   {
     uint ii = 0;
     uint offset = 0;
@@ -121,7 +121,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (uint i = 0; i < Si.size(); ++i)
     {
       FiniteElementSpace const& Vhi = (*Si[i]).space();
-      local_dim[i] = Vhi.dofmap().local_dimension();
+      local_dim[i] = Vhi.dofmap().num_element_support_dofs();
       celldofs[i] = Vhi.dofmap().dofsmapping();
     }
     real * block = F.create_block();

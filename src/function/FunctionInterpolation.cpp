@@ -53,7 +53,10 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], UE, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element()->evaluate_dofs(&block1[dof], UE,
+                                          S1.cell.coordinates.data(),
+                                          0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -78,7 +81,10 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element()->evaluate_dofs(&block1[dof], F0,
+                                         S1.cell.coordinates.data(),
+                                         0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -98,7 +104,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
   {
     // Analytical expression and flattened space (naive implementation)
     Array<ufc::finite_element const*> const& Sflt =
-        F1.space().element().flatten();
+        F1.space().element()->flatten();
     ScratchSpace S1(F1.space());
 
     uint dof = 0;
@@ -106,14 +112,15 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      S1.dof_map->tabulate_coordinates(S1.coordinates, S1.cell);
+      S1.finite_element->tabulate_dof_coordinates(S1.coordinates.data(),
+                                                  S1.cell.coordinates.data());
 
       uint celldof = 0;
       for (uint leaf = 0; leaf < Sflt.size(); ++leaf)
       {
         for (uint ii = 0; ii < Sflt[leaf]->space_dimension(); ++ii)
         {
-          F0.evaluate(S1.values, S1.coordinates[celldof++], S1.cell);
+          F0.evaluate(S1.values, &S1.coordinates[Space::MAX_DIMENSION*(celldof++)], S1.cell);
           block1[dof++] = S1.values[leaf];
         }
       }
@@ -133,7 +140,10 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element()->evaluate_dofs(&block1[dof], F0,
+                                          S1.cell.coordinates.data(),
+                                          0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -202,7 +212,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   bool const is_distributed = M0.is_distributed() || M1.is_distributed();
 #if HAVE_MPI
   bool const just_first_coords = Vh1.is_flattenable()
-      && Vh1.element().is_vectorizable();
+      && Vh1.element()->is_vectorizable();
 #endif
 
   //--- Collect on-proc and off-proc dofs
@@ -314,20 +324,21 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     //
     dolfin_assert(dofs_indices0.size() / S1.size == dofs_xcoords0.size() / gdim1);
   }
-  else if (Vh1.is_flattenable() && Vh1.element().is_vectorizable())
+  else if (Vh1.is_flattenable() && Vh1.element()->is_vectorizable())
   {
     // This implementation assumes a scalar function for which
     // components are approximated in a discrete space other than CG1 and DG0.
     // (u, r) : (indices for dofs located at node n,
     //           node coordinates)
     _set<uint> done;
-    uint const local_dim1 = dm1.local_dimension() / S1.size;
+    uint const local_dim1 = dm1.num_element_support_dofs() / S1.size;
     Point p;
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {
       S1.cell.update(*c1);
       dm1.tabulate_dofs(S1.dofs, S1.cell);
-      dm1.tabulate_coordinates(S1.coordinates, S1.cell);
+      S1.finite_element->tabulate_dof_coordinates(S1.coordinates.data(),
+                                                  S1.cell.coordinates.data());
 
       // For each dof of the first leaf
       for (uint i = 0; i < local_dim1; ++i)
@@ -335,7 +346,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         if ((done.count(S1.dofs[i]) == 0) && !dm1.is_ghost(S1.dofs[i]))
         {
           done.insert(S1.dofs[i]);
-          std::memcpy(&p[0], S1.coordinates[i], gdim1 * sizeof(real));
+          std::memcpy(&p[0], &S1.coordinates[i*Space::MAX_DIMENSION], gdim1 * sizeof(real));
           Array<uint> M0cells;
           M0.intersector().overlap(p, M0cells);
           if (M0cells.empty())

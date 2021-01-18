@@ -256,6 +256,7 @@ private:
 
   /// Discrete space
   FiniteElementSpace * discrete_space_{nullptr};
+  // FIXME element_ and dofmap_ are already part of the discrete_space_
   FiniteElement const * element_{nullptr};
   DofMap const * dofmap_{nullptr};
   ScratchSpace * scratch{nullptr};

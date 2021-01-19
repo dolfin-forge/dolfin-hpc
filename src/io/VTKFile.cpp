@@ -342,13 +342,13 @@ void VTKFile::ResultsWrite(
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -460,13 +460,13 @@ void VTKFile::ResultsWrite(
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -776,7 +776,7 @@ void VTKFile::VTKHeaderOpen(Mesh& mesh) const
   fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s %s>\n",
           endianness.c_str(), compressor.c_str());
   fprintf(fp, "<UnstructuredGrid>\n");
-  fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">\n",
+  fprintf(fp, "<Piece  NumberOfPoints=\" %8lu\"  NumberOfCells=\" %8lu\">\n",
           mesh.size(0), mesh.num_cells());
 
   // Close file

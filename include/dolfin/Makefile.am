@@ -27,7 +27,6 @@ nobase_pkginclude_HEADERS = \
 				common/Variable.h\
 				config/dolfin_config.h\
 				elements/dolfin_elements.h\
-				elements/ElementLibrary.h\
 				elements/Elements.h\
 				evolution/dolfin_evolution.h\
 				evolution/Time.h\
@@ -73,7 +72,6 @@ nobase_pkginclude_HEADERS = \
 				fem/UFCCoefficient.h\
 				fem/UFCExpression.h\
 				fem/UFCHalo.h\
-				fem/UFCMesh.h\
 				function/Analytic.h\
 				function/Constant.h\
 				function/dolfin_function.h\

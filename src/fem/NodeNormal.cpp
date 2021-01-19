@@ -114,7 +114,8 @@ uint NodeNormal::node_type(uint node_id) const
 //-----------------------------------------------------------------------------
 void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 {
-  message(1, "NodeNormal : compute P%u node normal", basis[0].space().degree());
+  message(1, "NodeNormal : compute P%u node normal",
+             basis[0].space().element()->degree());
   clear();
   BoundaryMesh& boundary = mesh.exterior_boundary();
 

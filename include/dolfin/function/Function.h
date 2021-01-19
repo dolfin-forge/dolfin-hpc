@@ -54,9 +54,6 @@ public:
   /// Create discrete function from given  discrete space
   Function(FiniteElementSpace const& space);
 
-  /// Create discrete function from given pre-generated UFL Finite Element
-  Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element);
-
   /// Create discrete function from sub function
   Function(SubFunction const& sub_function);
 

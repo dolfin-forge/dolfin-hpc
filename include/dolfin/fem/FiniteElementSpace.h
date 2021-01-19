@@ -53,10 +53,6 @@ public:
                                ufc::dofmap &               dofmap,
                                bool                        owner = false );
 
-  /// Create space from UFL space definition for pre-generated elements
-  explicit FiniteElementSpace( Mesh &                          mesh,
-                               ufl::FiniteElementSpace const & element );
-
   /// Create a finite element space from ith subspace of given space
   FiniteElementSpace( FiniteElementSpace const & space, uint const i );
 
@@ -193,7 +189,7 @@ inline bool FiniteElementSpace::is_cellwise_constant() const
 inline bool FiniteElementSpace::is_vertex_based() const
 {
   /// @todo Only a particular case.
-  return ( finite_element_->family() == ElementFamilyType::CG )
+  return     ( finite_element_->family() == Element::Family::CG )
          and ( finite_element_->degree() == 1 );
 }
 

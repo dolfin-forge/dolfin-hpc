@@ -17,8 +17,7 @@
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/SparsityPattern.h>
-#include <dolfin/la/Vector.h>
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/log/log.h>
 #include <dolfin/main/OpenMP.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>

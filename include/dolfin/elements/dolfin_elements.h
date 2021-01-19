@@ -3,6 +3,6 @@
 
 // DOLFIN elements classes
 
-#include <dolfin/elements/ElementLibrary.h>
+#include <dolfin/elements/Elements.h>
 
 #endif /* __DOLFIN_HEADER_ELEMENTS_H */

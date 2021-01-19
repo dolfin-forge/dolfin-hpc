@@ -91,26 +91,6 @@ Function::Function(FiniteElementSpace const& space) :
 }
 
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
-    GenericFunction(),
-    TimeDependent(),
-    mesh_(&mesh),
-    discrete_space_(new FiniteElementSpace(mesh, finite_element)),
-    element_(discrete_space_->element()),
-    dofmap_(&discrete_space_->dofmap()),
-    scratch(new ScratchSpace(*discrete_space_)),
-    X_(new Vector()),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(nullptr),
-    data_cache_(nullptr),
-    cache_mapping_(nullptr)
-{
-  // Initialise function
-  InitializeVector();
-}
-
-//-----------------------------------------------------------------------------
 Function::Function(SubFunction const& sub_function) :
     GenericFunction(),
     TimeDependent(sub_function.function()),

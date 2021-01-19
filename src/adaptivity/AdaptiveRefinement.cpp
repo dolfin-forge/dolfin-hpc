@@ -11,7 +11,6 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/io/BinaryFile.h>
-#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/EdgeIterator.h>
 #include <dolfin/mesh/LoadBalancer.h>
@@ -336,7 +335,8 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
   dolfin_set("GTS Tolerance", 1e-10);
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);
 
-  if ( ( space.family() != ufl::Family::CG ) || ( space.degree() != 1 ) )
+  if ( not ( space.element()->family() == Element::Family::CG )
+       or  ( space.element()->degree() != 1 ) )
   {
     error("AdaptiveRefinement::project only implemented for P1");
   }

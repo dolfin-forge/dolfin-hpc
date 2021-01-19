@@ -9,9 +9,12 @@
 namespace dolfin
 {
 
+namespace Element
+{
+
 // we only really use CG and DG at the moment, but here is a complete list of
 // element families ufc/ffc can generate
-enum ElementFamilyType
+enum Family
 {
   ARG,
   AW,
@@ -38,22 +41,26 @@ enum ElementFamilyType
   Restricted
 };
 
+} // end namespace Element
+
 struct Elements
 {
   struct cg
   {
-    static ElementFamilyType const type = ElementFamilyType::CG;
+    static Element::Family const type = Element::Family::CG;
   };
 
   struct dg
   {
-    static ElementFamilyType const type = ElementFamilyType::DG;
+    static Element::Family const type = Element::Family::DG;
   };
 };
 
-inline bool operator==( std::string const &       family_str,
-                        ElementFamilyType const & family_type )
+inline bool operator==( std::string const &     family_str,
+                        Element::Family const & family_type )
 {
+  using namespace Element;
+
   bool ret = false;
   switch ( family_type )
   {
@@ -107,6 +114,7 @@ inline bool operator==( std::string const &       family_str,
       break;
     case U:
       ret = family_str == "Undefined";
+      break;
     // case Q:
     //   ret = family_str == ;
     //   break;
@@ -133,20 +141,20 @@ inline bool operator==( std::string const &       family_str,
   return ret;
 }
 
-inline bool operator==( ElementFamilyType const & family_type,
-                        std::string const &       family_str )
+inline bool operator==( Element::Family const & family_type,
+                        std::string const &     family_str )
 {
   return family_str == family_type;
 }
 
-inline bool operator==( char const *              family_str,
-                        ElementFamilyType const & family_type )
+inline bool operator==( char const *            family_str,
+                        Element::Family const & family_type )
 {
   return std::string( family_str ) == family_type;
 }
 
-inline bool operator==( ElementFamilyType const & family_type,
-                        char const *              family_str )
+inline bool operator==( Element::Family const & family_type,
+                        char const *            family_str )
 {
   return std::string( family_str ) == family_type;
 }

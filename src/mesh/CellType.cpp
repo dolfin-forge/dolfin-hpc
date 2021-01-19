@@ -22,12 +22,12 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-CellType::CellType(std::string const& name, CellType::Type cell_type,
-                   CellType::Type facet_type) :
-    name_(name),
-    cell_type(cell_type),
-    facet_type(facet_type),
-    ufl_(CellType::ufldomain(cell_type))
+CellType::CellType( std::string const & name,
+                    CellType::Type      cell_type,
+                    CellType::Type      facet_type )
+  : name_( name )
+  , cell_type( cell_type )
+  , facet_type( facet_type )
 {
   // Do nothing
 }
@@ -37,79 +37,79 @@ CellType::~CellType()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Array<CellType*> CellType::create_all()
+Array< CellType * > CellType::create_all()
 {
-  Array<CellType *> ret;
-  ret.push_back(CellType::create(CellType::interval));
-  ret.push_back(CellType::create(CellType::triangle));
-  ret.push_back(CellType::create(CellType::tetrahedron));
-  ret.push_back(CellType::create(CellType::quadrilateral));
-  ret.push_back(CellType::create(CellType::hexahedron));
+  Array< CellType * > ret;
+  ret.push_back( CellType::create( CellType::interval ) );
+  ret.push_back( CellType::create( CellType::triangle ) );
+  ret.push_back( CellType::create( CellType::tetrahedron ) );
+  ret.push_back( CellType::create( CellType::quadrilateral ) );
+  ret.push_back( CellType::create( CellType::hexahedron ) );
   return ret;
 }
 //-----------------------------------------------------------------------------
-Array<CellType*> CellType::create_simplex()
+Array< CellType * > CellType::create_simplex()
 {
-  Array<CellType *> ret;
-  ret.push_back(CellType::create(CellType::interval));
-  ret.push_back(CellType::create(CellType::triangle));
-  ret.push_back(CellType::create(CellType::tetrahedron));
+  Array< CellType * > ret;
+  ret.push_back( CellType::create( CellType::interval ) );
+  ret.push_back( CellType::create( CellType::triangle ) );
+  ret.push_back( CellType::create( CellType::tetrahedron ) );
   return ret;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create_simplex(uint dim)
+CellType * CellType::create_simplex( uint dim )
 {
-  switch (dim)
-    {
+  switch ( dim )
+  {
     case 1:
-      return CellType::create(CellType::interval);
+      return CellType::create( CellType::interval );
       break;
     case 2:
-      return CellType::create(CellType::triangle);
+      return CellType::create( CellType::triangle );
       break;
     case 3:
-      return CellType::create(CellType::tetrahedron);
+      return CellType::create( CellType::tetrahedron );
       break;
     default:
-      error("Unknown simplex type for dimension: %d.", dim);
+      error( "Unknown simplex type for dimension: %d.", dim );
       break;
-    }
+  }
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-Array<CellType*> CellType::create_hypercube()
+Array< CellType * > CellType::create_hypercube()
 {
-  Array<CellType *> ret;
-  ret.push_back(CellType::create(CellType::interval));
-  ret.push_back(CellType::create(CellType::quadrilateral));
-  ret.push_back(CellType::create(CellType::hexahedron));
+  Array< CellType * > ret;
+  ret.push_back( CellType::create( CellType::interval ) );
+  ret.push_back( CellType::create( CellType::quadrilateral ) );
+  ret.push_back( CellType::create( CellType::hexahedron ) );
   return ret;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create_hypercube(uint dim)
+CellType * CellType::create_hypercube( uint dim )
 {
-  switch (dim)
-    {
+  switch ( dim )
+  {
     case 1:
-      return CellType::create(CellType::interval);
+      return CellType::create( CellType::interval );
       break;
     case 2:
-      return CellType::create(CellType::quadrilateral);
+      return CellType::create( CellType::quadrilateral );
       break;
     case 3:
-      return CellType::create(CellType::hexahedron);
+      return CellType::create( CellType::hexahedron );
       break;
     default:
-      error("Unknown hypercube type for dimension: %d.", dim);
+      error( "Unknown hypercube type for dimension: %d.", dim );
       break;
-    }
+  }
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create(CellType::Type type)
+CellType * CellType::create( CellType::Type type )
 {
-  switch (type)
-    {
+  switch ( type )
+  {
     case point:
       return new PointCell();
     case interval:
@@ -123,88 +123,64 @@ CellType* CellType::create(CellType::Type type)
     case hexahedron:
       return new HexahedronCell();
     default:
-      error("Unknown cell type: %d.", type);
+      error( "Unknown cell type: %d.", type );
       break;
-    }
+  }
 
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create(std::string const& type)
+CellType * CellType::create( std::string const & type )
 {
-  if (type == "point")
+  if ( type == "point" )
   {
     return new PointCell();
   }
-  if (type == "interval")
+  if ( type == "interval" )
   {
     return new IntervalCell();
   }
-  else if (type == "triangle")
+  else if ( type == "triangle" )
   {
     return new TriangleCell();
   }
-  else if (type == "tetrahedron")
+  else if ( type == "tetrahedron" )
   {
     return new TetrahedronCell();
   }
-  else if (type == "quadrilateral")
+  else if ( type == "quadrilateral" )
   {
     return new QuadrilateralCell();
   }
-  else if (type == "hexahedron")
+  else if ( type == "hexahedron" )
   {
     return new HexahedronCell();
   }
   else
   {
-    error("Unknown cell type: \"%s\".", type.c_str());
+    error( "Unknown cell type: \"%s\".", type.c_str() );
   }
 
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create(ufl::Cell const& cell)
+bool CellType::intersects( MeshEntity & entity, Cell & c ) const
 {
-  switch (cell.domain().type())
-    {
-    case ufl::Domain::vertex:
-      return new PointCell();
-    case ufl::Domain::interval:
-      return new IntervalCell();
-    case ufl::Domain::triangle:
-      return new TriangleCell();
-    case ufl::Domain::tetrahedron:
-      return new TetrahedronCell();
-    case ufl::Domain::quadrilateral:
-      return new QuadrilateralCell();
-    case ufl::Domain::hexahedron:
-      return new HexahedronCell();
-    default:
-      error("Unknown UFL domain type: %d.", type);
-      break;
-    }
-
-  return nullptr;
-}
-//-----------------------------------------------------------------------------
-bool CellType::intersects(MeshEntity& entity, Cell& c) const
-{
-  for (VertexIterator vi(entity); !vi.end(); ++vi)
+  for ( VertexIterator vi( entity ); !vi.end(); ++vi )
   {
     Point p = vi->point();
 
-    if (intersects(c, p))
+    if ( intersects( c, p ) )
     {
       return true;
     }
   }
 
-  for (VertexIterator vi(c); !vi.end(); ++vi)
+  for ( VertexIterator vi( c ); !vi.end(); ++vi )
   {
     Point p = vi->point();
 
-    if (intersects(entity, p))
+    if ( intersects( entity, p ) )
     {
       return true;
     }
@@ -213,44 +189,44 @@ bool CellType::intersects(MeshEntity& entity, Cell& c) const
   return false;
 }
 //-----------------------------------------------------------------------------
-CellType::Type CellType::type(std::string const& type)
+CellType::Type CellType::type( std::string const & type )
 {
-  if (type == "point")
+  if ( type == "point" )
   {
     return point;
   }
-  if (type == "interval")
+  if ( type == "interval" )
   {
     return interval;
   }
-  else if (type == "triangle")
+  else if ( type == "triangle" )
   {
     return triangle;
   }
-  else if (type == "tetrahedron")
+  else if ( type == "tetrahedron" )
   {
     return tetrahedron;
   }
-  else if (type == "quadrilateral")
+  else if ( type == "quadrilateral" )
   {
     return quadrilateral;
   }
-  else if (type == "hexahedron")
+  else if ( type == "hexahedron" )
   {
     return hexahedron;
   }
   else
   {
-    error("Unknown cell type: \"%s\".", type.c_str());
+    error( "Unknown cell type: \"%s\".", type.c_str() );
   }
 
   return point;
 }
 //-----------------------------------------------------------------------------
-std::string CellType::str(CellType::Type type)
+std::string CellType::str( CellType::Type type )
 {
-  switch (type)
-    {
+  switch ( type )
+  {
     case point:
       return "point";
     case interval:
@@ -264,69 +240,46 @@ std::string CellType::str(CellType::Type type)
     case hexahedron:
       return "hexahedron";
     default:
-      error("Unknown cell type: %d.", type);
+      error( "Unknown cell type: %d.", type );
       break;
-    }
+  }
 
   return "";
 }
 //-----------------------------------------------------------------------------
-std::string const& CellType::str() const
+std::string const & CellType::str() const
 {
   return name_;
 }
 //-----------------------------------------------------------------------------
-ufl::Domain::Type CellType::ufldomain(CellType::Type type)
-{
-  switch (type)
-    {
-    case CellType::point:
-      return ufl::Domain::vertex;
-    case CellType::interval:
-      return ufl::Domain::interval;
-    case CellType::triangle:
-      return ufl::Domain::triangle;
-    case CellType::tetrahedron:
-      return ufl::Domain::tetrahedron;
-    case CellType::quadrilateral:
-      return ufl::Domain::quadrilateral;
-    case CellType::hexahedron:
-      return ufl::Domain::hexahedron;
-    default:
-      error("Unknown cell type: %d.", type);
-      break;
-    }
-
-  return ufl::Domain::None;
-}
-//-----------------------------------------------------------------------------
-bool CellType::check(Cell& cell) const
+bool CellType::check( Cell & cell ) const
 {
   // Throw a hard error
-  if(cell.type() != this->cellType())
+  if ( cell.type() != this->cellType() )
   {
-    error("CellType::check : mismatch of cell type");
+    error( "CellType::check : mismatch of cell type" );
   }
 
   // UFC convention: edge -> vertices in ascending order
-  if(cell.dim() < 2)
+  if ( cell.dim() < 2 )
   {
     return true;
   }
   bool ret = true;
-  if (cell.mesh().topology().connectivity(1, 0))
+  if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array<uint> const & cell_edges = cell.entities(1);
+    Array< uint > const & cell_edges = cell.entities( 1 );
     dolfin_assert( not cell_edges.empty() );
-    uint const num_cell_edges = this->num_entities(1);
-    for (uint e = 0; e < num_cell_edges; ++e)
+    uint const num_cell_edges = this->num_entities( 1 );
+    for ( uint e = 0; e < num_cell_edges; ++e )
     {
-      Array<uint> const & edge_verts = cell.mesh().topology()(1, 0)[cell_edges[e]];
+      Array< uint > const & edge_verts =
+        cell.mesh().topology()( 1, 0 )[cell_edges[e]];
       dolfin_assert( not edge_verts.empty() );
-      if (edge_verts[1] < edge_verts[0])
+      if ( edge_verts[1] < edge_verts[0] )
       {
         ret = false;
-        warning("CellType::check : edge vertices are not in ascending order");
+        warning( "CellType::check : edge vertices are not in ascending order" );
       }
     }
   }
@@ -334,16 +287,16 @@ bool CellType::check(Cell& cell) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-uint const * CellType::is_sorted_until(uint const * begin, uint const * end)
+uint const * CellType::is_sorted_until( uint const * begin, uint const * end )
 {
-  if (begin == end)
+  if ( begin == end )
   {
     return begin;
   }
   uint const * next = begin;
-  while (++next != end)
+  while ( ++next != end )
   {
-    if (*next < *begin)
+    if ( *next < *begin )
     {
       return next;
     }
@@ -352,14 +305,14 @@ uint const * CellType::is_sorted_until(uint const * begin, uint const * end)
   return end;
 }
 //-----------------------------------------------------------------------------
-bool CellType::is_sorted(uint const * begin, uint const * end)
+bool CellType::is_sorted( uint const * begin, uint const * end )
 {
-  return (is_sorted_until(begin, end) == end);
+  return ( is_sorted_until( begin, end ) == end );
 }
 //-----------------------------------------------------------------------------
-bool CellType::pattern_applies(Cell& cell)const
+bool CellType::pattern_applies( Cell & cell ) const
 {
-  return (cell.type() == this->cellType());
+  return ( cell.type() == this->cellType() );
 }
 //-----------------------------------------------------------------------------
 

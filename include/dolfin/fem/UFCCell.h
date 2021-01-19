@@ -61,14 +61,14 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-UFCCell::UFCCell()
+inline UFCCell::UFCCell()
   : ufc::cell()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-UFCCell::UFCCell( Cell & dolfin_cell )
+inline UFCCell::UFCCell( Cell & dolfin_cell )
   : ufc::cell()
   , cell_( &dolfin_cell )
 {
@@ -77,7 +77,7 @@ UFCCell::UFCCell( Cell & dolfin_cell )
 
 //-----------------------------------------------------------------------------
 
-UFCCell::UFCCell( UFCCell const & other )
+inline UFCCell::UFCCell( UFCCell const & other )
   : ufc::cell()
   , cell_( other.cell_ )
 {
@@ -87,7 +87,7 @@ UFCCell::UFCCell( UFCCell const & other )
 
 //-----------------------------------------------------------------------------
 
-UFCCell::~UFCCell()
+inline UFCCell::~UFCCell()
 {
   clear();
 }

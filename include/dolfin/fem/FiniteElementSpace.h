@@ -4,8 +4,8 @@
 #ifndef __DOLFIN_FINITE_ELEMENT_SPACE_H
 #define __DOLFIN_FINITE_ELEMENT_SPACE_H
 
-#include <dolfin/fem/DiscreteSpaces.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/Elements.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/ufc/ufc.h>

@@ -2,7 +2,7 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/elements/Elements.h>
+#include <dolfin/fem/Elements.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/mesh/Mesh.h>
 
@@ -11,13 +11,13 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void test(std::string file)
 {
-  Mesh mesh(file);
-  uint const gdim = mesh.geometry_dimension();
-  ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1, gdim);
-  FiniteElementSpace Vh(mesh, space);
-  NodeNormal nn(mesh);
-  nn.init(Vh);
-  nn.compute();
+  // Mesh mesh(file);
+  // size_t const gdim = mesh.geometry_dimension();
+  // ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1, gdim);
+  // FiniteElementSpace Vh(mesh, space);
+  // NodeNormal nn(mesh);
+  // nn.init(Vh);
+  // nn.compute();
 }
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_NodeNormal )

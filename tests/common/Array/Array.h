@@ -11,18 +11,18 @@ DOLFIN_START_TEST( test_Array )
   {
     {
       // default constructor, empty array of zero length
-      Array<uint> A;
+      Array<size_t> A;
       ck_assert(A.data() == NULL);
     }
     //---
     {
-      Array<uint> const B;
+      Array<size_t> const B;
       ck_assert(B.data() == NULL);
     }
     //---
     {
       // array of given size
-      Array<uint> C(2);
+      Array<size_t> C(2);
       C[0] = 1;
       C[1] = 2;
       ck_assert(C.data() != NULL);
@@ -34,7 +34,7 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       // array of given size with default value
-      Array<uint> C(2,11);
+      Array<size_t> C(2,11);
       ck_assert(C.data() != NULL);
       ck_assert(C.data() == &C[0]);
       ck_assert(C.size() == 2);
@@ -46,11 +46,11 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       // copy constructor + swap
-      Array<uint> D(2);
+      Array<size_t> D(2);
       D[0] = 3;
       D[1] = 4;
 
-      Array<uint> E(D);
+      Array<size_t> E(D);
       ck_assert(D.data() != E.data());
       ck_assert(D.size() == E.size());
       ck_assert(D[0] == E[0]);
@@ -80,16 +80,16 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       //constructor from given range + operator= (copy and assign all elements)
-      std::vector<uint> input(3,0);
+      std::vector<size_t> input(3,0);
       input[0] = 1;
       input[1] = 4;
       input[2] = 7;
-      Array<uint> D(input.begin(), input.end());
+      Array<size_t> D(input.begin(), input.end());
       ck_assert(D[0] == 1);
       ck_assert(D[1] == 4);
       ck_assert(D[2] == 7);
 
-      Array<uint> E(3,0);
+      Array<size_t> E(3,0);
       ck_assert(E[0] == 0);
       ck_assert(E[1] == 0);
       ck_assert(E[2] == 0);
@@ -110,7 +110,7 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       /// Assign to all elements in the array
-      Array<uint> a(5, 42);
+      Array<size_t> a(5, 42);
       std::fill( a.begin(), a.end(), 23 );
       ck_assert(a[0] == 23);
       ck_assert(a[1] == 23);
@@ -127,8 +127,8 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       /// Assignement operator
-      Array<uint> a(5, 42);
-      Array<uint> b = a;
+      Array<size_t> a(5, 42);
+      Array<size_t> b = a;
       ck_assert(b.size() == 5);
       ck_assert(b.data() != a.data());
       ck_assert(a[0] == b[0]);
@@ -136,7 +136,7 @@ DOLFIN_START_TEST( test_Array )
       ck_assert(a[2] == b[2]);
       ck_assert(a[3] == b[3]);
       ck_assert(a[4] == b[4]);
-      Array<uint> c(7, 23);
+      Array<size_t> c(7, 23);
       ck_assert(c.size() == 7);
       c = a;
       ck_assert(c.size() == 5);
@@ -150,8 +150,8 @@ DOLFIN_START_TEST( test_Array )
     //---
     {
       /// append()
-      Array<uint> a(2, 42);
-      Array<uint> b(3, 23);
+      Array<size_t> a(2, 42);
+      Array<size_t> b(3, 23);
       ck_assert(a.size() == 2);
       append( a, b.begin(), b.end() );
       ck_assert(a.size() == 5);

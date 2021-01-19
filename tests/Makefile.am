@@ -1,5 +1,4 @@
 SUBDIRS = common \
-          elements \
           fem \
           function \
           io \
@@ -10,7 +9,6 @@ SUBDIRS = common \
           parameter
 
 TESTS = common/exe \
-        elements/exe \
         fem/exe \
         function/exe \
         io/exe \

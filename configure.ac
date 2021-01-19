@@ -381,10 +381,10 @@ if test "x${with_convert}" != xno; then
 fi
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
-AC_CONFIG_FILES([Makefile src/Makefile\
+AC_CONFIG_FILES([Makefile
+                 src/Makefile\
                  src/adaptivity/Makefile\
                  src/common/Makefile\
-                 src/elements/Makefile\
                  src/evolution/Makefile\
                  src/fem/Makefile\
                  src/function/Makefile\
@@ -404,7 +404,6 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 # Tests
 AC_CONFIG_FILES([tests/Makefile\
                  tests/common/Makefile\
-                 tests/elements/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\

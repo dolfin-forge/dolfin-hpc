@@ -1,5 +1,5 @@
 LDFLAGS =
-SUBDIRS = adaptivity common elements evolution fem function io\
+SUBDIRS = adaptivity common evolution fem function io\
 	        la log main math mesh parameter quadrature insitu
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -9,7 +9,6 @@ lib_LTLIBRARIES = libdolfin.la
 libdolfin_la_SOURCES =
 libdolfin_la_LIBADD = adaptivity/libdolfin_adaptivity.la\
                       common/libdolfin_common.la\
-                      elements/libdolfin_elements.la\
                       evolution/libdolfin_evolution.la\
                       fem/libdolfin_fem.la\
                       function/libdolfin_function.la\

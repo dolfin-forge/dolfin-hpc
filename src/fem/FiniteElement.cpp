@@ -3,7 +3,7 @@
 
 #include <dolfin/fem/FiniteElement.h>
 
-#include <dolfin/elements/Elements.h>
+#include <dolfin/fem/Elements.h>
 #include <dolfin/fem/Form.h>
 
 #include <algorithm>

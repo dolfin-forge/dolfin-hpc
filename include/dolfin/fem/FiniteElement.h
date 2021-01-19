@@ -340,7 +340,7 @@ inline size_t FiniteElement::value_size() const
   return ufc_finite_element_->value_size();
 }
 
-size_t FiniteElement::reference_value_rank() const
+inline size_t FiniteElement::reference_value_rank() const
 {
   return ufc_finite_element_->reference_value_rank();
 }

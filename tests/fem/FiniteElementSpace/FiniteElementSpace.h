@@ -121,7 +121,7 @@ DOLFIN_START_TEST( test_FiniteElementSpace )
       m = UnitCube( 8, 8, 8 );
     }
 
-    // FIXME
+    // FIXME try-catch should be removed, once CG1s is fixed
     try
     {
       // create FiniteElementSpace and transfer ownership

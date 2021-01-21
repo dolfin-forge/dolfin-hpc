@@ -10,6 +10,8 @@
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/RefinementPattern.h>
 
+#include <ufc.h>
+
 #include <string>
 
 namespace dolfin
@@ -183,6 +185,9 @@ public:
 
   /// Create cell type from type (factory function)
   static auto create(CellType::Type type) -> CellType*;
+
+  /// Create cell type from ufc::shape (factory function)
+  static auto create(ufc::shape type) -> CellType*;
 
   /// Create cell type from string (factory function)
   static auto create(std::string const& type) -> CellType*;

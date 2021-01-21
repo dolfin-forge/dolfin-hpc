@@ -16,6 +16,8 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexIterator.h>
 
+#include <ufc.h>
+
 #include <algorithm>
 
 namespace dolfin
@@ -112,16 +114,52 @@ auto CellType::create( CellType::Type type ) -> CellType *
   {
     case point:
       return new PointCell();
+      break;
     case interval:
       return new IntervalCell();
+      break;
     case triangle:
       return new TriangleCell();
+      break;
     case tetrahedron:
       return new TetrahedronCell();
+      break;
     case quadrilateral:
       return new QuadrilateralCell();
+      break;
     case hexahedron:
       return new HexahedronCell();
+      break;
+    default:
+      error( "Unknown cell type: %d.", type );
+      break;
+  }
+
+  return nullptr;
+}
+//-----------------------------------------------------------------------------
+auto CellType::create( ufc::shape type ) -> CellType *
+{
+  switch ( type )
+  {
+    case ufc::shape::vertex:
+      return new PointCell();
+      break;
+    case ufc::shape::interval:
+      return new IntervalCell();
+      break;
+    case ufc::shape::triangle:
+      return new TriangleCell();
+      break;
+    case ufc::shape::tetrahedron:
+      return new TetrahedronCell();
+      break;
+    case ufc::shape::quadrilateral:
+      return new QuadrilateralCell();
+      break;
+    case ufc::shape::hexahedron:
+      return new HexahedronCell();
+      break;
     default:
       error( "Unknown cell type: %d.", type );
       break;

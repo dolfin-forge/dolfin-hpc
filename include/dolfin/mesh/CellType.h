@@ -84,7 +84,7 @@ public:
   inline auto facet_dim() const -> uint { return (this->dim() ? this->dim() - 1 : 0); }
 
   /// Return dimension of Euclidean space
-  inline auto space_dim() const -> uint { return std::max(this->dim(), 1ul); }
+  inline auto space_dim() const -> uint { return std::max(this->dim(), 1u); }
 
   /// Return number of entities of given topological dimension
   virtual auto num_entities(uint dim) const -> uint = 0;

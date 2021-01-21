@@ -31,7 +31,7 @@ namespace dolfin
 using real    = double;
 
 // Unsigned integers
-using uint    = std::size_t;
+using uint    = unsigned int;
 using size_t  = std::size_t;
 
 // Index type (at least 64bit)
@@ -42,21 +42,25 @@ using complex = std::complex< double >;
 
 //-----------------------------------------------------------------------------
 
-constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
-constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
-constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
+constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
+constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
+constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
 
 constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
 constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
 constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
 
-constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
-constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
-constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
-
 constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
 constexpr long DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
 constexpr long DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
+
+constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
+constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
+constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
+
+constexpr size_t DOLFIN_SIZE_T_MIN   = std::numeric_limits< size_t >::min();
+constexpr size_t DOLFIN_SIZE_T_MAX   = std::numeric_limits< size_t >::max();
+constexpr size_t DOLFIN_SIZE_T_UNDEF = std::numeric_limits< size_t >::max();
 
 //-----------------------------------------------------------------------------
 

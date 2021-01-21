@@ -19,16 +19,16 @@ public:
   Jacobi(uint n, real a, real b);
 
   /// Evaluation at given point
-  real operator()(real x);
+  auto operator()(real x) -> real;
 
   /// Evaluation of derivative at given point
-  real ddx(real x);
+  auto ddx(real x) -> real;
 
   /// Evaluation at given point with weights a , b
-  static real eval(uint n, real a, real b, real x);
+  static auto eval(uint n, real a, real b, real x) -> real;
 
   /// Evaluation of derivative at given point with weights a , b
-  static real ddx(uint n, real a, real b, real x);
+  static auto ddx(uint n, real a, real b, real x) -> real;
 
 private:
 
@@ -41,12 +41,12 @@ private:
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline real Jacobi::operator() (real x)
+inline auto Jacobi::operator() (real x) -> real
 {
   return eval(n_, a_, b_, x);
 }
 //-----------------------------------------------------------------------------
-inline real Jacobi::ddx(real x)
+inline auto Jacobi::ddx(real x) -> real
 {
   return ddx(n_, a_, b_, x);
 }

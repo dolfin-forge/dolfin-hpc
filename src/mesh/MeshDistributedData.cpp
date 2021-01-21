@@ -31,7 +31,7 @@ MeshDistributedData::~MeshDistributedData()
   clear();
 }
 //-----------------------------------------------------------------------------
-MeshDistributedData& MeshDistributedData::operator=(MeshDistributedData const& other)
+auto MeshDistributedData::operator=(MeshDistributedData const& other) -> MeshDistributedData&
 {
   clear();
   dim_ = other.dim_;
@@ -43,7 +43,7 @@ MeshDistributedData& MeshDistributedData::operator=(MeshDistributedData const& o
   return *this;
 }
 //-----------------------------------------------------------------------------
-bool MeshDistributedData::operator==(MeshDistributedData const& other) const
+auto MeshDistributedData::operator==(MeshDistributedData const& other) const -> bool
 {
   if (dim_ != other.dim_)
   {
@@ -61,7 +61,7 @@ bool MeshDistributedData::operator==(MeshDistributedData const& other) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool MeshDistributedData::operator!=(MeshDistributedData const& other) const
+auto MeshDistributedData::operator!=(MeshDistributedData const& other) const -> bool
 {
   return !(*this == other);
 }
@@ -71,7 +71,7 @@ void MeshDistributedData::clear()
   dim_ = 0;
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::dim() const
+auto MeshDistributedData::dim() const -> uint
 {
   return dim_;
 }

@@ -59,7 +59,7 @@ VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) 
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal& VertexNormal::operator=(VertexNormal&)
+auto VertexNormal::operator=(VertexNormal&) -> VertexNormal&
 {
   return *this;
 }

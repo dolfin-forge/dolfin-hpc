@@ -54,47 +54,47 @@ public:
   ~CellType() override;
 
   /// Clone pattern
-  virtual CellType* clone() const = 0;
+  virtual auto clone() const -> CellType* = 0;
 
   /// Comparison operator
-  bool operator==(CellType const& other) const
+  auto operator==(CellType const& other) const -> bool
   {
     return (this->cell_type == other.cell_type);
   }
-  bool operator!=(CellType const& other) const
+  auto operator!=(CellType const& other) const -> bool
   {
     return !(*this == other);
   }
 
   /// Return type of cell
-  inline CellType::Type cellType() const { return cell_type; }
+  inline auto cellType() const -> CellType::Type { return cell_type; }
 
   /// Return type of cell for facets
-  inline CellType::Type facetType() const { return facet_type; }
+  inline auto facetType() const -> CellType::Type { return facet_type; }
 
   /// Return string of cell type
-  virtual std::string const& str() const;
+  virtual auto str() const -> std::string const&;
 
   /// Return topological dimension of cell
-  virtual uint dim() const = 0;
+  virtual auto dim() const -> uint = 0;
 
   /// Return topological dimension of facet
-  inline uint facet_dim() const { return (this->dim() ? this->dim() - 1 : 0); }
+  inline auto facet_dim() const -> uint { return (this->dim() ? this->dim() - 1 : 0); }
 
   /// Return dimension of Euclidean space
-  inline uint space_dim() const { return std::max(this->dim(), 1ul); }
+  inline auto space_dim() const -> uint { return std::max(this->dim(), 1ul); }
 
   /// Return number of entities of given topological dimension
-  virtual uint num_entities(uint dim) const = 0;
+  virtual auto num_entities(uint dim) const -> uint = 0;
 
   /// Return number of entities of given topological dimensions
-  virtual uint num_entities(uint d0, uint d1) const = 0;
+  virtual auto num_entities(uint d0, uint d1) const -> uint = 0;
 
   /// Return number of vertices for entity of given topological dimension
-  virtual uint num_vertices(uint dim) const = 0;
+  virtual auto num_vertices(uint dim) const -> uint = 0;
 
   /// Return orientation of the cell
-  virtual uint orientation(Cell const& cell) const = 0;
+  virtual auto orientation(Cell const& cell) const -> uint = 0;
 
   /// Create entities e of given topological dimension from vertices v
   virtual void create_entities(uint** e, uint dim, uint const* v) const = 0;
@@ -106,7 +106,7 @@ public:
   virtual void order_facet(uint vertices[], Facet& facet) const = 0;
 
   /// Return if mesh connectivities require ordering
-  virtual bool connectivity_needs_ordering(uint d0, uint d1) const = 0;
+  virtual auto connectivity_needs_ordering(uint d0, uint d1) const -> bool = 0;
 
   /// Initialize mesh connectivities required by ordering
   virtual void initialize_connectivities(Mesh& mesh) const = 0;
@@ -114,31 +114,31 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Return the cell type to which the pattern applies
-  bool pattern_applies(Cell& cell) const override;
+  auto pattern_applies(Cell& cell) const -> bool override;
 
   /// Refine cell uniformly
   void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const override = 0;
 
   /// Number of cells created by refinement pattern
-  uint num_refined_cells() const override = 0;
+  auto num_refined_cells() const -> uint override = 0;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  uint num_refined_vertices(uint dim) const override = 0;
+  auto num_refined_vertices(uint dim) const -> uint override = 0;
 
   //---------------------------------------------------------------------------
 
   /// Compute (generalized) volume of mesh entity
-  virtual real volume(MeshEntity const& entity) const = 0;
+  virtual auto volume(MeshEntity const& entity) const -> real = 0;
 
   /// Compute diameter of mesh entity
-  virtual real diameter(MeshEntity const& entity) const = 0;
+  virtual auto diameter(MeshEntity const& entity) const -> real = 0;
 
   /// Compute circumradius of mesh entity
-  virtual real circumradius(MeshEntity const& entity) const = 0;
+  virtual auto circumradius(MeshEntity const& entity) const -> real = 0;
 
   /// Compute inradius of mesh entity
-  virtual real inradius(MeshEntity const& entity) const = 0;
+  virtual auto inradius(MeshEntity const& entity) const -> real = 0;
 
   /// Compute coordinates of midpoint
   virtual void midpoint(MeshEntity const& entity, real * p) const = 0;
@@ -147,16 +147,16 @@ public:
   virtual void normal(Cell const& cell, uint facet, real * n) const = 0;
 
   /// Compute the area/length of given facet with respect to the cell
-  virtual real facet_area(Cell const& cell, uint facet) const = 0;
+  virtual auto facet_area(Cell const& cell, uint facet) const -> real = 0;
 
   /// Check if point p intersects the entity
-  virtual bool intersects(MeshEntity const& e, Point const& p) const = 0;
+  virtual auto intersects(MeshEntity const& e, Point const& p) const -> bool = 0;
 
   /// Check if points line connecting p1 and p2 cuts the entity
-  virtual bool intersects(MeshEntity const& e, Point const& p1, Point const& p2) const = 0;
+  virtual auto intersects(MeshEntity const& e, Point const& p1, Point const& p2) const -> bool = 0;
 
   /// Check if cell c intersects the cell
-  virtual bool intersects(MeshEntity& entity, Cell& c) const;
+  virtual auto intersects(MeshEntity& entity, Cell& c) const -> bool;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
@@ -164,12 +164,12 @@ public:
   virtual void create_reference_cell(Mesh& mesh) const = 0;
 
   /// Return coordinates of vertices in the reference cell
-  virtual real const * reference_vertex(uint i) const = 0;
+  virtual auto reference_vertex(uint i) const -> real const * = 0;
 
   //---------------------------------------------------------------------------
 
   /// Return description of cell type
-  virtual std::string description() const = 0;
+  virtual auto description() const -> std::string = 0;
 
   /// Display information
   virtual void disp() const = 0;
@@ -177,76 +177,76 @@ public:
   /// Common cell type check
   /// ASSERTION: cell vertices in ascending order
   /// ASSERTION: edge vertices in ascending order
-  virtual bool check(Cell& cell) const = 0;
+  virtual auto check(Cell& cell) const -> bool = 0;
 
   //---------------------------------------------------------------------------
 
   /// Create cell type from type (factory function)
-  static CellType* create(CellType::Type type);
+  static auto create(CellType::Type type) -> CellType*;
 
   /// Create cell type from string (factory function)
-  static CellType* create(std::string const& type);
+  static auto create(std::string const& type) -> CellType*;
 
   /// Create cell types
-  static Array<CellType*> create_all();
+  static auto create_all() -> Array<CellType*>;
 
   /// Create cell types
-  static Array<CellType*> create_simplex();
+  static auto create_simplex() -> Array<CellType*>;
 
   /// Create simplicial cell types
-  static CellType* create_simplex(uint dim);
+  static auto create_simplex(uint dim) -> CellType*;
 
   /// Create cell types
-  static Array<CellType*> create_hypercube();
+  static auto create_hypercube() -> Array<CellType*>;
 
   /// Create hypercube cell types
-  static CellType* create_hypercube(uint dim);
+  static auto create_hypercube(uint dim) -> CellType*;
 
 protected:
 
   /// Convert from string to cell type
-  static CellType::Type type(std::string const& type);
+  static auto type(std::string const& type) -> CellType::Type;
 
   /// Convert from cell type to string
-  static std::string str(CellType::Type type);
+  static auto str(CellType::Type type) -> std::string;
 
   std::string const name_;
   CellType::Type const cell_type;
   CellType::Type const facet_type;
 
   /// Implementation detail after C++11 <algorithm>
-  static uint const * is_sorted_until(uint const * begin, uint const * end);
+  static auto is_sorted_until(uint const * begin, uint const * end) -> uint const *;
 
   /// Implementation detail after C++11 <algorithm>
-  static bool is_sorted(uint const * begin, uint const * end);
+  static auto is_sorted(uint const * begin, uint const * end) -> bool;
 
 };
 
 // Helper function
 
-template<class E> inline uint dimension(CellType const& c);
+template<class E> inline auto dimension(CellType const& c) -> uint;
 
 //--- TEMPLATE SPECIALIZATION -------------------------------------------------
 
 class Vertex;
 template<>
-inline uint dimension<Vertex>(CellType const&) { return 0; }
+inline auto dimension<Vertex>(CellType const&) -> uint { return 0; }
 
 class Edge;
 template<>
-inline uint dimension<Edge>(CellType const&) { return 1; }
+inline auto dimension<Edge>(CellType const&) -> uint { return 1; }
 
 class Face;
 template<>
-inline uint dimension<Face>(CellType const&) { return 2; }
+inline auto dimension<Face>(CellType const&) -> uint { return 2; }
 
 class Facet;
 template<>
-inline uint dimension<Facet>(CellType const& c) { return c.facet_dim(); }
+inline auto dimension<Facet>(CellType const& c) -> uint { return c.facet_dim(); }
 
 class Cell;
 template<>
-inline uint dimension<Cell>(CellType const& c) { return c.dim(); }
+inline auto dimension<Cell>(CellType const& c) -> uint { return c.dim(); }
 
 //-----------------------------------------------------------------------------
 

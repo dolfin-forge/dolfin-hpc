@@ -44,16 +44,16 @@ public:
   void insert(uint const * num, uint const * const * idx) override;
 
   /// Return local size for given dimension
-  uint size(uint i) const override;
+  auto size(uint i) const -> uint override;
 
   /// Finalize sparsity pattern (needed by most parallel la backends)
   void apply() override;
 
   /// Is blocked
-  bool is_blocked() const override;
+  auto is_blocked() const -> bool override;
 
   /// Is distributed
-  bool is_distributed() const override;
+  auto is_distributed() const -> bool override;
 
   /// Return array with number of non-zeroes per local row
   void numNonZeroPerRow(uint nzrow[]) const override;
@@ -64,7 +64,7 @@ public:
   void numNonZeroPerRow(uint p_rank, uint d_nzrow[], uint o_nzrow[]) const override;
 
   /// Return total number of non-zeroes
-  uint numNonZero() const override;
+  auto numNonZero() const -> uint override;
 
   /// Display sparsity pattern
   void disp() const override;
@@ -75,7 +75,7 @@ public:
   void get_range(uint p_rank, uint range[]);
 
   /// Return number of local rows for process rank
-  uint range_size(uint p_rank) const;
+  auto range_size(uint p_rank) const -> uint;
 
   ///
   void set_blocked();
@@ -126,17 +126,17 @@ inline void SparsityPattern::set_blocked()
   blocked_ = true;
 }
 //-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_blocked() const
+inline auto SparsityPattern::is_blocked() const -> bool
 {
   return blocked_;
 }
 //-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_distributed() const
+inline auto SparsityPattern::is_distributed() const -> bool
 {
   return distributed_;
 }
 //-----------------------------------------------------------------------------
-inline uint SparsityPattern::size( uint i ) const
+inline auto SparsityPattern::size( uint i ) const -> uint
 {
   return ( local_range_[i][1] - local_range_[i][0] );
 }
@@ -148,7 +148,7 @@ inline void SparsityPattern::get_range( uint p_rank, uint range[] )
   std::copy( &range_[0][p_rank], &range_[0][p_rank + 1], range );
 }
 //-----------------------------------------------------------------------------
-inline uint SparsityPattern::range_size( uint p_rank ) const
+inline auto SparsityPattern::range_size( uint p_rank ) const -> uint
 {
   dolfin_assert( distributed_ );
   return range_[0][p_rank + 1] - range_[0][p_rank];

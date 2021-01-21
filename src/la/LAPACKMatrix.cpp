@@ -25,7 +25,7 @@ LAPACKMatrix::~LAPACKMatrix()
 }
 
 //-----------------------------------------------------------------------------
-std::string LAPACKMatrix::str(bool verbose) const
+auto LAPACKMatrix::str(bool verbose) const -> std::string
 {
   std::stringstream s;
 

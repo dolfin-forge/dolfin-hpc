@@ -238,7 +238,7 @@ void File::set_counter( uint new_value )
   file_->set_counter( new_value );
 }
 //-----------------------------------------------------------------------------
-std::string File::basename( std::string file )
+auto File::basename( std::string file ) -> std::string
 {
   size_t beg = file.find_last_of( '/' );
   if ( beg != std::string::npos )
@@ -249,7 +249,7 @@ std::string File::basename( std::string file )
   return file.substr( 0, pos );
 }
 //-----------------------------------------------------------------------------
-std::string File::filename( std::string basename, std::string format )
+auto File::filename( std::string basename, std::string format ) -> std::string
 {
   if ( format == "vtk" )
   {
@@ -266,7 +266,7 @@ std::string File::filename( std::string basename, std::string format )
   return basename;
 }
 //-----------------------------------------------------------------------------
-std::string File::filename( std::string basename )
+auto File::filename( std::string basename ) -> std::string
 {
   return filename( basename, dolfin_get<std::string>( "output_format" ) );
 }

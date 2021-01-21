@@ -34,7 +34,7 @@ void PETScPreconditioner::setup(const KSP ksp, PETScPreconditioner &pc)
   petscpc->ops->applysymmetricright = PETScPreconditioner::PCApply;
 }
 //-----------------------------------------------------------------------------
-int PETScPreconditioner::PCApply(PC pc, Vec x, Vec y)
+auto PETScPreconditioner::PCApply(PC pc, Vec x, Vec y) -> int
 {
   // Convert vectors to DOLFIN wrapper format and pass to DOLFIN preconditioner
 
@@ -47,7 +47,7 @@ int PETScPreconditioner::PCApply(PC pc, Vec x, Vec y)
   return 0;
 }
 //-----------------------------------------------------------------------------
-int PETScPreconditioner::PCCreate(PC pc)
+auto PETScPreconditioner::PCCreate(PC pc) -> int
 {
   // Initialize function pointers to 0
 
@@ -67,7 +67,7 @@ int PETScPreconditioner::PCCreate(PC pc)
   return 0;
 }
 //-----------------------------------------------------------------------------
-PCType PETScPreconditioner::getType(PreconditionerType pc)
+auto PETScPreconditioner::getType(PreconditionerType pc) -> PCType
 {
   switch (pc)
   {

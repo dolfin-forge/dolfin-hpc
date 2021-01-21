@@ -180,19 +180,19 @@ void mark(char const * msg)
 }
 
 //-----------------------------------------------------------------------------
-int verbose()
+auto verbose() -> int
 {
   return cout.verbose();
 }
 
 //-----------------------------------------------------------------------------
-int verbose(int n)
+auto verbose(int n) -> int
 {
   return cout.verbose(n);
 }
 
 //-----------------------------------------------------------------------------
-int silence()
+auto silence() -> int
 {
   return cout.silence();
 }

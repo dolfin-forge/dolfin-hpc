@@ -90,7 +90,7 @@ UnitSphere::UnitSphere(uint nx) :
 
 }
 //-----------------------------------------------------------------------------
-real UnitSphere::transformx(real x, real y, real z)
+auto UnitSphere::transformx(real x, real y, real z) -> real
 {
   real retrn = 0.0;
   if (x || y || z)
@@ -105,7 +105,7 @@ real UnitSphere::transformx(real x, real y, real z)
   return retrn;
 }
 //-----------------------------------------------------------------------------
-real UnitSphere::transformy(real x, real y, real z)
+auto UnitSphere::transformy(real x, real y, real z) -> real
 {
   real retrn = 0.0;
   if (x || y || z)
@@ -119,7 +119,7 @@ real UnitSphere::transformy(real x, real y, real z)
   return retrn;
 }
 //-----------------------------------------------------------------------------
-real UnitSphere::transformz(real x, real y, real z)
+auto UnitSphere::transformz(real x, real y, real z) -> real
 {
   real retrn = 0.0;
   //maxn transformation
@@ -134,7 +134,7 @@ real UnitSphere::transformz(real x, real y, real z)
   return retrn;
 }
 //-----------------------------------------------------------------------------
-real UnitSphere::max(real x, real y, real z)
+auto UnitSphere::max(real x, real y, real z) -> real
 {
   real rtrn = 0.0;
 

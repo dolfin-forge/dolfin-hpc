@@ -80,16 +80,22 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset)
 //-----------------------------------------------------------------------------
 DofMap::~DofMap()
 {
-  delete ufc_dofmap_;
-  delete numbering_;
+  if ( ufc_dofmap_ != nullptr )
+    delete ufc_dofmap_;
+
+  if ( numbering_ != nullptr )
+    delete numbering_;
+
   destruct( flattened_ );
-  delete periodic_dofmap_;
+
+  if ( periodic_dofmap_ != nullptr )
+    delete periodic_dofmap_;
 }
 
 //-----------------------------------------------------------------------------
 
-PeriodicDofsMapping const &
-  DofMap::periodic_mapping( FiniteElementSpace const & space ) const
+auto
+  DofMap::periodic_mapping( FiniteElementSpace const & space ) const -> PeriodicDofsMapping const &
 {
   dolfin_assert( space.dofmap() == *this );
 
@@ -101,7 +107,7 @@ PeriodicDofsMapping const &
 }
 
 //-----------------------------------------------------------------------------
-ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
+auto DofMap::create_sub_dofmap(Array<uint> const& sub_system) const -> ufc::dofmap*
 {
   // Reset offset
   uint local_offset = 0;
@@ -117,8 +123,8 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
 }
 
 //-----------------------------------------------------------------------------
-ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
-                                       uint& local_offset) const
+auto DofMap::create_sub_dofmap(Array<uint> const& sub_system,
+                                       uint& local_offset) const -> ufc::dofmap*
 {
   // Reset offset
   local_offset = 0;
@@ -134,9 +140,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
 }
 
 //-----------------------------------------------------------------------------
-ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
+auto DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
                                        Array<uint> const& sub_system,
-                                       uint& local_offset)
+                                       uint& local_offset) -> ufc::dofmap*
 {
   // Check that a sub system has been specified
   if (sub_system.size() == 0)
@@ -162,7 +168,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   for (uint i = 0; i < sub_system[0]; i++)
   {
     ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
-    local_offset += ufc_sub_dofmap->num_element_support_dofs();
+    local_offset += ufc_sub_dofmap->num_element_dofs();
     delete ufc_sub_dofmap;
   }
 
@@ -204,21 +210,21 @@ void DofMap::init()
     for (uint i = 0; i < nb_sub; ++i)
     {
       ufc::dofmap * subdm = this->create_sub_dofmap(i);
-      sub_dofmaps_dims_.push_back(subdm->num_element_support_dofs());
+      sub_dofmaps_dims_.push_back(subdm->num_element_dofs());
       sub_dofmaps_offs_.push_back(off);
-      off += subdm->num_element_support_dofs();
+      off += subdm->num_element_dofs();
       delete subdm;
     }
   }
   else
   {
-    sub_dofmaps_dims_.push_back(this->num_element_support_dofs());
-    sub_dofmaps_offs_.push_back(0);
+    sub_dofmaps_dims_ = { this->num_element_dofs() };
+    sub_dofmaps_offs_ = { 0 };
   }
 }
 
 //-----------------------------------------------------------------------------
-Array<ufc::dofmap const *> const& DofMap::flatten() const
+auto DofMap::flatten() const -> Array<ufc::dofmap const *> const&
 {
   if (flattened_.empty())
   {
@@ -282,7 +288,7 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
 }
 
 //-----------------------------------------------------------------------------
-bool DofMap::can_vectorize(Array<ufc::dofmap const *> flattened)
+auto DofMap::can_vectorize(Array<ufc::dofmap const *> flattened) -> bool
 {
   bool ret = true;
   for (uint s = 1; s < flattened.size(); ++s)
@@ -297,7 +303,7 @@ bool DofMap::can_vectorize(Array<ufc::dofmap const *> flattened)
 }
 
 //-----------------------------------------------------------------------------
-bool DofMap::renumbered() const
+auto DofMap::renumbered() const -> bool
 {
   // FIXME:
   return (true);
@@ -310,7 +316,7 @@ void DofMap::disp() const
   begin("ufc::dofmap info");
   prm("Signature"           , ufc_dofmap_->signature());
   // prm("Global dimension"    , ufc_dofmap_->global_dimension( num_entities ));
-  prm("Local dimension"     , ufc_dofmap_->num_element_support_dofs());
+  prm("Local dimension"     , ufc_dofmap_->num_element_dofs());
   // prm("Geometric dimension" , ufc_dofmap_->geometric_dimension());
   prm("Number of subdofmaps", ufc_dofmap_->num_sub_dofmaps());
   prm("Number of facet dofs", ufc_dofmap_->num_facet_dofs());
@@ -318,7 +324,7 @@ void DofMap::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-bool DofMap::check(bool throw_error)
+auto DofMap::check(bool throw_error) -> bool
 {
   bool ret = true;
 
@@ -344,7 +350,7 @@ bool DofMap::check(bool throw_error)
   EntitiesDofMap shared_owned_entities;
   Cell c0(mesh, 0);
   UFCCell ufc_cell(c0);
-  uint * cell_dofs = new uint[this->num_element_support_dofs()];
+  uint * cell_dofs = new uint[this->num_element_dofs()];
   uint * num_entity_dofs = new uint[tdim];
   for (uint d = 0; d < tdim; ++d)
   {

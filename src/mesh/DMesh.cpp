@@ -38,7 +38,7 @@ struct DCell
   {
   }
 
-  bool has_edge(DVertex *v1, DVertex *v2)
+  auto has_edge(DVertex *v1, DVertex *v2) -> bool
   {
     uint found = 0;
     for (std::vector<DVertex*>::iterator it = vertices.begin();
@@ -443,7 +443,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
 }
 //-----------------------------------------------------------------------------
-DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
+auto DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2) -> DCell*
 {
   for (std::list<DCell *>::iterator c = v1->cells.begin(); c != v1->cells.end();
        ++c)

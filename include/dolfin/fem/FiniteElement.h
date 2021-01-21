@@ -57,49 +57,49 @@ public:
   ~FiniteElement() override;
 
   /// Check if the element definitions are identical
-  bool operator==( FiniteElement const & other ) const;
-  bool operator!=( FiniteElement const & other ) const;
+  auto operator==( FiniteElement const & other ) const -> bool;
+  auto operator!=( FiniteElement const & other ) const -> bool;
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Return a string identifying the finite element
-  const char * signature() const override;
+  auto signature() const -> const char * override;
 
   /// Return the cell shape
-  ufc::shape cell_shape() const override;
+  auto cell_shape() const -> ufc::shape override;
 
   /// Return the topological dimension of the cell shape
-  size_t topological_dimension() const override;
+  auto topological_dimension() const -> size_t override;
 
   /// Return the geometric dimension of the cell shape
-  size_t geometric_dimension() const override;
+  auto geometric_dimension() const -> size_t override;
 
   /// Return the dimension of the finite element function space
-  size_t space_dimension() const override;
+  auto space_dimension() const -> size_t override;
 
   /// Return the rank of the value space
-  size_t value_rank() const override;
+  auto value_rank() const -> size_t override;
 
   /// Return the dimension of the value space for axis i
-  size_t value_dimension( size_t i ) const override;
+  auto value_dimension( size_t i ) const -> size_t override;
 
   /// Return the value size
-  size_t value_size() const override;
+  auto value_size() const -> size_t override;
 
   /// Return the rank of the reference value space
-  size_t reference_value_rank() const override;
+  auto reference_value_rank() const -> size_t override;
 
   /// Return the dimension of the reference value space for axis i
-  size_t reference_value_dimension( size_t i ) const override;
+  auto reference_value_dimension( size_t i ) const -> size_t override;
 
   /// Return the number of components of the reference value space
-  size_t reference_value_size() const override;
+  auto reference_value_size() const -> size_t override;
 
   /// Return the maximum polynomial degree of the finite element function space
-  size_t degree() const override;
+  auto degree() const -> size_t override;
 
   /// Return the family of the finite element function space
-  const char * family() const override;
+  auto family() const -> const char * override;
 
   /// Evaluate all basis functions at given point X in reference cell
   void evaluate_reference_basis( double *       reference_values,
@@ -178,13 +178,13 @@ public:
     ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate linear functional for dof i on the function f
-  double evaluate_dof(
+  auto evaluate_dof(
     size_t                          i,
     ufc::function const &           f,
     double const *                  coordinate_dofs,
     int                             cell_orientation,
     ufc::cell const &               c,
-    ufc::coordinate_mapping const * cm = nullptr ) const override;
+    ufc::coordinate_mapping const * cm = nullptr ) const -> double override;
 
   /// Evaluate linear functionals for all dofs on the function f
   void evaluate_dofs(
@@ -224,33 +224,33 @@ public:
     double * reference_dof_coordinates ) const override;
 
   /// Return the number of sub elements (for a mixed element)
-  size_t num_sub_elements() const override;
+  auto num_sub_elements() const -> size_t override;
 
   /// Create a new finite element for sub element i (for a mixed element)
-  ufc::finite_element * create_sub_element( size_t i ) const override;
+  auto create_sub_element( size_t i ) const -> ufc::finite_element * override;
 
   /// Create a new class instance
-  ufc::finite_element * create() const override;
+  auto create() const -> ufc::finite_element * override;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
   /// Recursively extract sub finite element
-  static ufc::finite_element *
+  static auto
     create_sub_element( ufc::finite_element const & finite_element,
-                        Array< size_t > const &     sub_system );
+                        Array< size_t > const &     sub_system ) -> ufc::finite_element *;
 
   /// Create sub finite element of given finite element
-  ufc::finite_element *
-    create_sub_element( Array< size_t > const & sub_system ) const;
+  auto
+    create_sub_element( Array< size_t > const & sub_system ) const -> ufc::finite_element *;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  Array< size_t > const & sub_value_dimensions( size_t i ) const;
+  auto sub_value_dimensions( size_t i ) const -> Array< size_t > const &;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  Array< size_t > const & sub_value_offsets( size_t i ) const;
+  auto sub_value_offsets( size_t i ) const -> Array< size_t > const &;
 
   /// Get list of scalar finite elements ordered by entries
-  Array< ufc::finite_element const * > const & flatten() const;
+  auto flatten() const -> Array< ufc::finite_element const * > const &;
 
   /// Create flatten representation finite element (append sub elements)
   static void flatten( ufc::finite_element const *            element,
@@ -262,7 +262,7 @@ public:
                        Array< ufc::finite_element const * > & stack );
 
   /// Check if the element can be seen as a vector element
-  bool is_vectorizable() const;
+  auto is_vectorizable() const -> bool;
 
   //---
 
@@ -286,89 +286,89 @@ private:
 
 //-----------------------------------------------------------------------------
 
-inline const char * FiniteElement::signature() const
+inline auto FiniteElement::signature() const -> const char *
 {
   return ufc_finite_element_->signature();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::shape FiniteElement::cell_shape() const
+inline auto FiniteElement::cell_shape() const -> ufc::shape
 {
   return ufc_finite_element_->cell_shape();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::topological_dimension() const
+inline auto FiniteElement::topological_dimension() const -> size_t
 {
   return ufc_finite_element_->topological_dimension();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::geometric_dimension() const
+inline auto FiniteElement::geometric_dimension() const -> size_t
 {
   return ufc_finite_element_->geometric_dimension();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::space_dimension() const
+inline auto FiniteElement::space_dimension() const -> size_t
 {
   return ufc_finite_element_->space_dimension();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::value_rank() const
+inline auto FiniteElement::value_rank() const -> size_t
 {
   return ufc_finite_element_->value_rank();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::value_dimension( size_t i ) const
+inline auto FiniteElement::value_dimension( size_t i ) const -> size_t
 {
   return ufc_finite_element_->value_dimension( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::value_size() const
+inline auto FiniteElement::value_size() const -> size_t
 {
   return ufc_finite_element_->value_size();
 }
 
-inline size_t FiniteElement::reference_value_rank() const
+inline auto FiniteElement::reference_value_rank() const -> size_t
 {
   return ufc_finite_element_->reference_value_rank();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::reference_value_dimension( size_t i ) const
+inline auto FiniteElement::reference_value_dimension( size_t i ) const -> size_t
 {
   return ufc_finite_element_->reference_value_dimension( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::reference_value_size() const
+inline auto FiniteElement::reference_value_size() const -> size_t
 {
   return ufc_finite_element_->reference_value_size();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::degree() const
+inline auto FiniteElement::degree() const -> size_t
 {
   return ufc_finite_element_->degree();
 }
 
 //-----------------------------------------------------------------------------
 
-inline const char * FiniteElement::family() const
+inline auto FiniteElement::family() const -> const char *
 {
   return ufc_finite_element_->family();
 }
@@ -502,13 +502,13 @@ inline void FiniteElement::evaluate_basis_derivatives_all(
 
 //-----------------------------------------------------------------------------
 
-inline double FiniteElement::evaluate_dof(
+inline auto FiniteElement::evaluate_dof(
   size_t                          i,
   ufc::function const &           f,
   double const *                  coordinate_dofs,
   int                             cell_orientation,
   ufc::cell const &               c,
-  ufc::coordinate_mapping const * cm ) const
+  ufc::coordinate_mapping const * cm ) const -> double
 {
   return ufc_finite_element_->evaluate_dof(
     i, f, coordinate_dofs, cell_orientation, c, cm );
@@ -582,67 +582,67 @@ inline void FiniteElement::tabulate_reference_dof_coordinates(
 
 //-----------------------------------------------------------------------------
 
-inline size_t FiniteElement::num_sub_elements() const
+inline auto FiniteElement::num_sub_elements() const -> size_t
 {
   return ufc_finite_element_->num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::finite_element * FiniteElement::create_sub_element( size_t i ) const
+inline auto FiniteElement::create_sub_element( size_t i ) const -> ufc::finite_element *
 {
   return ufc_finite_element_->create_sub_element( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::finite_element * FiniteElement::create() const
+inline auto FiniteElement::create() const -> ufc::finite_element *
 {
   return ufc_finite_element_->create();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElement::operator==( FiniteElement const & other ) const
+inline auto FiniteElement::operator==( FiniteElement const & other ) const -> bool
 {
   return ( std::strcmp( this->signature(), other.signature() ) == 0 );
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElement::operator!=( FiniteElement const & other ) const
+inline auto FiniteElement::operator!=( FiniteElement const & other ) const -> bool
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::finite_element *
-  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const
+inline auto
+  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const -> ufc::finite_element *
 {
   return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
 }
 
 //-----------------------------------------------------------------------------
 
-inline Array< size_t > const &
-  FiniteElement::sub_value_dimensions( size_t i ) const
+inline auto
+  FiniteElement::sub_value_dimensions( size_t i ) const -> Array< size_t > const &
 {
   return sub_value_dims_[i];
 }
 
 //-----------------------------------------------------------------------------
 
-inline Array< size_t > const &
-  FiniteElement::sub_value_offsets( size_t i ) const
+inline auto
+  FiniteElement::sub_value_offsets( size_t i ) const -> Array< size_t > const &
 {
   return sub_value_offs_[i];
 }
 
 //-----------------------------------------------------------------------------
 
-inline Array< ufc::finite_element const * > const &
-  FiniteElement::flatten() const
+inline auto
+  FiniteElement::flatten() const -> Array< ufc::finite_element const * > const &
 {
   if ( flattened_.empty() )
   {

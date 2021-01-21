@@ -34,16 +34,16 @@ public:
   void write(real t);
 
   /// Return array of evaluated values
-  real * values();
+  auto values() -> real *;
 
   /// Return number of values
-  uint value_size() const;
+  auto value_size() const -> uint;
 
   /// Return the number of samples registered
-  uint num_samples() const;
+  auto num_samples() const -> uint;
 
   /// Return the time interval of the data samples
-  std::pair<real, real> sampling_interval() const;
+  auto sampling_interval() const -> std::pair<real, real>;
 
   /// Display basic info
   void disp() const;

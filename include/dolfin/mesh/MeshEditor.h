@@ -48,7 +48,7 @@ public:
   ~MeshEditor();
 
   ///
-  Mesh& mesh() const { return mesh_; }
+  auto mesh() const -> Mesh& { return mesh_; }
 
   //--- VERTICES --------------------------------------------------------------
 
@@ -62,7 +62,7 @@ public:
   void add_vertex(uint v, real const * x);
 
   /// Return current vertex count
-  uint current_vertex() const;
+  auto current_vertex() const -> uint;
 
   //--- CELLS -----------------------------------------------------------------
 
@@ -76,7 +76,7 @@ public:
   void add_cell(uint c, uint const * v);
 
   /// Return current cell count
-  uint current_cell() const;
+  auto current_cell() const -> uint;
 
   //---------------------------------------------------------------------------
 

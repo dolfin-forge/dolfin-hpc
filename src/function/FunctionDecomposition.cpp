@@ -19,7 +19,7 @@
 namespace dolfin
 {
 //-----------------------------------------------------------------------------
-Array<Function *> FunctionDecomposition::compute(Function const& F)
+auto FunctionDecomposition::compute(Function const& F) -> Array<Function *>
 {
   message( 1, "Decomposing Function: %p", &F );
 
@@ -121,7 +121,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (uint i = 0; i < Si.size(); ++i)
     {
       FiniteElementSpace const& Vhi = (*Si[i]).space();
-      local_dim[i] = Vhi.dofmap().num_element_support_dofs();
+      local_dim[i] = Vhi.dofmap().num_element_dofs();
       celldofs[i] = Vhi.dofmap().dofsmapping();
     }
     real * block = F.create_block();

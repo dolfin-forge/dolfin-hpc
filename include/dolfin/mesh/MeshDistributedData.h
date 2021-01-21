@@ -36,30 +36,30 @@ public:
   ~MeshDistributedData();
 
   /// Assignment
-  MeshDistributedData& operator=(MeshDistributedData const& other);
+  auto operator=(MeshDistributedData const& other) -> MeshDistributedData&;
 
   /// Equality
-  bool operator==(MeshDistributedData const& other) const;
+  auto operator==(MeshDistributedData const& other) const -> bool;
 
   /// Non-equality
-  bool operator!=(MeshDistributedData const& other) const;
+  auto operator!=(MeshDistributedData const& other) const -> bool;
 
   /// Access to distributed data
-  inline DistributedData& operator[](uint dim)
+  inline auto operator[](uint dim) -> DistributedData&
   {
     dolfin_assert(dim <= dim_);
     return data_[dim];
   }
 
   /// Access to distributed data (const)
-  inline DistributedData const& operator[](uint dim) const
+  inline auto operator[](uint dim) const -> DistributedData const&
   {
     dolfin_assert(dim <= dim_);
     return data_[dim];
   }
 
   /// Return topological dimension of the distributed data
-  uint dim() const;
+  auto dim() const -> uint;
 
   /// Display basic information
   void disp() const;

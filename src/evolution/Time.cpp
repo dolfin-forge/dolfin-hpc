@@ -24,58 +24,58 @@ Time::Time( Interval I )
 {
 }
 //-----------------------------------------------------------------------------
-std::pair<real, real> const& Time::interval() const
+auto Time::interval() const -> std::pair<real, real> const&
 {
   return T_;
 }
 //-----------------------------------------------------------------------------
-int Time::sign() const
+auto Time::sign() const -> int
 {
   return sign_;
 }
 //-----------------------------------------------------------------------------
-bool Time::is_valid(real atol) const
+auto Time::is_valid(real atol) const -> bool
 {
   return std::fabs(t_ - T_.first)  <= std::fabs(T_.second - T_.first) + atol
       && std::fabs(t_ - T_.second) <= std::fabs(T_.second - T_.first) + atol;
 }
 //-----------------------------------------------------------------------------
-real Time::begin() const
+auto Time::begin() const -> real
 {
   return T_.first;
 }
 //-----------------------------------------------------------------------------
-real Time::end() const
+auto Time::end() const -> real
 {
   return T_.second;
 }
 //-----------------------------------------------------------------------------
-real Time::measure() const
+auto Time::measure() const -> real
 {
   return std::fabs(T_.second - T_.first);
 }
 //-----------------------------------------------------------------------------
-real const& Time::clock() const
+auto Time::clock() const -> real const&
 {
   return t_;
 }
 //-----------------------------------------------------------------------------
-real& Time::clock()
+auto Time::clock() -> real&
 {
   return t_;
 }
 //-----------------------------------------------------------------------------
-real Time::elapsed() const
+auto Time::elapsed() const -> real
 {
   return std::fabs(t_ - T_.first);
 }
 //-----------------------------------------------------------------------------
-real Time::remaining() const
+auto Time::remaining() const -> real
 {
   return std::fabs(T_.second - t_);
 }
 //-----------------------------------------------------------------------------
-real Time::elapsed_normalized() const
+auto Time::elapsed_normalized() const -> real
 {
   if(abscmp(T_.second, T_.first))
   {
@@ -84,7 +84,7 @@ real Time::elapsed_normalized() const
   return std::fabs(t_ - T_.first)/std::fabs(T_.second - T_.first);
 }
 //-----------------------------------------------------------------------------
-real Time::remaining_normalized() const
+auto Time::remaining_normalized() const -> real
 {
   if(abscmp(T_.second, T_.first))
   {

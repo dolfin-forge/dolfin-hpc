@@ -32,17 +32,17 @@ public:
   {
   }
 
-inline Vertex * operator->()
+inline auto operator->() -> Vertex *
 {
   return static_cast< Vertex * >( MeshEntityIterator::operator->() );
 }
 
-inline Vertex & operator*()
+inline auto operator*() -> Vertex &
 {
   return *operator->();
 }
 
-inline Vertex & operator[]( uint i )
+inline auto operator[]( uint i ) -> Vertex &
 {
   return static_cast< Vertex & >( MeshEntityIterator::operator[]( i ) );
 }

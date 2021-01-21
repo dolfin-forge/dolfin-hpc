@@ -53,7 +53,7 @@ public:
                     MeshValues<real, Cell>& h0, MeshValues<real, Cell>& subh0);
 
   ///
-  static bool onBoundary(Cell& cell);
+  static auto onBoundary(Cell& cell) -> bool;
 
   ///
   static void worstElement(int& index, MeshValues<bool, Cell>& masked_cells);

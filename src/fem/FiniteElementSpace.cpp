@@ -105,7 +105,7 @@ FiniteElementSpace::~FiniteElementSpace()
 
 //-----------------------------------------------------------------------------
 
-Array< FiniteElementSpace * > FiniteElementSpace::flatten() const
+auto FiniteElementSpace::flatten() const -> Array< FiniteElementSpace * >
 {
   Array< FiniteElementSpace * >        flt;
   Array< ufc::finite_element const * > flt_fe = finite_element_->flatten();

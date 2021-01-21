@@ -32,24 +32,24 @@ public:
   {
   }
 
-  inline Cell * operator->();
+  inline auto operator->() -> Cell *;
 
-  inline Cell & operator*();
+  inline auto operator*() -> Cell &;
 
-  inline Cell & operator[]( uint i );
+  inline auto operator[]( uint i ) -> Cell &;
 };
 
-inline Cell * CellIterator::operator->()
+inline auto CellIterator::operator->() -> Cell *
 {
   return static_cast< Cell * >( MeshEntityIterator::operator->() );
 }
 
-inline Cell & CellIterator::operator*()
+inline auto CellIterator::operator*() -> Cell &
 {
   return *operator->();
 }
 
-inline Cell & CellIterator::operator[]( uint i )
+inline auto CellIterator::operator[]( uint i ) -> Cell &
 {
   return static_cast< Cell & >( MeshEntityIterator::operator[]( i ) );
 }

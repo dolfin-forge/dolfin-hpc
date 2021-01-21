@@ -45,23 +45,23 @@ struct MeshValues : public MeshFunction<T>
   }
 
   /// Equality
-  bool operator==(MeshValues<T, E, N> const& other);
+  auto operator==(MeshValues<T, E, N> const& other) -> bool;
 
   /// Equality
-  bool operator!=(MeshValues<T, E, N> const& other);
+  auto operator!=(MeshValues<T, E, N> const& other) -> bool;
 
   /// Return value size
-  inline uint value_size();
+  inline auto value_size() -> uint;
 
   /// Assignment operator
-  MeshValues<T, E, N>& operator=(MeshValues<T, E, N> const& other);
+  auto operator=(MeshValues<T, E, N> const& other) -> MeshValues<T, E, N>&;
 
   /// Assignment conversion operator
   template <class V>
-  MeshValues<T, E, N>& operator=(MeshValues<V, E, N> const& other);
+  auto operator=(MeshValues<V, E, N> const& other) -> MeshValues<T, E, N>&;
 
   /// Set all values to given value
-  inline MeshValues<T, E, N>& operator=(T const& value);
+  inline auto operator=(T const& value) -> MeshValues<T, E, N>&;
 
   /// Swap operator
   friend void swap( MeshValues<T,E,N>& a, MeshValues<T,E,N>& b )
@@ -75,60 +75,60 @@ struct MeshValues : public MeshFunction<T>
   //       not valid until MeshFunction supports vector values.
 
   /// Return value at given entity
-  inline T& operator()(E const& entity, uint i = 0);
+  inline auto operator()(E const& entity, uint i = 0) -> T&;
 
   /// Return value at given entity
-  inline T const& operator()(E const& entity, uint i = 0) const;
+  inline auto operator()(E const& entity, uint i = 0) const -> T const&;
 
   /// Return value at given index;
-  inline T& operator()(uint index, uint i = 0);
+  inline auto operator()(uint index, uint i = 0) -> T&;
 
   /// Return value at given index
-  inline T const& operator()(uint index, uint i = 0) const;
+  inline auto operator()(uint index, uint i = 0) const -> T const&;
 
   ///--- Array accessors
 
   /// Return point to value at given entity
-  inline T * operator[](E& entity);
+  inline auto operator[](E& entity) -> T *;
 
   /// Return pointer to value at given entity
-  inline T const * operator[](E& entity) const;
+  inline auto operator[](E& entity) const -> T const *;
 
   /// Return point to value at given index
-  inline T * operator[](uint index);
+  inline auto operator[](uint index) -> T *;
 
   /// Return pointer to value at given index
-  inline T const * operator[](uint index) const;
+  inline auto operator[](uint index) const -> T const *;
 
 };
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline bool
-  MeshValues< T, E, N >::operator==( MeshValues< T, E, N > const & other )
+inline auto
+  MeshValues< T, E, N >::operator==( MeshValues< T, E, N > const & other ) -> bool
 {
   return MeshFunction< T >::operator==( other );
 }
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline bool
-  MeshValues< T, E, N >::operator!=( MeshValues< T, E, N > const & other )
+inline auto
+  MeshValues< T, E, N >::operator!=( MeshValues< T, E, N > const & other ) -> bool
 {
   return MeshFunction< T >::operator!=( other );
 }
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline uint MeshValues< T, E, N >::value_size()
+inline auto MeshValues< T, E, N >::value_size() -> uint
 {
   return N;
 }
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline MeshValues< T, E, N > &
-  MeshValues< T, E, N >::operator=( MeshValues< T, E, N > const & other )
+inline auto
+  MeshValues< T, E, N >::operator=( MeshValues< T, E, N > const & other ) -> MeshValues< T, E, N > &
 {
   MeshFunction< T >::operator=( other );
   return *this;
@@ -137,8 +137,8 @@ inline MeshValues< T, E, N > &
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
 template < class V >
-inline MeshValues< T, E, N > &
-  MeshValues< T, E, N >::operator=( MeshValues< V, E, N > const & other )
+inline auto
+  MeshValues< T, E, N >::operator=( MeshValues< V, E, N > const & other ) -> MeshValues< T, E, N > &
 {
   MeshFunction< T >::operator=( other );
   return *this;
@@ -146,8 +146,8 @@ inline MeshValues< T, E, N > &
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline MeshValues< T, E, N > &
-  MeshValues< T, E, N >::operator=( T const & value )
+inline auto
+  MeshValues< T, E, N >::operator=( T const & value ) -> MeshValues< T, E, N > &
 {
   MeshFunction< T >::operator=( value );
   return *this;
@@ -155,7 +155,7 @@ inline MeshValues< T, E, N > &
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T & MeshValues< T, E, N >::operator()( E const & entity, uint i )
+inline auto MeshValues< T, E, N >::operator()( E const & entity, uint i ) -> T &
 {
   dolfin_assert( this->values_ );
   dolfin_assert( &entity.mesh() == this->mesh_ );
@@ -165,8 +165,8 @@ inline T & MeshValues< T, E, N >::operator()( E const & entity, uint i )
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T const & MeshValues< T, E, N >::operator()( E const & entity,
-                                                    uint      i ) const
+inline auto MeshValues< T, E, N >::operator()( E const & entity,
+                                                    uint      i ) const -> T const &
 {
   dolfin_assert( this->values_ );
   dolfin_assert( &entity.mesh() == this->mesh_ );
@@ -176,7 +176,7 @@ inline T const & MeshValues< T, E, N >::operator()( E const & entity,
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T & MeshValues< T, E, N >::operator()( uint index, uint i )
+inline auto MeshValues< T, E, N >::operator()( uint index, uint i ) -> T &
 {
   dolfin_assert( this->values_ );
   dolfin_assert( index < this->size_ );
@@ -185,7 +185,7 @@ inline T & MeshValues< T, E, N >::operator()( uint index, uint i )
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T const & MeshValues< T, E, N >::operator()( uint index, uint i ) const
+inline auto MeshValues< T, E, N >::operator()( uint index, uint i ) const -> T const &
 {
   dolfin_assert( this->values_ );
   dolfin_assert( index < this->size_ );
@@ -194,7 +194,7 @@ inline T const & MeshValues< T, E, N >::operator()( uint index, uint i ) const
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T * MeshValues< T, E, N >::operator[]( E & entity )
+inline auto MeshValues< T, E, N >::operator[]( E & entity ) -> T *
 {
   dolfin_assert( this->values_ );
   dolfin_assert( &entity.mesh() == this->mesh_ );
@@ -204,7 +204,7 @@ inline T * MeshValues< T, E, N >::operator[]( E & entity )
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T const * MeshValues< T, E, N >::operator[]( E & entity ) const
+inline auto MeshValues< T, E, N >::operator[]( E & entity ) const -> T const *
 {
   dolfin_assert( this->values_ );
   dolfin_assert( &entity.mesh() == this->mesh_ );
@@ -214,7 +214,7 @@ inline T const * MeshValues< T, E, N >::operator[]( E & entity ) const
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T * MeshValues< T, E, N >::operator[]( uint index )
+inline auto MeshValues< T, E, N >::operator[]( uint index ) -> T *
 {
   dolfin_assert( this->values_ );
   dolfin_assert( index < this->size_ );
@@ -223,7 +223,7 @@ inline T * MeshValues< T, E, N >::operator[]( uint index )
 
 //-----------------------------------------------------------------------------
 template < class T, class E, uint N >
-inline T const * MeshValues< T, E, N >::operator[]( uint index ) const
+inline auto MeshValues< T, E, N >::operator[]( uint index ) const -> T const *
 {
   dolfin_assert( this->values_ );
   dolfin_assert( index < this->size_ );

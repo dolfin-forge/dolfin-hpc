@@ -21,16 +21,16 @@ public:
   PKDO(uint i, uint j);
 
   /// Evaluation at given point
-  real operator()(real r, real s);
+  auto operator()(real r, real s) -> real;
 
   /// Evaluation of derivative at given point
-  real ddx(real r, real s);
+  auto ddx(real r, real s) -> real;
 
   /// Evaluation at given point with weights a , b
-  static real eval(uint i, uint j, real r, real s);
+  static auto eval(uint i, uint j, real r, real s) -> real;
 
   /// Evaluation of derivative at given point with weights a , b
-  static real ddx(uint i, uint j, real r, real s);
+  static auto ddx(uint i, uint j, real r, real s) -> real;
 
 private:
 
@@ -42,12 +42,12 @@ private:
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline real PKDO::operator()(real r, real s)
+inline auto PKDO::operator()(real r, real s) -> real
 {
   return eval(i_, j_, r, s);
 }
 //-----------------------------------------------------------------------------
-inline real PKDO::ddx(real r, real s)
+inline auto PKDO::ddx(real r, real s) -> real
 {
   return ddx(i_, j_, r, s);
 }

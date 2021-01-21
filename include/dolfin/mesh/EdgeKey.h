@@ -60,7 +60,7 @@ struct EdgeKey : public std::pair<T, T>
   }
 
   ///
-  inline size_t hash() const
+  inline auto hash() const -> size_t
   {
     return (static_cast<std::size_t>(this->first)
         ^ static_cast<std::size_t>(this->second));
@@ -79,7 +79,7 @@ namespace std
 template<typename T>
 struct hash<dolfin::EdgeKey<T> >
 {
-  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
+  inline auto operator()(dolfin::EdgeKey<T> const& e) const -> std::size_t
   {
     return e.hash();
   }

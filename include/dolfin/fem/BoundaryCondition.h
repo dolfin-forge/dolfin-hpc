@@ -51,23 +51,23 @@ public:
                      BilinearForm const& form, SubSystem const sub_system);
 
   ///
-  BoundaryCondition& operator()(Time const& t)
+  auto operator()(Time const& t) -> BoundaryCondition&
   {
     this->sync(t);
     return *this;
   }
 
   ///
-  std::string const& type() const;
+  auto type() const -> std::string const&;
 
   ///
-  Mesh& mesh() const override;
+  auto mesh() const -> Mesh& override;
 
   // Sub domain
-  SubDomain const& sub_domain() const;
+  auto sub_domain() const -> SubDomain const&;
 
   ///
-  SubSystem const& sub_system() const;
+  auto sub_system() const -> SubSystem const&;
 
 protected:
 
@@ -107,22 +107,22 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline std::string const& BoundaryCondition::type() const
+inline auto BoundaryCondition::type() const -> std::string const&
 {
   return type_;
 }
 //-----------------------------------------------------------------------------
-inline Mesh& BoundaryCondition::mesh() const
+inline auto BoundaryCondition::mesh() const -> Mesh&
 {
   return mesh_;
 }
 //-----------------------------------------------------------------------------
-inline SubDomain const& BoundaryCondition::sub_domain() const
+inline auto BoundaryCondition::sub_domain() const -> SubDomain const&
 {
   return sub_domain_;
 }
 //-----------------------------------------------------------------------------
-inline SubSystem const& BoundaryCondition::sub_system() const
+inline auto BoundaryCondition::sub_system() const -> SubSystem const&
 {
   return sub_system_;
 }

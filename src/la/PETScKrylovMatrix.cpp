@@ -19,7 +19,7 @@ using namespace dolfin;
 namespace dolfin
 {
 
-  int usermult(Mat A, Vec x, Vec y)
+  auto usermult(Mat A, Vec x, Vec y) -> int
   {
     void* ctx = nullptr;
     MatShellGetContext(A, &ctx);
@@ -115,7 +115,7 @@ void PETScKrylovMatrix::init(int M, int N)
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovMatrix::size(uint dim) const
+auto PETScKrylovMatrix::size(uint dim) const -> dolfin::uint
 {
   int M = 0;
   int N = 0;
@@ -126,7 +126,7 @@ dolfin::uint PETScKrylovMatrix::size(uint dim) const
   return (dim == 0 ? static_cast<uint>(M) : static_cast<uint>(N));
 }
 //-----------------------------------------------------------------------------
-Mat PETScKrylovMatrix::mat() const
+auto PETScKrylovMatrix::mat() const -> Mat
 {
   return A;
 }
@@ -163,7 +163,7 @@ void PETScKrylovMatrix::disp(bool, int) const
 */
 }
 //-----------------------------------------------------------------------------
-LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
+auto dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A) -> LogStream&
 {
 
 #if PETSC_VERSION_MAJOR > 2

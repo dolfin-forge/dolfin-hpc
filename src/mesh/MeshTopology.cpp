@@ -80,7 +80,7 @@ void swap( MeshTopology & a, MeshTopology & b )
   }
 }
 //-----------------------------------------------------------------------------
-MeshTopology & MeshTopology::operator=( const MeshTopology & other )
+auto MeshTopology::operator=( const MeshTopology & other ) -> MeshTopology &
 {
   MeshTopology tmp( other );
   swap( *this, tmp );
@@ -88,7 +88,7 @@ MeshTopology & MeshTopology::operator=( const MeshTopology & other )
   return *this;
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::operator==( MeshTopology const & other ) const
+auto MeshTopology::operator==( MeshTopology const & other ) const -> bool
 {
   if ( this == &other )
     return true;
@@ -114,7 +114,7 @@ bool MeshTopology::operator==( MeshTopology const & other ) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::operator!=( MeshTopology const & other ) const
+auto MeshTopology::operator!=( MeshTopology const & other ) const -> bool
 {
   return !( *this == other );
 }
@@ -229,7 +229,7 @@ void MeshTopology::remap( uint d0, Array< uint > const & mapping )
   }
 }
 //-----------------------------------------------------------------------------
-Connectivity const * MeshTopology::entities( uint di ) const
+auto MeshTopology::entities( uint di ) const -> Connectivity const *
 {
   if ( connectivity( di ) )
   {
@@ -322,7 +322,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
   return connectivity( di );
 }
 //-----------------------------------------------------------------------------
-Connectivity const * MeshTopology::transpose( uint d1, uint d0 ) const
+auto MeshTopology::transpose( uint d1, uint d0 ) const -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -355,8 +355,8 @@ Connectivity const * MeshTopology::transpose( uint d1, uint d0 ) const
   return connectivity( d0, d1 );
 }
 //-----------------------------------------------------------------------------
-Connectivity const *
-  MeshTopology::intersection( uint d0, uint di, uint d1 ) const
+auto
+  MeshTopology::intersection( uint d0, uint di, uint d1 ) const -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -429,7 +429,7 @@ Connectivity const *
   return connectivity( d0, d1 );
 }
 //-----------------------------------------------------------------------------
-Connectivity const * MeshTopology::compute( uint d0, uint d1 ) const
+auto MeshTopology::compute( uint d0, uint d1 ) const -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -570,7 +570,7 @@ void MeshTopology::update_token()
   timestamp_ = std::time( nullptr );
 }
 //-----------------------------------------------------------------------------
-int MeshTopology::token() const
+auto MeshTopology::token() const -> int
 {
   return timestamp_ ^ size( 0 ) ^ size( dim_ );
 }

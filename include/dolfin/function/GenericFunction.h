@@ -44,13 +44,13 @@ public:
   void eval(real* values, const real* x) const override = 0;
 
   /// Return the rank of the value space
-  uint rank() const override = 0;
+  auto rank() const -> uint override = 0;
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const override = 0;
+  auto dim(uint i) const -> uint override = 0;
 
   // Return the value size
-  uint value_size() const override = 0;
+  auto value_size() const -> uint override = 0;
 
   /// Interpolate function to vertices of mesh
   virtual void interpolate_vertex_values(real* values) const = 0;
@@ -74,12 +74,12 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return the mesh
-  virtual Mesh& mesh() const = 0;
+  virtual auto mesh() const -> Mesh& = 0;
 
   //---------------------------------------------------------------------------
 
   /// Delegate time dependency
-  GenericFunction& operator()(Time const& t)
+  auto operator()(Time const& t) -> GenericFunction&
   {
     this->sync(t);
     return *this;

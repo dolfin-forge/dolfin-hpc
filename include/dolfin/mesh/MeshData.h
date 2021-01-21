@@ -24,23 +24,23 @@ class MeshData
   //--- Naive type erasure ----------------------------------------------------
 
   enum Values { Vbool, Vuint, Vreal };
-  template<class V> static inline Values values();
+  template<class V> static inline auto values() -> Values;
 
   enum Entity { Evertex, Eedge, Eface, Efacet, Ecell };
-  template<class E> static inline Entity entity();
+  template<class E> static inline auto entity() -> Entity;
 
   using key = std::pair<uint, uint>;
 
   template <class V, class E>
   struct type : public key { type() : key(values<V>(), entity<E>()) {} };
 
-  struct data_array { virtual uint size() const = 0; };
+  struct data_array { virtual auto size() const -> uint = 0; };
 
   template <class V, class E>
   struct array : public data_array
   {
     using type = Array<MeshValues<V, E> *>; type data;
-    uint size() const override { return data.size(); };
+    auto size() const -> uint override { return data.size(); };
   };
 
   //---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ public:
   MeshData(Mesh& mesh) : M_(mesh) {}
 
   //
-  Mesh& mesh() { return M_; }
+  auto mesh() -> Mesh& { return M_; }
 
   // Add mesh function to data, error if exists
   template <class V, class E> void add(MeshValues<V, E>& function)
@@ -82,13 +82,13 @@ public:
   }
 
   // Return number of function of given type in data
-  template <class V, class E> uint size()
+  template <class V, class E> auto size() -> uint
   {
     return lookup<V, E>().size();
   }
 
   // Return total number of functions
-  uint size() const
+  auto size() const -> uint
   {
     uint s = 0;
     for (Store::const_iterator it = S_.begin(); it != S_.end(); ++it)
@@ -99,7 +99,7 @@ public:
   }
 
   // Count number of function instances in data
-  template <class V, class E> uint count(MeshValues<V, E>& function)
+  template <class V, class E> auto count(MeshValues<V, E>& function) -> uint
   {
     if (&M_ != &function.mesh())
     {
@@ -118,19 +118,19 @@ public:
     iterator(MeshData& D) : b_(D.begin<V, E>()), e_(D.end<V, E>()), i_(b_) { };
 
     //
-    bool valid() { return (i_ != e_); }
+    auto valid() -> bool { return (i_ != e_); }
 
     //
-    uint pos() { return (i_ - b_); }
+    auto pos() -> uint { return (i_ - b_); }
 
     //
-    iterator& operator++() { ++i_; return *this; }
+    auto operator++() -> iterator& { ++i_; return *this; }
 
     //
-    MeshValues<V, E>* operator->() { return *i_; }
+    auto operator->() -> MeshValues<V, E>* { return *i_; }
 
     //
-    MeshValues<V, E>& operator*() { return **i_; }
+    auto operator*() -> MeshValues<V, E>& { return **i_; }
 
 
   private:
@@ -145,7 +145,7 @@ public:
 
 private:
 
-  template <class V, class E> typename array<V, E>::type& lookup()
+  template <class V, class E> auto lookup() -> typename array<V, E>::type&
   {
     type<V, E> K;
     std::pair<Store::iterator, bool> it(S_.find(K), false);
@@ -153,12 +153,12 @@ private:
     return (static_cast<array<V, E> *>(it.first->second)->data);
   }
 
-  template <class V, class E> typename array<V, E>::type::iterator begin()
+  template <class V, class E> auto begin() -> typename array<V, E>::type::iterator
   {
     return lookup<V, E>().begin();
   }
 
-  template <class V, class E> typename array<V, E>::type::iterator end()
+  template <class V, class E> auto end() -> typename array<V, E>::type::iterator
   {
     return lookup<V, E>().end();
   }
@@ -171,15 +171,15 @@ private:
 
 };
 
-template<> inline MeshData::Values MeshData::values<bool>() { return MeshData::Vbool; }
-template<> inline MeshData::Values MeshData::values<uint>() { return MeshData::Vuint; }
-template<> inline MeshData::Values MeshData::values<real>() { return MeshData::Vreal; }
+template<> inline auto MeshData::values<bool>() -> MeshData::Values { return MeshData::Vbool; }
+template<> inline auto MeshData::values<uint>() -> MeshData::Values { return MeshData::Vuint; }
+template<> inline auto MeshData::values<real>() -> MeshData::Values { return MeshData::Vreal; }
 
-template<> inline MeshData::Entity MeshData::entity<Vertex>() { return MeshData::Evertex; }
-template<> inline MeshData::Entity MeshData::entity<Edge>()   { return MeshData::Eedge;   }
-template<> inline MeshData::Entity MeshData::entity<Face>()   { return MeshData::Eface;   }
-template<> inline MeshData::Entity MeshData::entity<Facet>()  { return MeshData::Efacet;  }
-template<> inline MeshData::Entity MeshData::entity<Cell>()   { return MeshData::Ecell;   }
+template<> inline auto MeshData::entity<Vertex>() -> MeshData::Entity { return MeshData::Evertex; }
+template<> inline auto MeshData::entity<Edge>() -> MeshData::Entity   { return MeshData::Eedge;   }
+template<> inline auto MeshData::entity<Face>() -> MeshData::Entity   { return MeshData::Eface;   }
+template<> inline auto MeshData::entity<Facet>() -> MeshData::Entity  { return MeshData::Efacet;  }
+template<> inline auto MeshData::entity<Cell>() -> MeshData::Entity   { return MeshData::Ecell;   }
 
 //-----------------------------------------------------------------------------
 

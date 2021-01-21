@@ -48,10 +48,10 @@ public:
   {
     DofNumbering::init();
     //---
-    if (ufc_dofmap.num_element_support_dofs() != mesh.type().num_entities(0))
+    if (ufc_dofmap.num_element_dofs() != mesh.type().num_entities(0))
     {
       error("CG1sNumbering : local dimension %u != %u",
-            ufc_dofmap.num_element_support_dofs(), mesh.type().num_entities(0));
+            ufc_dofmap.num_element_dofs(), mesh.type().num_entities(0));
     }
     set_range(mesh.topology().offset(0), mesh.topology().num_owned(0));
     //---

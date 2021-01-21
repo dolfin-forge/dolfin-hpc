@@ -25,16 +25,16 @@ public:
   {
   }
 
-  inline Face & operator*();
+  inline auto operator*() -> Face &;
 
-  inline Face * operator->();
+  inline auto operator->() -> Face *;
 };
 
-inline Face & FaceIterator::operator*()
+inline auto FaceIterator::operator*() -> Face &
 {
   return *operator->();
 }
-inline Face * FaceIterator::operator->()
+inline auto FaceIterator::operator->() -> Face *
 {
   return static_cast< Face * >( MeshEntityIterator::operator->() );
 }

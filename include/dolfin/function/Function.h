@@ -73,7 +73,7 @@ public:
   Function(Mesh& mesh);
 
   /// Return whether the function is empty
-  bool empty() const;
+  auto empty() const -> bool;
 
   /// Initialize discrete function for argument function i of form
   void init(Form& form, uint i);
@@ -100,13 +100,13 @@ public:
   void eval(real* values, const real* x) const override;
 
   /// Return the rank of the value space
-  uint rank() const override;
+  auto rank() const -> uint override;
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const override;
+  auto dim(uint i) const -> uint override;
 
   // Return the value size
-  uint value_size() const override;
+  auto value_size() const -> uint override;
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const override;
@@ -130,15 +130,15 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return the mesh
-  Mesh& mesh() const override;
+  auto mesh() const -> Mesh& override;
 
   //---------------------------------------------------------------------------
 
   /// Return the discrete space
-  FiniteElementSpace const& space() const;
+  auto space() const -> FiniteElementSpace const&;
 
   /// Return vector
-  GenericVector& vector() const;
+  auto vector() const -> GenericVector&;
 
   /// Interpolate from an expression
   void operator<<(Expression const& other);
@@ -150,16 +150,16 @@ public:
   void operator<<(GenericFunction const& other);
 
   /// Compute function decomposition into scalar component functions
-  Array<Function *> decompose();
+  auto decompose() -> Array<Function *>;
 
   /// Return the number of sub functions i.e number of subspaces
-  uint num_sub_functions() const;
+  auto num_sub_functions() const -> uint;
 
   /// Get the size of tabulated block array
-  uidx block_size() const;
+  auto block_size() const -> uidx;
 
   /// Create a cell tabulated block array
-  real * create_block() const;
+  auto create_block() const -> real *;
 
   /// Get values to cell tabulated block array
   void get_block(real *& values) const;
@@ -171,67 +171,67 @@ public:
   void add_block(real *& values);
 
   /// Swap functions
-  Function& swap(Function& other);
+  auto swap(Function& other) -> Function&;
 
   //--- OPERATORS -------------------------------------------------------------
   // NOTE: A sequence of operations on Functions must be finalized with a sync.
 
   /// Assignment, fill the function if empty, error if space mismatch
-  Function& operator=(Function const& other);
+  auto operator=(Function const& other) -> Function&;
 
   /// Addition, error if empty or space mismatch
-  Function& operator+=(Function const& other);
+  auto operator+=(Function const& other) -> Function&;
 
   /// Subtraction, error if empty or space mismatch
-  Function& operator-=(Function const& other);
+  auto operator-=(Function const& other) -> Function&;
 
   /// Component-wise multiplication, error if empty or space mismatch
-  Function& operator*=(Function const& other);
+  auto operator*=(Function const& other) -> Function&;
 
   /// Add multiple of given vector (y=a*x+y)
-  Function& axpy( real a, const Function & x );
+  auto axpy( real a, const Function & x ) -> Function&;
 
   /// Add multiple of given vector (y=a*x+b*y)
-  Function& axpby( real a, const Function & x,
-                   real b );
+  auto axpby( real a, const Function & x,
+                   real b ) -> Function&;
 
   /// Add multiple of given vector (w=a*x+y)
-  Function& waxpy( real a, const Function & x,
-                           const Function & y );
+  auto waxpy( real a, const Function & x,
+                           const Function & y ) -> Function&;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  Function& axpbypcz( real a, const Function & x,
+  auto axpbypcz( real a, const Function & x,
                       real b, const Function & y,
-                      real c );
+                      real c ) -> Function&;
 
   /// Assignment to a real value, error if empty
-  Function& operator=(real value);
+  auto operator=(real value) -> Function&;
 
   /// Addition to a real number, error if empty [Not implemented]
-  Function& operator+=(real value);
+  auto operator+=(real value) -> Function&;
 
   /// Subtraction of a real number, error if empty [Not implemented]
-  Function& operator-=(real value);
+  auto operator-=(real value) -> Function&;
 
   /// Multiplication with a real number, error if empty
-  Function& operator*=(real value);
+  auto operator*=(real value) -> Function&;
 
   /// Division by a real number, error if empty
-  Function& operator/=(real value);
+  auto operator/=(real value) -> Function&;
 
   /// Zero the vector
-  Function& zero();
+  auto zero() -> Function&;
 
   /// Return the minimum value
-  real min() const;
+  auto min() const -> real;
 
   /// Return the maximum value
-  real max() const;
+  auto max() const -> real;
 
   //---------------------------------------------------------------------------
 
   /// Time dependency
-  Function& operator()(Time const& t)
+  auto operator()(Time const& t) -> Function&
   {
     TimeDependent::operator ()(t);
     return *this;
@@ -271,7 +271,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool Function::empty() const
+inline auto Function::empty() const -> bool
 {
   return ( discrete_space_ == nullptr );
 }
@@ -285,27 +285,27 @@ inline void Function::evaluate( real *            values,
 }
 
 //--- GenericFunction ---------------------------------------------------------
-inline Mesh & Function::mesh() const
+inline auto Function::mesh() const -> Mesh &
 {
   return ( *mesh_ );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Function::rank() const
+inline auto Function::rank() const -> uint
 {
   dolfin_assert( element_ );
   return element_->value_rank();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Function::dim( uint i ) const
+inline auto Function::dim( uint i ) const -> uint
 {
   dolfin_assert( element_ );
   return element_->value_dimension( i );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Function::value_size() const
+inline auto Function::value_size() const -> uint
 {
   dolfin_assert( scratch );
   return scratch->size;
@@ -321,14 +321,14 @@ inline void Function::interpolate( real *                      coefficients,
 }
 
 //-----------------------------------------------------------------------------
-inline GenericVector & Function::vector() const
+inline auto Function::vector() const -> GenericVector &
 {
   dolfin_assert( X_ );
   return *X_;
 }
 
 //-----------------------------------------------------------------------------
-inline FiniteElementSpace const & Function::space() const
+inline auto Function::space() const -> FiniteElementSpace const &
 {
   dolfin_assert( discrete_space_ );
   return *discrete_space_;
@@ -353,27 +353,27 @@ inline void Function::operator<<( GenericFunction const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Function * > Function::decompose()
+inline auto Function::decompose() -> Array< Function * >
 {
   return FunctionDecomposition::compute( *this );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Function::num_sub_functions() const
+inline auto Function::num_sub_functions() const -> uint
 {
   dolfin_assert( element_ );
   return element_->num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
-inline uidx Function::block_size() const
+inline auto Function::block_size() const -> uidx
 {
   dolfin_assert( dofmap_ );
   return dofmap_->dofsmapping_size();
 }
 
 //-----------------------------------------------------------------------------
-inline real * Function::create_block() const
+inline auto Function::create_block() const -> real *
 {
   dolfin_assert( dofmap_ );
   return new real[dofmap_->dofsmapping_size()];
@@ -411,7 +411,7 @@ inline void Function::add_block( real *& values )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator+=( Function const & other )
+inline auto Function::operator+=( Function const & other ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !other.empty() );
@@ -421,7 +421,7 @@ inline Function & Function::operator+=( Function const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator-=( Function const & other )
+inline auto Function::operator-=( Function const & other ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !other.empty() );
@@ -431,7 +431,7 @@ inline Function & Function::operator-=( Function const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator*=( Function const & other )
+inline auto Function::operator*=( Function const & other ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !other.empty() );
@@ -441,7 +441,7 @@ inline Function & Function::operator*=( Function const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::axpy( real a, const Function & x )
+inline auto Function::axpy( real a, const Function & x ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !x.empty() );
@@ -451,8 +451,8 @@ inline Function & Function::axpy( real a, const Function & x )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::axpby( real a, const Function & x,
-                                   real b )
+inline auto Function::axpby( real a, const Function & x,
+                                   real b ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !x.empty() );
@@ -462,8 +462,8 @@ inline Function & Function::axpby( real a, const Function & x,
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::waxpy( real a, const Function & x,
-                                           const Function & y )
+inline auto Function::waxpy( real a, const Function & x,
+                                           const Function & y ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !x.empty() );
@@ -475,9 +475,9 @@ inline Function & Function::waxpy( real a, const Function & x,
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::axpbypcz( real a, const Function & x,
+inline auto Function::axpbypcz( real a, const Function & x,
                                       real b, const Function & y,
-                                      real c )
+                                      real c ) -> Function &
 {
   dolfin_assert( !this->empty() );
   dolfin_assert( !x.empty() );
@@ -489,7 +489,7 @@ inline Function & Function::axpbypcz( real a, const Function & x,
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator=( real value )
+inline auto Function::operator=( real value ) -> Function &
 {
   dolfin_assert( !this->empty() );
   this->vector() = value;
@@ -497,7 +497,7 @@ inline Function & Function::operator=( real value )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator+=( real )
+inline auto Function::operator+=( real ) -> Function &
 {
   dolfin_assert( !this->empty() );
   error( "Not implemented" );
@@ -505,7 +505,7 @@ inline Function & Function::operator+=( real )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator-=( real )
+inline auto Function::operator-=( real ) -> Function &
 {
   dolfin_assert( !this->empty() );
   error( "Not implemented" );
@@ -513,7 +513,7 @@ inline Function & Function::operator-=( real )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator*=( real value )
+inline auto Function::operator*=( real value ) -> Function &
 {
   dolfin_assert( !this->empty() );
   this->vector() *= value;
@@ -521,7 +521,7 @@ inline Function & Function::operator*=( real value )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::operator/=( real value )
+inline auto Function::operator/=( real value ) -> Function &
 {
   dolfin_assert( !this->empty() );
   this->vector() /= value;
@@ -529,7 +529,7 @@ inline Function & Function::operator/=( real value )
 }
 
 //-----------------------------------------------------------------------------
-inline Function & Function::zero()
+inline auto Function::zero() -> Function &
 {
   dolfin_assert( !this->empty() );
   this->vector().zero();
@@ -537,14 +537,14 @@ inline Function & Function::zero()
 }
 
 //-----------------------------------------------------------------------------
-inline real Function::min() const
+inline auto Function::min() const -> real
 {
   dolfin_assert( !this->empty() );
   return this->vector().min();
 }
 
 //-----------------------------------------------------------------------------
-inline real Function::max() const
+inline auto Function::max() const -> real
 {
   dolfin_assert( !this->empty() );
   return this->vector().max();

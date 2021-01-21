@@ -30,31 +30,31 @@ public:
   ~LAPACKMatrix();
 
   /// Return size of given dimension
-  uint size(uint dim) const
+  auto size(uint dim) const -> uint
   {
     dolfin_assert(dim < 2);
     return (dim == 0 ? M_ : N_);
   }
 
-  double * values()
+  auto values() -> double *
   {
     return values_;
   }
 
   /// Access entry (i, j)
-  double& operator()(uint i, uint j)
+  auto operator()(uint i, uint j) -> double&
   {
     return values_[j * M_ + i];
   }
 
   /// Access entry (i, j), const version
-  double operator()(uint i, uint j) const
+  auto operator()(uint i, uint j) const -> double
   {
     return values_[j * M_ + i];
   }
 
   /// Return informal string representation (pretty-print)
-  std::string str(bool verbose) const;
+  auto str(bool verbose) const -> std::string;
 
 private:
 

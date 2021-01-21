@@ -30,7 +30,7 @@ public:
   ///
   inline void tabulate_dofs(uint* dofs, ufc::cell const&, Cell const&) const override
   {
-    std::copy(dofs_, dofs_ + ufc_dofmap.num_element_support_dofs(), dofs);
+    std::copy(dofs_, dofs_ + ufc_dofmap.num_element_dofs(), dofs);
   }
 
   //
@@ -39,12 +39,12 @@ public:
     DofNumbering::init();
 
     //---
-    uint offset = ufc_dofmap.num_element_support_dofs() * MPI::rank();
-    set_range(offset, ufc_dofmap.num_element_support_dofs());
+    uint offset = ufc_dofmap.num_element_dofs() * MPI::rank();
+    set_range(offset, ufc_dofmap.num_element_dofs());
     delete [] dofs_;
-    dofs_ = new uint[ufc_dofmap.num_element_support_dofs()];
-    std::fill_n(dofs_, ufc_dofmap.num_element_support_dofs(), offset);
-    for (uint i = 1; i < ufc_dofmap.num_element_support_dofs(); ++i)
+    dofs_ = new uint[ufc_dofmap.num_element_dofs()];
+    std::fill_n(dofs_, ufc_dofmap.num_element_dofs(), offset);
+    for (uint i = 1; i < ufc_dofmap.num_element_dofs(); ++i)
     {
       dofs_[i] += i;
     }

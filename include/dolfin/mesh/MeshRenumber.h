@@ -41,7 +41,7 @@ namespace MeshRenumber
 {
 
 /// Renumber all mesh entities
-bool renumber(MeshTopology& topology);
+auto renumber(MeshTopology& topology) -> bool;
 
 } /* namespace MeshRenumber */
 

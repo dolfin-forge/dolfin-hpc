@@ -101,7 +101,7 @@ ParameterSystem::~ParameterSystem()
 
 //-----------------------------------------------------------------------------
 
-Parameter const & ParameterSystem::get(std::string const& key) const
+auto ParameterSystem::get(std::string const& key) const -> Parameter const &
 {
   const_iterator p = this->find(key);
 
@@ -115,7 +115,7 @@ Parameter const & ParameterSystem::get(std::string const& key) const
 
 //-----------------------------------------------------------------------------
 
-Parameter::Type ParameterSystem::get_type( std::string const & key )
+auto ParameterSystem::get_type( std::string const & key ) -> Parameter::Type
 {
   dolfin_assert( this->defined( key ) );
   return (*this)[key]->type();
@@ -123,14 +123,14 @@ Parameter::Type ParameterSystem::get_type( std::string const & key )
 
 //-----------------------------------------------------------------------------
 
-bool ParameterSystem::defined(std::string const& key) const
+auto ParameterSystem::defined(std::string const& key) const -> bool
 {
   return (this->count(key) > 0);
 }
 
 //-----------------------------------------------------------------------------
 
-std::string ParameterSystem::to_json() const
+auto ParameterSystem::to_json() const -> std::string
 {
   std::stringstream ss;
   ss << "{\n";
@@ -170,7 +170,7 @@ std::string ParameterSystem::to_json() const
 
 //-----------------------------------------------------------------------------
 
-std::string ParameterSystem::serialize() const
+auto ParameterSystem::serialize() const -> std::string
 {
   std::stringstream ss;
   // Parameters are encoded as: "name";type;"value";

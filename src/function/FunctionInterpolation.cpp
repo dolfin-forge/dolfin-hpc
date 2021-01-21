@@ -331,7 +331,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     // (u, r) : (indices for dofs located at node n,
     //           node coordinates)
     _set<uint> done;
-    uint const local_dim1 = dm1.num_element_support_dofs() / S1.size;
+    uint const local_dim1 = dm1.num_element_dofs() / S1.size;
     Point p;
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {

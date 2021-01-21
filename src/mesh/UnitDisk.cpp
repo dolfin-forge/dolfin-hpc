@@ -141,7 +141,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
 
 }
 //-----------------------------------------------------------------------------
-real UnitDisk::transformx(real x, real y, Transformation transformation)
+auto UnitDisk::transformx(real x, real y, Transformation transformation) -> real
 {
   //maxn transformation
   if (transformation == maxn)
@@ -176,7 +176,7 @@ real UnitDisk::transformx(real x, real y, Transformation transformation)
   }
 }
 //-----------------------------------------------------------------------------
-real UnitDisk::transformy(real x, real y, Transformation transformation)
+auto UnitDisk::transformy(real x, real y, Transformation transformation) -> real
 {
   //maxn transformation
   if (transformation == maxn)

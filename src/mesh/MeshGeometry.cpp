@@ -43,7 +43,7 @@ MeshGeometry::~MeshGeometry()
     delete space_;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry & MeshGeometry::operator=(MeshGeometry const& other)
+auto MeshGeometry::operator=(MeshGeometry const& other) -> MeshGeometry &
 {
   MeshGeometry tmp(other);
   swap( *this, tmp );
@@ -51,7 +51,7 @@ MeshGeometry & MeshGeometry::operator=(MeshGeometry const& other)
   return *this;
 }
 //-----------------------------------------------------------------------------
-bool MeshGeometry::operator==(MeshGeometry const& other) const
+auto MeshGeometry::operator==(MeshGeometry const& other) const -> bool
 {
   if ( *space_ != *other.space_ )
   {
@@ -77,7 +77,7 @@ bool MeshGeometry::operator==(MeshGeometry const& other) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool MeshGeometry::operator!=(MeshGeometry const& other) const
+auto MeshGeometry::operator!=(MeshGeometry const& other) const -> bool
 {
   return !(*this == other);
 }
@@ -187,7 +187,7 @@ void MeshGeometry::assign(MeshGeometry const& other, Array<uint> const& mapping)
   }
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator*=(real const a)
+auto MeshGeometry::operator*=(real const a) -> MeshGeometry&
 {
   typedef Array< real >::iterator CoordIter;
 	for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
@@ -198,7 +198,7 @@ MeshGeometry& MeshGeometry::operator*=(real const a)
 	return *this;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator/=(real const a)
+auto MeshGeometry::operator/=(real const a) -> MeshGeometry&
 {
   if(small(a))
   {
@@ -215,7 +215,7 @@ MeshGeometry& MeshGeometry::operator/=(real const a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator+=(real const a)
+auto MeshGeometry::operator+=(real const a) -> MeshGeometry&
 {
   using CoordIter = Array<real>::iterator;
 
@@ -226,7 +226,7 @@ MeshGeometry& MeshGeometry::operator+=(real const a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator-=(real const a)
+auto MeshGeometry::operator-=(real const a) -> MeshGeometry&
 {
   using CoordIter = Array<real>::iterator;
 
@@ -238,7 +238,7 @@ MeshGeometry& MeshGeometry::operator-=(real const a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator+=(Point const& p)
+auto MeshGeometry::operator+=(Point const& p) -> MeshGeometry&
 {
   using CoordIter = Array<real>::iterator;
 
@@ -253,7 +253,7 @@ MeshGeometry& MeshGeometry::operator+=(Point const& p)
   return *this;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& MeshGeometry::operator-=(Point const& p)
+auto MeshGeometry::operator-=(Point const& p) -> MeshGeometry&
 {
   using CoordIter = Array<real>::iterator;
 
@@ -269,7 +269,7 @@ MeshGeometry& MeshGeometry::operator-=(Point const& p)
   return *this;
 }
 //-----------------------------------------------------------------------------
-int MeshGeometry::token() const
+auto MeshGeometry::token() const -> int
 {
   return timestamp_ ^ size_;
 }
@@ -300,7 +300,7 @@ void MeshGeometry::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-MeshGeometry const& MeshGeometry::operator>>(Array<real>&) const
+auto MeshGeometry::operator>>(Array<real>&) const -> MeshGeometry const&
 {
   error( "MeshGeometry::operator>> unimplemented / deprecated." );
   // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);

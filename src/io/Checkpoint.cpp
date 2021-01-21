@@ -435,7 +435,7 @@ void Checkpoint::load( std::string filename, VectorMap const & vec )
 
 //-----------------------------------------------------------------------------
 
-real Checkpoint::time() const
+auto Checkpoint::time() const -> real
 {
   return chkp_header.time;
 }
@@ -457,28 +457,28 @@ void Checkpoint::increment_counter()
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::CheckpointHeader const & Checkpoint::get_header() const
+auto Checkpoint::get_header() const -> Checkpoint::CheckpointHeader const &
 {
   return chkp_header;
 }
 
 //-----------------------------------------------------------------------------
 
-Array< Checkpoint::MeshHeader > const & Checkpoint::get_mesh_header() const
+auto Checkpoint::get_mesh_header() const -> Array< Checkpoint::MeshHeader > const &
 {
   return mesh_header;
 }
 
 //-----------------------------------------------------------------------------
 
-Array< Checkpoint::FunctionHeader > const & Checkpoint::get_function_header() const
+auto Checkpoint::get_function_header() const -> Array< Checkpoint::FunctionHeader > const &
 {
   return functions_header;
 }
 
 //-----------------------------------------------------------------------------
 
-Array< Checkpoint::VectorHeader > const & Checkpoint::get_vector_header() const
+auto Checkpoint::get_vector_header() const -> Array< Checkpoint::VectorHeader > const &
 {
   return vectors_header;
 }
@@ -741,7 +741,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, VectorMap & vec )
 
 //-----------------------------------------------------------------------------
 
-std::string Checkpoint::build_filename( std::string filename )
+auto Checkpoint::build_filename( std::string filename ) -> std::string
 {
   // if the input filename contains the extension, remove it
   if ( filename.size() > 5
@@ -765,7 +765,7 @@ std::string Checkpoint::build_filename( std::string filename )
 
 //-----------------------------------------------------------------------------
 
-Checkpoint::stream_t Checkpoint::load_file( std::string & filename )
+auto Checkpoint::load_file( std::string & filename ) -> Checkpoint::stream_t
 {
   // if the input filename contains the extension, remove it
   if ( filename.size() > 5

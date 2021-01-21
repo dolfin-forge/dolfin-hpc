@@ -19,22 +19,22 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-std::string filename(std::string const& name, std::string const& ext,
-                     uint counter, int width)
+auto filename(std::string const& name, std::string const& ext,
+                     uint counter, int width) -> std::string
 {
   std::stringstream ss;
   ss << name << std::setfill('0') << std::setw(width) << counter << ext;
   return ss.str();
 }
 //-----------------------------------------------------------------------------
-std::string strcounter(uint counter, int width)
+auto strcounter(uint counter, int width) -> std::string
 {
   std::stringstream ss;
   ss << std::setfill('0') << std::setw(width) << counter;
   return ss.str();
 }
 //-----------------------------------------------------------------------------
-std::string basename(std::string file)
+auto basename(std::string file) -> std::string
 {
   size_t beg = file.find_last_of('/');
   if (beg != std::string::npos)
@@ -45,18 +45,18 @@ std::string basename(std::string file)
   return file.substr(0, pos);
 }
 //-----------------------------------------------------------------------------
-std::string dirname(std::string file)
+auto dirname(std::string file) -> std::string
 {
   size_t beg = file.find_last_of('/');
   return file.substr(0, beg);
 }
 //-----------------------------------------------------------------------------
-std::string path(std::string p0, std::string const& p1)
+auto path(std::string p0, std::string const& p1) -> std::string
 {
   return p0 + "/" + p1;
 }
 //-----------------------------------------------------------------------------
-std::string path(std::string p0, std::string const& p1, std::string const& p2)
+auto path(std::string p0, std::string const& p1, std::string const& p2) -> std::string
 {
   return p0 + "/" + p1 + "/" + p2;
 }
@@ -91,13 +91,13 @@ void mkdir(std::string const& dirpath)
   message( 1, "mkdir: %s", dirpath.c_str() );
 }
 //-----------------------------------------------------------------------------
-bool stat(std::string const& dirpath)
+auto stat(std::string const& dirpath) -> bool
 {
   struct stat sb;
   return !(::stat(dirpath.c_str(), &sb) < 0);
 }
 //-----------------------------------------------------------------------------
-std::string getcwd()
+auto getcwd() -> std::string
 {
   char curpath[PATH_MAX] = { 0 };
   if (::getcwd(curpath, sizeof(curpath)) == nullptr)
@@ -169,7 +169,7 @@ void dirs(int n, std::string& dirname)
   }
 }
 //-----------------------------------------------------------------------------
-Array<std::string>& dirstack()
+auto dirstack() -> Array<std::string>&
 {
   static Array<std::string> dirstack_;
   return dirstack_;

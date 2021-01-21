@@ -34,32 +34,32 @@ public:
   ~Form() override = default;
 
   /// Return array of coefficients
-  virtual Array< Coefficient * > const & coefficients() const = 0;
+  virtual auto coefficients() const -> Array< Coefficient * > const & = 0;
 
   /// Return index of argument associated with the given name
-  virtual size_t coefficient_index( std::string const & name ) const;
+  virtual auto coefficient_index( std::string const & name ) const -> size_t;
 
   /// Return name of argument associated with the given number
-  virtual std::string coefficient_name( size_t i ) const;
+  virtual auto coefficient_name( size_t i ) const -> std::string;
 
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 
   /// Return mesh
-  Mesh & mesh() const;
+  auto mesh() const -> Mesh &;
 
   /// Return DofMapSet
-  DofMapSet & dofmaps() const;
+  auto dofmaps() const -> DofMapSet &;
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
-  const char * signature() const override;
+  auto signature() const -> const char * override;
 
   /// Return the rank of the global tensor (r)
-  size_t rank() const override;
+  auto rank() const -> size_t override;
 
   /// Return the number of coefficients (n)
-  size_t num_coefficients() const override;
+  auto num_coefficients() const -> size_t override;
 
   // /// Return the number of cell integrals
   // size_t num_cell_integrals() const override;
@@ -71,140 +71,140 @@ public:
   // size_t num_interior_facet_integrals() const override;
 
   /// Return original coefficient position for each coefficient
-  size_t original_coefficient_position( size_t i ) const override;
+  auto original_coefficient_position( size_t i ) const -> size_t override;
 
   /// Create a new finite element for parameterization of coordinates
-  ufc::finite_element * create_coordinate_finite_element() const override;
+  auto create_coordinate_finite_element() const -> ufc::finite_element * override;
 
   /// Create a new dofmap for parameterization of coordinates
-  ufc::dofmap * create_coordinate_dofmap() const override;
+  auto create_coordinate_dofmap() const -> ufc::dofmap * override;
 
   /// Create a new coordinate mapping
-  ufc::coordinate_mapping * create_coordinate_mapping() const override;
+  auto create_coordinate_mapping() const -> ufc::coordinate_mapping * override;
 
   /// Create a new finite element for argument function i
-  ufc::finite_element * create_finite_element( size_t i ) const override;
+  auto create_finite_element( size_t i ) const -> ufc::finite_element * override;
 
   /// Create a new dof map for argument function i
-  ufc::dofmap * create_dofmap( size_t i ) const override;
+  auto create_dofmap( size_t i ) const -> ufc::dofmap * override;
 
   /// Return the upper bound on subdomain ids for cell integrals
-  size_t max_cell_subdomain_id() const override;
+  auto max_cell_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for exterior facet integrals
-  size_t max_exterior_facet_subdomain_id() const override;
+  auto max_exterior_facet_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for interior facet integrals
-  size_t max_interior_facet_subdomain_id() const override;
+  auto max_interior_facet_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for vertex integrals
-  size_t max_vertex_subdomain_id() const override;
+  auto max_vertex_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for custom integrals
-  size_t max_custom_subdomain_id() const override;
+  auto max_custom_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for cutcell integrals
-  size_t max_cutcell_subdomain_id() const override;
+  auto max_cutcell_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for interface integrals
-  size_t max_interface_subdomain_id() const override;
+  auto max_interface_subdomain_id() const -> size_t override;
 
   /// Return the upper bound on subdomain ids for overlap integrals
-  size_t max_overlap_subdomain_id() const override;
+  auto max_overlap_subdomain_id() const -> size_t override;
 
   /// Return whether form has any cell integrals
-  bool has_cell_integrals() const override;
+  auto has_cell_integrals() const -> bool override;
 
   /// Return whether form has any exterior facet integrals
-  bool has_exterior_facet_integrals() const override;
+  auto has_exterior_facet_integrals() const -> bool override;
 
   /// Return whether form has any interior facet integrals
-  bool has_interior_facet_integrals() const override;
+  auto has_interior_facet_integrals() const -> bool override;
 
   /// Return whether form has any vertex integrals
-  bool has_vertex_integrals() const override;
+  auto has_vertex_integrals() const -> bool override;
 
   /// Return whether form has any custom integrals
-  bool has_custom_integrals() const override;
+  auto has_custom_integrals() const -> bool override;
 
   /// Return whether form has any cutcell integrals
-  bool has_cutcell_integrals() const override;
+  auto has_cutcell_integrals() const -> bool override;
 
   /// Return whether form has any interface integrals
-  bool has_interface_integrals() const override;
+  auto has_interface_integrals() const -> bool override;
 
   /// Return whether form has any overlap integrals
-  bool has_overlap_integrals() const override;
+  auto has_overlap_integrals() const -> bool override;
 
   /// Create a new cell integral on sub domain i
-  ufc::cell_integral * create_cell_integral( size_t subdomain_id ) const override;
+  auto create_cell_integral( size_t subdomain_id ) const -> ufc::cell_integral * override;
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral * create_exterior_facet_integral( size_t subdomain_id ) const override;
+  auto create_exterior_facet_integral( size_t subdomain_id ) const -> ufc::exterior_facet_integral * override;
 
   /// Create a new interior facet integral on sub domain i
-  ufc::interior_facet_integral * create_interior_facet_integral( size_t subdomain_id ) const override;
+  auto create_interior_facet_integral( size_t subdomain_id ) const -> ufc::interior_facet_integral * override;
 
   /// Create a new vertex integral on sub domain subdomain_id
-  ufc::vertex_integral * create_vertex_integral( size_t subdomain_id ) const override;
+  auto create_vertex_integral( size_t subdomain_id ) const -> ufc::vertex_integral * override;
 
   /// Create a new custom integral on sub domain subdomain_id
-  ufc::custom_integral * create_custom_integral( size_t subdomain_id ) const override;
+  auto create_custom_integral( size_t subdomain_id ) const -> ufc::custom_integral * override;
 
   /// Create a new cutcell integral on sub domain subdomain_id
-  ufc::cutcell_integral * create_cutcell_integral( size_t subdomain_id ) const override;
+  auto create_cutcell_integral( size_t subdomain_id ) const -> ufc::cutcell_integral * override;
 
   /// Create a new interface integral on sub domain subdomain_id
-  ufc::interface_integral * create_interface_integral( size_t subdomain_id ) const override;
+  auto create_interface_integral( size_t subdomain_id ) const -> ufc::interface_integral * override;
 
   /// Create a new overlap integral on sub domain subdomain_id
-  ufc::overlap_integral * create_overlap_integral( size_t subdomain_id ) const override;
+  auto create_overlap_integral( size_t subdomain_id ) const -> ufc::overlap_integral * override;
 
   /// Create a new cell integral on everywhere else
-  ufc::cell_integral * create_default_cell_integral() const override;
+  auto create_default_cell_integral() const -> ufc::cell_integral * override;
 
   /// Create a new exterior facet integral on everywhere else
-  ufc::exterior_facet_integral * create_default_exterior_facet_integral() const override;
+  auto create_default_exterior_facet_integral() const -> ufc::exterior_facet_integral * override;
 
   /// Create a new interior facet integral on everywhere else
-  ufc::interior_facet_integral * create_default_interior_facet_integral() const override;
+  auto create_default_interior_facet_integral() const -> ufc::interior_facet_integral * override;
 
   /// Create a new vertex integral on everywhere else
-  ufc::vertex_integral * create_default_vertex_integral() const override;
+  auto create_default_vertex_integral() const -> ufc::vertex_integral * override;
 
   /// Create a new custom integral on everywhere else
-  ufc::custom_integral * create_default_custom_integral() const override;
+  auto create_default_custom_integral() const -> ufc::custom_integral * override;
 
   /// Create a new cutcell integral on everywhere else
-  ufc::cutcell_integral * create_default_cutcell_integral() const override;
+  auto create_default_cutcell_integral() const -> ufc::cutcell_integral * override;
 
   /// Create a new interface integral on everywhere else
-  ufc::interface_integral * create_default_interface_integral() const override;
+  auto create_default_interface_integral() const -> ufc::interface_integral * override;
 
   /// Create a new overlap integral on everywhere else
-  ufc::overlap_integral * create_default_overlap_integral() const override;
+  auto create_default_overlap_integral() const -> ufc::overlap_integral * override;
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
   /// Create function space for i-th function (arguments + coefficients)
-  FiniteElementSpace * create_space( size_t i ) const;
+  auto create_space( size_t i ) const -> FiniteElementSpace *;
 
   /// Create function space for given coefficient
-  FiniteElementSpace *
-    create_coefficient_space( std::string const & name ) const;
+  auto
+    create_coefficient_space( std::string const & name ) const -> FiniteElementSpace *;
 
   /// Check dimension and rank of coefficients
-  bool check( Array< Coefficient * > const & coefficients ) const;
+  auto check( Array< Coefficient * > const & coefficients ) const -> bool;
 
   /// Check if index is valid
-  bool is_valid_index( size_t i ) const;
+  auto is_valid_index( size_t i ) const -> bool;
 
   /// Assemble form
   void assemble( GenericTensor & T, bool reset_tensor );
 
 protected:
   /// Return UFC form
-  virtual ufc::form const & form() const = 0;
+  virtual auto form() const -> ufc::form const & = 0;
 
   /// Assign coefficients from map to form coefficients
   void init( Array< Coefficient * > & coefficients );
@@ -222,21 +222,21 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline const char * Form::signature() const
+inline auto Form::signature() const -> const char *
 {
   return form().signature();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::rank() const
+inline auto Form::rank() const -> size_t
 {
   return form().rank();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::num_coefficients() const
+inline auto Form::num_coefficients() const -> size_t
 {
   return form().num_coefficients();
 }
@@ -261,154 +261,154 @@ inline size_t Form::num_coefficients() const
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::original_coefficient_position( size_t i ) const
+inline auto Form::original_coefficient_position( size_t i ) const -> size_t
 {
   return form().original_coefficient_position( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::finite_element * Form::create_coordinate_finite_element() const
+inline auto Form::create_coordinate_finite_element() const -> ufc::finite_element *
 {
   return form().create_coordinate_finite_element();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::dofmap * Form::create_coordinate_dofmap() const
+inline auto Form::create_coordinate_dofmap() const -> ufc::dofmap *
 {
   return form().create_coordinate_dofmap();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::coordinate_mapping * Form::create_coordinate_mapping() const
+inline auto Form::create_coordinate_mapping() const -> ufc::coordinate_mapping *
 {
   return form().create_coordinate_mapping();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::finite_element * Form::create_finite_element( size_t i ) const
+inline auto Form::create_finite_element( size_t i ) const -> ufc::finite_element *
 {
   return form().create_finite_element( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::dofmap * Form::create_dofmap( size_t i ) const
+inline auto Form::create_dofmap( size_t i ) const -> ufc::dofmap *
 {
   return form().create_dofmap( i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_cell_subdomain_id() const
+inline auto Form::max_cell_subdomain_id() const -> size_t
 {
   return form().max_cell_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_exterior_facet_subdomain_id() const
+inline auto Form::max_exterior_facet_subdomain_id() const -> size_t
 {
   return form().max_exterior_facet_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_interior_facet_subdomain_id() const
+inline auto Form::max_interior_facet_subdomain_id() const -> size_t
 {
   return form().max_interior_facet_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_vertex_subdomain_id() const
+inline auto Form::max_vertex_subdomain_id() const -> size_t
 {
   return form().max_vertex_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_custom_subdomain_id() const
+inline auto Form::max_custom_subdomain_id() const -> size_t
 {
   return form().max_custom_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_cutcell_subdomain_id() const
+inline auto Form::max_cutcell_subdomain_id() const -> size_t
 {
   return form().max_cutcell_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_interface_subdomain_id() const
+inline auto Form::max_interface_subdomain_id() const -> size_t
 {
   return form().max_interface_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::max_overlap_subdomain_id() const
+inline auto Form::max_overlap_subdomain_id() const -> size_t
 {
   return form().max_overlap_subdomain_id();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_cell_integrals() const
+inline auto Form::has_cell_integrals() const -> bool
 {
   return form().has_cell_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_exterior_facet_integrals() const
+inline auto Form::has_exterior_facet_integrals() const -> bool
 {
   return form().has_exterior_facet_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_interior_facet_integrals() const
+inline auto Form::has_interior_facet_integrals() const -> bool
 {
   return form().has_interior_facet_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_vertex_integrals() const
+inline auto Form::has_vertex_integrals() const -> bool
 {
   return form().has_vertex_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_custom_integrals() const
+inline auto Form::has_custom_integrals() const -> bool
 {
   return form().has_custom_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_cutcell_integrals() const
+inline auto Form::has_cutcell_integrals() const -> bool
 {
   return form().has_cutcell_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_interface_integrals() const
+inline auto Form::has_interface_integrals() const -> bool
 {
   return form().has_interface_integrals();
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool Form::has_overlap_integrals() const
+inline auto Form::has_overlap_integrals() const -> bool
 {
   return form().has_overlap_integrals();
 }
@@ -416,114 +416,114 @@ inline bool Form::has_overlap_integrals() const
 //-----------------------------------------------------------------------------
 
 
-inline ufc::cell_integral * Form::create_cell_integral( size_t subdomain_id ) const
+inline auto Form::create_cell_integral( size_t subdomain_id ) const -> ufc::cell_integral *
 {
   return form().create_cell_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::exterior_facet_integral *
-  Form::create_exterior_facet_integral( size_t subdomain_id ) const
+inline auto
+  Form::create_exterior_facet_integral( size_t subdomain_id ) const -> ufc::exterior_facet_integral *
 {
   return form().create_exterior_facet_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::interior_facet_integral *
-  Form::create_interior_facet_integral( size_t subdomain_id ) const
+inline auto
+  Form::create_interior_facet_integral( size_t subdomain_id ) const -> ufc::interior_facet_integral *
 {
   return form().create_interior_facet_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::vertex_integral * Form::create_vertex_integral( size_t subdomain_id ) const
+inline auto Form::create_vertex_integral( size_t subdomain_id ) const -> ufc::vertex_integral *
 {
   return form().create_vertex_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::custom_integral * Form::create_custom_integral( size_t subdomain_id ) const
+inline auto Form::create_custom_integral( size_t subdomain_id ) const -> ufc::custom_integral *
 {
   return form().create_custom_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::cutcell_integral * Form::create_cutcell_integral( size_t subdomain_id ) const
+inline auto Form::create_cutcell_integral( size_t subdomain_id ) const -> ufc::cutcell_integral *
 {
   return form().create_cutcell_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::interface_integral * Form::create_interface_integral( size_t subdomain_id ) const
+inline auto Form::create_interface_integral( size_t subdomain_id ) const -> ufc::interface_integral *
 {
   return form().create_interface_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::overlap_integral * Form::create_overlap_integral( size_t subdomain_id ) const
+inline auto Form::create_overlap_integral( size_t subdomain_id ) const -> ufc::overlap_integral *
 {
   return form().create_overlap_integral( subdomain_id );
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::cell_integral * Form::create_default_cell_integral() const
+inline auto Form::create_default_cell_integral() const -> ufc::cell_integral *
 {
   return form().create_default_cell_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::exterior_facet_integral * Form::create_default_exterior_facet_integral() const
+inline auto Form::create_default_exterior_facet_integral() const -> ufc::exterior_facet_integral *
 {
   return form().create_default_exterior_facet_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::interior_facet_integral * Form::create_default_interior_facet_integral() const
+inline auto Form::create_default_interior_facet_integral() const -> ufc::interior_facet_integral *
 {
   return form().create_default_interior_facet_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::vertex_integral * Form::create_default_vertex_integral() const
+inline auto Form::create_default_vertex_integral() const -> ufc::vertex_integral *
 {
   return form().create_default_vertex_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::custom_integral * Form::create_default_custom_integral() const
+inline auto Form::create_default_custom_integral() const -> ufc::custom_integral *
 {
   return form().create_default_custom_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::cutcell_integral * Form::create_default_cutcell_integral() const
+inline auto Form::create_default_cutcell_integral() const -> ufc::cutcell_integral *
 {
   return form().create_default_cutcell_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::interface_integral * Form::create_default_interface_integral() const
+inline auto Form::create_default_interface_integral() const -> ufc::interface_integral *
 {
   return form().create_default_interface_integral();
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::overlap_integral * Form::create_default_overlap_integral() const
+inline auto Form::create_default_overlap_integral() const -> ufc::overlap_integral *
 {
   return form().create_default_overlap_integral();
 }
@@ -540,14 +540,14 @@ inline void Form::update_dofmaps() const
 
 //-----------------------------------------------------------------------------
 
-inline Mesh & Form::mesh() const
+inline auto Form::mesh() const -> Mesh &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline DofMapSet & Form::dofmaps() const
+inline auto Form::dofmaps() const -> DofMapSet &
 {
   this->update_dofmaps();
   return dof_map_set_;
@@ -555,7 +555,7 @@ inline DofMapSet & Form::dofmaps() const
 
 //-----------------------------------------------------------------------------
 
-inline size_t Form::coefficient_index( std::string const & name ) const
+inline auto Form::coefficient_index( std::string const & name ) const -> size_t
 {
   for ( size_t i = 0; i < this->num_coefficients(); ++i )
   {
@@ -570,7 +570,7 @@ inline size_t Form::coefficient_index( std::string const & name ) const
 
 //-----------------------------------------------------------------------------
 
-inline std::string Form::coefficient_name( size_t ) const
+inline auto Form::coefficient_name( size_t ) const -> std::string
 {
   error( "Not implemented without UFL support: \n"
          "std::string Form::coefficient_name(size_t i) const" );
@@ -579,7 +579,7 @@ inline std::string Form::coefficient_name( size_t ) const
 
 //----------------------------------------------------------------------------
 
-inline FiniteElementSpace * Form::create_space( size_t i ) const
+inline auto Form::create_space( size_t i ) const -> FiniteElementSpace *
 {
   ufc::finite_element * test_f = this->form().create_finite_element( i );
   ufc::dofmap *         test_d = this->form().create_dofmap( i );
@@ -590,8 +590,8 @@ inline FiniteElementSpace * Form::create_space( size_t i ) const
 
 //----------------------------------------------------------------------------
 
-inline FiniteElementSpace *
-  Form::create_coefficient_space( std::string const & name ) const
+inline auto
+  Form::create_coefficient_space( std::string const & name ) const -> FiniteElementSpace *
 {
   return this->create_space( this->rank() + this->coefficient_index( name ) );
 }

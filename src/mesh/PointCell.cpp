@@ -38,12 +38,12 @@ void PointCell::create_reference_cell(Mesh& mesh) const
   me.close();
 }
 //-----------------------------------------------------------------------------
-real const * PointCell::reference_vertex(uint i) const
+auto PointCell::reference_vertex(uint i) const -> real const *
 {
   return &VC[i][0];
 }
 //-----------------------------------------------------------------------------
-std::string PointCell::description() const
+auto PointCell::description() const -> std::string
 {
   return std::string("point (simplex of topological dimension 0)");
 }
@@ -58,7 +58,7 @@ void PointCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-bool PointCell::check(Cell& cell) const
+auto PointCell::check(Cell& cell) const -> bool
 {
   return CellType::check(cell);
 }

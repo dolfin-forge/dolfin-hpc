@@ -59,7 +59,7 @@ DistributedData::~DistributedData()
   clear();
 }
 //-----------------------------------------------------------------------------
-DistributedData& DistributedData::operator=(DistributedData const& other)
+auto DistributedData::operator=(DistributedData const& other) -> DistributedData&
 {
   DistributedData tmp(other);
   swap( *this, tmp );
@@ -829,7 +829,7 @@ void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs
   adjacents_.insert(adjs.begin(), adjs.end());
 }
 //-----------------------------------------------------------------------------
-SharedMapping const& DistributedData::shared_mapping() const
+auto DistributedData::shared_mapping() const -> SharedMapping const&
 {
   if(shared_mapping_ == nullptr)
   {

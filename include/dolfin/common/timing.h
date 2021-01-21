@@ -13,13 +13,13 @@ namespace dolfin
 void tic();
 
 /// Return elapsed CPU time
-real toc();
+auto toc() -> real;
 
 /// Return and display elapsed CPU time at given verbose level
-real tocd( uint level = 0 );
+auto tocd( uint level = 0 ) -> real;
 
 /// Return current CPU time used by process
-real time();
+auto time() -> real;
 
 }
 

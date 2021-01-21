@@ -43,7 +43,7 @@ GTSInterface::~GTSInterface()
 #endif
 }
 //-----------------------------------------------------------------------------
-GtsBBox* GTSInterface::bboxCell(Cell& c) const
+auto GTSInterface::bboxCell(Cell& c) const -> GtsBBox*
 {
 #ifdef HAVE_GTS
   GtsBBox* bbox;
@@ -73,7 +73,7 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
 #endif
 }
 //-----------------------------------------------------------------------------
-GtsBBox* GTSInterface::bboxPoint(Point const& p) const
+auto GTSInterface::bboxPoint(Point const& p) const -> GtsBBox*
 {
 #ifdef HAVE_GTS
 
@@ -91,7 +91,7 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p) const
 #endif
 }
 //-----------------------------------------------------------------------------
-GtsBBox* GTSInterface::bboxPoint(Point const& p1, Point const& p2) const
+auto GTSInterface::bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*
 {
 #ifdef HAVE_GTS
 

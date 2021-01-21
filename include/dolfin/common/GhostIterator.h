@@ -30,22 +30,22 @@ public:
   ~GhostIterator() = default;
 
   ///
-  GhostIterator & operator++();
+  auto operator++() -> GhostIterator &;
 
   ///
-  inline uint index() const;
+  inline auto index() const -> uint;
 
   ///
-  inline uint global_index() const;
+  inline auto global_index() const -> uint;
 
   ///
-  inline uint owner() const;
+  inline auto owner() const -> uint;
 
   ///
-  inline bool valid() const;
+  inline auto valid() const -> bool;
 
   ///
-  inline _set< uint > const & adj() const;
+  inline auto adj() const -> _set< uint > const &;
 
   ///
   template < class T >
@@ -57,33 +57,33 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline GhostIterator & GhostIterator::operator++()
+inline auto GhostIterator::operator++() -> GhostIterator &
 {
   ++iter_;
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::index() const
+inline auto GhostIterator::index() const -> uint
 {
   return iter_->first;
 }
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::global_index() const
+inline auto GhostIterator::global_index() const -> uint
 {
   return distdata_.get_global( iter_->first );
 }
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::owner() const
+inline auto GhostIterator::owner() const -> uint
 {
   return iter_->second;
 }
 //-----------------------------------------------------------------------------
-inline bool GhostIterator::valid() const
+inline auto GhostIterator::valid() const -> bool
 {
   return iter_ != distdata_.ghost_.end();
 }
 //-----------------------------------------------------------------------------
-inline _set< uint > const & GhostIterator::adj() const
+inline auto GhostIterator::adj() const -> _set< uint > const &
 {
   return distdata_.shared_.find( iter_->first )->second;
 }

@@ -31,7 +31,7 @@ public:
   ~Face() = default;
 
   /// Compute coordinates of face midpoint
-  Point midpoint() const;
+  auto midpoint() const -> Point;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -79,7 +79,7 @@ public:
   using higher_dimensional = Cell;
 };
 
-inline Point Face::midpoint() const
+inline auto Face::midpoint() const -> Point
 {
   MeshGeometry const &  geometry     = this->mesh().geometry();
   Array< uint > const & vertices     = this->entities( 0 );

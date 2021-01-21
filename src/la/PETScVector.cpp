@@ -172,7 +172,7 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
 
 }
 //-----------------------------------------------------------------------------
-real PETScVector::norm(VectorNormType type) const
+auto PETScVector::norm(VectorNormType type) const -> real
 {
   dolfin_assert(x_);
 
@@ -308,7 +308,7 @@ void PETScVector::init_ghosted(uint, _ordered_set<uint>& indices,
 }
 
 //-----------------------------------------------------------------------------
-LinearAlgebraFactory& PETScVector::factory() const
+auto PETScVector::factory() const -> LinearAlgebraFactory&
 {
   return PETScFactory::instance();
 }

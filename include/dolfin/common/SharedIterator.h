@@ -30,25 +30,25 @@ public:
   ~SharedIterator() = default;
 
   ///
-  SharedIterator & operator++();
+  auto operator++() -> SharedIterator &;
 
   ///
-  inline uint index() const;
+  inline auto index() const -> uint;
 
   ///
-  inline uint global_index() const;
+  inline auto global_index() const -> uint;
 
   ///
-  inline uint owner() const;
+  inline auto owner() const -> uint;
 
   ///
-  inline bool is_owned() const;
+  inline auto is_owned() const -> bool;
 
   ///
-  inline bool valid() const;
+  inline auto valid() const -> bool;
 
   ///
-  inline _set< uint > const & adj() const;
+  inline auto adj() const -> _set< uint > const &;
 
   ///
   template < typename T >
@@ -60,38 +60,38 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline SharedIterator & SharedIterator::operator++()
+inline auto SharedIterator::operator++() -> SharedIterator &
 {
   ++iter_;
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline uint SharedIterator::index() const
+inline auto SharedIterator::index() const -> uint
 {
   return iter_->first;
 }
 //-----------------------------------------------------------------------------
-inline uint SharedIterator::global_index() const
+inline auto SharedIterator::global_index() const -> uint
 {
   return distdata_.get_global( iter_->first );
 }
 //-----------------------------------------------------------------------------
-inline uint SharedIterator::owner() const
+inline auto SharedIterator::owner() const -> uint
 {
   return distdata_.get_owner( iter_->first );
 }
 //-----------------------------------------------------------------------------
-inline bool SharedIterator::is_owned() const
+inline auto SharedIterator::is_owned() const -> bool
 {
   return distdata_.is_owned( iter_->first );
 }
 //-----------------------------------------------------------------------------
-inline bool SharedIterator::valid() const
+inline auto SharedIterator::valid() const -> bool
 {
   return iter_ != distdata_.shared_.end();
 }
 //-----------------------------------------------------------------------------
-inline _set< uint > const & SharedIterator::adj() const
+inline auto SharedIterator::adj() const -> _set< uint > const &
 {
   return iter_->second;
 }

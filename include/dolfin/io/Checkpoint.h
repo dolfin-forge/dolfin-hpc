@@ -120,7 +120,7 @@ public:
   void load( std::string filename, VectorMap const & vec );
 
   ///
-  real time() const;
+  auto time() const -> real;
 
   ///
   void reset_counter();
@@ -129,10 +129,10 @@ public:
   void increment_counter();
 
   ///
-  CheckpointHeader        const & get_header() const;
-  Array< MeshHeader >     const & get_mesh_header() const;
-  Array< FunctionHeader > const & get_function_header() const;
-  Array< VectorHeader >   const & get_vector_header() const;
+  auto get_header() const -> CheckpointHeader        const &;
+  auto get_mesh_header() const -> Array< MeshHeader >     const &;
+  auto get_function_header() const -> Array< FunctionHeader > const &;
+  auto get_vector_header() const -> Array< VectorHeader >   const &;
 
 private:
   void fill_headers( real const t, uint param_size, MeshMap & meshes,
@@ -144,8 +144,8 @@ private:
 
   void write( stream_t file, offset_t & byte_offset, VectorMap & vec );
 
-  std::string build_filename( std::string filename );
-  stream_t    load_file( std::string & filename );
+  auto build_filename( std::string filename ) -> std::string;
+  auto    load_file( std::string & filename ) -> stream_t;
   void        close_file( stream_t & file );
 
 private:

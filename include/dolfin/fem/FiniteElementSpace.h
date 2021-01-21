@@ -69,23 +69,23 @@ public:
   ~FiniteElementSpace();
 
   /// Check if the finite element space definitions are identical
-  bool operator==( FiniteElementSpace const & other ) const;
-  bool operator!=( FiniteElementSpace const & other ) const;
+  auto operator==( FiniteElementSpace const & other ) const -> bool;
+  auto operator!=( FiniteElementSpace const & other ) const -> bool;
 
   /// Return mesh on which the discrete space is defined
-  Mesh & mesh() const;
+  auto mesh() const -> Mesh &;
 
   /// Return cell on which the reference element is defined
-  Cell & cell() const; //!< @tod Cannot const this due to Mesh implementation
+  auto cell() const -> Cell &; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
-  FiniteElement const * element() const;
+  auto element() const -> FiniteElement const *;
 
   /// Return the dofmap
-  DofMap const & dofmap() const;
+  auto dofmap() const -> DofMap const &;
 
   /// Returns a flattened representation of the space
-  Array< FiniteElementSpace * > flatten() const;
+  auto flatten() const -> Array< FiniteElementSpace * >;
 
   /// Display basic information
   void disp() const;
@@ -93,16 +93,16 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return whether the discrete space is defined per cell (discontinuous)
-  bool is_cellwise_defined() const;
+  auto is_cellwise_defined() const -> bool;
 
   /// Return whether the discrete space is piecewise constant
-  bool is_cellwise_constant() const;
+  auto is_cellwise_constant() const -> bool;
 
   /// Return whether the discrete space is defined at the vertices only
-  bool is_vertex_based() const;
+  auto is_vertex_based() const -> bool;
 
   /// Return whether the discrete space can be flattened to scalar elements
-  bool is_flattenable() const;
+  auto is_flattenable() const -> bool;
 
 private:
   Mesh &                mesh_;
@@ -113,15 +113,15 @@ private:
 
 //-----------------------------------------------------------------------------
 
-inline Mesh & FiniteElementSpace::mesh() const
+inline auto FiniteElementSpace::mesh() const -> Mesh &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool
-  FiniteElementSpace::operator==( FiniteElementSpace const & other ) const
+inline auto
+  FiniteElementSpace::operator==( FiniteElementSpace const & other ) const -> bool
 {
   return ( this->mesh() == other.mesh() )
          && ( this->element() == other.element() )
@@ -130,36 +130,36 @@ inline bool
 
 //-----------------------------------------------------------------------------
 
-inline bool
-  FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const
+inline auto
+  FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const -> bool
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
 
-inline Cell & FiniteElementSpace::cell() const
+inline auto FiniteElementSpace::cell() const -> Cell &
 {
   return cell_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline FiniteElement const * FiniteElementSpace::element() const
+inline auto FiniteElementSpace::element() const -> FiniteElement const *
 {
   return finite_element_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline DofMap const & FiniteElementSpace::dofmap() const
+inline auto FiniteElementSpace::dofmap() const -> DofMap const &
 {
   return dof_map_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElementSpace::is_cellwise_defined() const
+inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 {
   // FIXME num_entities should maybe be stored somewhere else
   std::vector< size_t > num_entities( finite_element_->topological_dimension(),
@@ -172,21 +172,21 @@ inline bool FiniteElementSpace::is_cellwise_defined() const
     }
   }
 
-  return ( mesh_.num_global_cells() * dof_map_.num_element_support_dofs() )
+  return ( mesh_.num_global_cells() * dof_map_.num_element_dofs() )
          == dof_map_.global_dimension( num_entities );
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElementSpace::is_cellwise_constant() const
+inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 {
   return is_cellwise_defined()
-         && ( dof_map_.num_element_support_dofs() == finite_element_->value_size() );
+         && ( dof_map_.num_element_dofs() == finite_element_->value_size() );
 }
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElementSpace::is_vertex_based() const
+inline auto FiniteElementSpace::is_vertex_based() const -> bool
 {
   /// @todo Only a particular case.
   return     ( finite_element_->family() == Element::Family::CG )
@@ -195,7 +195,7 @@ inline bool FiniteElementSpace::is_vertex_based() const
 
 //-----------------------------------------------------------------------------
 
-inline bool FiniteElementSpace::is_flattenable() const
+inline auto FiniteElementSpace::is_flattenable() const -> bool
 {
   /// @todo Only a particular case.
   uint value_size = 1;

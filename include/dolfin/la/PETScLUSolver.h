@@ -36,10 +36,10 @@ namespace dolfin
     ~PETScLUSolver();
 
     /// Solve linear system Ax = b
-    uint solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b);
+    auto solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b) -> uint;
 
     /// Solve linear system Ax = b
-    uint solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b);
+    auto solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b) -> uint;
 
     /// Display LU solver data
     void disp() const;
@@ -47,7 +47,7 @@ namespace dolfin
   private:
 
     // Create dense copy of virtual matrix
-    real copyToDense(const PETScKrylovMatrix& A);
+    auto copyToDense(const PETScKrylovMatrix& A) -> real;
 
     KSP ksp{ nullptr };
 

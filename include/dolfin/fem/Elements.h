@@ -56,8 +56,8 @@ struct Elements
   };
 };
 
-inline bool operator==( std::string const &     family_str,
-                        Element::Family const & family_type )
+inline auto operator==( std::string const &     family_str,
+                        Element::Family const & family_type ) -> bool
 {
   using namespace Element;
 
@@ -141,20 +141,20 @@ inline bool operator==( std::string const &     family_str,
   return ret;
 }
 
-inline bool operator==( Element::Family const & family_type,
-                        std::string const &     family_str )
+inline auto operator==( Element::Family const & family_type,
+                        std::string const &     family_str ) -> bool
 {
   return family_str == family_type;
 }
 
-inline bool operator==( char const *            family_str,
-                        Element::Family const & family_type )
+inline auto operator==( char const *            family_str,
+                        Element::Family const & family_type ) -> bool
 {
   return std::string( family_str ) == family_type;
 }
 
-inline bool operator==( Element::Family const & family_type,
-                        char const *            family_str )
+inline auto operator==( Element::Family const & family_type,
+                        char const *            family_str ) -> bool
 {
   return std::string( family_str ) == family_type;
 }

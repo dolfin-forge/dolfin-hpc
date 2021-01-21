@@ -26,13 +26,13 @@ public:
   void init( const GenericSparsityPattern & sparsity_pattern ) override = 0;
 
   /// Return copy of tensor
-  GenericMatrix * copy() const override = 0;
+  auto copy() const -> GenericMatrix * override = 0;
 
   /// Return tensor rank (number of dimensions)
-  inline uint rank() const override;
+  inline auto rank() const -> uint override;
 
   /// Return size of given dimension
-  uint size( uint dim ) const override = 0;
+  auto size( uint dim ) const -> uint override = 0;
 
   /// Get block of values
   inline void get( real * block,
@@ -82,7 +82,7 @@ public:
                     uint n, const uint * cols ) = 0;
 
   /// Return norm of matrix
-  virtual real norm( std::string norm_type = "frobenius" ) const = 0;
+  virtual auto norm( std::string norm_type = "frobenius" ) const -> real = 0;
 
   /// Get non-zero values of given row
   virtual void getrow( uint            row,
@@ -106,31 +106,31 @@ public:
                      bool                  transposed = false ) const = 0;
 
   /// Multiply matrix by given number
-  virtual const GenericMatrix & operator*=( real a ) = 0;
+  virtual auto operator*=( real a ) -> const GenericMatrix & = 0;
 
   /// Divide matrix by given number
-  virtual const GenericMatrix & operator/=( real a ) = 0;
+  virtual auto operator/=( real a ) -> const GenericMatrix & = 0;
 
   /// Assignment operator
-  virtual const GenericMatrix & operator=( const GenericMatrix & x ) = 0;
+  virtual auto operator=( const GenericMatrix & x ) -> const GenericMatrix & = 0;
 
   /// Get number of non-zeros in the matrix
-  virtual uint nz() const = 0;
+  virtual auto nz() const -> uint = 0;
 
   //--- Convenience functions ---
 
   /// Get value of given entry
-  virtual real operator()( uint i, uint j ) const;
+  virtual auto operator()( uint i, uint j ) const -> real;
 
   /// Get value of given entry
-  virtual real getitem( std::pair< uint, uint > ij ) const;
+  virtual auto getitem( std::pair< uint, uint > ij ) const -> real;
 
   /// Set given entry to value
   virtual void setitem( std::pair< uint, uint > ij, real value );
 };
 
 //-----------------------------------------------------------------------------
-inline uint GenericMatrix::rank() const
+inline auto GenericMatrix::rank() const -> uint
 {
   return 2;
 }
@@ -160,7 +160,7 @@ inline void GenericMatrix::add( const real * block,
 }
 
 //-----------------------------------------------------------------------------
-inline real GenericMatrix::operator()( uint i, uint j ) const
+inline auto GenericMatrix::operator()( uint i, uint j ) const -> real
 {
   real value( 0 );
   get( &value, 1, &i, 1, &j );
@@ -168,7 +168,7 @@ inline real GenericMatrix::operator()( uint i, uint j ) const
 }
 
 //-----------------------------------------------------------------------------
-inline real GenericMatrix::getitem( std::pair< uint, uint > ij ) const
+inline auto GenericMatrix::getitem( std::pair< uint, uint > ij ) const -> real
 {
   real value( 0 );
   get( &value, 1, &ij.first, 1, &ij.second );

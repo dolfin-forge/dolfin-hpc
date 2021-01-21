@@ -33,21 +33,21 @@ public:
   ~MeshEntity() = default;
 
   /// Return mesh associated with mesh entity
-  Mesh & mesh();
+  auto mesh() -> Mesh &;
 
   /// Return mesh associated with mesh entity
-  Mesh const & mesh() const;
+  auto mesh() const -> Mesh const &;
 
   //--- Topology --------------------------------------------------------------
 
   /// Return topological dimension
-  uint dim() const;
+  auto dim() const -> uint;
 
   /// Return index of mesh entity
-  uint index() const;
+  auto index() const -> uint;
 
   /// Return number of incident mesh entities of given topological dimension
-  uint num_entities( uint dim ) const; //!< @tod remove this function
+  auto num_entities( uint dim ) const -> uint; //!< @tod remove this function
 
   /// Copy global indices of mesh entities to array
   void get_entities( uint dim, uint * indices ) const;
@@ -57,17 +57,17 @@ public:
 
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
-  Array< uint > & entities( uint dim );
+  auto entities( uint dim ) -> Array< uint > &;
 
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
-  Array< uint > const & entities( uint dim ) const;
+  auto entities( uint dim ) const -> Array< uint > const &;
 
   /// Check if given entity is incident
-  bool incident( MeshEntity const & entity ) const;
+  auto incident( MeshEntity const & entity ) const -> bool;
 
   /// Compute local index of given incident entity (-1 if not found)
-  int index( MeshEntity const & entity ) const;
+  auto index( MeshEntity const & entity ) const -> int;
 
   //--- Geometry --------------------------------------------------------------
 
@@ -86,7 +86,7 @@ public:
    */
 
   /// Return global index of mesh entity
-  uint global_index() const;
+  auto global_index() const -> uint;
 
   /// Copy global indices of mesh entities to array
   void get_global_entities( uint dim, uint * indices ) const;
@@ -95,25 +95,25 @@ public:
   void get_global_entities( uint ** indices ) const;
 
   /// Return if the mesh entity is owned
-  bool is_owned() const;
+  auto is_owned() const -> bool;
 
   /// Return if the mesh entity is shared
-  bool is_shared() const;
+  auto is_shared() const -> bool;
 
   /// Return if the mesh entity is ghosted
-  bool is_ghost() const;
+  auto is_ghost() const -> bool;
 
   /// Return the owner of the mesh entity
-  uint owner() const;
+  auto owner() const -> uint;
 
   /// Returns a pointer to the adjacent set or null is non-shared
-  _set< uint > const * adjacents() const;
+  auto adjacents() const -> _set< uint > const *;
 
   /// Return if the mesh entity has all vertices shared
-  bool has_all_vertices_shared() const;
+  auto has_all_vertices_shared() const -> bool;
 
   /// Return if the mesh entity is located on the global mesh boundary
-  bool on_boundary() const;
+  auto on_boundary() const -> bool;
 
   //---------------------------------------------------------------------------
 
@@ -145,31 +145,31 @@ protected:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline Mesh & MeshEntity::mesh()
+inline auto MeshEntity::mesh() -> Mesh &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline Mesh const & MeshEntity::mesh() const
+inline auto MeshEntity::mesh() const -> Mesh const &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::dim() const
+inline auto MeshEntity::dim() const -> uint
 {
   return tdim_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::index() const
+inline auto MeshEntity::index() const -> uint
 {
   return index_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::num_entities( uint dim ) const
+inline auto MeshEntity::num_entities( uint dim ) const -> uint
 {
   // dolfin_assert(topology_(tdim_, dim).is_initialized());
   dolfin_assert( topology_( tdim_, dim ).min_degree()
@@ -179,7 +179,7 @@ inline uint MeshEntity::num_entities( uint dim ) const
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > & MeshEntity::entities( uint dim )
+inline auto MeshEntity::entities( uint dim ) -> Array< uint > &
 {
   // dolfin_assert(topology_(tdim_, dim).is_initialized());
   dolfin_assert( topology_( tdim_, dim ).min_degree()
@@ -189,7 +189,7 @@ inline Array< uint > & MeshEntity::entities( uint dim )
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > const & MeshEntity::entities( uint dim ) const
+inline auto MeshEntity::entities( uint dim ) const -> Array< uint > const &
 {
   // dolfin_assert(topology_(tdim_, dim).is_initialized());
   dolfin_assert( topology_( tdim_, dim ).min_degree()
@@ -220,7 +220,7 @@ inline void MeshEntity::get_entities( uint ** indices ) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshEntity::incident( MeshEntity const & entity ) const
+inline auto MeshEntity::incident( MeshEntity const & entity ) const -> bool
 {
   // Must be in the same mesh to be incident
   if ( &topology_ != &entity.topology_ )
@@ -230,7 +230,7 @@ inline bool MeshEntity::incident( MeshEntity const & entity ) const
 }
 
 //-----------------------------------------------------------------------------
-inline int MeshEntity::index( MeshEntity const & entity ) const
+inline auto MeshEntity::index( MeshEntity const & entity ) const -> int
 {
   // Must be in the same mesh to be incident
   if ( &topology_ != &entity.topology_ )
@@ -243,7 +243,7 @@ inline int MeshEntity::index( MeshEntity const & entity ) const
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::global_index() const
+inline auto MeshEntity::global_index() const -> uint
 {
   return ( topology_.distributed() ? distdata_[tdim_].get_global( index_ )
                                    : index_ );
@@ -286,35 +286,35 @@ inline void MeshEntity::get_global_entities( uint ** indices ) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshEntity::is_owned() const
+inline auto MeshEntity::is_owned() const -> bool
 {
   return ( topology_.distributed() ? distdata_[tdim_].is_owned( index_ )
                                    : true );
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshEntity::is_shared() const
+inline auto MeshEntity::is_shared() const -> bool
 {
   return ( topology_.distributed() ? distdata_[tdim_].is_shared( index_ )
                                    : false );
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshEntity::is_ghost() const
+inline auto MeshEntity::is_ghost() const -> bool
 {
   return ( topology_.distributed() ? distdata_[tdim_].is_ghost( index_ )
                                    : false );
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::owner() const
+inline auto MeshEntity::owner() const -> uint
 {
   return ( topology_.distributed() ? distdata_[tdim_].get_owner( index_ )
                                    : MPI::rank() );
 }
 
 //-----------------------------------------------------------------------------
-inline _set< uint > const * MeshEntity::adjacents() const
+inline auto MeshEntity::adjacents() const -> _set< uint > const *
 {
   return ( topology_.distributed() ? distdata_[tdim_].ptr_shared_adj( index_ )
                                    : nullptr );

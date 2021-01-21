@@ -36,16 +36,16 @@ public:
 
   /// Get value of parameter with given key
   template < typename T >
-  T get( std::string const & key ) const;
+  auto get( std::string const & key ) const -> T;
 
-  Parameter::Type get_type( std::string const & key );
+  auto get_type( std::string const & key ) -> Parameter::Type;
 
   /// Check if parameter with given key has been defined
-  bool defined( std::string const & key ) const;
+  auto defined( std::string const & key ) const -> bool;
 
   // (de)serialize ParameterSystem
-  std::string to_json() const;
-  std::string serialize() const;
+  auto to_json() const -> std::string;
+  auto serialize() const -> std::string;
   void deserialize( std::string const & parameters );
 
   /// print contents of the ParameterSystem
@@ -59,7 +59,7 @@ private:
   ~ParameterSystem();
 
   /// Get Parameter with given key
-  Parameter const & get( std::string const & key ) const;
+  auto get( std::string const & key ) const -> Parameter const &;
 
   /// cleanup Parameter
   void delete_parameter( std::string const & key );
@@ -130,7 +130,7 @@ inline void ParameterSystem::set( std::string key, char const * value )
 //-----------------------------------------------------------------------------
 
 template <>
-inline bool ParameterSystem::get( std::string const & key ) const
+inline auto ParameterSystem::get( std::string const & key ) const -> bool
 {
   if ( defined( key ) )
   {
@@ -164,7 +164,7 @@ inline bool ParameterSystem::get( std::string const & key ) const
 //-----------------------------------------------------------------------------
 
 template <>
-inline int ParameterSystem::get( std::string const & key ) const
+inline auto ParameterSystem::get( std::string const & key ) const -> int
 {
   if ( defined( key ) )
   {
@@ -200,7 +200,7 @@ inline int ParameterSystem::get( std::string const & key ) const
 //-----------------------------------------------------------------------------
 
 template <>
-inline uint ParameterSystem::get( std::string const & key ) const
+inline auto ParameterSystem::get( std::string const & key ) const -> uint
 {
   if ( defined( key ) )
   {
@@ -236,7 +236,7 @@ inline uint ParameterSystem::get( std::string const & key ) const
 //-----------------------------------------------------------------------------
 
 template <>
-inline real ParameterSystem::get( std::string const & key ) const
+inline auto ParameterSystem::get( std::string const & key ) const -> real
 {
   if ( defined( key ) )
   {
@@ -272,7 +272,7 @@ inline real ParameterSystem::get( std::string const & key ) const
 //-----------------------------------------------------------------------------
 
 template <>
-inline std::string ParameterSystem::get( std::string const & key ) const
+inline auto ParameterSystem::get( std::string const & key ) const -> std::string
 {
   if ( defined( key ) )
   {

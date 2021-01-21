@@ -85,9 +85,9 @@ void timing(char const * task, real t);
 void mark(char const * msg = "");
 
 //-----------------------------------------------------------------------------
-int verbose();
-int verbose(int n);
-int silence();
+auto verbose() -> int;
+auto verbose(int n) -> int;
+auto silence() -> int;
 
 //-----------------------------------------------------------------------------
 

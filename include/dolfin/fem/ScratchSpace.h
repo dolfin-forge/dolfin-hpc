@@ -96,7 +96,7 @@ private:
   ScratchSpace(ScratchSpace const& other);
 
   /// FIXME this should now be present in the ufc::FE interface
-  uint value_size(ufc::finite_element const& finite_element);
+  auto value_size(ufc::finite_element const& finite_element) -> uint;
 
   void init();
 

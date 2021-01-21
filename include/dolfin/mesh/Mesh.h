@@ -82,25 +82,25 @@ public:
   friend void swap( Mesh& a, Mesh& b );
 
   /// Assignment
-  Mesh const& operator=(Mesh const& other);
+  auto operator=(Mesh const& other) -> Mesh const&;
 
   /// Identity
-  bool operator ==(Mesh const& other) const;
-  bool operator !=(Mesh const& other) const;
+  auto operator ==(Mesh const& other) const -> bool;
+  auto operator !=(Mesh const& other) const -> bool;
 
   /// Return mesh cell type
-  CellType const& type() const;
+  auto type() const -> CellType const&;
 
   /// Return mesh space
-  Space const& space() const;
+  auto space() const -> Space const&;
 
   /// Return a Point describing the minimum extent of the mesh
   /// this point might not be part of the mesh itself
-  Point const & extent_min() const;
+  auto extent_min() const -> Point const &;
 
   /// Return a Point describing the maximum extent of the mesh
   /// this point might not be part of the mesh itself
-  Point const & extent_max() const;
+  auto extent_max() const -> Point const &;
 
   /// update the mesh extent
   void extent_update();
@@ -108,28 +108,28 @@ public:
   //--- TOPOLOGY --------------------------------------------------------------
 
   /// Return mesh topology (non-const version)
-  MeshTopology& topology();
+  auto topology() -> MeshTopology&;
 
   /// Return mesh topology (const)
-  MeshTopology const& topology() const;
+  auto topology() const -> MeshTopology const&;
 
   /// Return topological dimension
-  uint topology_dimension() const;
+  auto topology_dimension() const -> uint;
 
   /// Return number of entities of given topological dimension
-  uint size(uint dim) const;
+  auto size(uint dim) const -> uint;
 
   /// Return number of vertices of mesh partition
-  uint num_vertices() const;
+  auto num_vertices() const -> uint;
 
   /// Return number of cells of mesh partition
-  uint num_cells() const;
+  auto num_cells() const -> uint;
 
   /// Return connectivity for all cells
-  Array< Array< uint > > & cells(); //!< @tod remove this function
+  auto cells() -> Array< Array< uint > > &; //!< @tod remove this function
 
   /// Return connectivity for all cells
-  Array< Array< uint > > const & cells() const; //!< @tod remove this function
+  auto cells() const -> Array< Array< uint > > const &; //!< @tod remove this function
 
   /// Compute entities of given topological dimension
   void init(uint dim) const;
@@ -141,68 +141,68 @@ public:
   void init() const;
 
   /// Return if the topology should be reordered
-  virtual bool reordering() const { return true; }
+  virtual auto reordering() const -> bool { return true; }
 
   //---
 
   /// Return exterior boundary of the mesh
-  BoundaryMesh& exterior_boundary();
+  auto exterior_boundary() -> BoundaryMesh&;
 
   /// Return interior boundary of the mesh
-  BoundaryMesh& interior_boundary();
+  auto interior_boundary() -> BoundaryMesh&;
 
   //---
 
   //// Return if the mesh should be read/written in serial
-  bool serial_io() const;
+  auto serial_io() const -> bool;
 
   //// Return if the mesh should be read/written in parallel
-  bool parallel_io() const;
+  auto parallel_io() const -> bool;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const; //!< @todo remove this function
+  auto is_distributed() const -> bool; //!< @todo remove this function
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata(); //!< @todo remove this function
+  auto distdata() -> MeshDistributedData&; //!< @todo remove this function
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const; //!< @tod remove this function
+  auto distdata() const -> MeshDistributedData const&; //!< @tod remove this function
 
   /// Return global number of entities of given topological dimension
-  uint global_size(uint dim) const;
+  auto global_size(uint dim) const -> uint;
 
   /// Return number of vertices of global mesh
-  uint num_global_vertices() const;
+  auto num_global_vertices() const -> uint;
 
   /// Return number of cells of global mesh
-  uint num_global_cells() const;
+  auto num_global_cells() const -> uint;
 
   //--- GEOMETRY --------------------------------------------------------------
 
   /// Return mesh geometry (non-const version)
-  MeshGeometry& geometry();
+  auto geometry() -> MeshGeometry&;
 
   /// Return mesh geometry (const)
-  MeshGeometry const& geometry() const;
+  auto geometry() const -> MeshGeometry const&;
 
   /// Return geometric dimension
-  uint geometry_dimension() const;
+  auto geometry_dimension() const -> uint;
 
   //---
 
   /// Return intersection detector for the mesh
-  IntersectionDetector& intersector();
+  auto intersector() -> IntersectionDetector&;
 
   //--- PERIODICITY -----------------------------------------------------------
 
   /// Return whether the mesh has periodic subdomain
-  bool has_periodic_constraint() const;
+  auto has_periodic_constraint() const -> bool;
 
   /// Add a periodic subdomain
   void add_periodic_constraint(PeriodicSubDomain const& periodic);
 
   /// Return the list of periodic mappings
-  Array<MappedManifold *> const& periodic_mappings() const;
+  auto periodic_mappings() const -> Array<MappedManifold *> const&;
 
   //---------------------------------------------------------------------------
 
@@ -244,7 +244,7 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return hash to identify the state of the mesh
-  std::string const hash() const;
+  auto hash() const -> std::string const;
 
   /// Display mesh data
   void disp() const;
@@ -279,61 +279,61 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::operator!=( Mesh const & other ) const
+inline auto Mesh::operator!=( Mesh const & other ) const -> bool
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
-inline CellType const & Mesh::type() const
+inline auto Mesh::type() const -> CellType const &
 {
   return topology_.type();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshTopology & Mesh::topology()
+inline auto Mesh::topology() -> MeshTopology &
 {
   return topology_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshTopology const & Mesh::topology() const
+inline auto Mesh::topology() const -> MeshTopology const &
 {
   return topology_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::topology_dimension() const
+inline auto Mesh::topology_dimension() const -> uint
 {
   return topology_.dim();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::size( uint dim ) const
+inline auto Mesh::size( uint dim ) const -> uint
 {
   return topology_.size( dim );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_vertices() const
+inline auto Mesh::num_vertices() const -> uint
 {
   return topology_.size( 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_cells() const
+inline auto Mesh::num_cells() const -> uint
 {
   return topology_.size( topology_.dim() );
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > & Mesh::cells()
+inline auto Mesh::cells() -> Array< Array< uint > > &
 {
   return topology_( topology_.dim(), 0 )();
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > const & Mesh::cells() const
+inline auto Mesh::cells() const -> Array< Array< uint > > const &
 {
   return topology_( topology_.dim(), 0 )();
 }
@@ -351,85 +351,85 @@ inline void Mesh::init( uint d0, uint d1 ) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::serial_io() const
+inline auto Mesh::serial_io() const -> bool
 {
   return ( PE::size() == 1 ) || dolfin_get< bool >( "Mesh read in serial" );
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::parallel_io() const
+inline auto Mesh::parallel_io() const -> bool
 {
   return !this->serial_io();
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::is_distributed() const
+inline auto Mesh::is_distributed() const -> bool
 {
   return topology().distributed();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData & Mesh::distdata()
+inline auto Mesh::distdata() -> MeshDistributedData &
 {
   return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData const & Mesh::distdata() const
+inline auto Mesh::distdata() const -> MeshDistributedData const &
 {
   return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::global_size( uint dim ) const
+inline auto Mesh::global_size( uint dim ) const -> uint
 {
   return topology_.global_size( dim );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_global_vertices() const
+inline auto Mesh::num_global_vertices() const -> uint
 {
   return topology_.global_size( 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_global_cells() const
+inline auto Mesh::num_global_cells() const -> uint
 {
   return topology_.global_size( topology_.dim() );
 }
 
 //-----------------------------------------------------------------------------
-inline Space const & Mesh::space() const
+inline auto Mesh::space() const -> Space const &
 {
   return geometry_.space();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshGeometry & Mesh::geometry()
+inline auto Mesh::geometry() -> MeshGeometry &
 {
   return geometry_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshGeometry const & Mesh::geometry() const
+inline auto Mesh::geometry() const -> MeshGeometry const &
 {
   return geometry_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::geometry_dimension() const
+inline auto Mesh::geometry_dimension() const -> uint
 {
   return geometry_.dim();
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & Mesh::extent_min() const
+inline auto Mesh::extent_min() const -> Point const &
 {
   return extent_min_;
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & Mesh::extent_max() const
+inline auto Mesh::extent_max() const -> Point const &
 {
   return extent_max_;
 }
@@ -437,7 +437,7 @@ inline Point const & Mesh::extent_max() const
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
 
 template<class E>
-inline uint entity_dimension(Mesh& m) { return dimension<E>(m.type()); }
+inline auto entity_dimension(Mesh& m) -> uint { return dimension<E>(m.type()); }
 
 //-----------------------------------------------------------------------------
 

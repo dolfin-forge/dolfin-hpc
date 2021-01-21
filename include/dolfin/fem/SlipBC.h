@@ -44,7 +44,7 @@ public:
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
              BilinearForm const& form) override;
 
-  BoundaryNormal& normal()
+  auto normal() -> BoundaryNormal&
   {
     return *node_normal;
   }

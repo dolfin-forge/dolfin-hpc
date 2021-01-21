@@ -242,7 +242,7 @@ void TriangleCell::normal(Cell const& cell, uint facet, real * n) const
   }
 }
 //-----------------------------------------------------------------------------
-real TriangleCell::facet_area(Cell const& cell, uint facet) const
+auto TriangleCell::facet_area(Cell const& cell, uint facet) const -> real
 {
   dolfin_assert(cell.type() == this->cell_type);
 
@@ -262,7 +262,7 @@ real TriangleCell::facet_area(Cell const& cell, uint facet) const
   return std::sqrt(meas);
 }
 //-----------------------------------------------------------------------------
-bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
+auto TriangleCell::intersects(MeshEntity const& e, Point const& p) const -> bool
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
@@ -335,8 +335,8 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool TriangleCell::intersects(MeshEntity const& e, Point const& p1,
-                              Point const& p2) const
+auto TriangleCell::intersects(MeshEntity const& e, Point const& p1,
+                              Point const& p2) const -> bool
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
@@ -410,12 +410,12 @@ void TriangleCell::create_reference_cell(Mesh& mesh) const
   me.close();
 }
 //-----------------------------------------------------------------------------
-real const * TriangleCell::reference_vertex(uint i) const
+auto TriangleCell::reference_vertex(uint i) const -> real const *
 {
   return &VC[i][0];
 }
 //-----------------------------------------------------------------------------
-std::string TriangleCell::description() const
+auto TriangleCell::description() const -> std::string
 {
   return std::string("triangle (simplex of topological dimension 2)");
 }
@@ -430,7 +430,7 @@ void TriangleCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-uint TriangleCell::findEdge(uint i, Cell const& cell) const
+auto TriangleCell::findEdge(uint i, Cell const& cell) const -> uint
 {
   // Ordering convention for edges (order of non-incident vertices)
 
@@ -458,7 +458,7 @@ uint TriangleCell::findEdge(uint i, Cell const& cell) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-bool TriangleCell::check(Cell& cell) const
+auto TriangleCell::check(Cell& cell) const -> bool
 {
   bool ret = CellType::check(cell);
 

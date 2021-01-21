@@ -64,8 +64,8 @@ PETScLUSolver::~PETScLUSolver()
   if ( idxn ) delete [] idxn;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
-		       PETScVector& x, const PETScVector& b)
+auto PETScLUSolver::solve(const PETScMatrix& A,
+		       PETScVector& x, const PETScVector& b) -> dolfin::uint
 {
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
@@ -153,8 +153,8 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
   return 1;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
-		       PETScVector& x, const PETScVector& b)
+auto PETScLUSolver::solve(const PETScKrylovMatrix& A,
+		       PETScVector& x, const PETScVector& b) -> dolfin::uint
 {
   // Copy data to dense matrix
   const real Anorm = copyToDense(A);
@@ -195,7 +195,7 @@ void PETScLUSolver::disp() const
   KSPView(ksp, PETSC_VIEWER_STDOUT_WORLD);
 }
 //-----------------------------------------------------------------------------
-real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
+auto PETScLUSolver::copyToDense(const PETScKrylovMatrix&) -> real
 {
   error("PETScLUSolver::copyToDense needs to be fixed");
 /*

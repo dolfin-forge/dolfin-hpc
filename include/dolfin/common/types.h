@@ -123,7 +123,7 @@ using _set = std::unordered_set< Key, Hash, Comp, Alloc >;
 
 /// Facility to compare object through pointers
 template < class T >
-bool objptrcmp( T const * p0, T const * p1 )
+auto objptrcmp( T const * p0, T const * p1 ) -> bool
 {
   if ( p0 == p1 )
   {

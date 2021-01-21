@@ -40,16 +40,16 @@ public:
   ~DistributedData() override;
 
   ///
-  DistributedData & operator=( DistributedData const & other );
+  auto operator=( DistributedData const & other ) -> DistributedData &;
 
   ///
   friend void swap( DistributedData & a, DistributedData & b );
 
   ///
-  bool operator==( DistributedData const & other ) const;
+  auto operator==( DistributedData const & other ) const -> bool;
 
   ///
-  bool operator!=( DistributedData const & other ) const;
+  auto operator!=( DistributedData const & other ) const -> bool;
 
   /// Finalize the data: validate and set process range + global size
   void finalize();
@@ -59,36 +59,36 @@ public:
   void assign( DistributedData const & other, Array< uint > const & mapping );
 
   /// Return if the distributed data is empty
-  bool empty() const;
+  auto empty() const -> bool;
 
   /// Return the storage capacity of mappings
-  uint capacity() const;
+  auto capacity() const -> uint;
 
   /// Return whether the data is finalized
-  bool is_finalized() const;
+  auto is_finalized() const -> bool;
 
   //--- Data bounds -----------------------------------------------------------
 
   /// Return the offset of the process range
-  uint offset() const;
+  auto offset() const -> uint;
 
   /// Return the process range size
-  uint range_size() const;
+  auto range_size() const -> uint;
 
   /// Return if the process range is set
-  bool range_is_set() const;
+  auto range_is_set() const -> bool;
 
   /// Return if the global index is in the process range
-  bool in_range( uint global_index ) const;
+  auto in_range( uint global_index ) const -> bool;
 
   /// Return if the global index is off the process range
-  bool off_range( uint global_index ) const;
+  auto off_range( uint global_index ) const -> bool;
 
   /// Return the local data size
-  uint local_size() const;
+  auto local_size() const -> uint;
 
   /// Return the global data size i.e the global sum of number of owned entities
-  uint global_size() const;
+  auto global_size() const -> uint;
 
   /// Set the process range and the global size: if the second is not provided
   /// it is computed by summing the number of owned entities.
@@ -106,10 +106,10 @@ public:
   //--- Numbering -------------------------------------------------------------
 
   /// Return if the index is a local index
-  uint has_local( uint local_index ) const;
+  auto has_local( uint local_index ) const -> uint;
 
   /// Return the global index given a local index
-  uint get_global( uint local_index ) const;
+  auto get_global( uint local_index ) const -> uint;
 
   /// Get the global indices given an array of n local indices
   void get_global( uint         n,
@@ -123,10 +123,10 @@ public:
   }
 
   /// Return if the index is a global index
-  uint has_global( uint global_index ) const;
+  auto has_global( uint global_index ) const -> uint;
 
   /// Return the local index given a global index
-  uint get_local( uint global_index ) const;
+  auto get_local( uint global_index ) const -> uint;
 
   /// Get the local indices given an array of n local indices
   void get_local( uint         n,
@@ -154,36 +154,36 @@ public:
   //--- Adjacency -------------------------------------------------------------
 
   /// Return whether the given rank is adjacent
-  bool has_adj_rank( uint rank ) const;
+  auto has_adj_rank( uint rank ) const -> bool;
 
   /// Return the number of adjacent ranks
-  uint num_adj_ranks() const;
+  auto num_adj_ranks() const -> uint;
 
   /// Return the set of adjacent ranks
-  _set< uint > const & get_adj_ranks() const;
+  auto get_adj_ranks() const -> _set< uint > const &;
 
   //--- Ownership -------------------------------------------------------------
 
   /// Return the owner of the entity: self if owned and not self otherwise
-  uint get_owner( uint local_index ) const;
+  auto get_owner( uint local_index ) const -> uint;
 
   /// Return if the entity is owned
-  bool is_owned( uint local_index ) const;
+  auto is_owned( uint local_index ) const -> bool;
 
   /// Return if the entity is shared: it can be owned or not
-  bool is_shared( uint local_index ) const;
+  auto is_shared( uint local_index ) const -> bool;
 
   /// Return if the entity is ghost:  it is shared and not owned
-  bool is_ghost( uint local_index ) const;
+  auto is_ghost( uint local_index ) const -> bool;
 
   /// Return the number of owned entities
-  uint num_owned() const;
+  auto num_owned() const -> uint;
 
   /// Return the number of shared entities
-  uint num_shared() const;
+  auto num_shared() const -> uint;
 
   /// Return the number of ghost entities
-  uint num_ghost() const;
+  auto num_ghost() const -> uint;
 
   /// Re-map ownership with given mapping for process ranks
   void remap_ownership( Array< uint > const & mapping );
@@ -191,10 +191,10 @@ public:
   //--- Shared ---
 
   /// Return the adjacent set of a shared entity
-  _set< uint > const & get_shared_adj( uint local_index ) const;
+  auto get_shared_adj( uint local_index ) const -> _set< uint > const &;
 
   /// Return the adjacent set of a shared entity
-  _set< uint > const * ptr_shared_adj( uint local_index ) const;
+  auto ptr_shared_adj( uint local_index ) const -> _set< uint > const *;
 
   /// Return the common adjacent set to an array of shared entities
   void get_common_adj( uint n, Array< uint > const & indices,
@@ -211,7 +211,7 @@ public:
   void setall_shared_adj( uint local_index, _set< uint > const & adjs );
 
   /// Return shared entities mapping, only on finalized data
-  SharedMapping const & shared_mapping() const;
+  auto shared_mapping() const -> SharedMapping const &;
 
   /// Re-map the adjacent set
   void remap_shared_adj();
@@ -271,7 +271,7 @@ private:
   mutable SharedMapping * shared_mapping_{};
 };
 //-----------------------------------------------------------------------------
-inline bool DistributedData::operator==( DistributedData const & other ) const
+inline auto DistributedData::operator==( DistributedData const & other ) const -> bool
 {
   if ( rank_ != other.rank_ )
     return false;
@@ -303,64 +303,64 @@ inline bool DistributedData::operator==( DistributedData const & other ) const
   return true;
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::operator!=( DistributedData const & other ) const
+inline auto DistributedData::operator!=( DistributedData const & other ) const -> bool
 {
   return !( *this == other );
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::empty() const
+inline auto DistributedData::empty() const -> bool
 {
   return ( local_.empty() and global_.empty() and shared_.empty()
            and ghost_.empty() );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::capacity() const
+inline auto DistributedData::capacity() const -> uint
 {
   return local_.size();
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::is_finalized() const
+inline auto DistributedData::is_finalized() const -> bool
 {
   return finalized_;
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::offset() const
+inline auto DistributedData::offset() const -> uint
 {
   return offset_;
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::range_size() const
+inline auto DistributedData::range_size() const -> uint
 {
   return range_size_;
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::range_is_set() const
+inline auto DistributedData::range_is_set() const -> bool
 {
   return range_is_set_;
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::in_range( uint global_index ) const
+inline auto DistributedData::in_range( uint global_index ) const -> bool
 {
   dolfin_assert( global_size_ > 0 );
   dolfin_assert( offset_ + range_size_ <= global_size_ );
   return ( offset_ <= global_index && global_index < offset_ + range_size_ );
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::off_range( uint global_index ) const
+inline auto DistributedData::off_range( uint global_index ) const -> bool
 {
   dolfin_assert( global_size_ > 0 );
   dolfin_assert( offset_ + range_size_ <= global_size_ );
   return ( global_index < offset_ || offset_ + range_size_ <= global_index );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::local_size() const
+inline auto DistributedData::local_size() const -> uint
 {
   // If local size is not known, return current size, otherwise return
   return ( cached_numbering_.empty() ? local_.size()
                                      : cached_numbering_.size() );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::global_size() const
+inline auto DistributedData::global_size() const -> uint
 {
   if ( global_size_ < local_.size() )
   {
@@ -369,7 +369,7 @@ inline uint DistributedData::global_size() const
   return global_size_;
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::has_local( uint local_index ) const
+inline auto DistributedData::has_local( uint local_index ) const -> uint
 {
   if ( not cached_numbering_.empty() )
   {
@@ -380,7 +380,7 @@ inline uint DistributedData::has_local( uint local_index ) const
   return ( global_.count( local_index ) > 0 );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::get_global( uint local_index ) const
+inline auto DistributedData::get_global( uint local_index ) const -> uint
 {
   if ( not cached_numbering_.empty() )
   {
@@ -417,12 +417,12 @@ inline void DistributedData::get_global( uint         n,
   }
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::has_global( uint global_index ) const
+inline auto DistributedData::has_global( uint global_index ) const -> uint
 {
   return ( local_.count( global_index ) > 0 );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::get_local( uint global_index ) const
+inline auto DistributedData::get_local( uint global_index ) const -> uint
 {
   dolfin_assert( local_.count( global_index ) > 0 );
   return local_.find( global_index )->second;
@@ -439,22 +439,22 @@ inline void DistributedData::get_local( uint         n,
   }
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::has_adj_rank( uint rank ) const
+inline auto DistributedData::has_adj_rank( uint rank ) const -> bool
 {
   return ( adjacents_.count( rank ) > 0 );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::num_adj_ranks() const
+inline auto DistributedData::num_adj_ranks() const -> uint
 {
   return adjacents_.size();
 }
 //-----------------------------------------------------------------------------
-inline _set< uint > const & DistributedData::get_adj_ranks() const
+inline auto DistributedData::get_adj_ranks() const -> _set< uint > const &
 {
   return adjacents_;
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::get_owner( uint local_index ) const
+inline auto DistributedData::get_owner( uint local_index ) const -> uint
 {
   if ( not cached_ownership_.empty() )
   {
@@ -471,7 +471,7 @@ inline uint DistributedData::get_owner( uint local_index ) const
   return it->second;
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::is_owned( uint local_index ) const
+inline auto DistributedData::is_owned( uint local_index ) const -> bool
 {
   if ( not cached_ownership_.empty() )
   {
@@ -482,7 +482,7 @@ inline bool DistributedData::is_owned( uint local_index ) const
   return ( ghost_.count( local_index ) == 0 );
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::is_shared( uint local_index ) const
+inline auto DistributedData::is_shared( uint local_index ) const -> bool
 {
   if ( not cached_ownership_.empty() )
   {
@@ -492,7 +492,7 @@ inline bool DistributedData::is_shared( uint local_index ) const
   return ( shared_.count( local_index ) > 0 );
 }
 //-----------------------------------------------------------------------------
-inline bool DistributedData::is_ghost( uint local_index ) const
+inline auto DistributedData::is_ghost( uint local_index ) const -> bool
 {
   if ( not cached_ownership_.empty() )
   {
@@ -503,31 +503,31 @@ inline bool DistributedData::is_ghost( uint local_index ) const
   return ( ghost_.count( local_index ) > 0 );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::num_owned() const
+inline auto DistributedData::num_owned() const -> uint
 {
   dolfin_assert( local_.size() >= ghost_.size() );
   return ( local_.size() - ghost_.size() );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::num_shared() const
+inline auto DistributedData::num_shared() const -> uint
 {
   return ( shared_.size() );
 }
 //-----------------------------------------------------------------------------
-inline uint DistributedData::num_ghost() const
+inline auto DistributedData::num_ghost() const -> uint
 {
   return ( ghost_.size() );
 }
 //-----------------------------------------------------------------------------
-inline _set< uint > const &
-  DistributedData::get_shared_adj( uint local_index ) const
+inline auto
+  DistributedData::get_shared_adj( uint local_index ) const -> _set< uint > const &
 {
   dolfin_assert( shared_.count( local_index ) > 0 );
   return shared_.find( local_index )->second;
 }
 //-----------------------------------------------------------------------------
-inline _set< uint > const *
-  DistributedData::ptr_shared_adj( uint local_index ) const
+inline auto
+  DistributedData::ptr_shared_adj( uint local_index ) const -> _set< uint > const *
 {
   if ( not cached_ownership_.empty() )
   {

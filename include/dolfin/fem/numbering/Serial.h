@@ -34,7 +34,7 @@ public:
   {
     // FIXME num_entities should maybe be stored somewhere else
     size_t const tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim, 0 );
+    std::vector< size_t > num_entities( tdim+1, 0 );
     for ( uint d = 0; d <= tdim; ++d )
     {
       if ( mesh.topology().connectivity( d ) )
@@ -59,7 +59,7 @@ public:
 
     // FIXME num_entities should maybe be stored somewhere else
     size_t const tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim, 0 );
+    std::vector< size_t > num_entities( tdim+1, 0 );
     for ( uint d = 0; d <= tdim; ++d )
     {
       if ( mesh.topology().connectivity( d ) )

@@ -52,31 +52,31 @@ public:
   };
 
   /// Access i-the point
-  Point & operator[]( uint i );
+  auto operator[]( uint i ) -> Point &;
 
   /// Access i-the point
-  Point const & operator[]( uint i ) const;
+  auto operator[]( uint i ) const -> Point const &;
 
   /// Assignment
-  BoundingBox & operator=( BoundingBox const & other );
+  auto operator=( BoundingBox const & other ) -> BoundingBox &;
 
   /// Translation
-  BoundingBox & operator+=( Point const & p );
+  auto operator+=( Point const & p ) -> BoundingBox &;
 
   /// Translation
-  BoundingBox & operator-=( Point const & p );
+  auto operator-=( Point const & p ) -> BoundingBox &;
 
   /// Homothety
-  BoundingBox & operator*=( real const a );
+  auto operator*=( real const a ) -> BoundingBox &;
 
   /// Scaling along axis
-  BoundingBox & scale( uint axis, real const a );
+  auto scale( uint axis, real const a ) -> BoundingBox &;
 
   /// Dilatation
-  BoundingBox & operator*=( Point const & p );
+  auto operator*=( Point const & p ) -> BoundingBox &;
 
   /// Return bounding box centroid
-  Point centroid() const;
+  auto centroid() const -> Point;
 
   // Display information
   void disp() const;
@@ -87,21 +87,21 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline Point & BoundingBox::operator[]( uint i )
+inline auto BoundingBox::operator[]( uint i ) -> Point &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & BoundingBox::operator[]( uint i ) const
+inline auto BoundingBox::operator[]( uint i ) const -> Point const &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator=( BoundingBox const & other )
+inline auto BoundingBox::operator=( BoundingBox const & other ) -> BoundingBox &
 {
   if ( this != &other )
   {
@@ -118,7 +118,7 @@ inline BoundingBox & BoundingBox::operator=( BoundingBox const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator+=( Point const & p )
+inline auto BoundingBox::operator+=( Point const & p ) -> BoundingBox &
 {
   for ( uint i = 0; i <= D_; ++i )
   {
@@ -128,7 +128,7 @@ inline BoundingBox & BoundingBox::operator+=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator-=( Point const & p )
+inline auto BoundingBox::operator-=( Point const & p ) -> BoundingBox &
 {
   for ( uint i = 0; i <= D_; ++i )
   {
@@ -138,7 +138,7 @@ inline BoundingBox & BoundingBox::operator-=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator*=( real const a )
+inline auto BoundingBox::operator*=( real const a ) -> BoundingBox &
 {
   Point c = this->centroid();
   for ( uint i = 0; i <= D_; ++i )
@@ -149,7 +149,7 @@ inline BoundingBox & BoundingBox::operator*=( real const a )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::scale( uint axis, real const a )
+inline auto BoundingBox::scale( uint axis, real const a ) -> BoundingBox &
 {
   for ( uint i = 0; i <= D_; ++i )
   {
@@ -159,7 +159,7 @@ inline BoundingBox & BoundingBox::scale( uint axis, real const a )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator*=( Point const & p )
+inline auto BoundingBox::operator*=( Point const & p ) -> BoundingBox &
 {
   Point c = this->centroid();
   for ( uint i = 0; i <= D_; ++i )
@@ -173,7 +173,7 @@ inline BoundingBox & BoundingBox::operator*=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline Point BoundingBox::centroid() const
+inline auto BoundingBox::centroid() const -> Point
 {
   Point c( BOX_[0] );
   for ( uint i = 1; i <= D_; ++i )

@@ -29,10 +29,10 @@ namespace dolfin
  */
 /* Header file for robust predicates by Jonathan Richard Shewchuk */
 
-real orient2d(real const* pa, real const* pb, real const* pc);
-real orient3d(real const* pa, real const* pb, real const* pc, real const* pd);
-real incircle(real const* pa, real const* pb, real const* pc, real const* pd);
-real insphere(real const* pa, real const* pb, real const* pc, real const* pd, real const* pe);
+auto orient2d(real const* pa, real const* pb, real const* pc) -> real;
+auto orient3d(real const* pa, real const* pb, real const* pc, real const* pd) -> real;
+auto incircle(real const* pa, real const* pb, real const* pc, real const* pd) -> real;
+auto insphere(real const* pa, real const* pb, real const* pc, real const* pd, real const* pe) -> real;
 
 }
 

@@ -28,13 +28,13 @@ public:
   inline void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
   /// Return copy of tensor
-  GenericVector * copy() const override = 0;
+  auto copy() const -> GenericVector * override = 0;
 
   /// Return tensor rank (number of dimensions)
-  uint rank() const override;
+  auto rank() const -> uint override;
 
   /// Return size of given dimension
-  inline uint size( uint dim ) const override;
+  inline auto size( uint dim ) const -> uint override;
 
   /// Get block of values
   inline void get( real * block,
@@ -74,13 +74,13 @@ public:
                              _ordered_map< uint, uint > & map ) = 0;
 
   /// Return size of vector
-  virtual uint size() const = 0;
+  virtual auto size() const -> uint = 0;
 
   /// Return local size of vector
-  virtual uint local_size() const = 0;
+  virtual auto local_size() const -> uint = 0;
 
   /// Return rank's offset into vector
-  virtual uint offset() const = 0;
+  virtual auto offset() const -> uint = 0;
 
   /// Get block of values
   virtual void get( real * block, uint m, const uint * rows ) const = 0;
@@ -117,49 +117,49 @@ public:
                          real c ) = 0;
 
   /// Return inner product with given vector
-  virtual real inner( const GenericVector & x ) const = 0;
+  virtual auto inner( const GenericVector & x ) const -> real = 0;
 
   /// Return norm of vector
-  virtual real norm( VectorNormType type = l2 ) const = 0;
+  virtual auto norm( VectorNormType type = l2 ) const -> real = 0;
 
   /// Return minimum value of vector
-  virtual real min() const = 0;
+  virtual auto min() const -> real = 0;
 
   /// Return maximum value of vector
-  virtual real max() const = 0;
+  virtual auto max() const -> real = 0;
 
   /// Return pointwise operator op of vector and given vector x
   virtual void pointwise( const GenericVector & x,
                           VectorPointwiseOp     op = pw_min ) const = 0;
 
   /// Multiply vector by given number
-  virtual const GenericVector & operator*=( real a ) = 0;
+  virtual auto operator*=( real a ) -> const GenericVector & = 0;
 
   /// Divide vector by given number
-  virtual const GenericVector & operator/=( real a ) = 0;
+  virtual auto operator/=( real a ) -> const GenericVector & = 0;
 
   /// Multiply vector by given vector component-wise
-  virtual const GenericVector & operator*=( const GenericVector & x ) = 0;
+  virtual auto operator*=( const GenericVector & x ) -> const GenericVector & = 0;
 
   /// Add given vector
-  virtual const GenericVector & operator+=( const GenericVector & x ) = 0;
+  virtual auto operator+=( const GenericVector & x ) -> const GenericVector & = 0;
 
   /// Subtract given vector
-  virtual const GenericVector & operator-=( const GenericVector & x ) = 0;
+  virtual auto operator-=( const GenericVector & x ) -> const GenericVector & = 0;
 
   /// Assignment operator
-  virtual const GenericVector & operator=( const GenericVector & x ) = 0;
+  virtual auto operator=( const GenericVector & x ) -> const GenericVector & = 0;
 
   /// Assignment operator
-  virtual const GenericVector & operator=( real a ) = 0;
+  virtual auto operator=( real a ) -> const GenericVector & = 0;
 
   //--- Convenience functions ---
 
   /// Get value of given entry
-  virtual real operator[]( uint i ) const;
+  virtual auto operator[]( uint i ) const -> real;
 
   /// Get value of given entry
-  virtual real getitem( uint i ) const;
+  virtual auto getitem( uint i ) const -> real;
 
   /// Set given entry to value
   virtual void setitem( uint i, real value );
@@ -172,13 +172,13 @@ inline void GenericVector::init( const GenericSparsityPattern & sparsity_pattern
 }
 
 //-----------------------------------------------------------------------------
-inline uint GenericVector::rank() const
+inline auto GenericVector::rank() const -> uint
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
-inline uint GenericVector::size( uint dim ) const
+inline auto GenericVector::size( uint dim ) const -> uint
 {
   dolfin_assert( dim == 0 );
   MAYBE_UNUSED( dim );
@@ -210,7 +210,7 @@ inline void GenericVector::add( const real *         block,
 }
 
 //-----------------------------------------------------------------------------
-inline real GenericVector::operator[]( uint i ) const
+inline auto GenericVector::operator[]( uint i ) const -> real
 {
   real value( 0 );
   get( &value, 1, &i );
@@ -218,7 +218,7 @@ inline real GenericVector::operator[]( uint i ) const
 }
 
 //-----------------------------------------------------------------------------
-inline real GenericVector::getitem( uint i ) const
+inline auto GenericVector::getitem( uint i ) const -> real
 {
   real value( 0 );
   get( &value, 1, &i );

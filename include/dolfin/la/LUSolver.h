@@ -29,7 +29,7 @@ namespace dolfin
       delete petsc_solver;
     }
 
-    uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
+    auto solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b) -> uint
     {
       Timer timer("LU solver");
 
@@ -47,7 +47,7 @@ namespace dolfin
       return 0;
     }
 
-    uint factorize(const GenericMatrix&)
+    auto factorize(const GenericMatrix&) -> uint
     {
 
       error("No matrix factorization for given backend.");
@@ -55,7 +55,7 @@ namespace dolfin
 
     }
 
-    uint factorized_solve(GenericVector&, const GenericVector&)
+    auto factorized_solve(GenericVector&, const GenericVector&) -> uint
     {
       error("No factorized LU solver for given backend.");
       return 0;

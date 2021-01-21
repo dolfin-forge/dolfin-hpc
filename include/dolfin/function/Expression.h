@@ -24,13 +24,13 @@ public:
   virtual void eval(real* values, const real* x) const = 0;
 
   /// Return the rank of the value space
-  virtual uint rank() const = 0;
+  virtual auto rank() const -> uint = 0;
 
   /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const = 0;
+  virtual auto dim(uint i) const -> uint = 0;
 
   // Return the value size
-  inline uint value_size() const
+  inline auto value_size() const -> uint
   {
     uint size = 1;
     for (uint i = 0; i < this->rank(); ++i)

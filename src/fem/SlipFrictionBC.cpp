@@ -25,7 +25,7 @@ SlipFrictionBC::SlipFrictionBC(Coefficient& beta, Mesh& mesh,
 {
 }
 //-----------------------------------------------------------------------------
-BoundaryNormal& SlipFrictionBC::normal()
+auto SlipFrictionBC::normal() -> BoundaryNormal&
 {
   return slipbc_.normal();
 }

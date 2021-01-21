@@ -23,10 +23,10 @@ public:
 
 private:
 
-  real transformx(real x, real y, real z);
-  real transformy(real x, real y, real z);
-  real transformz(real x, real y, real z);
-  real max(real x, real y, real z);
+  auto transformx(real x, real y, real z) -> real;
+  auto transformy(real x, real y, real z) -> real;
+  auto transformz(real x, real y, real z) -> real;
+  auto max(real x, real y, real z) -> real;
 
 };
 

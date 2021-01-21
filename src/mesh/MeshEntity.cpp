@@ -20,7 +20,7 @@ MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
 {
 }
 //-----------------------------------------------------------------------------
-bool MeshEntity::has_all_vertices_shared() const
+auto MeshEntity::has_all_vertices_shared() const -> bool
 {
   if( topology_.distributed() )
   {
@@ -48,7 +48,7 @@ bool MeshEntity::has_all_vertices_shared() const
   }
 }
 //-----------------------------------------------------------------------------
-bool MeshEntity::on_boundary() const
+auto MeshEntity::on_boundary() const -> bool
 {
   uint const mdim = topology_.dim();
   uint const fdim = topology_.type().facet_dim();

@@ -35,7 +35,7 @@ DofMapCache::~DofMapCache()
 }
 
 //-----------------------------------------------------------------------------
-DofMap& DofMapCache::acquire(Mesh& mesh, Form const& form, uint const& i)
+auto DofMapCache::acquire(Mesh& mesh, Form const& form, uint const& i) -> DofMap&
 {
   // Update dof maps of form:
   // This triggers creation of a dof map set if needed and acquistion of a token
@@ -58,7 +58,7 @@ DofMap& DofMapCache::acquire(Mesh& mesh, Form const& form, uint const& i)
 }
 
 //-----------------------------------------------------------------------------
-DofMap& DofMapCache::acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner)
+auto DofMapCache::acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner) -> DofMap&
 {
   DofMap * ret = nullptr;
   std::string const h = DofMap::make_hash(mesh, dofmap);

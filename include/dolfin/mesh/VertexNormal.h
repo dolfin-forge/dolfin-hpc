@@ -63,24 +63,24 @@ public:
   ~VertexNormal() = default;
 
   ///
-  Mesh& mesh();
+  auto mesh() -> Mesh&;
 
   ///
-  MeshValues<real, Vertex> const& basis(uint i, uint j) const;
+  auto basis(uint i, uint j) const -> MeshValues<real, Vertex> const&;
 
   ///
-  MeshValues<uint, Vertex>& vertex_type();
+  auto vertex_type() -> MeshValues<uint, Vertex>&;
 
 private:
 
   /// Assignment [Disable]
-  VertexNormal& operator=(VertexNormal& other);
+  auto operator=(VertexNormal& other) -> VertexNormal&;
 
   // Compute normals to the boundary nodes
   void computeNormal(Mesh& mesh);
 
   ///
-  MeshValues<real, Vertex>& basis(uint i, uint j);
+  auto basis(uint i, uint j) -> MeshValues<real, Vertex>&;
 
   //
   void getFacetData(VertexNormal::Type type, Mesh& mesh, BoundaryMesh& boundary,
@@ -111,25 +111,25 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline Mesh& VertexNormal::mesh()
+inline auto VertexNormal::mesh() -> Mesh&
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<real, Vertex> const& VertexNormal::basis(uint i, uint j) const
+inline auto VertexNormal::basis(uint i, uint j) const -> MeshValues<real, Vertex> const&
 {
   return basis_[i * gdim_ + j];
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<real, Vertex>& VertexNormal::basis(uint i, uint j)
+inline auto VertexNormal::basis(uint i, uint j) -> MeshValues<real, Vertex>&
 {
   return basis_[i * gdim_ + j];
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<uint, Vertex>& VertexNormal::vertex_type()
+inline auto VertexNormal::vertex_type() -> MeshValues<uint, Vertex>&
 {
   return vertex_type_;
 }

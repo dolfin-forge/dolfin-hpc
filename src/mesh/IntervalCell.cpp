@@ -77,8 +77,8 @@ void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
   editor.add_cell(current_cell++, &cv1[0]);
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::intersects(MeshEntity const& e, Point const&,
-                              Point const&) const
+auto IntervalCell::intersects(MeshEntity const& e, Point const&,
+                              Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[1][0]);
@@ -89,7 +89,7 @@ bool IntervalCell::intersects(MeshEntity const& e, Point const&,
   return false;
 }
 //-----------------------------------------------------------------------------
-std::string IntervalCell::description() const
+auto IntervalCell::description() const -> std::string
 {
   return std::string("interval (simplex of topological dimension 1)");
 }
@@ -116,7 +116,7 @@ void IntervalCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::check(Cell& cell) const
+auto IntervalCell::check(Cell& cell) const -> bool
 {
   bool ret = CellType::check(cell);
 

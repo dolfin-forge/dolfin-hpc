@@ -31,8 +31,8 @@ KrylovSolver::~KrylovSolver()
 }
 
 //-----------------------------------------------------------------------------
-uint KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
-                         const GenericVector& b)
+auto KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
+                         const GenericVector& b) -> uint
 {
   Timer timer("Krylov solver");
 

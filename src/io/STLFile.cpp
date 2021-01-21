@@ -20,7 +20,7 @@ struct stl_vertex
   double v[3];
   uint   index;
 
-  bool operator<( const stl_vertex & other ) const
+  auto operator<( const stl_vertex & other ) const -> bool
   {
     return ( ( v[0] < other.v[0] )
              or ( v[0] == other.v[0]
@@ -28,7 +28,7 @@ struct stl_vertex
                         or ( v[1] == other.v[1] and v[2] < other.v[2] ) ) ) );
   }
 
-  bool operator==( const stl_vertex & other ) const
+  auto operator==( const stl_vertex & other ) const -> bool
   {
     return ( v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2] );
   }

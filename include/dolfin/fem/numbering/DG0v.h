@@ -60,10 +60,10 @@ public:
     value_size_ = flattened.size();
     destruct( flattened );
     //---
-    if (ufc_dofmap.num_element_support_dofs() != value_size_)
+    if (ufc_dofmap.num_element_dofs() != value_size_)
     {
       error("DG0vNumbering : local dimension %u != %u",
-            ufc_dofmap.num_element_support_dofs(), value_size_);
+            ufc_dofmap.num_element_dofs(), value_size_);
     }
     set_range(value_size_ * mesh.topology().offset(tdim),
               value_size_ * mesh.topology().num_owned(tdim));

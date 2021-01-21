@@ -43,10 +43,10 @@ public:
   ~SubFunction() = default;
 
   /// Return global function
-  Function & function() const;
+  auto function() const -> Function &;
 
   /// Return index of the sub function
-  uint index() const;
+  auto index() const -> uint;
 
   /// Display basic information
   void disp() const;
@@ -66,13 +66,13 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline Function & SubFunction::function() const
+inline auto SubFunction::function() const -> Function &
 {
   return *f_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint SubFunction::index() const
+inline auto SubFunction::index() const -> uint
 {
   return i_;
 }

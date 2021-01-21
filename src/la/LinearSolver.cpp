@@ -28,9 +28,9 @@ LinearSolver::~LinearSolver()
   delete krylov_solver;
 }
 //-----------------------------------------------------------------------------
-uint LinearSolver::solve( GenericMatrix const & A,
+auto LinearSolver::solve( GenericMatrix const & A,
                           GenericVector &       x,
-                          GenericVector const & b )
+                          GenericVector const & b ) -> uint
 {
   dolfin_assert( lu_solver || krylov_solver );
   if ( lu_solver )

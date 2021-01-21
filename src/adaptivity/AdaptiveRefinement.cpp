@@ -322,7 +322,7 @@ void project( Mesh& new_mesh, Array<Function>& f_post, Function& projected )
 
   Array< real > vv ( projected.vector().local_size() );
   Array< uint > indices( projected.vector().local_size() );
-  Array< uint > local_indices( projected.space().dofmap().num_element_support_dofs() );
+  Array< uint > local_indices( projected.space().dofmap().num_element_dofs() );
   uint i = 0;
   MeshValues<bool, Vertex> processed( new_mesh, false );
 

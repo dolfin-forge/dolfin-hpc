@@ -41,10 +41,10 @@ public:
   ~PETScKrylovSolver();
 
   /// Solve linear system Ax = b and return number of iterations
-  uint solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b);
+  auto solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b) -> uint;
 
   /// Solve linear system Ax = b and return number of iterations
-  uint solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b);
+  auto solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b) -> uint;
 
   /// Display solver data
   void disp() const;
@@ -67,7 +67,7 @@ private:
   void writeReport(int num_iterations);
 
   /// Get PETSc method identifier
-  KSPType getType(SolverType method) const;
+  auto getType(SolverType method) const -> KSPType;
 
   /// Krylov method
   SolverType method;

@@ -687,11 +687,11 @@ void LoadBalancer::process_reassignment(MeshFunction<size_t>& partitions,
   delete[] SiM; // FIXME, this should only be needon on rank == 0
 }
 //-----------------------------------------------------------------------------
-bool LoadBalancer::computational_gain(Mesh& mesh,
+auto LoadBalancer::computational_gain(Mesh& mesh,
                                       MeshValues<size_t, Cell>& weight,
                                       MeshValues<size_t, Cell>& partitions,
                                       size_t max_sendrecv, real tf, real tb,
-                                      real ts)
+                                      real ts) -> bool
 {
   size_t pe_size = MPI::size();
 
@@ -882,7 +882,7 @@ void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&,
 //-----------------------------------------------------------------------------
 #endif
 //-----------------------------------------------------------------------------
-MeshValues<size_t, Cell>& LoadBalancer::partitions(Mesh& mesh)
+auto LoadBalancer::partitions(Mesh& mesh) -> MeshValues<size_t, Cell>&
 {
   _ordered_map<Mesh *, MeshValues<size_t, Cell> *>::iterator it = s_.find(&mesh);
   if (it == s_.end())
@@ -894,7 +894,7 @@ MeshValues<size_t, Cell>& LoadBalancer::partitions(Mesh& mesh)
   return *(it->second);
 }
 //-----------------------------------------------------------------------------
-bool LoadBalancer::clear(Mesh& mesh)
+auto LoadBalancer::clear(Mesh& mesh) -> bool
 {
   _ordered_map<Mesh *, MeshValues<size_t, Cell> *>::iterator it = s_.find(&mesh);
   if (it != s_.end())

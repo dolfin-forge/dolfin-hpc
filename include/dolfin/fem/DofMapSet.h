@@ -37,13 +37,13 @@ public:
   void update(Form const& form, Mesh& mesh);
 
   /// Return number of dof maps
-  uint size() const;
+  auto size() const -> uint;
 
   /// Return the mesh on which dof maps have been initialized
-  Mesh const& mesh() const;
+  auto mesh() const -> Mesh const&;
 
   /// Return dof map for argument function i
-  DofMap& operator[](uint i) const;
+  auto operator[](uint i) const -> DofMap&;
 
 private:
 
@@ -62,19 +62,19 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline uint DofMapSet::size() const
+inline auto DofMapSet::size() const -> uint
 {
   return dof_map_set.size();
 }
 
 //-----------------------------------------------------------------------------
-inline Mesh const & DofMapSet::mesh() const
+inline auto DofMapSet::mesh() const -> Mesh const &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline DofMap & DofMapSet::operator[]( uint i ) const
+inline auto DofMapSet::operator[]( uint i ) const -> DofMap &
 {
   dolfin_assert( dof_map_set.size() > 0 );
   dolfin_assert( i < dof_map_set.size() );

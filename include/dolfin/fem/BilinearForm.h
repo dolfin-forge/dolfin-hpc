@@ -21,7 +21,7 @@ public:
 
   using Coefficients = Form::Coefficients;
 
-  static inline std::string name() { return "BilinearForm"; }
+  static inline auto name() -> std::string { return "BilinearForm"; }
 
   /// Constructor
   BilinearForm(Mesh& mesh);
@@ -30,17 +30,17 @@ public:
   ~BilinearForm() override;
 
   /// Trial space
-  FiniteElementSpace const& trial_space() const;
+  auto trial_space() const -> FiniteElementSpace const&;
 
   /// Test space
-  FiniteElementSpace const& test_space() const;
+  auto test_space() const -> FiniteElementSpace const&;
 
   /// Check whether linear system's dimensions match discrete spaces
   void check(GenericMatrix const& A, GenericVector const& b) const;
 
   /// Creator function
   template <class E> static inline
-  typename E::BilinearForm * create(Mesh& mesh, Coefficients& coefs)
+  auto create(Mesh& mesh, Coefficients& coefs) -> typename E::BilinearForm *
   {
     return new typename E::BilinearForm(mesh, coefs);
   }
@@ -54,7 +54,7 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline FiniteElementSpace const& BilinearForm::trial_space() const
+inline auto BilinearForm::trial_space() const -> FiniteElementSpace const&
 {
   if (!trial_space_)
   {
@@ -64,7 +64,7 @@ inline FiniteElementSpace const& BilinearForm::trial_space() const
 }
 
 //-----------------------------------------------------------------------------
-inline FiniteElementSpace const& BilinearForm::test_space() const
+inline auto BilinearForm::test_space() const -> FiniteElementSpace const&
 {
   if (!test_space_)
   {

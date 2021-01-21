@@ -26,24 +26,24 @@ public:
   {
   }
 
-  inline Facet * operator->();
+  inline auto operator->() -> Facet *;
 
-  inline Facet & operator*();
+  inline auto operator*() -> Facet &;
 
-  inline Facet & operator[]( uint i );
+  inline auto operator[]( uint i ) -> Facet &;
 };
 
-inline Facet * FacetIterator::operator->()
+inline auto FacetIterator::operator->() -> Facet *
 {
   return static_cast< Facet * >( MeshEntityIterator::operator->() );
 }
 
-inline Facet & FacetIterator::operator*()
+inline auto FacetIterator::operator*() -> Facet &
 {
   return *operator->();
 }
 
-inline Facet & FacetIterator::operator[]( uint i )
+inline auto FacetIterator::operator[]( uint i ) -> Facet &
 {
   return static_cast< Facet & >( MeshEntityIterator::operator[]( i ) );
 }

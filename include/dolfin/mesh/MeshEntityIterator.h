@@ -55,22 +55,22 @@ public:
   virtual ~MeshEntityIterator() = default;
 
   /// Step to next mesh entity (prefix increment)
-  MeshEntityIterator& operator++();
+  auto operator++() -> MeshEntityIterator&;
 
   /// Return current position
-  uint pos() const;
+  auto pos() const -> uint;
 
   /// Check if iterator has reached the end
-  bool end() const;
+  auto end() const -> bool;
 
   /// Member access operator
-  MeshEntity* operator->();
+  auto operator->() -> MeshEntity*;
 
   /// Dereference operator
-  MeshEntity& operator*();
+  auto operator*() -> MeshEntity&;
 
   /// Access operator at position relative to begin
-  MeshEntity& operator[](uint i);
+  auto operator[](uint i) -> MeshEntity&;
 
 private:
 
@@ -101,26 +101,26 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline MeshEntityIterator& MeshEntityIterator::operator++()
+inline auto MeshEntityIterator::operator++() -> MeshEntityIterator&
 {
   ++pos_;
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntityIterator::pos() const
+inline auto MeshEntityIterator::pos() const -> uint
 {
   return pos_;
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshEntityIterator::end() const
+inline auto MeshEntityIterator::end() const -> bool
 {
   return pos_ >= end_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshEntity* MeshEntityIterator::operator->()
+inline auto MeshEntityIterator::operator->() -> MeshEntity*
 {
   // WARNING: index is only updated if iterator is dereferenced
   entity_.index_ = (index_ == nullptr) ? pos_ : (*index_)[pos_];
@@ -128,7 +128,7 @@ inline MeshEntity* MeshEntityIterator::operator->()
 }
 
 //-----------------------------------------------------------------------------
-inline MeshEntity& MeshEntityIterator::operator*()
+inline auto MeshEntityIterator::operator*() -> MeshEntity&
 {
   // WARNING: index is only updated if iterator is dereferenced
   entity_.index_ = (index_ == nullptr) ? pos_ : (*index_)[pos_];
@@ -136,7 +136,7 @@ inline MeshEntity& MeshEntityIterator::operator*()
 }
 
 //-----------------------------------------------------------------------------
-inline MeshEntity& MeshEntityIterator::operator[](uint i)
+inline auto MeshEntityIterator::operator[](uint i) -> MeshEntity&
 {
   dolfin_assert(i < end_);
   pos_ = i;

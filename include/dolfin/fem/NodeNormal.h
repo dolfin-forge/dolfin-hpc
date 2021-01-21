@@ -50,7 +50,7 @@ public:
   void compute() override;
 
   /// Returns the node type
-  uint node_type(uint node_id) const;
+  auto node_type(uint node_id) const -> uint;
 
 private:
 

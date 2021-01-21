@@ -42,10 +42,10 @@ public:
   ~MeshQualityFunction() override = default;
 
   //
-  uint rank() const override;
+  auto rank() const -> uint override;
 
   //
-  uint dim(uint i) const override;
+  auto dim(uint i) const -> uint override;
 
   //
   void evaluate(real* values, const real* x, const ufc::cell& cell) const override;
@@ -57,13 +57,13 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline uint MeshQualityFunction::rank() const
+inline auto MeshQualityFunction::rank() const -> uint
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshQualityFunction::dim( uint ) const
+inline auto MeshQualityFunction::dim( uint ) const -> uint
 {
   return 1;
 }

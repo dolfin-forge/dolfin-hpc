@@ -21,7 +21,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
   , dof_map( &space.dofmap() )
   , size( value_size( *finite_element ) )
   , space_dimension( finite_element->space_dimension() )
-  , local_dimension( dof_map->num_element_support_dofs() )
+  , local_dimension( dof_map->num_element_dofs() )
   , num_sub_elements( finite_element->num_sub_elements() )
   , topological_dimension( finite_element->topological_dimension() )
   , geometric_dimension( space.mesh().geometry_dimension() )
@@ -35,7 +35,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
   all_basis_values( new real *[space_dimension] )
   ,
 #endif
-  coordinates( dof_map->num_element_support_dofs() * Space::MAX_DIMENSION, 0.0 )
+  coordinates( dof_map->num_element_dofs() * Space::MAX_DIMENSION, 0.0 )
   , owner_( false )
 {
   init();
@@ -50,7 +50,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
   , dof_map( space.dofmap().create_sub_dofmap( sub_system.array(), offset ) )
   , size( value_size( *finite_element ) )
   , space_dimension( finite_element->space_dimension() )
-  , local_dimension( dof_map->num_element_support_dofs() )
+  , local_dimension( dof_map->num_element_dofs() )
   , num_sub_elements( finite_element->num_sub_elements() )
   , topological_dimension( finite_element->topological_dimension() )
   , geometric_dimension( space.mesh().geometry_dimension() )
@@ -64,7 +64,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
   all_basis_values( new real *[space_dimension] )
   ,
 #endif
-  coordinates( dof_map->num_element_support_dofs() * Space::MAX_DIMENSION, 0.0 )
+  coordinates( dof_map->num_element_dofs() * Space::MAX_DIMENSION, 0.0 )
   , owner_( true )
 {
   init();
@@ -123,7 +123,7 @@ ScratchSpace::~ScratchSpace()
 }
 
 //-----------------------------------------------------------------------------
-uint ScratchSpace::value_size( ufc::finite_element const & finite_element )
+auto ScratchSpace::value_size( ufc::finite_element const & finite_element ) -> uint
 {
   // Compute size of value (number of entries in tensor value)
   uint size = 1;

@@ -21,10 +21,10 @@ public:
   MeshQuality(Mesh& mesh);
 
   ///
-  bool is_inverted(uint& first);
+  auto is_inverted(uint& first) -> bool;
 
   /// Cell quality based on mean-ratio metric
-  real mean_ratio(Cell const& cell) const;
+  auto mean_ratio(Cell const& cell) const -> real;
 
   ///
   void compute();
@@ -46,9 +46,9 @@ public:
 private:
 
   ///
-  static real reduceMinReal(real val);
-  static real reduceMaxReal(real val);
-  static real reduceAvgReal(real val);
+  static auto reduceMinReal(real val) -> real;
+  static auto reduceMaxReal(real val) -> real;
+  static auto reduceAvgReal(real val) -> real;
 
   MeshValues<int, Cell> orientation_;
   mutable EquiAffineMapping mapping_;

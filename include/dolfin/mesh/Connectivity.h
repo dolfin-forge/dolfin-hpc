@@ -42,51 +42,51 @@ public:
   /// Destructor
   ~Connectivity();
 
-  Connectivity & operator=( Connectivity const & other );
+  auto operator=( Connectivity const & other ) -> Connectivity &;
 
   /// Equality
-  bool operator==(Connectivity const& other) const;
+  auto operator==(Connectivity const& other) const -> bool;
 
   /// Non-equality
-  bool operator!=(Connectivity const& other) const;
+  auto operator!=(Connectivity const& other) const -> bool;
 
   /// Return array of connections for given entity
-  Array< uint > & operator[](uint entity);
+  auto operator[](uint entity) -> Array< uint > &;
 
   /// Return array of connections for given entity
-  Array< uint > const & operator[](uint entity) const;
+  auto operator[](uint entity) const -> Array< uint > const &;
 
   /// Return arrays of connections for all entities
-  Array< Array< uint > > & operator()();
+  auto operator()() -> Array< Array< uint > > &;
 
   /// Return arrays of connections for all entities
-  Array< Array< uint > > const & operator()() const;
+  auto operator()() const -> Array< Array< uint > > const &;
 
   /// Return incidence of the edge
-  bool incident(uint entity, uint edge) const;
+  auto incident(uint entity, uint edge) const -> bool;
 
   /// Return index of the edge, -1 if not incident
-  int index(uint entity, uint edge) const;
+  auto index(uint entity, uint edge) const -> int;
 
   //---------------------------------------------------------------------------
 
   /// Return number of entities
-  uint order() const;
+  auto order() const -> uint;
 
   /// Return total number of entries
-  uint entries() const;
+  auto entries() const -> uint;
 
   /// Return minimum number of connections
-  uint min_degree() const;
+  auto min_degree() const -> uint;
 
   /// Return maximum number of connections
-  uint max_degree() const;
+  auto max_degree() const -> uint;
 
   /// Return degree if regular, zero otherwise
-  uint regular() const;
+  auto regular() const -> uint;
 
   /// Return number of connections for given entity
-  uint degree(uint entity) const;
+  auto degree(uint entity) const -> uint;
 
   /// Set all connections for given entity
   void set(uint entity, uint const * connections);
@@ -107,7 +107,7 @@ public:
   void dump() const;
 
   //--- SERIALIZATION ---------------------------------------------------------
-  Connectivity const& operator>>(Array<uint>& A) const;
+  auto operator>>(Array<uint>& A) const -> Connectivity const&;
 
   //--- CHECK ROUTINES --------------------------------------------------------
   void check() const;
@@ -129,31 +129,31 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool Connectivity::operator!=(Connectivity const& other) const
+inline auto Connectivity::operator!=(Connectivity const& other) const -> bool
 {
   return not (*this == other);
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > & Connectivity::operator()()
+inline auto Connectivity::operator()() -> Array< Array< uint > > &
 {
   return connections_;
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > const & Connectivity::operator()() const
+inline auto Connectivity::operator()() const -> Array< Array< uint > > const &
 {
   return connections_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Connectivity::order() const
+inline auto Connectivity::order() const -> uint
 {
   return order_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Connectivity::entries() const
+inline auto Connectivity::entries() const -> uint
 {
   uint entries = 0;
 
@@ -164,19 +164,19 @@ inline uint Connectivity::entries() const
 }
 
 //----------------------------------------------------------------------------
-inline uint Connectivity::min_degree() const
+inline auto Connectivity::min_degree() const -> uint
 {
   return min_degree_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Connectivity::max_degree() const
+inline auto Connectivity::max_degree() const -> uint
 {
   return max_degree_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Connectivity::regular() const
+inline auto Connectivity::regular() const -> uint
 {
   return (min_degree_ == max_degree_ ? min_degree_ : 0);
 }
@@ -192,7 +192,7 @@ inline void Connectivity::set(uint entity, uint const * connections)
     connections_[entity][e] = connections[e];
 }
 
-inline uint Connectivity::degree(uint entity) const
+inline auto Connectivity::degree(uint entity) const -> uint
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -200,7 +200,7 @@ inline uint Connectivity::degree(uint entity) const
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > & Connectivity::operator[](uint entity)
+inline auto Connectivity::operator[](uint entity) -> Array< uint > &
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -208,7 +208,7 @@ inline Array< uint > & Connectivity::operator[](uint entity)
 }
 
 //-----------------------------------------------------------------------------
-inline Array< uint > const & Connectivity::operator[](uint entity) const
+inline auto Connectivity::operator[](uint entity) const -> Array< uint > const &
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -216,7 +216,7 @@ inline Array< uint > const & Connectivity::operator[](uint entity) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool Connectivity::incident(uint entity, uint edge) const
+inline auto Connectivity::incident(uint entity, uint edge) const -> bool
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -226,7 +226,7 @@ inline bool Connectivity::incident(uint entity, uint edge) const
 }
 
 //-----------------------------------------------------------------------------
-inline int Connectivity::index(uint entity, uint edge) const
+inline auto Connectivity::index(uint entity, uint edge) const -> int
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -238,7 +238,7 @@ inline int Connectivity::index(uint entity, uint edge) const
 
 //--- OPERATORS ---------------------------------------------------------------
 
-Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C);
+auto operator<<(Array<Array<uint> >& A, Connectivity const& C) -> Array<Array<uint> >&;
 
 } /* namespace dolfin */
 

@@ -41,7 +41,7 @@ MeshQuality::MeshQuality(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-bool MeshQuality::is_inverted(uint& first)
+auto MeshQuality::is_inverted(uint& first) -> bool
 {
   for (CellIterator c(mesh()); !c.end(); ++c)
   {
@@ -55,7 +55,7 @@ bool MeshQuality::is_inverted(uint& first)
 }
 
 //-----------------------------------------------------------------------------
-real MeshQuality::mean_ratio(Cell const& cell) const
+auto MeshQuality::mean_ratio(Cell const& cell) const -> real
 {
   uint const d = cell.dim();
   mapping_.update(cell);
@@ -138,19 +138,19 @@ void MeshQuality::compute()
   }
 }
 //-----------------------------------------------------------------------------
-real MeshQuality::reduceMinReal(real val)
+auto MeshQuality::reduceMinReal(real val) -> real
 {
   MPI::all_reduce_in_place<MPI::min>( val );
   return val;
 }
 //-----------------------------------------------------------------------------
-real MeshQuality::reduceMaxReal(real val)
+auto MeshQuality::reduceMaxReal(real val) -> real
 {
   MPI::all_reduce_in_place<MPI::max>( val );
   return val;
 }
 //-----------------------------------------------------------------------------
-real MeshQuality::reduceAvgReal(real val)
+auto MeshQuality::reduceAvgReal(real val) -> real
 {
   MPI::all_reduce_in_place<MPI::min>( val );
   return val / dolfin::MPI::size();

@@ -19,7 +19,7 @@ public:
 
   typedef Form::Coefficients Coefficients;
 
-  static inline std::string name() { return "LinearForm"; }
+  static inline auto name() -> std::string { return "LinearForm"; }
 
   /// Constructor
   LinearForm(Mesh& mesh);
@@ -28,11 +28,11 @@ public:
   ~LinearForm() override;
 
   /// Test space
-  FiniteElementSpace const& test_space() const;
+  auto test_space() const -> FiniteElementSpace const&;
 
   /// Creator function
   template <class E> static inline
-  typename E::LinearForm * create(Mesh& mesh, CoefficientMap& coefs)
+  auto create(Mesh& mesh, CoefficientMap& coefs) -> typename E::LinearForm *
   {
     return new typename E::LinearForm(mesh, coefs);
   }
@@ -45,7 +45,7 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline FiniteElementSpace const& LinearForm::test_space() const
+inline auto LinearForm::test_space() const -> FiniteElementSpace const&
 {
   if (!test_space_)
   {

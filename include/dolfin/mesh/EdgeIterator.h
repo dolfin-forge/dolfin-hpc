@@ -28,24 +28,24 @@ public:
   {
   }
 
-  inline Edge * operator->();
+  inline auto operator->() -> Edge *;
 
-  inline Edge & operator*();
+  inline auto operator*() -> Edge &;
 
-  inline Edge & operator[]( uint i );
+  inline auto operator[]( uint i ) -> Edge &;
 };
 
-inline Edge * EdgeIterator::operator->()
+inline auto EdgeIterator::operator->() -> Edge *
 {
   return static_cast< Edge * >( MeshEntityIterator::operator->() );
 }
 
-inline Edge & EdgeIterator::operator*()
+inline auto EdgeIterator::operator*() -> Edge &
 {
   return *operator->();
 }
 
-inline Edge & EdgeIterator::operator[]( uint i )
+inline auto EdgeIterator::operator[]( uint i ) -> Edge &
 {
   return static_cast< Edge & >( MeshEntityIterator::operator[]( i ) );
 }

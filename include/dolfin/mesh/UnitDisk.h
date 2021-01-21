@@ -36,11 +36,11 @@ public:
 
 private:
 
-  real transformx(real x, real y, Transformation transformation);
+  auto transformx(real x, real y, Transformation transformation) -> real;
 
-  real transformy(real x, real y, Transformation transformation);
+  auto transformy(real x, real y, Transformation transformation) -> real;
 
-  inline real max(real x, real y)
+  inline auto max(real x, real y) -> real
   {
     return ((x > y) ? x : y);
   }

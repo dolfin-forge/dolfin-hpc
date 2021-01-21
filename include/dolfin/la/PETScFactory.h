@@ -23,16 +23,16 @@ public:
   ~PETScFactory() override = default;
 
   /// Create empty matrix
-  PETScMatrix * createMatrix() const override;
+  auto createMatrix() const -> PETScMatrix * override;
 
   /// Create empty vector
-  PETScVector * createVector() const override;
+  auto createVector() const -> PETScVector * override;
 
   /// Create empty sparsity pattern
-  SparsityPattern * createPattern() const override;
+  auto createPattern() const -> SparsityPattern * override;
 
   /// Return singleton instance
-  static PETScFactory & instance()
+  static auto instance() -> PETScFactory &
   {
     return factory;
   }

@@ -55,17 +55,17 @@ public:
 protected:
 
   /// Meyers singleton
-  static DofMapCache& instance()
+  static auto instance() -> DofMapCache&
   {
     static DofMapCache instance_;
     return instance_;
   }
 
   /// Return a dofmap corresponding to the i-th coefficient space
-  DofMap& acquire(Mesh& mesh, Form const& form, uint const& i);
+  auto acquire(Mesh& mesh, Form const& form, uint const& i) -> DofMap&;
 
   /// Return a dofmap for the UFC dofmap object
-  DofMap& acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner);
+  auto acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner) -> DofMap&;
 
   ///
   void release(DofMap& dofmap);

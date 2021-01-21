@@ -19,7 +19,7 @@ Jacobi::Jacobi(uint n, real a, real b) :
 {
 }
 //-----------------------------------------------------------------------------
-real Jacobi::eval(uint n, real a, real b, real x)
+auto Jacobi::eval(uint n, real a, real b, real x) -> real
 {
   // Special case n = 0
   if (n == 0) return 1.0;
@@ -48,7 +48,7 @@ real Jacobi::eval(uint n, real a, real b, real x)
   return p;
 }
 //-----------------------------------------------------------------------------
-real Jacobi::ddx(uint n, real a, real b, real x)
+auto Jacobi::ddx(uint n, real a, real b, real x) -> real
 {
   // Special case n = 0
   if (n == 0) return 0.0;

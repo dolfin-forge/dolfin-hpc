@@ -20,10 +20,9 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Test::Test(int argc, char *argv[]) :
     Startup(argc, argv),
-    btest_(false),
-    dir_(""),
-    total_(0.0),
-    padding_(0)
+    
+    dir_("")
+    
 {
   init(argc, argv);
 }

@@ -45,7 +45,7 @@ inline void append( Array< T > & array, Iterator begin, Iterator end )
 //-----------------------------------------------------------------------------
 
 template < typename T >
-inline uint max_array_size( Array< Array< T > > const & arrays )
+inline auto max_array_size( Array< Array< T > > const & arrays ) -> uint
 {
     return std::max_element( arrays.begin(), arrays.end(),
                              []( Array< T > const & a, Array< T > const & b ) {

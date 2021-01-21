@@ -20,7 +20,7 @@ Form::Form(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-bool Form::check(Array<Coefficient*> const& coefficients) const
+auto Form::check(Array<Coefficient*> const& coefficients) const -> bool
 {
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
@@ -111,7 +111,7 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
 }
 
 //-----------------------------------------------------------------------------
-bool Form::is_valid_index(uint i) const
+auto Form::is_valid_index(uint i) const -> bool
 {
   // Check argument
   uint const num_arguments = form().rank() + form().num_coefficients();

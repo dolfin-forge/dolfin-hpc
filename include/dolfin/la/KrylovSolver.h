@@ -45,7 +45,7 @@ public:
   ~KrylovSolver();
 
   /// Solve linear system Ax = b
-  uint solve(GenericMatrix const& A, GenericVector& x, GenericVector const& b);
+  auto solve(GenericMatrix const& A, GenericVector& x, GenericVector const& b) -> uint;
 
 private:
 

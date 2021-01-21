@@ -47,8 +47,8 @@ public:
   inline void tabulate_dofs(uint* dofs, ufc::cell const&,
                             Cell const& cell) const override
   {
-    uint const ii = ufc_dofmap.num_element_support_dofs() * cell.index();
-    std::copy(&array[ii], &array[ii] + ufc_dofmap.num_element_support_dofs(), dofs);
+    uint const ii = ufc_dofmap.num_element_dofs() * cell.index();
+    std::copy(&array[ii], &array[ii] + ufc_dofmap.num_element_dofs(), dofs);
   }
 
   ///
@@ -69,7 +69,7 @@ public:
      */
 
     uint const tdim = mesh.topology_dimension();
-    uint * dofs = new uint[ufc_dofmap.num_element_support_dofs()];
+    uint * dofs = new uint[ufc_dofmap.num_element_dofs()];
     _set<uint> owned;
     _set<uint> ufc_ghosts;
     _set<uint> ufc_shared;
@@ -104,7 +104,7 @@ public:
     uint * facet_dofs = new uint[ufc_dofmap.num_facet_dofs()];
 
     // FIXME num_entities should maybe be stored somewhere else
-    std::vector< size_t > num_entities( tdim, 0 );
+    std::vector< size_t > num_entities( tdim+1, 0 );
     for ( uint d = 0; d <= tdim; ++d )
     {
       if ( mesh.topology().connectivity( d ) )
@@ -122,7 +122,7 @@ public:
       ufc_dofmap.tabulate_dofs(dofs, num_entities, ufc_cell.entity_indices);
 
       // Create mapping from dof to dofmap offset
-      for (uint i = 0; i < ufc_dofmap.num_element_support_dofs(); ++i)
+      for (uint i = 0; i < ufc_dofmap.num_element_dofs(); ++i)
       {
         dof2index[dofs[i]].push_back(ii++);
       }
@@ -179,7 +179,7 @@ public:
     dolfin_assert(ufc_shared.size() == num_expected_shared - num_expected_ghosts);
 
     // Renumber dofs
-    array_size = mesh.num_cells() * ufc_dofmap.num_element_support_dofs();
+    array_size = mesh.num_cells() * ufc_dofmap.num_element_dofs();
     array = new uint[array_size];
 
     uint const range = owned.size();

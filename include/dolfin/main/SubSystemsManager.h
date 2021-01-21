@@ -17,7 +17,7 @@ class SubSystemsManager
 {
 
   // Singleton instance
-  static SubSystemsManager& instance()
+  static auto instance() -> SubSystemsManager&
   {
     static SubSystemsManager instance_;
     return instance_;
@@ -33,7 +33,7 @@ public:
               zoltan    = 16 };
 
   //-------------------------------------------------------------------------
-  static int start(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0)
+  static auto start(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0) -> int
   {
     return SubSystemsManager::instance().init(argc, argv, n, w_limit);
   }
@@ -45,7 +45,7 @@ public:
   }
 
   //-------------------------------------------------------------------------
-  static inline bool active(SubSystemsManager::Type s)
+  static inline auto active(SubSystemsManager::Type s) -> bool
   {
     return SubSystemsManager::instance().iset(s);
   }
@@ -56,13 +56,13 @@ public:
     static SubSystemsManager::Type const flag = mpi;
 
     /// Initialize MPI
-    static bool init(int argc = 0, char* argv[] = nullptr, uint n = 0);
+    static auto init(int argc = 0, char* argv[] = nullptr, uint n = 0) -> bool;
 
     /// Finalize MPI
-    static bool fini();
+    static auto fini() -> bool;
 
     // Check if MPI has been initialized
-    static bool initialized();
+    static auto initialized() -> bool;
 
     ///
     static int sema;
@@ -74,10 +74,10 @@ public:
     static SubSystemsManager::Type const flag = petsc;
 
     /// Initialize PETSc with command-line arguments
-    static bool init(int argc = 0, char* argv[] = nullptr);
+    static auto init(int argc = 0, char* argv[] = nullptr) -> bool;
 
     /// Finalize PETSc
-    static bool fini();
+    static auto fini() -> bool;
 
     ///
     static int sema;
@@ -101,10 +101,10 @@ public:
     static SubSystemsManager::Type const flag = zoltan;
 
     /// Initialize PETSc with command-line arguments
-    static bool init(int argc = 0, char* argv[] = nullptr);
+    static auto init(int argc = 0, char* argv[] = nullptr) -> bool;
 
     /// Finalize PETSc
-    static bool fini();
+    static auto fini() -> bool;
 
     ///
     static int sema;
@@ -115,15 +115,15 @@ public:
 
   //--- ALARM ---------------------------------------------------------------
 
-  static alarm& timer()
+  static auto timer() -> alarm&
   {
     return SubSystemsManager::instance().alarm_handler();
   }
 
 private:
 
-  int init(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0);
-  int fini();
+  auto init(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0) -> int;
+  auto fini() -> int;
 
   // Constructor
   SubSystemsManager() = default;
@@ -139,9 +139,9 @@ private:
 
   void fini(SubSystemsManager::Type s) { state_ &= (1 ^ s); }
 
-  bool iset(SubSystemsManager::Type s) const { return (state_ & s) == s; }
+  auto iset(SubSystemsManager::Type s) const -> bool { return (state_ & s) == s; }
 
-  alarm& alarm_handler() { return timer_; }
+  auto alarm_handler() -> alarm& { return timer_; }
 
   // State variable
   int count_{0};

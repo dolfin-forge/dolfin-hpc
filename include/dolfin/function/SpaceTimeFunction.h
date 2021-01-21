@@ -24,7 +24,7 @@ public:
   ~SpaceTimeFunction() override;
 
   /// Load samples
-  uint load();
+  auto load() -> uint;
 
   /// Save sample
   void eval();
@@ -41,7 +41,7 @@ public:
   //---------------------------------------------------------------------------
 
   /// Time dependency
-  inline Function& operator()(Time const& t)
+  inline auto operator()(Time const& t) -> Function&
   {
     return Function::operator ()(t);
   }
@@ -49,7 +49,7 @@ public:
   //---------------------------------------------------------------------------
 
   /// File name format
-  static std::string filename(std::string const& basename, uint id);
+  static auto filename(std::string const& basename, uint id) -> std::string;
 
   //---------------------------------------------------------------------------
 

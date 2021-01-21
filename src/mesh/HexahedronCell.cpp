@@ -421,7 +421,7 @@ void HexahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
   editor.add_cell(current_cell++, &cv7[0]);
 }
 //-----------------------------------------------------------------------------
-bool HexahedronCell::intersects(MeshEntity const& e, Point const&) const
+auto HexahedronCell::intersects(MeshEntity const& e, Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[3][0]);
@@ -446,8 +446,8 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const&) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool HexahedronCell::intersects(MeshEntity const& e, Point const&,
-                                Point const&) const
+auto HexahedronCell::intersects(MeshEntity const& e, Point const&,
+                                Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[3][0]);
@@ -490,7 +490,7 @@ void HexahedronCell::create_reference_cell(Mesh& mesh) const
   me.close();
 }
 //-----------------------------------------------------------------------------
-std::string HexahedronCell::description() const
+auto HexahedronCell::description() const -> std::string
 {
   return std::string("hexahedron (hypercube of topological dimension 3)");
 }
@@ -505,7 +505,7 @@ void HexahedronCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-bool HexahedronCell::check(Cell& cell) const
+auto HexahedronCell::check(Cell& cell) const -> bool
 {
   bool ret = CellType::check(cell);
 
@@ -560,7 +560,7 @@ bool HexahedronCell::check(Cell& cell) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-uint HexahedronCell::findEdge(uint i, Cell const& cell) const
+auto HexahedronCell::findEdge(uint i, Cell const& cell) const -> uint
 {
   // Ordering convention for edges (order of non-incident vertices)
 
@@ -591,7 +591,7 @@ uint HexahedronCell::findEdge(uint i, Cell const& cell) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint HexahedronCell::findFace(uint i, Cell const& cell) const
+auto HexahedronCell::findFace(uint i, Cell const& cell) const -> uint
 {
   // Ordering convention for faces (order of non-incident vertices)
 

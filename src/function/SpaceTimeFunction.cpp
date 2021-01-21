@@ -42,7 +42,7 @@ SpaceTimeFunction::~SpaceTimeFunction()
   delete [] W_;
 }
 //-----------------------------------------------------------------------------
-uint SpaceTimeFunction::load()
+auto SpaceTimeFunction::load() -> uint
 {
   if (this->empty())
   {
@@ -157,7 +157,7 @@ void SpaceTimeFunction::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-std::string SpaceTimeFunction::filename(std::string const& basename, uint id)
+auto SpaceTimeFunction::filename(std::string const& basename, uint id) -> std::string
 {
   std::ostringstream filename;
   filename << basename << std::setw(6) << std::setfill('0') << id;

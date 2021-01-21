@@ -22,13 +22,13 @@ public:
 
   //----------------------------------------------------------------------------
   // access data
-  MPI::Communicator &       comm();
-  MPI::Communicator const & comm() const;
+  auto       comm() -> MPI::Communicator &;
+  auto comm() const -> MPI::Communicator const &;
 
-  inline uint comm_rank() const;
-  inline uint comm_size() const;
+  inline auto comm_rank() const -> uint;
+  inline auto comm_size() const -> uint;
 
-  inline bool distributed() const;
+  inline auto distributed() const -> bool;
 
   /// Swap instances
   friend void swap( Distributed< T > & a, Distributed< T > & b )
@@ -41,7 +41,7 @@ protected:
   //----------------------------------------------------------------------------
   virtual ~Distributed();
 
-  Distributed & operator=( Distributed const & other );
+  auto operator=( Distributed const & other ) -> Distributed &;
 
 private:
   //----------------------------------------------------------------------------
@@ -90,34 +90,34 @@ Distributed< T >::Distributed( Distributed const & other )
 }
 //------------------------------------------------------------------------------
 template < typename T >
-MPI::Communicator & Distributed< T >::comm()
+auto Distributed< T >::comm() -> MPI::Communicator &
 {
   return comm_;
 }
 //------------------------------------------------------------------------------
 template < typename T >
-MPI::Communicator const & Distributed< T >::comm() const
+auto Distributed< T >::comm() const -> MPI::Communicator const &
 {
   return comm_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
-inline uint Distributed< T >::comm_rank() const
+inline auto Distributed< T >::comm_rank() const -> uint
 {
   return comm_rank_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
-inline uint Distributed< T >::comm_size() const
+inline auto Distributed< T >::comm_size() const -> uint
 {
   return comm_size_;
 }
 
 //------------------------------------------------------------------------------
 template < typename T >
-inline bool Distributed< T >::distributed() const
+inline auto Distributed< T >::distributed() const -> bool
 {
   return comm_size_ > 1;
 }
@@ -134,7 +134,7 @@ Distributed< T >::~Distributed()
 
 //------------------------------------------------------------------------------
 template < typename T >
-Distributed< T > & Distributed< T >::operator=( Distributed< T > const & other )
+auto Distributed< T >::operator=( Distributed< T > const & other ) -> Distributed< T > &
 {
   if ( this != &other )
   {

@@ -16,7 +16,7 @@ class FunctionDecomposition
 
 public:
   ///
-  static Array<Function *> compute(Function const& F);
+  static auto compute(Function const& F) -> Array<Function *>;
 };
 
 } /* namespace dolfin */

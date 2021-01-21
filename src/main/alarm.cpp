@@ -42,7 +42,7 @@ void alarm::action(int sig_code)
     }
 }
 //-----------------------------------------------------------------------------
-bool alarm::set_limit(long wall_clock_limit)
+auto alarm::set_limit(long wall_clock_limit) -> bool
 {
   if (wall_clock_limit > 0)
   {
@@ -75,7 +75,7 @@ bool alarm::set_limit(long wall_clock_limit)
 }
 
 //-----------------------------------------------------------------------------
-bool alarm::state() const
+auto alarm::state() const -> bool
 {
   return WALL_CLOCK_LIMIT;
 }

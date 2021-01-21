@@ -61,10 +61,10 @@ public:
   void init(const GenericSparsityPattern& sparsity_pattern) override;
 
   /// Return copy of tensor
-  PETScMatrix* copy() const override;
+  auto copy() const -> PETScMatrix* override;
 
   /// Return size of given dimension
-  uint size(uint dim) const override;
+  auto size(uint dim) const -> uint override;
 
   /// Set all entries to zero and keep any sparse structure
   void zero() override;
@@ -96,7 +96,7 @@ public:
            const uint* cols) override;
 
   /// Return norm of matrix
-  real norm(std::string norm_type = "frobenius") const override;
+  auto norm(std::string norm_type = "frobenius") const -> real override;
 
   /// Get non-zero values of given row
   void getrow(uint row, Array<uint>& columns, Array<real>& values) const override;
@@ -118,35 +118,35 @@ public:
             bool transposed = false) const override;
 
   /// Multiply matrix by given number
-  const PETScMatrix& operator*=(real a) override;
+  auto operator*=(real a) -> const PETScMatrix& override;
 
   /// Divide matrix by given number
-  const PETScMatrix& operator/=(real a) override;
+  auto operator/=(real a) -> const PETScMatrix& override;
 
   /// Assignment operator
-  const GenericMatrix& operator=(const GenericMatrix& A) override;
+  auto operator=(const GenericMatrix& A) -> const GenericMatrix& override;
 
   /// Get number of non-zeros in the matrix
-  uint nz() const override;
+  auto nz() const -> uint override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const override;
+  auto factory() const -> LinearAlgebraFactory& override;
 
   //--- Special PETScFunctions ---
 
   /// Return PETSc Mat pointer
-  Mat mat() const;
+  auto mat() const -> Mat;
 
   /// Return norm of matrix
-  real norm(const Norm type = l1) const;
+  auto norm(const Norm type = l1) const -> real;
 
   /// Assignment operator
-  const PETScMatrix& operator=(const PETScMatrix& A);
+  auto operator=(const PETScMatrix& A) -> const PETScMatrix&;
 
   /// Matrix axpy, Y = a X+ Y
-  const PETScMatrix& operator+=(const PETScMatrix& A);
+  auto operator+=(const PETScMatrix& A) -> const PETScMatrix&;
 
 private:
 
@@ -188,7 +188,7 @@ inline void PETScMatrix::init( uint M, uint N )
   init( M, N, true );
 }
 //-----------------------------------------------------------------------------
-inline uint PETScMatrix::size( uint dim ) const
+inline auto PETScMatrix::size( uint dim ) const -> uint
 {
   int M = 0;
   int N = 0;
@@ -196,7 +196,7 @@ inline uint PETScMatrix::size( uint dim ) const
   return ( dim == 0 ? M : N );
 }
 //-----------------------------------------------------------------------------
-inline uint PETScMatrix::nz() const
+inline auto PETScMatrix::nz() const -> uint
 {
   MatInfo info;
   MatGetInfo( A, MAT_GLOBAL_SUM, &info );
@@ -264,28 +264,28 @@ inline void PETScMatrix::zero()
   MatZeroEntries( A );
 }
 //-----------------------------------------------------------------------------
-inline const PETScMatrix & PETScMatrix::operator+=( const PETScMatrix & A )
+inline auto PETScMatrix::operator+=( const PETScMatrix & A ) -> const PETScMatrix &
 {
   dolfin_assert( this->A );
   MatAXPY( this->A, 1.0, A.A, SAME_NONZERO_PATTERN );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline const PETScMatrix & PETScMatrix::operator*=( real a )
+inline auto PETScMatrix::operator*=( real a ) -> const PETScMatrix &
 {
   dolfin_assert( A );
   MatScale( A, a );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline const PETScMatrix & PETScMatrix::operator/=( real a )
+inline auto PETScMatrix::operator/=( real a ) -> const PETScMatrix &
 {
   dolfin_assert( A );
   MatScale( A, 1.0 / a );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline const GenericMatrix & PETScMatrix::operator=( const GenericMatrix & A )
+inline auto PETScMatrix::operator=( const GenericMatrix & A ) -> const GenericMatrix &
 {
   if ( &A != this )
   {
@@ -294,7 +294,7 @@ inline const GenericMatrix & PETScMatrix::operator=( const GenericMatrix & A )
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline const PETScMatrix & PETScMatrix::operator=( const PETScMatrix & A )
+inline auto PETScMatrix::operator=( const PETScMatrix & A ) -> const PETScMatrix &
 {
   if ( &A != this )
   {
@@ -308,7 +308,7 @@ inline void PETScMatrix::dup( GenericMatrix & A )
   MatDuplicate( A.down_cast< PETScMatrix >().A, MAT_COPY_VALUES, &this->A );
 }
 //-----------------------------------------------------------------------------
-inline Mat PETScMatrix::mat() const
+inline auto PETScMatrix::mat() const -> Mat
 {
   return A;
 }

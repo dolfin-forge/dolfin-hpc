@@ -17,7 +17,7 @@ public:
 
   typedef Form::Coefficients Coefficients;
 
-  static inline std::string name() { return "Functional"; }
+  static inline auto name() -> std::string { return "Functional"; }
 
   /// Constructor
   Functional(Mesh& mesh);
@@ -27,7 +27,7 @@ public:
 
   /// Creator function
   template <class E> static inline
-  typename E::Functional * create(Mesh& mesh, Coefficients& coefs)
+  auto create(Mesh& mesh, Coefficients& coefs) -> typename E::Functional *
   {
     return new typename E::Functional(mesh, coefs);
   }

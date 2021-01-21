@@ -92,7 +92,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       // Tabulate dofs for each dimension on macro element
       for (uint i = 0; i < ufc.form.rank(); ++i)
       {
-        const uint offset = dof_map_set[i].num_element_support_dofs();
+        const uint offset = dof_map_set[i].num_element_dofs();
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i], ufc.cell0);
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1);
       }

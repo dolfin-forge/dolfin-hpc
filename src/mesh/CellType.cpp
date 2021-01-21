@@ -37,7 +37,7 @@ CellType::~CellType()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Array< CellType * > CellType::create_all()
+auto CellType::create_all() -> Array< CellType * >
 {
   Array< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
@@ -48,7 +48,7 @@ Array< CellType * > CellType::create_all()
   return ret;
 }
 //-----------------------------------------------------------------------------
-Array< CellType * > CellType::create_simplex()
+auto CellType::create_simplex() -> Array< CellType * >
 {
   Array< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
@@ -57,7 +57,7 @@ Array< CellType * > CellType::create_simplex()
   return ret;
 }
 //-----------------------------------------------------------------------------
-CellType * CellType::create_simplex( uint dim )
+auto CellType::create_simplex( uint dim ) -> CellType *
 {
   switch ( dim )
   {
@@ -77,7 +77,7 @@ CellType * CellType::create_simplex( uint dim )
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-Array< CellType * > CellType::create_hypercube()
+auto CellType::create_hypercube() -> Array< CellType * >
 {
   Array< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
@@ -86,7 +86,7 @@ Array< CellType * > CellType::create_hypercube()
   return ret;
 }
 //-----------------------------------------------------------------------------
-CellType * CellType::create_hypercube( uint dim )
+auto CellType::create_hypercube( uint dim ) -> CellType *
 {
   switch ( dim )
   {
@@ -106,7 +106,7 @@ CellType * CellType::create_hypercube( uint dim )
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-CellType * CellType::create( CellType::Type type )
+auto CellType::create( CellType::Type type ) -> CellType *
 {
   switch ( type )
   {
@@ -130,7 +130,7 @@ CellType * CellType::create( CellType::Type type )
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-CellType * CellType::create( std::string const & type )
+auto CellType::create( std::string const & type ) -> CellType *
 {
   if ( type == "point" )
   {
@@ -164,7 +164,7 @@ CellType * CellType::create( std::string const & type )
   return nullptr;
 }
 //-----------------------------------------------------------------------------
-bool CellType::intersects( MeshEntity & entity, Cell & c ) const
+auto CellType::intersects( MeshEntity & entity, Cell & c ) const -> bool
 {
   for ( VertexIterator vi( entity ); !vi.end(); ++vi )
   {
@@ -189,7 +189,7 @@ bool CellType::intersects( MeshEntity & entity, Cell & c ) const
   return false;
 }
 //-----------------------------------------------------------------------------
-CellType::Type CellType::type( std::string const & type )
+auto CellType::type( std::string const & type ) -> CellType::Type
 {
   if ( type == "point" )
   {
@@ -223,7 +223,7 @@ CellType::Type CellType::type( std::string const & type )
   return point;
 }
 //-----------------------------------------------------------------------------
-std::string CellType::str( CellType::Type type )
+auto CellType::str( CellType::Type type ) -> std::string
 {
   switch ( type )
   {
@@ -247,12 +247,12 @@ std::string CellType::str( CellType::Type type )
   return "";
 }
 //-----------------------------------------------------------------------------
-std::string const & CellType::str() const
+auto CellType::str() const -> std::string const &
 {
   return name_;
 }
 //-----------------------------------------------------------------------------
-bool CellType::check( Cell & cell ) const
+auto CellType::check( Cell & cell ) const -> bool
 {
   // Throw a hard error
   if ( cell.type() != this->cellType() )
@@ -287,7 +287,7 @@ bool CellType::check( Cell & cell ) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-uint const * CellType::is_sorted_until( uint const * begin, uint const * end )
+auto CellType::is_sorted_until( uint const * begin, uint const * end ) -> uint const *
 {
   if ( begin == end )
   {
@@ -305,12 +305,12 @@ uint const * CellType::is_sorted_until( uint const * begin, uint const * end )
   return end;
 }
 //-----------------------------------------------------------------------------
-bool CellType::is_sorted( uint const * begin, uint const * end )
+auto CellType::is_sorted( uint const * begin, uint const * end ) -> bool
 {
   return ( is_sorted_until( begin, end ) == end );
 }
 //-----------------------------------------------------------------------------
-bool CellType::pattern_applies( Cell & cell ) const
+auto CellType::pattern_applies( Cell & cell ) const -> bool
 {
   return ( cell.type() == this->cellType() );
 }

@@ -335,7 +335,7 @@ void TetrahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
   editor.add_cell(current_cell++, &cv7[0]);
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
+auto TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const -> bool
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
@@ -369,8 +369,8 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::intersects(MeshEntity const& e, Point const&,
-                                 Point const&) const
+auto TetrahedronCell::intersects(MeshEntity const& e, Point const&,
+                                 Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[3][0]);
@@ -394,7 +394,7 @@ void TetrahedronCell::create_reference_cell(Mesh& mesh) const
   me.close();
 }
 //-----------------------------------------------------------------------------
-std::string TetrahedronCell::description() const
+auto TetrahedronCell::description() const -> std::string
 {
   return std::string("tetrahedron (simplex of topological dimension 3)");
 }
@@ -408,7 +408,7 @@ void TetrahedronCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::check(Cell& cell) const
+auto TetrahedronCell::check(Cell& cell) const -> bool
 {
   bool ret = CellType::check(cell);
 
@@ -473,7 +473,7 @@ bool TetrahedronCell::check(Cell& cell) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-uint TetrahedronCell::findEdge(uint i, Cell const& cell) const
+auto TetrahedronCell::findEdge(uint i, Cell const& cell) const -> uint
 {
   // Ordering convention for edges (order of non-incident vertices)
 

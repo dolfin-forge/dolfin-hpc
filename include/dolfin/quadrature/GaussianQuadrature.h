@@ -36,7 +36,7 @@ namespace dolfin {
     void computeWeights();
 
     // Check that quadrature is exact for given degree q
-    bool check(unsigned int q) const;
+    auto check(unsigned int q) const -> bool;
 
     /// Display quadrature data
     void disp() const override = 0;

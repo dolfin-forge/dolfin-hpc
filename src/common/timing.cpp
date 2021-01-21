@@ -18,7 +18,7 @@ void tic()
   _dolfin_timer_.push( clock() );
 }
 //-----------------------------------------------------------------------------
-real toc()
+auto toc() -> real
 {
   if ( _dolfin_timer_.empty() )
   {
@@ -30,14 +30,14 @@ real toc()
   return t;
 }
 //-----------------------------------------------------------------------------
-real tocd( uint level )
+auto tocd( uint level ) -> real
 {
   real const elapsed_time = toc();
   message( level, "Elapsed time: %8e seconds", elapsed_time );
   return elapsed_time;
 }
 //-----------------------------------------------------------------------------
-real time()
+auto time() -> real
 {
   return static_cast< real >( clock() ) / CLOCKS_PER_SEC;
 }

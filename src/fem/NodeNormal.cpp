@@ -100,7 +100,7 @@ void NodeNormal::compute()
 }
 
 //-----------------------------------------------------------------------------
-uint NodeNormal::node_type(uint node_id) const
+auto NodeNormal::node_type(uint node_id) const -> uint
 {
   dolfin_assert(node_type_.size() > 0);
   _map<uint, uint>::const_iterator it = node_type_.find(node_id);

@@ -29,30 +29,30 @@ public:
   ~LAPACKVector();
 
   /// Return size of vector
-  uint size() const
+  auto size() const -> uint
   {
     return M_;
   }
 
-  double * values()
+  auto values() -> double *
   {
     return values_;
   }
 
   /// Access entry i
-  double& operator[](uint i)
+  auto operator[](uint i) -> double&
   {
     return values_[i];
   }
 
   /// Access entry i, const version
-  double operator[](uint i) const
+  auto operator[](uint i) const -> double
   {
     return values_[i];
   }
 
   /// Return informal string representation (pretty-print)
-  std::string str(bool verbose) const;
+  auto str(bool verbose) const -> std::string;
 
 private:
 

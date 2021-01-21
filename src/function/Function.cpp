@@ -113,7 +113,7 @@ Function::Function(SubFunction const& sub_function) :
   // Copy subvector, naive implementation
   Function& gFunc = sub_function.function();
   DofMap const& gDm = gFunc.space().dofmap();
-  uint const gLocalDim = gDm.num_element_support_dofs();
+  uint const gLocalDim = gDm.num_element_dofs();
   uint const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
   uint const thisLocalDim = scratch->local_dimension;
 
@@ -615,7 +615,7 @@ void Function::sync()
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator=(Function const& other)
+auto Function::operator=(Function const& other) -> Function&
 {
   if(this == &other)
   {
@@ -650,7 +650,7 @@ Function& Function::operator=(Function const& other)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::swap(Function& other)
+auto Function::swap(Function& other) -> Function&
 {
   TimeDependent::swap(other);
   std::swap(const_cast<Mesh *&>(this->mesh_), const_cast<Mesh *&>(other.mesh_));

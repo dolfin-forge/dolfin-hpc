@@ -90,7 +90,7 @@ SharedMapping::SharedMapping( DistributedData const & data )
 #endif /* HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
-Array< uint > const & SharedMapping::to( uint rank ) const
+auto SharedMapping::to( uint rank ) const -> Array< uint > const &
 {
   _map< uint, AdjacentMapping >::const_iterator it = mappings_.find( rank );
   if ( it == mappings_.end() )
@@ -100,7 +100,7 @@ Array< uint > const & SharedMapping::to( uint rank ) const
   return it->second.send;
 }
 //-----------------------------------------------------------------------------
-Array< uint > const & SharedMapping::from( uint rank ) const
+auto SharedMapping::from( uint rank ) const -> Array< uint > const &
 {
   _map< uint, AdjacentMapping >::const_iterator it = mappings_.find( rank );
   if ( it == mappings_.end() )

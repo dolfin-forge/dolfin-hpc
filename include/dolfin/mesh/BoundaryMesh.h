@@ -55,25 +55,25 @@ public:
   ~BoundaryMesh() override;
 
   /// Return facet index in the mesh associated with the boundary cell
-  uint facet_index(Cell const& boundary_cell) const;
+  auto facet_index(Cell const& boundary_cell) const -> uint;
 
   /// Return facet index in the mesh associated with the boundary cell
-  uint facet_index(uint boundary_cell_index) const;
+  auto facet_index(uint boundary_cell_index) const -> uint;
 
   /// Return vertex index in the mesh associated with the boundary vertex
-  uint vertex_index(Vertex const& boundary_vertex) const;
+  auto vertex_index(Vertex const& boundary_vertex) const -> uint;
 
   /// Return vertex index in the mesh associated with the boundary vertex
-  uint vertex_index(uint boundary_vertex_index) const;
+  auto vertex_index(uint boundary_vertex_index) const -> uint;
 
   /// Return type
-  Type boundary_type() const;
+  auto boundary_type() const -> Type;
 
   /// Return whether it is the boundary of a boundary mesh
-  bool is_boundary_of_boundary() const;
+  auto is_boundary_of_boundary() const -> bool;
 
   /// Return if the topology should be reordered
-  bool reordering() const override { return false; }
+  auto reordering() const -> bool override { return false; }
 
 private:
 
@@ -99,36 +99,36 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline uint BoundaryMesh::facet_index(Cell const& boundary_cell) const
+inline auto BoundaryMesh::facet_index(Cell const& boundary_cell) const -> uint
 {
   dolfin_assert(&boundary_cell.mesh() == this);
   return cell_map_[boundary_cell.index()];
 }
 //-----------------------------------------------------------------------------
-inline uint BoundaryMesh::facet_index(uint boundary_cell_index) const
+inline auto BoundaryMesh::facet_index(uint boundary_cell_index) const -> uint
 {
   dolfin_assert(boundary_cell_index < cell_map_.size());
   return cell_map_[boundary_cell_index];
 }
 //-----------------------------------------------------------------------------
-inline uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex) const
+inline auto BoundaryMesh::vertex_index(Vertex const& boundary_vertex) const -> uint
 {
   dolfin_assert(&boundary_vertex.mesh() == this);
   return vertex_map_[boundary_vertex.index()];
 }
 //-----------------------------------------------------------------------------
-inline uint BoundaryMesh::vertex_index(uint boundary_vertex_index) const
+inline auto BoundaryMesh::vertex_index(uint boundary_vertex_index) const -> uint
 {
   dolfin_assert(boundary_vertex_index < vertex_map_.size());
   return vertex_map_[boundary_vertex_index];
 }
 //-----------------------------------------------------------------------------
-inline BoundaryMesh::Type BoundaryMesh::boundary_type() const
+inline auto BoundaryMesh::boundary_type() const -> BoundaryMesh::Type
 {
   return type_;
 }
 //-----------------------------------------------------------------------------
-inline bool BoundaryMesh::is_boundary_of_boundary() const
+inline auto BoundaryMesh::is_boundary_of_boundary() const -> bool
 {
   return boundary_of_boundary_;
 }

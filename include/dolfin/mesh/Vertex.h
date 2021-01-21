@@ -44,16 +44,16 @@ public:
   ~Vertex() = default;
 
   /// Return array of vertex coordinates
-  inline real * x();
+  inline auto x() -> real *;
 
   /// Return array of vertex coordinates
-  inline const real * x() const;
+  inline auto x() const -> const real *;
 
   /// Return vertex coordinates as a 3D point value
-  inline Point point() const;
+  inline auto point() const -> Point;
 
   /// Return vertex coordinates as a 3D point value
-  inline Point midpoint() const;
+  inline auto midpoint() const -> Point;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -102,25 +102,25 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-inline real * Vertex::x()
+inline auto Vertex::x() -> real *
 {
   return mesh_.geometry().x( index_ );
 }
 
 //-----------------------------------------------------------------------------
-inline const real * Vertex::x() const
+inline auto Vertex::x() const -> const real *
 {
   return mesh_.geometry().x( index_ );
 }
 
 //-----------------------------------------------------------------------------
-inline Point Vertex::point() const
+inline auto Vertex::point() const -> Point
 {
   return mesh_.geometry().point( index_ );
 }
 
 //-----------------------------------------------------------------------------
-inline Point Vertex::midpoint() const
+inline auto Vertex::midpoint() const -> Point
 {
   return mesh_.geometry().point( index_ );
 }

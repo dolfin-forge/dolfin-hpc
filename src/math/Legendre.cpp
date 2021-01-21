@@ -18,7 +18,7 @@ Legendre::Legendre(uint n) :
 {
 }
 //-----------------------------------------------------------------------------
-real Legendre::eval(uint n, real x)
+auto Legendre::eval(uint n, real x) -> real
 {
   // Special case n = 0
   if (n == 0) return 1.0;
@@ -30,7 +30,7 @@ real Legendre::eval(uint n, real x)
   return Jacobi::eval(n, 0.0, 0.0, x);
 }
 //-----------------------------------------------------------------------------
-real Legendre::ddx(uint n, real x)
+auto Legendre::ddx(uint n, real x) -> real
 {
   // Special case n = 0
   if (n == 0) return 0.0;
@@ -47,7 +47,7 @@ real Legendre::ddx(uint n, real x)
   return nn * (x * eval(n, x) - eval(n - 1, x)) / (x * x - 1.0);
 }
 //-----------------------------------------------------------------------------
-real Legendre::d2dx(uint n, real x)
+auto Legendre::d2dx(uint n, real x) -> real
 {
   // Special case n = 0
   if (n == 0) return 0.0;

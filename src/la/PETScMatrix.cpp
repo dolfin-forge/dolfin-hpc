@@ -229,7 +229,7 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
   }
 }
 //-----------------------------------------------------------------------------
-PETScMatrix* PETScMatrix::copy() const
+auto PETScMatrix::copy() const -> PETScMatrix*
 {
   PETScMatrix* mcopy = new PETScMatrix();
   MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
@@ -237,7 +237,7 @@ PETScMatrix* PETScMatrix::copy() const
   return mcopy;
 }
 //-----------------------------------------------------------------------------
-real PETScMatrix::norm(std::string norm_type) const
+auto PETScMatrix::norm(std::string norm_type) const -> real
 {
   real norm;
   if (norm_type == "l1")
@@ -428,7 +428,7 @@ void PETScMatrix::mult(const GenericVector& x, GenericVector& y,
   }
 }
 //-----------------------------------------------------------------------------
-real PETScMatrix::norm(const Norm type) const
+auto PETScMatrix::norm(const Norm type) const -> real
 {
   real value = 0.0;
   switch (type)
@@ -492,7 +492,7 @@ void PETScMatrix::disp(uint) const
   end();
 }
 //-----------------------------------------------------------------------------
-LinearAlgebraFactory& PETScMatrix::factory() const
+auto PETScMatrix::factory() const -> LinearAlgebraFactory&
 {
   return PETScFactory::instance();
 }

@@ -43,13 +43,13 @@ public:
   virtual void eval(real* values, const real* x) const = 0;
 
   /// Return the rank of the value space
-  virtual uint rank() const = 0;
+  virtual auto rank() const -> uint = 0;
 
   /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const = 0;
+  virtual auto dim(uint i) const -> uint = 0;
 
   // Return the value size
-  virtual uint value_size() const = 0;
+  virtual auto value_size() const -> uint = 0;
 
   /// Interpolate function to finite element space on cell
   virtual void interpolate(real* coefficients, const ufc::cell& cell,
@@ -70,7 +70,7 @@ public:
   //---------------------------------------------------------------------------
 
   /// Delegate time dependence
-  Coefficient& operator()(Time const& t)
+  auto operator()(Time const& t) -> Coefficient&
   {
     this->sync(t);
     return *this;
@@ -78,14 +78,14 @@ public:
 
   ///
   template<class T>
-  bool compatible(T const& other)
+  auto compatible(T const& other) -> bool
   {
     return compatible(*this, other);
   }
 
   ///
   template<class T>
-  static bool compatible(Coefficient const& a, T const& b)
+  static auto compatible(Coefficient const& a, T const& b) -> bool
   {
     // Check value shape compatibility
     if (a.rank() != b.rank())
@@ -111,7 +111,7 @@ private:
 
 };
 //-----------------------------------------------------------------------------
-inline uint Coefficient::value_size() const
+inline auto Coefficient::value_size() const -> uint
 {
   uint size = 1;
   for (uint i = 0; i < this->rank(); ++i)

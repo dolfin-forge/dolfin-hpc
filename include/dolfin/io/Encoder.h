@@ -10,7 +10,7 @@
 #include <zlib.h>
 extern "C"
 {
-  int compress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen);
+  auto compress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen) -> int;
 }
 #endif
 
@@ -48,7 +48,7 @@ namespace dolfin
 
 #ifdef HAVE_LIBZ
     template<typename T>
-    static std::pair<unsigned char *, unsigned long> compress_data(const std::vector<T>& data)
+    static auto compress_data(const std::vector<T>& data) -> std::pair<unsigned char *, unsigned long>
     {
       // Compute length of uncompressed data
       const unsigned long uncompressed_size = data.size()*sizeof(T);

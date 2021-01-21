@@ -7,9 +7,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-uint EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
+auto EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
                              Array<real> const& W, real cosalpha_max,
-                             bool weighted)
+                             bool weighted) -> uint
 {
   if (N.size() != W.size() * gdim)
   {

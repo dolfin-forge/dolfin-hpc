@@ -39,43 +39,43 @@ public:
   ~MeshGeometry() override;
 
   /// Assignment
-  MeshGeometry & operator=(MeshGeometry const& geometry);
+  auto operator=(MeshGeometry const& geometry) -> MeshGeometry &;
 
   /// Equality
-  bool operator==(MeshGeometry const& other) const;
+  auto operator==(MeshGeometry const& other) const -> bool;
 
   /// Non-equality
-  bool operator!=(MeshGeometry const& other) const;
+  auto operator!=(MeshGeometry const& other) const -> bool;
 
   /// Swap instances
   friend void swap( MeshGeometry& a, MeshGeometry& b );
 
   /// Return space of coordinate system
-  Space const& space() const;
+  auto space() const -> Space const&;
 
   /// Return Euclidean dimension of coordinate system
-  uint dim() const;
+  auto dim() const -> uint;
 
   /// Return number of points (not coordinates!)
-  uint size() const;
+  auto size() const -> uint;
 
   /// Return absolute geometric tolerance for given topological dimension
-  real abs_tolerance(uint dim) const;
+  auto abs_tolerance(uint dim) const -> real;
 
   /// Return array of values for coordinate n
-  real* x(uint n);
+  auto x(uint n) -> real*;
 
   /// Return array of values for coordinate n
-  real const * x(uint n) const;
+  auto x(uint n) const -> real const *;
 
   /// Return array of values for all coordinates
-  real* coordinates();
+  auto coordinates() -> real*;
 
   /// Return array of values for all coordinates
-  real const * coordinates() const;
+  auto coordinates() const -> real const *;
 
   /// Return coordinate n as a 3D point value
-  Point point(uint n) const;
+  auto point(uint n) const -> Point;
 
   /// Resize space coordinates to size
   void resize(uint size);
@@ -107,16 +107,16 @@ public:
   void assign(MeshGeometry const& other, Array<uint> const& mapping);
 
   /// Scale geometry
-  MeshGeometry& operator*=(real const a);
-  MeshGeometry& operator/=(real const a);
+  auto operator*=(real const a) -> MeshGeometry&;
+  auto operator/=(real const a) -> MeshGeometry&;
 
   /// Offset geometry
-  MeshGeometry& operator+=(real const a);
-  MeshGeometry& operator-=(real const a);
+  auto operator+=(real const a) -> MeshGeometry&;
+  auto operator-=(real const a) -> MeshGeometry&;
 
   /// Translate geometry
-  MeshGeometry& operator+=(Point const& p);
-  MeshGeometry& operator-=(Point const& p);
+  auto operator+=(Point const& p) -> MeshGeometry&;
+  auto operator-=(Point const& p) -> MeshGeometry&;
 
   /// Display data
   void disp() const;
@@ -125,12 +125,12 @@ public:
   void dump() const;
 
   //--- SERIALIZATION ---------------------------------------------------------
-  MeshGeometry const& operator>>(Array<real>& A) const;
+  auto operator>>(Array<real>& A) const -> MeshGeometry const&;
 
   //--- TOKENIZED -------------------------------------------------------------
 
   /// Return token identifying the internal state of mesh geometry
-  int token() const override;
+  auto token() const -> int override;
 
 private:
 
@@ -164,14 +164,14 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline real * MeshGeometry::x( uint n )
+inline auto MeshGeometry::x( uint n ) -> real *
 {
   dolfin_assert( n < size_ );
   return coordinates_.data() + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
-inline real const * MeshGeometry::x( uint n ) const
+inline auto MeshGeometry::x( uint n ) const -> real const *
 {
   dolfin_assert( n < size_ );
   return coordinates_.data() + n * dim_;
@@ -199,44 +199,44 @@ inline void MeshGeometry::set( real const * x )
 }
 
 //-----------------------------------------------------------------------------
-inline Space const & MeshGeometry::space() const
+inline auto MeshGeometry::space() const -> Space const &
 {
   return *space_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshGeometry::dim() const
+inline auto MeshGeometry::dim() const -> uint
 {
   return dim_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshGeometry::size() const
+inline auto MeshGeometry::size() const -> uint
 {
   return size_;
 }
 
 //-----------------------------------------------------------------------------
-inline real MeshGeometry::abs_tolerance( uint dim ) const
+inline auto MeshGeometry::abs_tolerance( uint dim ) const -> real
 {
   dolfin_assert( dim <= dim_ );
   return abs_tol_[dim];
 }
 
 //-----------------------------------------------------------------------------
-inline Point MeshGeometry::point( uint n ) const
+inline auto MeshGeometry::point( uint n ) const -> Point
 {
   return Point( coordinates_.data() + n * dim_ );
 }
 
 //-----------------------------------------------------------------------------
-inline real * MeshGeometry::coordinates()
+inline auto MeshGeometry::coordinates() -> real *
 {
   return coordinates_.data();
 }
 
 //-----------------------------------------------------------------------------
-inline real const * MeshGeometry::coordinates() const
+inline auto MeshGeometry::coordinates() const -> real const *
 {
   return coordinates_.data();
 }

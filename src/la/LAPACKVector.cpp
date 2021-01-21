@@ -24,7 +24,7 @@ LAPACKVector::~LAPACKVector()
 }
 
 //-----------------------------------------------------------------------------
-std::string LAPACKVector::str(bool verbose) const
+auto LAPACKVector::str(bool verbose) const -> std::string
 {
   std::stringstream s;
 

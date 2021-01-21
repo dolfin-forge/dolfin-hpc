@@ -29,16 +29,16 @@ class BoundaryNormal
 public:
 
   /// Return boundary mesh
-  BoundaryMesh& boundary();
+  auto boundary() -> BoundaryMesh&;
 
   /// Destructor
   virtual ~BoundaryNormal();
 
   /// Return global mesh
-  Mesh& mesh();
+  auto mesh() -> Mesh&;
 
   /// Return the basis (n, tau, 0) in 2d or (n, tau1, tau2) in 3d
-  Array<Function>& basis();
+  auto basis() -> Array<Function>&;
 
   /// Initialization of basis functions and node type for given space
   void init(FiniteElementSpace const& space);
@@ -69,17 +69,17 @@ private:
 
 
 //-----------------------------------------------------------------------------
-inline Mesh& BoundaryNormal::mesh()
+inline auto BoundaryNormal::mesh() -> Mesh&
 {
   return mesh_;
 }
 //-----------------------------------------------------------------------------
-inline BoundaryMesh& BoundaryNormal::boundary()
+inline auto BoundaryNormal::boundary() -> BoundaryMesh&
 {
   return *boundary_;
 }
 //-----------------------------------------------------------------------------
-inline Array<Function>& BoundaryNormal::basis()
+inline auto BoundaryNormal::basis() -> Array<Function>&
 {
   return basis_;
 }

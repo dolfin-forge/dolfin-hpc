@@ -65,7 +65,7 @@ Connectivity::Connectivity( Connectivity const & other )
 //-----------------------------------------------------------------------------
 Connectivity::~Connectivity() = default;
 //-----------------------------------------------------------------------------
-Connectivity & Connectivity::operator=( Connectivity const & other )
+auto Connectivity::operator=( Connectivity const & other ) -> Connectivity &
 {
   connections_.resize( other.order() );
 
@@ -83,7 +83,7 @@ Connectivity & Connectivity::operator=( Connectivity const & other )
   return *this;
 }
 //-----------------------------------------------------------------------------
-bool Connectivity::operator==( Connectivity const & other ) const
+auto Connectivity::operator==( Connectivity const & other ) const -> bool
 {
 	if ( this == &other )
 	{
@@ -205,7 +205,7 @@ void Connectivity::dump() const
   }
 }
 //-----------------------------------------------------------------------------
-Connectivity const& Connectivity::operator>>(Array<uint>&) const
+auto Connectivity::operator>>(Array<uint>&) const -> Connectivity const&
 {
   error( "Connectivity::operator>> unimplemented / deprecated" );
   // A.reserve( this->entries() );
@@ -244,7 +244,7 @@ void Connectivity::check() const
   }
 }
 //-----------------------------------------------------------------------------
-Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C)
+auto operator<<(Array<Array<uint> >& A, Connectivity const& C) -> Array<Array<uint> >&
 {
   A.clear();
   A.resize(C.order());

@@ -52,10 +52,10 @@ namespace dolfin
     void init(int M, int N);
 
     /// Return number of rows (dim = 0) or columns (dim = 1) along dimension dim
-    uint size(uint dim) const;
+    auto size(uint dim) const -> uint;
 
     /// Return PETSc Mat pointer
-    Mat mat() const;
+    auto mat() const -> Mat;
 
     /// Compute product y = Ax
     virtual void mult(const PETScVector& x, PETScVector& y) const = 0;
@@ -64,7 +64,7 @@ namespace dolfin
     void disp(bool sparse = true, int precision = 2) const;
 
     /// Output
-    friend LogStream& operator<< (LogStream& stream, const PETScKrylovMatrix& A);
+    friend auto operator<< (LogStream& stream, const PETScKrylovMatrix& A) -> LogStream&;
 
   private:
 
@@ -73,7 +73,7 @@ namespace dolfin
 
   };
 
-  LogStream& operator<< (LogStream& stream, const PETScKrylovMatrix& A);
+  auto operator<< (LogStream& stream, const PETScKrylovMatrix& A) -> LogStream&;
   
 }
 

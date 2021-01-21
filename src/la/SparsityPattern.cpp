@@ -247,7 +247,7 @@ void SparsityPattern::numNonZeroPerRow(uint p_rank, uint d_nzrow[],
   }
 }
 //-----------------------------------------------------------------------------
-uint SparsityPattern::numNonZero() const
+auto SparsityPattern::numNonZero() const -> uint
 {
   if (rank_ != 2)
   {

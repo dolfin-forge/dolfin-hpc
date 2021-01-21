@@ -31,7 +31,7 @@ public:
   ~LinearSolver();
 
   /// Solve linear system Ax = b
-  uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b);
+  auto solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b) -> uint;
 
 private:
 

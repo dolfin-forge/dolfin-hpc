@@ -72,13 +72,13 @@ public:
   }
 
   ///
-  bool empty() const
+  auto empty() const -> bool
   {
     return (values_ == nullptr);
   }
 
   /// Assignment operator
-  MeshFunction<T>& operator=(MeshFunction<T> const& other)
+  auto operator=(MeshFunction<T> const& other) -> MeshFunction<T>&
   {
     if(this != &other)
     {
@@ -101,7 +101,7 @@ public:
 
   /// Assignment conversion operator
   template <class V>
-  MeshFunction<T>& operator=(MeshFunction<V> const& other)
+  auto operator=(MeshFunction<V> const& other) -> MeshFunction<T>&
   {
     if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
     {
@@ -113,7 +113,7 @@ public:
   }
 
   /// Equality
-  bool operator==(MeshFunction<T> const& other)
+  auto operator==(MeshFunction<T> const& other) -> bool
   {
     if(this == &other)
     {
@@ -143,7 +143,7 @@ public:
 
   /// Equality with cast
   template <class V>
-  bool operator==(MeshFunction<V> const& other)
+  auto operator==(MeshFunction<V> const& other) -> bool
   {
     if(this == &other)
     {
@@ -172,32 +172,32 @@ public:
   }
 
   /// Equality
-  bool operator!=(MeshFunction<T> const& other)
+  auto operator!=(MeshFunction<T> const& other) -> bool
   {
     return !(*this == other);
   }
 
   /// Return mesh associated with mesh function
-  inline Mesh& mesh() const
+  inline auto mesh() const -> Mesh&
   {
     dolfin_assert(mesh_);
     return *mesh_;
   }
 
   /// Return topological dimension
-  inline uint dim() const
+  inline auto dim() const -> uint
   {
     return dim_;
   }
 
   /// Return size (number of entities)
-  inline uint size() const
+  inline auto size() const -> uint
   {
     return size_;
   }
 
   /// Access value at given index
-  inline T& operator()(uidx index)
+  inline auto operator()(uidx index) -> T&
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
@@ -205,7 +205,7 @@ public:
   }
 
   /// Access value at given index (const)
-  inline T const& operator()(uidx index) const
+  inline auto operator()(uidx index) const -> T const&
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
@@ -213,7 +213,7 @@ public:
   }
 
   /// Return value at given entity
-  inline T& operator()(MeshEntity& entity)
+  inline auto operator()(MeshEntity& entity) -> T&
   {
     dolfin_assert(values_);
     dolfin_assert(&entity.mesh() == mesh_);
@@ -223,7 +223,7 @@ public:
   }
 
   /// Return value at given entity
-  inline T const& operator()(MeshEntity& entity) const
+  inline auto operator()(MeshEntity& entity) const -> T const&
   {
     dolfin_assert(values_);
     dolfin_assert(&entity.mesh() == mesh_);
@@ -233,7 +233,7 @@ public:
   }
 
   /// Set all values to given value
-  MeshFunction<T>& operator=(T const& value)
+  auto operator=(T const& value) -> MeshFunction<T>&
   {
     dolfin_assert(!((values_ == nullptr) && (size_>0)));
     std::fill_n(values_, size_, value);
@@ -320,7 +320,7 @@ protected:
 /// Helper function that performs symmetric rounding to closest integer
 
 template<> template<> inline
-bool MeshFunction<bool>::cast<float>::operator()(float x) const
+auto MeshFunction<bool>::cast<float>::operator()(float x) const -> bool
 {
   return static_cast<bool>(x > 0);
 }
@@ -332,7 +332,7 @@ bool MeshFunction<bool>::cast<real>::operator()(real x) const
 }
 
 template<> template<> inline
-int MeshFunction<int>::cast<float>::operator()(float x) const
+auto MeshFunction<int>::cast<float>::operator()(float x) const -> int
 {
   return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
 }
@@ -350,7 +350,7 @@ uint MeshFunction<uint>::cast<float>::operator()(float x) const
 }
 
 template<> template<> inline
-uint MeshFunction<uint>::cast<real>::operator()(real x) const
+auto MeshFunction<uint>::cast<real>::operator()(real x) const -> uint
 {
   return static_cast<uint>(std::floor(x + 0.5));
 }

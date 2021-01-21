@@ -47,42 +47,42 @@ public:
    */
 
   /// Return process rank in local communicator
-  static uint rank();
+  static auto rank() -> uint;
 
   /// Return local communicator size
-  static uint size();
+  static auto size() -> uint;
 
   /// Return if the given rank is valid
-  static bool is_valid_rank(uint rank);
+  static auto is_valid_rank(uint rank) -> bool;
 
   /// Return if the current process is the root process in local communicator
-  static bool is_root();
+  static auto is_root() -> bool;
 
   /// Return group identifier
-  static uint group_id();
+  static auto group_id() -> uint;
 
   /*
    *  Global communicator
    */
 
   /// Return process rank in global communicator
-  static uint global_rank();
+  static auto global_rank() -> uint;
 
   /// Return global communicator size
-  static uint global_size();
+  static auto global_size() -> uint;
 
   /// Return if the current process is the root process in global communicator
-  static bool is_global_root();
+  static auto is_global_root() -> bool;
 
   /// Return number of groups in global communicator
-  static uint num_groups();
+  static auto num_groups() -> uint;
 
   /*
    *  Global communicator
    */
 
   /// Return seed value for current process
-  static uint seed();
+  static auto seed() -> uint;
 
   ///
   static
@@ -93,42 +93,42 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template<typename T>
-  static int bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM);
+  static auto bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<typename T>
-  static int all_gather( T * sendbuf, int sendcount,
+  static auto all_gather( T * sendbuf, int sendcount,
                          T * recvbuf, int recvcount,
-                         Communicator& comm = MPI::DOLFIN_COMM );
+                         Communicator& comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<int R,typename T>
-  static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
+  static auto all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<int R,typename T>
-  static int all_reduce( T * x, T * r, uint count,
-                         Communicator& comm = MPI::DOLFIN_COMM );
+  static auto all_reduce( T * x, T * r, uint count,
+                         Communicator& comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<int R,typename T>
-  static int all_reduce_in_place( T & r, Communicator& comm = MPI::DOLFIN_COMM );
+  static auto all_reduce_in_place( T & r, Communicator& comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<int R,typename T>
-  static int all_reduce_in_place( Array< T > & data,
-                                  Communicator& comm = MPI::DOLFIN_COMM );
+  static auto all_reduce_in_place( Array< T > & data,
+                                  Communicator& comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template<typename T>
-  static int sendrecv( T * sendbuf, int sendcount, int destination,
+  static auto sendrecv( T * sendbuf, int sendcount, int destination,
                        T * recvbuf, int recvcount, int source, int tag,
-                       Communicator& comm = MPI::DOLFIN_COMM);
+                       Communicator& comm = MPI::DOLFIN_COMM) -> int;
 
   template<typename T>
-  static int sendrecv( Array< T > & sendbuf, int destination,
+  static auto sendrecv( Array< T > & sendbuf, int destination,
                        Array< T > & recvbuf, int source, int tag,
-                       Communicator& comm = MPI::DOLFIN_COMM);
+                       Communicator& comm = MPI::DOLFIN_COMM) -> int;
 
   /// Start MPI timer
   static void startTimer();
@@ -137,10 +137,10 @@ public:
   static void startTimer(dolfin::real& stime);
 
   /// Stop MPI timer
-  static real stopTimer();
+  static auto stopTimer() -> real;
 
   /// Stop MPI timer
-  static real stopTimer(dolfin::real& stime);
+  static auto stopTimer(dolfin::real& stime) -> real;
 
   /// Setup DOLFIN_COMM MPI communicator
   static void initComm(int ngroups = 0);
@@ -151,7 +151,7 @@ public:
   static Communicator DOLFIN_COMM;
 
   /// Check for MPI errors
-  static int check_error( int const mpi_error );
+  static auto check_error( int const mpi_error ) -> int;
 
 #ifdef HAVE_MPI
 
@@ -160,44 +160,44 @@ public:
                          MPI_Info info = MPI_INFO_NULL );
 
   template< typename T >
-  static offset_t file_read_all( MPI_File & file, T & element,
-                                 MPI_Status * status = MPI_STATUS_IGNORE );
+  static auto file_read_all( MPI_File & file, T & element,
+                                 MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_read_all( MPI_File & file,
+  static auto file_read_all( MPI_File & file,
                                  T & element, uint const size,
-                                 MPI_Status * status = MPI_STATUS_IGNORE );
+                                 MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_read_at_all( MPI_File & file, T * elements,
+  static auto file_read_at_all( MPI_File & file, T * elements,
                                     uint const count, offset_t offset,
                                     uint const global_count = 0,
-                                    MPI_Status * status = MPI_STATUS_IGNORE );
+                                    MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_read_at_all( MPI_File & file, T & element,
+  static auto file_read_at_all( MPI_File & file, T & element,
                                     offset_t offset,
-                                    MPI_Status * status = MPI_STATUS_IGNORE );
+                                    MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_write_all( MPI_File & file, T const & element,
-                                  MPI_Status * status = MPI_STATUS_IGNORE );
+  static auto file_write_all( MPI_File & file, T const & element,
+                                  MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_write_all( MPI_File & file,
+  static auto file_write_all( MPI_File & file,
                                   T const & element, uint const size,
-                                  MPI_Status * status = MPI_STATUS_IGNORE );
+                                  MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_write_at_all( MPI_File & file, T const * elements,
+  static auto file_write_at_all( MPI_File & file, T const * elements,
                                      uint const count, offset_t offset,
                                      uint const global_count = 0,
-                                     MPI_Status * status = MPI_STATUS_IGNORE );
+                                     MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   template< typename T >
-  static offset_t file_write_at_all( MPI_File & file, T const & element,
+  static auto file_write_at_all( MPI_File & file, T const & element,
                                      offset_t offset,
-                                     MPI_Status * status = MPI_STATUS_IGNORE );
+                                     MPI_Status * status = MPI_STATUS_IGNORE ) -> offset_t;
 
   static void file_close( MPI_File & file );
 
@@ -242,15 +242,15 @@ using Comm = MPI::Communicator;
 
 //-----------------------------------------------------------------------------
 template<typename T>
-inline int MPI::bcast(T* x, int n, int r, Communicator& comm)
+inline auto MPI::bcast(T* x, int n, int r, Communicator& comm) -> int
 {
   return MPI::check_error( MPI_Bcast(x, n, MPI_type<T>::value, r, comm) );
 }
 //-----------------------------------------------------------------------------
 template<typename T>
-inline int MPI::all_gather( T * sendbuf, int sendcount,
+inline auto MPI::all_gather( T * sendbuf, int sendcount,
                             T * recvbuf, int recvcount,
-                            Communicator& comm )
+                            Communicator& comm ) -> int
 {
   return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_type<T>::value,
                                           recvbuf, recvcount, MPI_type<T>::value,
@@ -262,25 +262,25 @@ inline int MPI::all_gather( T * sendbuf, int sendcount,
 template < int R, typename T >
 struct helper
 {
-  inline static int
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm );
+  inline static auto
+    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int;
 
-  inline static int all_reduce_in_place( T * r, int count,
-                                         MPI::Communicator & comm );
+  inline static auto all_reduce_in_place( T * r, int count,
+                                         MPI::Communicator & comm ) -> int;
 };
 
 template < typename T >
 struct helper< MPI::sum, T >
 {
-  inline static int
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error( MPI_Allreduce( x, r, count, MPI_type< T >::value,
                                             MPI_SUM, comm ) );
   }
 
-  inline static int
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
                                             MPI_type< T >::value,
@@ -291,15 +291,15 @@ struct helper< MPI::sum, T >
 template < typename T >
 struct helper< MPI::min, T >
 {
-  inline static int
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error(
       MPI_Allreduce( x, r, count, MPI_type< T >::value, MPI_MIN, comm ) );
   }
 
-  inline static int
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
                                             MPI_type< T >::value,
@@ -310,15 +310,15 @@ struct helper< MPI::min, T >
 template < typename T >
 struct helper< MPI::max, T >
 {
-  inline static int
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error( MPI_Allreduce( x, r, count, MPI_type< T >::value,
                                             MPI_MAX, comm ) );
   }
 
-  inline static int
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm )
+  inline static auto
+    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
   {
     return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
                                             MPI_type< T >::value,
@@ -327,33 +327,33 @@ struct helper< MPI::max, T >
 };
 
 template < int R, typename T >
-inline int MPI::all_reduce( T x, T & r, Communicator & comm )
+inline auto MPI::all_reduce( T x, T & r, Communicator & comm ) -> int
 {
   return helper< R, T >::all_reduce( &x, &r, 1, comm );
 }
 
 template < int R, typename T >
-inline int MPI::all_reduce( T * x, T * r, uint count, Communicator & comm )
+inline auto MPI::all_reduce( T * x, T * r, uint count, Communicator & comm ) -> int
 {
   return helper< R, T >::all_reduce( x, r, count, comm );
 }
 
 template < int R, typename T >
-inline int MPI::all_reduce_in_place( T & r, Communicator & comm )
+inline auto MPI::all_reduce_in_place( T & r, Communicator & comm ) -> int
 {
   return helper< R, T >::all_reduce_in_place( &r, 1, comm );
 }
 
 template < int R, typename T >
-inline int MPI::all_reduce_in_place( Array< T > & data, Communicator & comm )
+inline auto MPI::all_reduce_in_place( Array< T > & data, Communicator & comm ) -> int
 {
   return helper< R, T >::all_reduce_in_place( data.data(), data.size(), comm );
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(bool * sendbuf, int sendcount, int destination,
+inline auto MPI::sendrecv(bool * sendbuf, int sendcount, int destination,
                          bool * recvbuf, int recvcount, int source,
-                         int tag, Communicator& comm)
+                         int tag, Communicator& comm) -> int
 {
   MPI_Status status;
   int recv_count;
@@ -376,9 +376,9 @@ inline int MPI::sendrecv(bool * sendbuf, int sendcount, int destination,
 }
 
 template<typename T>
-inline int MPI::sendrecv(T * sendbuf, int sendcount, int destination,
+inline auto MPI::sendrecv(T * sendbuf, int sendcount, int destination,
                          T * recvbuf, int recvcount, int source,
-                         int tag, Communicator& comm)
+                         int tag, Communicator& comm) -> int
 {
   MPI_Status status;
 	int        recv_count;
@@ -399,12 +399,12 @@ inline int MPI::sendrecv(T * sendbuf, int sendcount, int destination,
 }
 
 template < typename T >
-inline int MPI::sendrecv( Array< T > &   sendbuf,
+inline auto MPI::sendrecv( Array< T > &   sendbuf,
                           int            destination,
                           Array< T > &   recvbuf,
                           int            source,
                           int            tag,
-                          Communicator & comm )
+                          Communicator & comm ) -> int
 {
 	return MPI::sendrecv< T >( sendbuf.data(),
 	                           sendbuf.size(),
@@ -425,7 +425,7 @@ inline int MPI::check_error( int const mpi_error )
 //-----------------------------------------------------------------------------
 
 template< typename T >
-MPI::offset_t MPI::file_read_all( MPI_File & file, T & element, MPI_Status * status )
+auto MPI::file_read_all( MPI_File & file, T & element, MPI_Status * status ) -> MPI::offset_t
 {
   check_error( MPI_File_read_all( file,
                                   static_cast< void * >( &element ),
@@ -434,8 +434,8 @@ MPI::offset_t MPI::file_read_all( MPI_File & file, T & element, MPI_Status * sta
 }
 
 template< typename T >
-MPI::offset_t MPI::file_read_all( MPI_File & file, T & element,
-                         uint const size, MPI_Status * status)
+auto MPI::file_read_all( MPI_File & file, T & element,
+                         uint const size, MPI_Status * status) -> MPI::offset_t
 {
   check_error( MPI_File_read_all( file,
                                   static_cast< void * >( &element ),
@@ -446,9 +446,9 @@ MPI::offset_t MPI::file_read_all( MPI_File & file, T & element,
 //-----------------------------------------------------------------------------
 
 template< typename T >
-MPI::offset_t MPI::file_read_at_all( MPI_File & file, T * elements, uint const count,
+auto MPI::file_read_at_all( MPI_File & file, T * elements, uint const count,
                                      offset_t offset, uint const global_count,
-                                     MPI_Status * status )
+                                     MPI_Status * status ) -> MPI::offset_t
 {
   dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_read_at_all( file, offset,
@@ -458,8 +458,8 @@ MPI::offset_t MPI::file_read_at_all( MPI_File & file, T * elements, uint const c
 }
 
 template< typename T >
-MPI::offset_t MPI::file_read_at_all( MPI_File & file, T & element,
-                                     offset_t offset, MPI_Status * status )
+auto MPI::file_read_at_all( MPI_File & file, T & element,
+                                     offset_t offset, MPI_Status * status ) -> MPI::offset_t
 {
   check_error( MPI_File_read_at_all( file, offset,
                                      static_cast< void * >( &element ),
@@ -470,8 +470,8 @@ MPI::offset_t MPI::file_read_at_all( MPI_File & file, T & element,
 //-----------------------------------------------------------------------------
 
 template< typename T >
-MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
-                                   MPI_Status * status )
+auto MPI::file_write_all( MPI_File & file, T const & element,
+                                   MPI_Status * status ) -> MPI::offset_t
 {
   check_error( MPI_File_write_all( file,
                                    static_cast< void const * >( &element ),
@@ -480,8 +480,8 @@ MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
 }
 
 template< typename T >
-MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
-                                   uint const size, MPI_Status * status )
+auto MPI::file_write_all( MPI_File & file, T const & element,
+                                   uint const size, MPI_Status * status ) -> MPI::offset_t
 {
   check_error( MPI_File_write_all( file,
                                    static_cast< void const * >( &element ),
@@ -492,9 +492,9 @@ MPI::offset_t MPI::file_write_all( MPI_File & file, T const & element,
 //-----------------------------------------------------------------------------
 
 template< typename T >
-MPI::offset_t MPI::file_write_at_all( MPI_File & file, T const * elements,
+auto MPI::file_write_at_all( MPI_File & file, T const * elements,
                                   uint const count, offset_t offset,
-                                  uint const global_count, MPI_Status * status )
+                                  uint const global_count, MPI_Status * status ) -> MPI::offset_t
 {
   dolfin_assert( count <= global_count or global_count == 0 );
   check_error( MPI_File_write_at_all( file, offset,
@@ -504,8 +504,8 @@ MPI::offset_t MPI::file_write_at_all( MPI_File & file, T const * elements,
 }
 
 template< typename T >
-MPI::offset_t MPI::file_write_at_all( MPI_File & file, T const & element,
-                                      offset_t offset, MPI_Status * status )
+auto MPI::file_write_at_all( MPI_File & file, T const & element,
+                                      offset_t offset, MPI_Status * status ) -> MPI::offset_t
 {
   check_error( MPI_File_write_at_all( file, offset,
                                       static_cast< void const * >( &element ),

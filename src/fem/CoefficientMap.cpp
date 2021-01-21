@@ -9,7 +9,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-bool CoefficientMap::has(std::string const& label) const
+auto CoefficientMap::has(std::string const& label) const -> bool
 {
   return (this->count(label) > 0);
 }

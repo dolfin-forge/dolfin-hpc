@@ -20,16 +20,16 @@ namespace dolfin
     virtual ~Quadrature();
     
     /// Return number of quadrature points
-    unsigned int size() const;
+    auto size() const -> unsigned int;
 
     /// Return quadrature point
-    real point(unsigned int i) const;
+    auto point(unsigned int i) const -> real;
 
     /// Return quadrature weight
-    real weight(unsigned int i) const;
+    auto weight(unsigned int i) const -> real;
 
     /// Return sum of weights (length, area, volume)
-    real measure() const;
+    auto measure() const -> real;
     
     /// Display quadrature data
     virtual void disp() const = 0;

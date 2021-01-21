@@ -36,19 +36,19 @@ public:
   ~OwnedIterator() = default;
 
   ///
-  OwnedIterator & operator++();
+  auto operator++() -> OwnedIterator &;
 
   ///
-  inline uint index() const;
+  inline auto index() const -> uint;
 
   ///
-  inline uint global_index() const;
+  inline auto global_index() const -> uint;
 
   ///
-  inline uint is_shared() const;
+  inline auto is_shared() const -> uint;
 
   ///
-  inline bool end() const;
+  inline auto end() const -> bool;
 
 private:
   DistributedData const &       distdata_;
@@ -57,7 +57,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline OwnedIterator & OwnedIterator::operator++()
+inline auto OwnedIterator::operator++() -> OwnedIterator &
 {
   if ( iter_ == owner_.end() )
   {
@@ -72,22 +72,22 @@ inline OwnedIterator & OwnedIterator::operator++()
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::index() const
+inline auto OwnedIterator::index() const -> uint
 {
   return iter_ - owner_.begin();
 }
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::global_index() const
+inline auto OwnedIterator::global_index() const -> uint
 {
   return *iter_;
 }
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::is_shared() const
+inline auto OwnedIterator::is_shared() const -> uint
 {
   return ( *iter_ == distdata_.rank_ );
 }
 //-----------------------------------------------------------------------------
-inline bool OwnedIterator::end() const
+inline auto OwnedIterator::end() const -> bool
 {
   return iter_ == owner_.end();
 }

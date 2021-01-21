@@ -71,7 +71,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   uint num_entries = 1;
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    num_entries *= dofmaps[i].num_element_support_dofs();
+    num_entries *= dofmaps[i].num_element_dofs();
   }
   A = new real[num_entries];
   std::fill_n( A, num_entries, 0. );
@@ -80,7 +80,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   num_entries = 1;
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    num_entries *= 2 * dofmaps[i].num_element_support_dofs();
+    num_entries *= 2 * dofmaps[i].num_element_dofs();
   }
   macro_A = new real[num_entries];
   std::fill_n( macro_A, num_entries, 0. );
@@ -89,14 +89,14 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   local_dimensions = new uint[form.rank()];
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    local_dimensions[i] = dofmaps[i].num_element_support_dofs();
+    local_dimensions[i] = dofmaps[i].num_element_dofs();
   }
 
   // Initialize local dimensions for macro element
   macro_local_dimensions = new uint[form.rank()];
   for ( uint i = 0; i < form.rank(); ++i )
   {
-    macro_local_dimensions[i] = 2 * dofmaps[i].num_element_support_dofs();
+    macro_local_dimensions[i] = 2 * dofmaps[i].num_element_dofs();
   }
 
   // Initialize local sizes
@@ -114,7 +114,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
     ufc::finite_element * fe = form.create_finite_element( i );
 
     // FIXME num_entities should maybe be stored somewhere else
-    std::vector< size_t > num_entities( fe->topological_dimension(),
+    std::vector< size_t > num_entities( fe->topological_dimension()+1,
                                         0 );
     for ( uint d = 0; d <= fe->topological_dimension(); ++d )
     {

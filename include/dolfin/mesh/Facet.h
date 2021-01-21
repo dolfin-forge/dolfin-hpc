@@ -33,7 +33,7 @@ public:
   ~Facet() = default;
 
   /// Compute coordinates of facet midpoint
-  Point midpoint() const;
+  auto midpoint() const -> Point;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -77,7 +77,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-inline Point Facet::midpoint() const
+inline auto Facet::midpoint() const -> Point
 {
   MeshGeometry const &  geometry     = this->mesh().geometry();
   Array< uint > const & vertices     = this->entities( 0 );

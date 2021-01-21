@@ -28,7 +28,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-bool onEntity( Point & p, MeshEntity & entity )
+auto onEntity( Point & p, MeshEntity & entity ) -> bool
 {
   // Check if the coordinates are on the same line as the line segment
   if ( entity.dim() == 1 )
@@ -161,7 +161,7 @@ void PeriodicDofsMapping::init()
   // UFC dofmap data structures
   UFCCell             ufc_cell0( c0 );
   UFCCell             ufc_cell1( c0 );
-  uint const          local_dimension = dofmap.num_element_support_dofs();
+  uint const          local_dimension = dofmap.num_element_dofs();
   uint *              dofsG           = new uint[local_dimension];
   uint *              dofsH           = new uint[local_dimension];
   std::vector< real > coordinatesG( local_dimension * maxgdim, 0.0 );

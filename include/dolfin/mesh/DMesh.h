@@ -57,8 +57,8 @@ private:
     uint owner;	//< rank of owner
   } prop_edge;
 
-  static bool less_pair_comp( std::pair< uint, prop_edge > const & x,
-                              std::pair< uint, prop_edge > const & y );
+  static auto less_pair_comp( std::pair< uint, prop_edge > const & x,
+                              std::pair< uint, prop_edge > const & y ) -> bool;
 
   /// Pair datatype for propagation
   using Propagation = std::pair<uint, prop_edge>;
@@ -96,7 +96,7 @@ private:
   void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
 
   /// Get opposite cell with respect to vertices v1 and v2
-  DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
+  auto opposite(DCell* dcell, DVertex* v1, DVertex* v2) -> DCell*;
 
   /// Propagate refinement
   void propagate_refinement(Mesh& mesh,
@@ -150,8 +150,8 @@ private:
 };
 //-----------------------------------------------------------------------------
 /// Comparison operator for index/value pairs
-inline bool DMesh::less_pair_comp( std::pair< uint, prop_edge > const & x,
-                                   std::pair< uint, prop_edge > const & y )
+inline auto DMesh::less_pair_comp( std::pair< uint, prop_edge > const & x,
+                                   std::pair< uint, prop_edge > const & y ) -> bool
 {
   return x.first < y.first;
 }

@@ -129,9 +129,9 @@ void FiniteElement::Initialize()
 
 //-----------------------------------------------------------------------------
 
-ufc::finite_element *
-  FiniteElement::create_sub_element( const ufc::finite_element & finite_element,
-                                     Array< uint > const &       sub_system )
+auto FiniteElement::create_sub_element(
+  const ufc::finite_element & finite_element,
+  Array< uint > const &       sub_system ) -> ufc::finite_element *
 {
   // If the subsystem is empty return self
   if ( sub_system.size() == 0 )
@@ -236,7 +236,7 @@ void FiniteElement::flatten( ufc::finite_element const *            element,
 
 //-----------------------------------------------------------------------------
 
-bool FiniteElement::is_vectorizable() const
+auto FiniteElement::is_vectorizable() const -> bool
 {
   bool                                         ret = true;
   Array< ufc::finite_element const * > const & flt = this->flatten();
@@ -253,44 +253,38 @@ bool FiniteElement::is_vectorizable() const
 
 //-----------------------------------------------------------------------------
 
-std::ostream & operator<<( std::ostream & out, ufc::shape const & s )
+void FiniteElement::disp() const
 {
-  switch ( s )
+  std::string shape;
+  switch ( ufc_finite_element_->cell_shape() )
   {
     case ufc::shape::interval:
-      out << "interval";
+      shape = "interval";
       break;
     case ufc::shape::triangle:
-      out << "triangle";
+      shape = "triangle";
       break;
     case ufc::shape::quadrilateral:
-      out << "quadrilateral";
+      shape = "quadrilateral";
       break;
     case ufc::shape::tetrahedron:
-      out << "tetrahedron";
+      shape = "tetrahedron";
       break;
     case ufc::shape::hexahedron:
-      out << "hexahedron";
+      shape = "hexahedron";
       break;
     case ufc::shape::vertex:
-      out << "vertex";
+      shape = "vertex";
       break;
     default:
-      out << "unknown shape";
+      shape = "unknown shape";
       break;
   }
 
-  return out;
-}
-
-//-----------------------------------------------------------------------------
-
-void FiniteElement::disp() const
-{
   section( "FiniteElement" );
   begin( "ufc::finite_element info" );
   prm( "Signature", ufc_finite_element_->signature() );
-  prm( "Cell shape", ufc_finite_element_->cell_shape() );
+  prm( "Cell shape", shape.c_str() );
   prm( "Topological dimension", ufc_finite_element_->topological_dimension() );
   prm( "Geometric dimension", ufc_finite_element_->geometric_dimension() );
   prm( "Space dimension", ufc_finite_element_->space_dimension() );

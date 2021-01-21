@@ -20,15 +20,18 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
+auto DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap) -> DofNumbering *
 {
   DofNumbering * ret = nullptr;
   uint const tdim = mesh.topology_dimension();
   uint const num_verts = mesh.topology().global_size(0);
   uint const num_cells = mesh.topology().global_size(tdim);
 
+  Array<ufc::dofmap const*> flattened( 1, nullptr );
+  flattened.resize( 0 );
+
   // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( tdim, 0 );
+  std::vector< size_t > num_entities( tdim+1, 0 );
   for ( uint d = 0; d <= tdim; ++d )
   {
     if ( mesh.topology().connectivity( d ) )
@@ -38,17 +41,19 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
 
   ///
-  Array<ufc::dofmap const*> flattened;
   DofMap::flatten(&ufc_dofmap, flattened);
   uint const value_size = flattened.size();
   bool const vector = DofMap::can_vectorize(flattened);
-  destruct( flattened );
+  // destruct( flattened );
+  for( size_t i = 0; i < flattened.size(); ++i )
+    if( flattened[i] != nullptr )
+      delete flattened[i];
 
   // UFC dofmap should be initialized to compute the global dimension
   DofNumbering::init(mesh, ufc_dofmap);
 
   // Real
-  if (ufc_dofmap.global_dimension(num_entities) == ufc_dofmap.num_element_support_dofs())
+  if (ufc_dofmap.global_dimension(num_entities) == ufc_dofmap.num_element_dofs())
   {
     message(1, "DofNumbering: create RealSpaceNumbering for %s",
             ufc_dofmap.signature());
@@ -144,11 +149,11 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
   {
     error("DofNumbering::cache : numbering range is zero");
   }
-  array = new uint[mesh.num_cells() * ufc_dofmap.num_element_support_dofs()];
+  array = new uint[mesh.num_cells() * ufc_dofmap.num_element_dofs()];
   array_size = 0;
   CellIterator cell(mesh);
   UFCCell ufc_cell(*cell);
-  for (; !cell.end(); ++cell, array_size += ufc_dofmap.num_element_support_dofs())
+  for (; !cell.end(); ++cell, array_size += ufc_dofmap.num_element_dofs())
   {
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
@@ -189,7 +194,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
 
   // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( ufc_dofmap.topological_dimension(), 0 );
+  std::vector< size_t > num_entities( ufc_dofmap.topological_dimension()+1, 0 );
   for ( uint d = 0; d <= ufc_dofmap.topological_dimension(); ++d )
   {
     if ( mesh.topology().connectivity( d ) )

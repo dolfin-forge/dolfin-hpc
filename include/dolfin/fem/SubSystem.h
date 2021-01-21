@@ -40,13 +40,13 @@ public:
   SubSystem( SubSystem const & sub_system );
 
   /// Assignment operator
-  SubSystem & operator=( SubSystem const & sub_system ) = default;
+  auto operator=( SubSystem const & sub_system ) -> SubSystem & = default;
 
   /// Return number of levels for nested sub system
-  uint depth() const;
+  auto depth() const -> uint;
 
   /// Return array which defines sub system
-  Array< uint > const & array() const;
+  auto array() const -> Array< uint > const &;
 
   /// Cast
   operator Array< uint > &()
@@ -59,7 +59,7 @@ public:
   }
 
   ///
-  std::string str() const;
+  auto str() const -> std::string;
 
 private:
   // The array specifying the sub system
@@ -67,12 +67,12 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline uint SubSystem::depth() const
+inline auto SubSystem::depth() const -> uint
 {
   return sub_system.size();
 }
 //-----------------------------------------------------------------------------
-inline Array< uint > const & SubSystem::array() const
+inline auto SubSystem::array() const -> Array< uint > const &
 {
   return sub_system;
 }

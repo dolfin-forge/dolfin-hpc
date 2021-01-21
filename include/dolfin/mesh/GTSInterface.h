@@ -42,13 +42,13 @@ public:
 private:
 
   /// Construct bounding box of cell
-  GtsBBox* bboxCell(Cell&) const;
+  auto bboxCell(Cell&) const -> GtsBBox*;
 
   /// Construct bounding box of a single point
-  GtsBBox* bboxPoint(Point const& p) const;
+  auto bboxPoint(Point const& p) const -> GtsBBox*;
 
   /// Construct bounding box of a pair of points
-  GtsBBox* bboxPoint(Point const& p1, Point const& p2) const;
+  auto bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*;
 
   /// Construct hierarchical space partition tree of mesh
   void buildCellTree(void);

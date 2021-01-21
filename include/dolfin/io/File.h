@@ -98,11 +98,11 @@ namespace dolfin
 
     //--- STATIC
 
-    static std::string basename(std::string file);
+    static auto basename(std::string file) -> std::string;
 
-    static std::string filename(std::string basename, std::string format);
+    static auto filename(std::string basename, std::string format) -> std::string;
 
-    static std::string filename(std::string basename);
+    static auto filename(std::string basename) -> std::string;
 
   private:
 

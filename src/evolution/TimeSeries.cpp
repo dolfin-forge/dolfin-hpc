@@ -150,26 +150,26 @@ void TimeSeries::write(real t)
 }
 
 //-----------------------------------------------------------------------------
-real * TimeSeries::values()
+auto TimeSeries::values() -> real *
 {
   return &values_[0];
 }
 
 //-----------------------------------------------------------------------------
-uint TimeSeries::value_size() const
+auto TimeSeries::value_size() const -> uint
 {
   dolfin_assert(value_size_ == values_.size());
   return value_size_;
 }
 
 //-----------------------------------------------------------------------------
-uint TimeSeries::num_samples() const
+auto TimeSeries::num_samples() const -> uint
 {
   return discrete_times_.size();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<real, real> TimeSeries::sampling_interval() const
+auto TimeSeries::sampling_interval() const -> std::pair<real, real>
 {
   return data_timespan_;
 }

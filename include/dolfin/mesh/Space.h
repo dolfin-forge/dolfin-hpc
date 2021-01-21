@@ -23,21 +23,21 @@ struct Space
   virtual ~Space() = default;
 
   /// Equality
-  bool operator==(Space const& other) const
+  auto operator==(Space const& other) const -> bool
   {
     if(typeid(*this) != typeid(other)) return false;
     return (this->dim() == other.dim());
   }
 
   /// Non-equality
-  bool operator!=(Space const& other) const
+  auto operator!=(Space const& other) const -> bool
   { return !(*this == other); }
 
   /// Space dimension
-  virtual uint dim() const = 0;
+  virtual auto dim() const -> uint = 0;
 
   /// Clone pattern
-  virtual Space* clone() const = 0;
+  virtual auto clone() const -> Space* = 0;
 
   /// Display info
   virtual void disp() const = 0;

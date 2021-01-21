@@ -31,7 +31,7 @@ public:
   virtual void insert(uint const * num_rows, uint const * const * rows) = 0;
 
   /// Return local size
-  virtual uint size(uint i) const = 0;
+  virtual auto size(uint i) const -> uint = 0;
 
   /// Finalize sparsity pattern (needed by most parallel la backends)
   virtual void apply() = 0;
@@ -40,10 +40,10 @@ public:
   virtual void clear() = 0;
 
   /// Is blocked
-  virtual bool is_blocked() const = 0;
+  virtual auto is_blocked() const -> bool = 0;
 
   /// Is distributed
-  virtual bool is_distributed() const = 0;
+  virtual auto is_distributed() const -> bool = 0;
 
   /// Return array with number of non-zeroes per row
   virtual void numNonZeroPerRow(uint nzrow[]) const = 0;
@@ -54,7 +54,7 @@ public:
                                 uint o_nzrow[]) const = 0;
 
   /// Return total number of non-zeroes
-  virtual uint numNonZero() const = 0;
+  virtual auto numNonZero() const -> uint = 0;
 
   /// Display sparsity pattern
   virtual void disp() const = 0;

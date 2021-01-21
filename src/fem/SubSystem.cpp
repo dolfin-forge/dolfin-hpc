@@ -42,7 +42,7 @@ SubSystem::SubSystem(SubSystem const& sub_system)
   this->sub_system = sub_system.sub_system;
 }
 //-----------------------------------------------------------------------------
-std::string SubSystem::str() const
+auto SubSystem::str() const -> std::string
 {
   std::stringstream ss;
   ss << "[ ";

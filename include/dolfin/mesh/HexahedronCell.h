@@ -52,22 +52,22 @@ public:
   ~HexahedronCell() override = default;
 
   /// Clone pattern
-  CellType* clone() const override { return new HexahedronCell(*this); }
+  auto clone() const -> CellType* override { return new HexahedronCell(*this); }
 
   /// Return topological dimension of cell
-  uint dim() const override;
+  auto dim() const -> uint override;
 
   /// Return number of entitites of given topological dimension
-  uint num_entities(uint dim) const override;
+  auto num_entities(uint dim) const -> uint override;
 
   /// Return number of entities of given topological dimensions
-  uint num_entities(uint d0, uint d1) const override;
+  auto num_entities(uint d0, uint d1) const -> uint override;
 
   /// Return number of vertices for entity of given topological dimension
-  uint num_vertices(uint dim) const override;
+  auto num_vertices(uint dim) const -> uint override;
 
   /// Return orientation of the cell
-  uint orientation(Cell const& cell) const override;
+  auto orientation(Cell const& cell) const -> uint override;
 
   /// Create entities e of given topological dimension from vertices v
   void create_entities(uint** e, uint dim, uint const* v) const override;
@@ -79,7 +79,7 @@ public:
   void order_facet(uint vertices[], Facet& facet) const override;
 
   /// Return if mesh connectivities require ordering
-  bool connectivity_needs_ordering(uint d0, uint d1) const override;
+  auto connectivity_needs_ordering(uint d0, uint d1) const -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities(Mesh& mesh) const override;
@@ -90,25 +90,25 @@ public:
   void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const override;
 
   /// Number of cells created by refinement pattern
-  uint num_refined_cells() const override;
+  auto num_refined_cells() const -> uint override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  uint num_refined_vertices(uint dim) const override;
+  auto num_refined_vertices(uint dim) const -> uint override;
 
   //---------------------------------------------------------------------------
 
   /// Compute (generalized) volume (area) of hexahedron
-  real volume(MeshEntity const& entity) const override;
+  auto volume(MeshEntity const& entity) const -> real override;
 
   /// Compute diameter of hexahedron
-  real diameter(MeshEntity const& entity) const override;
+  auto diameter(MeshEntity const& entity) const -> real override;
 
   /// Compute circumradius of hexahedron
-  real circumradius(MeshEntity const& entity) const override;
+  auto circumradius(MeshEntity const& entity) const -> real override;
 
   /// Compute inradius of hexahedron
-  real inradius(MeshEntity const& entity) const override;
+  auto inradius(MeshEntity const& entity) const -> real override;
 
   /// Compute coordinates of midpoint
   void midpoint(MeshEntity const& entity, real * p) const override;
@@ -117,13 +117,13 @@ public:
   void normal(Cell const& cell, uint facet, real * n) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  real facet_area(Cell const& cell, uint facet) const override;
+  auto facet_area(Cell const& cell, uint facet) const -> real override;
 
   /// Check if point p intersects the entity
-  bool intersects(MeshEntity const& e, Point const& p) const override;
+  auto intersects(MeshEntity const& e, Point const& p) const -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
-  bool intersects(MeshEntity const& e, Point const& p1, Point const& p2) const override;
+  auto intersects(MeshEntity const& e, Point const& p1, Point const& p2) const -> bool override;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
@@ -131,44 +131,44 @@ public:
   void create_reference_cell(Mesh& mesh) const override;
 
   /// Return coordinates of vertices in the reference cell
-  real const * reference_vertex(uint i) const override;
+  auto reference_vertex(uint i) const -> real const * override;
 
   //---------------------------------------------------------------------------
 
   /// Return description of cell type
-  std::string description() const override;
+  auto description() const -> std::string override;
 
   /// Display information
   void disp() const override;
 
   /// Check
-  bool check(Cell& cell) const override;
+  auto check(Cell& cell) const -> bool override;
 
 private:
 
   // Find local index of edge i according to ordering convention
-  uint findEdge(uint i, Cell const& cell) const;
+  auto findEdge(uint i, Cell const& cell) const -> uint;
 
   // Find local index of face i according to ordering convention
-  uint findFace(uint i, Cell const& cell) const;
+  auto findFace(uint i, Cell const& cell) const -> uint;
 
 };
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::dim() const
+inline auto HexahedronCell::dim() const -> uint
 {
   return 3;
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::num_entities(uint dim) const
+inline auto HexahedronCell::num_entities(uint dim) const -> uint
 {
   dolfin_assert(dim <= TD);
   return NE[3][dim];
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::num_entities(uint d0, uint d1) const
+inline auto HexahedronCell::num_entities(uint d0, uint d1) const -> uint
 {
   dolfin_assert(d0 <= TD);
   dolfin_assert(d1 <= TD);
@@ -176,14 +176,14 @@ inline uint HexahedronCell::num_entities(uint d0, uint d1) const
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::num_vertices(uint dim) const
+inline auto HexahedronCell::num_vertices(uint dim) const -> uint
 {
   dolfin_assert(dim <= TD);
   return NE[dim][0];
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::orientation(Cell const& cell) const
+inline auto HexahedronCell::orientation(Cell const& cell) const -> uint
 {
   dolfin_assert(cell.type() == this->cell_type);
 
@@ -207,7 +207,7 @@ inline uint HexahedronCell::orientation(Cell const& cell) const
 }
 
 //-----------------------------------------------------------------------------
-inline bool HexahedronCell::connectivity_needs_ordering(uint d0, uint d1) const
+inline auto HexahedronCell::connectivity_needs_ordering(uint d0, uint d1) const -> bool
 {
   dolfin_assert(d0 <= TD && d1 <= TD);
   // Do not order cell - vertices connectivities
@@ -226,13 +226,13 @@ inline void HexahedronCell::initialize_connectivities(Mesh& mesh) const
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::num_refined_cells() const
+inline auto HexahedronCell::num_refined_cells() const -> uint
 {
   return 8;
 }
 
 //-----------------------------------------------------------------------------
-inline uint HexahedronCell::num_refined_vertices(uint dim) const
+inline auto HexahedronCell::num_refined_vertices(uint dim) const -> uint
 {
   dolfin_assert(dim <= TD);
   MAYBE_UNUSED(dim);
@@ -240,7 +240,7 @@ inline uint HexahedronCell::num_refined_vertices(uint dim) const
 }
 
 //-----------------------------------------------------------------------------
-inline real HexahedronCell::volume(MeshEntity const& entity) const
+inline auto HexahedronCell::volume(MeshEntity const& entity) const -> real
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[3][0]);
@@ -265,7 +265,7 @@ inline real HexahedronCell::volume(MeshEntity const& entity) const
 }
 
 //-----------------------------------------------------------------------------
-inline real HexahedronCell::diameter(MeshEntity const& entity) const
+inline auto HexahedronCell::diameter(MeshEntity const& entity) const -> real
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[3][0]);
@@ -298,14 +298,14 @@ inline real HexahedronCell::diameter(MeshEntity const& entity) const
 }
 
 //-----------------------------------------------------------------------------
-inline real HexahedronCell::circumradius(MeshEntity const& entity) const
+inline auto HexahedronCell::circumradius(MeshEntity const& entity) const -> real
 {
   /// @todo No better idea for now
   return 0.5*std::sqrt(3.0)*this->diameter(entity);
 }
 
 //-----------------------------------------------------------------------------
-inline real HexahedronCell::inradius(MeshEntity const& entity) const
+inline auto HexahedronCell::inradius(MeshEntity const& entity) const -> real
 {
   /// @todo No better idea for now
   return 0.5*this->diameter(entity);
@@ -376,7 +376,7 @@ inline void HexahedronCell::normal(Cell const& cell, uint facet, real * n) const
 }
 
 //-----------------------------------------------------------------------------
-inline real HexahedronCell::facet_area(Cell const& cell, uint facet) const
+inline auto HexahedronCell::facet_area(Cell const& cell, uint facet) const -> real
 {
   dolfin_assert(cell.type() == this->cell_type);
 
@@ -399,7 +399,7 @@ inline real HexahedronCell::facet_area(Cell const& cell, uint facet) const
 }
 
 //-----------------------------------------------------------------------------
-inline real const * HexahedronCell::reference_vertex(uint i) const
+inline auto HexahedronCell::reference_vertex(uint i) const -> real const *
 {
   return &VC[i][0];
 }

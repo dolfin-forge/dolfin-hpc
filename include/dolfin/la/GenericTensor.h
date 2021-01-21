@@ -34,13 +34,13 @@ namespace dolfin
     virtual void init(const GenericSparsityPattern& sparsity_pattern) = 0;
 
     /// Return copy of tensor
-    virtual GenericTensor* copy() const = 0;
+    virtual auto copy() const -> GenericTensor* = 0;
 
     /// Return tensor rank (number of dimensions)
-    virtual uint rank() const = 0;
+    virtual auto rank() const -> uint = 0;
 
     /// Return size of given dimension
-    virtual uint size(uint dim) const = 0;
+    virtual auto size(uint dim) const -> uint = 0;
 
     /// Get block of values
     virtual void get(real* block, const uint* num_rows, const uint * const * rows) const = 0;
@@ -63,10 +63,10 @@ namespace dolfin
     //--- Special functions, downcasting to concrete types ---
 
     /// Return linear algebra backend factory
-    virtual LinearAlgebraFactory& factory() const = 0;
+    virtual auto factory() const -> LinearAlgebraFactory& = 0;
 
     /// Cast a GenericTensor to its derived class (const)
-    template<class T> const T& down_cast() const
+    template<class T> auto down_cast() const -> const T&
     {
       const T* t = dynamic_cast<const T*>(instance());
       if (!t) error("GenericTensor cannot be cast to the requested type.");
@@ -74,7 +74,7 @@ namespace dolfin
     }
 
     /// Cast a GenericTensor to its derived class (non-const version)
-    template<class T> T& down_cast()
+    template<class T> auto down_cast() -> T&
     {
       T* t = dynamic_cast<T*>(instance());
       if (!t) error("GenericTensor cannot be cast to the requested type.");
@@ -82,17 +82,17 @@ namespace dolfin
     }
 
     /// Check whether the GenericTensor instance matches a specific type
-    template<class T> bool has_type() const
+    template<class T> auto has_type() const -> bool
     { return bool(dynamic_cast<const T*>(instance())); }
 
     //--- Special functions, intended for library use only ---
 
     /// Return concrete instance / unwrap (const)
-    virtual const GenericTensor* instance() const
+    virtual auto instance() const -> const GenericTensor*
     { return this; }
 
     /// Return concrete instance / unwrap (non-const version)
-    virtual GenericTensor* instance()
+    virtual auto instance() -> GenericTensor*
     { return this; }
 
   };

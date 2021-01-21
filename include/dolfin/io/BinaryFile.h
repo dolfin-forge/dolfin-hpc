@@ -98,17 +98,17 @@ private:
 
   void write_function(LabelList<Function>& f);
 
-  bool hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size);
+  auto hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size) -> bool;
 
 #ifdef ENABLE_MPIIO
   void bswap_func_hdr(BinaryFunctionHeader& hdr);
 #endif
 
   /// Returns binary file cell type identifier for given DOLFIN cell type
-  uint cell_type(uint version, CellType::Type const type);
+  auto cell_type(uint version, CellType::Type const type) -> uint;
 
   /// Returns DOLFIN cell type for given binary file cell type identifier
-  CellType::Type cell_type(uint version, uint const type);
+  auto cell_type(uint version, uint const type) -> CellType::Type;
 
   // Function filename
   std::string bin_filename_;

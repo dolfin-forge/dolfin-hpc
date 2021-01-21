@@ -27,7 +27,7 @@ namespace dolfin
 // coordinates are considered equal if equal to within round-off.
 struct lt_coordinate
 {
-  bool operator()(const std::vector<real>& x, const std::vector<real>& y) const
+  auto operator()(const std::vector<real>& x, const std::vector<real>& y) const -> bool
   {
     if (x.size() > (y.size() + DOLFIN_EPS)) return false;
 

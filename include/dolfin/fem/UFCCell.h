@@ -34,7 +34,7 @@ public:
 
 public:
   /// Dereference operator, returns a reference to the underlying Cell
-  inline Cell const & operator*() const;
+  inline auto operator*() const -> Cell const &;
 
   // Initialize UFC cell data
   void init( Cell & cell );
@@ -43,7 +43,7 @@ public:
   void update( Cell & cell );
 
   ///
-  static ufc::shape shape( CellType::Type type );
+  static auto shape( CellType::Type type ) -> ufc::shape;
 
   // Number of cell vertices
   uint num_vertices { 0 };
@@ -94,14 +94,14 @@ inline UFCCell::~UFCCell()
 
 //-----------------------------------------------------------------------------
 
-inline Cell const & UFCCell::operator*() const
+inline auto UFCCell::operator*() const -> Cell const &
 {
   return *cell_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline ufc::shape UFCCell::shape( CellType::Type type )
+inline auto UFCCell::shape( CellType::Type type ) -> ufc::shape
 {
   switch ( type )
   {

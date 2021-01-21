@@ -41,10 +41,10 @@ public:
   ~Edge() = default;
 
   /// Compute Euclidian length of edge
-  real length() const;
+  auto length() const -> real;
 
   /// Compute coordinates of edge midpoint
-  Point midpoint() const;
+  auto midpoint() const -> Point;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -92,7 +92,7 @@ public:
   using higher_dimensional = Face;
 };
 
-inline real Edge::length() const
+inline auto Edge::length() const -> real
 {
   Array< uint > const & vertices = entities( 0 );
   MeshGeometry const &  geom     = mesh_.geometry();
@@ -105,7 +105,7 @@ inline real Edge::length() const
   return p0.dist( p1 );
 }
 //-----------------------------------------------------------------------------
-inline Point Edge::midpoint() const
+inline auto Edge::midpoint() const -> Point
 {
   Array< uint > const & vertices = entities( 0 );
   MeshGeometry const &  geom     = mesh_.geometry();

@@ -67,11 +67,11 @@ public:
     value_size_ = flattened.size();
     destruct( flattened );
     //---
-    if (ufc_dofmap.num_element_support_dofs()
+    if (ufc_dofmap.num_element_dofs()
         != mesh.type().num_entities(0) * value_size_)
     {
       error("CG1sNumbering : local dimension %u != %u",
-            ufc_dofmap.num_element_support_dofs(),
+            ufc_dofmap.num_element_dofs(),
             mesh.type().num_entities(0) * value_size_);
     }
     set_range(value_size_ * mesh.topology().offset(0),

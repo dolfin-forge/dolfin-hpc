@@ -24,21 +24,21 @@ public:
   ~EuclideanSpace() override = default;
 
   /// Equality
-  bool operator==(EuclideanSpace const& other) const
+  auto operator==(EuclideanSpace const& other) const -> bool
   { return dim_ == other.dim_; }
 
   /// Non-equality
-  bool operator!=(EuclideanSpace const& other) const
+  auto operator!=(EuclideanSpace const& other) const -> bool
   { return dim_ != other.dim_; }
 
   /// Return dimension
-  inline uint dim() const override
+  inline auto dim() const -> uint override
   {
     return dim_;
   }
 
   /// Return clone
-  inline EuclideanSpace * clone() const override
+  inline auto clone() const -> EuclideanSpace * override
   {
     return Clonable<EuclideanSpace>::clone();
   }

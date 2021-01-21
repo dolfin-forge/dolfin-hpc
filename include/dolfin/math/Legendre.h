@@ -31,22 +31,22 @@ public:
   ~Legendre() = default;
 
   /// Evaluation at given point
-  real operator()(real x);
+  auto operator()(real x) -> real;
 
   /// Evaluation of derivative at given point
-  real ddx(real x);
+  auto ddx(real x) -> real;
 
   /// Evaluation of second derivative at given point
-  real d2dx(real x);
+  auto d2dx(real x) -> real;
 
   /// Evaluation at given point
-  static real eval(uint n, real x);
+  static auto eval(uint n, real x) -> real;
 
   /// Evaluation of derivative at given point
-  static real ddx(uint n, real x);
+  static auto ddx(uint n, real x) -> real;
 
   /// Evaluation of second derivative at given point
-  static real d2dx(uint n, real x);
+  static auto d2dx(uint n, real x) -> real;
 
 private:
 
@@ -57,17 +57,17 @@ private:
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline real Legendre::operator()(real x)
+inline auto Legendre::operator()(real x) -> real
 {
   return eval(n_, x);
 }
 //-----------------------------------------------------------------------------
-inline real Legendre::ddx(real x)
+inline auto Legendre::ddx(real x) -> real
 {
   return ddx(n_, x);
 }
 //-----------------------------------------------------------------------------
-inline real Legendre::d2dx(real x)
+inline auto Legendre::d2dx(real x) -> real
 {
   return d2dx(n_, x);
 }

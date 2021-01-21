@@ -49,7 +49,7 @@ typedef struct atomic_cell
     std::copy(other.v, other.v + size, v);
   }
   //-----------------------------------
-  atomic_cell& operator=(atomic_cell const& other)
+  auto operator=(atomic_cell const& other) -> atomic_cell&
   {
     if(&other == this)
     {
@@ -1191,8 +1191,8 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 }
 
 //-----------------------------------------------------------------------------
-bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
-                           uint pe_size)
+auto BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
+                           uint pe_size) -> bool
 {
 
   bool byteswap = false;
@@ -1258,7 +1258,7 @@ void BinaryFile::bswap_func_hdr(BinaryFunctionHeader& hdr)
 #endif
 
 //-----------------------------------------------------------------------------
-uint BinaryFile::cell_type(uint version, CellType::Type const type)
+auto BinaryFile::cell_type(uint version, CellType::Type const type) -> uint
 {
   switch (version)
     {
@@ -1310,7 +1310,7 @@ uint BinaryFile::cell_type(uint version, CellType::Type const type)
 }
 
 //-----------------------------------------------------------------------------
-CellType::Type BinaryFile::cell_type(uint version, uint const type)
+auto BinaryFile::cell_type(uint version, uint const type) -> CellType::Type
 {
   switch (version)
     {

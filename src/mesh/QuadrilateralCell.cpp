@@ -196,7 +196,7 @@ void QuadrilateralCell::refine_cell(Cell& cell, MeshEditor& editor,
   editor.add_cell(current_cell++, &cv3[0]);
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&) const
+auto QuadrilateralCell::intersects(MeshEntity const& e, Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[2][0]);
@@ -217,8 +217,8 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&,
-                                   Point const&) const
+auto QuadrilateralCell::intersects(MeshEntity const& e, Point const&,
+                                   Point const&) const -> bool
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[2][0]);
@@ -239,7 +239,7 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&,
   return true;
 }
 //-----------------------------------------------------------------------------
-std::string QuadrilateralCell::description() const
+auto QuadrilateralCell::description() const -> std::string
 {
   return std::string("quadrilateral (hypercube of topological dimension 2)");
 }
@@ -268,7 +268,7 @@ void QuadrilateralCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::check(Cell& cell) const
+auto QuadrilateralCell::check(Cell& cell) const -> bool
 {
   bool ret = CellType::check(cell);
 
@@ -299,7 +299,7 @@ bool QuadrilateralCell::check(Cell& cell) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
+auto QuadrilateralCell::findEdge(uint i, Cell const& cell) const -> uint
 {
   // Ordering convention for edges (order of non-incident vertices)
 

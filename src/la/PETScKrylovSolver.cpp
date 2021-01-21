@@ -25,7 +25,7 @@ namespace dolfin
 {
 
 // Monitor function
-int monitor( KSP, int iteration, real rnorm, void * )
+auto monitor( KSP, int iteration, real rnorm, void * ) -> int
 {
   message( "Iteration %d: residual = %g", iteration, rnorm );
   return 0;
@@ -65,9 +65,9 @@ PETScKrylovSolver::~PETScKrylovSolver()
 #endif
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovSolver::solve( const PETScMatrix & A,
+auto PETScKrylovSolver::solve( const PETScMatrix & A,
                                        PETScVector &       x,
-                                       const PETScVector & b )
+                                       const PETScVector & b ) -> dolfin::uint
 {
   // Check dimensions
   uint M = A.size( 0 );
@@ -197,9 +197,9 @@ dolfin::uint PETScKrylovSolver::solve( const PETScMatrix & A,
   return num_iterations;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
+auto PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
                                        PETScVector &             x,
-                                       const PETScVector &       b )
+                                       const PETScVector &       b ) -> dolfin::uint
 {
   // Check dimensions
   uint M = A.size( 0 );
@@ -488,7 +488,7 @@ void PETScKrylovSolver::writeReport( int num_iterations )
   }
 }
 //-----------------------------------------------------------------------------
-KSPType PETScKrylovSolver::getType( SolverType method ) const
+auto PETScKrylovSolver::getType( SolverType method ) const -> KSPType
 {
   switch ( method )
   {

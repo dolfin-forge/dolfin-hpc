@@ -15,8 +15,8 @@ class EuclideanBasis
 public:
 
   ///
-  static uint compute(uint gdim, Point B[], Array<real> const& N,
-                      Array<real> const& W, real cosalpha_max, bool weighted);
+  static auto compute(uint gdim, Point B[], Array<real> const& N,
+                      Array<real> const& W, real cosalpha_max, bool weighted) -> uint;
 
 
 };

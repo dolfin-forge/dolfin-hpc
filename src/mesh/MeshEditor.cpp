@@ -234,12 +234,12 @@ void MeshEditor::clear()
   open_ = false;
 }
 //-----------------------------------------------------------------------------
-uint MeshEditor::current_vertex() const
+auto MeshEditor::current_vertex() const -> uint
 {
   return vertex_index_;
 }
 //-----------------------------------------------------------------------------
-uint MeshEditor::current_cell() const
+auto MeshEditor::current_cell() const -> uint
 {
   return cell_index_;
 }

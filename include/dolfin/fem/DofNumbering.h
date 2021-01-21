@@ -29,7 +29,7 @@ class DofNumbering
 public:
 
   /// Create dof numbering for given ufc dofmap (factory function)
-  static DofNumbering * create(Mesh& mesh, ufc::dofmap& ufc_dofmap);
+  static auto create(Mesh& mesh, ufc::dofmap& ufc_dofmap) -> DofNumbering *;
 
   /// Default constructor given a UFC mesh and dofmap
   DofNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap);
@@ -47,28 +47,28 @@ public:
 
   /// Return is the dof is shared
   /// No checking performed: return false if the index is not known (!)
-  virtual bool is_shared(uint index) const = 0;
+  virtual auto is_shared(uint index) const -> bool = 0;
 
   /// Return is the dof is ghosted
   /// No checking performed: return false if the index is not known (!)
-  virtual bool is_ghost(uint index) const = 0;
+  virtual auto is_ghost(uint index) const -> bool = 0;
 
   /// Return string description
-  virtual std::string description() const = 0;
+  virtual auto description() const -> std::string = 0;
 
   //---------------------------------------------------------------------------
 
   /// Return local dof numbering offset
-  uint offset() const;
+  auto offset() const -> uint;
 
   /// Return local dof numbering size
-  uint size() const;
+  auto size() const -> uint;
 
   /// Cached cell tabulated local-to-global mapping
-  uint const * block() const;
+  auto block() const -> uint const *;
 
   /// Cached cell tabulated local-to-global mapping
-  uint block_size() const;
+  auto block_size() const -> uint;
 
   //---------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ private:
   DofNumbering(DofNumbering const& other);
 
   /// Assignment
-  DofNumbering& operator=(DofNumbering const& other);
+  auto operator=(DofNumbering const& other) -> DofNumbering&;
 
   ///
   void clear();
@@ -125,22 +125,22 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline DofNumbering & DofNumbering::operator=( DofNumbering const & )
+inline auto DofNumbering::operator=( DofNumbering const & ) -> DofNumbering &
 {
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline uint DofNumbering::offset() const
+inline auto DofNumbering::offset() const -> uint
 {
   return offset_;
 }
 //-----------------------------------------------------------------------------
-inline uint DofNumbering::size() const
+inline auto DofNumbering::size() const -> uint
 {
   return size_;
 }
 //-----------------------------------------------------------------------------
-inline uint const * DofNumbering::block() const
+inline auto DofNumbering::block() const -> uint const *
 {
   if ( array == nullptr )
   {
@@ -149,7 +149,7 @@ inline uint const * DofNumbering::block() const
   return array;
 }
 //-----------------------------------------------------------------------------
-inline uint DofNumbering::block_size() const
+inline auto DofNumbering::block_size() const -> uint
 {
   if ( array == nullptr )
   {

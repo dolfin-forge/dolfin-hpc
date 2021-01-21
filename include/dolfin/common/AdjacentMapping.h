@@ -29,13 +29,13 @@ public:
   ~SharedMapping() = default;
 
   /// Do not allow assignment
-  SharedMapping & operator=( SharedMapping const & other ) = delete;
+  auto operator=( SharedMapping const & other ) -> SharedMapping & = delete;
 
   ///
-  Array< uint > const & to( uint rank ) const;
+  auto to( uint rank ) const -> Array< uint > const &;
 
   ///
-  Array< uint > const & from( uint rank ) const;
+  auto from( uint rank ) const -> Array< uint > const &;
 
   ///
   void disp() const;

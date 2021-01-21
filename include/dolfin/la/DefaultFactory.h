@@ -15,7 +15,7 @@ class DefaultFactory : public LinearAlgebraFactory
 public:
 
   // Return instance of default backend
-  static LinearAlgebraFactory& factory();
+  static auto factory() -> LinearAlgebraFactory&;
 
   /// Constructor
   DefaultFactory() = default;
@@ -24,13 +24,13 @@ public:
   ~DefaultFactory() override = default;
 
   /// Create empty matrix
-  GenericMatrix* createMatrix() const override;
+  auto createMatrix() const -> GenericMatrix* override;
 
   /// Create empty vector
-  GenericVector* createVector() const override;
+  auto createVector() const -> GenericVector* override;
 
   /// Create empty sparsity pattern
-  GenericSparsityPattern * createPattern() const override;
+  auto createPattern() const -> GenericSparsityPattern * override;
 
 };
 

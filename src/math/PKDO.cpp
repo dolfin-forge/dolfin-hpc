@@ -19,7 +19,7 @@ PKDO::PKDO(uint i, uint j) :
 {
 }
 //-----------------------------------------------------------------------------
-real PKDO::eval(uint i, uint j, real r, real s)
+auto PKDO::eval(uint i, uint j, real r, real s) -> real
 {
   dolfin_assert(r >= 0.0);
   dolfin_assert(s >= -1.0);
@@ -30,7 +30,7 @@ real PKDO::eval(uint i, uint j, real r, real s)
       * Jacobi::eval(j, 2 * i + 1, 0, s);
 }
 //-----------------------------------------------------------------------------
-real PKDO::ddx(uint, uint, real, real)
+auto PKDO::ddx(uint, uint, real, real) -> real
 {
   error("PKDO derivatives not implemented.");
   return 0.0;

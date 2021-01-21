@@ -118,10 +118,10 @@ private:
   static void process_reassignment(MeshFunction<uint>& partitions,
                                    uint* max_sendrecv);
 
-  static bool computational_gain(Mesh& mesh,
+  static auto computational_gain(Mesh& mesh,
                                  MeshValues<uint, Cell>& weight,
                                  MeshValues<uint, Cell>& partitions,
-                                 uint max_sendrecv, real tf, real tb, real ts);
+                                 uint max_sendrecv, real tf, real tb, real ts) -> bool;
 
   static void radixsort_matrix(uint* res, uint* Matrix, uint m, bool desc);
 
@@ -130,9 +130,9 @@ private:
 public:
 
   // Very imperfect but good enough for now
-  static MeshValues<uint, Cell>& partitions(Mesh& mesh);
+  static auto partitions(Mesh& mesh) -> MeshValues<uint, Cell>&;
 
-  static bool clear(Mesh& mesh);
+  static auto clear(Mesh& mesh) -> bool;
 
 private:
 

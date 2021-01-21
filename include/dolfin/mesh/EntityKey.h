@@ -63,7 +63,7 @@ struct EntityKey
   }
 
   ///
-  EntityKey& operator=(EntityKey const& other)
+  auto operator=(EntityKey const& other) -> EntityKey&
   {
     if(this != &other)
     {
@@ -77,7 +77,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator<(EntityKey const& other) const
+  inline auto operator<(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -91,7 +91,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator<=(EntityKey const& other) const
+  inline auto operator<=(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -105,7 +105,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator==(EntityKey const& other) const
+  inline auto operator==(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -119,7 +119,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator!=(EntityKey const& other) const
+  inline auto operator!=(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -133,7 +133,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator>=(EntityKey const& other) const
+  inline auto operator>=(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -147,7 +147,7 @@ struct EntityKey
   }
 
   ///
-  inline bool operator>(EntityKey const& other) const
+  inline auto operator>(EntityKey const& other) const -> bool
   {
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
@@ -191,7 +191,7 @@ struct EntityKey
   }
 
   ///
-  inline size_t hash() const
+  inline auto hash() const -> size_t
   {
     size_t ret = static_cast<std::size_t>(indices[0]);
     for (uint i = 1; i < size; ++i)
@@ -233,7 +233,7 @@ namespace std
 template<>
 struct hash<dolfin::EntityKey>
 {
-  inline std::size_t operator()(dolfin::EntityKey const& e) const
+  inline auto operator()(dolfin::EntityKey const& e) const -> std::size_t
   {
     return e.hash();
   }

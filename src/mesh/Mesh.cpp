@@ -112,7 +112,7 @@ void swap( Mesh& a, Mesh& b )
 
 //-----------------------------------------------------------------------------
 
-Mesh const & Mesh::operator=( Mesh const & other )
+auto Mesh::operator=( Mesh const & other ) -> Mesh const &
 {
   Mesh tmp(other);
   swap( *this, tmp );
@@ -122,7 +122,7 @@ Mesh const & Mesh::operator=( Mesh const & other )
 
 //-----------------------------------------------------------------------------
 
-bool Mesh::operator ==(Mesh const& other) const
+auto Mesh::operator ==(Mesh const& other) const -> bool
 {
   if ( not ( topology_ == other.topology_ ) )
   {
@@ -161,14 +161,12 @@ void Mesh::extent_update()
 
   for ( VertexIterator v( *this ); not v.end(); ++v )
   {
-    Point const & p = v->point();
-    min_[0] = std::min( min_[0], p[0] );
-    min_[1] = std::min( min_[1], p[1] );
-    min_[2] = std::min( min_[2], p[2] );
-
-    max_[0] = std::max( max_[0], p[0] );
-    max_[1] = std::max( max_[1], p[1] );
-    max_[2] = std::max( max_[2], p[2] );
+    real const * x = v->x();
+    for ( size_t i = 0; i < geometry_.dim(); ++i )
+    {
+      min_[i] = std::min( min_[i], x[i] );
+      max_[i] = std::max( max_[i], x[i] );
+    }
   }
 
 #ifdef HAVE_MPI
@@ -196,7 +194,7 @@ void Mesh::init() const
 
 //-----------------------------------------------------------------------------
 
-BoundaryMesh& Mesh::exterior_boundary()
+auto Mesh::exterior_boundary() -> BoundaryMesh&
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
   if (exterior_boundary_ == nullptr || exterior_boundary_->invalid_mesh_topology())
@@ -213,7 +211,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 
 //-----------------------------------------------------------------------------
 
-BoundaryMesh& Mesh::interior_boundary()
+auto Mesh::interior_boundary() -> BoundaryMesh&
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
   if (interior_boundary_ == nullptr || interior_boundary_->invalid_mesh_topology())
@@ -231,7 +229,7 @@ BoundaryMesh& Mesh::interior_boundary()
 //-----------------------------------------------------------------------------
 
 
-IntersectionDetector& Mesh::intersector()
+auto Mesh::intersector() -> IntersectionDetector&
 {
   /// @todo Improve hash logic to regenerate detector at topology change
   if (intersection_detector_ == nullptr)
@@ -317,7 +315,7 @@ void Mesh::refine()
 
 //-----------------------------------------------------------------------------
 
-bool Mesh::has_periodic_constraint() const
+auto Mesh::has_periodic_constraint() const -> bool
 {
   return (!periodic_mappings_.empty());
 }
@@ -331,7 +329,7 @@ void Mesh::add_periodic_constraint(PeriodicSubDomain const& periodic)
 
 //-----------------------------------------------------------------------------
 
-Array<MappedManifold *> const& Mesh::periodic_mappings() const
+auto Mesh::periodic_mappings() const -> Array<MappedManifold *> const&
 {
   for(Array<MappedManifold *>::iterator it = periodic_mappings_.begin();
       it != periodic_mappings_.end(); ++it)
@@ -350,7 +348,7 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
 
 //-----------------------------------------------------------------------------
 
-std::string const Mesh::hash() const
+auto Mesh::hash() const -> std::string const
 {
   std::stringstream ss;
   ss << "Mesh@" << this << ":";

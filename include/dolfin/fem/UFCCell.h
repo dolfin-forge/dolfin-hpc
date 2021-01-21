@@ -134,9 +134,6 @@ inline void UFCCell::init( Cell & cell )
   // Clear old data
   clear();
 
-  //
-  num_vertices = cell.num_entities( 0 );
-
   // Update dolfin cell pointer
   this->cell_ = &cell;
 
@@ -152,28 +149,34 @@ inline void UFCCell::init( Cell & cell )
   // Set entity indices
   entity_indices.resize( topological_dimension + 1 );
 
-  // Cell index (short-cut for entity_indices[topological_dimension][0])
-  index = entity_indices[topological_dimension][0];
-
   // In any case store topological data in object
   for ( uint d = 0; d < topological_dimension; ++d )
   {
     entity_indices[d] = cell.entities( d );
   }
 
-  entity_indices[topological_dimension] =
-    std::vector< std::size_t >( 1, cell.global_index() );
+  // Cell index (short-cut for entity_indices[topological_dimension][0])
+  entity_indices[topological_dimension] = { cell.global_index() };
+  index = entity_indices[topological_dimension][0];
+
+  // FIXME the following three are only set with placeholders
+  local_facet = -1;
+  orientation = -1;
+  mesh_identifier = -1;
+
+  //
+  num_vertices = cell.num_entities( 0 );
 
   /// Set vertex coordinates
   Array< uint > const & vertices = cell.entities( 0 );
   coordinates.resize( num_vertices * geometric_dimension );
 
-  for ( uint i = 0; i < coordinates.size(); i += geometric_dimension )
+  for ( uint i = 0; i < num_vertices; ++i )
   {
     double const * coords = cell.mesh().geometry().x( vertices[i] );
 
     for ( uint c = 0; c < geometric_dimension; ++c )
-      coordinates[i+c] = coords[c];
+      coordinates[i * geometric_dimension + c] = coords[c];
   }
 }
 
@@ -208,12 +211,12 @@ inline void UFCCell::update( Cell & cell )
 
   // /// Set vertex coordinates
   Array< uint > const & vertices = cell.entities( 0 );
-  for ( uint i = 0; i < coordinates.size(); i += geometric_dimension )
+  for ( uint i = 0; i < num_vertices; ++i )
   {
     double const * coords = cell.mesh().geometry().x( vertices[i] );
 
     for ( uint c = 0; c < geometric_dimension; ++c )
-      coordinates[i+c] = coords[c];
+      coordinates[i * geometric_dimension + c] = coords[c];
   }
 }
 

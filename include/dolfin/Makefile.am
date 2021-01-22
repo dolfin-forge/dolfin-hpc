@@ -83,7 +83,6 @@ nobase_pkginclude_HEADERS = \
 				function/Real.h\
 				function/SpaceTimeFunction.h\
 				function/SubFunction.h\
-				function/UFCFunction.h\
 				function/Value.h\
 				function/ValueSpace.h\
 				insitu/dolfin_insitu.h\

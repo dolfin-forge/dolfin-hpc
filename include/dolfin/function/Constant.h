@@ -13,16 +13,15 @@ class Constant : public Coefficient
 {
 
 public:
-
   /// Constructor
-  Constant() :
-    value_(0.0)
+  Constant()
+    : value_( 0.0 )
   {
   }
 
   /// Constructor
-  Constant(real value) :
-    value_(value)
+  Constant( real value )
+    : value_( value )
   {
   }
 
@@ -32,16 +31,16 @@ public:
   }
 
   /// Assignment
-  Constant& operator=(real const& value)
+  Constant & operator=( real const & value )
   {
     value_ = value;
     return *this;
   }
 
   /// Equality
-  bool operator==(Constant const& other)
+  bool operator==( Constant const & other )
   {
-    if(value_ == other.value_)
+    if ( value_ == other.value_ )
     {
       return true;
     }
@@ -49,28 +48,28 @@ public:
   }
 
   /// Multiply by constant real number
-  inline Constant& operator+=(real const& value)
+  inline Constant & operator+=( real const & value )
   {
     value_ += value;
     return *this;
   }
 
   /// Add a constant real number
-  inline Constant& operator-=(real const& value)
+  inline Constant & operator-=( real const & value )
   {
     value_ -= value;
     return *this;
   }
 
   /// Substract a constant real number
-  inline Constant& operator*=(real const& value)
+  inline Constant & operator*=( real const & value )
   {
     value_ *= value;
     return *this;
   }
 
   /// Divide by constant real number
-  inline Constant& operator/=(real const& value)
+  inline Constant & operator/=( real const & value )
   {
     value_ /= value;
     return *this;
@@ -85,7 +84,7 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(real* values, const real*, const ufc::cell&) const
+  inline void evaluate( real * values, const real *, const ufc::cell & ) const
   {
     values[0] = value_;
   }
@@ -93,61 +92,65 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(uint n, real* values, const real*,const ufc::cell&) const
+  inline void
+    evaluate( size_t n, real * values, const real *, const ufc::cell & ) const
   {
-    std::fill_n(values, n, value_);
+    std::fill_n( values, n, value_ );
   }
 
   /// Evaluate function at given point
-  inline void eval(real* values, const real*) const
+  inline void eval( real * values, const real * ) const
   {
     values[0] = value_;
   }
 
   /// Return the rank of the value space
-  inline uint rank() const
+  inline size_t rank() const
   {
     return 0;
   }
 
   /// Return the dimension of the value space for axis i
-  inline uint dim(uint) const
+  inline size_t dim( size_t ) const
   {
     return 1;
   }
 
   /// Value size
-  inline uint value_size() const
+  inline size_t value_size() const
   {
     return 1;
   }
 
   ///
-  inline Constant const& operator()(Time const&) const
+  inline Constant const & operator()( Time const & ) const
   {
     // No-op
     return *this;
   }
 
   /// Interpolate function to finite element space on cell
-  inline void interpolate(real* coefficients, const ufc::cell&,
-                          const ufc::finite_element& finite_element,
-                          const Cell&) const
+  inline void interpolate( real * coefficients,
+                           const ufc::cell &,
+                           const ufc::finite_element & finite_element,
+                           const Cell & ) const
   {
-    dolfin_assert(coefficients);
-    for (uint i = 0; i < finite_element.space_dimension(); ++i)
+    dolfin_assert( coefficients );
+    for ( size_t i = 0; i < finite_element.space_dimension(); ++i )
     {
       coefficients[i] = value_;
     }
   }
 
   /// Interpolate function to finite element space on facet
-  inline void interpolate(real* coefficients, const ufc::cell&,
-                          const ufc::finite_element& finite_element,
-                          const Cell&, uint) const
+  inline void interpolate( real * coefficients,
+                           const ufc::cell &,
+                           const ufc::finite_element & finite_element,
+                           const Cell &,
+                           size_t ) const
   {
-    dolfin_assert(coefficients);
-    for (uint i = 0; i < finite_element.space_dimension(); ++i)
+    dolfin_assert( coefficients );
+    for ( size_t i = 0; i < finite_element.space_dimension(); ++i )
     {
       coefficients[i] = value_;
     }
@@ -162,18 +165,18 @@ public:
   /// Display basic information
   inline void disp() const
   {
-    section("Constant");
-    message("Value : %f", value_);
+    section( "Constant" );
+    message( "Value : %f", value_ );
     end();
     skip();
   }
 
 private:
-
-  void sync(Time const&) { /* No-op */ }
+  void sync( Time const & )
+  { /* No-op */
+  }
 
   real value_;
-
 };
 
 } // end namespace dolfin

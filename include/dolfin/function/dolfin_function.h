@@ -10,7 +10,6 @@
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/Real.h>
-#include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/Value.h>
 
 

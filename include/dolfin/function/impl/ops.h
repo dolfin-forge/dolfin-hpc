@@ -3,7 +3,7 @@
 
 #include <dolfin/function/ValueSpace.h>
 #include <dolfin/fem/UFCCell.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Vertex.h>
 
 namespace dolfin
 {

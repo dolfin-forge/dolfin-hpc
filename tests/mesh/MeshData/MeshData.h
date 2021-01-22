@@ -3,7 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/mesh/MeshData.h>
-#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
 
 using namespace dolfin;
 

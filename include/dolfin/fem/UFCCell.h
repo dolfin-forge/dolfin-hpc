@@ -170,7 +170,7 @@ inline auto UFCCell::init( Cell & cell ) -> void
   num_vertices = cell.num_entities( 0 );
 
   /// Set vertex coordinates
-  Array< size_t > const & vertices = cell.entities( 0 );
+  std::vector< size_t > const & vertices = cell.entities( 0 );
   coordinates.resize( num_vertices * geometric_dimension );
 
   for ( size_t i = 0; i < num_vertices; ++i )
@@ -200,7 +200,7 @@ inline auto UFCCell::update( Cell & cell ) -> void
   index = entity_indices[topological_dimension][0];
 
   // /// Set vertex coordinates
-  Array< size_t > const & vertices = cell.entities( 0 );
+  std::vector< size_t > const & vertices = cell.entities( 0 );
   for ( size_t i = 0; i < num_vertices; ++i )
   {
     double const * coords = cell.mesh().geometry().x( vertices[i] );

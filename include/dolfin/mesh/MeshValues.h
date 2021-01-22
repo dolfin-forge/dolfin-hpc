@@ -31,6 +31,9 @@ struct MeshValues : public MeshFunction< T >
   MeshValues( Mesh & mesh, T val = static_cast< T >( 0 ) );
 
   ///
+  MeshValues( MeshValues< T, E, N > const & other );
+
+  ///
   template < class V >
   MeshValues( MeshValues< V, E, N > const & other );
 
@@ -102,6 +105,14 @@ MeshValues< T, E, N >::MeshValues( Mesh & mesh, T val )
   {
     error( "MeshValues : vector values are unsupported for now." );
   }
+}
+
+//-----------------------------------------------------------------------------
+
+template < class T, class E, size_t N >
+MeshValues< T, E, N >::MeshValues( MeshValues< T, E, N > const & other )
+  : MeshFunction< T >( other )
+{
 }
 
 //-----------------------------------------------------------------------------

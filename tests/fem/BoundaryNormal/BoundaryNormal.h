@@ -18,10 +18,10 @@ void test( std::string file )
   Mesh mesh( file );
 
   ufc::finite_element * element =
-    create_finite_element( "FiniteElement('Lagrange', tetrahedron, 1)" );
+    create_finite_element( "FiniteElement('Lagrange', triangle, 1)" );
 
   ufc::dofmap * dofmap = create_dof_map(
-    "FFC dofmap for FiniteElement('Lagrange', tetrahedron, 1)" );
+    "FFC dofmap for FiniteElement('Lagrange', triangle, 1)" );
 
   FiniteElementSpace Vh( mesh, element, *dofmap, true );
 

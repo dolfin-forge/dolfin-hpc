@@ -4,7 +4,6 @@
 #ifndef __DOLFIN_FUNCTION_H
 #define __DOLFIN_FUNCTION_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/evolution/TimeDependent.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElement.h>
@@ -14,6 +13,8 @@
 #include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/GenericFunction.h>
 #include <dolfin/la/GenericVector.h>
+
+#include <vector>
 
 namespace ufl
 {
@@ -49,7 +50,7 @@ public:
 
   /// Create discrete function for argument function i of form
   /// The discrete space is defined on the i-th coefficient mesh.
-  Function(Form& form, uint i);
+  Function(Form& form, size_t i);
 
   /// Create discrete function from given  discrete space
   Function(FiniteElementSpace const& space);
@@ -76,7 +77,7 @@ public:
   auto empty() const -> bool;
 
   /// Initialize discrete function for argument function i of form
-  void init(Form& form, uint i);
+  void init(Form& form, size_t i);
 
   /// Initialize discrete function on given discrete space
   void init(FiniteElementSpace const& space);
@@ -93,20 +94,20 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given points in cell
-  void evaluate(uint n, real* values, const real* coordinates,
+  void evaluate(size_t n, real* values, const real* coordinates,
                 const ufc::cell& cell) const override;
 
   /// Evaluate function at given point
   void eval(real* values, const real* x) const override;
 
   /// Return the rank of the value space
-  auto rank() const -> uint override;
+  auto rank() const -> size_t override;
 
   /// Return the dimension of the value space for axis i
-  auto dim(uint i) const -> uint override;
+  auto dim(size_t i) const -> size_t override;
 
   // Return the value size
-  auto value_size() const -> uint override;
+  auto value_size() const -> size_t override;
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const override;
@@ -119,7 +120,7 @@ public:
   /// Interpolate function to finite element space on facet
   void interpolate(real* coefficients, const ufc::cell& cell,
                    const ufc::finite_element& finite_element,
-                   const Cell& dolfin_cell, uint facet) const override;
+                   const Cell& dolfin_cell, size_t facet) const override;
 
   /// Synchronize values
   void sync() override;
@@ -150,10 +151,10 @@ public:
   void operator<<(GenericFunction const& other);
 
   /// Compute function decomposition into scalar component functions
-  auto decompose() -> Array<Function *>;
+  auto decompose() -> std::vector<Function *>;
 
   /// Return the number of sub functions i.e number of subspaces
-  auto num_sub_functions() const -> uint;
+  auto num_sub_functions() const -> size_t;
 
   /// Get the size of tabulated block array
   auto block_size() const -> uidx;
@@ -263,10 +264,10 @@ private:
 
   /// Renumbered dof_map;
   bool renumbered_{false};
-  uint cache_size_{0};
-  uint * indices_{nullptr};
+  size_t cache_size_{0};
+  size_t * indices_{nullptr};
   real * data_cache_{nullptr};
-  _map<uint, uint> * cache_mapping_{nullptr};
+  _map<size_t, size_t> * cache_mapping_{nullptr};
 
 };
 
@@ -291,21 +292,21 @@ inline auto Function::mesh() const -> Mesh &
 }
 
 //-----------------------------------------------------------------------------
-inline auto Function::rank() const -> uint
+inline auto Function::rank() const -> size_t
 {
   dolfin_assert( element_ );
   return element_->value_rank();
 }
 
 //-----------------------------------------------------------------------------
-inline auto Function::dim( uint i ) const -> uint
+inline auto Function::dim( size_t i ) const -> size_t
 {
   dolfin_assert( element_ );
   return element_->value_dimension( i );
 }
 
 //-----------------------------------------------------------------------------
-inline auto Function::value_size() const -> uint
+inline auto Function::value_size() const -> size_t
 {
   dolfin_assert( scratch );
   return scratch->size;
@@ -315,7 +316,7 @@ inline void Function::interpolate( real *                      coefficients,
                             const ufc::cell &           cell,
                             const ufc::finite_element & finite_element,
                             const Cell &                dolfin_cell,
-                            uint ) const
+                            size_t ) const
 {
   interpolate( coefficients, cell, finite_element, dolfin_cell );
 }
@@ -353,13 +354,13 @@ inline void Function::operator<<( GenericFunction const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline auto Function::decompose() -> Array< Function * >
+inline auto Function::decompose() -> std::vector< Function * >
 {
   return FunctionDecomposition::compute( *this );
 }
 
 //-----------------------------------------------------------------------------
-inline auto Function::num_sub_functions() const -> uint
+inline auto Function::num_sub_functions() const -> size_t
 {
   dolfin_assert( element_ );
   return element_->num_sub_elements();

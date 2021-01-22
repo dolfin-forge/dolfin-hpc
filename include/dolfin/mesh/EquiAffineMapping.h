@@ -8,12 +8,13 @@
 
 #include <dolfin/mesh/Mapping.h>
 
-#include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/Cell.h>
 
 namespace dolfin
 {
+
+class Cell;
+class Mesh;
 
 /// This class represents the affine map from regular simplices to the current
 /// element.
@@ -42,49 +43,46 @@ class EquiAffineMapping : public Mapping
 {
 
 public:
-
   /// Constructor
-  EquiAffineMapping(Mesh const& mesh);
+  EquiAffineMapping( Mesh const & mesh );
 
   /// Destructor
   ~EquiAffineMapping() override;
 
   /// Update map for current element
-  void update(Cell const& cell) override;
+  void update( Cell const & cell ) override;
 
   /// Map given point from the reference element
-  void map_from_reference_cell(real const * xref, real * x) const override;
+  void map_from_reference_cell( real const * xref, real * x ) const override;
 
   /// Map given point to the reference element
-  void map_to_reference_cell(real const * x, real * xref) const override;
+  void map_to_reference_cell( real const * x, real * xref ) const override;
 
   // Determinant of Jacobian of map
   real det;
 
   // Jacobian of map
-  real *J;
+  real * J;
 
   // Inverse of Jacobian of map
-  real *K;
+  real * K;
 
 private:
-
   // Update affine map from reference triangle
-  void updateTriangle(Cell const& cell);
+  void updateTriangle( Cell const & cell );
 
   // Update affine map from reference tetrahedron
-  void updateTetrahedron(Cell const& cell);
+  void updateTetrahedron( Cell const & cell );
 
   //
-  static uint const d_ = Point::MAX_SIZE;
-  uint const gdim_;
+  static size_t const d_ = Point::MAX_SIZE;
+  size_t const        gdim_;
 
   // Vertices of current cell
   real p0[d_];
   real p1[d_];
   real p2[d_];
   real p3[d_];
-
 };
 
 }

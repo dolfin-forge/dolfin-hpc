@@ -3,16 +3,15 @@
 
 #include <dolfin/mesh/GTSInterface.h>
 
-#include <dolfin/common/Array.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_GTS
@@ -23,14 +22,14 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-GTSInterface::GTSInterface(Mesh& mesh) :
-    mesh_(mesh),
-    tree_(nullptr)
+GTSInterface::GTSInterface( Mesh & mesh )
+  : mesh_( mesh )
+  , tree_( nullptr )
 {
-  if (mesh.geometry_dimension() > 3)
+  if ( mesh.geometry_dimension() > 3 )
   {
-    error("Sorry, GTS interface not implemented for meshes of dimension %d.",
-          mesh.geometry_dimension());
+    error( "Sorry, GTS interface not implemented for meshes of dimension %d.",
+           mesh.geometry_dimension() );
   }
 
   buildCellTree();
@@ -39,69 +38,88 @@ GTSInterface::GTSInterface(Mesh& mesh) :
 GTSInterface::~GTSInterface()
 {
 #ifdef HAVE_GTS
-  gts_bb_tree_destroy(tree_, 1);
+  gts_bb_tree_destroy( tree_, 1 );
 #endif
 }
 //-----------------------------------------------------------------------------
-auto GTSInterface::bboxCell(Cell& c) const -> GtsBBox*
+auto GTSInterface::bboxCell( Cell & c ) const -> GtsBBox *
 {
 #ifdef HAVE_GTS
-  GtsBBox* bbox;
-  Point p;
+  GtsBBox * bbox;
+  Point     p;
 
-  VertexIterator v(c);
+  VertexIterator v( c );
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), reinterpret_cast<gpointer>(c.index()),
-                      p[0], p[1], p[2], p[0], p[1], p[2]);
+  bbox = gts_bbox_new( gts_bbox_class(),
+                       reinterpret_cast< gpointer >( c.index() ),
+                       p[0],
+                       p[1],
+                       p[2],
+                       p[0],
+                       p[1],
+                       p[2] );
 
-  for (++v; !v.end(); ++v)
+  for ( ++v; !v.end(); ++v )
   {
     p = v->point();
-    if (p[0] > bbox->x2) bbox->x2 = p[0];
-    if (p[0] < bbox->x1) bbox->x1 = p[0];
-    if (p[1] > bbox->y2) bbox->y2 = p[1];
-    if (p[1] < bbox->y1) bbox->y1 = p[1];
-    if (p[2] > bbox->z2) bbox->z2 = p[2];
-    if (p[2] < bbox->z1) bbox->z1 = p[2];
+    if ( p[0] > bbox->x2 )
+      bbox->x2 = p[0];
+    if ( p[0] < bbox->x1 )
+      bbox->x1 = p[0];
+    if ( p[1] > bbox->y2 )
+      bbox->y2 = p[1];
+    if ( p[1] < bbox->y1 )
+      bbox->y1 = p[1];
+    if ( p[2] > bbox->z2 )
+      bbox->z2 = p[2];
+    if ( p[2] < bbox->z1 )
+      bbox->z1 = p[2];
   }
   return bbox;
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto GTSInterface::bboxPoint(Point const& p) const -> GtsBBox*
+auto GTSInterface::bboxPoint( Point const & p ) const -> GtsBBox *
 {
 #ifdef HAVE_GTS
 
-  GtsBBox* bbox;
+  GtsBBox * bbox;
 
-  real btol = dolfin_get<real>("GTS Tolerance");
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) nullptr, p[0] - btol, p[1] - btol,
-                      p[2] - btol, p[0] + btol, p[1] + btol, p[2] + btol);
+  real btol = dolfin_get< real >( "GTS Tolerance" );
+  bbox      = gts_bbox_new( gts_bbox_class(),
+                       ( gpointer ) nullptr,
+                       p[0] - btol,
+                       p[1] - btol,
+                       p[2] - btol,
+                       p[0] + btol,
+                       p[1] + btol,
+                       p[2] + btol );
 
   return bbox;
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto GTSInterface::bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*
+auto GTSInterface::bboxPoint( Point const & p1, Point const & p2 ) const
+  -> GtsBBox *
 {
 #ifdef HAVE_GTS
 
-  GtsBBox* bbox;
+  GtsBBox * bbox;
 
   real x1, x2;
   real y1, y2;
   real z1, z2;
 
-  if (p1[0] < p2[0])
+  if ( p1[0] < p2[0] )
   {
     x1 = p1[0];
     x2 = p2[0];
@@ -111,7 +129,7 @@ auto GTSInterface::bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*
     x1 = p2[0];
     x2 = p1[0];
   }
-  if (p1[1] < p2[1])
+  if ( p1[1] < p2[1] )
   {
     y1 = p1[1];
     y2 = p2[1];
@@ -121,7 +139,7 @@ auto GTSInterface::bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*
     y1 = p2[1];
     y2 = p1[1];
   }
-  if (p1[2] < p2[2])
+  if ( p1[2] < p2[2] )
   {
     z1 = p1[2];
     z2 = p2[2];
@@ -132,12 +150,13 @@ auto GTSInterface::bboxPoint(Point const& p1, Point const& p2) const -> GtsBBox*
     z2 = p1[2];
   }
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) nullptr, x1, y1, z1, x2, y2, z2);
+  bbox = gts_bbox_new(
+    gts_bbox_class(), ( gpointer ) nullptr, x1, y1, z1, x2, y2, z2 );
 
   return bbox;
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
   return 0;
 #endif
 }
@@ -146,137 +165,139 @@ void GTSInterface::buildCellTree()
 {
 #ifdef HAVE_GTS
 
-  if (tree_)
+  if ( tree_ )
   {
-    error("GTS tree already initialized");
+    error( "GTS tree already initialized" );
   }
 
-  GSList* bboxes = nullptr;
+  GSList * bboxes = nullptr;
 
-  for (CellIterator ci(mesh_); !ci.end(); ++ci)
+  for ( CellIterator ci( mesh_ ); !ci.end(); ++ci )
   {
-    Cell& c = *ci;
-    bboxes = g_slist_prepend(bboxes, bboxCell(c));
+    Cell & c = *ci;
+    bboxes   = g_slist_prepend( bboxes, bboxCell( c ) );
   }
 
   // A null pointer is returned if the mesh is empty
-  tree_ = gts_bb_tree_new(bboxes);
-  g_slist_free(bboxes);
+  tree_ = gts_bb_tree_new( bboxes );
+  g_slist_free( bboxes );
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
 #endif
 }
 //-----------------------------------------------------------------------------
-void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
+void GTSInterface::overlap( Cell & c, std::vector< size_t > & cells ) const
 {
 #ifdef HAVE_GTS
-  GtsBBox* bbprobe;
-  GtsBBox* bb;
-  GSList* overlaps = nullptr, *overlaps_base;
-  uint boundedcell;
+  GtsBBox * bbprobe;
+  GtsBBox * bb;
+  GSList *  overlaps = nullptr, *overlaps_base;
+  size_t    boundedcell;
 
-  CellType const& type = mesh_.type();
+  CellType const & type = mesh_.type();
 
-  bbprobe = bboxCell(c);
+  bbprobe = bboxCell( c );
 
-  overlaps = gts_bb_tree_overlap(tree_, bbprobe);
+  overlaps      = gts_bb_tree_overlap( tree_, bbprobe );
   overlaps_base = overlaps;
 
-  while (overlaps)
+  while ( overlaps )
   {
-    bb = (GtsBBox *) overlaps->data;
-    boundedcell = (uint)(long) bb->bounded;
+    bb          = ( GtsBBox * ) overlaps->data;
+    boundedcell = ( size_t )( long ) bb->bounded;
 
-	Cell close(mesh_, boundedcell);
-    if (type.intersects(c, close))
+    Cell close( mesh_, boundedcell );
+    if ( type.intersects( c, close ) )
     {
-      cells.push_back(boundedcell);
+      cells.push_back( boundedcell );
     }
     overlaps = overlaps->next;
   }
 
-  g_slist_free(overlaps_base);
-  gts_object_destroy(GTS_OBJECT(bbprobe));
+  g_slist_free( overlaps_base );
+  gts_object_destroy( GTS_OBJECT( bbprobe ) );
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
 #endif
 }
 //-----------------------------------------------------------------------------
-void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
+void GTSInterface::overlap( Point const &           p,
+                            std::vector< size_t > & cells ) const
 {
 #ifdef HAVE_GTS
-  GtsBBox* bbprobe;
-  GtsBBox* bb;
-  GSList* overlaps = nullptr, *overlaps_base;
-  uint boundedcell;
+  GtsBBox * bbprobe;
+  GtsBBox * bb;
+  GSList *  overlaps = nullptr, *overlaps_base;
+  size_t    boundedcell;
 
-  CellType const& type = mesh_.type();
+  CellType const & type = mesh_.type();
 
-  bbprobe = bboxPoint(p);
+  bbprobe = bboxPoint( p );
 
-  overlaps = gts_bb_tree_overlap(tree_, bbprobe);
+  overlaps      = gts_bb_tree_overlap( tree_, bbprobe );
   overlaps_base = overlaps;
 
-  while (overlaps)
+  while ( overlaps )
   {
-    bb = (GtsBBox *) overlaps->data;
-    boundedcell = (uint)(long)bb->bounded;
+    bb          = ( GtsBBox * ) overlaps->data;
+    boundedcell = ( size_t )( long ) bb->bounded;
 
-	Cell close(mesh_, boundedcell);
+    Cell close( mesh_, boundedcell );
 
-    if (type.intersects(close, p))
+    if ( type.intersects( close, p ) )
     {
-      cells.push_back(boundedcell);
+      cells.push_back( boundedcell );
     }
 
     overlaps = overlaps->next;
   }
 
-  g_slist_free(overlaps_base);
-  gts_object_destroy(GTS_OBJECT(bbprobe));
+  g_slist_free( overlaps_base );
+  gts_object_destroy( GTS_OBJECT( bbprobe ) );
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
 #endif
 }
 //-----------------------------------------------------------------------------
-void GTSInterface::overlap(Point const& p1, Point const& p2,
-                           Array<uint>& cells) const
+void GTSInterface::overlap( Point const &           p1,
+                            Point const &           p2,
+                            std::vector< size_t > & cells ) const
 {
 #ifdef HAVE_GTS
-  GtsBBox* bbprobe;
-  GtsBBox* bb;
-  GSList* overlaps = nullptr, *overlaps_base;
-  uint boundedcell;
+  GtsBBox * bbprobe;
+  GtsBBox * bb;
+  GSList *  overlaps = nullptr, *overlaps_base;
+  size_t    boundedcell;
 
-  CellType const& type = mesh_.type();
+  CellType const & type = mesh_.type();
 
-  bbprobe = bboxPoint(p1, p2);
+  bbprobe = bboxPoint( p1, p2 );
 
-  overlaps = gts_bb_tree_overlap(tree_, bbprobe);
+  overlaps      = gts_bb_tree_overlap( tree_, bbprobe );
   overlaps_base = overlaps;
 
-  while (overlaps)
+  while ( overlaps )
   {
-    bb = (GtsBBox *) overlaps->data;
-    boundedcell = (uint) (long) bb->bounded;
+    bb          = ( GtsBBox * ) overlaps->data;
+    boundedcell = ( size_t )( long ) bb->bounded;
 
-    Cell close(mesh_, boundedcell);
+    Cell close( mesh_, boundedcell );
 
-    if (type.intersects(close, p1, p2)) cells.push_back(boundedcell);
+    if ( type.intersects( close, p1, p2 ) )
+      cells.push_back( boundedcell );
 
     overlaps = overlaps->next;
   }
-  g_slist_free(overlaps_base);
-  gts_object_destroy(GTS_OBJECT(bbprobe));
+  g_slist_free( overlaps_base );
+  gts_object_destroy( GTS_OBJECT( bbprobe ) );
 
 #else
-  error("Missing GTS");
+  error( "Missing GTS" );
 #endif
 }
 //-----------------------------------------------------------------------------
 
 }
-

@@ -5,10 +5,10 @@
 
 #include <dolfin/log/log.h>
 #include <dolfin/math/basic.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/EntityKey.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 #include <algorithm>
 #include <ctime>
@@ -16,11 +16,8 @@
 namespace dolfin
 {
 
-#define FOREACH_CONNECTIVITY( I, J )              \
-  for ( uint I = 0; I < MeshTopology::CMAX; ++I ) \
-    for ( uint J = 0; J < MeshTopology::CMAX; ++J )
-
 //-----------------------------------------------------------------------------
+
 MeshTopology::MeshTopology( CellType const & type, Comm & comm, bool frozen )
   : Distributed< MeshTopology >( comm )
   , type_( type.clone() )
@@ -29,13 +26,19 @@ MeshTopology::MeshTopology( CellType const & type, Comm & comm, bool frozen )
   , distdata_( dim_ )
   , timestamp_( 0 )
 {
-  FOREACH_CONNECTIVITY( i, j )
+  for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
-    C_[i][j] = nullptr;
+    for ( size_t j = 0; j < MeshTopology::CMAX; ++j )
+    {
+      C_[i][j] = nullptr;
+    }
   }
+
   update_token();
 }
+
 //-----------------------------------------------------------------------------
+
 MeshTopology::MeshTopology( MeshTopology const & other )
   : Distributed< MeshTopology >( other )
   , type_( cloneptr( other.type_ ) )
@@ -44,24 +47,35 @@ MeshTopology::MeshTopology( MeshTopology const & other )
   , distdata_( other.distdata_ )
   , timestamp_( other.timestamp_ )
 {
-  FOREACH_CONNECTIVITY( i, j )
+  for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
-    C_[i][j] = copyptr( other.C_[i][j] );
+    for ( size_t j = 0; j < MeshTopology::CMAX; ++j )
+    {
+      C_[i][j] = copyptr( other.C_[i][j] );
+    }
   }
 }
+
 //-----------------------------------------------------------------------------
+
 MeshTopology::~MeshTopology()
 {
-  FOREACH_CONNECTIVITY( i, j )
+  for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
-    delete C_[i][j];
-    C_[i][j] = nullptr;
+    for ( size_t j = 0; j < MeshTopology::CMAX; ++j )
+    {
+      delete C_[i][j];
+      C_[i][j] = nullptr;
+    }
   }
+
   delete type_;
   type_ = nullptr;
 }
+
 //-----------------------------------------------------------------------------
-void swap( MeshTopology & a, MeshTopology & b )
+
+auto swap( MeshTopology & a, MeshTopology & b ) -> void
 {
   using std::swap;
 
@@ -74,12 +88,17 @@ void swap( MeshTopology & a, MeshTopology & b )
   swap( a.distdata_, b.distdata_ );
   swap( a.timestamp_, b.timestamp_ );
 
-  FOREACH_CONNECTIVITY( i, j )
+  for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
-    swap( a.C_[i][j], b.C_[i][j] );
+    for ( size_t j = 0; j < MeshTopology::CMAX; ++j )
+    {
+      swap( a.C_[i][j], b.C_[i][j] );
+    }
   }
 }
+
 //-----------------------------------------------------------------------------
+
 auto MeshTopology::operator=( const MeshTopology & other ) -> MeshTopology &
 {
   MeshTopology tmp( other );
@@ -87,7 +106,9 @@ auto MeshTopology::operator=( const MeshTopology & other ) -> MeshTopology &
 
   return *this;
 }
+
 //-----------------------------------------------------------------------------
+
 auto MeshTopology::operator==( MeshTopology const & other ) const -> bool
 {
   if ( this == &other )
@@ -96,16 +117,19 @@ auto MeshTopology::operator==( MeshTopology const & other ) const -> bool
   if ( !objptrcmp( type_, other.type_ ) )
     return false;
 
-  for ( uint i = 0; i <= dim_; ++i )
+  for ( size_t i = 0; i <= dim_; ++i )
   {
     if ( this->size( i ) != other.size( i ) )
       return false;
   }
 
-  FOREACH_CONNECTIVITY( i, j )
+  for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
-    if ( !objptrcmp( C_[i][j], other.C_[i][j] ) )
-      return false;
+    for ( size_t j = 0; j < MeshTopology::CMAX; ++j )
+    {
+      if ( !objptrcmp( C_[i][j], other.C_[i][j] ) )
+        return false;
+    }
   }
 
   if ( distdata_ != other.distdata_ )
@@ -113,13 +137,17 @@ auto MeshTopology::operator==( MeshTopology const & other ) const -> bool
 
   return true;
 }
+
 //-----------------------------------------------------------------------------
+
 auto MeshTopology::operator!=( MeshTopology const & other ) const -> bool
 {
   return !( *this == other );
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::init( uint dim, uint nlocal, uint nglobal )
+
+auto MeshTopology::init( size_t dim, size_t nlocal, size_t nglobal ) -> void
 {
   // Overflow
   if ( dim_ < dim )
@@ -172,8 +200,10 @@ void MeshTopology::init( uint dim, uint nlocal, uint nglobal )
     }
   }
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::finalize()
+
+auto MeshTopology::finalize() -> void
 {
   // Reorder cells according to UFC convention
   reorder();
@@ -181,7 +211,7 @@ void MeshTopology::finalize()
   // Finalize distributed data
   if ( distributed() )
   {
-    for ( uint d = 0; d <= dim_; ++d )
+    for ( size_t d = 0; d <= dim_; ++d )
     {
       if ( this->connectivity( d ) )
       {
@@ -203,10 +233,13 @@ void MeshTopology::finalize()
   // Do not renumber automatically !
   // This would cause issues for boundary meshes and some mesh algorithms.
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::remap( uint d0, Array< uint > const & mapping )
+
+auto MeshTopology::remap( size_t d0, std::vector< size_t > const & mapping )
+  -> void
 {
-  for ( uint d1 = 0; d1 <= dim_; ++d1 )
+  for ( size_t d1 = 0; d1 <= dim_; ++d1 )
   {
     if ( C_[d0][d1] )
     {
@@ -228,8 +261,10 @@ void MeshTopology::remap( uint d0, Array< uint > const & mapping )
     distdata_[d0].remap_numbering( mapping );
   }
 }
+
 //-----------------------------------------------------------------------------
-auto MeshTopology::entities( uint di ) const -> Connectivity const *
+
+auto MeshTopology::entities( size_t di ) const -> Connectivity const *
 {
   if ( connectivity( di ) )
   {
@@ -244,26 +279,26 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
   if ( cv != nullptr )
   {
     // Initialize local array of entities
-    uint const             m = type_->num_entities( di );
-    uint const             n = type_->num_vertices( di );
-    Array< Array< uint > > vertex_entities( this->size( 0 ) );
-    uint **                entities = new uint *[m];
-    for ( uint e = 0; e < m; ++e )
+    size_t const                         m = type_->num_entities( di );
+    size_t const                         n = type_->num_vertices( di );
+    std::vector< std::vector< size_t > > vertex_entities( this->size( 0 ) );
+    size_t **                            entities = new size_t *[m];
+    for ( size_t e = 0; e < m; ++e )
     {
-      entities[e] = new uint[n]();
+      entities[e] = new size_t[n]();
     }
 
     // Collect entities and create cell -> entities connectivities
-    EntityKey            key( n );
-    Array< EntityKey * > entities_list;
-    Connectivity *       ce = new Connectivity( this->size( dim_ ), m );
-    for ( uint c = 0; c < cv->order(); ++c )
+    EntityKey                  key( n );
+    std::vector< EntityKey * > entities_list;
+    Connectivity *             ce = new Connectivity( this->size( dim_ ), m );
+    for ( size_t c = 0; c < cv->order(); ++c )
     {
       type_->create_entities( entities, di, ( *cv )[c].data() );
-      for ( uint e = 0; e < m; ++e )
+      for ( size_t e = 0; e < m; ++e )
       {
         key.set( entities[e], entities_list.size() );
-        uint v0 = entities[e][0];
+        size_t v0 = entities[e][0];
         dolfin_assert( v0 < this->size( 0 ) );
         if ( vertex_entities[v0].size() == 0 )
         {
@@ -272,7 +307,7 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
         else
         {
           // If the first vertex does not contain entity, append new key
-          for ( uint i = 0; i < vertex_entities[v0].size(); ++i )
+          for ( size_t i = 0; i < vertex_entities[v0].size(); ++i )
           {
             if ( *entities_list[vertex_entities[v0][i]] == key )
             {
@@ -284,7 +319,7 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
         }
 
       add_entity:
-        for ( uint v = 0; v < n; ++v )
+        for ( size_t v = 0; v < n; ++v )
         {
           vertex_entities[entities[e][v]].push_back( key.idx );
         }
@@ -296,7 +331,7 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
 
     // Create entity -> vertices connectivities from collected entities
     Connectivity * ev = new Connectivity( entities_list.size(), n );
-    for ( uint e = 0; e < entities_list.size(); ++e )
+    for ( size_t e = 0; e < entities_list.size(); ++e )
     {
       ev->set( e, entities_list[e]->indices );
     }
@@ -305,7 +340,7 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
 
     // Cleanup
     destruct( entities_list );
-    for ( uint e = 0; e < m; ++e )
+    for ( size_t e = 0; e < m; ++e )
     {
       delete[] entities[e];
     }
@@ -321,8 +356,11 @@ auto MeshTopology::entities( uint di ) const -> Connectivity const *
 
   return connectivity( di );
 }
+
 //-----------------------------------------------------------------------------
-auto MeshTopology::transpose( uint d1, uint d0 ) const -> Connectivity const *
+
+auto MeshTopology::transpose( size_t d1, size_t d0 ) const
+  -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -331,21 +369,21 @@ auto MeshTopology::transpose( uint d1, uint d0 ) const -> Connectivity const *
 
   Connectivity const * const c10 = connectivity( d1, d0 );
 
-  uint const    card0 = compute( d0, 0 )->order();
-  Array< uint > conn( card0, 0 );
+  size_t const          card0 = compute( d0, 0 )->order();
+  std::vector< size_t > conn( card0, 0 );
 
-  for ( uint e = 0; e < c10->order(); ++e )
-    for ( uint i = 0; i < c10->degree( e ); ++i )
+  for ( size_t e = 0; e < c10->order(); ++e )
+    for ( size_t i = 0; i < c10->degree( e ); ++i )
       conn[( *c10 )[e][i]]++;
 
   Connectivity * c01 = new Connectivity( conn );
   std::fill( conn.begin(), conn.end(), 0 );
 
-  for ( uint e1 = 0; e1 < c10->order(); ++e1 )
+  for ( size_t e1 = 0; e1 < c10->order(); ++e1 )
   {
-    for ( uint e0 = 0; e0 < c10->degree( e1 ); ++e0 )
+    for ( size_t e0 = 0; e0 < c10->degree( e1 ); ++e0 )
     {
-      uint const ei            = ( *c10 )[e1][e0];
+      size_t const ei          = ( *c10 )[e1][e0];
       ( *c01 )[ei][conn[ei]++] = e1;
     }
   }
@@ -355,8 +393,8 @@ auto MeshTopology::transpose( uint d1, uint d0 ) const -> Connectivity const *
   return connectivity( d0, d1 );
 }
 //-----------------------------------------------------------------------------
-auto
-  MeshTopology::intersection( uint d0, uint di, uint d1 ) const -> Connectivity const *
+auto MeshTopology::intersection( size_t d0, size_t di, size_t d1 ) const
+  -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -373,18 +411,18 @@ auto
 
   if ( d0 != d1 )
   {
-    uint const             o0v = c0v->order();
-    Array< Array< uint > > conn( o0v );
-    for ( uint e0 = 0; e0 < o0v; ++e0 )
+    size_t const                         o0v = c0v->order();
+    std::vector< std::vector< size_t > > conn( o0v );
+    for ( size_t e0 = 0; e0 < o0v; ++e0 )
     {
-      _ordered_set< uint > entities;
-      Array< uint > const & c0 = ( *c0v )[e0];
-      uint const            d0 = c0v->degree( e0 );
-      for ( uint i = 0; i < d0; ++i )
+      _ordered_set< size_t >        entities;
+      std::vector< size_t > const & c0 = ( *c0v )[e0];
+      size_t const                  d0 = c0v->degree( e0 );
+      for ( size_t i = 0; i < d0; ++i )
       {
-        Array< uint > const & c1 = ( *cv1 )[c0[i]];
-        uint const   d1 = cv1->degree( c0[i] );
-        for ( uint j = 0; j < d1; ++j )
+        std::vector< size_t > const & c1 = ( *cv1 )[c0[i]];
+        size_t const                  d1 = cv1->degree( c0[i] );
+        for ( size_t j = 0; j < d1; ++j )
         {
           if ( contains( c0, ( *c1v )[c1[j]] ) )
           {
@@ -400,18 +438,18 @@ auto
   }
   else
   {
-    uint const             o0v = c0v->order();
-    Array< Array< uint > > conn( o0v );
-    for ( uint e0 = 0; e0 < o0v; ++e0 )
+    size_t const                         o0v = c0v->order();
+    std::vector< std::vector< size_t > > conn( o0v );
+    for ( size_t e0 = 0; e0 < o0v; ++e0 )
     {
-      _ordered_set< uint > entities;
-      Array< uint > const & c0 = ( *c0v )[e0];
-      uint const            d0 = c0v->degree( e0 );
-      for ( uint i = 0; i < d0; ++i )
+      _ordered_set< size_t >        entities;
+      std::vector< size_t > const & c0 = ( *c0v )[e0];
+      size_t const                  d0 = c0v->degree( e0 );
+      for ( size_t i = 0; i < d0; ++i )
       {
-        Array< uint > const & c1 = ( *cv1 )[c0[i]];
-        uint const            d1 = cv1->degree( c0[i] );
-        for ( uint j = 0; j < d1; ++j )
+        std::vector< size_t > const & c1 = ( *cv1 )[c0[i]];
+        size_t const                  d1 = cv1->degree( c0[i] );
+        for ( size_t j = 0; j < d1; ++j )
         {
           if ( e0 != c1[j] )
           {
@@ -428,8 +466,10 @@ auto
 
   return connectivity( d0, d1 );
 }
+
 //-----------------------------------------------------------------------------
-auto MeshTopology::compute( uint d0, uint d1 ) const -> Connectivity const *
+
+auto MeshTopology::compute( size_t d0, size_t d1 ) const -> Connectivity const *
 {
   if ( connectivity( d0, d1 ) )
   {
@@ -446,8 +486,8 @@ auto MeshTopology::compute( uint d0, uint d1 ) const -> Connectivity const *
   }
   else
   {
-    uint const dp = std::max( d0, d1 );
-    uint const dm = std::min( d0, d1 );
+    size_t const dp = std::max( d0, d1 );
+    size_t const dm = std::min( d0, d1 );
     if ( d0 != d1 && ( dp == dim_ || dm == 0 ) )
     {
       /*
@@ -487,22 +527,26 @@ auto MeshTopology::compute( uint d0, uint d1 ) const -> Connectivity const *
 
   return connectivity( d0, d1 );
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::reorder() const
+
+auto MeshTopology::reorder() const -> void
 {
   // NOTE: ensure that boundary meshes and empty meshes are not reordered
   if ( !frozen_ && this->connectivity( dim_ ) )
   {
     MeshTopology & topology  = const_cast< MeshTopology & >( *this );
-    uint const     num_cells = this->size( dim_ );
-    for ( uint i = 0; i < num_cells; ++i )
+    size_t const   num_cells = this->size( dim_ );
+    for ( size_t i = 0; i < num_cells; ++i )
     {
       type_->order_entities( topology, i );
     }
   }
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::renumber() const
+
+auto MeshTopology::renumber() const -> void
 {
   if ( distributed() )
   {
@@ -513,8 +557,10 @@ void MeshTopology::renumber() const
     }
   }
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::disp() const
+
+auto MeshTopology::disp() const -> void
 {
   section( "MeshTopology" );
   //---
@@ -522,7 +568,7 @@ void MeshTopology::disp() const
   cout << "Distributed : " << distributed() << "\n";
   skip();
   begin( "Number of entities:" );
-  for ( uint d = 1; d <= dim_; ++d )
+  for ( size_t d = 1; d <= dim_; ++d )
   {
     if ( C_[d][0] )
     {
@@ -530,22 +576,23 @@ void MeshTopology::disp() const
     }
     else
     {
-      cout << d << ": " << "x\n";
+      cout << d << ": "
+           << "x\n";
     }
   }
   end();
   skip();
   begin( "Connectivity:" );
   cout << " ";
-  for ( uint d1 = 0; d1 <= dim_; ++d1 )
+  for ( size_t d1 = 0; d1 <= dim_; ++d1 )
   {
     cout << " " << d1;
   }
   cout << "\n";
-  for ( uint d0 = 0; d0 <= dim_; ++d0 )
+  for ( size_t d0 = 0; d0 <= dim_; ++d0 )
   {
     cout << d0;
-    for ( uint d1 = 0; d1 <= dim_; ++d1 )
+    for ( size_t d1 = 0; d1 <= dim_; ++d1 )
     {
       if ( C_[d0][d1] )
       {
@@ -564,16 +611,21 @@ void MeshTopology::disp() const
   end();
   skip();
 }
+
 //-----------------------------------------------------------------------------
-void MeshTopology::update_token()
+
+auto MeshTopology::update_token() -> void
 {
   timestamp_ = std::time( nullptr );
 }
+
 //-----------------------------------------------------------------------------
+
 auto MeshTopology::token() const -> int
 {
   return timestamp_ ^ size( 0 ) ^ size( dim_ );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

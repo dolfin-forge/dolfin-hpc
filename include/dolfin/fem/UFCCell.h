@@ -7,7 +7,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/ufc/ufc.h>
 
@@ -37,16 +37,16 @@ public:
   inline auto operator*() const -> Cell const &;
 
   // Initialize UFC cell data
-  void init( Cell & cell );
+  auto init( Cell & cell ) -> void;
 
   // Update cell entities to global indices and coordinates
-  void update( Cell & cell );
+  auto update( Cell & cell ) -> void;
 
   ///
   static auto shape( CellType::Type type ) -> ufc::shape;
 
   // Number of cell vertices
-  uint num_vertices { 0 };
+  size_t num_vertices { 0 };
 
   // coordinates
   std::vector< double > coordinates;
@@ -56,7 +56,7 @@ private:
   Cell const * cell_ { nullptr };
 
   // Clear UFC cell data
-  void clear();
+  auto clear() -> void;
 };
 
 //--- INLINES -----------------------------------------------------------------
@@ -89,7 +89,12 @@ inline UFCCell::UFCCell( UFCCell const & other )
 
 inline UFCCell::~UFCCell()
 {
-  clear();
+  entity_indices.clear();
+  coordinates.clear();
+
+  cell_shape            = ufc::shape::interval;
+  topological_dimension = 0;
+  geometric_dimension   = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -129,11 +134,8 @@ inline auto UFCCell::shape( CellType::Type type ) -> ufc::shape
 
 //-----------------------------------------------------------------------------
 
-inline void UFCCell::init( Cell & cell )
+inline auto UFCCell::init( Cell & cell ) -> void
 {
-  // Clear old data
-  clear();
-
   // Update dolfin cell pointer
   this->cell_ = &cell;
 
@@ -150,7 +152,7 @@ inline void UFCCell::init( Cell & cell )
   entity_indices.resize( topological_dimension + 1 );
 
   // In any case store topological data in object
-  for ( uint d = 0; d < topological_dimension; ++d )
+  for ( size_t d = 0; d < topological_dimension; ++d )
   {
     entity_indices[d] = cell.entities( d );
   }
@@ -168,33 +170,21 @@ inline void UFCCell::init( Cell & cell )
   num_vertices = cell.num_entities( 0 );
 
   /// Set vertex coordinates
-  Array< uint > const & vertices = cell.entities( 0 );
+  Array< size_t > const & vertices = cell.entities( 0 );
   coordinates.resize( num_vertices * geometric_dimension );
 
-  for ( uint i = 0; i < num_vertices; ++i )
+  for ( size_t i = 0; i < num_vertices; ++i )
   {
     double const * coords = cell.mesh().geometry().x( vertices[i] );
 
-    for ( uint c = 0; c < geometric_dimension; ++c )
+    for ( size_t c = 0; c < geometric_dimension; ++c )
       coordinates[i * geometric_dimension + c] = coords[c];
   }
 }
 
 //-----------------------------------------------------------------------------
 
-inline void UFCCell::clear()
-{
-  entity_indices.clear();
-  coordinates.clear();
-
-  cell_shape            = ufc::shape::interval;
-  topological_dimension = 0;
-  geometric_dimension   = 0;
-}
-
-//-----------------------------------------------------------------------------
-
-inline void UFCCell::update( Cell & cell )
+inline auto UFCCell::update( Cell & cell ) -> void
 {
   // Update dolfin cell pointer
   this->cell_ = &cell;
@@ -210,12 +200,12 @@ inline void UFCCell::update( Cell & cell )
   index = entity_indices[topological_dimension][0];
 
   // /// Set vertex coordinates
-  Array< uint > const & vertices = cell.entities( 0 );
-  for ( uint i = 0; i < num_vertices; ++i )
+  Array< size_t > const & vertices = cell.entities( 0 );
+  for ( size_t i = 0; i < num_vertices; ++i )
   {
     double const * coords = cell.mesh().geometry().x( vertices[i] );
 
-    for ( uint c = 0; c < geometric_dimension; ++c )
+    for ( size_t c = 0; c < geometric_dimension; ++c )
       coordinates[i * geometric_dimension + c] = coords[c];
   }
 }

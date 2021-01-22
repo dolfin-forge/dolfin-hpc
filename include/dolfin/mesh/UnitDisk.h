@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_UNIT_DISK_H
 #define __DOLFIN_UNIT_DISK_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
@@ -21,30 +21,32 @@ namespace dolfin
 class UnitDisk : public Mesh
 {
 public:
-
   enum Type
   {
-    right, left, crisscross
+    right,
+    left,
+    crisscross
   };
   enum Transformation
   {
-    maxn, sumn, rotsumn
+    maxn,
+    sumn,
+    rotsumn
   };
 
-  UnitDisk(uint nx, Type type = crisscross, Transformation transformation =
-                 rotsumn);
+  UnitDisk( size_t         nx,
+            Type           type           = crisscross,
+            Transformation transformation = rotsumn );
 
 private:
+  auto transformx( real x, real y, Transformation transformation ) -> real;
 
-  auto transformx(real x, real y, Transformation transformation) -> real;
+  auto transformy( real x, real y, Transformation transformation ) -> real;
 
-  auto transformy(real x, real y, Transformation transformation) -> real;
-
-  inline auto max(real x, real y) -> real
+  inline auto max( real x, real y ) -> real
   {
-    return ((x > y) ? x : y);
+    return ( ( x > y ) ? x : y );
   }
-
 };
 
 }

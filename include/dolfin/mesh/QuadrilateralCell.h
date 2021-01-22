@@ -5,8 +5,8 @@
 #define __DOLFIN_QUADRANGLE_CELL_H
 
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
 
 namespace dolfin
 {
@@ -21,19 +21,19 @@ namespace dolfin
 class QuadrilateralCell : public CellType
 {
   // UFC: Topological Dimension
-  static uint const TD = 2;
+  static size_t const TD = 2;
 
   // UFC: Number of Entities
-  static uint const NE[3][3];
+  static size_t const NE[3][3];
 
   // UFC: Vertex Coordinates
   static real const VC[4][2];
 
   // UFC: Edge - Incident Vertices
-  static uint const EIV[4][2];
+  static size_t const EIV[4][2];
 
   // UFC: Edge - Non-Incident Vertices
-  static uint const ENV[4][2];
+  static size_t const ENV[4][2];
 
 public:
   /// Specify cell type and facet type
@@ -49,31 +49,33 @@ public:
   }
 
   /// Return topological dimension of cell
-  auto dim() const -> uint override;
+  auto dim() const -> size_t override;
 
   /// Return number of entitites of given topological dimension
-  auto num_entities( uint dim ) const -> uint override;
+  auto num_entities( size_t dim ) const -> size_t override;
 
   /// Return number of entities of given topological dimensions
-  auto num_entities( uint d0, uint d1 ) const -> uint override;
+  auto num_entities( size_t d0, size_t d1 ) const -> size_t override;
 
   /// Return number of vertices for entity of given topological dimension
-  auto num_vertices( uint dim ) const -> uint override;
+  auto num_vertices( size_t dim ) const -> size_t override;
 
   /// Return orientation of the cell
-  auto orientation( Cell const & cell ) const -> uint override;
+  auto orientation( Cell const & cell ) const -> size_t override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( uint ** e, uint dim, uint const * v ) const override;
+  void
+    create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
-  void order_entities( MeshTopology & topology, uint i ) const override;
+  void order_entities( MeshTopology & topology, size_t i ) const override;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
-  void order_facet( uint vertices[], Facet & facet ) const override;
+  void order_facet( size_t vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  auto connectivity_needs_ordering( uint d0, uint d1 ) const -> bool override;
+  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const
+    -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities( Mesh & mesh ) const override;
@@ -81,15 +83,16 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Refine cell uniformly
-  void
-    refine_cell( Cell & cell, MeshEditor & editor, uint & current_cell ) const override;
+  void refine_cell( Cell &       cell,
+                    MeshEditor & editor,
+                    size_t &     current_cell ) const override;
 
   /// Number of cells created by refinement pattern
-  auto num_refined_cells() const -> uint override;
+  auto num_refined_cells() const -> size_t override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  auto num_refined_vertices( uint dim ) const -> uint override;
+  auto num_refined_vertices( size_t dim ) const -> size_t override;
 
   //---------------------------------------------------------------------------
 
@@ -109,17 +112,19 @@ public:
   void midpoint( MeshEntity const & entity, real * p ) const override;
 
   /// Compute of given facet with respect to the cell
-  void normal( Cell const & cell, uint facet, real * n ) const override;
+  void normal( Cell const & cell, size_t facet, real * n ) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  auto facet_area( Cell const & cell, uint facet ) const -> real override;
+  auto facet_area( Cell const & cell, size_t facet ) const -> real override;
 
   /// Check if point p intersects the entity
-  auto intersects( MeshEntity const & e, Point const & p ) const -> bool override;
+  auto intersects( MeshEntity const & e, Point const & p ) const
+    -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
   auto intersects( MeshEntity const & e,
-                   Point const & p1, Point const & p2 ) const -> bool override;
+                   Point const &      p1,
+                   Point const &      p2 ) const -> bool override;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
@@ -127,7 +132,7 @@ public:
   void create_reference_cell( Mesh & mesh ) const override;
 
   /// Return coordinates of vertices in the reference cell
-  auto reference_vertex( uint i ) const -> real const * override;
+  auto reference_vertex( size_t i ) const -> real const * override;
 
   //---------------------------------------------------------------------------
 
@@ -142,24 +147,25 @@ public:
 
 private:
   // Find local index of edge i according to ordering convention
-  auto findEdge( uint i, Cell const & cell ) const -> uint;
+  auto findEdge( size_t i, Cell const & cell ) const -> size_t;
 };
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::dim() const -> uint
+inline auto QuadrilateralCell::dim() const -> size_t
 {
   return 2;
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::num_entities( uint dim ) const -> uint
+inline auto QuadrilateralCell::num_entities( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[2][dim];
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::num_entities( uint d0, uint d1 ) const -> uint
+inline auto QuadrilateralCell::num_entities( size_t d0, size_t d1 ) const
+  -> size_t
 {
   dolfin_assert( d0 <= TD );
   dolfin_assert( d1 <= TD );
@@ -167,23 +173,23 @@ inline auto QuadrilateralCell::num_entities( uint d0, uint d1 ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::num_vertices( uint dim ) const -> uint
+inline auto QuadrilateralCell::num_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[dim][0];
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::orientation( Cell const & cell ) const -> uint
+inline auto QuadrilateralCell::orientation( Cell const & cell ) const -> size_t
 {
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get the coordinates of vertices v0, v1 and v2
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< uint > const & vertices = cell.entities( 0 );
-  real const *          v0       = geometry.x( vertices[0] );
-  real const *          v1       = geometry.x( vertices[1] );
-  real const *          v2       = geometry.x( vertices[2] );
+  MeshGeometry const &    geometry = cell.mesh().geometry();
+  Array< size_t > const & vertices = cell.entities( 0 );
+  real const *            v0       = geometry.x( vertices[0] );
+  real const *            v1       = geometry.x( vertices[1] );
+  real const *            v2       = geometry.x( vertices[2] );
 
   // Check whether (v0v1, v0v2) is counter-clockwise
   return ( ( ( v1[0] - v0[0] ) * ( v2[1] - v0[1] )
@@ -194,8 +200,9 @@ inline auto QuadrilateralCell::orientation( Cell const & cell ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::connectivity_needs_ordering( uint d0,
-                                                            uint d1 ) const -> bool
+inline auto QuadrilateralCell::connectivity_needs_ordering( size_t d0,
+                                                            size_t d1 ) const
+  -> bool
 {
   dolfin_assert( d0 <= TD && d1 <= TD );
   // Do not order cell - vertices connectivities
@@ -211,13 +218,14 @@ inline void QuadrilateralCell::initialize_connectivities( Mesh & mesh ) const
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::num_refined_cells() const -> uint
+inline auto QuadrilateralCell::num_refined_cells() const -> size_t
 {
   return 4;
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::num_refined_vertices( uint dim ) const -> uint
+inline auto QuadrilateralCell::num_refined_vertices( size_t dim ) const
+  -> size_t
 {
   dolfin_assert( dim <= TD );
   MAYBE_UNUSED( dim );
@@ -231,8 +239,8 @@ inline auto QuadrilateralCell::volume( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * a = geometry.x( vertices[0] );
   real const * b = geometry.x( vertices[1] );
@@ -243,18 +251,19 @@ inline auto QuadrilateralCell::volume( MeshEntity const & entity ) const -> real
   {
     case 2:
     {
-      return 0.5 * std::fabs( ( c[0] - a[0] ) * ( d[1] - b[1] )
-                              - ( c[1] - a[1] ) * ( d[0] - b[0] ) );
+      return 0.5
+             * std::fabs( ( c[0] - a[0] ) * ( d[1] - b[1] )
+                          - ( c[1] - a[1] ) * ( d[0] - b[0] ) );
     }
     break;
     case 3:
     {
-      real c0 =   ( c[1] - a[1] ) * ( d[2] - b[2] )
-                - ( c[2] - a[2] ) * ( d[1] - b[1] );
-      real c1 =   ( c[2] - a[2] ) * ( d[0] - b[0] )
-                - ( c[0] - a[0] ) * ( d[2] - b[2] );
-      real c2 =   ( c[0] - a[0] ) * ( d[1] - b[1] )
-                - ( c[1] - a[1] ) * ( d[0] - b[0] );
+      real c0 =
+        ( c[1] - a[1] ) * ( d[2] - b[2] ) - ( c[2] - a[2] ) * ( d[1] - b[1] );
+      real c1 =
+        ( c[2] - a[2] ) * ( d[0] - b[0] ) - ( c[0] - a[0] ) * ( d[2] - b[2] );
+      real c2 =
+        ( c[0] - a[0] ) * ( d[1] - b[1] ) - ( c[1] - a[1] ) * ( d[0] - b[0] );
       return 0.5 * std::sqrt( c0 * c0 + c1 * c1 + c2 * c2 );
     }
     break;
@@ -264,14 +273,15 @@ inline auto QuadrilateralCell::volume( MeshEntity const & entity ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::diameter( MeshEntity const & entity ) const -> real
+inline auto QuadrilateralCell::diameter( MeshEntity const & entity ) const
+  -> real
 {
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -281,7 +291,7 @@ inline auto QuadrilateralCell::diameter( MeshEntity const & entity ) const -> re
   // Compute maximum diagonal length
   real d0 = 0.0;
   real d1 = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     d0 += ( x3[i] - x0[i] ) * ( x3[i] - x0[i] );
     d1 += ( x2[i] - x1[i] ) * ( x2[i] - x1[i] );
@@ -290,14 +300,15 @@ inline auto QuadrilateralCell::diameter( MeshEntity const & entity ) const -> re
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::circumradius( MeshEntity const & entity ) const -> real
+inline auto QuadrilateralCell::circumradius( MeshEntity const & entity ) const
+  -> real
 {
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -309,7 +320,7 @@ inline auto QuadrilateralCell::circumradius( MeshEntity const & entity ) const -
   real b = 0.0;
   real c = 0.0;
   real d = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     a += ( x1[i] - x0[i] ) * ( x1[i] - x0[i] );
     b += ( x2[i] - x1[i] ) * ( x2[i] - x1[i] );
@@ -329,14 +340,15 @@ inline auto QuadrilateralCell::circumradius( MeshEntity const & entity ) const -
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::inradius( MeshEntity const & entity ) const -> real
+inline auto QuadrilateralCell::inradius( MeshEntity const & entity ) const
+  -> real
 {
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -350,7 +362,7 @@ inline auto QuadrilateralCell::inradius( MeshEntity const & entity ) const -> re
   real d = 0.0;
   real p = 0.0;
   real q = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     a += ( x1[i] - x0[i] ) * ( x1[i] - x0[i] );
     b += ( x2[i] - x1[i] ) * ( x2[i] - x1[i] );
@@ -366,7 +378,8 @@ inline auto QuadrilateralCell::inradius( MeshEntity const & entity ) const -> re
   p = std::sqrt( p );
   q = std::sqrt( q );
 
-  return 0.5 * std::sqrt( 4.0 * p * p * q * q
+  return 0.5
+         * std::sqrt( 4.0 * p * p * q * q
                       - ( a * a - b * b + c * c - d * d )
                           * ( a * a - b * b + c * c - d * d ) )
          / ( a + b + c + d );
@@ -379,15 +392,15 @@ inline void QuadrilateralCell::midpoint( MeshEntity const & entity,
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
   real const * x2 = geometry.x( vertices[2] );
   real const * x3 = geometry.x( vertices[3] );
 
-  for ( uint d = 0; d < geometry.dim(); ++d )
+  for ( size_t d = 0; d < geometry.dim(); ++d )
   {
     p[d] = 0.25 * ( x0[d] + x1[d] + x2[d] + x3[d] );
   }
@@ -395,7 +408,7 @@ inline void QuadrilateralCell::midpoint( MeshEntity const & entity,
 
 //-----------------------------------------------------------------------------
 inline void
-  QuadrilateralCell::normal( Cell const & cell, uint facet, real * n ) const
+  QuadrilateralCell::normal( Cell const & cell, size_t facet, real * n ) const
 {
   dolfin_assert( cell.type() == this->cell_type );
 
@@ -407,7 +420,7 @@ inline void
   real const * p0 = geometry.x( c.entities( 0 )[ENV[facet][0]] );
 
   // Get coordinates of edge vertices
-  Array< uint > const & vertices = f.entities( 0 );
+  Array< size_t > const & vertices = f.entities( 0 );
 
   real const * p1 = geometry.x( vertices[0] );
   real const * p2 = geometry.x( vertices[1] );
@@ -457,20 +470,21 @@ inline void
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::facet_area( Cell const & cell, uint facet ) const -> real
+inline auto QuadrilateralCell::facet_area( Cell const & cell,
+                                           size_t       facet ) const -> real
 {
   dolfin_assert( cell.type() == this->cell_type );
 
-  Cell &                c = const_cast< Cell & >( cell );
-  Facet                 f( c.mesh(), c.entities( 1 )[facet] );
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< uint > const & vertices = f.entities( 0 );
-  real const *          p0       = geometry.x( vertices[0] );
-  real const *          p1       = geometry.x( vertices[1] );
+  Cell &                  c = const_cast< Cell & >( cell );
+  Facet                   f( c.mesh(), c.entities( 1 )[facet] );
+  MeshGeometry const &    geometry = cell.mesh().geometry();
+  Array< size_t > const & vertices = f.entities( 0 );
+  real const *            p0       = geometry.x( vertices[0] );
+  real const *            p1       = geometry.x( vertices[1] );
   // Compute distance between vertices
-  real       meas = 0.0;
-  uint const gdim = geometry.dim();
-  for ( uint d = 0; d < gdim; ++d )
+  real         meas = 0.0;
+  size_t const gdim = geometry.dim();
+  for ( size_t d = 0; d < gdim; ++d )
   {
     meas += ( p1[d] - p0[d] ) * ( p1[d] - p0[d] );
   }
@@ -478,7 +492,8 @@ inline auto QuadrilateralCell::facet_area( Cell const & cell, uint facet ) const
 }
 
 //-----------------------------------------------------------------------------
-inline auto QuadrilateralCell::reference_vertex( uint i ) const -> real const *
+inline auto QuadrilateralCell::reference_vertex( size_t i ) const
+  -> real const *
 {
   return &VC[i][0];
 }

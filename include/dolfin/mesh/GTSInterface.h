@@ -5,8 +5,9 @@
 #define __DOLFIN_GTS_INTERFACE_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/mesh/Point.h>
+
+#include <vector>
 
 // Forward declarations
 struct _GtsBBox;
@@ -31,13 +32,13 @@ public:
   ~GTSInterface();
 
   /// Compute cells overlapping c
-  void overlap(Cell& c, Array<uint>& cells) const;
+  void overlap(Cell& c, std::vector<size_t>& cells) const;
 
   /// Compute cells overlapping p
-  void overlap(Point const& p, Array<uint>& cells) const;
+  void overlap(Point const& p, std::vector<size_t>& cells) const;
 
   /// Compute cells overlapping bounding box constructed from p1 and p2
-  void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const;
+  void overlap(Point const& p1, Point const& p2, std::vector<size_t>& cells) const;
 
 private:
 

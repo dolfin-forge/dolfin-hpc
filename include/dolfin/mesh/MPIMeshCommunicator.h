@@ -19,10 +19,10 @@ namespace MPIMeshCommunicator
 {
 
 /// Distribute mesh according to a vertex-based distribution
-void distribute( MeshValues< uint, Vertex > & dist );
+void distribute( MeshValues< size_t, Vertex > & dist );
 
 /// Distribute mesh according to a cell-based distribution
-void distribute( MeshValues< uint, Cell > & dist, MeshData * D = nullptr );
+void distribute( MeshValues< size_t, Cell > & dist, MeshData * D = nullptr );
 
 /// Check mesh entity distribution
 template < class E >

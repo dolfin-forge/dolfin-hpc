@@ -16,36 +16,37 @@ class IntersectionDetector
 {
 
 public:
-
   /// Constructor
-  IntersectionDetector(Mesh& mesh);
+  IntersectionDetector( Mesh & mesh );
 
   /// Destructor
   ~IntersectionDetector();
 
   /// Compute overlap with mesh
-  inline void overlap(Cell& c, Array<uint>& cells) const
+  inline void overlap( Cell & c, std::vector< size_t > & cells ) const
   {
-    gts.overlap(c, cells);
+    gts.overlap( c, cells );
   }
 
   /// Compute overlap with point
-  inline void overlap(Point const& p, Array<uint>& cells) const
+  inline void overlap( Point const & p, std::vector< size_t > & cells ) const
   {
-    gts.overlap(p, cells);
+    gts.overlap( p, cells );
   }
 
   /// Compute overlap with bounding box
-  inline void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const
+  inline void overlap( Point const &           p1,
+                       Point const &           p2,
+                       std::vector< size_t > & cells ) const
   {
-    gts.overlap(p1, p2, cells);
+    gts.overlap( p1, p2, cells );
   }
 
   /// Compute which cells are intersected by a polygon (defined by points)
-  void overlap(Array<Point> const& points, Array<uint>& overlap) const;
+  void overlap( std::vector< Point > const & points,
+                std::vector< size_t > &      overlap ) const;
 
 private:
-
   GTSInterface gts;
 };
 

@@ -18,16 +18,13 @@ namespace dolfin
 class UnitSphere : public Mesh
 {
 public:
-
-  UnitSphere(uint nx);
+  UnitSphere( size_t nx );
 
 private:
-
-  auto transformx(real x, real y, real z) -> real;
-  auto transformy(real x, real y, real z) -> real;
-  auto transformz(real x, real y, real z) -> real;
-  auto max(real x, real y, real z) -> real;
-
+  auto transformx( real x, real y, real z ) -> real;
+  auto transformy( real x, real y, real z ) -> real;
+  auto transformz( real x, real y, real z ) -> real;
+  auto max( real x, real y, real z ) -> real;
 };
 
 }

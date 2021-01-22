@@ -9,11 +9,11 @@
 #include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/la/GenericSparsityPattern.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 namespace dolfin
@@ -55,7 +55,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       ufc.cell.update(*cell);
 
       // Tabulate dofs for each dimension
-      for (uint i = 0; i < ufc.form.rank(); ++i)
+      for (size_t i = 0; i < ufc.form.rank(); ++i)
       {
         dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell);
       }
@@ -71,7 +71,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   // Build sparsity pattern for interior facet integrals
   if (ufc.form.has_interior_facet_integrals())
   {
-    uint const tdim = mesh.topology_dimension();
+    size_t const tdim = mesh.topology_dimension();
 
     for (FacetIterator facet(mesh); !facet.end(); ++facet)
     {
@@ -90,9 +90,9 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       ufc.cell1.update(cell1);
 
       // Tabulate dofs for each dimension on macro element
-      for (uint i = 0; i < ufc.form.rank(); ++i)
+      for (size_t i = 0; i < ufc.form.rank(); ++i)
       {
-        const uint offset = dof_map_set[i].num_element_dofs();
+        const size_t offset = dof_map_set[i].num_element_dofs();
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i], ufc.cell0);
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1);
       }
@@ -108,7 +108,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   {
     bool has_facet_dofs = (dof_map_set[0].num_facet_dofs() > 0);
     bool is_square = true;
-    for (uint i = 1; i < ufc.form.rank(); ++i)
+    for (size_t i = 1; i < ufc.form.rank(); ++i)
     {
       has_facet_dofs |= (dof_map_set[i].num_facet_dofs() > 0);
       is_square &= (dof_map_set[i] == dof_map_set[i - 1]);
@@ -119,13 +119,13 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       // FIXME is this the correct space?!
       FiniteElementSpace space( mesh, ufc.finite_elements[0], dof_map_set[0] );
       PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping( space );
-      uint local_dim[2];
+      size_t local_dim[2];
       local_dim[0] = 1;
       local_dim[1] = pdm.max_local_dimension();
-      uint ** dofs = new uint*[2];
-      dofs[0] = new uint[1];
-      dofs[1] = new uint[pdm.max_local_dimension()];
-      for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+      size_t ** dofs = new size_t*[2];
+      dofs[0] = new size_t[1];
+      dofs[1] = new size_t[pdm.max_local_dimension()];
+      for (size_t i = 0; i < pdm.num_Gdofs(); ++i)
       {
         pdm.tabulate_dofs(i, dofs[0], dofs[1], local_dim[1]);
 

@@ -27,11 +27,10 @@ class DG0vNumbering : public DofNumbering
 {
 
 public:
-
   ///
-  DG0vNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
-      DofNumbering(mesh, ufc_dofmap),
-      value_size_(0)
+  DG0vNumbering( Mesh & mesh, ufc::dofmap & ufc_dofmap )
+    : DofNumbering( mesh, ufc_dofmap )
+    , value_size_( 0 )
   {
   }
 
@@ -39,11 +38,12 @@ public:
   ~DG0vNumbering() override = default;
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
-                            Cell const&) const override
+  inline void tabulate_dofs( size_t *          dofs,
+                             ufc::cell const & ufc_cell,
+                             Cell const & ) const override
   {
-    std::fill_n(dofs, value_size_, value_size_ * ufc_cell.index);
-    for (uint k = 1; k < value_size_; ++k)
+    std::fill_n( dofs, value_size_, value_size_ * ufc_cell.index );
+    for ( size_t k = 1; k < value_size_; ++k )
     {
       ++dofs[k];
     }
@@ -54,73 +54,72 @@ public:
   {
     DofNumbering::init();
     //---
-    uint const tdim = mesh.topology_dimension();
-    Array<ufc::dofmap const*> flattened;
-    DofMap::flatten(&ufc_dofmap, flattened);
+    size_t const                       tdim = mesh.topology_dimension();
+    std::vector< ufc::dofmap const * > flattened;
+    DofMap::flatten( &ufc_dofmap, flattened );
     value_size_ = flattened.size();
     destruct( flattened );
     //---
-    if (ufc_dofmap.num_element_dofs() != value_size_)
+    if ( ufc_dofmap.num_element_dofs() != value_size_ )
     {
-      error("DG0vNumbering : local dimension %u != %u",
-            ufc_dofmap.num_element_dofs(), value_size_);
+      error( "DG0vNumbering : local dimension %u != %u",
+             ufc_dofmap.num_element_dofs(),
+             value_size_ );
     }
-    set_range(value_size_ * mesh.topology().offset(tdim),
-              value_size_ * mesh.topology().num_owned(tdim));
+    set_range( value_size_ * mesh.topology().offset( tdim ),
+               value_size_ * mesh.topology().num_owned( tdim ) );
     //---
-    if (mesh.is_distributed())
+    if ( mesh.is_distributed() )
     {
-      DistributedData const& distdata = mesh.distdata()[tdim];
-      if (!distdata.valid_numbering)
+      DistributedData const & distdata = mesh.distdata()[tdim];
+      if ( !distdata.valid_numbering )
       {
-        error("DG0vNumbering : cell numbering is invalid");
+        error( "DG0vNumbering : cell numbering is invalid" );
       }
       shared_.clear();
-      for (SharedIterator it(distdata); it.valid(); ++it)
+      for ( SharedIterator it( distdata ); it.valid(); ++it )
       {
-        for (uint i = 0; i < value_size_; ++i)
+        for ( size_t i = 0; i < value_size_; ++i )
         {
-          shared_.insert(value_size_ * it.global_index() + i);
+          shared_.insert( value_size_ * it.global_index() + i );
         }
       }
       ghosts_.clear();
-      for (GhostIterator it(distdata); it.valid(); ++it)
+      for ( GhostIterator it( distdata ); it.valid(); ++it )
       {
-        for (uint i = 0; i < value_size_; ++i)
+        for ( size_t i = 0; i < value_size_; ++i )
         {
-          ghosts_.insert(value_size_ * it.global_index() + i);
+          ghosts_.insert( value_size_ * it.global_index() + i );
         }
       }
     }
   }
 
   ///
-  inline bool is_shared(uint index) const override
+  inline bool is_shared( size_t index ) const override
   {
-    return (shared_.count(index) > 0);
+    return ( shared_.count( index ) > 0 );
   }
 
   ///
-  inline bool is_ghost(uint index) const override
+  inline bool is_ghost( size_t index ) const override
   {
-    return (ghosts_.count(index) > 0);
+    return ( ghosts_.count( index ) > 0 );
   }
 
   ///
   inline std::string description() const override
   {
-    return std::string("Dof numbering for DG0 vector");
+    return std::string( "Dof numbering for DG0 vector" );
   }
 
 private:
-
   // Number of scalar entries
-  uint value_size_;
+  size_t value_size_;
 
   ///
-  _set<uint> shared_;
-  _set<uint> ghosts_;
-
+  _set< size_t > shared_;
+  _set< size_t > ghosts_;
 };
 
 }

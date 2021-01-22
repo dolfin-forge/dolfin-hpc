@@ -28,14 +28,14 @@ public:
   ~SerialNumbering() override = default;
 
   ///
-  inline void tabulate_dofs( uint *            dofs,
+  inline void tabulate_dofs( size_t *          dofs,
                              ufc::cell const & ufc_cell,
                              Cell const & ) const override
   {
     // FIXME num_entities should maybe be stored somewhere else
-    size_t const tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim+1, 0 );
-    for ( uint d = 0; d <= tdim; ++d )
+    size_t const          tdim = mesh.topology_dimension();
+    std::vector< size_t > num_entities( tdim + 1, 0 );
+    for ( size_t d = 0; d <= tdim; ++d )
     {
       if ( mesh.topology().connectivity( d ) )
       {
@@ -58,9 +58,9 @@ public:
     //---
 
     // FIXME num_entities should maybe be stored somewhere else
-    size_t const tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim+1, 0 );
-    for ( uint d = 0; d <= tdim; ++d )
+    size_t const          tdim = mesh.topology_dimension();
+    std::vector< size_t > num_entities( tdim + 1, 0 );
+    for ( size_t d = 0; d <= tdim; ++d )
     {
       if ( mesh.topology().connectivity( d ) )
       {
@@ -68,17 +68,17 @@ public:
       }
     }
 
-    set_range( 0, ufc_dofmap.global_dimension( num_entities) );
+    set_range( 0, ufc_dofmap.global_dimension( num_entities ) );
   }
 
   ///
-  inline bool is_shared( uint ) const override
+  inline bool is_shared( size_t ) const override
   {
     return false;
   }
 
   ///
-  inline bool is_ghost( uint ) const override
+  inline bool is_ghost( size_t ) const override
   {
     return false;
   }

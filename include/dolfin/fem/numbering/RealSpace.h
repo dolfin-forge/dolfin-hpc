@@ -13,24 +13,25 @@ class RealSpaceNumbering : public DofNumbering
 {
 
 public:
-
   ///
-  RealSpaceNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
-      DofNumbering(mesh, ufc_dofmap),
-      dofs_(NULL)
+  RealSpaceNumbering( Mesh & mesh, ufc::dofmap & ufc_dofmap )
+    : DofNumbering( mesh, ufc_dofmap )
+    , dofs_( NULL )
   {
   }
 
   ///
   ~RealSpaceNumbering() override
   {
-    delete [] dofs_;
+    delete[] dofs_;
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const&, Cell const&) const override
+  inline void tabulate_dofs( size_t * dofs,
+                             ufc::cell const &,
+                             Cell const & ) const override
   {
-    std::copy(dofs_, dofs_ + ufc_dofmap.num_element_dofs(), dofs);
+    std::copy( dofs_, dofs_ + ufc_dofmap.num_element_dofs(), dofs );
   }
 
   //
@@ -39,25 +40,25 @@ public:
     DofNumbering::init();
 
     //---
-    uint offset = ufc_dofmap.num_element_dofs() * MPI::rank();
-    set_range(offset, ufc_dofmap.num_element_dofs());
-    delete [] dofs_;
-    dofs_ = new uint[ufc_dofmap.num_element_dofs()];
-    std::fill_n(dofs_, ufc_dofmap.num_element_dofs(), offset);
-    for (uint i = 1; i < ufc_dofmap.num_element_dofs(); ++i)
+    size_t offset = ufc_dofmap.num_element_dofs() * MPI::rank();
+    set_range( offset, ufc_dofmap.num_element_dofs() );
+    delete[] dofs_;
+    dofs_ = new size_t[ufc_dofmap.num_element_dofs()];
+    std::fill_n( dofs_, ufc_dofmap.num_element_dofs(), offset );
+    for ( size_t i = 1; i < ufc_dofmap.num_element_dofs(); ++i )
     {
       dofs_[i] += i;
     }
   }
 
   ///
-  inline bool is_shared(uint) const override
+  inline bool is_shared( size_t ) const override
   {
     return false;
   }
 
   ///
-  inline bool is_ghost(uint) const override
+  inline bool is_ghost( size_t ) const override
   {
     return false;
   }
@@ -65,13 +66,11 @@ public:
   ///
   inline std::string description() const override
   {
-    return std::string("Dof numbering for real space");
+    return std::string( "Dof numbering for real space" );
   }
 
 private:
-
-  uint * dofs_;
-
+  size_t * dofs_;
 };
 
 } /* namespace dolfin */

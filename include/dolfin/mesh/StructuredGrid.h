@@ -24,26 +24,23 @@ class StructuredGrid : public Mesh
 {
 
 public:
-
   /// Create unit structured grid
-  StructuredGrid(CellType const& type, uint N);
+  StructuredGrid( CellType const & type, size_t N );
 
   /// Create unit structured grid with a given bounding box
-  StructuredGrid(CellType const& type, uint N, BoundingBox bbox);
+  StructuredGrid( CellType const & type, size_t N, BoundingBox bbox );
 
   /// Destructor
   ~StructuredGrid() override = default;
 
 private:
-
   //
-  void init(CellType const& type);
+  void init( CellType const & type );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  BoundingBox bbox_;
-  uint const n_;
-
+  BoundingBox  bbox_;
+  size_t const n_;
 };
 
 } /* namespace dolfin */

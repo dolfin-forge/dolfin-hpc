@@ -5,9 +5,9 @@
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <string>
-#include <algorithm>
 
 namespace dolfin
 {
@@ -22,38 +22,38 @@ struct EntityKey
 {
 
   ///
-  EntityKey(uint D) :
-      size(D),
-      indices(D ? new uint[size]() : nullptr),
-      idx(0)
+  EntityKey( size_t D )
+    : size( D )
+    , indices( D ? new size_t[size]() : nullptr )
+    , idx( 0 )
   {
   }
 
   ///
-  EntityKey(uint D, uint const * v) :
-      size(D),
-      indices(D ? new uint[size] : nullptr),
-      idx(0)
+  EntityKey( size_t D, size_t const * v )
+    : size( D )
+    , indices( D ? new size_t[size] : nullptr )
+    , idx( 0 )
   {
-    set(v);
+    set( v );
   }
 
   ///
-  EntityKey(uint D, uint const * v, uint i) :
-      size(D),
-      indices(D ? new uint[size] : nullptr),
-      idx(i)
+  EntityKey( size_t D, size_t const * v, size_t i )
+    : size( D )
+    , indices( D ? new size_t[size] : nullptr )
+    , idx( i )
   {
-    set(v);
+    set( v );
   }
 
   ///
-  EntityKey(EntityKey const& other) :
-      size(other.size),
-      indices(new uint[size]),
-      idx(other.idx)
+  EntityKey( EntityKey const & other )
+    : size( other.size )
+    , indices( new size_t[size] )
+    , idx( other.idx )
   {
-    std::copy(other.indices, other.indices + size, indices);
+    std::copy( other.indices, other.indices + size, indices );
   }
 
   ///
@@ -63,26 +63,27 @@ struct EntityKey
   }
 
   ///
-  auto operator=(EntityKey const& other) -> EntityKey&
+  auto operator=( EntityKey const & other ) -> EntityKey &
   {
-    if(this != &other)
+    if ( this != &other )
     {
-      if(size != other.size)
+      if ( size != other.size )
       {
-        error("EntityKey : purposely disabled assignment with different size");
+        error(
+          "EntityKey : purposely disabled assignment with different size" );
       }
-      std::copy(other.indices, other.indices + size, indices);
+      std::copy( other.indices, other.indices + size, indices );
     }
     return *this;
   }
 
   ///
-  inline auto operator<(EntityKey const& other) const -> bool
+  inline auto operator<( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return this->indices[i] < other.indices[i];
       }
@@ -91,12 +92,12 @@ struct EntityKey
   }
 
   ///
-  inline auto operator<=(EntityKey const& other) const -> bool
+  inline auto operator<=( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return this->indices[i] < other.indices[i];
       }
@@ -105,12 +106,12 @@ struct EntityKey
   }
 
   ///
-  inline auto operator==(EntityKey const& other) const -> bool
+  inline auto operator==( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return false;
       }
@@ -119,12 +120,12 @@ struct EntityKey
   }
 
   ///
-  inline auto operator!=(EntityKey const& other) const -> bool
+  inline auto operator!=( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return true;
       }
@@ -133,12 +134,12 @@ struct EntityKey
   }
 
   ///
-  inline auto operator>=(EntityKey const& other) const -> bool
+  inline auto operator>=( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return this->indices[i] > other.indices[i];
       }
@@ -147,12 +148,12 @@ struct EntityKey
   }
 
   ///
-  inline auto operator>(EntityKey const& other) const -> bool
+  inline auto operator>( EntityKey const & other ) const -> bool
   {
-    dolfin_assert(size == other.size);
-    for (uint i = 0; i < size; ++i)
+    dolfin_assert( size == other.size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      if (this->indices[i] != other.indices[i])
+      if ( this->indices[i] != other.indices[i] )
       {
         return this->indices[i] > other.indices[i];
       }
@@ -161,42 +162,42 @@ struct EntityKey
   }
 
   ///
-  inline void set(uint const * v)
+  inline void set( size_t const * v )
   {
-    switch(size)
+    switch ( size )
     {
       case 1:
         indices[0] = v[0];
         break;
       case 2:
-        //Important: copy to avoid aliasing issues
-        std::copy(v, v + 2, indices);
-        if(indices[1] < indices[0])
+        // Important: copy to avoid aliasing issues
+        std::copy( v, v + 2, indices );
+        if ( indices[1] < indices[0] )
         {
-          std::swap(indices[0], indices[1]);
+          std::swap( indices[0], indices[1] );
         }
         break;
       default:
-        std::copy(v, v + size, indices);
-        std::sort(indices, indices + size);
+        std::copy( v, v + size, indices );
+        std::sort( indices, indices + size );
         break;
     }
   }
 
   ///
-  inline void set(uint const * v, uint i)
+  inline void set( size_t const * v, size_t i )
   {
-    set(v);
+    set( v );
     idx = i;
   }
 
   ///
   inline auto hash() const -> size_t
   {
-    size_t ret = static_cast<std::size_t>(indices[0]);
-    for (uint i = 1; i < size; ++i)
+    size_t ret = static_cast< std::size_t >( indices[0] );
+    for ( size_t i = 1; i < size; ++i )
     {
-      ret = ret ^ static_cast<std::size_t>(indices[i]);
+      ret = ret ^ static_cast< std::size_t >( indices[i] );
     }
     return ret;
   }
@@ -204,25 +205,23 @@ struct EntityKey
   ///
   inline void disp() const
   {
-    section("EntityKey");
-    message("idx  : %u", idx);
-    message("size : %u", size);
-    for (uint i = 0; i < size; ++i)
+    section( "EntityKey" );
+    message( "idx  : %u", idx );
+    message( "size : %u", size );
+    for ( size_t i = 0; i < size; ++i )
     {
-      message("i%u : %u", i, indices[i]);
+      message( "i%u : %u", i, indices[i] );
     }
     end();
   }
 
-  uint const size{0};
-  uint * indices{nullptr};
-  uint idx{0};
+  size_t const size { 0 };
+  size_t *     indices { nullptr };
+  size_t       idx { 0 };
 
 private:
-
   ///
   EntityKey() = delete;
-
 };
 
 } /* namespace dolfin */
@@ -230,10 +229,10 @@ private:
 namespace std
 {
 
-template<>
-struct hash<dolfin::EntityKey>
+template <>
+struct hash< dolfin::EntityKey >
 {
-  inline auto operator()(dolfin::EntityKey const& e) const -> std::size_t
+  inline auto operator()( dolfin::EntityKey const & e ) const -> std::size_t
   {
     return e.hash();
   }

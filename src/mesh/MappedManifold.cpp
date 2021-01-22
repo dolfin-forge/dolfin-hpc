@@ -4,12 +4,12 @@
 #include <dolfin/mesh/MappedManifold.h>
 
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 namespace dolfin
 {
@@ -30,21 +30,21 @@ void MappedManifold::init()
   Mesh& globalmesh = this->mesh();
   BoundaryMesh& boundary = globalmesh.exterior_boundary();
 
-  uint const tdim = globalmesh.topology_dimension();
-  uint const gdim = globalmesh.geometry_dimension();
+  size_t const tdim = globalmesh.topology_dimension();
+  size_t const gdim = globalmesh.geometry_dimension();
   MeshEditor editor(*this, boundary.type().cellType(),
                     boundary.geometry_dimension());
-  Array<uint> mm_vertices(boundary.size(0),boundary.size(0));
-  uint const invalid_vertex_index = mm_vertices.size();
+  Array<size_t> mm_vertices(boundary.size(0),boundary.size(0));
+  size_t const invalid_vertex_index = mm_vertices.size();
   Array<real> mm_coordinates(gdim * mm_vertices.size());
-  uint const num_cell_vertices = boundary.type().num_entities(0);
-  Array<uint> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);
+  size_t const num_cell_vertices = boundary.type().num_entities(0);
+  Array<size_t> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);
 
-  Array<uint> localGH;
+  Array<size_t> localGH;
 
   //
-  uint mm_cell_count = 0;
-  uint mm_vertex_count = 0;
+  size_t mm_cell_count = 0;
+  size_t mm_vertex_count = 0;
   Point x1;
   cell_map_.clear();
   for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
@@ -55,7 +55,7 @@ void MappedManifold::init()
     //
     bool is_Gfacet = false;
     bool is_Hfacet = false;
-    uint Hfound = 0;
+    size_t Hfound = 0;
     for (VertexIterator v(*bcell); !v.end(); ++v)
     {
       is_Gfacet |= subdomainG_.inside(v->x(), true);
@@ -88,7 +88,7 @@ void MappedManifold::init()
           subdomainG_.map(v->x(), &mm_coordinates[mm_vertex_count * gdim]);
           ++mm_vertex_count;
 
-          Array<uint> matching_facets;
+          Array<size_t> matching_facets;
           boundary.intersector().overlap(x1, matching_facets);
           if(!matching_facets.empty())
           {
@@ -117,9 +117,9 @@ void MappedManifold::init()
   vertex_map_.resize(mm_vertex_count);
 
   // Create vertices
-  for (uint v = 0; v < mm_vertices.size(); ++v)
+  for (size_t v = 0; v < mm_vertices.size(); ++v)
   {
-    uint const vertex_index = mm_vertices[v];
+    size_t const vertex_index = mm_vertices[v];
     if (vertex_index != invalid_vertex_index)
     {
       // Create mapping from boundary vertex to mesh vertex
@@ -131,8 +131,8 @@ void MappedManifold::init()
   }
 
   // Create cells (boundary mesh is already ordered)
-  Array<uint> cell_vertices(num_cell_vertices);
-  for (uint c = 0; c < mm_cell_count; ++c)
+  Array<size_t> cell_vertices(num_cell_vertices);
+  for (size_t c = 0; c < mm_cell_count; ++c)
   {
     // Add cell
     editor.add_cell(c, &mm_cell_vertices[c * num_cell_vertices]);

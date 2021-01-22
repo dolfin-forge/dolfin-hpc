@@ -4,7 +4,6 @@
 #include <dolfin/mesh/CellType.h>
 
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/HexahedronCell.h>
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/MeshTopology.h>
@@ -13,8 +12,9 @@
 #include <dolfin/mesh/QuadrilateralCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <ufc.h>
 
@@ -24,6 +24,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 CellType::CellType( std::string const & name,
                     CellType::Type      cell_type,
                     CellType::Type      facet_type )
@@ -33,15 +34,19 @@ CellType::CellType( std::string const & name,
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
+
 CellType::~CellType()
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::create_all() -> Array< CellType * >
+
+auto CellType::create_all() -> std::vector< CellType * >
 {
-  Array< CellType * > ret;
+  std::vector< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
   ret.push_back( CellType::create( CellType::triangle ) );
   ret.push_back( CellType::create( CellType::tetrahedron ) );
@@ -49,17 +54,21 @@ auto CellType::create_all() -> Array< CellType * >
   ret.push_back( CellType::create( CellType::hexahedron ) );
   return ret;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::create_simplex() -> Array< CellType * >
+
+auto CellType::create_simplex() -> std::vector< CellType * >
 {
-  Array< CellType * > ret;
+  std::vector< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
   ret.push_back( CellType::create( CellType::triangle ) );
   ret.push_back( CellType::create( CellType::tetrahedron ) );
   return ret;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::create_simplex( uint dim ) -> CellType *
+
+auto CellType::create_simplex( size_t dim ) -> CellType *
 {
   switch ( dim )
   {
@@ -78,17 +87,21 @@ auto CellType::create_simplex( uint dim ) -> CellType *
   }
   return nullptr;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::create_hypercube() -> Array< CellType * >
+
+auto CellType::create_hypercube() -> std::vector< CellType * >
 {
-  Array< CellType * > ret;
+  std::vector< CellType * > ret;
   ret.push_back( CellType::create( CellType::interval ) );
   ret.push_back( CellType::create( CellType::quadrilateral ) );
   ret.push_back( CellType::create( CellType::hexahedron ) );
   return ret;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::create_hypercube( uint dim ) -> CellType *
+
+auto CellType::create_hypercube( size_t dim ) -> CellType *
 {
   switch ( dim )
   {
@@ -107,7 +120,9 @@ auto CellType::create_hypercube( uint dim ) -> CellType *
   }
   return nullptr;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::create( CellType::Type type ) -> CellType *
 {
   switch ( type )
@@ -137,7 +152,9 @@ auto CellType::create( CellType::Type type ) -> CellType *
 
   return nullptr;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::create( ufc::shape type ) -> CellType *
 {
   switch ( type )
@@ -167,7 +184,9 @@ auto CellType::create( ufc::shape type ) -> CellType *
 
   return nullptr;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::create( std::string const & type ) -> CellType *
 {
   if ( type == "point" )
@@ -201,7 +220,9 @@ auto CellType::create( std::string const & type ) -> CellType *
 
   return nullptr;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::intersects( MeshEntity & entity, Cell & c ) const -> bool
 {
   for ( VertexIterator vi( entity ); !vi.end(); ++vi )
@@ -226,7 +247,9 @@ auto CellType::intersects( MeshEntity & entity, Cell & c ) const -> bool
 
   return false;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::type( std::string const & type ) -> CellType::Type
 {
   if ( type == "point" )
@@ -260,7 +283,9 @@ auto CellType::type( std::string const & type ) -> CellType::Type
 
   return point;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::str( CellType::Type type ) -> std::string
 {
   switch ( type )
@@ -284,12 +309,16 @@ auto CellType::str( CellType::Type type ) -> std::string
 
   return "";
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::str() const -> std::string const &
 {
   return name_;
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::check( Cell & cell ) const -> bool
 {
   // Throw a hard error
@@ -306,12 +335,12 @@ auto CellType::check( Cell & cell ) const -> bool
   bool ret = true;
   if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array< uint > const & cell_edges = cell.entities( 1 );
+    std::vector< size_t > const & cell_edges = cell.entities( 1 );
     dolfin_assert( not cell_edges.empty() );
-    uint const num_cell_edges = this->num_entities( 1 );
-    for ( uint e = 0; e < num_cell_edges; ++e )
+    size_t const num_cell_edges = this->num_entities( 1 );
+    for ( size_t e = 0; e < num_cell_edges; ++e )
     {
-      Array< uint > const & edge_verts =
+      std::vector< size_t > const & edge_verts =
         cell.mesh().topology()( 1, 0 )[cell_edges[e]];
       dolfin_assert( not edge_verts.empty() );
       if ( edge_verts[1] < edge_verts[0] )
@@ -324,14 +353,17 @@ auto CellType::check( Cell & cell ) const -> bool
 
   return ret;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::is_sorted_until( uint const * begin, uint const * end ) -> uint const *
+
+auto CellType::is_sorted_until( size_t const * begin, size_t const * end )
+  -> size_t const *
 {
   if ( begin == end )
   {
     return begin;
   }
-  uint const * next = begin;
+  size_t const * next = begin;
   while ( ++next != end )
   {
     if ( *next < *begin )
@@ -342,16 +374,21 @@ auto CellType::is_sorted_until( uint const * begin, uint const * end ) -> uint c
   }
   return end;
 }
+
 //-----------------------------------------------------------------------------
-auto CellType::is_sorted( uint const * begin, uint const * end ) -> bool
+
+auto CellType::is_sorted( size_t const * begin, size_t const * end ) -> bool
 {
   return ( is_sorted_until( begin, end ) == end );
 }
+
 //-----------------------------------------------------------------------------
+
 auto CellType::pattern_applies( Cell & cell ) const -> bool
 {
   return ( cell.type() == this->cellType() );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

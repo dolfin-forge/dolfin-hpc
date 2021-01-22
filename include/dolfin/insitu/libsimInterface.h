@@ -10,11 +10,11 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Vertex.h>
 #include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <algorithm>
 #include <string>
@@ -239,7 +239,7 @@ namespace dolfin
 	    *(cp++) = c->entities(0)[i];
 	  }
 	}
-	
+
 	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1,
 				    nconn, visit_conn);
 	VisIt_UnstructuredMesh_setConnectivity(msh, mesh->num_cells(), conn);

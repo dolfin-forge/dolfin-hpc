@@ -16,15 +16,15 @@ namespace MeshPartition
 {
 
 /// Partition a mesh into pe_size partitions in parallel
-void partition( MeshValues< uint, Cell > & partitions );
+void partition( MeshValues< size_t, Cell > & partitions );
 
 /// Partition a mesh into pe_size partitions in parallel with
 /// weights on vertices on the cells
-void partition( MeshValues< uint, Cell > & partitions,
-                MeshValues< uint, Cell > & weight );
+void partition( MeshValues< size_t, Cell > & partitions,
+                MeshValues< size_t, Cell > & weight );
 
 /// Partition a mesh based on coordinates
-void partition_geom( MeshValues< uint, Vertex > & partitions );
+void partition_geom( MeshValues< size_t, Vertex > & partitions );
 
 } /* namespace MeshPartition */
 

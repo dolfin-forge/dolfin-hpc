@@ -7,13 +7,14 @@
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Space.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
   : cell( space.cell() )
   , offset( 0 )
@@ -25,8 +26,8 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
   , num_sub_elements( finite_element->num_sub_elements() )
   , topological_dimension( finite_element->topological_dimension() )
   , geometric_dimension( space.mesh().geometry_dimension() )
-  , dofs( new uint[space_dimension] )
-  , facet_dofs( new uint[dof_map->num_facet_dofs()] )
+  , dofs( new size_t[space_dimension] )
+  , facet_dofs( new size_t[dof_map->num_facet_dofs()] )
   , values( new real[size] )
   , coefficients( new real[space_dimension] )
   , basis_values( new real[space_dimension] )
@@ -42,6 +43,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
 }
 
 //-----------------------------------------------------------------------------
+
 ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
                             SubSystem const &          sub_system )
   : cell( space.cell() )
@@ -54,8 +56,8 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
   , num_sub_elements( finite_element->num_sub_elements() )
   , topological_dimension( finite_element->topological_dimension() )
   , geometric_dimension( space.mesh().geometry_dimension() )
-  , dofs( new uint[space_dimension] )
-  , facet_dofs( new uint[dof_map->num_facet_dofs()] )
+  , dofs( new size_t[space_dimension] )
+  , facet_dofs( new size_t[dof_map->num_facet_dofs()] )
   , values( new real[size] )
   , coefficients( new real[space_dimension] )
   , basis_values( new real[space_dimension] )
@@ -71,6 +73,7 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
 }
 
 //-----------------------------------------------------------------------------
+
 ScratchSpace::ScratchSpace( ScratchSpace const & other )
   : cell( other.cell )
   , offset( 0 )
@@ -99,6 +102,7 @@ ScratchSpace::ScratchSpace( ScratchSpace const & other )
 }
 
 //-----------------------------------------------------------------------------
+
 ScratchSpace::~ScratchSpace()
 {
   coordinates.clear();
@@ -113,7 +117,7 @@ ScratchSpace::~ScratchSpace()
     delete finite_element;
   }
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-  for ( uint i = 0; i < space_dimension; ++i )
+  for ( size_t i = 0; i < space_dimension; ++i )
   {
     if ( all_basis_values[i] != nullptr )
       delete[] all_basis_values[i];
@@ -123,11 +127,13 @@ ScratchSpace::~ScratchSpace()
 }
 
 //-----------------------------------------------------------------------------
-auto ScratchSpace::value_size( ufc::finite_element const & finite_element ) -> uint
+
+auto ScratchSpace::value_size( ufc::finite_element const & finite_element )
+  -> size_t
 {
   // Compute size of value (number of entries in tensor value)
-  uint size = 1;
-  for ( uint i = 0; i < finite_element.value_rank(); ++i )
+  size_t size = 1;
+  for ( size_t i = 0; i < finite_element.value_rank(); ++i )
   {
     size *= finite_element.value_dimension( i );
   }
@@ -135,11 +141,12 @@ auto ScratchSpace::value_size( ufc::finite_element const & finite_element ) -> u
 }
 
 //-----------------------------------------------------------------------------
+
 void ScratchSpace::init()
 {
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
   // Initialize local array for dof coordinates
-  for ( uint i = 0; i < space_dimension; ++i )
+  for ( size_t i = 0; i < space_dimension; ++i )
   {
     // Using same storage size as a Point
     all_basis_values[i] = new real[Space::MAX_DIMENSION];

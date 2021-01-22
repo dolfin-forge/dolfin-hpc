@@ -41,7 +41,7 @@ public:
   UFCCell cell;
 
   // Offset for sub system
-  uint offset;
+  size_t offset;
 
   // Finite element
   ufc::finite_element const * finite_element;
@@ -50,28 +50,28 @@ public:
   ufc::dofmap const * dof_map;
 
   // Value size (number of entries in tensor value)
-  uint const size;
+  size_t const size;
 
   // Reference finite element space dimension
-  uint const space_dimension;
+  size_t const space_dimension;
 
   // Reference finite element dof map dimension
-  uint const local_dimension;
+  size_t const local_dimension;
 
   // Number of subspaces of the reference finite element
-  uint const num_sub_elements;
+  size_t const num_sub_elements;
 
   // Topological dimension
-  uint const topological_dimension;
+  size_t const topological_dimension;
 
   // Geometric dimension
-  uint const geometric_dimension;
+  size_t const geometric_dimension;
 
   // Local array for mapping of dofs
-  uint * const dofs;
+  size_t * const dofs;
 
   // Local array for mapping of facet dofs
-  uint * const facet_dofs;
+  size_t * const facet_dofs;
 
   // Local array for values
   real * const values;
@@ -96,7 +96,7 @@ private:
   ScratchSpace(ScratchSpace const& other);
 
   /// FIXME this should now be present in the ufc::FE interface
-  auto value_size(ufc::finite_element const& finite_element) -> uint;
+  auto value_size(ufc::finite_element const& finite_element) -> size_t;
 
   void init();
 

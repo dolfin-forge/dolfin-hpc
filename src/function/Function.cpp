@@ -11,12 +11,12 @@
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/SubFunction.h>
 #include <dolfin/la/Vector.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <algorithm>
 
@@ -51,7 +51,7 @@ Function::Function(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-Function::Function(Form& form, uint i) :
+Function::Function(Form& form, size_t i) :
     GenericFunction(),
     TimeDependent(),
     mesh_(&form.dofmaps()[i].mesh()),
@@ -113,9 +113,9 @@ Function::Function(SubFunction const& sub_function) :
   // Copy subvector, naive implementation
   Function& gFunc = sub_function.function();
   DofMap const& gDm = gFunc.space().dofmap();
-  uint const gLocalDim = gDm.num_element_dofs();
-  uint const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
-  uint const thisLocalDim = scratch->local_dimension;
+  size_t const gLocalDim = gDm.num_element_dofs();
+  size_t const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
+  size_t const thisLocalDim = scratch->local_dimension;
 
   // Sync ghosts before getting the block
   real * gblock = gFunc.create_block();
@@ -123,12 +123,12 @@ Function::Function(SubFunction const& sub_function) :
   gFunc.get_block(gblock);
 
   // Loop baby, loop...
-  uint gBlockOffset = 0;
-  uint ii = 0;
+  size_t gBlockOffset = 0;
+  size_t ii = 0;
   real * this_block = this->create_block();
   for (CellIterator cell(*mesh_); !cell.end(); ++cell, gBlockOffset += gLocalDim)
   {
-    for (uint dof = 0; dof < thisLocalDim; ++dof)
+    for (size_t dof = 0; dof < thisLocalDim; ++dof)
     {
       this_block[ii++] = gblock[gBlockOffset + gDmOffset + dof];
     }
@@ -168,7 +168,7 @@ Function::~Function()
 }
 
 //-----------------------------------------------------------------------------
-void Function::init(Form& form, uint i)
+void Function::init(Form& form, size_t i)
 {
   if(mesh_ == nullptr)
   {
@@ -232,7 +232,7 @@ void Function::clear()
 }
 
 //-----------------------------------------------------------------------------
-void Function::evaluate(uint n, real* values, const real* x,
+void Function::evaluate(size_t n, real* values, const real* x,
                         const ufc::cell& cell) const
 {
   dolfin_assert( values != nullptr );
@@ -244,7 +244,7 @@ void Function::evaluate(uint n, real* values, const real* x,
   dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
   X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
   std::fill_n(values, n * scratch->size, 0.0);
-  for (uint q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
+  for (size_t q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
   {
 // FIXME reintroduce this, once all other things are worked out
 // #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
@@ -260,17 +260,17 @@ void Function::evaluate(uint n, real* values, const real* x,
 //                                                scratch->all_basis_values );
 
 //     // Compute linear combination
-//     for (uint i = 0; i < element_->space_dimension(); ++i)
-//       for (uint j = 0; j < scratch->size; ++j)
+//     for (size_t i = 0; i < element_->space_dimension(); ++i)
+//       for (size_t j = 0; j < scratch->size; ++j)
 //         values[j] += scratch->coefficients[i] * scratch->all_basis_values[i][j];
 // #else
     // Compute linear combination
-    for (uint i = 0; i < element_->space_dimension(); ++i)
+    for (size_t i = 0; i < element_->space_dimension(); ++i)
     {
       // FIXME cell_orientation needs a correct value here
       element_->evaluate_basis(i, scratch->basis_values, x,
                                ufc_cell->coordinates.data(), 0);
-      for (uint j = 0; j < scratch->size; ++j)
+      for (size_t j = 0; j < scratch->size; ++j)
       {
         values[j] += scratch->coefficients[i] * scratch->basis_values[j];
       }
@@ -284,7 +284,7 @@ void Function::eval(real* values, const real* x) const
 {
   // Find the cell that contains x
   Point p( x );
-  Array<uint> cells;
+  std::vector<size_t> cells;
   mesh_->intersector().overlap(p, cells);
   if (cells.size() == 0)
   {
@@ -293,7 +293,7 @@ void Function::eval(real* values, const real* x) const
       warning("Unable to evaluate function at given point (not inside domain).");
     }
 
-    for (uint j = 0; j < scratch->size; ++j)
+    for (size_t j = 0; j < scratch->size; ++j)
     {
       values[j] = std::numeric_limits<real>::infinity();
     }
@@ -308,7 +308,7 @@ void Function::eval(real* values, const real* x) const
 void Function::interpolate_vertex_values(real* values) const
 {
   // Local data for interpolation on each cell
-  uint const num_verts = mesh_->size(0);
+  size_t const num_verts = mesh_->size(0);
 
   // Make sure vector's ghost values are updated)
   X_->apply();
@@ -319,7 +319,7 @@ void Function::interpolate_vertex_values(real* values) const
   if (mesh_->num_global_cells() > 1 && this->space().is_cellwise_defined())
   {
     //FIXME: imported from naive 2013ish code before mappings existed.
-    uint const num_cell_vertices = mesh_->type().num_entities(0);
+    size_t const num_cell_vertices = mesh_->type().num_entities(0);
     std::fill(values, values + scratch->size * mesh_->num_vertices(), 0.0);
     real* vertex_sumwghts = new real[mesh_->num_vertices()];
     std::fill(vertex_sumwghts, vertex_sumwghts + mesh_->num_vertices(), 0.0);
@@ -347,7 +347,7 @@ void Function::interpolate_vertex_values(real* values) const
       {
         static real const w = 1.0;  // plan for other weights
         vertex_sumwghts[vertex->index()] += w;
-        for (uint i = 0; i < scratch->size; ++i)
+        for (size_t i = 0; i < scratch->size; ++i)
         {
           values[i * num_verts + vertex->index()] +=
               w * vertex_values[vertex.pos() * scratch->size + i];
@@ -361,17 +361,17 @@ void Function::interpolate_vertex_values(real* values) const
     if (mesh_->is_distributed())
     {
 #ifdef HAVE_MPI
-      uint const rank = dolfin::MPI::rank();
-      uint const pe_size = dolfin::MPI::size();
+      size_t const rank = dolfin::MPI::rank();
+      size_t const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
-      Array< Array<real> > sendbuf( pe_size );
+      std::vector< std::vector<real> > sendbuf( pe_size );
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
-        for ( uint const & adj : it.adj() )
+        for ( size_t const & adj : it.adj() )
         {
           sendbuf[adj].push_back(vertex_sumwghts[it.index()]);
-          for (uint i = 0; i < scratch->size; ++i)
+          for (size_t i = 0; i < scratch->size; ++i)
           {
             sendbuf[adj].push_back(values[i * num_verts + it.index()]);
           }
@@ -381,13 +381,13 @@ void Function::interpolate_vertex_values(real* values) const
       // Exchange data
 
       MPI_Status status;
-      uint src;
-      uint dst;
+      size_t src;
+      size_t dst;
 
       //FIXME: Overallocate
-      Array< uint > recvbuf( dist0.num_shared() );
+      std::vector< size_t > recvbuf( dist0.num_shared() );
       int recvcount = 0;
-      for (uint j = 1; j < pe_size; ++j)
+      for (size_t j = 1; j < pe_size; ++j)
       {
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
@@ -399,13 +399,13 @@ void Function::interpolate_vertex_values(real* values) const
         MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
         // Add contributions, just simplified this part with mappings
-        Array<uint> recvmapping = dist0.shared_mapping().from(src);
-        dolfin_assert(recvmapping.size() == (uint) recvcount);
+        std::vector<size_t> recvmapping = dist0.shared_mapping().from(src);
+        dolfin_assert(recvmapping.size() == (size_t) recvcount);
         for (int k = 0; k < recvcount; k += (1 + scratch->size))
         {
           dolfin_assert(dist0.has_local(recvmapping[k]) > 0);
           vertex_sumwghts[recvmapping[k]] +=  recvbuf[k];
-          for (uint i = 1; i <= scratch->size; ++i)
+          for (size_t i = 1; i <= scratch->size; ++i)
           {
             values[i * num_verts + recvmapping[k]] += recvbuf[k + i];
           }
@@ -416,9 +416,9 @@ void Function::interpolate_vertex_values(real* values) const
 
 
     // Average
-    for (uint vindex = 0; vindex < num_verts; ++vindex)
+    for (size_t vindex = 0; vindex < num_verts; ++vindex)
     {
-      for (uint i = 0; i < scratch->size; ++i)
+      for (size_t i = 0; i < scratch->size; ++i)
       {
         values[i * num_verts + vindex] /= vertex_sumwghts[vindex];
       }
@@ -430,7 +430,7 @@ void Function::interpolate_vertex_values(real* values) const
   }
   else
   {
-    uint const num_cell_vertices = mesh_->type().num_entities(0);
+    size_t const num_cell_vertices = mesh_->type().num_entities(0);
     real* vertex_values = new real[scratch->size * num_cell_vertices];
     for (CellIterator cell(*mesh_); !cell.end(); ++cell)
     {
@@ -453,7 +453,7 @@ void Function::interpolate_vertex_values(real* values) const
       // Copy values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
       {
-        for (uint i = 0; i < scratch->size; ++i)
+        for (size_t i = 0; i < scratch->size; ++i)
         {
           values[i * num_verts + vertex->index()] = vertex_values[vertex.pos()
               * scratch->size + i];
@@ -482,9 +482,9 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 #ifdef ENABLE_FUNCTION_CACHE
   if (cache_mapping_ != nullptr)
   {
-    for (uint i = 0; i < scratch->local_dimension; ++i)
+    for (size_t i = 0; i < scratch->local_dimension; ++i)
     {
-      _map<uint, uint>::const_iterator it = cache_mapping_->find(scratch->dofs[i]);
+      _map<size_t, size_t>::const_iterator it = cache_mapping_->find(scratch->dofs[i]);
       coefficients[i] = data_cache_[it->second];
     }
     return;
@@ -500,7 +500,7 @@ void Function::InitializeVector()
   // FIXME num_entities should maybe be stored somewhere else
   std::vector< size_t > num_entities( element_->topological_dimension(),
                                       0 );
-  for ( uint d = 0; d <= element_->topological_dimension(); ++d )
+  for ( size_t d = 0; d <= element_->topological_dimension(); ++d )
   {
     if ( mesh_->topology().connectivity( d ) )
     {
@@ -527,7 +527,7 @@ void Function::InitializeGhosts()
 {
   if(!mesh_->is_distributed()) return;
 
-  _ordered_set<uint> indices;
+  _ordered_set<size_t> indices;
 
   for (CellIterator cell(*mesh_); !cell.end(); ++cell)
   {
@@ -537,13 +537,13 @@ void Function::InitializeGhosts()
     // Tabulate dofs
     dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
 
-    for (uint j = 0; j < element_->space_dimension(); ++j)
+    for (size_t j = 0; j < element_->space_dimension(); ++j)
     {
       indices.insert(scratch->dofs[j]);
     }
 
   }
-  _ordered_map<uint, uint> map = dofmap_->get_map();
+  _ordered_map<size_t, size_t> map = dofmap_->get_map();
   dolfin_assert(map.size() == 0);
 
   X_->init_ghosted(indices.size(), indices, map);
@@ -552,13 +552,13 @@ void Function::InitializeGhosts()
   delete[] indices_;
   delete[] data_cache_;
   delete cache_mapping_;
-  cache_mapping_ = new _map<uint, uint>;
+  cache_mapping_ = new _map<size_t, size_t>;
 
-  indices_ = new uint[indices.size()];
+  indices_ = new size_t[indices.size()];
   data_cache_ = new real[indices.size()];
 
-  uint i = 0;
-  _ordered_set<uint>::iterator it;
+  size_t i = 0;
+  _ordered_set<size_t>::iterator it;
   for (it = indices.begin(); it != indices.end(); it++)
   {
     indices_[i] = *it;

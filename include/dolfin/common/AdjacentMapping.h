@@ -2,8 +2,9 @@
 #ifndef __DOLFIN_ADJACENT_MAPPING_H
 #define __DOLFIN_ADJACENT_MAPPING_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/DistributedData.h>
+
+#include <vector>
 
 namespace dolfin
 {
@@ -32,10 +33,10 @@ public:
   auto operator=( SharedMapping const & other ) -> SharedMapping & = delete;
 
   ///
-  auto to( uint rank ) const -> Array< uint > const &;
+  auto to( size_t rank ) const -> std::vector< size_t > const &;
 
   ///
-  auto from( uint rank ) const -> Array< uint > const &;
+  auto from( size_t rank ) const -> std::vector< size_t > const &;
 
   ///
   void disp() const;
@@ -43,8 +44,8 @@ public:
 private:
   struct AdjacentMapping
   {
-    Array< uint > send;
-    Array< uint > recv;
+    std::vector< size_t > send;
+    std::vector< size_t > recv;
 
     ///
     AdjacentMapping()
@@ -55,11 +56,10 @@ private:
   };
 
 private:
-
-  DistributedData const &       data_;
-  _map< uint, AdjacentMapping > mappings_;
-  uint                          send_min_;
-  uint                          send_max_;
+  DistributedData const &         data_;
+  _map< size_t, AdjacentMapping > mappings_;
+  size_t                          send_min_;
+  size_t                          send_max_;
 };
 
 } /* namespace dolfin */

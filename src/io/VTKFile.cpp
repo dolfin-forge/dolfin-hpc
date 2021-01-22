@@ -8,12 +8,12 @@
 #include <dolfin/io/Encoder.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <cstdint>
 
@@ -342,13 +342,13 @@ void VTKFile::ResultsWrite(
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -460,13 +460,13 @@ void VTKFile::ResultsWrite(
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%ld\" format=\"binary\">\n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -691,7 +691,7 @@ void VTKFile::pvtuFileWriteFunction(
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
-               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
+               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),3ul)
                << "\" />\n";
     }
   }
@@ -732,7 +732,7 @@ void VTKFile::pvtuFileWriteFunction(
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
-               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
+               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),3ul)
                << "\" />\n";
     }
   }

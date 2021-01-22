@@ -12,124 +12,123 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
-    Mesh(TriangleCell(), EuclideanSpace(2))
+UnitSquare::UnitSquare( size_t nx, size_t ny, Type type )
+  : Mesh( TriangleCell(), EuclideanSpace( 2 ) )
 {
 
-  if (nx < 1 || ny < 1)
+  if ( nx < 1 || ny < 1 )
   {
-    error("Size of unit square must be at least 1 in each dimension.");
+    error( "Size of unit square must be at least 1 in each dimension." );
   }
 
-  rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
+  rename( "mesh", "Mesh of the unit square (0,1) x (0,1)" );
 
   // Open mesh for editing
-  MeshEditor editor(*this, this->type(), this->space());
+  MeshEditor editor( *this, this->type(), this->space() );
 
   // Create vertices and cells:
-  if (type == crisscross)
+  if ( type == crisscross )
   {
-    editor.init_vertices((nx + 1) * (ny + 1) + nx * ny);
-    editor.init_cells(4 * nx * ny);
+    editor.init_vertices( ( nx + 1 ) * ( ny + 1 ) + nx * ny );
+    editor.init_cells( 4 * nx * ny );
   }
   else
   {
-    editor.init_vertices((nx + 1) * (ny + 1));
-    editor.init_cells(2 * nx * ny);
+    editor.init_vertices( ( nx + 1 ) * ( ny + 1 ) );
+    editor.init_cells( 2 * nx * ny );
   }
 
   // Create main vertices:
-  uint vertex = 0;
-  real x[2] = { 0.0 };
-  for (uint iy = 0; iy <= ny; ++iy)
+  size_t vertex = 0;
+  real   x[2]   = { 0.0 };
+  for ( size_t iy = 0; iy <= ny; ++iy )
   {
-    x[1] = static_cast<real>(iy) / static_cast<real>(ny);
-    for (uint ix = 0; ix <= nx; ++ix)
+    x[1] = static_cast< real >( iy ) / static_cast< real >( ny );
+    for ( size_t ix = 0; ix <= nx; ++ix )
     {
-      x[0] = static_cast<real>(ix) / static_cast<real>(nx);
-      editor.add_vertex(vertex++, x);
+      x[0] = static_cast< real >( ix ) / static_cast< real >( nx );
+      editor.add_vertex( vertex++, x );
     }
   }
 
   // Create midpoint vertices if the mesh type is crisscross
-  if (type == crisscross)
+  if ( type == crisscross )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      x[1] = (static_cast<real>(iy) + 0.5) / static_cast<real>(ny);
-      for (uint ix = 0; ix < nx; ix++)
+      x[1] = ( static_cast< real >( iy ) + 0.5 ) / static_cast< real >( ny );
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        x[0] = (static_cast<real>(ix) + 0.5) / static_cast<real>(nx);
-        editor.add_vertex(vertex++, x);
+        x[0] = ( static_cast< real >( ix ) + 0.5 ) / static_cast< real >( nx );
+        editor.add_vertex( vertex++, x );
       }
     }
   }
 
   // Create triangles
-  uint cell = 0;
-  if (type == crisscross)
+  size_t cell = 0;
+  if ( type == crisscross )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        uint const v0 = iy * (nx + 1) + ix;
-        uint const v1 = v0 + 1;
-        uint const v2 = v0 + (nx + 1);
-        uint const v3 = v1 + (nx + 1);
-        uint const vmid = (nx + 1) * (ny + 1) + iy * nx + ix;
+        size_t const v0   = iy * ( nx + 1 ) + ix;
+        size_t const v1   = v0 + 1;
+        size_t const v2   = v0 + ( nx + 1 );
+        size_t const v3   = v1 + ( nx + 1 );
+        size_t const vmid = ( nx + 1 ) * ( ny + 1 ) + iy * nx + ix;
 
         // Note that v0 < v1 < v2 < v3 < vmid.
-        uint const connectivity[12] = { v0, v1, vmid, v0, v2, vmid, v1, v3,
-                                        vmid, v2, v3, vmid };
+        size_t const connectivity[12] = {
+          v0, v1, vmid, v0, v2, vmid, v1, v3, vmid, v2, v3, vmid };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
-        editor.add_cell(cell++, &connectivity[6]);
-        editor.add_cell(cell++, &connectivity[9]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
+        editor.add_cell( cell++, &connectivity[6] );
+        editor.add_cell( cell++, &connectivity[9] );
       }
     }
   }
-  else if (type == left)
+  else if ( type == left )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        uint const v0 = iy * (nx + 1) + ix;
-        uint const v1 = v0 + 1;
-        uint const v2 = v0 + (nx + 1);
-        uint const v3 = v1 + (nx + 1);
+        size_t const v0 = iy * ( nx + 1 ) + ix;
+        size_t const v1 = v0 + 1;
+        size_t const v2 = v0 + ( nx + 1 );
+        size_t const v3 = v1 + ( nx + 1 );
 
-        uint const connectivity[6] = { v0, v1, v2, v1, v2, v3 };
+        size_t const connectivity[6] = { v0, v1, v2, v1, v2, v3 };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
       }
     }
   }
   else
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        uint const v0 = iy * (nx + 1) + ix;
-        uint const v1 = v0 + 1;
-        uint const v2 = v0 + (nx + 1);
-        uint const v3 = v1 + (nx + 1);
+        size_t const v0 = iy * ( nx + 1 ) + ix;
+        size_t const v1 = v0 + 1;
+        size_t const v2 = v0 + ( nx + 1 );
+        size_t const v3 = v1 + ( nx + 1 );
 
-        uint const connectivity[6] = { v0, v1, v3, v0, v2, v3 };
+        size_t const connectivity[6] = { v0, v1, v3, v0, v2, v3 };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
       }
     }
   }
 
   // Close mesh editor
   editor.close();
-
 }
 //-----------------------------------------------------------------------------
 

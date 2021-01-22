@@ -4,7 +4,8 @@
 #ifndef __DOLFIN_SUB_SYSTEM_H
 #define __DOLFIN_SUB_SYSTEM_H
 
-#include <dolfin/common/Array.h>
+#include <string>
+#include <vector>
 
 namespace dolfin
 {
@@ -25,13 +26,13 @@ public:
   SubSystem() = default;
 
   /// Create given sub system (one level)
-  SubSystem( uint sub_system );
+  SubSystem( size_t sub_system );
 
   /// Create given sub sub system (two levels)
-  SubSystem( uint sub_system, uint sub_sub_system );
+  SubSystem( size_t sub_system, size_t sub_sub_system );
 
   /// Create sub system for given array (n levels)
-  SubSystem( Array< uint > const & sub_system );
+  SubSystem( std::vector< size_t > const & sub_system );
 
   /// Create given sub and sub sub system (two levels)
   SubSystem( SubSystem const & sub_system, SubSystem const & sub_sub_system );
@@ -43,17 +44,17 @@ public:
   auto operator=( SubSystem const & sub_system ) -> SubSystem & = default;
 
   /// Return number of levels for nested sub system
-  auto depth() const -> uint;
+  auto depth() const -> size_t;
 
   /// Return array which defines sub system
-  auto array() const -> Array< uint > const &;
+  auto array() const -> std::vector< size_t > const &;
 
   /// Cast
-  operator Array< uint > &()
+  operator std::vector< size_t > &()
   {
     return sub_system;
   }
-  operator Array< uint > const &() const
+  operator std::vector< size_t > const &() const
   {
     return sub_system;
   }
@@ -63,16 +64,16 @@ public:
 
 private:
   // The array specifying the sub system
-  Array< uint > sub_system;
+  std::vector< size_t > sub_system;
 };
 
 //-----------------------------------------------------------------------------
-inline auto SubSystem::depth() const -> uint
+inline auto SubSystem::depth() const -> size_t
 {
   return sub_system.size();
 }
 //-----------------------------------------------------------------------------
-inline auto SubSystem::array() const -> Array< uint > const &
+inline auto SubSystem::array() const -> std::vector< size_t > const &
 {
   return sub_system;
 }

@@ -14,14 +14,14 @@
 #include <dolfin/mesh/Space.h>
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/UniformRefinement.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <sstream>
 
 namespace dolfin
 {
 
-#define DOLFIN_DEFAULT_MESH_NAME  "mesh"
+#define DOLFIN_DEFAULT_MESH_NAME "mesh"
 #define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
 
 //-----------------------------------------------------------------------------
@@ -47,7 +47,6 @@ Mesh::Mesh( CellType const & ctype, Space const & space, Comm & comm )
 }
 
 //-----------------------------------------------------------------------------
-
 
 Mesh::Mesh( Mesh const & other )
   : Variable( other.name(), other.label() )
@@ -95,26 +94,26 @@ Mesh::~Mesh()
 
 //-----------------------------------------------------------------------------
 
-void swap( Mesh& a, Mesh& b )
+auto swap( Mesh & a, Mesh & b ) -> void
 {
   using std::swap;
 
-  swap( a.topology_,              b.topology_              );
-  swap( a.geometry_,              b.geometry_              );
-  swap( a.exterior_boundary_,     b.exterior_boundary_     );
-  swap( a.interior_boundary_,     b.interior_boundary_     );
+  swap( a.topology_, b.topology_ );
+  swap( a.geometry_, b.geometry_ );
+  swap( a.exterior_boundary_, b.exterior_boundary_ );
+  swap( a.interior_boundary_, b.interior_boundary_ );
   swap( a.intersection_detector_, b.intersection_detector_ );
-  swap( a.periodic_mappings_,     b.periodic_mappings_     );
-  swap( a.extent_min_,            b.extent_min_            );
-  swap( a.extent_max_,            b.extent_max_            );
-  swap( a.timestamp_,             b.timestamp_             );
+  swap( a.periodic_mappings_, b.periodic_mappings_ );
+  swap( a.extent_min_, b.extent_min_ );
+  swap( a.extent_max_, b.extent_max_ );
+  swap( a.timestamp_, b.timestamp_ );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Mesh::operator=( Mesh const & other ) -> Mesh const &
 {
-  Mesh tmp(other);
+  Mesh tmp( other );
   swap( *this, tmp );
 
   return *this;
@@ -122,29 +121,29 @@ auto Mesh::operator=( Mesh const & other ) -> Mesh const &
 
 //-----------------------------------------------------------------------------
 
-auto Mesh::operator ==(Mesh const& other) const -> bool
+auto Mesh::operator==( Mesh const & other ) const -> bool
 {
-  if ( not ( topology_ == other.topology_ ) )
+  if ( not( topology_ == other.topology_ ) )
   {
     return false;
   }
 
-  if ( not ( geometry_ == other.geometry_ ) )
+  if ( not( geometry_ == other.geometry_ ) )
   {
     return false;
   }
 
-  if ( not ( exterior_boundary_ == other.exterior_boundary_ ) )
+  if ( not( exterior_boundary_ == other.exterior_boundary_ ) )
   {
     return false;
   }
 
-  if ( not ( interior_boundary_ == other.interior_boundary_ ) )
+  if ( not( interior_boundary_ == other.interior_boundary_ ) )
   {
     return false;
   }
 
-  if ( not ( intersection_detector_ == other.intersection_detector_ ) )
+  if ( not( intersection_detector_ == other.intersection_detector_ ) )
   {
     return false;
   }
@@ -154,7 +153,7 @@ auto Mesh::operator ==(Mesh const& other) const -> bool
 
 //-----------------------------------------------------------------------------
 
-void Mesh::extent_update()
+auto Mesh::extent_update() -> void
 {
   Point min_( +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX, +DOLFIN_REAL_MAX );
   Point max_( -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX );
@@ -181,105 +180,107 @@ void Mesh::extent_update()
 
 //-----------------------------------------------------------------------------
 
-void Mesh::init() const
+auto Mesh::init() const -> void
 {
-  for (uint d0 = 0; d0 <= topology_dimension(); ++d0)
+  for ( size_t d0 = 0; d0 <= topology_dimension(); ++d0 )
   {
-    for (uint d1 = 0; d1 <= topology_dimension(); ++d1)
+    for ( size_t d1 = 0; d1 <= topology_dimension(); ++d1 )
     {
-      init(d0, d1);
+      init( d0, d1 );
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 
-auto Mesh::exterior_boundary() -> BoundaryMesh&
+auto Mesh::exterior_boundary() -> BoundaryMesh &
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (exterior_boundary_ == nullptr || exterior_boundary_->invalid_mesh_topology())
+  if ( exterior_boundary_ == nullptr
+       || exterior_boundary_->invalid_mesh_topology() )
   {
-    if(exterior_boundary_)
+    if ( exterior_boundary_ )
     {
-      warning("Recomputing mesh exterior boundary");
+      warning( "Recomputing mesh exterior boundary" );
     }
     delete exterior_boundary_;
-    exterior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::exterior);
+    exterior_boundary_ = new BoundaryMesh( *this, BoundaryMesh::exterior );
   }
   return *exterior_boundary_;
 }
 
 //-----------------------------------------------------------------------------
 
-auto Mesh::interior_boundary() -> BoundaryMesh&
+auto Mesh::interior_boundary() -> BoundaryMesh &
 {
   /// @todo Improve hash logic to regenerate boundary at topology change
-  if (interior_boundary_ == nullptr || interior_boundary_->invalid_mesh_topology())
+  if ( interior_boundary_ == nullptr
+       || interior_boundary_->invalid_mesh_topology() )
   {
-    if(interior_boundary_)
+    if ( interior_boundary_ )
     {
-      warning("Recomputing mesh interior boundary");
+      warning( "Recomputing mesh interior boundary" );
     }
     delete interior_boundary_;
-    interior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::interior);
+    interior_boundary_ = new BoundaryMesh( *this, BoundaryMesh::interior );
   }
   return *interior_boundary_;
 }
 
 //-----------------------------------------------------------------------------
 
-
-auto Mesh::intersector() -> IntersectionDetector&
+auto Mesh::intersector() -> IntersectionDetector &
 {
   /// @todo Improve hash logic to regenerate detector at topology change
-  if (intersection_detector_ == nullptr)
+  if ( intersection_detector_ == nullptr )
   {
-    if(intersection_detector_)
+    if ( intersection_detector_ )
     {
-      warning("Recreating mesh intersection detector");
+      warning( "Recreating mesh intersection detector" );
     }
     delete intersection_detector_;
-    intersection_detector_ = new IntersectionDetector(*this);
+    intersection_detector_ = new IntersectionDetector( *this );
   }
   return *intersection_detector_;
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::partition(MeshValues<uint, Cell>& partitions)
+auto Mesh::partition( MeshValues< size_t, Cell > & partitions ) -> void
 {
-  MeshPartition::partition(partitions);
+  MeshPartition::partition( partitions );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight)
+auto Mesh::partition( MeshValues< size_t, Cell > & partitions,
+                      MeshValues< size_t, Cell > & weight ) -> void
 {
-  MeshPartition::partition(partitions, weight);
+  MeshPartition::partition( partitions, weight );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::partition_geom(MeshValues<uint, Vertex>& partitions)
+auto Mesh::partition_geom( MeshValues< size_t, Vertex > & partitions ) -> void
 {
-  MeshPartition::partition_geom(partitions);
+  MeshPartition::partition_geom( partitions );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::distribute()
+auto Mesh::distribute() -> void
 {
-  if (this->parallel_io())
+  if ( this->parallel_io() )
   {
     // COMMENT: At this point the distributed data cannot be empty as the file
     //          format is supposed to fill it.
-    if(!topology().distributed())
+    if ( !topology().distributed() )
     {
-      error("The topology of a mesh read in parallel should be distributed.");
+      error( "The topology of a mesh read in parallel should be distributed." );
     }
-    MeshValues<uint, Cell> partitions(*this);
-    partition(partitions);
-    distribute(partitions);
+    MeshValues< size_t, Cell > partitions( *this );
+    partition( partitions );
+    distribute( partitions );
     /// @todo following the legacy behaviour entities are always renumbered
     topology().renumber();
   }
@@ -287,60 +288,63 @@ void Mesh::distribute()
 
 //-----------------------------------------------------------------------------
 
-void Mesh::distribute(MeshValues<uint, Cell>& distribution)
+auto Mesh::distribute( MeshValues< size_t, Cell > & distribution ) -> void
 {
-  MPIMeshCommunicator::distribute(distribution);
+  MPIMeshCommunicator::distribute( distribution );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::distribute(MeshValues<uint, Vertex>& distribution)
+auto Mesh::distribute( MeshValues< size_t, Vertex > & distribution ) -> void
 {
-  MPIMeshCommunicator::distribute(distribution);
+  MPIMeshCommunicator::distribute( distribution );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
+auto Mesh::distribute( MeshValues< size_t, Cell > & distribution,
+                       MeshData &                   data ) -> void
 {
-  MPIMeshCommunicator::distribute(distribution, &data);
+  MPIMeshCommunicator::distribute( distribution, &data );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::refine()
+auto Mesh::refine() -> void
 {
-  UniformRefinement::refine(*this);
+  UniformRefinement::refine( *this );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Mesh::has_periodic_constraint() const -> bool
 {
-  return (!periodic_mappings_.empty());
+  return ( !periodic_mappings_.empty() );
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::add_periodic_constraint(PeriodicSubDomain const& periodic)
+auto Mesh::add_periodic_constraint( PeriodicSubDomain const & periodic ) -> void
 {
-  periodic_mappings_.push_back(new MappedManifold(*this, periodic));
+  periodic_mappings_.push_back( new MappedManifold( *this, periodic ) );
 }
 
 //-----------------------------------------------------------------------------
 
-auto Mesh::periodic_mappings() const -> Array<MappedManifold *> const&
+auto Mesh::periodic_mappings() const -> std::vector< MappedManifold * > const &
 {
-  for(Array<MappedManifold *>::iterator it = periodic_mappings_.begin();
-      it != periodic_mappings_.end(); ++it)
+  for ( std::vector< MappedManifold * >::iterator it =
+          periodic_mappings_.begin();
+        it != periodic_mappings_.end();
+        ++it )
   {
-    if((*it)->invalid_mesh())
+    if ( ( *it )->invalid_mesh() )
     {
-      PeriodicSubDomain const * p = &(*it)->subdomain();
-      delete (*it);
-      warning("Recreating mesh periodic mapping");
-      Mesh& mesh = const_cast<Mesh&>(*this);
-      (*it) = new MappedManifold(mesh, *p);
+      PeriodicSubDomain const * p = &( *it )->subdomain();
+      delete ( *it );
+      warning( "Recreating mesh periodic mapping" );
+      Mesh & mesh = const_cast< Mesh & >( *this );
+      ( *it )     = new MappedManifold( mesh, *p );
     }
   }
   return periodic_mappings_;
@@ -361,7 +365,7 @@ auto Mesh::hash() const -> std::string const
 
 //-----------------------------------------------------------------------------
 
-void Mesh::disp() const
+auto Mesh::disp() const -> void
 {
   section( "Mesh" );
   section( "Topology" );
@@ -369,9 +373,11 @@ void Mesh::disp() const
   if ( this->is_distributed() )
   {
     message( "cells    : local = %12u ; global = %12u",
-             this->num_cells(), this->num_global_cells() );
+             this->num_cells(),
+             this->num_global_cells() );
     message( "vertices : local = %12u ; global = %12u",
-             this->num_vertices(), this->num_global_vertices() );
+             this->num_vertices(),
+             this->num_global_vertices() );
   }
   else
   {
@@ -380,16 +386,18 @@ void Mesh::disp() const
   }
   end();
   section( "Extent" );
-  message( "Min: [%f, %f, %f]", extent_min_[0], extent_min_[1], extent_min_[2] );
-  message( "Max: [%f, %f, %f]", extent_max_[0], extent_max_[1], extent_max_[2] );
+  message(
+    "Min: [%f, %f, %f]", extent_min_[0], extent_min_[1], extent_min_[2] );
+  message(
+    "Max: [%f, %f, %f]", extent_max_[0], extent_max_[1], extent_max_[2] );
   end();
 }
 
 //-----------------------------------------------------------------------------
 
-void Mesh::check() const
+auto Mesh::check() const -> void
 {
-  MPIMeshCommunicator::check(const_cast<Mesh&>(*this));
+  MPIMeshCommunicator::check( const_cast< Mesh & >( *this ) );
 }
 
 //-----------------------------------------------------------------------------

@@ -4,13 +4,14 @@
 #include <dolfin/mesh/MeshOrdering.h>
 
 #include <dolfin/log/log.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 void MeshOrdering::order( Mesh & mesh )
 {
 	message( 1, "MeshOrdering: Ordering mesh entities..." );
@@ -22,15 +23,14 @@ void MeshOrdering::order( Mesh & mesh )
 	// NOTE: ensure that boundary meshes and empty meshes are not reordered
 	if ( mesh.topology().connectivity( cell_type.dim() ) )
 	{
-		uint const num_cells = mesh.topology().size( cell_type.dim() );
-		for ( uint i = 0; i < num_cells; ++i )
+		size_t const num_cells = mesh.topology().size( cell_type.dim() );
+		for ( size_t i = 0; i < num_cells; ++i )
 		{
 			cell_type.order_entities( mesh.topology(), i );
 		}
 	}
-
-	// mesh._ordered = true;
 }
+
 //-----------------------------------------------------------------------------
 
 }

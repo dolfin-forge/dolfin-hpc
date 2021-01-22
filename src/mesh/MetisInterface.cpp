@@ -7,12 +7,12 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PARMETIS
@@ -20,7 +20,7 @@
 
 #if PARMETIS_MAJOR_VERSION > 3
 
-#define pm_ncon   1
+#define pm_ncon 1
 
 // (par)metis integer type
 typedef idx_t pm_idx_t;
@@ -29,9 +29,9 @@ typedef idx_t pm_idx_t;
 using pm_real_t = real_t;
 
 #else
-#define pm_idx_t  idxtype
+#define pm_idx_t idxtype
 #define pm_real_t float
-#define pm_ncon   0
+#define pm_ncon 0
 #endif
 
 #endif
@@ -43,11 +43,12 @@ namespace dolfin
 
 #ifdef HAVE_PARMETIS
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh& mesh,
-                                          MeshValues<uint, Cell>& partitions,
-                                          MeshValues<uint, Cell> * weight)
+void MetisInterface::partitionCommonMetis(
+  Mesh &                       mesh,
+  MeshValues< size_t, Cell > & partitions,
+  MeshValues< size_t, Cell > * weight )
 {
-  if(!mesh.is_distributed())
+  if ( !mesh.is_distributed() )
   {
     return;
   }
@@ -55,105 +56,118 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   mesh.distdata()[0].renumber_global();
   tic();
 
-  pm_real_t ubvec = 1.05;
-  pm_idx_t numflag = 0;    // C-style numbering
-  pm_idx_t edgecut = 0;
-  pm_idx_t wgtflag, ncon;
-  if (weight)
+  pm_real_t ubvec   = 1.05;
+  pm_idx_t  numflag = 0; // C-style numbering
+  pm_idx_t  edgecut = 0;
+  pm_idx_t  wgtflag, ncon;
+  if ( weight )
   {
-    wgtflag = 2;    // Weights on vertices only
-    ncon = 1;       // One weight per vertex
+    wgtflag = 2; // Weights on vertices only
+    ncon    = 1; // One weight per vertex
   }
   else
   {
-    wgtflag = 0;    // Turn off graph weights
-    ncon = pm_ncon; // No weights on vertices
+    wgtflag = 0;       // Turn off graph weights
+    ncon    = pm_ncon; // No weights on vertices
   }
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI::check_error( MPI_Comm_dup(mesh.topology().comm(), &comm) );
+  MPI::check_error( MPI_Comm_dup( mesh.topology().comm(), &comm ) );
 
   // Get information about the PE
   int size, rank;
-  MPI::check_error( MPI_Comm_size(comm, &size) );
-  MPI::check_error( MPI_Comm_rank(comm, &rank) );
+  MPI::check_error( MPI_Comm_size( comm, &size ) );
+  MPI::check_error( MPI_Comm_rank( comm, &rank ) );
 
-  pm_idx_t *elmdist = new pm_idx_t[size + 1];
+  pm_idx_t * elmdist = new pm_idx_t[size + 1];
 
-  uint const tdim = mesh.topology_dimension();
-  pm_idx_t ncells = static_cast<pm_idx_t>(mesh.num_cells());
+  size_t const tdim   = mesh.topology_dimension();
+  pm_idx_t     ncells = static_cast< pm_idx_t >( mesh.num_cells() );
 
   /*
    * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-nullptr
    * which forbids empty partitions.
    *
    */
-  if (ncells == 0)
+  if ( ncells == 0 )
   {
-    dolfin::error("MetisInterface : mesh partition contains zero cells.");
+    dolfin::error( "MetisInterface : mesh partition contains zero cells." );
   }
 
   elmdist[rank] = ncells;
   MPI::all_gather( &ncells, 1, elmdist, 1 );
 
-  pm_idx_t *elmwgt = nullptr;
+  pm_idx_t * elmwgt = nullptr;
 
-  if( weight )
+  if ( weight )
   {
     elmwgt = new pm_idx_t[ncells];
-    for(CellIterator c(mesh); !c.end(); ++c)
+    for ( CellIterator c( mesh ); !c.end(); ++c )
     {
-      elmwgt[c->index()] = static_cast<pm_idx_t>((*weight)(*c));
+      elmwgt[c->index()] = static_cast< pm_idx_t >( ( *weight )( *c ) );
     }
   }
 
   pm_idx_t sum_elm = elmdist[0];
   pm_idx_t tmp_elm;
   elmdist[0] = 0;
-  for (int i = 1; i < size + 1; i++)
+  for ( int i = 1; i < size + 1; i++ )
   {
-    tmp_elm = elmdist[i];
+    tmp_elm    = elmdist[i];
     elmdist[i] = sum_elm;
-    sum_elm = tmp_elm + sum_elm;
+    sum_elm    = tmp_elm + sum_elm;
   }
 
-  pm_idx_t nvertices = static_cast<pm_idx_t>(mesh.type().num_vertices(tdim));
+  pm_idx_t nvertices =
+    static_cast< pm_idx_t >( mesh.type().num_vertices( tdim ) );
   pm_idx_t ncnodes = nvertices - 1;
 
-  pm_idx_t *eptr = new pm_idx_t[ncells + 1];
+  pm_idx_t * eptr = new pm_idx_t[ncells + 1];
 
   eptr[0] = 0;
-  for(uint i=1;i < (mesh.num_cells() + 1);i++)
+  for ( size_t i = 1; i < ( mesh.num_cells() + 1 ); i++ )
   {
-    eptr[i] = eptr[i-1] + nvertices;
+    eptr[i] = eptr[i - 1] + nvertices;
   }
 
-  pm_idx_t *eind =  new pm_idx_t[nvertices * ncells];
+  pm_idx_t * eind = new pm_idx_t[nvertices * ncells];
 
   int i = 0;
-  for (CellIterator c(mesh); !c.end(); ++c)
+  for ( CellIterator c( mesh ); !c.end(); ++c )
   {
-    for (VertexIterator v(*c); !v.end(); ++v)
+    for ( VertexIterator v( *c ); !v.end(); ++v )
     {
-      eind[i++] = static_cast<pm_idx_t>(v->global_index());
+      eind[i++] = static_cast< pm_idx_t >( v->global_index() );
     }
   }
 
-  pm_idx_t *part = new pm_idx_t[ncells];
-  pm_real_t *tpwgts = new pm_real_t[size];
+  pm_idx_t *  part   = new pm_idx_t[ncells];
+  pm_real_t * tpwgts = new pm_real_t[size];
 
-  for (i = 0; i < size; ++i)
+  for ( i = 0; i < size; ++i )
   {
-    tpwgts[i] = 1.0 / static_cast<pm_real_t>(size);
+    tpwgts[i] = 1.0 / static_cast< pm_real_t >( size );
   }
 
   // default options
   pm_idx_t options[3] = { 1, 0, 15 };
-  pm_idx_t pm_size = static_cast<pm_idx_t>(size);
-  ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag,&numflag,
-                           &ncon,&ncnodes,&pm_size, tpwgts, &ubvec, options,
-                           &edgecut, part, &comm);
+  pm_idx_t pm_size    = static_cast< pm_idx_t >( size );
+  ParMETIS_V3_PartMeshKway( elmdist,
+                            eptr,
+                            eind,
+                            elmwgt,
+                            &wgtflag,
+                            &numflag,
+                            &ncon,
+                            &ncnodes,
+                            &pm_size,
+                            tpwgts,
+                            &ubvec,
+                            options,
+                            &edgecut,
+                            part,
+                            &comm );
 
   delete[] eind;
   delete[] elmdist;
@@ -162,35 +176,37 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   delete[] elmwgt;
 
   // Create partition function
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  for ( CellIterator cell( mesh ); !cell.end(); ++cell )
   {
-    partitions(*cell) = (uint) part[cell->index()];
+    partitions( *cell ) = ( size_t ) part[cell->index()];
   }
 #if DEBUG
-  uint lreassigned = 0;
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  size_t lreassigned = 0;
+  for ( CellIterator cell( mesh ); !cell.end(); ++cell )
   {
-    if(part[cell->index()] != rank)
+    if ( part[cell->index()] != rank )
     {
       ++lreassigned;
     }
   }
-  uint greassigned = 0;
-  MPI::all_reduce<MPI::sum>(lreassigned, greassigned, comm);
-  message(1, "METISPartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
-          percent(lreassigned, mesh.size(tdim)),
-          percent(greassigned, mesh.distdata()[tdim].global_size()));
+  size_t greassigned = 0;
+  MPI::all_reduce< MPI::sum >( lreassigned, greassigned, comm );
+  message( 1,
+           "METISPartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
+           percent( lreassigned, mesh.size( tdim ) ),
+           percent( greassigned, mesh.distdata()[tdim].global_size() ) );
 #endif
   tocd();
 
   delete[] part;
-  MPI::check_error( MPI_Comm_free(&comm) );
+  MPI::check_error( MPI_Comm_free( &comm ) );
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh& mesh,
-                                        MeshValues<uint, Vertex> & partitions)
+void MetisInterface::partitionGeomMetis(
+  Mesh &                         mesh,
+  MeshValues< size_t, Vertex > & partitions )
 {
-  if(!mesh.is_distributed())
+  if ( !mesh.is_distributed() )
   {
     return;
   }
@@ -199,86 +215,88 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI::check_error( MPI_Comm_dup(mesh.topology().comm(), &comm) );
+  MPI::check_error( MPI_Comm_dup( mesh.topology().comm(), &comm ) );
 
   int size, rank;
   // Get information about the PE
-  MPI::check_error( MPI_Comm_size(comm, &size) );
-  MPI::check_error( MPI_Comm_rank(comm, &rank) );
+  MPI::check_error( MPI_Comm_size( comm, &size ) );
+  MPI::check_error( MPI_Comm_rank( comm, &rank ) );
 
   // Gather number of locally stored vertices for each processor
-  pm_idx_t *vtxdist = new pm_idx_t[size+1];
-  vtxdist[rank] = static_cast<pm_idx_t> (mesh.size(0));
+  pm_idx_t * vtxdist      = new pm_idx_t[size + 1];
+  vtxdist[rank]           = static_cast< pm_idx_t >( mesh.size( 0 ) );
   pm_idx_t local_vertices = vtxdist[rank];
 
-  MPI::all_gather(&local_vertices, 1, vtxdist, 1 );
+  MPI::all_gather( &local_vertices, 1, vtxdist, 1 );
 
-  int i;
+  int      i;
   pm_idx_t tmp;
   pm_idx_t sum = vtxdist[0];
-  vtxdist[0] = 0;
-  for (i = 1; i < size + 1; i++)
+  vtxdist[0]   = 0;
+  for ( i = 1; i < size + 1; i++ )
   {
-    tmp = vtxdist[i];
+    tmp        = vtxdist[i];
     vtxdist[i] = sum;
-    sum = tmp + sum;
+    sum        = tmp + sum;
   }
 
-  pm_idx_t *part = new pm_idx_t[mesh.size(0)];
-  pm_idx_t gdim =  static_cast<pm_idx_t>( mesh.geometry_dimension() );
-  pm_real_t *xdy = new pm_real_t[gdim * mesh.size(0)];
+  pm_idx_t *  part = new pm_idx_t[mesh.size( 0 )];
+  pm_idx_t    gdim = static_cast< pm_idx_t >( mesh.geometry_dimension() );
+  pm_real_t * xdy  = new pm_real_t[gdim * mesh.size( 0 )];
 
   i = 0;
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex, i += gdim)
+  for ( VertexIterator vertex( mesh ); !vertex.end(); ++vertex, i += gdim )
   {
-    for (int d = 0; d < gdim; ++d)
+    for ( int d = 0; d < gdim; ++d )
     {
-      xdy[i + d] = static_cast<pm_real_t>(vertex->x()[d]);
+      xdy[i + d] = static_cast< pm_real_t >( vertex->x()[d] );
     }
   }
 
-  ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);
+  ParMETIS_V3_PartGeom( vtxdist, &gdim, xdy, part, &comm );
 
   // Create meshfunction from partitions
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  for ( VertexIterator vertex( mesh ); !vertex.end(); ++vertex )
   {
-    partitions(*vertex) = static_cast<uint>(part[vertex->index()]);
+    partitions( *vertex ) = static_cast< size_t >( part[vertex->index()] );
   }
 #if DEBUG
-  uint lreassigned = 0;
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  size_t lreassigned = 0;
+  for ( VertexIterator vertex( mesh ); !vertex.end(); ++vertex )
   {
-    if(static_cast<int>(part[vertex->index()]) != rank)
+    if ( static_cast< int >( part[vertex->index()] ) != rank )
     {
       ++lreassigned;
     }
   }
-  uint greassigned = 0;
-  MPI::all_reduce<MPI::sum>(lreassigned, greassigned, comm);
-  message(1, "METISPartGeom reassigned local = %2.2f %%, global = %2.2f %%",
-          percent(lreassigned, mesh.size(0)),
-          percent(greassigned, mesh.distdata()[0].global_size()));
+  size_t greassigned = 0;
+  MPI::all_reduce< MPI::sum >( lreassigned, greassigned, comm );
+  message( 1,
+           "METISPartGeom reassigned local = %2.2f %%, global = %2.2f %%",
+           percent( lreassigned, mesh.size( 0 ) ),
+           percent( greassigned, mesh.distdata()[0].global_size() ) );
 #endif
   tocd();
 
   delete[] xdy;
   delete[] part;
   delete[] vtxdist;
-  MPI::check_error( MPI_Comm_free(&comm) );
+  MPI::check_error( MPI_Comm_free( &comm ) );
 }
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh&,
-                                          MeshValues<uint, Cell> &,
-                                          MeshValues<uint, Cell> *)
+void MetisInterface::partitionCommonMetis( Mesh &,
+                                           MeshValues< size_t, Cell > &,
+                                           MeshValues< size_t, Cell > * )
 {
-  error("DOLFIN needs to be built with ParMetis support");
+  error( "DOLFIN needs to be built with ParMetis support" );
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh&, MeshValues<uint, Vertex> &)
+void MetisInterface::partitionGeomMetis( Mesh &,
+                                         MeshValues< size_t, Vertex > & )
 {
-  error("DOLFIN needs to be built with ParMetis support");
+  error( "DOLFIN needs to be built with ParMetis support" );
 }
 //-----------------------------------------------------------------------------
 #endif

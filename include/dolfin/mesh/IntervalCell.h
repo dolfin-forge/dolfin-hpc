@@ -6,8 +6,8 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
 
 namespace dolfin
 {
@@ -22,16 +22,16 @@ namespace dolfin
 class IntervalCell : public CellType
 {
   // UFC: Topological Dimension
-  static uint const TD = 1;
+  static size_t const TD = 1;
 
   // UFC: Number of Entities
-  static uint const NE[2][2];
+  static size_t const NE[2][2];
 
   // UFC: Vertex Coordinates
   static real const VC[2][1];
 
   // UFC: Edge - Incident Vertices
-  static uint const EIV[1][2];
+  static size_t const EIV[1][2];
 
 public:
   /// Specify cell type and facet type
@@ -47,31 +47,33 @@ public:
   }
 
   /// Return topological dimension of cell
-  auto dim() const -> uint override;
+  auto dim() const -> size_t override;
 
   /// Return number of entitites of given topological dimension
-  auto num_entities( uint dim ) const -> uint override;
+  auto num_entities( size_t dim ) const -> size_t override;
 
   /// Return number of entities of given topological dimensions
-  auto num_entities( uint d0, uint d1 ) const -> uint override;
+  auto num_entities( size_t d0, size_t d1 ) const -> size_t override;
 
   /// Return number of vertices for entity of given topological dimension
-  auto num_vertices( uint dim ) const -> uint override;
+  auto num_vertices( size_t dim ) const -> size_t override;
 
   /// Return orientation of the cell
-  auto orientation( Cell const & cell ) const -> uint override;
+  auto orientation( Cell const & cell ) const -> size_t override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( uint ** e, uint dim, uint const * v ) const override;
+  void
+    create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
 
   /// Order entities locally (connectivity 1-0)
-  void order_entities( MeshTopology & topology, uint i ) const override;
+  void order_entities( MeshTopology & topology, size_t i ) const override;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
-  void order_facet( uint vertices[], Facet & facet ) const override;
+  void order_facet( size_t vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  auto connectivity_needs_ordering( uint d0, uint d1 ) const -> bool override;
+  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const
+    -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities( Mesh & mesh ) const override;
@@ -79,15 +81,16 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Refine cell uniformly
-  void
-    refine_cell( Cell & cell, MeshEditor & editor, uint & current_cell ) const override;
+  void refine_cell( Cell &       cell,
+                    MeshEditor & editor,
+                    size_t &     current_cell ) const override;
 
   /// Number of cells created by refinement pattern
-  auto num_refined_cells() const -> uint override;
+  auto num_refined_cells() const -> size_t override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  auto num_refined_vertices( uint dim ) const -> uint override;
+  auto num_refined_vertices( size_t dim ) const -> size_t override;
 
   //---------------------------------------------------------------------------
 
@@ -107,13 +110,14 @@ public:
   void midpoint( MeshEntity const & entity, real * p ) const override;
 
   /// Compute of given facet with respect to the cell
-  void normal( Cell const & cell, uint facet, real * n ) const override;
+  void normal( Cell const & cell, size_t facet, real * n ) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  auto facet_area( Cell const & cell, uint facet ) const -> real override;
+  auto facet_area( Cell const & cell, size_t facet ) const -> real override;
 
   /// Check if point p intersects the entity
-  auto intersects( MeshEntity const & e, Point const & p ) const -> bool override;
+  auto intersects( MeshEntity const & e, Point const & p ) const
+    -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
   auto intersects( MeshEntity const & e,
@@ -126,7 +130,7 @@ public:
   void create_reference_cell( Mesh & mesh ) const override;
 
   /// Return coordinates of vertices in the reference cell
-  auto reference_vertex( uint i ) const -> real const * override;
+  auto reference_vertex( size_t i ) const -> real const * override;
 
   //---------------------------------------------------------------------------
 
@@ -141,20 +145,20 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::dim() const -> uint
+inline auto IntervalCell::dim() const -> size_t
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::num_entities( uint dim ) const -> uint
+inline auto IntervalCell::num_entities( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[1][dim];
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::num_entities( uint d0, uint d1 ) const -> uint
+inline auto IntervalCell::num_entities( size_t d0, size_t d1 ) const -> size_t
 {
   dolfin_assert( d0 <= TD );
   dolfin_assert( d1 <= TD );
@@ -162,17 +166,17 @@ inline auto IntervalCell::num_entities( uint d0, uint d1 ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::num_vertices( uint dim ) const -> uint
+inline auto IntervalCell::num_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[dim][0];
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::orientation( Cell const & cell ) const -> uint
+inline auto IntervalCell::orientation( Cell const & cell ) const -> size_t
 {
   dolfin_assert( cell.type() == this->cell_type );
-  Point v01 =   Point( cell.entities( 0 )[1], 0.0, 0.0 )
+  Point v01 = Point( cell.entities( 0 )[1], 0.0, 0.0 )
               - Point( cell.entities( 0 )[0], 0.0, 0.0 );
   Point n( -v01[1], v01[0], 0.0 );
 
@@ -180,13 +184,14 @@ inline auto IntervalCell::orientation( Cell const & cell ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline void IntervalCell::order_facet( uint[], Facet & ) const
+inline void IntervalCell::order_facet( size_t[], Facet & ) const
 {
   // Do nothing
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::connectivity_needs_ordering( uint d0, uint d1 ) const -> bool
+inline auto IntervalCell::connectivity_needs_ordering( size_t d0,
+                                                       size_t d1 ) const -> bool
 {
   dolfin_assert( d0 <= TD && d1 <= TD );
   return ( d0 == TD && d1 == 0 );
@@ -199,13 +204,13 @@ inline void IntervalCell::initialize_connectivities( Mesh & mesh ) const
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::num_refined_cells() const -> uint
+inline auto IntervalCell::num_refined_cells() const -> size_t
 {
   return 2;
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::num_refined_vertices( uint dim ) const -> uint
+inline auto IntervalCell::num_refined_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   MAYBE_UNUSED( dim );
@@ -222,13 +227,13 @@ inline auto IntervalCell::volume( MeshEntity const & entity ) const -> real
   MeshGeometry const & geometry = entity.mesh().geometry();
 
   // Get the coordinates of the two vertices
-  Array< uint > const & vertices = entity.entities( 0 );
-  real const *          x0       = geometry.x( vertices[0] );
-  real const *          x1       = geometry.x( vertices[1] );
+  Array< size_t > const & vertices = entity.entities( 0 );
+  real const *            x0       = geometry.x( vertices[0] );
+  real const *            x1       = geometry.x( vertices[1] );
 
   // Compute length of interval (line segment)
   real sum = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     sum += ( x1[i] - x0[i] ) * ( x1[i] - x0[i] );
   }
@@ -244,7 +249,8 @@ inline auto IntervalCell::diameter( MeshEntity const & entity ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::circumradius( MeshEntity const & entity ) const -> real
+inline auto IntervalCell::circumradius( MeshEntity const & entity ) const
+  -> real
 {
   // Circumradius is same as volume for interval (line segment)
   return volume( entity );
@@ -263,12 +269,12 @@ inline void IntervalCell::midpoint( MeshEntity const & entity, real * p ) const
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[1][0] );
 
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
-  real const *          x0       = geometry.x( vertices[0] );
-  real const *          x1       = geometry.x( vertices[1] );
-  uint const            gdim     = geometry.dim();
-  for ( uint d = 0; d < gdim; ++d )
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
+  real const *            x0       = geometry.x( vertices[0] );
+  real const *            x1       = geometry.x( vertices[1] );
+  size_t const            gdim     = geometry.dim();
+  for ( size_t d = 0; d < gdim; ++d )
   {
     p[d] = 0.5 * ( x0[d] + x1[d] );
   }
@@ -276,18 +282,18 @@ inline void IntervalCell::midpoint( MeshEntity const & entity, real * p ) const
 
 //-----------------------------------------------------------------------------
 inline void
-  IntervalCell::normal( Cell const & cell, uint facet, real * n ) const
+  IntervalCell::normal( Cell const & cell, size_t facet, real * n ) const
 {
   dolfin_assert( cell.type() == this->cell_type );
 
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< uint > const & vertices = cell.entities( 0 );
+  MeshGeometry const &    geometry = cell.mesh().geometry();
+  Array< size_t > const & vertices = cell.entities( 0 );
 
   Point p0 = geometry.point( vertices[facet] );
   Point p1 = geometry.point( vertices[( facet + 1 ) % 2] );
-  real nn  = p0.dist( p1 );
+  real  nn = p0.dist( p1 );
 
-  for ( uint d = 0; d < geometry.dim(); ++d )
+  for ( size_t d = 0; d < geometry.dim(); ++d )
   {
     n[d] /= nn;
   }
@@ -301,8 +307,8 @@ inline auto IntervalCell::intersects( MeshEntity const & e,
   dolfin_assert( e.num_entities( 0 ) == NE[1][0] );
 
   // Get the coordinates of the vertices
-  MeshGeometry const &  geometry = e.mesh().geometry();
-  Array< uint > const & vertices = e.entities( 0 );
+  MeshGeometry const &    geometry = e.mesh().geometry();
+  Array< size_t > const & vertices = e.entities( 0 );
 
   // Create points
   Point v0 = geometry.point( vertices[0] );
@@ -319,7 +325,7 @@ inline auto IntervalCell::intersects( MeshEntity const & e,
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::facet_area( Cell const & cell, uint ) const -> real
+inline auto IntervalCell::facet_area( Cell const & cell, size_t ) const -> real
 {
   dolfin_assert( cell.type() == this->cell_type );
   MAYBE_UNUSED( cell );
@@ -327,7 +333,7 @@ inline auto IntervalCell::facet_area( Cell const & cell, uint ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto IntervalCell::reference_vertex( uint i ) const -> real const *
+inline auto IntervalCell::reference_vertex( size_t i ) const -> real const *
 {
   return &VC[i][0];
 }

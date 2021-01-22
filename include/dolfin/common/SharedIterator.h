@@ -9,6 +9,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  SharedIterator
  *
@@ -20,11 +22,7 @@ class SharedIterator
 
 public:
   ///
-  SharedIterator( DistributedData const & distdata )
-    : distdata_( distdata )
-    , iter_( distdata_.shared_.begin() )
-  {
-  }
+  SharedIterator( DistributedData const & distdata );
 
   ///
   ~SharedIterator() = default;
@@ -33,13 +31,13 @@ public:
   auto operator++() -> SharedIterator &;
 
   ///
-  inline auto index() const -> uint;
+  inline auto index() const -> size_t;
 
   ///
-  inline auto global_index() const -> uint;
+  inline auto global_index() const -> size_t;
 
   ///
-  inline auto owner() const -> uint;
+  inline auto owner() const -> size_t;
 
   ///
   inline auto is_owned() const -> bool;
@@ -48,11 +46,12 @@ public:
   inline auto valid() const -> bool;
 
   ///
-  inline auto adj() const -> _set< uint > const &;
+  inline auto adj() const -> _set< size_t > const &;
 
   ///
   template < typename T >
-  inline void adj_enqueue( Array< Array< T > > & container, T const & value ) const;
+  inline auto adj_enqueue( std::vector< std::vector< T > > & container,
+                           T const & value ) const -> void;
 
 private:
   DistributedData const &                    distdata_;
@@ -60,52 +59,77 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
+inline SharedIterator::SharedIterator( DistributedData const & distdata )
+  : distdata_( distdata )
+  , iter_( distdata_.shared_.begin() )
+{
+}
+
+//-----------------------------------------------------------------------------
+
 inline auto SharedIterator::operator++() -> SharedIterator &
 {
   ++iter_;
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-inline auto SharedIterator::index() const -> uint
+
+inline auto SharedIterator::index() const -> size_t
 {
   return iter_->first;
 }
+
 //-----------------------------------------------------------------------------
-inline auto SharedIterator::global_index() const -> uint
+
+inline auto SharedIterator::global_index() const -> size_t
 {
   return distdata_.get_global( iter_->first );
 }
+
 //-----------------------------------------------------------------------------
-inline auto SharedIterator::owner() const -> uint
+
+inline auto SharedIterator::owner() const -> size_t
 {
   return distdata_.get_owner( iter_->first );
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SharedIterator::is_owned() const -> bool
 {
   return distdata_.is_owned( iter_->first );
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SharedIterator::valid() const -> bool
 {
   return iter_ != distdata_.shared_.end();
 }
+
 //-----------------------------------------------------------------------------
-inline auto SharedIterator::adj() const -> _set< uint > const &
+
+inline auto SharedIterator::adj() const -> _set< size_t > const &
 {
   return iter_->second;
 }
+
 //-----------------------------------------------------------------------------
+
 template < typename T >
-inline void SharedIterator::adj_enqueue( Array< Array< T > > & container,
-                                         T const & value ) const
+inline auto
+  SharedIterator::adj_enqueue( std::vector< std::vector< T > > & container,
+                               T const & value ) const -> void
 {
-  _set< uint > const & a = iter_->second;
-  for ( _set< uint >::const_iterator it = a.begin(); it != a.end(); ++it )
+  _set< size_t > const & a = iter_->second;
+  for ( _set< size_t >::const_iterator it = a.begin(); it != a.end(); ++it )
   {
     container[*it].push_back( value );
   }
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

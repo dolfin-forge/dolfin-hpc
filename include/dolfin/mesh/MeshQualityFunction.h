@@ -29,46 +29,57 @@ namespace dolfin
  *
  */
 
-
 class MeshQualityFunction : public Function
 {
 
 public:
-
   // The default value for p ought to be 2
-  MeshQualityFunction(Mesh& mesh, uint p);
+  MeshQualityFunction( Mesh & mesh, size_t p );
 
   //
   ~MeshQualityFunction() override = default;
 
   //
-  auto rank() const -> uint override;
+  auto rank() const -> size_t override;
 
   //
-  auto dim(uint i) const -> uint override;
+  auto dim( size_t i ) const -> size_t override;
 
   //
-  void evaluate(real* values, const real* x, const ufc::cell& cell) const override;
+  void evaluate( real *            values,
+                 const real *      x,
+                 const ufc::cell & cell ) const override;
 
 private:
-
-  uint const p_;
+  size_t const  p_;
   MeshQuality mqual_;
 };
 
 //-----------------------------------------------------------------------------
-inline auto MeshQualityFunction::rank() const -> uint
+
+MeshQualityFunction::MeshQualityFunction( Mesh & mesh, size_t p )
+  : Function( mesh )
+  , p_( p )
+  , mqual_( mesh )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto MeshQualityFunction::rank() const -> size_t
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-inline auto MeshQualityFunction::dim( uint ) const -> uint
+
+inline auto MeshQualityFunction::dim( size_t ) const -> size_t
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
+
 inline void MeshQualityFunction::evaluate( real * values,
                                            const real *,
                                            const ufc::cell & cell ) const

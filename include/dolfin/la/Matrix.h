@@ -5,12 +5,12 @@
 #define __DOLFIN_MATRIX_H
 
 #include <dolfin/common/Variable.h>
+#include <dolfin/la/DefaultFactory.h>
+#include <dolfin/la/GenericMatrix.h>
 #include <dolfin/main/PE.h>
-#include "DefaultFactory.h"
-#include "GenericMatrix.h"
 
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 namespace dolfin
 {
@@ -21,7 +21,6 @@ namespace dolfin
 class Matrix : public GenericMatrix, public Variable
 {
 public:
-
   /// Create empty matrix
   Matrix()
     : Variable( "A", "DOLFIN matrix" )
@@ -31,7 +30,7 @@ public:
   }
 
   /// Create M x N matrix distributed by default
-  Matrix( uint M, uint N )
+  Matrix( size_t M, size_t N )
     : Variable( "A", "DOLFIN matrix" )
     , matrix( 0 )
   {
@@ -41,7 +40,7 @@ public:
   }
 
   /// Create M x N matrix distributed if specified
-  Matrix( uint M, uint N, bool distributed )
+  Matrix( size_t M, size_t N, bool distributed )
     : Variable( "A", "DOLFIN matrix" )
     , matrix( 0 )
   {
@@ -67,95 +66,111 @@ public:
 
   /// Initialize zero tensor using sparsity pattern
   /// The tensor is distributed if the sparsity pattern is distributed
-  void init(const GenericSparsityPattern& sparsity_pattern) override;
+  void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
   /// Return copy of tensor
-  Matrix* copy() const override;
+  Matrix * copy() const override;
 
   /// Return size of given dimension
-  uint size(uint dim) const override;
+  size_t size( size_t dim ) const override;
 
   /// Set all entries to zero and keep any sparse structure
   void zero() override;
 
   /// Finalize assembly of tensor
-  void apply(FinalizeType finaltype=FINALIZE) override;
+  void apply( FinalizeType finaltype = FINALIZE ) override;
 
   /// Display tensor
-  void disp(uint precision=2) const override;
+  void disp( size_t precision = 2 ) const override;
 
   //--- Implementation of the GenericMatrix interface ---
 
   /// Initialize M x N matrix and distribute by default
-  void init(uint M, uint N) override;
+  void init( size_t M, size_t N ) override;
 
   /// Initialize M x N matrix and distribute if specified
-  void init(uint M, uint N, bool distributed) override;
+  void init( size_t M, size_t N, bool distributed ) override;
 
   /// Get block of values
-  void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const override;
+  void get( real *         block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) const override;
 
   /// Set block of values
-  void set(const real* block, uint m, const uint* rows, uint n, const uint* cols) override;
+  void set( const real *   block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) override;
 
   /// Add block of values
-  void add(const real* block, uint m, const uint* rows, uint n, const uint* cols) override;
+  void add( const real *   block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) override;
 
   /// Return norm of matrix
-  double norm(std::string norm_type = "frobenius") const override;
+  double norm( std::string norm_type = "frobenius" ) const override;
 
   /// Get non-zero values of given row
-  void getrow(uint row, Array<uint>& columns, Array<real>& values) const override;
+  void getrow( size_t                  row,
+               std::vector< size_t > & columns,
+               std::vector< real > &   values ) const override;
 
   /// Set values for given row
-  void setrow(uint row, const Array<uint>& columns, const Array<real>& values) override;
+  void setrow( size_t                        row,
+               const std::vector< size_t > & columns,
+               const std::vector< real > &   values ) override;
 
   /// Set given rows to zero
-  void zero(uint m, const uint* rows) override;
+  void zero( size_t m, const size_t * rows ) override;
 
   /// Set given rows to identity matrix
-  void ident(uint m, const uint* rows) override;
+  void ident( size_t m, const size_t * rows ) override;
 
   // Matrix-vector product, y = Ax
-  void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const override;
+  void mult( const GenericVector & x,
+             GenericVector &       y,
+             bool                  transposed = false ) const override;
 
   /// Multiply matrix by given number
-  const Matrix& operator*= (real a) override;
+  const Matrix & operator*=( real a ) override;
 
   /// Divide matrix by given number
-  const Matrix& operator/= (real a) override;
+  const Matrix & operator/=( real a ) override;
 
   /// Assignment operator
-  const GenericMatrix& operator= (const GenericMatrix& A) override;
+  const GenericMatrix & operator=( const GenericMatrix & A ) override;
 
   /// Get number of non-zeros in the matrix
-  uint nz() const override;
+  size_t nz() const override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const override;
+  LinearAlgebraFactory & factory() const override;
 
   //--- Special functions, intended for library use only ---
 
   /// Return concrete instance / unwrap (const)
-  const GenericMatrix* instance() const override;
+  const GenericMatrix * instance() const override;
 
   /// Return concrete instance / unwrap (non-const version)
-  GenericMatrix* instance() override;
+  GenericMatrix * instance() override;
 
   //--- Special Matrix functions ---
 
   /// Assignment operator
-  const Matrix& operator= (const Matrix& A);
+  const Matrix & operator=( const Matrix & A );
 
   void spy() const;
 
 private:
-
   // Pointer to concrete implementation
-  GenericMatrix* matrix{ 0 };
-
+  GenericMatrix * matrix { 0 };
 };
 
 //-----------------------------------------------------------------------------
@@ -174,7 +189,7 @@ inline Matrix * Matrix::copy() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint Matrix::size( uint dim ) const
+inline size_t Matrix::size( size_t dim ) const
 {
   return matrix->size( dim );
 }
@@ -192,43 +207,49 @@ inline void Matrix::apply( FinalizeType finaltype )
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::disp( uint precision ) const
+inline void Matrix::disp( size_t precision ) const
 {
   matrix->disp( precision );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::init( uint M, uint N )
+inline void Matrix::init( size_t M, size_t N )
 {
   matrix->init( M, N );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::init( uint M, uint N, bool distributed )
+inline void Matrix::init( size_t M, size_t N, bool distributed )
 {
   matrix->init( M, N, distributed );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::get( real * block,
-                         uint m, const uint * rows,
-                         uint n, const uint * cols ) const
+inline void Matrix::get( real *         block,
+                         size_t         m,
+                         const size_t * rows,
+                         size_t         n,
+                         const size_t * cols ) const
 {
   matrix->get( block, m, rows, n, cols );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::set( const real * block,
-                         uint m, const uint * rows,
-                         uint n, const uint * cols )
+inline void Matrix::set( const real *   block,
+                         size_t         m,
+                         const size_t * rows,
+                         size_t         n,
+                         const size_t * cols )
 {
   matrix->set( block, m, rows, n, cols );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::add( const real * block,
-                         uint m, const uint * rows,
-                         uint n, const uint * cols )
+inline void Matrix::add( const real *   block,
+                         size_t         m,
+                         const size_t * rows,
+                         size_t         n,
+                         const size_t * cols )
 {
   matrix->add( block, m, rows, n, cols );
 }
@@ -240,36 +261,37 @@ inline double Matrix::norm( std::string norm_type ) const
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::getrow( uint row,
-                     Array< uint > & columns,
-                     Array< real > & values ) const
+inline void Matrix::getrow( size_t                  row,
+                            std::vector< size_t > & columns,
+                            std::vector< real > &   values ) const
 {
   matrix->getrow( row, columns, values );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::setrow( uint row,
-                            const Array< uint > & columns,
-                            const Array< real > & values )
+inline void Matrix::setrow( size_t                        row,
+                            const std::vector< size_t > & columns,
+                            const std::vector< real > &   values )
 {
   matrix->setrow( row, columns, values );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::zero( uint m, const uint * rows )
+inline void Matrix::zero( size_t m, const size_t * rows )
 {
   matrix->zero( m, rows );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::ident( uint m, const uint * rows )
+inline void Matrix::ident( size_t m, const size_t * rows )
 {
   matrix->ident( m, rows );
 }
 
 //-----------------------------------------------------------------------------
-inline void Matrix::mult( const GenericVector & x, GenericVector & y,
-                          bool transposed ) const
+inline void Matrix::mult( const GenericVector & x,
+                          GenericVector &       y,
+                          bool                  transposed ) const
 {
   matrix->mult( x, y, transposed );
 }
@@ -293,7 +315,7 @@ inline const GenericMatrix & Matrix::operator=( const GenericMatrix & A )
 }
 
 //-----------------------------------------------------------------------------
-inline uint Matrix::nz() const
+inline size_t Matrix::nz() const
 {
   return matrix->nz();
 }
@@ -326,36 +348,36 @@ inline const Matrix & Matrix::operator=( const Matrix & A )
 //-----------------------------------------------------------------------------
 inline void Matrix::spy() const
 {
-  if(PE::size() == 1)
+  if ( PE::size() == 1 )
   {
     std::stringstream ss;
-    ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;
-    std::ofstream Afile(ss.str().c_str());
-    real val = 0.;
+    ss << "A" << matrix->size( 0 ) * matrix->size( 1 ) << ".xpm" << std::ends;
+    std::ofstream     Afile( ss.str().c_str() );
+    real              val = 0.;
     std::stringstream xpm;
-    xpm << "/* XPM */\n" <<
-    "static char * map_xpm = {\n" <<
-    "/* width height number_of_colors chars_per_pixel */\n" <<
-    "\""<< matrix->size(0) << " "<< matrix->size(1)<<" 2 1\",\n" <<
-    "/* intensity levels */\n"<<
-    "\"0 c #ffffff\",\n" <<
-    "\"1 c none\",\n" <<
-    "/* map */\n";
+    xpm << "/* XPM */\n"
+        << "static char * map_xpm = {\n"
+        << "/* width height number_of_colors chars_per_pixel */\n"
+        << "\"" << matrix->size( 0 ) << " " << matrix->size( 1 ) << " 2 1\",\n"
+        << "/* intensity levels */\n"
+        << "\"0 c #ffffff\",\n"
+        << "\"1 c none\",\n"
+        << "/* map */\n";
     Afile << xpm.str();
-    for (uint i = 0; i < matrix->size(0); ++i)
+    for ( size_t i = 0; i < matrix->size( 0 ); ++i )
     {
       std::stringstream row;
       row << "\"";
-      for (uint j = 0; j < matrix->size(1); ++j)
+      for ( size_t j = 0; j < matrix->size( 1 ); ++j )
       {
-        val = matrix->getitem(std::pair<uint,uint>(i,j));
-        if(val > 1.0e-14)
+        val = matrix->getitem( std::pair< size_t, size_t >( i, j ) );
+        if ( val > 1.0e-14 )
         {
-          row<< "1";
+          row << "1";
         }
         else
         {
-          row<< "0";
+          row << "0";
         }
       }
       row << "\",\n";

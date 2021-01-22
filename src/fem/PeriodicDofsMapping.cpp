@@ -9,14 +9,14 @@
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
 
 #include <algorithm>
 #include <cstring>
@@ -119,9 +119,9 @@ void PeriodicDofsMapping::init()
   DofMap const &        dofmap  = space_.dofmap();
   FiniteElement const & element = *space_.element();
 
-  uint const tdim    = mesh.topology_dimension();
-  uint const gdim    = mesh.geometry_dimension();
-  uint const maxgdim = Space::MAX_DIMENSION;
+  size_t const tdim    = mesh.topology_dimension();
+  size_t const gdim    = mesh.geometry_dimension();
+  size_t const maxgdim = Space::MAX_DIMENSION;
   Cell       c0( mesh, 0 );
   mesh.init( tdim, mesh.type().facet_dim() );
   mesh.init( mesh.type().facet_dim(), tdim );
@@ -130,45 +130,45 @@ void PeriodicDofsMapping::init()
   BoundaryMesh & boundary = mesh.exterior_boundary();
 
   Array< MappedManifold * > const & manifold_list = mesh.periodic_mappings();
-  uint                              totalcardGnI  = 0;
+  size_t                              totalcardGnI  = 0;
   for ( MappedManifold * manifold : manifold_list )
   {
-    _set< uint > const & setG = manifold->Gfacets();
-    _set< uint > const & setI = manifold->Ifacets();
+    _set< size_t > const & setG = manifold->Gfacets();
+    _set< size_t > const & setI = manifold->Ifacets();
     totalcardGnI += setG.size() - setI.size();
   }
 
   //--- Setup data structures -----------------------------------------------
-  _ordered_map< uint, uint > Gdofs_map;
-  uint const                 num_facet_dofs = dofmap.num_facet_dofs();
-  uint const                 max_numGdofs   = num_facet_dofs * totalcardGnI;
-  uint                       Gcount         = 0;
-  uint                       Hcount         = 0;
+  _ordered_map< size_t, size_t > Gdofs_map;
+  size_t const                 num_facet_dofs = dofmap.num_facet_dofs();
+  size_t const                 max_numGdofs   = num_facet_dofs * totalcardGnI;
+  size_t                       Gcount         = 0;
+  size_t                       Hcount         = 0;
   // dolfin_assert(max_numGdofs > 0);
-  uint *          Gdofs_indices = nullptr;
+  size_t *          Gdofs_indices = nullptr;
   real *          Gdofs_xcoords = nullptr;
-  Array< uint > * Hdofs_indices = nullptr;
+  Array< size_t > * Hdofs_indices = nullptr;
   Array< real > * Hdofs_xcoords = nullptr;
   // Avoid allocating zero size array
   if ( max_numGdofs > 0 )
   {
-    Gdofs_indices = new uint[max_numGdofs];
+    Gdofs_indices = new size_t[max_numGdofs];
     Gdofs_xcoords = new real[max_numGdofs * gdim];
-    Hdofs_indices = new Array< uint >[max_numGdofs];
+    Hdofs_indices = new Array< size_t >[max_numGdofs];
     Hdofs_xcoords = new Array< real >[max_numGdofs];
   }
 
   // UFC dofmap data structures
   UFCCell             ufc_cell0( c0 );
   UFCCell             ufc_cell1( c0 );
-  uint const          local_dimension = dofmap.num_element_dofs();
-  uint *              dofsG           = new uint[local_dimension];
-  uint *              dofsH           = new uint[local_dimension];
+  size_t const          local_dimension = dofmap.num_element_dofs();
+  size_t *              dofsG           = new size_t[local_dimension];
+  size_t *              dofsH           = new size_t[local_dimension];
   std::vector< real > coordinatesG( local_dimension * maxgdim, 0.0 );
   std::vector< real > coordinatesH( local_dimension * maxgdim, 0.0 );
 
-  uint * facet_dofsG = new uint[num_facet_dofs];
-  uint * facet_dofsH = new uint[num_facet_dofs];
+  size_t * facet_dofsG = new size_t[num_facet_dofs];
+  size_t * facet_dofsH = new size_t[num_facet_dofs];
 
   for ( Array< MappedManifold * >::const_iterator it = manifold_list.begin();
         it != manifold_list.end();
@@ -176,11 +176,11 @@ void PeriodicDofsMapping::init()
   {
     MappedManifold &          manifold = *( *it );
     PeriodicSubDomain const & mapped   = manifold.subdomain();
-    _set< uint > const &      setG     = manifold.Gfacets();
-    _set< uint > const &      setH     = manifold.Hfacets();
-    _set< uint > const &      setI     = manifold.Ifacets();
+    _set< size_t > const &      setG     = manifold.Gfacets();
+    _set< size_t > const &      setH     = manifold.Hfacets();
+    _set< size_t > const &      setI     = manifold.Ifacets();
 #if HAVE_MPI
-    uint const GpmOffset = Gcount;
+    size_t const GpmOffset = Gcount;
 #endif
 
     //--- Collect dofs and exchange -------------------------------------------
@@ -188,20 +188,20 @@ void PeriodicDofsMapping::init()
     Point xG;
 
     //--- Exclude dofs located in I
-    for ( uint const & I : setI )
+    for ( size_t const & I : setI )
     {
       Facet facet( mesh, I );
       Cell  cell( mesh, facet.entities( tdim )[0] );
-      uint  facet_posI = cell.index( facet );
+      size_t  facet_posI = cell.index( facet );
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
       dofmap.tabulate_facet_dofs( facet_dofsG, facet_posI );
       element.tabulate_dof_coordinates( coordinatesG.data(),
                                         ufc_cell0.coordinates.data() );
 
-      for ( uint ii = 0; ii < num_facet_dofs; ++ii )
+      for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
-        uint         dofG = dofsG[facet_dofsG[ii]];
+        size_t         dofG = dofsG[facet_dofsG[ii]];
         real const * x    = &coordinatesG[facet_dofsG[ii] * maxgdim];
         // Determine if the dof is in I
         mapped.map( x, &xG[0] );
@@ -213,20 +213,20 @@ void PeriodicDofsMapping::init()
     }
 
     //--- Collect dofs located in G to initialize data structure
-    for ( uint const & G : setG )
+    for ( size_t const & G : setG )
     {
       Facet facet( mesh, G );
       Cell  cell( mesh, facet.entities( tdim )[0] );
-      uint  facet_posG = cell.index( facet );
+      size_t  facet_posG = cell.index( facet );
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
       dofmap.tabulate_facet_dofs( facet_dofsG, facet_posG );
       element.tabulate_dof_coordinates( coordinatesG.data(),
                                         ufc_cell0.coordinates.data() );
 
-      for ( uint ii = 0; ii < num_facet_dofs; ++ii )
+      for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
-        uint         dofG = dofsG[facet_dofsG[ii]];
+        size_t         dofG = dofsG[facet_dofsG[ii]];
         real const * xG   = &coordinatesG[facet_dofsG[ii] * maxgdim];
 
         // Determine if the dof is in G (dofs in I are excluded)
@@ -243,7 +243,7 @@ void PeriodicDofsMapping::init()
       }
     }
 
-    for ( _ordered_map< uint, uint >::const_iterator it = Gdofs_map.begin();
+    for ( _ordered_map< size_t, size_t >::const_iterator it = Gdofs_map.begin();
           it != Gdofs_map.end();
           ++it )
     {
@@ -254,20 +254,20 @@ void PeriodicDofsMapping::init()
     }
 
     //--- Collect dofs located in H and find corresponding local G facet
-    for ( uint const & H : setH )
+    for ( size_t const & H : setH )
     {
       Facet facetH( mesh, H );
       Cell  cellH( mesh, facetH.entities( tdim )[0] );
-      uint  facet_posH = cellH.index( facetH );
+      size_t  facet_posH = cellH.index( facetH );
       ufc_cell1.update( cellH );
       dofmap.tabulate_dofs( dofsH, ufc_cell1 );
       dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
       element.tabulate_dof_coordinates( coordinatesH.data(),
                                         ufc_cell1.coordinates.data() );
 
-      for ( uint ii = 0; ii < num_facet_dofs; ++ii )
+      for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
-        uint         dofH = dofsH[facet_dofsH[ii]];
+        size_t         dofH = dofsH[facet_dofsH[ii]];
         real const * xH   = &coordinatesH[facet_dofsH[ii] * maxgdim];
 
         // In case the subdomain is not well implemented
@@ -277,13 +277,13 @@ void PeriodicDofsMapping::init()
         if ( mapped.inside( &xG[0], true ) && ( Hdofs_.count( dofH ) == 0 )
              && ( Idofs_.count( dofH ) == 0 ) )
         {
-          Array< uint > matching_facets;
+          Array< size_t > matching_facets;
           boundary.intersector().overlap( xG, matching_facets );
           if ( !matching_facets.empty() )
           {
             Hdofs_.insert( dofH );
             // message("dofH %8d : %1d facets", dofH, matching_facets.size() );
-            for ( uint & match : matching_facets )
+            for ( size_t & match : matching_facets )
             {
               Cell cbG( boundary, match );
               // FIXME: Bug in intersect functions.
@@ -294,25 +294,25 @@ void PeriodicDofsMapping::init()
               //}
               Facet facetG( mesh, boundary.facet_index( cbG ) );
               Cell  cellG( mesh, facetG.entities( tdim )[0] );
-              uint  facet_posG = cellG.index( facetG );
+              size_t  facet_posG = cellG.index( facetG );
               ufc_cell0.update( cellG );
               dofmap.tabulate_dofs( dofsG, ufc_cell0 );
               dofmap.tabulate_facet_dofs( facet_dofsG, facet_posG );
 
-              for ( uint jj = 0; jj < num_facet_dofs; ++jj )
+              for ( size_t jj = 0; jj < num_facet_dofs; ++jj )
               {
                 // Find if the mapped dof is a valid G dof
-                uint dofG = dofsG[facet_dofsG[jj]];
-                _ordered_map< uint, uint >::const_iterator itG =
+                size_t dofG = dofsG[facet_dofsG[jj]];
+                _ordered_map< size_t, size_t >::const_iterator itG =
                   Gdofs_map.find( dofG );
                 if ( itG == Gdofs_map.end() )
                 {
                   continue;
                 }
-                uint iiG = itG->second;
+                size_t iiG = itG->second;
                 dolfin_assert( dofG == Gdofs_indices[iiG] );
                 bool insert = true;
-                for ( uint const & Hidx : Hdofs_indices[iiG] )
+                for ( size_t const & Hidx : Hdofs_indices[iiG] )
                 {
                   if ( Hidx == dofH )
                   {
@@ -324,7 +324,7 @@ void PeriodicDofsMapping::init()
                 {
                   ++Hcount;
                   Hdofs_indices[iiG].push_back( dofH );
-                  for ( uint d = 0; d < gdim; ++d )
+                  for ( size_t d = 0; d < gdim; ++d )
                   {
                     Hdofs_xcoords[iiG].push_back( xH[d] );
                   }
@@ -340,22 +340,22 @@ void PeriodicDofsMapping::init()
     {
 #if HAVE_MPI
       //--- Exchange data -----------------------------------------------------
-      uint rank            = dolfin::MPI::rank();
-      uint pe_size         = dolfin::MPI::size();
+      size_t rank            = dolfin::MPI::rank();
+      size_t pe_size         = dolfin::MPI::size();
       int  u_recvdata_size = Gcount - GpmOffset;
       int  u_recvdata_maxi = 0;
       MPI::all_reduce< MPI::max >( u_recvdata_size, u_recvdata_maxi );
-      uint *        u_recvbuff = new uint[u_recvdata_maxi];
-      Array< uint > u_sendbuff;
+      size_t *        u_recvbuff = new size_t[u_recvdata_maxi];
+      Array< size_t > u_sendbuff;
       int           r_recvdata_size = u_recvdata_size * gdim;
       int           r_recvdata_maxi = u_recvdata_maxi * gdim;
       real *        r_recvbuff      = new real[r_recvdata_maxi];
       Array< real > r_sendbuff;
 
-      uint * u_offsets = new uint[pe_size];
-      uint * r_offsets = new uint[pe_size];
-      uint * u_datsize = new uint[pe_size];
-      uint * r_datsize = new uint[pe_size];
+      size_t * u_offsets = new size_t[pe_size];
+      size_t * r_offsets = new size_t[pe_size];
+      size_t * u_datsize = new size_t[pe_size];
+      size_t * r_datsize = new size_t[pe_size];
       for ( int j = 1; j < ( int ) pe_size; ++j )
       {
         int src = ( rank - j + pe_size ) % pe_size;
@@ -382,21 +382,21 @@ void PeriodicDofsMapping::init()
         r_offsets[src] = r_sendbuff.size();
         if ( manifold.num_cells() > 0 )
         {
-          for ( uint ii = 0; ii < ( uint ) u_count; ++ii )
+          for ( size_t ii = 0; ii < ( size_t ) u_count; ++ii )
           {
-            uint const dofG = u_recvbuff[ii];
+            size_t const dofG = u_recvbuff[ii];
             std::copy(
               &r_recvbuff[ii * gdim], &r_recvbuff[ii * gdim] + gdim, &xG[0] );
 
-            Array< uint > matching_facets;
+            Array< size_t > matching_facets;
             manifold.intersector().overlap( xG, matching_facets );
             if ( !matching_facets.empty() )
             {
               u_sendbuff.push_back( dofG );
               u_sendbuff.push_back( 0 ); // Reserve matching dofs
 
-              _set< uint > matching;
-              for ( uint & match : matching_facets )
+              _set< size_t > matching;
+              for ( size_t & match : matching_facets )
               {
                 Cell cm( manifold, match );
                 // FIXME: Bug in intersect functions.
@@ -407,16 +407,16 @@ void PeriodicDofsMapping::init()
                 //}
                 Facet facet( mesh, manifold.facet_index( cm ) );
                 Cell  cell( mesh, facet.entities( tdim )[0] );
-                uint  facet_posH = cell.index( facet );
+                size_t  facet_posH = cell.index( facet );
                 ufc_cell1.update( cell );
                 dofmap.tabulate_dofs( dofsH, ufc_cell1 );
                 dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
                 element.tabulate_dof_coordinates( coordinatesH.data(),
                                                   ufc_cell1.coordinates.data() );
 
-                for ( uint jj = 0; jj < num_facet_dofs; ++jj )
+                for ( size_t jj = 0; jj < num_facet_dofs; ++jj )
                 {
-                  uint         dofH = dofsH[facet_dofsH[jj]];
+                  size_t         dofH = dofsH[facet_dofsH[jj]];
                   real const * xH   = &coordinatesH[facet_dofsH[jj]*maxgdim];
                   std::copy( xH, xH + gdim, &xG[0] );
                   mapped.map( xH, &xG[0] );
@@ -425,7 +425,7 @@ void PeriodicDofsMapping::init()
                   {
                     matching.insert( dofH );
                     u_sendbuff.push_back( dofH );
-                    for ( uint d = 0; d < gdim; ++d )
+                    for ( size_t d = 0; d < gdim; ++d )
                     {
                       r_sendbuff.push_back( xH[d] );
                     }
@@ -447,7 +447,7 @@ void PeriodicDofsMapping::init()
       MPI::all_reduce_in_place< MPI::max >( u_recvdata_maxi );
       delete[] u_recvbuff;
       u_recvbuff      = nullptr;
-      u_recvbuff      = new uint[u_recvdata_maxi];
+      u_recvbuff      = new size_t[u_recvdata_maxi];
       r_recvdata_maxi = r_sendbuff.size();
       MPI::all_reduce_in_place< MPI::max >( r_recvdata_maxi );
       delete[] r_recvbuff;
@@ -475,30 +475,30 @@ void PeriodicDofsMapping::init()
                        src,
                        1 );
 
-        uint uii = 0;
-        uint rii = 0;
-        while ( uii < ( uint ) u_count )
+        size_t uii = 0;
+        size_t rii = 0;
+        while ( uii < ( size_t ) u_count )
         {
-          uint const dof = u_recvbuff[uii];
+          size_t const dof = u_recvbuff[uii];
           ++uii;
-          uint const nbH = u_recvbuff[uii];
+          size_t const nbH = u_recvbuff[uii];
           ++uii;
-          _ordered_map< uint, uint >::const_iterator itG =
+          _ordered_map< size_t, size_t >::const_iterator itG =
             Gdofs_map.find( dof );
           if ( itG == Gdofs_map.end() )
           {
             error( "No G dof %d sent from rank %d", dof, src );
           }
-          Array< uint > & Hidx = Hdofs_indices[itG->second];
+          Array< size_t > & Hidx = Hdofs_indices[itG->second];
           Array< real > & Hxcs = Hdofs_xcoords[itG->second];
-          _set< uint >    existing( Hidx.begin(), Hidx.end() );
-          for ( uint i = 0; i < nbH; ++i )
+          _set< size_t >    existing( Hidx.begin(), Hidx.end() );
+          for ( size_t i = 0; i < nbH; ++i )
           {
             if ( existing.count( u_recvbuff[uii] ) == 0 )
             {
               ++Hcount;
               Hidx.push_back( u_recvbuff[uii] );
-              for ( uint d = 0; d < gdim; ++d )
+              for ( size_t d = 0; d < gdim; ++d )
               {
                 Hxcs.push_back( r_recvbuff[rii + d] );
               }
@@ -520,24 +520,24 @@ void PeriodicDofsMapping::init()
 
   // Finalize data structures
   dolfin_assert( Gcount == Gdofs_map.size() );
-  Gindices_ = new uint[Gcount];
-  std::memset( Gindices_, 0, Gcount * sizeof( uint ) );
+  Gindices_ = new size_t[Gcount];
+  std::memset( Gindices_, 0, Gcount * sizeof( size_t ) );
   Gxcoords_ = new real[Gcount * maxgdim];
   std::memset( Gxcoords_, 0, Gcount * maxgdim * sizeof( real ) );
-  Hcount_ = new uint[Gcount];
-  std::memset( Hcount_, 0, Gcount * sizeof( uint ) );
-  Hoffsets_ = new uint[Gcount];
-  std::memset( Hoffsets_, 0, Gcount * sizeof( uint ) );
-  Hindices_ = new uint[Hcount];
-  std::memset( Hindices_, 0, Hcount * sizeof( uint ) );
+  Hcount_ = new size_t[Gcount];
+  std::memset( Hcount_, 0, Gcount * sizeof( size_t ) );
+  Hoffsets_ = new size_t[Gcount];
+  std::memset( Hoffsets_, 0, Gcount * sizeof( size_t ) );
+  Hindices_ = new size_t[Hcount];
+  std::memset( Hindices_, 0, Hcount * sizeof( size_t ) );
   Hxcoords_ = new real[Hcount * maxgdim];
   std::memset( Hxcoords_, 0, Hcount * maxgdim * sizeof( real ) );
-  uint offset          = 0;
+  size_t offset          = 0;
   max_local_dimension_ = 0;
-  for ( uint ii = 0; ii < Gcount; ++ii )
+  for ( size_t ii = 0; ii < Gcount; ++ii )
   {
-    uint const dof = Gdofs_indices[ii];
-    uint const iG  = Gdofs_map[dof];
+    size_t const dof = Gdofs_indices[ii];
+    size_t const iG  = Gdofs_map[dof];
 
     //
     Gindices_[ii] = Gdofs_indices[ii];
@@ -545,13 +545,13 @@ void PeriodicDofsMapping::init()
                &Gdofs_indices[ii * gdim] + gdim,
                &Gxcoords_[ii * maxgdim] );
     //
-    Array< uint > const & Hidx      = Hdofs_indices[iG];
-    uint const            num_Hdofs = Hidx.size();
+    Array< size_t > const & Hidx      = Hdofs_indices[iG];
+    size_t const            num_Hdofs = Hidx.size();
     Hcount_[ii]                     = num_Hdofs;
     std::copy( &Hidx[0], &Hidx[0] + num_Hdofs, &Hindices_[offset] );
     Array< real > const & Hxcs = Hdofs_xcoords[iG];
     dolfin_assert( Hxcs.size() == gdim * Hidx.size() );
-    for ( uint jj = 0; jj < num_Hdofs; ++jj )
+    for ( size_t jj = 0; jj < num_Hdofs; ++jj )
     {
       std::copy( &Hxcs[jj * gdim],
                  &Hxcs[jj * gdim] + gdim,
@@ -599,9 +599,9 @@ void PeriodicDofsMapping::clear()
 }
 
 //-----------------------------------------------------------------------------
-void PeriodicDofsMapping::tabulate_dofs( uint   Gdof,
-                                         uint * Hdofs,
-                                         uint & count ) const
+void PeriodicDofsMapping::tabulate_dofs( size_t   Gdof,
+                                         size_t * Hdofs,
+                                         size_t & count ) const
 {
   OffsetMap::const_iterator it = Goffsets_.find( Gdof );
   if ( it == Goffsets_.end() )
@@ -612,27 +612,27 @@ void PeriodicDofsMapping::tabulate_dofs( uint   Gdof,
   {
     count = Hcount_[it->second];
     std::memcpy(
-      &Hdofs[0], &Hindices_[Hoffsets_[it->second]], count * sizeof( uint ) );
+      &Hdofs[0], &Hindices_[Hoffsets_[it->second]], count * sizeof( size_t ) );
   }
 }
 
 //-----------------------------------------------------------------------------
-void PeriodicDofsMapping::tabulate_dofs( uint   i,
-                                         uint * Gdof,
-                                         uint * Hdofs,
-                                         uint & count ) const
+void PeriodicDofsMapping::tabulate_dofs( size_t   i,
+                                         size_t * Gdof,
+                                         size_t * Hdofs,
+                                         size_t & count ) const
 {
   dolfin_assert( i < Goffsets_.size() );
   count = Hcount_[i];
   *Gdof = Gindices_[i];
-  std::memcpy( &Hdofs[0], &Hindices_[Hoffsets_[i]], count * sizeof( uint ) );
+  std::memcpy( &Hdofs[0], &Hindices_[Hoffsets_[i]], count * sizeof( size_t ) );
 }
 
 //-----------------------------------------------------------------------------
-void PeriodicDofsMapping::tabulate_coordinates( uint    Gdof,
+void PeriodicDofsMapping::tabulate_coordinates( size_t    Gdof,
                                                 real *  Gcoords,
                                                 real ** Hcoords,
-                                                uint &  count ) const
+                                                size_t &  count ) const
 {
   OffsetMap::const_iterator it = Goffsets_.find( Gdof );
   if ( it == Goffsets_.end() )
@@ -645,7 +645,7 @@ void PeriodicDofsMapping::tabulate_coordinates( uint    Gdof,
                  &Gxcoords_[it->second * Space::MAX_DIMENSION],
                  Space::MAX_DIMENSION * sizeof( real ) );
     count = Hcount_[it->second];
-    for ( uint dof = 0; dof < count; ++dof )
+    for ( size_t dof = 0; dof < count; ++dof )
     {
       std::memcpy(
         &Hcoords[dof][0],
@@ -656,11 +656,11 @@ void PeriodicDofsMapping::tabulate_coordinates( uint    Gdof,
 }
 
 //-----------------------------------------------------------------------------
-void PeriodicDofsMapping::tabulate_coordinates( uint    i,
-                                                uint *  Gdof,
+void PeriodicDofsMapping::tabulate_coordinates( size_t    i,
+                                                size_t *  Gdof,
                                                 real *  Gcoords,
                                                 real ** Hcoords,
-                                                uint &  count ) const
+                                                size_t &  count ) const
 {
   dolfin_assert( i < Goffsets_.size() );
   count = Hcount_[i];
@@ -668,7 +668,7 @@ void PeriodicDofsMapping::tabulate_coordinates( uint    i,
   std::memcpy( &Gcoords[0],
                &Gxcoords_[i * Space::MAX_DIMENSION],
                Space::MAX_DIMENSION * sizeof( real ) );
-  for ( uint dof = 0; dof < count; ++dof )
+  for ( size_t dof = 0; dof < count; ++dof )
   {
     std::memcpy( &Hcoords[dof][0],
                  &Hxcoords_[Hoffsets_[i] + dof * Space::MAX_DIMENSION],
@@ -684,11 +684,11 @@ void PeriodicDofsMapping::disp() const
   prm( "Number of G dofs", Goffsets_.size() );
   end();
   //
-  uint maxgdim = Space::MAX_DIMENSION;
+  size_t maxgdim = Space::MAX_DIMENSION;
   for ( OffsetMap::value_type const & offset : Goffsets_ )
   {
-    uint              dof = offset.first;
-    uint              iid = offset.second;
+    size_t              dof = offset.first;
+    size_t              iid = offset.second;
     std::stringstream ss;
     if ( space_.dofmap().is_ghost( dof ) )
     {
@@ -700,14 +700,14 @@ void PeriodicDofsMapping::disp() const
     }
     ss << std::setw( 6 ) << dof << " : ";
 
-    uint         off  = Hoffsets_[iid];
-    uint const * Hidx = &Hindices_[off];
+    size_t         off  = Hoffsets_[iid];
+    size_t const * Hidx = &Hindices_[off];
     real const * Hxcs = &Hxcoords_[off * maxgdim];
 
-    for ( uint i = 0; i < Hcount_[iid]; ++i )
+    for ( size_t i = 0; i < Hcount_[iid]; ++i )
     {
       ss << " " << std::setw( 6 ) << Hidx[i] << " (";
-      for ( uint d = 0; d < maxgdim; ++d )
+      for ( size_t d = 0; d < maxgdim; ++d )
       {
         ss << " " << std::fixed << std::setw( 8 ) << Hxcs[i * maxgdim + d];
       }

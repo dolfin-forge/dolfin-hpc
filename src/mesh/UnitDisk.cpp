@@ -12,208 +12,218 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
-    Mesh(TriangleCell(), EuclideanSpace(2))
+UnitDisk::UnitDisk( size_t nx, Type type, Transformation transformation )
+  : Mesh( TriangleCell(), EuclideanSpace( 2 ) )
 {
-  warning("UnitDisk is Experimental: It may be of poor quality.");
+  warning( "UnitDisk is Experimental: It may be of poor quality." );
 
-  uint ny = nx;
+  size_t ny = nx;
 
-  if (nx < 1 || ny < 1) error(
-      "Size of unit square must be at least 1 in each dimension.");
+  if ( nx < 1 || ny < 1 )
+    error( "Size of unit square must be at least 1 in each dimension." );
 
-  rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
+  rename( "mesh", "Mesh of the unit square (0,1) x (0,1)" );
 
   // Open mesh for editing
-  MeshEditor editor(*this, this->type(), this->space());
+  MeshEditor editor( *this, this->type(), this->space() );
 
   // Create vertices and cells:
-  if (type == crisscross)
+  if ( type == crisscross )
   {
-    editor.init_vertices((nx + 1) * (ny + 1) + nx * ny);
-    editor.init_cells(4 * nx * ny);
+    editor.init_vertices( ( nx + 1 ) * ( ny + 1 ) + nx * ny );
+    editor.init_cells( 4 * nx * ny );
   }
   else
   {
-    editor.init_vertices((nx + 1) * (ny + 1));
-    editor.init_cells(2 * nx * ny);
+    editor.init_vertices( ( nx + 1 ) * ( ny + 1 ) );
+    editor.init_cells( 2 * nx * ny );
   }
 
   // Create main vertices:
   // variables for transformation
-  uint vertex = 0;
-  real trns_x[2] = { 0.0 };
-  for (uint iy = 0; iy <= ny; iy++)
+  size_t vertex    = 0;
+  real   trns_x[2] = { 0.0 };
+  for ( size_t iy = 0; iy <= ny; iy++ )
   {
-    const real y = -1.0 + static_cast<real>(iy) * 2.0 / static_cast<real>(ny);
-    for (uint ix = 0; ix <= nx; ix++)
+    const real y =
+      -1.0 + static_cast< real >( iy ) * 2.0 / static_cast< real >( ny );
+    for ( size_t ix = 0; ix <= nx; ix++ )
     {
-      const real x = -1. + static_cast<real>(ix) * 2.0 / static_cast<real>(nx);
-      trns_x[0] = transformx(x, y, transformation);
-      trns_x[1] = transformy(x, y, transformation);
-      editor.add_vertex(vertex++, trns_x);
+      const real x =
+        -1. + static_cast< real >( ix ) * 2.0 / static_cast< real >( nx );
+      trns_x[0] = transformx( x, y, transformation );
+      trns_x[1] = transformy( x, y, transformation );
+      editor.add_vertex( vertex++, trns_x );
     }
   }
 
   // Create midpoint vertices if the mesh type is crisscross
-  if (type == crisscross)
+  if ( type == crisscross )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      const real y = -1.0
-          + (static_cast<real>(iy) + 0.5) * 2.0 / static_cast<real>(ny);
-      for (uint ix = 0; ix < nx; ix++)
+      const real y =
+        -1.0
+        + ( static_cast< real >( iy ) + 0.5 ) * 2.0 / static_cast< real >( ny );
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
         const real x = -1.0
-            + (static_cast<real>(ix) + 0.5) * 2.0 / static_cast<real>(nx);
-        trns_x[0] = transformx(x, y, transformation);
-        trns_x[1] = transformy(x, y, transformation);
-        editor.add_vertex(vertex++, trns_x);
+                       + ( static_cast< real >( ix ) + 0.5 ) * 2.0
+                           / static_cast< real >( nx );
+        trns_x[0] = transformx( x, y, transformation );
+        trns_x[1] = transformy( x, y, transformation );
+        editor.add_vertex( vertex++, trns_x );
       }
     }
   }
 
   // Create triangles
-  uint cell = 0;
-  if (type == crisscross)
+  size_t cell = 0;
+  if ( type == crisscross )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        const uint v0 = iy * (nx + 1) + ix;
-        const uint v1 = v0 + 1;
-        const uint v2 = v0 + (nx + 1);
-        const uint v3 = v1 + (nx + 1);
-        const uint vmid = (nx + 1) * (ny + 1) + iy * nx + ix;
+        const size_t v0   = iy * ( nx + 1 ) + ix;
+        const size_t v1   = v0 + 1;
+        const size_t v2   = v0 + ( nx + 1 );
+        const size_t v3   = v1 + ( nx + 1 );
+        const size_t vmid = ( nx + 1 ) * ( ny + 1 ) + iy * nx + ix;
 
         // Note that v0 < v1 < v2 < v3 < vmid.
         // Note that v0 < v1 < v2 < v3 < vmid.
-        uint const connectivity[12] = { v0, v1, vmid, v0, v2, vmid, v1, v3,
-                                        vmid, v2, v3, vmid };
+        size_t const connectivity[12] = {
+          v0, v1, vmid, v0, v2, vmid, v1, v3, vmid, v2, v3, vmid };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
-        editor.add_cell(cell++, &connectivity[6]);
-        editor.add_cell(cell++, &connectivity[9]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
+        editor.add_cell( cell++, &connectivity[6] );
+        editor.add_cell( cell++, &connectivity[9] );
       }
     }
   }
-  else if (type == left)
+  else if ( type == left )
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        const uint v0 = iy * (nx + 1) + ix;
-        const uint v1 = v0 + 1;
-        const uint v2 = v0 + (nx + 1);
-        const uint v3 = v1 + (nx + 1);
+        const size_t v0 = iy * ( nx + 1 ) + ix;
+        const size_t v1 = v0 + 1;
+        const size_t v2 = v0 + ( nx + 1 );
+        const size_t v3 = v1 + ( nx + 1 );
 
-        uint const connectivity[12] = { v0, v1, v2, v1, v2, v3 };
+        size_t const connectivity[12] = { v0, v1, v2, v1, v2, v3 };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
       }
     }
   }
   else
   {
-    for (uint iy = 0; iy < ny; iy++)
+    for ( size_t iy = 0; iy < ny; iy++ )
     {
-      for (uint ix = 0; ix < nx; ix++)
+      for ( size_t ix = 0; ix < nx; ix++ )
       {
-        const uint v0 = iy * (nx + 1) + ix;
-        const uint v1 = v0 + 1;
-        const uint v2 = v0 + (nx + 1);
-        const uint v3 = v1 + (nx + 1);
+        const size_t v0 = iy * ( nx + 1 ) + ix;
+        const size_t v1 = v0 + 1;
+        const size_t v2 = v0 + ( nx + 1 );
+        const size_t v3 = v1 + ( nx + 1 );
 
-        uint const connectivity[12] = { v0, v1, v3, v0, v2, v3 };
+        size_t const connectivity[12] = { v0, v1, v3, v0, v2, v3 };
 
-        editor.add_cell(cell++, &connectivity[0]);
-        editor.add_cell(cell++, &connectivity[3]);
+        editor.add_cell( cell++, &connectivity[0] );
+        editor.add_cell( cell++, &connectivity[3] );
       }
     }
   }
 
   // Close mesh editor
   editor.close();
-
 }
 //-----------------------------------------------------------------------------
-auto UnitDisk::transformx(real x, real y, Transformation transformation) -> real
+auto UnitDisk::transformx( real x, real y, Transformation transformation )
+  -> real
 {
-  //maxn transformation
-  if (transformation == maxn)
+  // maxn transformation
+  if ( transformation == maxn )
   {
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
-    return x * max(fabs(x), fabs(y)) / sqrt(x * x + y * y);
-    else return x;
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
+      return x * max( fabs( x ), fabs( y ) ) / sqrt( x * x + y * y );
+    else
+      return x;
   }
-  //sumn transformation
-  else if (transformation == sumn)
+  // sumn transformation
+  else if ( transformation == sumn )
   {
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
-    return x * (fabs(x) + fabs(y)) / sqrt(x * x + y * y);
-    else return x;
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
+      return x * ( fabs( x ) + fabs( y ) ) / sqrt( x * x + y * y );
+    else
+      return x;
   }
   else
   {
     /// @todo Use easier to understand check
-    if ((transformation != maxn) && (transformation != sumn)
-        && (transformation != rotsumn))
+    if ( ( transformation != maxn ) && ( transformation != sumn )
+         && ( transformation != rotsumn ) )
     {
-      message("Implemented  transformations are: maxn,sumn and rotsumn");
-      message("Using rotsumn transformation");
+      message( "Implemented  transformations are: maxn,sumn and rotsumn" );
+      message( "Using rotsumn transformation" );
     }
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
     {
-      real xx = 0.5 * (x + y);
-      real yy = 0.5 * (-x + y);
-      return xx * (fabs(xx) + fabs(yy)) / sqrt(xx * xx + yy * yy);
+      real xx = 0.5 * ( x + y );
+      real yy = 0.5 * ( -x + y );
+      return xx * ( fabs( xx ) + fabs( yy ) ) / sqrt( xx * xx + yy * yy );
     }
-    else return y;
+    else
+      return y;
   }
 }
 //-----------------------------------------------------------------------------
-auto UnitDisk::transformy(real x, real y, Transformation transformation) -> real
+auto UnitDisk::transformy( real x, real y, Transformation transformation )
+  -> real
 {
-  //maxn transformation
-  if (transformation == maxn)
+  // maxn transformation
+  if ( transformation == maxn )
   {
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
     {
-      return y * max(fabs(x), fabs(y)) / sqrt(x * x + y * y);
+      return y * max( fabs( x ), fabs( y ) ) / sqrt( x * x + y * y );
     }
     else
     {
       return y;
     }
   }
-  //sumn transformation
-  else if (transformation == sumn)
+  // sumn transformation
+  else if ( transformation == sumn )
   {
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
     {
-      return y * (fabs(x) + fabs(y)) / sqrt(x * x + y * y);
+      return y * ( fabs( x ) + fabs( y ) ) / sqrt( x * x + y * y );
     }
-    else return y;
+    else
+      return y;
   }
   else
   {
-    if ((transformation != maxn) && (transformation != sumn)
-        && (transformation != rotsumn))
+    if ( ( transformation != maxn ) && ( transformation != sumn )
+         && ( transformation != rotsumn ) )
     {
-      message("Implemented  transformations for are: maxn, sumn and rotsumn");
-      message("Using rotsumn transformation");
+      message( "Implemented  transformations for are: maxn, sumn and rotsumn" );
+      message( "Using rotsumn transformation" );
     }
-    if (x || y)  //in (0,0) (trns_x,trans_y)=(nan,nan)
+    if ( x || y ) // in (0,0) (trns_x,trans_y)=(nan,nan)
     {
-      real xx = 0.5 * (x + y);
-      real yy = 0.5 * (-x + y);
-      return yy * (fabs(xx) + fabs(yy)) / sqrt(xx * xx + yy * yy);
+      real xx = 0.5 * ( x + y );
+      real yy = 0.5 * ( -x + y );
+      return yy * ( fabs( xx ) + fabs( yy ) ) / sqrt( xx * xx + yy * yy );
     }
-    else return y;
+    else
+      return y;
   }
 }
 //-----------------------------------------------------------------------------

@@ -156,32 +156,36 @@ nobase_pkginclude_HEADERS = \
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
+				mesh/entities/iterators/CellIterator.h\
+				mesh/entities/iterators/EdgeIterator.h\
+				mesh/entities/iterators/FaceIterator.h\
+				mesh/entities/iterators/FacetIterator.h\
+				mesh/entities/iterators/MeshEntityIterator.h\
+				mesh/entities/iterators/VertexIterator.h\
+				mesh/entities/Cell.h\
+				mesh/entities/Edge.h\
+				mesh/entities/Face.h\
+				mesh/entities/Facet.h\
+				mesh/entities/MeshEntity.h\
+				mesh/entities/Vertex.h\
 				mesh/AffineMapping.h \
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\
 				mesh/Box.h\
-				mesh/Cell.h\
-				mesh/CellIterator.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
 				mesh/Connectivity.h\
 				mesh/DMesh.h\
 				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
-				mesh/Edge.h\
-				mesh/EdgeIterator.h\
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
 				mesh/EuclideanSpace.h \
-				mesh/Face.h\
-				mesh/FaceIterator.h\
 				mesh/FaceKey.h\
-				mesh/Facet.h\
-				mesh/FacetIterator.h\
 				mesh/GeometricPredicates.h\
 				mesh/GTSInterface.h\
 				mesh/HexahedronCell.h\
@@ -195,8 +199,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshDependent.h\
 				mesh/MeshDistributedData.h\
 				mesh/MeshEditor.h\
-				mesh/MeshEntity.h\
-				mesh/MeshEntityIterator.h\
 				mesh/MeshFunction.h\
 				mesh/MeshGeometry.h\
 				mesh/MeshOrdering.h\
@@ -231,8 +233,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/UnitInterval.h\
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\
-				mesh/Vertex.h\
-				mesh/VertexIterator.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\

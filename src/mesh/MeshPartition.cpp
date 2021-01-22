@@ -15,57 +15,62 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
+void MeshPartition::partition( MeshValues< size_t, Cell > & partitions )
 {
-  const std::string method = dolfin_get<std::string>("Mesh partitioner");
+  const std::string method = dolfin_get< std::string >( "Mesh partitioner" );
 
-  if (method == "parmetis")
-    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, nullptr);
-  else if (method == "zoltan")
-    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, nullptr);
+  if ( method == "parmetis" )
+    MetisInterface::partitionCommonMetis(
+      partitions.mesh(), partitions, nullptr );
+  else if ( method == "zoltan" )
+    ZoltanInterface::partitionCommonZoltan(
+      partitions.mesh(), partitions, nullptr );
   else
-    error("Unknown mesh partitioner");
+    error( "Unknown mesh partitioner" );
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
-                              MeshValues<uint, Cell>& weight)
+void MeshPartition::partition( MeshValues< size_t, Cell > & partitions,
+                               MeshValues< size_t, Cell > & weight )
 {
-  const std::string method = dolfin_get<std::string>("Mesh partitioner");
+  const std::string method = dolfin_get< std::string >( "Mesh partitioner" );
 
-  if (method == "parmetis")
-    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, &weight);
-  else if (method == "zoltan")
-    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, &weight);
+  if ( method == "parmetis" )
+    MetisInterface::partitionCommonMetis(
+      partitions.mesh(), partitions, &weight );
+  else if ( method == "zoltan" )
+    ZoltanInterface::partitionCommonZoltan(
+      partitions.mesh(), partitions, &weight );
   else
-    error("Unknown mesh partitioner");
+    error( "Unknown mesh partitioner" );
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
+void MeshPartition::partition_geom( MeshValues< size_t, Vertex > & partitions )
 {
-  const std::string method = dolfin_get<std::string>("Mesh partitioner");
+  const std::string method = dolfin_get< std::string >( "Mesh partitioner" );
 
-  if (method == "parmetis")
-    MetisInterface::partitionGeomMetis(partitions.mesh(), partitions);
-  else if (method == "zoltan")
-    ZoltanInterface::partitionGeomZoltan(partitions.mesh(), partitions);
+  if ( method == "parmetis" )
+    MetisInterface::partitionGeomMetis( partitions.mesh(), partitions );
+  else if ( method == "zoltan" )
+    ZoltanInterface::partitionGeomZoltan( partitions.mesh(), partitions );
   else
-    error("Unknown mesh partitioner");
+    error( "Unknown mesh partitioner" );
 }
 //-----------------------------------------------------------------------------
 #else
-void MeshPartition::partition(MeshValues<uint, Cell>&)
+void MeshPartition::partition( MeshValues< size_t, Cell > & )
 {
-  error("Mesh partitioning requires MPI");
+  error( "Mesh partitioning requires MPI" );
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(MeshValues<uint, Cell>&, MeshValues<uint, Cell>&)
+void MeshPartition::partition( MeshValues< size_t, Cell > &,
+                               MeshValues< size_t, Cell > & )
 {
-  error("Mesh partitioning requires MPI");
+  error( "Mesh partitioning requires MPI" );
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(MeshValues<uint, Vertex>&)
+void MeshPartition::partition_geom( MeshValues< size_t, Vertex > & )
 {
-  error("Geometric mesh partitioning requires MPI");
+  error( "Geometric mesh partitioning requires MPI" );
 }
 #endif
 //-----------------------------------------------------------------------------

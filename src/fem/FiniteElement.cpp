@@ -25,7 +25,7 @@ FiniteElement::FiniteElement( ufc::finite_element const & element,
 //-----------------------------------------------------------------------------
 
 FiniteElement::FiniteElement( ufc::finite_element const & element,
-                              uint const                  i )
+                              size_t const                i )
   : ufc_finite_element_( element.create_sub_element( i ) )
   , sub_value_dims_( nullptr )
 {
@@ -35,7 +35,7 @@ FiniteElement::FiniteElement( ufc::finite_element const & element,
 //-----------------------------------------------------------------------------
 
 FiniteElement::FiniteElement( ufc::finite_element const & element,
-                              Array< uint > const &       sub_system )
+                              Array< size_t > const &     sub_system )
   : ufc_finite_element_(
     FiniteElement::create_sub_element( element, sub_system ) )
   , sub_value_dims_( nullptr )
@@ -45,12 +45,12 @@ FiniteElement::FiniteElement( ufc::finite_element const & element,
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( CellType const &, Form & form, uint const i )
+FiniteElement::FiniteElement( CellType const &, Form & form, size_t const i )
   : ufc_finite_element_( nullptr )
   , sub_value_dims_( nullptr )
 {
   // Check argument
-  uint const num_arguments = form.rank() + form.num_coefficients();
+  size_t const num_arguments = form.rank() + form.num_coefficients();
   if ( i >= num_arguments )
   {
     error( "Illegal function index %d. Form only has %d arguments.",
@@ -95,19 +95,19 @@ void FiniteElement::Initialize()
   dolfin_assert( ufc_finite_element_ );
 
   // Add sub value dimensions for mixed elements, packed by axis
-  uint const max_dim = ufc_finite_element_->value_rank() + 1;
-  sub_value_dims_    = new Array< uint >[max_dim];
-  sub_value_offs_    = new Array< uint >[max_dim];
-  uint nb_subs       = this->num_sub_elements();
+  size_t const max_dim = ufc_finite_element_->value_rank() + 1;
+  sub_value_dims_      = new Array< size_t >[max_dim];
+  sub_value_offs_      = new Array< size_t >[max_dim];
+  size_t nb_subs       = this->num_sub_elements();
   if ( nb_subs > 0 )
   {
-    uint * off = new uint[max_dim];
+    size_t * off = new size_t[max_dim];
     std::fill_n( off, max_dim, 0 );
-    for ( uint e = 0; e < nb_subs; ++e )
+    for ( size_t e = 0; e < nb_subs; ++e )
     {
       ufc::finite_element * sub_fe =
         ufc_finite_element_->create_sub_element( e );
-      for ( uint a = 0; a < max_dim; ++a )
+      for ( size_t a = 0; a < max_dim; ++a )
       {
         sub_value_dims_[a].push_back( sub_fe->value_dimension( a ) );
         sub_value_offs_[a].push_back( off[a] );
@@ -119,7 +119,7 @@ void FiniteElement::Initialize()
   }
   else
   {
-    for ( uint a = 0; a < max_dim; ++a )
+    for ( size_t a = 0; a < max_dim; ++a )
     {
       sub_value_dims_[a].push_back( value_dimension( a ) );
       sub_value_offs_[a].push_back( 0 );
@@ -131,7 +131,7 @@ void FiniteElement::Initialize()
 
 auto FiniteElement::create_sub_element(
   const ufc::finite_element & finite_element,
-  Array< uint > const &       sub_system ) -> ufc::finite_element *
+  Array< size_t > const &     sub_system ) -> ufc::finite_element *
 {
   // If the subsystem is empty return self
   if ( sub_system.size() == 0 )
@@ -165,8 +165,8 @@ auto FiniteElement::create_sub_element(
   }
 
   // Otherwise, recursively extract the sub sub system
-  Array< uint > sub_sub_system;
-  for ( uint i = 1; i < sub_system.size(); i++ )
+  Array< size_t > sub_sub_system;
+  for ( size_t i = 1; i < sub_system.size(); i++ )
   {
     sub_sub_system.push_back( sub_system[i] );
   }
@@ -181,7 +181,7 @@ auto FiniteElement::create_sub_element(
 
 void FiniteElement::flatten( ufc::finite_element const *            element,
                              Array< ufc::finite_element const * > & stack,
-                             uint                                   maxlevel )
+                             size_t                                 maxlevel )
 {
   // Single root element or max level is set to zero, return immediately
   if ( element->num_sub_elements() == 0 || maxlevel == 0 )
@@ -190,7 +190,7 @@ void FiniteElement::flatten( ufc::finite_element const *            element,
     return;
   }
   // Go one level down
-  for ( uint s = 0; s < element->num_sub_elements(); ++s )
+  for ( size_t s = 0; s < element->num_sub_elements(); ++s )
   {
     ufc::finite_element const * sub = element->create_sub_element( s );
     if ( sub->num_sub_elements() == 0 )
@@ -218,7 +218,7 @@ void FiniteElement::flatten( ufc::finite_element const *            element,
     return;
   }
   // Go one level down
-  for ( uint s = 0; s < element->num_sub_elements(); ++s )
+  for ( size_t s = 0; s < element->num_sub_elements(); ++s )
   {
     ufc::finite_element const * sub = element->create_sub_element( s );
     if ( sub->num_sub_elements() == 0 )
@@ -240,7 +240,7 @@ auto FiniteElement::is_vectorizable() const -> bool
 {
   bool                                         ret = true;
   Array< ufc::finite_element const * > const & flt = this->flatten();
-  for ( uint s = 1; s < flt.size(); ++s )
+  for ( size_t s = 1; s < flt.size(); ++s )
   {
     if ( std::strcmp( flt[0]->signature(), flt[s]->signature() ) != 0 )
     {

@@ -7,7 +7,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/Elements.h>
 #include <dolfin/fem/FiniteElement.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/ufc/ufc.h>
 
 #include <string>
@@ -41,11 +41,11 @@ class FiniteElementSpace
 
 public:
   /// Create space from i-th coefficient space of given form
-  FiniteElementSpace( Form & form, uint const i );
+  FiniteElementSpace( Form & form, size_t const i );
 
   /// Create space from i-th coefficient element of given form but on the mesh
   /// provided as argument
-  FiniteElementSpace( Mesh & mesh, Form & form, uint const i );
+  FiniteElementSpace( Mesh & mesh, Form & form, size_t const i );
 
   /// Create space from UFC finite element
   explicit FiniteElementSpace( Mesh &                      mesh,
@@ -54,7 +54,7 @@ public:
                                bool                        owner = false );
 
   /// Create a finite element space from ith subspace of given space
-  FiniteElementSpace( FiniteElementSpace const & space, uint const i );
+  FiniteElementSpace( FiniteElementSpace const & space, size_t const i );
 
   /// Create a finite element space from given subspace
   FiniteElementSpace( FiniteElementSpace const & space, SubSystem const & sub );
@@ -76,7 +76,8 @@ public:
   auto mesh() const -> Mesh &;
 
   /// Return cell on which the reference element is defined
-  auto cell() const -> Cell &; //!< @tod Cannot const this due to Mesh implementation
+  auto cell() const
+    -> Cell &; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
   auto element() const -> FiniteElement const *;
@@ -85,10 +86,10 @@ public:
   auto dofmap() const -> DofMap const &;
 
   /// Returns a flattened representation of the space
-  auto flatten() const -> Array< FiniteElementSpace * >;
+  auto flatten() const -> std::vector< FiniteElementSpace * >;
 
   /// Display basic information
-  void disp() const;
+  auto disp() const -> void;
 
   //---------------------------------------------------------------------------
 
@@ -121,7 +122,8 @@ inline auto FiniteElementSpace::mesh() const -> Mesh &
 //-----------------------------------------------------------------------------
 
 inline auto
-  FiniteElementSpace::operator==( FiniteElementSpace const & other ) const -> bool
+  FiniteElementSpace::operator==( FiniteElementSpace const & other ) const
+  -> bool
 {
   return ( this->mesh() == other.mesh() )
          && ( this->element() == other.element() )
@@ -131,7 +133,8 @@ inline auto
 //-----------------------------------------------------------------------------
 
 inline auto
-  FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const -> bool
+  FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const
+  -> bool
 {
   return !( *this == other );
 }
@@ -164,7 +167,7 @@ inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
   // FIXME num_entities should maybe be stored somewhere else
   std::vector< size_t > num_entities( finite_element_->topological_dimension(),
                                       0 );
-  for ( uint d = 0; d <= finite_element_->topological_dimension(); ++d )
+  for ( size_t d = 0; d <= finite_element_->topological_dimension(); ++d )
   {
     if ( mesh_.topology().connectivity( d ) )
     {
@@ -189,7 +192,7 @@ inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 inline auto FiniteElementSpace::is_vertex_based() const -> bool
 {
   /// @todo Only a particular case.
-  return     ( finite_element_->family() == Element::Family::CG )
+  return ( finite_element_->family() == Element::Family::CG )
          and ( finite_element_->degree() == 1 );
 }
 
@@ -198,8 +201,8 @@ inline auto FiniteElementSpace::is_vertex_based() const -> bool
 inline auto FiniteElementSpace::is_flattenable() const -> bool
 {
   /// @todo Only a particular case.
-  uint value_size = 1;
-  for ( uint i = 0; i < finite_element_->value_rank(); ++i )
+  size_t value_size = 1;
+  for ( size_t i = 0; i < finite_element_->value_rank(); ++i )
   {
     value_size *= finite_element_->value_dimension( i );
   }

@@ -6,8 +6,8 @@
 
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 namespace dolfin
 {
@@ -22,10 +22,10 @@ namespace dolfin
 class PointCell : public CellType
 {
   // UFC: Topological Dimension
-  static uint const TD = 0;
+  static size_t const TD = 0;
 
   // UFC: Number of Entities
-  static uint const NE[1];
+  static size_t const NE[1];
 
   // UFC: Vertex Coordinates
   static real const VC[1][1];
@@ -44,31 +44,33 @@ public:
   }
 
   /// Return topological dimension of cell
-  auto dim() const -> uint override;
+  auto dim() const -> size_t override;
 
   /// Return number of entitites of given topological dimension
-  auto num_entities( uint dim ) const -> uint override;
+  auto num_entities( size_t dim ) const -> size_t override;
 
   /// Return number of entities of given topological dimensions
-  auto num_entities( uint d0, uint d1 ) const -> uint override;
+  auto num_entities( size_t d0, size_t d1 ) const -> size_t override;
 
   /// Return number of vertices for entity of given topological dimension
-  auto num_vertices( uint dim ) const -> uint override;
+  auto num_vertices( size_t dim ) const -> size_t override;
 
   /// Return orientation of the cell
-  auto orientation( Cell const & cell ) const -> uint override;
+  auto orientation( Cell const & cell ) const -> size_t override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( uint ** e, uint dim, uint const * v ) const override;
+  void
+    create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
-  void order_entities( MeshTopology & topology, uint i ) const override;
+  void order_entities( MeshTopology & topology, size_t i ) const override;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
-  void order_facet( uint vertices[], Facet & facet ) const override;
+  void order_facet( size_t vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  auto connectivity_needs_ordering( uint d0, uint d1 ) const -> bool override;
+  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const
+    -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities( Mesh & mesh ) const override;
@@ -76,15 +78,16 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Refine cell uniformly
-  void refine_cell( Cell & cell, MeshEditor & editor,
-                    uint & current_cell ) const override;
+  void refine_cell( Cell &       cell,
+                    MeshEditor & editor,
+                    size_t &     current_cell ) const override;
 
   /// Number of cells created by refinement pattern
-  auto num_refined_cells() const -> uint override;
+  auto num_refined_cells() const -> size_t override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  auto num_refined_vertices( uint dim ) const -> uint override;
+  auto num_refined_vertices( size_t dim ) const -> size_t override;
 
   //---------------------------------------------------------------------------
 
@@ -104,17 +107,19 @@ public:
   void midpoint( MeshEntity const & entity, real * p ) const override;
 
   /// Compute of given facet with respect to the cell
-  void normal( Cell const & cell, uint facet, real * n ) const override;
+  void normal( Cell const & cell, size_t facet, real * n ) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  auto facet_area( Cell const & cell, uint facet ) const -> real override;
+  auto facet_area( Cell const & cell, size_t facet ) const -> real override;
 
   /// Check if point p intersects the cell
-  auto intersects( MeshEntity const & e, Point const & p ) const -> bool override;
+  auto intersects( MeshEntity const & e, Point const & p ) const
+    -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the cell
   auto intersects( MeshEntity const & e,
-                   Point const & p1, Point const & p2 ) const -> bool override;
+                   Point const &      p1,
+                   Point const &      p2 ) const -> bool override;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
@@ -122,7 +127,7 @@ public:
   void create_reference_cell( Mesh & mesh ) const override;
 
   /// Return coordinates of vertices in the reference cell
-  auto reference_vertex( uint i ) const -> real const * override;
+  auto reference_vertex( size_t i ) const -> real const * override;
 
   //---------------------------------------------------------------------------
 
@@ -139,13 +144,13 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::dim() const -> uint
+inline auto PointCell::dim() const -> size_t
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::num_entities( uint dim ) const -> uint
+inline auto PointCell::num_entities( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   MAYBE_UNUSED( dim );
@@ -153,7 +158,7 @@ inline auto PointCell::num_entities( uint dim ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::num_entities( uint d0, uint d1 ) const -> uint
+inline auto PointCell::num_entities( size_t d0, size_t d1 ) const -> size_t
 {
   dolfin_assert( d0 <= TD );
   dolfin_assert( d1 <= TD );
@@ -163,7 +168,7 @@ inline auto PointCell::num_entities( uint d0, uint d1 ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::num_vertices( uint dim ) const -> uint
+inline auto PointCell::num_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   MAYBE_UNUSED( dim );
@@ -171,14 +176,14 @@ inline auto PointCell::num_vertices( uint dim ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::orientation( Cell const & ) const -> uint
+inline auto PointCell::orientation( Cell const & ) const -> size_t
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
 inline void
-  PointCell::create_entities( uint ** e, uint dim, uint const * v ) const
+  PointCell::create_entities( size_t ** e, size_t dim, size_t const * v ) const
 {
   if ( dim > 0 )
   {
@@ -188,19 +193,20 @@ inline void
 }
 
 //-----------------------------------------------------------------------------
-inline void PointCell::order_entities( MeshTopology &, uint ) const
+inline void PointCell::order_entities( MeshTopology &, size_t ) const
 {
   // do nothing
 }
 
 //-----------------------------------------------------------------------------
-inline void PointCell::order_facet( uint[], Facet & ) const
+inline void PointCell::order_facet( size_t[], Facet & ) const
 {
   // Do nothing
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::connectivity_needs_ordering( uint d0, uint d1 ) const -> bool
+inline auto PointCell::connectivity_needs_ordering( size_t d0, size_t d1 ) const
+  -> bool
 {
   dolfin_assert( d0 <= TD && d1 <= TD );
   MAYBE_UNUSED( d0 );
@@ -217,19 +223,19 @@ inline void PointCell::initialize_connectivities( Mesh & ) const
 //-----------------------------------------------------------------------------
 inline void PointCell::refine_cell( Cell &       cell,
                                     MeshEditor & editor,
-                                    uint &       current_cell ) const
+                                    size_t &     current_cell ) const
 {
   editor.add_cell( current_cell++, cell.entities( 0 ).data() );
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::num_refined_cells() const -> uint
+inline auto PointCell::num_refined_cells() const -> size_t
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::num_refined_vertices( uint ) const -> uint
+inline auto PointCell::num_refined_vertices( size_t ) const -> size_t
 {
   return 1;
 }
@@ -269,19 +275,20 @@ inline void PointCell::midpoint( MeshEntity const & entity, real * p ) const
 }
 
 //-----------------------------------------------------------------------------
-inline void PointCell::normal( Cell const &, uint, real * ) const
+inline void PointCell::normal( Cell const &, size_t, real * ) const
 {
   error( "PointCell::normal() is undefined" );
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::facet_area( Cell const &, uint ) const -> real
+inline auto PointCell::facet_area( Cell const &, size_t ) const -> real
 {
   return 0.0;
 }
 
 //-----------------------------------------------------------------------------
-inline auto PointCell::intersects( MeshEntity const & e, Point const & p ) const -> bool
+inline auto PointCell::intersects( MeshEntity const & e, Point const & p ) const
+  -> bool
 {
   return abscmp( p.dist( e.mesh().geometry().point( e.index() ) ), 0.0 );
 }

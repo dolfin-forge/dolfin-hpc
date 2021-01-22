@@ -6,17 +6,17 @@
 #include <dolfin/common/byteswap.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/math/LinearDistribution.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
-#include <dolfin/main/MPI.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -30,36 +30,37 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 typedef struct atomic_cell
 {
-  uint const size;
-  uint * const v;
+  size_t const   size;
+  size_t * const v;
 
   //-----------------------------------
-  atomic_cell(uint d) :
-      size(d),
-      v(new uint[size])
+  atomic_cell( size_t d )
+    : size( d )
+    , v( new size_t[size] )
   {
   }
   //-----------------------------------
-  atomic_cell(atomic_cell const& other) :
-      size(other.size),
-      v(new uint[size])
+  atomic_cell( atomic_cell const & other )
+    : size( other.size )
+    , v( new size_t[size] )
   {
-    std::copy(other.v, other.v + size, v);
+    std::copy( other.v, other.v + size, v );
   }
   //-----------------------------------
-  auto operator=(atomic_cell const& other) -> atomic_cell&
+  auto operator=( atomic_cell const & other ) -> atomic_cell &
   {
-    if(&other == this)
+    if ( &other == this )
     {
       return *this;
     }
-    if(size != other.size)
+    if ( size != other.size )
     {
-      error("Size of atomic_cells in assignment do not match");
+      error( "Size of atomic_cells in assignment do not match" );
     }
-    std::copy(other.v, other.v + size, v);
+    std::copy( other.v, other.v + size, v );
     return *this;
   }
   //-----------------------------------
@@ -70,6 +71,7 @@ typedef struct atomic_cell
 } atomic_cell;
 
 //----------------------------------------------------------------------------
+
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile("Binary", filename),
 #if defined( HAVE_MPI )
@@ -520,17 +522,23 @@ void BinaryFile::operator>>(Mesh& mesh)
     fp.read((char *) &num_cells, sizeof(uint));
     if(byteswap) num_cells = bswap(num_cells);
     editor.init_cells(num_cells);
-    uint const cell_data_size = num_cells * num_cellvertices;
-    uint * cell_data = new uint[cell_data_size];
-    fp.read((char *) cell_data, cell_data_size * sizeof(uint));
 
-    if (byteswap) { bswap(cell_data, cell_data + cell_data_size); }
+    std::vector< uint > cell_data( num_cells * num_cellvertices );
+    fp.read((char *) cell_data.data(), cell_data.size() * sizeof(uint));
+
+    if ( byteswap )
+    {
+      bswap( cell_data.data(), cell_data.data() + cell_data.size() );
+    }
+
+    std::vector< size_t > cell_data2( cell_data.size() );
+    std::copy( cell_data.begin(), cell_data.end(), cell_data2.begin() );
 
     for (uint c = 0; c < num_cells; ++c)
     {
-      editor.add_cell(c, &cell_data[c * num_cellvertices]);
+      editor.add_cell(c, &cell_data2[c * num_cellvertices]);
     }
-    delete[] cell_data;
+
     editor.close();
     fp.close();
   }
@@ -797,7 +805,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Add cell connectivities
     uint local_cell_index = 0;
-    Array< uint > connectivity( num_cellvertices );
+    Array< size_t > connectivity( num_cellvertices );
     for (Array<atomic_cell>::iterator it = cells.begin();
          it != cells.end(); ++local_cell_index, ++it)
     {
@@ -887,9 +895,10 @@ void BinaryFile::operator<<(Mesh& mesh)
     byte_offset += MPI::file_write_all( fh, type );
 
     // Write vertices
-    uint vertex_offset = 0;
-    uint vertex_buffer_size = gdim * mesh.topology().num_owned(0);
+    size_t vertex_offset = 0;
+    size_t vertex_buffer_size = gdim * mesh.topology().num_owned(0);
     MPI::offset(vertex_buffer_size, vertex_offset, comm);
+
     real * vertex_buffer = new real[vertex_buffer_size];
     real * vptr = &vertex_buffer[0];
     for (VertexIterator v(mesh); !v.end(); ++v)
@@ -907,9 +916,10 @@ void BinaryFile::operator<<(Mesh& mesh)
     delete[] vertex_buffer;
 
     // Write Cells
-    uint cell_offset = 0;
-    uint cell_buffer_size = num_cellvertices * mesh.num_cells();
+    size_t cell_offset = 0;
+    size_t cell_buffer_size = num_cellvertices * mesh.num_cells();
     MPI::offset(cell_buffer_size, cell_offset, comm);
+
     uint * cell_buffer = new uint[cell_buffer_size];
     uint * cp = &cell_buffer[0];
     for (CellIterator c(mesh); !c.end(); ++c)

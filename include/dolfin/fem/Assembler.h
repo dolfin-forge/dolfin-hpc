@@ -33,9 +33,9 @@ void assemble(GenericTensor& A, Form& form, SubDomain const& sub_domain,
 
 /// Assemble tensor from given variational form over sub domains
 void assemble(GenericTensor& A, Form& form,
-              MeshValues<uint, Cell> const& cell_domains,
-              MeshValues<uint, Facet> const& exterior_facet_domains,
-              MeshValues<uint, Facet> const& interior_facet_domains,
+              MeshValues<size_t, Cell> const& cell_domains,
+              MeshValues<size_t, Facet> const& exterior_facet_domains,
+              MeshValues<size_t, Facet> const& interior_facet_domains,
               bool reset_tensor);
 
 } // end namespace Assembler

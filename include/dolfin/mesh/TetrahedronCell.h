@@ -5,8 +5,8 @@
 #define __DOLFIN_TETRAHEDRON_CELL_H
 
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
 
 namespace dolfin
 {
@@ -21,25 +21,25 @@ namespace dolfin
 class TetrahedronCell : public CellType
 {
   // UFC: Topological Dimension
-  static uint const TD = 3;
+  static size_t const TD = 3;
 
   // UFC: Number of Entities
-  static uint const NE[4][4];
+  static size_t const NE[4][4];
 
   // UFC: Vertex Coordinates
   static real const VC[4][3];
 
   // UFC: Edge - Incident Vertices
-  static uint const EIV[6][2];
+  static size_t const EIV[6][2];
 
   // UFC: Edge - Non-Incident Vertices
-  static uint const ENV[6][2];
+  static size_t const ENV[6][2];
 
   // UFC: Face - Incident Vertices
-  static uint const FIV[4][3];
+  static size_t const FIV[4][3];
 
   // UFC: Face - Non-Incident Vertices
-  static uint const FNV[4][1];
+  static size_t const FNV[4][1];
 
 public:
   /// Specify cell type and facet type
@@ -55,31 +55,33 @@ public:
   }
 
   /// Return topological dimension of cell
-  auto dim() const -> uint override;
+  auto dim() const -> size_t override;
 
   /// Return number of entitites of given topological dimension
-  auto num_entities( uint dim ) const -> uint override;
+  auto num_entities( size_t dim ) const -> size_t override;
 
   /// Return number of entities of given topological dimensions
-  auto num_entities( uint d0, uint d1 ) const -> uint override;
+  auto num_entities( size_t d0, size_t d1 ) const -> size_t override;
 
   /// Return number of vertices for entity of given topological dimension
-  auto num_vertices( uint dim ) const -> uint override;
+  auto num_vertices( size_t dim ) const -> size_t override;
 
   /// Return orientation of the cell
-  auto orientation( Cell const & cell ) const -> uint override;
+  auto orientation( Cell const & cell ) const -> size_t override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( uint ** e, uint dim, uint const * v ) const override;
+  void
+    create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1, 3-0, 3-1, 3-2)
-  void order_entities( MeshTopology & topology, uint i ) const override;
+  void order_entities( MeshTopology & topology, size_t i ) const override;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
-  void order_facet( uint vertices[], Facet & facet ) const override;
+  void order_facet( size_t vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  auto connectivity_needs_ordering( uint d0, uint d1 ) const -> bool override;
+  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const
+    -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities( Mesh & mesh ) const override;
@@ -87,15 +89,16 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Regular refinement of cell
-  void
-    refine_cell( Cell & cell, MeshEditor & editor, uint & current_cell ) const override;
+  void refine_cell( Cell &       cell,
+                    MeshEditor & editor,
+                    size_t &     current_cell ) const override;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  auto num_refined_vertices( uint dim ) const -> uint override;
+  auto num_refined_vertices( size_t dim ) const -> size_t override;
 
   /// Number of cells created by refinement pattern
-  auto num_refined_cells() const -> uint override;
+  auto num_refined_cells() const -> size_t override;
 
   //---------------------------------------------------------------------------
 
@@ -115,17 +118,19 @@ public:
   void midpoint( MeshEntity const & entity, real * p ) const override;
 
   /// Compute of given facet with respect to the cell
-  void normal( Cell const & cell, uint facet, real * n ) const override;
+  void normal( Cell const & cell, size_t facet, real * n ) const override;
 
   /// Compute the area/length of given facet with respect to the cell
-  auto facet_area( Cell const & cell, uint facet ) const -> real override;
+  auto facet_area( Cell const & cell, size_t facet ) const -> real override;
 
   /// Check if point p intersects the entity
-  auto intersects( MeshEntity const & e, Point const & p ) const -> bool override;
+  auto intersects( MeshEntity const & e, Point const & p ) const
+    -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
   auto intersects( MeshEntity const & e,
-                   Point const & p1, Point const & p2 ) const -> bool override;
+                   Point const &      p1,
+                   Point const &      p2 ) const -> bool override;
 
   //--- REFERENCE CELL --------------------------------------------------------
 
@@ -133,7 +138,7 @@ public:
   void create_reference_cell( Mesh & mesh ) const override;
 
   /// Return coordinates of vertices in the reference cell
-  auto reference_vertex( uint i ) const -> real const * override;
+  auto reference_vertex( size_t i ) const -> real const * override;
 
   //---------------------------------------------------------------------------
 
@@ -148,23 +153,24 @@ public:
 
 private:
   // Find local index of edge i according to ordering convention
-  auto findEdge( uint i, Cell const & cell ) const -> uint;
+  auto findEdge( size_t i, Cell const & cell ) const -> size_t;
 };
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::dim() const -> uint
+inline auto TetrahedronCell::dim() const -> size_t
 {
   return 3;
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::num_entities( uint dim ) const -> uint
+inline auto TetrahedronCell::num_entities( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[3][dim];
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::num_entities( uint d0, uint d1 ) const -> uint
+inline auto TetrahedronCell::num_entities( size_t d0, size_t d1 ) const
+  -> size_t
 {
   dolfin_assert( d0 <= TD );
   dolfin_assert( d1 <= TD );
@@ -172,20 +178,20 @@ inline auto TetrahedronCell::num_entities( uint d0, uint d1 ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::num_vertices( uint dim ) const -> uint
+inline auto TetrahedronCell::num_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return NE[dim][0];
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::orientation( Cell const & cell ) const -> uint
+inline auto TetrahedronCell::orientation( Cell const & cell ) const -> size_t
 {
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< uint > const & vertices = cell.entities( 0 );
+  MeshGeometry const &    geometry = cell.mesh().geometry();
+  Array< size_t > const & vertices = cell.entities( 0 );
 
   real const * v0 = geometry.x( vertices[0] );
   real const * v1 = geometry.x( vertices[1] );
@@ -206,8 +212,9 @@ inline auto TetrahedronCell::orientation( Cell const & cell ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::connectivity_needs_ordering( uint d0,
-                                                          uint d1 ) const -> bool
+inline auto TetrahedronCell::connectivity_needs_ordering( size_t d0,
+                                                          size_t d1 ) const
+  -> bool
 {
   dolfin_assert( d0 <= TD && d1 <= TD );
   return ( d0 > 0 && d0 > d1 );
@@ -225,13 +232,13 @@ inline void TetrahedronCell::initialize_connectivities( Mesh & mesh ) const
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::num_refined_cells() const -> uint
+inline auto TetrahedronCell::num_refined_cells() const -> size_t
 {
   return 8;
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::num_refined_vertices( uint dim ) const -> uint
+inline auto TetrahedronCell::num_refined_vertices( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= TD );
   return ( dim > 1 ? 0 : 1 );
@@ -244,8 +251,8 @@ inline auto TetrahedronCell::volume( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -276,8 +283,8 @@ inline auto TetrahedronCell::diameter( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -291,7 +298,7 @@ inline auto TetrahedronCell::diameter( MeshEntity const & entity ) const -> real
   real aa = 0.0;
   real bb = 0.0;
   real cc = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     a += ( x1[i] - x2[i] ) * ( x1[i] - x2[i] );
     b += ( x0[i] - x2[i] ) * ( x0[i] - x2[i] );
@@ -311,14 +318,15 @@ inline auto TetrahedronCell::diameter( MeshEntity const & entity ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::circumradius( MeshEntity const & entity ) const -> real
+inline auto TetrahedronCell::circumradius( MeshEntity const & entity ) const
+  -> real
 {
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -332,7 +340,7 @@ inline auto TetrahedronCell::circumradius( MeshEntity const & entity ) const -> 
   real aa = 0.0;
   real bb = 0.0;
   real cc = 0.0;
-  for ( uint i = 0; i < geometry.dim(); ++i )
+  for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     a += ( x1[i] - x2[i] ) * ( x1[i] - x2[i] );
     b += ( x0[i] - x2[i] ) * ( x0[i] - x2[i] );
@@ -381,15 +389,15 @@ inline void TetrahedronCell::midpoint( MeshEntity const & entity,
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< uint > const & vertices = entity.entities( 0 );
+  MeshGeometry const &    geometry = entity.mesh().geometry();
+  Array< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
   real const * x2 = geometry.x( vertices[2] );
   real const * x3 = geometry.x( vertices[3] );
 
-  for ( uint d = 0; d < geometry.dim(); ++d )
+  for ( size_t d = 0; d < geometry.dim(); ++d )
   {
     p[d] = 0.25 * ( x0[d] + x1[d] + x2[d] + x3[d] );
   }
@@ -397,7 +405,7 @@ inline void TetrahedronCell::midpoint( MeshEntity const & entity,
 
 //-----------------------------------------------------------------------------
 inline void
-  TetrahedronCell::normal( Cell const & cell, uint facet, real * n ) const
+  TetrahedronCell::normal( Cell const & cell, size_t facet, real * n ) const
 {
   dolfin_assert( cell.type() == this->cell_type );
 
@@ -410,7 +418,7 @@ inline void
   real const * p0 = geometry.x( cell.entities( 0 )[facet] );
 
   // Get coordinates of facet vertices
-  Array< uint > const & vertices = f.entities( 0 );
+  Array< size_t > const & vertices = f.entities( 0 );
 
   real const * p1 = geometry.x( vertices[0] );
   real const * p2 = geometry.x( vertices[1] );
@@ -439,7 +447,8 @@ inline void
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::facet_area( Cell const & cell, uint facet ) const -> real
+inline auto TetrahedronCell::facet_area( Cell const & cell, size_t facet ) const
+  -> real
 {
   dolfin_assert( cell.type() == this->cell_type );
 
@@ -448,8 +457,8 @@ inline auto TetrahedronCell::facet_area( Cell const & cell, uint facet ) const -
   Facet  f( c.mesh(), c.entities( 2 )[facet] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< uint > const & vertices = f.entities( 0 );
+  MeshGeometry const &    geometry = cell.mesh().geometry();
+  Array< size_t > const & vertices = f.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -468,7 +477,7 @@ inline auto TetrahedronCell::facet_area( Cell const & cell, uint facet ) const -
 }
 
 //-----------------------------------------------------------------------------
-inline auto TetrahedronCell::reference_vertex( uint i ) const -> real const *
+inline auto TetrahedronCell::reference_vertex( size_t i ) const -> real const *
 {
   return &VC[i][0];
 }

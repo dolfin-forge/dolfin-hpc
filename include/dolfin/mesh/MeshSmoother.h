@@ -26,7 +26,7 @@ extern "C"
 }
 #endif
 
-#define RM(row,col,nrow) ((row) + ((nrow)*(col)))
+#define RM( row, col, nrow ) ( ( row ) + ( ( nrow ) * ( col ) ) )
 
 namespace dolfin
 {
@@ -39,40 +39,44 @@ class Vector;
 class MeshSmoother : public MeshDependent
 {
 public:
-
   //--- INTERFACE -------------------------------------------------------------
 
-  virtual void smooth(MeshValues<bool, Cell>& smoothed_cells,
-                      MeshValues<bool, Vertex>& masked_vertices,
-                      MeshValues<real, Cell>& h0, GenericVector& node_values,
-                      GenericVector& motion, bool reset) = 0;
+  virtual void smooth( MeshValues< bool, Cell > &   smoothed_cells,
+                       MeshValues< bool, Vertex > & masked_vertices,
+                       MeshValues< real, Cell > &   h0,
+                       GenericVector &              node_values,
+                       GenericVector &              motion,
+                       bool                         reset ) = 0;
 
   //---------------------------------------------------------------------------
 
-  static void maph0(MeshValues<int, Cell>& cell_map,
-                    MeshValues<real, Cell>& h0, MeshValues<real, Cell>& subh0);
+  static void maph0( MeshValues< int, Cell > &  cell_map,
+                     MeshValues< real, Cell > & h0,
+                     MeshValues< real, Cell > & subh0 );
 
   ///
-  static auto onBoundary(Cell& cell) -> bool;
+  static auto onBoundary( Cell & cell ) -> bool;
 
   ///
-  static void worstElement(int& index, MeshValues<bool, Cell>& masked_cells);
+  static void worstElement( int &                      index,
+                            MeshValues< bool, Cell > & masked_cells );
 
   ///
-  static void elementNhood(Cell& element, MeshValues<bool, Cell>& elements, int depth);
+  static void elementNhood( Cell &                     element,
+                            MeshValues< bool, Cell > & elements,
+                            int                        depth );
 
   ///
-  static void submesh(Mesh& sub, MeshValues<bool, Cell>& smoothed_cells,
-                      MeshValues<int, Vertex>& old2new_vertex,
-                      MeshValues<int, Cell>& old2new_cell);
+  static void submesh( Mesh &                      sub,
+                       MeshValues< bool, Cell > &  smoothed_cells,
+                       MeshValues< int, Vertex > & old2new_vertex,
+                       MeshValues< int, Cell > &   old2new_cell );
 
 protected:
-
   /// Constructor
-  MeshSmoother(Mesh& mesh);
+  MeshSmoother( Mesh & mesh );
 
   ~MeshSmoother() override = default;
-
 };
 
 //-----------------------------------------------------------------------------

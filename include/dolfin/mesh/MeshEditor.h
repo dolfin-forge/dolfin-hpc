@@ -5,10 +5,8 @@
 #define __DOLFIN_MESH_EDITOR_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Point.h>
 
 namespace dolfin
 {
@@ -16,39 +14,46 @@ namespace dolfin
 class Mesh;
 class Connectivity;
 
+//-----------------------------------------------------------------------------
+
 /// A simple mesh editor for creating meshes.
 
 class MeshEditor
 {
 
 public:
+  /// Constructor for serial meshes given a cell type and default space
+  MeshEditor( Mesh & mesh, CellType const & ctype );
 
   /// Constructor for serial meshes given a cell type and default space
-  MeshEditor(Mesh& mesh, CellType const& ctype);
-
-  /// Constructor for serial meshes given a cell type and default space
-  MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm);
+  MeshEditor( Mesh & mesh, CellType const & ctype, Comm & comm );
 
   /// Constructor for serial meshes given a cell type and a space definition
-  MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space);
+  MeshEditor( Mesh & mesh, CellType const & ctype, Space const & space );
 
   /// Constructor for meshes given a cell type and a space definition
-  MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space, Comm& comm);
+  MeshEditor( Mesh &           mesh,
+              CellType const & ctype,
+              Space const &    space,
+              Comm &           comm );
 
   /// Constructor for serial meshes with type of cell from factory function
-  MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim);
+  MeshEditor( Mesh & mesh, CellType::Type cell_type, size_t gdim );
 
   /// Constructor for serial meshes with type of cell from factory function
-  MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm);
+  MeshEditor( Mesh & mesh, CellType::Type cell_type, size_t gdim, Comm & comm );
 
   /// Constructor using already initialized mesh.
-  MeshEditor(Mesh& mesh);
+  MeshEditor( Mesh & mesh );
 
   /// Destructor
   ~MeshEditor();
 
   ///
-  auto mesh() const -> Mesh& { return mesh_; }
+  auto mesh() const -> Mesh &
+  {
+    return mesh_;
+  }
 
   //--- VERTICES --------------------------------------------------------------
 
@@ -56,13 +61,13 @@ public:
   /// Optionally specify the global number of vertices for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local vertices will trigger an error.
-  void init_vertices(uint num_local, uint num_global = 0);
+  auto init_vertices( size_t num_local, size_t num_global = 0 ) -> void;
 
   /// Add vertex v at given coordinates x
-  void add_vertex(uint v, real const * x);
+  auto add_vertex( size_t v, real const * x ) -> void;
 
   /// Return current vertex count
-  auto current_vertex() const -> uint;
+  auto current_vertex() const -> size_t;
 
   //--- CELLS -----------------------------------------------------------------
 
@@ -70,66 +75,60 @@ public:
   /// Optionally specify the global number of cells for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local cells will trigger an error.
-  void init_cells(uint num_local, uint num_global = 0);
+  auto init_cells( size_t num_local, size_t num_global = 0 ) -> void;
 
   /// Add cell with given vertices
-  void add_cell(uint c, uint const * v);
+  auto add_cell( size_t c, size_t const * v ) -> void;
 
   /// Return current cell count
-  auto current_cell() const -> uint;
+  auto current_cell() const -> size_t;
 
   //---------------------------------------------------------------------------
 
   /// Close mesh, finish editing
-  void close();
+  auto close() -> void;
 
   //---------------------------------------------------------------------------
 
-  struct Parameters
-  {
-    CellType * ctype_{nullptr};
-    Space    * space_{nullptr};
-    Comm     * mcomm_{nullptr};
-
-    Parameters() = default;
-  };
-
 private:
-
   /// Open mesh of given cell type and geometrical dimension
-  void init(Mesh& mesh, CellType const& ctype, Space const& space, Comm& comm);
+  auto init( Mesh &           mesh,
+             CellType const & ctype,
+             Space const &    space,
+             Comm &           comm ) -> void;
 
   // Clear all data
-  void clear();
+  auto clear() -> void;
 
   // Mesh
-  Mesh& mesh_;
+  Mesh & mesh_;
 
   // Cell connectivity to vertices
   Connectivity * cell_vertices_;
 
   // Topological dimension
-  uint tdim_;
+  size_t tdim_;
 
   // Geometrical (Euclidean) dimension
-  uint gdim_;
+  size_t gdim_;
 
   // Number of vertices
-  uint num_vertices_;
+  size_t num_vertices_;
 
   // Number of cells
-  uint num_cells_;
+  size_t num_cells_;
 
   // Next available vertex
-  uint vertex_index_;
+  size_t vertex_index_;
 
   // Next available cell
-  uint cell_index_;
+  size_t cell_index_;
 
   //
   bool open_;
-
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

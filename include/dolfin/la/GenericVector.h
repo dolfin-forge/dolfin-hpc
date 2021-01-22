@@ -4,15 +4,17 @@
 #ifndef __DOLFIN_GENERIC_VECTOR_H
 #define __DOLFIN_GENERIC_VECTOR_H
 
-#include "GenericSparsityPattern.h"
-#include "GenericTensor.h"
-#include "VectorNormType.h"
-#include "VectorPointwiseOp.h"
+#include <dolfin/la/GenericSparsityPattern.h>
+#include <dolfin/la/GenericTensor.h>
+#include <dolfin/la/VectorNormType.h>
+#include <dolfin/la/VectorPointwiseOp.h>
 
 #include <dolfin/common/maybe_unused.h>
 
 namespace dolfin
 {
+
+//-----------------------------------------------------------------------------
 
 /// This class defines a common interface for vectors.
 
@@ -31,25 +33,25 @@ public:
   auto copy() const -> GenericVector * override = 0;
 
   /// Return tensor rank (number of dimensions)
-  auto rank() const -> uint override;
+  auto rank() const -> size_t override;
 
   /// Return size of given dimension
-  inline auto size( uint dim ) const -> uint override;
+  inline auto size( size_t dim ) const -> size_t override;
 
   /// Get block of values
-  inline void get( real * block,
-                   const uint * num_rows,
-                   const uint * const * rows ) const override;
+  inline void get( real *                 block,
+                   const size_t *         num_rows,
+                   const size_t * const * rows ) const override;
 
   /// Set block of values
-  inline void set( const real * block,
-                   const uint * num_rows,
-                   const uint * const * rows ) override;
+  inline void set( const real *           block,
+                   const size_t *         num_rows,
+                   const size_t * const * rows ) override;
 
   /// Add block of values
-  inline void add( const real * block,
-                   const uint * num_rows,
-                   const uint * const * rows ) override;
+  inline void add( const real *           block,
+                   const size_t *         num_rows,
+                   const size_t * const * rows ) override;
 
   /// Set all entries to zero and keep any sparse structure
   void zero() override = 0;
@@ -58,38 +60,38 @@ public:
   void apply( FinalizeType finaltype = FINALIZE ) override = 0;
 
   /// Display tensor
-  void disp( uint precision = 2 ) const override = 0;
+  void disp( size_t precision = 2 ) const override = 0;
 
   //--- Vector interface ---
 
   /// Initialize vector of size N
-  virtual void init( uint N ) = 0;
+  virtual void init( size_t N ) = 0;
 
   /// Initialize vector of size N and distribute if specified
-  virtual void init( uint N, bool distributed ) = 0;
+  virtual void init( size_t N, bool distributed ) = 0;
 
   /// Initialize ghost entries
-  virtual void init_ghosted( uint                         n,
-                             _ordered_set< uint > &       indices,
-                             _ordered_map< uint, uint > & map ) = 0;
+  virtual void init_ghosted( size_t                           n,
+                             _ordered_set< size_t > &         indices,
+                             _ordered_map< size_t, size_t > & map ) = 0;
 
   /// Return size of vector
-  virtual auto size() const -> uint = 0;
+  virtual auto size() const -> size_t = 0;
 
   /// Return local size of vector
-  virtual auto local_size() const -> uint = 0;
+  virtual auto local_size() const -> size_t = 0;
 
   /// Return rank's offset into vector
-  virtual auto offset() const -> uint = 0;
+  virtual auto offset() const -> size_t = 0;
 
   /// Get block of values
-  virtual void get( real * block, uint m, const uint * rows ) const = 0;
+  virtual void get( real * block, size_t m, const size_t * rows ) const = 0;
 
   /// Set block of values
-  virtual void set( const real * block, uint m, const uint * rows ) = 0;
+  virtual void set( const real * block, size_t m, const size_t * rows ) = 0;
 
   /// Add block of values
-  virtual void add( const real * block, uint m, const uint * rows ) = 0;
+  virtual void add( const real * block, size_t m, const size_t * rows ) = 0;
 
   /// Get all values
   virtual void get( real * values ) const = 0;
@@ -104,17 +106,18 @@ public:
   virtual void axpy( real a, const GenericVector & x ) = 0;
 
   /// Add multiple of given vector (y=a*x+b*y)
-  virtual void axpby( real a, const GenericVector & x,
-                      real b ) = 0;
+  virtual void axpby( real a, const GenericVector & x, real b ) = 0;
 
   /// Add multiple of given vector (w=a*x+y)
-  virtual void waxpy( real a, const GenericVector & x,
-                              const GenericVector & y ) = 0;
+  virtual void
+    waxpy( real a, const GenericVector & x, const GenericVector & y ) = 0;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  virtual void axpbypcz( real a, const GenericVector & x,
-                         real b, const GenericVector & y,
-                         real c ) = 0;
+  virtual void axpbypcz( real                  a,
+                         const GenericVector & x,
+                         real                  b,
+                         const GenericVector & y,
+                         real                  c ) = 0;
 
   /// Return inner product with given vector
   virtual auto inner( const GenericVector & x ) const -> real = 0;
@@ -139,16 +142,20 @@ public:
   virtual auto operator/=( real a ) -> const GenericVector & = 0;
 
   /// Multiply vector by given vector component-wise
-  virtual auto operator*=( const GenericVector & x ) -> const GenericVector & = 0;
+  virtual auto operator*=( const GenericVector & x )
+    -> const GenericVector & = 0;
 
   /// Add given vector
-  virtual auto operator+=( const GenericVector & x ) -> const GenericVector & = 0;
+  virtual auto operator+=( const GenericVector & x )
+    -> const GenericVector & = 0;
 
   /// Subtract given vector
-  virtual auto operator-=( const GenericVector & x ) -> const GenericVector & = 0;
+  virtual auto operator-=( const GenericVector & x )
+    -> const GenericVector & = 0;
 
   /// Assignment operator
-  virtual auto operator=( const GenericVector & x ) -> const GenericVector & = 0;
+  virtual auto operator      =( const GenericVector & x )
+    -> const GenericVector & = 0;
 
   /// Assignment operator
   virtual auto operator=( real a ) -> const GenericVector & = 0;
@@ -156,29 +163,33 @@ public:
   //--- Convenience functions ---
 
   /// Get value of given entry
-  virtual auto operator[]( uint i ) const -> real;
+  virtual auto operator[]( size_t i ) const -> real;
 
   /// Get value of given entry
-  virtual auto getitem( uint i ) const -> real;
+  virtual auto getitem( size_t i ) const -> real;
 
   /// Set given entry to value
-  virtual void setitem( uint i, real value );
+  virtual void setitem( size_t i, real value );
 };
 
 //-----------------------------------------------------------------------------
-inline void GenericVector::init( const GenericSparsityPattern & sparsity_pattern )
+
+inline void
+  GenericVector::init( const GenericSparsityPattern & sparsity_pattern )
 {
   init( sparsity_pattern.size( 0 ), sparsity_pattern.is_distributed() );
 }
 
 //-----------------------------------------------------------------------------
-inline auto GenericVector::rank() const -> uint
+
+inline auto GenericVector::rank() const -> size_t
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
-inline auto GenericVector::size( uint dim ) const -> uint
+
+inline auto GenericVector::size( size_t dim ) const -> size_t
 {
   dolfin_assert( dim == 0 );
   MAYBE_UNUSED( dim );
@@ -186,31 +197,35 @@ inline auto GenericVector::size( uint dim ) const -> uint
 }
 
 //-----------------------------------------------------------------------------
-inline void GenericVector::get( real *               block,
-                                const uint *         num_rows,
-                                const uint * const * rows ) const
+
+inline void GenericVector::get( real *                 block,
+                                const size_t *         num_rows,
+                                const size_t * const * rows ) const
 {
   get( block, num_rows[0], rows[0] );
 }
 
 //-----------------------------------------------------------------------------
-inline void GenericVector::set( const real *         block,
-                                const uint *         num_rows,
-                                const uint * const * rows )
+
+inline void GenericVector::set( const real *           block,
+                                const size_t *         num_rows,
+                                const size_t * const * rows )
 {
   set( block, num_rows[0], rows[0] );
 }
 
 //-----------------------------------------------------------------------------
-inline void GenericVector::add( const real *         block,
-                                const uint *         num_rows,
-                                const uint * const * rows )
+
+inline void GenericVector::add( const real *           block,
+                                const size_t *         num_rows,
+                                const size_t * const * rows )
 {
   add( block, num_rows[0], rows[0] );
 }
 
 //-----------------------------------------------------------------------------
-inline auto GenericVector::operator[]( uint i ) const -> real
+
+inline auto GenericVector::operator[]( size_t i ) const -> real
 {
   real value( 0 );
   get( &value, 1, &i );
@@ -218,7 +233,8 @@ inline auto GenericVector::operator[]( uint i ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto GenericVector::getitem( uint i ) const -> real
+
+inline auto GenericVector::getitem( size_t i ) const -> real
 {
   real value( 0 );
   get( &value, 1, &i );
@@ -226,7 +242,8 @@ inline auto GenericVector::getitem( uint i ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline void GenericVector::setitem( uint i, real value )
+
+inline void GenericVector::setitem( size_t i, real value )
 {
   set( &value, 1, &i );
 }

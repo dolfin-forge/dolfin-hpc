@@ -15,9 +15,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-auto MeshRenumber::renumber(MeshTopology& topology) -> bool
+auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
 {
-  if (!topology.distributed())
+  if ( !topology.distributed() )
   {
     return false;
   }
@@ -26,25 +26,25 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
 
 #ifdef HAVE_MPI
 
-  MeshDistributedData& distdata = topology.distdata();
+  MeshDistributedData & distdata = topology.distdata();
 
-  uint const tdim = topology.dim();
-  uint const rank = MPI::rank();
-  uint const pe_size = MPI::size();
+  size_t const tdim    = topology.dim();
+  size_t const rank    = MPI::rank();
+  size_t const pe_size = MPI::size();
 
   /*
    * Renumber vertices: compacting global numbering per rank.
    *
    */
 
-  if (topology.connectivity(0) && !distdata[0].valid_numbering)
+  if ( topology.connectivity( 0 ) && !distdata[0].valid_numbering )
   {
-    message(1, "MeshRenumber : renumber vertices");
-    renumbered = true;
-    DistributedData& vdata = distdata[0];
-    dolfin_assert(vdata.local_size() == topology.size(0));
+    message( 1, "MeshRenumber : renumber vertices" );
+    renumbered              = true;
+    DistributedData & vdata = distdata[0];
+    dolfin_assert( vdata.local_size() == topology.size( 0 ) );
     vdata.renumber_global();
-    dolfin_assert(vdata.local_size() == topology.size(0));
+    dolfin_assert( vdata.local_size() == topology.size( 0 ) );
     vdata.valid_numbering = true;
   }
 
@@ -53,57 +53,57 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
    *
    */
 
-  for (uint d = 1; d < tdim; ++d)
+  for ( size_t d = 1; d < tdim; ++d )
   {
-    if (!(topology.connectivity(d) && !distdata[d].valid_numbering))
+    if ( !( topology.connectivity( d ) && !distdata[d].valid_numbering ) )
     {
       continue;
     }
 
-    message(1, "MeshRenumber : renumber entities of dimension %u", d);
-    renumbered = true;
-    DistributedData& vdata = distdata[0];
-    DistributedData& edata = distdata[d];
-    Connectivity const& cve = topology(0, d);
-    Connectivity const& cev = topology(d, 0);
+    message( 1, "MeshRenumber : renumber entities of dimension %u", d );
+    renumbered                 = true;
+    DistributedData &    vdata = distdata[0];
+    DistributedData &    edata = distdata[d];
+    Connectivity const & cve   = topology( 0, d );
+    Connectivity const & cev   = topology( d, 0 );
 
     // Set the random seed
-    std::srand(MPI::seed());
+    std::srand( MPI::seed() );
 
     // Distributed data size is known: cache arrays are used.
-    dolfin_assert(edata.empty());
-    dolfin_assert(!edata.is_finalized());
-    edata.set_size(topology.size(d));
+    dolfin_assert( edata.empty() );
+    dolfin_assert( !edata.is_finalized() );
+    edata.set_size( topology.size( d ) );
 
     //
-    uint const num_entity_vertices = cev.max_degree();
-    EntityKey key(num_entity_vertices);
-    _map<EntityKey, uint> entity_map;
-    Array< Array<uint> > sendbuf ( pe_size );
+    size_t const              num_entity_vertices = cev.max_degree();
+    EntityKey                 key( num_entity_vertices );
+    _map< EntityKey, size_t > entity_map;
+    Array< Array< size_t > >  sendbuf( pe_size );
 
     // Collect entities with a common adjacent to shared vertices
-    _set<uint> adjs;
-    Array< bool > used_entities( topology.size(d), false);
-    for (SharedIterator it(vdata); it.valid(); ++it)
+    _set< size_t > adjs;
+    Array< bool >  used_entities( topology.size( d ), false );
+    for ( SharedIterator it( vdata ); it.valid(); ++it )
     {
-      dolfin_assert(it.index() < cve.order());
-      Array<uint> const & v_entities = cve[it.index()];
-      for (uint e = 0; e < cve.degree(it.index()); ++e)
+      dolfin_assert( it.index() < cve.order() );
+      Array< size_t > const & v_entities = cve[it.index()];
+      for ( size_t e = 0; e < cve.degree( it.index() ); ++e )
       {
-        uint const entity_index = v_entities[e];
-        if (used_entities[entity_index] == true)
+        size_t const entity_index = v_entities[e];
+        if ( used_entities[entity_index] == true )
         {
           continue;
         }
         used_entities[entity_index] = true;
 
         // Skip entities with a non-shared vertex
-        Array<uint> const & vertices = cev[entity_index];
-        dolfin_assert(vertices[0] != vertices[1]);
+        Array< size_t > const & vertices = cev[entity_index];
+        dolfin_assert( vertices[0] != vertices[1] );
         bool all_shared = true;
-        for (uint v = 0; v < num_entity_vertices; ++v)
+        for ( size_t v = 0; v < num_entity_vertices; ++v )
         {
-          if(it.index() != vertices[v] && !vdata.is_shared(vertices[v]))
+          if ( it.index() != vertices[v] && !vdata.is_shared( vertices[v] ) )
           {
             all_shared = false;
             break;
@@ -111,27 +111,29 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
         }
 
         // Append to send buffer for each adjacent
-        if(all_shared)
+        if ( all_shared )
         {
           /// @todo randomness may be harmful
-          uint const vote = std::rand();
-          vdata.get_common_adj(num_entity_vertices, vertices, adjs);
-          if (adjs.size() > 0)
+          size_t const vote = std::rand();
+          vdata.get_common_adj( num_entity_vertices, vertices, adjs );
+          if ( adjs.size() > 0 )
           {
-            vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
+            vdata.get_global(
+              num_entity_vertices, vertices.data(), key.indices );
             // NOTE: it is important to use set to copy global indices as sort
             //       is called to store indices in increasing order.
-            key.set(key.indices, entity_index);
-            dolfin_assert(key.indices[0] < key.indices[1]);
+            key.set( key.indices, entity_index );
+            dolfin_assert( key.indices[0] < key.indices[1] );
             entity_map[key] = vote;
-            for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end();
-                 ++a)
+            for ( _set< size_t >::const_iterator a = adjs.begin();
+                  a != adjs.end();
+                  ++a )
             {
-              sendbuf[*a].push_back(vote);
-              sendbuf[*a].push_back(entity_index);
-              for (uint v = 0; v < num_entity_vertices; ++v)
+              sendbuf[*a].push_back( vote );
+              sendbuf[*a].push_back( entity_index );
+              for ( size_t v = 0; v < num_entity_vertices; ++v )
               {
-                sendbuf[*a].push_back(key.indices[v]);
+                sendbuf[*a].push_back( key.indices[v] );
               }
             }
           }
@@ -140,58 +142,58 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
     }
 
     // Exchange data to mark which entities are shared
-    _map<uint,uint> recvmap;
+    _map< size_t, size_t > recvmap;
 
-    uint recvmax = max_array_size( sendbuf );
-    MPI::all_reduce_in_place<MPI::max>( recvmax );
-    //recvmap.reserve( recvmax );
-    Array< uint > recvbuf( recvmax );
-    for (uint j = 1; j < pe_size; ++j)
+    size_t recvmax = max_array_size( sendbuf );
+    MPI::all_reduce_in_place< MPI::max >( recvmax );
+    // recvmap.reserve( recvmax );
+    Array< size_t > recvbuf( recvmax );
+    for ( size_t j = 1; j < pe_size; ++j )
     {
-      uint src = (rank - j + pe_size) % pe_size;
-      uint dst = (rank + j) % pe_size;
+      size_t src = ( rank - j + pe_size ) % pe_size;
+      size_t dst = ( rank + j ) % pe_size;
 
       int recvcount = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1 );
 
-      for (int k = 0; k < recvcount; k+=(2 + num_entity_vertices))
+      for ( int k = 0; k < recvcount; k += ( 2 + num_entity_vertices ) )
       {
         // Data is received in the following order:
         // [ vote, local index, sorted global vertex indices ]
-        uint const vote1 = recvbuf[k];
-        key.idx = recvbuf[k + 1];
+        size_t const vote1 = recvbuf[k];
+        key.idx            = recvbuf[k + 1];
         // Entities are already sorted, just copy them to save sort computation
-        std::copy(&recvbuf[k + 2], &recvbuf[k + 2] + num_entity_vertices,
-                  key.indices);
-        //dolfin_assert(key.indices[0] < key.indices[1]);
+        std::copy(
+          &recvbuf[k + 2], &recvbuf[k + 2] + num_entity_vertices, key.indices );
+        // dolfin_assert(key.indices[0] < key.indices[1]);
 
         // Beware camembert !
         // Even if the rank is adjacent for all the vertices, the entity may
         // still not be shared: the main bug of the original implementation was
         // that entities with all vertices shared were marked as shared although
         // the condition is only necessary, not sufficient.
-        _map<EntityKey, uint>::iterator it = entity_map.find(key);
-        if (it != entity_map.end())
+        _map< EntityKey, size_t >::iterator it = entity_map.find( key );
+        if ( it != entity_map.end() )
         {
           /// @todo Hash collision possible ?
-          uint const local_index = it->first.idx;
-          uint const vote0 = it->second;
+          size_t const local_index = it->first.idx;
+          size_t const vote0       = it->second;
 
           // Give ownership to the minimum vote amongst adjacent ranks
-          if ((vote1 < vote0) ||
-              (vote1 == vote0 && src < edata.get_owner(local_index)))
+          if ( ( vote1 < vote0 )
+               || ( vote1 == vote0 && src < edata.get_owner( local_index ) ) )
           {
             // Update vote, map local index and set owner
             it->second = vote1;
-            dolfin_assert(it->second == vote1);
+            dolfin_assert( it->second == vote1 );
             recvmap[local_index] = key.idx;
-            dolfin_assert(key.idx == recvbuf[k + 1]);
-            edata.set_ghost(local_index, src);
-            dolfin_assert(edata.is_ghost(local_index));
-            dolfin_assert(edata.get_owner(local_index) == src);
-            dolfin_assert(edata.is_shared(local_index));
+            dolfin_assert( key.idx == recvbuf[k + 1] );
+            edata.set_ghost( local_index, src );
+            dolfin_assert( edata.is_ghost( local_index ) );
+            dolfin_assert( edata.get_owner( local_index ) == src );
+            dolfin_assert( edata.is_shared( local_index ) );
           }
-          edata.set_shared_adj(local_index, src);
-          dolfin_assert(edata.is_shared(local_index));
+          edata.set_shared_adj( local_index, src );
+          dolfin_assert( edata.is_shared( local_index ) );
         }
       }
     }
@@ -202,76 +204,82 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
     // Exchange ghost entities
     sendbuf.clear();
     sendbuf.resize( pe_size );
-    Array< Array<uint> > ghostid( pe_size );
-    edata.set_range(cev.order() - edata.num_ghost());
-    uint current_index = edata.offset();
-    for(uint i = 0; i < cev.order(); ++i)
+    Array< Array< size_t > > ghostid( pe_size );
+    edata.set_range( cev.order() - edata.num_ghost() );
+    size_t current_index = edata.offset();
+    for ( size_t i = 0; i < cev.order(); ++i )
     {
-      if(edata.is_owned(i))
+      if ( edata.is_owned( i ) )
       {
-        edata.set_map(i, current_index);
+        edata.set_map( i, current_index );
         ++current_index;
       }
       else
       {
         // Enqueue to query global index
-        uint const owner = edata.get_owner(i);
-        dolfin_assert(owner != rank);
-        dolfin_assert(owner < pe_size);
-        dolfin_assert(recvmap.count(i) > 0);
-        sendbuf[owner].push_back(recvmap.find(i)->second);
-        ghostid[owner].push_back(i);
+        size_t const owner = edata.get_owner( i );
+        dolfin_assert( owner != rank );
+        dolfin_assert( owner < pe_size );
+        dolfin_assert( recvmap.count( i ) > 0 );
+        sendbuf[owner].push_back( recvmap.find( i )->second );
+        ghostid[owner].push_back( i );
       }
     }
 
     // At this point the mapping is set for owned entities but not for ghosts
-    if (edata.num_shared() < edata.num_ghost())
+    if ( edata.num_shared() < edata.num_ghost() )
     {
-      error("MeshRenumber : invalid number of entities, shared %u < %u ghost",
-            edata.num_shared(), edata.num_ghost());
+      error( "MeshRenumber : invalid number of entities, shared %u < %u ghost",
+             edata.num_shared(),
+             edata.num_ghost() );
     }
     recvmax = edata.num_shared() - edata.num_ghost();
     recvbuf.clear();
     recvbuf.resize( recvmax );
-    Array< uint > sendbuf_back( recvmax );
-    Array< uint > recvbuf_back( edata.num_ghost() );
-    for (uint j = 1; j < pe_size; ++j)
+    Array< size_t > sendbuf_back( recvmax );
+    Array< size_t > recvbuf_back( edata.num_ghost() );
+    for ( size_t j = 1; j < pe_size; ++j )
     {
-      int src = (rank - j + pe_size) % pe_size;
-      int dst = (rank + j) % pe_size;
+      int src = ( rank - j + pe_size ) % pe_size;
+      int dst = ( rank + j ) % pe_size;
 
       int recvcount = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1 );
 
-      for (int k = 0; k < recvcount; ++k)
+      for ( int k = 0; k < recvcount; ++k )
       {
-        ///Throw hard error to make sure consistency of data is ensured before
+        /// Throw hard error to make sure consistency of data is ensured before
         // renumbering.
-        if(!edata.is_shared(recvbuf[k]))
+        if ( !edata.is_shared( recvbuf[k] ) )
         {
-          error("MeshRenumber : received entity %u is not marked as shared",
-                recvbuf[k]);
+          error( "MeshRenumber : received entity %u is not marked as shared",
+                 recvbuf[k] );
         }
-        if(!edata.is_owned(recvbuf[k]))
+        if ( !edata.is_owned( recvbuf[k] ) )
         {
-          error("MeshRenumber : received entity %u is not marked as owned",
-                recvbuf[k]);
+          error( "MeshRenumber : received entity %u is not marked as owned",
+                 recvbuf[k] );
         }
-        dolfin_assert(edata.get_shared_adj(recvbuf[k]).count(src) > 0);
-        sendbuf_back[k] = edata.get_global(recvbuf[k]);
+        dolfin_assert( edata.get_shared_adj( recvbuf[k] ).count( src ) > 0 );
+        sendbuf_back[k] = edata.get_global( recvbuf[k] );
       }
 
-      MPI::sendrecv( &sendbuf_back[0], recvcount, src,
-                     &recvbuf_back[0], sendbuf[dst].size(), dst, 2 );
+      MPI::sendrecv( &sendbuf_back[0],
+                     recvcount,
+                     src,
+                     &recvbuf_back[0],
+                     sendbuf[dst].size(),
+                     dst,
+                     2 );
 
-      for (int k = 0; k < (int) sendbuf[dst].size(); ++k)
+      for ( int k = 0; k < ( int ) sendbuf[dst].size(); ++k )
       {
-        edata.set_map(ghostid[dst][k], recvbuf_back[k]);
+        edata.set_map( ghostid[dst][k], recvbuf_back[k] );
       }
     }
 
     //
     edata.finalize();
-    dolfin_assert(edata.local_size() == topology.size(d));
+    dolfin_assert( edata.local_size() == topology.size( d ) );
     edata.valid_numbering = true;
   }
 
@@ -280,14 +288,14 @@ auto MeshRenumber::renumber(MeshTopology& topology) -> bool
    *
    */
 
-  if (topology.connectivity(tdim) && !distdata[tdim].valid_numbering)
+  if ( topology.connectivity( tdim ) && !distdata[tdim].valid_numbering )
   {
-    message(1, "MeshRenumber : renumber cells");
-    renumbered = true;
-    DistributedData& cdata = distdata[tdim];
+    message( 1, "MeshRenumber : renumber cells" );
+    renumbered              = true;
+    DistributedData & cdata = distdata[tdim];
     // Cell numbering is applied automatically at finalized call
     cdata.renumber_global();
-    dolfin_assert(cdata.local_size() == topology.size(tdim));
+    dolfin_assert( cdata.local_size() == topology.size( tdim ) );
     cdata.valid_numbering = true;
   }
 

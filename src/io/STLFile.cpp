@@ -60,7 +60,7 @@ void STLFile::operator>>( Mesh & mesh )
 
   struct stl_vertex              V[3];
   _ordered_set< stl_vertex >     vertices;
-  Array< std::array< uint, 3 > > cells;
+  std::vector< std::array< size_t, 3 > > cells;
 
   std::ifstream fp( filename.c_str(), std::ifstream::binary );
   fp.read( hdr.data(), hdr.size() * sizeof( char ) );

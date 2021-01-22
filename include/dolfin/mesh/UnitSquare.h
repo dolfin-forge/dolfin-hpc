@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_UNIT_SQUARE_H
 #define __DOLFIN_UNIT_SQUARE_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
@@ -23,11 +23,12 @@ class UnitSquare : public Mesh
 public:
   enum Type
   {
-    right, left, crisscross
+    right,
+    left,
+    crisscross
   };
 
-  UnitSquare(uint nx, uint ny, Type type = right);
-
+  UnitSquare( size_t nx, size_t ny, Type type = right );
 };
 
 }

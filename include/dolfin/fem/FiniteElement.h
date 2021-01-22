@@ -178,13 +178,13 @@ public:
     ufc::coordinate_mapping const * cm = nullptr ) const override;
 
   /// Evaluate linear functional for dof i on the function f
-  auto evaluate_dof(
-    size_t                          i,
-    ufc::function const &           f,
-    double const *                  coordinate_dofs,
-    int                             cell_orientation,
-    ufc::cell const &               c,
-    ufc::coordinate_mapping const * cm = nullptr ) const -> double override;
+  auto evaluate_dof( size_t                          i,
+                     ufc::function const &           f,
+                     double const *                  coordinate_dofs,
+                     int                             cell_orientation,
+                     ufc::cell const &               c,
+                     ufc::coordinate_mapping const * cm = nullptr ) const
+    -> double override;
 
   /// Evaluate linear functionals for all dofs on the function f
   void evaluate_dofs(
@@ -235,13 +235,13 @@ public:
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
   /// Recursively extract sub finite element
-  static auto
-    create_sub_element( ufc::finite_element const & finite_element,
-                        Array< size_t > const &     sub_system ) -> ufc::finite_element *;
+  static auto create_sub_element( ufc::finite_element const & finite_element,
+                                  Array< size_t > const &     sub_system )
+    -> ufc::finite_element *;
 
   /// Create sub finite element of given finite element
-  auto
-    create_sub_element( Array< size_t > const & sub_system ) const -> ufc::finite_element *;
+  auto create_sub_element( Array< size_t > const & sub_system ) const
+    -> ufc::finite_element *;
 
   /// Get value dimensions for sub spaces just one level down for axis i
   auto sub_value_dimensions( size_t i ) const -> Array< size_t > const &;
@@ -502,13 +502,14 @@ inline void FiniteElement::evaluate_basis_derivatives_all(
 
 //-----------------------------------------------------------------------------
 
-inline auto FiniteElement::evaluate_dof(
-  size_t                          i,
-  ufc::function const &           f,
-  double const *                  coordinate_dofs,
-  int                             cell_orientation,
-  ufc::cell const &               c,
-  ufc::coordinate_mapping const * cm ) const -> double
+inline auto
+  FiniteElement::evaluate_dof( size_t                          i,
+                               ufc::function const &           f,
+                               double const *                  coordinate_dofs,
+                               int                             cell_orientation,
+                               ufc::cell const &               c,
+                               ufc::coordinate_mapping const * cm ) const
+  -> double
 {
   return ufc_finite_element_->evaluate_dof(
     i, f, coordinate_dofs, cell_orientation, c, cm );
@@ -516,13 +517,13 @@ inline auto FiniteElement::evaluate_dof(
 
 //-----------------------------------------------------------------------------
 
-inline void FiniteElement::evaluate_dofs(
-  double *                        values,
-  ufc::function const &           f,
-  double const *                  coordinate_dofs,
-  int                             cell_orientation,
-  ufc::cell const &               c,
-  ufc::coordinate_mapping const * cm ) const
+inline void
+  FiniteElement::evaluate_dofs( double *              values,
+                                ufc::function const & f,
+                                double const *        coordinate_dofs,
+                                int                   cell_orientation,
+                                ufc::cell const &     c,
+                                ufc::coordinate_mapping const * cm ) const
 {
   ufc_finite_element_->evaluate_dofs(
     values, f, coordinate_dofs, cell_orientation, c, cm );
@@ -589,7 +590,8 @@ inline auto FiniteElement::num_sub_elements() const -> size_t
 
 //-----------------------------------------------------------------------------
 
-inline auto FiniteElement::create_sub_element( size_t i ) const -> ufc::finite_element *
+inline auto FiniteElement::create_sub_element( size_t i ) const
+  -> ufc::finite_element *
 {
   return ufc_finite_element_->create_sub_element( i );
 }
@@ -603,14 +605,16 @@ inline auto FiniteElement::create() const -> ufc::finite_element *
 
 //-----------------------------------------------------------------------------
 
-inline auto FiniteElement::operator==( FiniteElement const & other ) const -> bool
+inline auto FiniteElement::operator==( FiniteElement const & other ) const
+  -> bool
 {
   return ( std::strcmp( this->signature(), other.signature() ) == 0 );
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto FiniteElement::operator!=( FiniteElement const & other ) const -> bool
+inline auto FiniteElement::operator!=( FiniteElement const & other ) const
+  -> bool
 {
   return !( *this == other );
 }
@@ -618,31 +622,32 @@ inline auto FiniteElement::operator!=( FiniteElement const & other ) const -> bo
 //-----------------------------------------------------------------------------
 
 inline auto
-  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const -> ufc::finite_element *
+  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const
+  -> ufc::finite_element *
 {
   return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto
-  FiniteElement::sub_value_dimensions( size_t i ) const -> Array< size_t > const &
+inline auto FiniteElement::sub_value_dimensions( size_t i ) const
+  -> Array< size_t > const &
 {
   return sub_value_dims_[i];
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto
-  FiniteElement::sub_value_offsets( size_t i ) const -> Array< size_t > const &
+inline auto FiniteElement::sub_value_offsets( size_t i ) const
+  -> Array< size_t > const &
 {
   return sub_value_offs_[i];
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto
-  FiniteElement::flatten() const -> Array< ufc::finite_element const * > const &
+inline auto FiniteElement::flatten() const
+  -> Array< ufc::finite_element const * > const &
 {
   if ( flattened_.empty() )
   {

@@ -5,10 +5,10 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/FacetIterator.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
@@ -67,8 +67,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   /// Lagrange where more than one per element is associated with
   /// each coordinate. Note that globally there may very well be
   /// more than one dof per coordinate (for conforming elements).
-  uint const gdim = mesh().geometry_dimension();
-  uint const tdim = mesh().geometry_dimension();
+  size_t const gdim = mesh().geometry_dimension();
+  size_t const tdim = mesh().geometry_dimension();
 
   // Table of mappings from coordinates to dofs
   _ordered_map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
@@ -77,7 +77,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 
   // Array used for mapping coordinates
   real * y = new real[gdim];
-  for (uint i = 0; i < gdim; i++)
+  for (size_t i = 0; i < gdim; i++)
   {
     y[i] = 0.0;
   }
@@ -97,7 +97,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     scratch.cell.update(cell);
 
     // Get local index of facet with respect to the cell
-    const uint local_facet = cell.index(*facet);
+    const size_t local_facet = cell.index(*facet);
 
     // Tabulate dofs on cell
     space.dofmap().tabulate_dofs(scratch.dofs, scratch.cell);
@@ -110,15 +110,15 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
 
     // Iterate over facet dofs
-    for (uint i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
+    for (size_t i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
     {
       // Get dof and coordinate of dof
-      uint const dof = scratch.offset + scratch.facet_dofs[i];
+      size_t const dof = scratch.offset + scratch.facet_dofs[i];
       int const global_dof = static_cast<int>(scratch.dofs[dof]);
       real * x = &scratch.coordinates[scratch.facet_dofs[i]*Space::MAX_DIMENSION];
 
       // Map coordinate from H to G
-      for (uint j = 0; j < gdim; j++)
+      for (size_t j = 0; j < gdim; j++)
       {
         y[j] = x[j];
       }
@@ -131,7 +131,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
       if (subdomain.inside(x, on_boundary))
       {
         // Copy coordinate to std::vector
-        for (uint j = 0; j < gdim; j++)
+        for (size_t j = 0; j < gdim; j++)
         {
           xx[j] = x[j];
         }
@@ -145,7 +145,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            if (it->second.first != -1)
            {
            cout << "Coordinate: x =";
-           for (uint j = 0; j < gdim; j++)
+           for (size_t j = 0; j < gdim; j++)
            cout << " " << xx[j];
            cout << "\n";
            cout << "Degrees of freedom: " << it->second.first << " " << global_dof << "\n";
@@ -167,7 +167,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
         // y = F(x) is in G, so coordinate x is in H
 
         // Copy coordinate to std::vector
-        for (uint j = 0; j < gdim; j++)
+        for (size_t j = 0; j < gdim; j++)
           xx[j] = y[j];
 
         // Check if coordinate exists from before
@@ -179,7 +179,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            if (it->second.second != -1)
            {
            cout << "Coordinate: x =";
-           for (uint j = 0; j < gdim; j++)
+           for (size_t j = 0; j < gdim; j++)
            cout << " " << xx[j];
            cout << "\n";
            cout << "Degrees of freedom: " << it->second.second << " " << global_dof << "\n";
@@ -201,16 +201,16 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   // Given pairs <dofG, dofH>
 
   // Insert 1 at (dof0, dof0)
-  uint* rows = new uint[coordinate_dofs.size()];
-  uint i = 0;
+  size_t* rows = new size_t[coordinate_dofs.size()];
+  size_t i = 0;
   for (iterator it = coordinate_dofs.begin(); it != coordinate_dofs.end(); ++it)
   {
-    rows[i++] = static_cast<uint>(it->second.first);
+    rows[i++] = static_cast<size_t>(it->second.first);
   }
   A.ident(coordinate_dofs.size(), rows);
 
   // Insert -1 at (dof0, dof1) and 0 on right-hand side
-  uint* cols = new uint[1];
+  size_t* cols = new size_t[1];
   real* vals = new real[1];
   real* zero = new real[1];
   for (iterator it = coordinate_dofs.begin(); it != coordinate_dofs.end(); ++it)
@@ -221,7 +221,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     if (dof0 == -1 || dof1 == -1)
     {
       cout << "At coordinate: x =";
-      for (uint j = 0; j < gdim; j++)
+      for (size_t j = 0; j < gdim; j++)
         cout << " " << it->first[j];
       cout << "\n";
       error(
@@ -231,8 +231,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     /// @todo Perhaps this can be done more efficiently?
 
     // Set x_i - x_j = 0
-    rows[0] = static_cast<uint>(dof0);
-    cols[0] = static_cast<uint>(dof1);
+    rows[0] = static_cast<size_t>(dof0);
+    cols[0] = static_cast<size_t>(dof1);
     vals[0] = -1;
     zero[0] = 0.0;
 
@@ -258,11 +258,11 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
     real * block = new real[pdm.max_local_dimension() + 1];
     std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);
-    uint irow = 0;
-    uint * jcols = new uint[pdm.max_local_dimension() + 1];
+    size_t irow = 0;
+    size_t * jcols = new size_t[pdm.max_local_dimension() + 1];
     std::fill_n(jcols, pdm.max_local_dimension() + 1, 0.0);
-    uint ncols = 0;
-    for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+    size_t ncols = 0;
+    for (size_t i = 0; i < pdm.num_Gdofs(); ++i)
     {
       pdm.tabulate_dofs(i, &irow, jcols, ncols);
       jcols[ncols] = irow;
@@ -276,7 +276,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     //
     PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
     Vector& vecA = static_cast<Vector&>(A);
-    uint const num_rows = pdm.num_Gdofs();
+    size_t const num_rows = pdm.num_Gdofs();
     real * block = new real[num_rows];
     std::memset(&block[0], 0, num_rows);
     vecA.set(&block[0], num_rows, pdm.get_Gindices());

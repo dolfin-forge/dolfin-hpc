@@ -12,7 +12,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/io/File.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/entities/MeshEntity.h>
 
 #include <algorithm>
 

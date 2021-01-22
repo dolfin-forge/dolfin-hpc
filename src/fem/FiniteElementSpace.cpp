@@ -13,7 +13,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-FiniteElementSpace::FiniteElementSpace( Form & form, uint const i )
+FiniteElementSpace::FiniteElementSpace( Form & form, size_t const i )
   : mesh_( form.dofmaps()[i].mesh() )
   , cell_( mesh_, 0 )
   , finite_element_( new FiniteElement( mesh_.type(), form, i ) )
@@ -23,7 +23,9 @@ FiniteElementSpace::FiniteElementSpace( Form & form, uint const i )
 
 //-----------------------------------------------------------------------------
 
-FiniteElementSpace::FiniteElementSpace( Mesh & mesh, Form & form, uint const i )
+FiniteElementSpace::FiniteElementSpace( Mesh &       mesh,
+                                        Form &       form,
+                                        size_t const i )
   : mesh_( mesh )
   , cell_( mesh, 0 )
   , finite_element_( new FiniteElement( mesh.type(), form, i ) )
@@ -47,7 +49,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                      mesh,
 //-----------------------------------------------------------------------------
 
 FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
-                                        uint const                 i )
+                                        size_t const               i )
   : mesh_( space.mesh() )
   , cell_( space.cell() )
   , finite_element_( new FiniteElement( *space.element(), i ) )
@@ -105,14 +107,15 @@ FiniteElementSpace::~FiniteElementSpace()
 
 //-----------------------------------------------------------------------------
 
-auto FiniteElementSpace::flatten() const -> Array< FiniteElementSpace * >
+auto FiniteElementSpace::flatten() const -> std::vector< FiniteElementSpace * >
 {
-  Array< FiniteElementSpace * >        flt;
-  Array< ufc::finite_element const * > flt_fe = finite_element_->flatten();
-  Array< ufc::dofmap const * >         flt_dm = dof_map_.flatten();
+  std::vector< FiniteElementSpace * >        flt;
+  std::vector< ufc::finite_element const * > flt_fe =
+    finite_element_->flatten();
+  std::vector< ufc::dofmap const * > flt_dm = dof_map_.flatten();
 
   dolfin_assert( flt_fe.size() == flt_dm.size() );
-  for ( uint s = 0; s < flt_fe.size(); ++s )
+  for ( size_t s = 0; s < flt_fe.size(); ++s )
   {
     flt.push_back( new FiniteElementSpace(
       mesh_, flt_fe[s]->create(), *flt_dm[s]->create(), true ) );
@@ -122,7 +125,7 @@ auto FiniteElementSpace::flatten() const -> Array< FiniteElementSpace * >
 
 //-----------------------------------------------------------------------------
 
-void FiniteElementSpace::disp() const
+auto FiniteElementSpace::disp() const -> void
 {
   section( "FiniteElementSpace" );
   prm( "Finite element", this->element()->signature() );

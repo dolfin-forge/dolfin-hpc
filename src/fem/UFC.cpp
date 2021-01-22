@@ -21,21 +21,21 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
 {
   // Create finite elements
   finite_elements = new ufc::finite_element *[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     finite_elements[i] = form.create_finite_element( i );
   }
 
   // Create finite elements for coefficients
   coefficient_elements = new ufc::finite_element *[form.num_coefficients()];
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     coefficient_elements[i] = form.create_finite_element( form.rank() + i );
   }
 
   // Create cell integrals
   cell_integrals = new ufc::cell_integral *[form.max_cell_subdomain_id()];
-  for ( uint i = 0; i < form.max_cell_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_cell_subdomain_id(); ++i )
   {
     cell_integrals[i] = form.create_cell_integral( i );
   }
@@ -43,7 +43,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   // Create exterior facet integrals
   exterior_facet_integrals =
     new ufc::exterior_facet_integral *[form.max_exterior_facet_subdomain_id()];
-  for ( uint i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
   {
     exterior_facet_integrals[i] = form.create_exterior_facet_integral( i );
   }
@@ -51,7 +51,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   // Create interior facet integrals
   interior_facet_integrals =
     new ufc::interior_facet_integral *[form.max_interior_facet_subdomain_id()];
-  for ( uint i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
   {
     interior_facet_integrals[i] = form.create_interior_facet_integral( i );
   }
@@ -68,8 +68,8 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   facet1 = 0;
 
   // Initialize local tensor
-  uint num_entries = 1;
-  for ( uint i = 0; i < form.rank(); ++i )
+  size_t num_entries = 1;
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     num_entries *= dofmaps[i].num_element_dofs();
   }
@@ -78,7 +78,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
 
   // Initialize local tensor for macro element
   num_entries = 1;
-  for ( uint i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     num_entries *= 2 * dofmaps[i].num_element_dofs();
   }
@@ -86,29 +86,29 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   std::fill_n( macro_A, num_entries, 0. );
 
   // Initialize local dimensions
-  local_dimensions = new uint[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  local_dimensions = new size_t[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     local_dimensions[i] = dofmaps[i].num_element_dofs();
   }
 
   // Initialize local dimensions for macro element
-  macro_local_dimensions = new uint[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  macro_local_dimensions = new size_t[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     macro_local_dimensions[i] = 2 * dofmaps[i].num_element_dofs();
   }
 
   // Initialize local sizes
-  local_sizes = new uint[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  local_sizes = new size_t[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     local_sizes[i] = dofmaps[i].local_size();
   }
 
   // Initialize global dimensions
-  global_dimensions = new uint[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  global_dimensions = new size_t[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     // FIXME is i the correct here?
     ufc::finite_element * fe = form.create_finite_element( i );
@@ -116,7 +116,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
     // FIXME num_entities should maybe be stored somewhere else
     std::vector< size_t > num_entities( fe->topological_dimension()+1,
                                         0 );
-    for ( uint d = 0; d <= fe->topological_dimension(); ++d )
+    for ( size_t d = 0; d <= fe->topological_dimension(); ++d )
     {
       if ( mesh.topology().connectivity( d ) )
       {
@@ -130,24 +130,24 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   }
 
   // Initialize dofs
-  dofs = new uint *[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  dofs = new size_t *[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
-    dofs[i] = new uint[local_dimensions[i]];
+    dofs[i] = new size_t[local_dimensions[i]];
     std::fill_n( dofs[i], local_dimensions[i], 0 );
   }
 
   // Initialize dofs on macro element
-  macro_dofs = new uint *[form.rank()];
-  for ( uint i = 0; i < form.rank(); ++i )
+  macro_dofs = new size_t *[form.rank()];
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
-    macro_dofs[i] = new uint[macro_local_dimensions[i]];
+    macro_dofs[i] = new size_t[macro_local_dimensions[i]];
     std::fill_n( macro_dofs[i], macro_local_dimensions[i], 0 );
   }
 
   // Initialize coefficients
   w = new real *[form.num_coefficients()];
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     w[i] = new real[coefficient_elements[i]->space_dimension()];
     std::fill_n( w[i], coefficient_elements[i]->space_dimension(), 0. );
@@ -155,7 +155,7 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
 
   // Initialize coefficients on macro element
   macro_w = new real *[form.num_coefficients()];
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     macro_w[i] = new real[2 * coefficient_elements[i]->space_dimension()];
     std::fill_n(
@@ -166,35 +166,35 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
 UFC::~UFC()
 {
   // Delete finite elements
-  for ( uint i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     delete finite_elements[i];
   }
   delete[] finite_elements;
 
   // Delete coefficient finite elements
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     delete coefficient_elements[i];
   }
   delete[] coefficient_elements;
 
   // Delete cell integrals
-  for ( uint i = 0; i < form.max_cell_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_cell_subdomain_id(); ++i )
   {
     delete cell_integrals[i];
   }
   delete[] cell_integrals;
 
   // Delete exterior facet integrals
-  for ( uint i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
   {
     delete exterior_facet_integrals[i];
   }
   delete[] exterior_facet_integrals;
 
   // Delete interior facet integrals
-  for ( uint i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
+  for ( size_t i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
   {
     delete interior_facet_integrals[i];
   }
@@ -219,28 +219,28 @@ UFC::~UFC()
   delete[] macro_local_dimensions;
 
   // Delete dofs
-  for ( uint i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     delete[] dofs[i];
   }
   delete[] dofs;
 
   // Delete macro dofs
-  for ( uint i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form.rank(); ++i )
   {
     delete[] macro_dofs[i];
   }
   delete[] macro_dofs;
 
   // Delete coefficients
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     delete[] w[i];
   }
   delete[] w;
 
   // Delete macro coefficients
-  for ( uint i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form.num_coefficients(); ++i )
   {
     delete[] macro_w[i];
   }

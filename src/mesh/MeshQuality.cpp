@@ -2,12 +2,12 @@
 #include <dolfin/mesh/MeshQuality.h>
 
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Edge.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <cmath>
 
@@ -15,25 +15,25 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshQuality::MeshQuality(Mesh& mesh) :
-    MeshDependent(mesh),
-    mu_min(0.0),
-    mu_max(0.0),
-    mu_avg(0.0),
-    h_min(0.0),
-    h_max(0.0),
-    h_avg(0.0),
-    vol_min(0.0),
-    vol_max(0.0),
-    orientation_(mesh),
-    mapping_(mesh),
-    bbox_min_(),
-    bbox_max_()
+MeshQuality::MeshQuality( Mesh & mesh )
+  : MeshDependent( mesh )
+  , mu_min( 0.0 )
+  , mu_max( 0.0 )
+  , mu_avg( 0.0 )
+  , h_min( 0.0 )
+  , h_max( 0.0 )
+  , h_avg( 0.0 )
+  , vol_min( 0.0 )
+  , vol_max( 0.0 )
+  , orientation_( mesh )
+  , mapping_( mesh )
+  , bbox_min_()
+  , bbox_max_()
 {
   // Initialize orientation
-  for (CellIterator c(mesh); !c.end(); ++c)
+  for ( CellIterator c( mesh ); !c.end(); ++c )
   {
-    orientation_(c->index()) = (uint) c->orientation();
+    orientation_( c->index() ) = ( size_t ) c->orientation();
   }
 
   //
@@ -41,11 +41,11 @@ MeshQuality::MeshQuality(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
-auto MeshQuality::is_inverted(uint& first) -> bool
+auto MeshQuality::is_inverted( size_t & first ) -> bool
 {
-  for (CellIterator c(mesh()); !c.end(); ++c)
+  for ( CellIterator c( mesh() ); !c.end(); ++c )
   {
-    if (orientation_(c->index()) != c->orientation())
+    if ( orientation_( c->index() ) != c->orientation() )
     {
       first = c->index();
       return true;
@@ -55,29 +55,29 @@ auto MeshQuality::is_inverted(uint& first) -> bool
 }
 
 //-----------------------------------------------------------------------------
-auto MeshQuality::mean_ratio(Cell const& cell) const -> real
+auto MeshQuality::mean_ratio( Cell const & cell ) const -> real
 {
-  uint const d = cell.dim();
-  mapping_.update(cell);
+  size_t const d = cell.dim();
+  mapping_.update( cell );
 
   // Compute the square of the Frobenius norm;
   real sqrFnorm = 0.0;
-  for (uint i = 0; i < d; ++i)
+  for ( size_t i = 0; i < d; ++i )
   {
-    for (uint j = 0; j < d; ++j)
+    for ( size_t j = 0; j < d; ++j )
     {
       sqrFnorm += mapping_.J[i + j * Point::MAX_SIZE]
-          * mapping_.J[i + j * Point::MAX_SIZE];
+                  * mapping_.J[i + j * Point::MAX_SIZE];
     }
   }
 
-  return d * std::pow(std::fabs(mapping_.det), 2.0 / d) / sqrFnorm;
+  return d * std::pow( std::fabs( mapping_.det ), 2.0 / d ) / sqrFnorm;
 }
 
 //-----------------------------------------------------------------------------
 void MeshQuality::compute()
 {
-  Mesh& m = mesh();
+  Mesh & m = mesh();
 
   mu_max = 0.0;
   mu_min = 1.0;
@@ -86,85 +86,85 @@ void MeshQuality::compute()
   h_min = 1.0e12;
 
   real mu_sum = 0.0;
-  real h_sum = 0.0;
+  real h_sum  = 0.0;
 
-  for (CellIterator c(m); !c.end(); ++c)
+  for ( CellIterator c( m ); !c.end(); ++c )
   {
-    real mu = mean_ratio(*c);
-    real h = c->diameter();
+    real mu = mean_ratio( *c );
+    real h  = c->diameter();
 
     mu_sum += mu;
     h_sum += h;
 
-    mu_max = std::max(mu_max, mu);
-    mu_min = std::min(mu_min, mu);
+    mu_max = std::max( mu_max, mu );
+    mu_min = std::min( mu_min, mu );
 
-    h_max = std::max(h_max, h);
-    h_min = std::min(h_min, h);
+    h_max = std::max( h_max, h );
+    h_min = std::min( h_min, h );
   }
 
-  uint const d = m.topology_dimension();
-  for (uint i = 0; i < d; ++i)
+  size_t const d = m.topology_dimension();
+  for ( size_t i = 0; i < d; ++i )
   {
     bbox_min_[i] = 1.0e12;
     bbox_max_[i] = -1.0e12;
   }
 
-  for (VertexIterator vi(m); !vi.end(); ++vi)
+  for ( VertexIterator vi( m ); !vi.end(); ++vi )
   {
-    const Vertex& v = *vi;
+    const Vertex & v = *vi;
 
     Point p = v.point();
 
-    for (uint i = 0; i < d; ++i)
+    for ( size_t i = 0; i < d; ++i )
     {
-      bbox_min_[i] = std::min(bbox_min_[i], p[i]);
-      bbox_max_[i] = std::max(bbox_max_[i], p[i]);
+      bbox_min_[i] = std::min( bbox_min_[i], p[i] );
+      bbox_max_[i] = std::max( bbox_max_[i], p[i] );
     }
   }
 
   mu_avg = mu_sum / m.num_cells();
-  h_avg = h_sum / m.num_cells();
+  h_avg  = h_sum / m.num_cells();
 
-  if (m.is_distributed())
+  if ( m.is_distributed() )
   {
-    mu_min = reduceMinReal(mu_min);
-    mu_max = reduceMaxReal(mu_max);
-    mu_avg = reduceAvgReal(mu_avg);
+    mu_min = reduceMinReal( mu_min );
+    mu_max = reduceMaxReal( mu_max );
+    mu_avg = reduceAvgReal( mu_avg );
 
-    h_min = reduceMinReal(h_min);
-    h_max = reduceMaxReal(h_max);
-    h_avg = reduceAvgReal(h_avg);
+    h_min = reduceMinReal( h_min );
+    h_max = reduceMaxReal( h_max );
+    h_avg = reduceAvgReal( h_avg );
   }
 }
 //-----------------------------------------------------------------------------
-auto MeshQuality::reduceMinReal(real val) -> real
+auto MeshQuality::reduceMinReal( real val ) -> real
 {
-  MPI::all_reduce_in_place<MPI::min>( val );
+  MPI::all_reduce_in_place< MPI::min >( val );
   return val;
 }
 //-----------------------------------------------------------------------------
-auto MeshQuality::reduceMaxReal(real val) -> real
+auto MeshQuality::reduceMaxReal( real val ) -> real
 {
-  MPI::all_reduce_in_place<MPI::max>( val );
+  MPI::all_reduce_in_place< MPI::max >( val );
   return val;
 }
 //-----------------------------------------------------------------------------
-auto MeshQuality::reduceAvgReal(real val) -> real
+auto MeshQuality::reduceAvgReal( real val ) -> real
 {
-  MPI::all_reduce_in_place<MPI::min>( val );
+  MPI::all_reduce_in_place< MPI::min >( val );
   return val / dolfin::MPI::size();
 }
 //-----------------------------------------------------------------------------
 void MeshQuality::disp()
 {
-  section("MeshQuality");
-  prm("mu_min", mu_min);
-  prm("mu_max", mu_max);
-  prm("mu_avg", mu_avg);
-  prm("h_min" , h_min);
-  prm("h_max" , h_max);
-  prm("h_avg" , h_avg);
+  section( "MeshQuality" );
+  prm( "mu_min", mu_min );
+  prm( "mu_max", mu_max );
+  prm( "mu_avg", mu_avg );
+  prm( "h_min", h_min );
+  prm( "h_max", h_max );
+  prm( "h_avg", h_avg );
   end();
 }
 //-----------------------------------------------------------------------------

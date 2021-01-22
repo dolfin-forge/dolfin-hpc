@@ -1,7 +1,6 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/timing.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/fem/Assembler.h>
@@ -20,15 +19,16 @@
 #include <dolfin/log/log.h>
 #include <dolfin/main/OpenMP.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/FacetIterator.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
 
 #include <memory>
+#include <vector>
 
 namespace dolfin
 {
@@ -45,35 +45,35 @@ namespace Assembler
 /// Either a null pointer or an empty MeshFunction may be used to specify that
 /// the tensor should be assembled over the entire set of cells or facets.
 void assemble(GenericTensor& A, const Form& form,
-              Array<Coefficient*> const& coefficients,
+              std::vector<Coefficient*> const& coefficients,
               DofMapSet const& dofmaps,
-              MeshValues<uint, Cell> const* cell_domains,
-              MeshValues<uint, Facet> const* exterior_facet_domains,
-              MeshValues<uint, Facet> const* interior_facet_domains,
+              MeshValues<size_t, Cell> const* cell_domains,
+              MeshValues<size_t, Facet> const* exterior_facet_domains,
+              MeshValues<size_t, Facet> const* interior_facet_domains,
               bool reset_tensor = true);
 
 // Assemble over cells
-void assembleCells(GenericTensor& A, Array<Coefficient*> const& coefficients,
+void assembleCells(GenericTensor& A, std::vector<Coefficient*> const& coefficients,
                    DofMapSet const& dofmaps, UFC& data,
-                   MeshValues<uint, Cell> const* domains);
+                   MeshValues<size_t, Cell> const* domains);
 
 // Assemble over exterior facets
 void assembleExteriorFacets(GenericTensor& A,
-                            Array<Coefficient*> const& coefficients,
+                            std::vector<Coefficient*> const& coefficients,
                             DofMapSet const& dofmaps, UFC& data,
-                            MeshValues<uint, Facet> const* domains);
+                            MeshValues<size_t, Facet> const* domains);
 
 // Assemble over interior facets
 void assembleInteriorFacets(GenericTensor& A,
-                            Array<Coefficient*> const& coefficients,
+                            std::vector<Coefficient*> const& coefficients,
                             DofMapSet const& dofmaps, UFC& data,
-                            MeshValues<uint, Facet> const* domains);
+                            MeshValues<size_t, Facet> const* domains);
 
 // Bogus-assemble periodic contributions
 void initializePeriodicDofs(GenericTensor& A,
-                            Array<Coefficient*> const& coefficients,
+                            std::vector<Coefficient*> const& coefficients,
                             DofMapSet const& dofmaps, UFC& data,
-                            MeshValues<uint, Facet> const* domains);
+                            MeshValues<size_t, Facet> const* domains);
 
 // Initialize global tensor
 void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,
@@ -93,16 +93,16 @@ void assemble(GenericTensor& A, Form& form,
   Mesh& mesh = form.mesh();
 
   // Extract cell domains
-  MeshValues<uint, Cell>* cell_domains = nullptr;
+  MeshValues<size_t, Cell>* cell_domains = nullptr;
 
   // Extract facet domains
-  MeshValues<uint, Facet>* facet_domains = nullptr;
+  MeshValues<size_t, Facet>* facet_domains = nullptr;
 
 OPENMP_PRAGMA( master )
   {
     if ( form.has_cell_integrals() )
     {
-      cell_domains = new MeshValues<uint, Cell>(mesh);
+      cell_domains = new MeshValues<size_t, Cell>(mesh);
       (*cell_domains) = 1;
       sub_domain.mark(*cell_domains, 0);
     }
@@ -110,7 +110,7 @@ OPENMP_PRAGMA( master )
     if ( form.has_exterior_facet_integrals() or
          form.has_interior_facet_integrals() )
     {
-      facet_domains = new MeshValues<uint, Facet>(mesh);
+      facet_domains = new MeshValues<size_t, Facet>(mesh);
       (*facet_domains) = 1;
       sub_domain.mark(*facet_domains, 0);
     }
@@ -129,9 +129,9 @@ OPENMP_PRAGMA( master )
 }
 //-----------------------------------------------------------------------------
 void assemble(GenericTensor& A, Form& form,
-                         MeshValues<uint, Cell> const& cell_domains,
-                         MeshValues<uint, Facet> const& exterior_facet_domains,
-                         MeshValues<uint, Facet> const& interior_facet_domains,
+                         MeshValues<size_t, Cell> const& cell_domains,
+                         MeshValues<size_t, Facet> const& exterior_facet_domains,
+                         MeshValues<size_t, Facet> const& interior_facet_domains,
                          bool reset_tensor)
 {
   assemble(A, form, form.coefficients(), form.dofmaps(), &cell_domains,
@@ -139,11 +139,11 @@ void assemble(GenericTensor& A, Form& form,
 }
 //-----------------------------------------------------------------------------
 void assemble(GenericTensor& A, const Form& form,
-                         Array<Coefficient*> const& coefficients,
+                         std::vector<Coefficient*> const& coefficients,
                          DofMapSet const& dofmaps,
-                         MeshValues<uint, Cell> const* cell_domains,
-                         MeshValues<uint, Facet> const* exterior_facet_domains,
-                         MeshValues<uint, Facet> const* interior_facet_domains,
+                         MeshValues<size_t, Cell> const* cell_domains,
+                         MeshValues<size_t, Facet> const* exterior_facet_domains,
+                         MeshValues<size_t, Facet> const* interior_facet_domains,
                          bool reset_tensor)
 {
   // Check arguments
@@ -192,10 +192,10 @@ OPENMP_PRAGMA( barrier )
 }
 //-----------------------------------------------------------------------------
 void assembleCells(GenericTensor& A,
-                              Array<Coefficient*> const& coefficients,
+                              std::vector<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps,
                               UFC& ufc,
-                              MeshValues<uint, Cell> const* domains)
+                              MeshValues<size_t, Cell> const* domains)
 {
   if ( not ufc.form.has_cell_integrals() )
   {
@@ -206,21 +206,21 @@ void assembleCells(GenericTensor& A,
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
-  uint const N = mesh.num_cells();
-  uint const form_rank = ufc.form.rank();
-  uint const coef_size = coefficients.size();
+  size_t const N = mesh.num_cells();
+  size_t const form_rank = ufc.form.rank();
+  size_t const coef_size = coefficients.size();
   ufc::cell_integral * integral = ufc.cell_integrals[0];
 
   CellIterator it(mesh);
 OPENMP_PRAGMA( for )
-  for (uint i = 0; i < N; ++i)
+  for (size_t i = 0; i < N; ++i)
   {
     Cell& cell = it[i];
 
     // Get integral for sub domain (if any)
     if ((domains != nullptr) && domains->size() > 0)
     {
-      uint const domain = (*domains)(cell);
+      size_t const domain = (*domains)(cell);
       // FIXME is this correct?!
       if (domain <= ufc.form.max_cell_subdomain_id())
       {
@@ -236,13 +236,13 @@ OPENMP_PRAGMA( for )
     ufc.cell.update(cell);
 
     // Interpolate coefficients on cell
-    for (uint c = 0; c < coef_size; ++c)
+    for (size_t c = 0; c < coef_size; ++c)
     {
       coefficients[c]->interpolate(ufc.w[c], ufc.cell, *ufc.coefficient_elements[c], cell);
     }
 
     // Tabulate dofs for each dimension
-    for (uint d = 0; d < form_rank; ++d)
+    for (size_t d = 0; d < form_rank; ++d)
     {
       dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell);
     }
@@ -259,10 +259,10 @@ OPENMP_PRAGMA( for )
 }
 //-----------------------------------------------------------------------------
 void assembleExteriorFacets(GenericTensor& A,
-                                       Array<Coefficient*> const& coefficients,
+                                       std::vector<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshValues<uint, Facet> const* domains)
+                                       MeshValues<size_t, Facet> const* domains)
 {
   if ( not ufc.form.has_exterior_facet_integrals() )
   {
@@ -273,21 +273,21 @@ void assembleExteriorFacets(GenericTensor& A,
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
-  uint const tdim = mesh.topology_dimension();
+  size_t const tdim = mesh.topology_dimension();
   BoundaryMesh& exterior_boundary = mesh.exterior_boundary();
-  uint const N = exterior_boundary.num_cells();
+  size_t const N = exterior_boundary.num_cells();
   if (N == 0)
   {
     return;
   }
-  uint const form_rank = ufc.form.rank();
-  uint const coef_size = coefficients.size();
+  size_t const form_rank = ufc.form.rank();
+  size_t const coef_size = coefficients.size();
   ufc::exterior_facet_integral * integral = ufc.exterior_facet_integrals[0];
 
   FacetIterator it(mesh);
   CellIterator  c0(mesh);
 OPENMP_PRAGMA( for )
-  for (uint i = 0; i < N; ++i)
+  for (size_t i = 0; i < N; ++i)
   {
     // Get mesh facet corresponding to boundary cell
     Facet& facet = it[exterior_boundary.facet_index(i)];
@@ -295,7 +295,7 @@ OPENMP_PRAGMA( for )
     // Get integral for sub domain (if any)
     if ((domains != nullptr) && domains->size() > 0)
     {
-      uint const domain = (*domains)(facet);
+      size_t const domain = (*domains)(facet);
       // FIXME is this correct?!
       if (domain <= ufc.form.max_exterior_facet_subdomain_id())
       {
@@ -311,19 +311,19 @@ OPENMP_PRAGMA( for )
     Cell& cell = c0[facet.entities(tdim)[0]];
 
     // Get local index of facet with respect to the cell
-    uint const local_facet = cell.index(facet);
+    size_t const local_facet = cell.index(facet);
 
     // Update to current cell
     ufc.cell.update(cell);
 
     // Interpolate coefficients on cell
-    for (uint c = 0; c < coef_size; ++c)
+    for (size_t c = 0; c < coef_size; ++c)
     {
       coefficients[c]->interpolate(ufc.w[c], ufc.cell, *ufc.coefficient_elements[c], cell, local_facet);
     }
 
     // Tabulate dofs for each dimension
-    for (uint d = 0; d < form_rank; ++d)
+    for (size_t d = 0; d < form_rank; ++d)
     {
       dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell);
     }
@@ -341,10 +341,10 @@ OPENMP_PRAGMA( for )
 }
 //-----------------------------------------------------------------------------
 void assembleInteriorFacets(GenericTensor& A,
-                                       Array<Coefficient*> const& coefficients,
+                                       std::vector<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshValues<uint, Facet> const* domains)
+                                       MeshValues<size_t, Facet> const* domains)
 {
   if ( not ufc.form.has_interior_facet_integrals() )
   {
@@ -355,10 +355,10 @@ void assembleInteriorFacets(GenericTensor& A,
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
-  uint const tdim = mesh.topology_dimension();
-  uint const N = mesh.size(mesh.type().facet_dim());
-  uint const form_rank = ufc.form.rank();
-  uint const coef_size = coefficients.size();
+  size_t const tdim = mesh.topology_dimension();
+  size_t const N = mesh.size(mesh.type().facet_dim());
+  size_t const form_rank = ufc.form.rank();
+  size_t const coef_size = coefficients.size();
   ufc::interior_facet_integral * integral = ufc.interior_facet_integrals[0];
 
   // Halo data structure caching macro element coefficients and dofs
@@ -368,14 +368,14 @@ void assembleInteriorFacets(GenericTensor& A,
   CellIterator  c0(mesh);
   CellIterator  c1(mesh);
 OPENMP_PRAGMA( for )
-  for (uint i = 0; i < N; ++i)
+  for (size_t i = 0; i < N; ++i)
   {
     Facet& facet = it[i];
 
     // Get integral for sub domain (if any)
     if ((domains != nullptr) && domains->size() > 0)
     {
-      uint const domain = (*domains)(facet);
+      size_t const domain = (*domains)(facet);
       // FIXME is this correct?!
       if (domain <= ufc.form.max_interior_facet_subdomain_id())
       {
@@ -400,18 +400,18 @@ OPENMP_PRAGMA( for )
       ufc.cell1.update(cell1);
 
       // Interpolate coefficients on cell1
-      for (uint c = 0; c < coef_size; ++c)
+      for (size_t c = 0; c < coef_size; ++c)
       {
         coefficients[c]->interpolate(ufc.macro_w[c], ufc.cell0, *ufc.coefficient_elements[c], cell0, ufc.facet0);
-        uint const offset = ufc.coefficient_elements[c]->space_dimension();
+        size_t const offset = ufc.coefficient_elements[c]->space_dimension();
         coefficients[c]->interpolate(ufc.macro_w[c] + offset, ufc.cell1, *ufc.coefficient_elements[c], cell1, ufc.facet1);
       }
 
       // Tabulate dofs for each dimension on cell1
-      for (uint d = 0; d < form_rank; ++d)
+      for (size_t d = 0; d < form_rank; ++d)
       {
         dofmaps[d].tabulate_dofs(ufc.macro_dofs[d], ufc.cell0);
-        uint const offset = ufc.local_dimensions[d];
+        size_t const offset = ufc.local_dimensions[d];
         dofmaps[d].tabulate_dofs(ufc.macro_dofs[d] + offset, ufc.cell1);
       }
 
@@ -448,10 +448,10 @@ OPENMP_PRAGMA( for )
 }
 //-----------------------------------------------------------------------------
 void initializePeriodicDofs(GenericTensor& A,
-                            Array<Coefficient*> const&,
+                            std::vector<Coefficient*> const&,
                             DofMapSet const& dofmaps,
                             UFC& ufc,
-                            MeshValues<uint, Facet> const*)
+                            MeshValues<size_t, Facet> const*)
 {
   if(!dofmaps[0].mesh().has_periodic_constraint())
   {
@@ -470,11 +470,11 @@ void initializePeriodicDofs(GenericTensor& A,
     PeriodicDofsMapping const& pdm = dofmaps[0].periodic_mapping( space );
     real * block = new real[pdm.max_local_dimension() + 1];
     std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);
-    uint irow = 0;
-    uint * jcols = new uint[pdm.max_local_dimension() + 1];
+    size_t irow = 0;
+    size_t * jcols = new size_t[pdm.max_local_dimension() + 1];
     std::fill_n(jcols, pdm.max_local_dimension() + 1, 0.0);
-    uint ncols = 0;
-    for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+    size_t ncols = 0;
+    for (size_t i = 0; i < pdm.num_Gdofs(); ++i)
     {
       pdm.tabulate_dofs(i, &irow, jcols, ncols);
       jcols[ncols] = irow;

@@ -13,6 +13,8 @@ class Cell;
 class Mesh;
 class MeshEditor;
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  RefinementPattern
  *
@@ -24,39 +26,40 @@ class RefinementPattern
 {
 
 public:
-
   ///
   RefinementPattern() = default;
 
   ///--- INTERFACE ------------------------------------------------------------
 
   /// Return if the cell to which the pattern applies is valid
-  virtual auto pattern_applies(Cell& cell) const -> bool = 0;
+  virtual auto pattern_applies( Cell & cell ) const -> bool = 0;
 
   /// Refine cell uniformly
-  virtual void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const = 0;
+  virtual void refine_cell( Cell &       cell,
+                            MeshEditor & editor,
+                            size_t &     current_cell ) const = 0;
 
   /// Number of cells created by refinement pattern
-  virtual auto num_refined_cells() const -> uint = 0;
+  virtual auto num_refined_cells() const -> size_t = 0;
 
   /// Number of vertices created by refinement pattern restricted to each
   /// entity of given topological dimensions
-  virtual auto num_refined_vertices(uint dim) const -> uint = 0;
+  virtual auto num_refined_vertices( size_t dim ) const -> size_t = 0;
 
   ///--------------------------------------------------------------------------
 
   /// Return the number of vertices after refinement
-  auto num_refined_vertices(Mesh const& mesh) const -> uint;
+  auto num_refined_vertices( Mesh const & mesh ) const -> size_t;
 
   /// Return the number of cells after refinement
-  auto num_refined_cells(Mesh const& mesh) const -> uint;
+  auto num_refined_cells( Mesh const & mesh ) const -> size_t;
 
 protected:
-
   ///
   virtual ~RefinementPattern() = default;
-
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

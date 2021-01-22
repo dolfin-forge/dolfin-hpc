@@ -4,17 +4,20 @@
 #ifndef __DOLFIN_CELL_H
 #define __DOLFIN_CELL_H
 
-#include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshEntity.h>
-#include <dolfin/mesh/Point.h>
-
 #include <dolfin/common/GhostIterator.h>
 #include <dolfin/common/OwnedIterator.h>
 #include <dolfin/common/SharedIterator.h>
+#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/entities/MeshEntity.h>
 
 namespace dolfin
 {
+
+class CellIterator;
+
+//-----------------------------------------------------------------------------
 
 /**
  *  @class  Cell
@@ -23,17 +26,12 @@ namespace dolfin
  *
  */
 
-class CellIterator;
-
 class Cell : public MeshEntity
 {
 
 public:
   /// Constructor
-  Cell( Mesh & mesh, uint index )
-    : MeshEntity( mesh, mesh.topology_dimension(), index )
-  {
-  }
+  Cell( Mesh & mesh, size_t index );
 
   /// Destructor
   ~Cell() = default;
@@ -57,19 +55,19 @@ public:
   inline auto inradius() const -> real;
 
   /// Compute normal of given facet with respect to the cell
-  inline auto normal( uint facet ) const -> Point;
+  inline auto normal( size_t facet ) const -> Point;
 
   /// Compute normal of given facet with respect to the cell
-  inline void normal( uint facet, real * n ) const;
+  inline auto normal( size_t facet, real * n ) const -> void;
 
   /// Compute the area/length of given facet with respect to the cell
-  inline auto facet_area( uint facet ) const -> real;
+  inline auto facet_area( size_t facet ) const -> real;
 
   /// Compute coordinates of cell midpoint
   inline auto midpoint() const -> Point;
 
   /// Compute coordinates of cell midpoint
-  inline void midpoint( real * p ) const;
+  inline auto midpoint( real * p ) const -> void;
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -77,38 +75,20 @@ public:
 
   struct shared : SharedIterator
   {
-    shared( Mesh & M )
-      : SharedIterator( M.topology().distdata()[M.type().dim()] )
-    {
-    }
-    shared( MeshTopology & T )
-      : SharedIterator( T.distdata()[T.dim()] )
-    {
-    }
+    shared( Mesh & M );
+    shared( MeshTopology & T );
   };
 
   struct ghost : GhostIterator
   {
-    ghost( Mesh & M )
-      : GhostIterator( M.topology().distdata()[M.type().dim()] )
-    {
-    }
-    ghost( MeshTopology & T )
-      : GhostIterator( T.distdata()[T.dim()] )
-    {
-    }
+    ghost( Mesh & M );
+    ghost( MeshTopology & T );
   };
 
   struct owned : OwnedIterator
   {
-    owned( Mesh & M )
-      : OwnedIterator( M.topology().distdata()[M.type().dim()] )
-    {
-    }
-    owned( MeshTopology & T )
-      : OwnedIterator( T.distdata()[T.dim()] )
-    {
-    }
+    owned( Mesh & M );
+    owned( MeshTopology & T );
   };
 
   //--- Entity relation -------------------------------------------------------
@@ -117,43 +97,57 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+
+inline Cell::Cell( Mesh & mesh, size_t index )
+  : MeshEntity( mesh, mesh.topology_dimension(), index )
+{
+}
+
+//-----------------------------------------------------------------------------
+
 inline auto Cell::type() const -> CellType::Type
 {
   return mesh_.type().cellType();
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::orientation() const -> real
 {
   return mesh_.type().orientation( *this );
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::volume() const -> real
 {
   return mesh_.type().volume( *this );
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::diameter() const -> real
 {
   return mesh_.type().diameter( *this );
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::circumradius() const -> real
 {
   return mesh_.type().circumradius( *this );
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::inradius() const -> real
 {
   return mesh_.type().inradius( *this );
 }
 
 //-----------------------------------------------------------------------------
-inline auto Cell::normal( uint facet ) const -> Point
+
+inline auto Cell::normal( size_t facet ) const -> Point
 {
   Point n;
   mesh_.type().normal( *this, facet, &n[0] );
@@ -161,18 +155,21 @@ inline auto Cell::normal( uint facet ) const -> Point
 }
 
 //-----------------------------------------------------------------------------
-inline void Cell::normal( uint facet, real * n ) const
+
+inline auto Cell::normal( size_t facet, real * n ) const -> void
 {
   mesh_.type().normal( *this, facet, n );
 }
 
 //-----------------------------------------------------------------------------
-inline auto Cell::facet_area( uint facet ) const -> real
+
+inline auto Cell::facet_area( size_t facet ) const -> real
 {
   return mesh_.type().facet_area( *this, facet );
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto Cell::midpoint() const -> Point
 {
   Point p;
@@ -181,9 +178,52 @@ inline auto Cell::midpoint() const -> Point
 }
 
 //-----------------------------------------------------------------------------
-inline void Cell::midpoint( real * p ) const
+
+inline auto Cell::midpoint( real * p ) const -> void
 {
   mesh_.type().midpoint( *this, p );
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::shared::shared( Mesh & M )
+  : SharedIterator( M.topology().distdata()[M.type().dim()] )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::shared::shared( MeshTopology & T )
+  : SharedIterator( T.distdata()[T.dim()] )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::ghost::ghost( Mesh & M )
+  : GhostIterator( M.topology().distdata()[M.type().dim()] )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::ghost::ghost( MeshTopology & T )
+  : GhostIterator( T.distdata()[T.dim()] )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::owned::owned( Mesh & M )
+  : OwnedIterator( M.topology().distdata()[M.type().dim()] )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Cell::owned::owned( MeshTopology & T )
+  : OwnedIterator( T.distdata()[T.dim()] )
+{
 }
 
 //-----------------------------------------------------------------------------

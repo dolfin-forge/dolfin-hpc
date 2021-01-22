@@ -34,66 +34,66 @@ MPI::Context MPI::ctx_;
   error("Unimplemented without MPI support");
 
 //-----------------------------------------------------------------------------
-auto MPI::rank() -> uint
+auto MPI::rank() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.rank);
+  return static_cast<size_t>(ctx_.rank);
 #else
   DOLFIN_MPI_WRN_UNIMPLEMENTED
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::size() -> uint
+auto MPI::size() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.size);
+  return static_cast<size_t>(ctx_.size);
 #else
   DOLFIN_MPI_WRN_UNIMPLEMENTED
   return 1;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::group_id() -> uint
+auto MPI::group_id() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.group_idx);
+  return static_cast<size_t>(ctx_.group_idx);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::num_groups() -> uint
+auto MPI::num_groups() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.group_cnt);
+  return static_cast<size_t>(ctx_.group_cnt);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::global_rank() -> uint
+auto MPI::global_rank() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.global_rank);
+  return static_cast<size_t>(ctx_.global_rank);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::global_size() -> uint
+auto MPI::global_size() -> size_t
 {
 #ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
-  return static_cast<uint>(ctx_.global_size);
+  return static_cast<size_t>(ctx_.global_size);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
   return 0;
@@ -207,14 +207,14 @@ void MPI::finiComm()
 #endif
 }
 //-----------------------------------------------------------------------------
-auto MPI::seed() -> uint
+auto MPI::seed() -> size_t
 {
   return ctx_.seed;
 }
 //-----------------------------------------------------------------------------
-auto MPI::is_valid_rank(uint rank) -> bool
+auto MPI::is_valid_rank(size_t rank) -> bool
 {
-  return (rank < static_cast<uint>(ctx_.size));
+  return (rank < static_cast<size_t>(ctx_.size));
 }
 //-----------------------------------------------------------------------------
 auto MPI::is_root() -> bool
@@ -222,7 +222,7 @@ auto MPI::is_root() -> bool
   return (ctx_.rank == 0);
 }
 //-----------------------------------------------------------------------------
-void MPI::offset(uint local, uint& offset, Communicator& comm)
+void MPI::offset(size_t local, size_t& offset, Communicator& comm)
 {
   // Fool-proof as the value for rank 0 is undefined according to MPI specs
   offset = 0;

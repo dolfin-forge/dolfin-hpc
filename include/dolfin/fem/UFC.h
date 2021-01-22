@@ -60,8 +60,8 @@ public:
   UFCCell cell1;
 
   // Current pair of local facet indices of macro element
-  uint facet0;
-  uint facet1;
+  size_t facet0;
+  size_t facet1;
 
   // Local tensor
   real* A;
@@ -70,22 +70,22 @@ public:
   real* macro_A;
 
   // Array of local dimensions for each argument
-  uint* local_dimensions;
+  size_t* local_dimensions;
 
   // Array of local dimensions of macro element for primary arguments
-  uint* macro_local_dimensions;
+  size_t* macro_local_dimensions;
 
   // Array of local dofmap sizes
-  uint* local_sizes;
+  size_t* local_sizes;
 
   // Array of global dimensions for primary arguments
-  uint* global_dimensions;
+  size_t* global_dimensions;
 
   // Array of mapped dofs for primary arguments
-  uint** dofs;
+  size_t** dofs;
 
   // Array of mapped dofs of macro element for primary arguments
-  uint** macro_dofs;
+  size_t** macro_dofs;
 
   // Array of coefficients
   real** w;

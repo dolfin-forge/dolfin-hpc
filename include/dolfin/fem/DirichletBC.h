@@ -4,13 +4,12 @@
 #ifndef __DOLFIN_DIRICHLET_BC_H
 #define __DOLFIN_DIRICHLET_BC_H
 
-#include <dolfin/fem/BoundaryCondition.h>
-
 #include <dolfin/common/types.h>
-#include <dolfin/fem/SubSystem.h>
+#include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/fem/Coefficient.h>
-#include <dolfin/mesh/Facet.h>
+#include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/SubDomain.h>
+#include <dolfin/mesh/entities/Facet.h>
 
 namespace dolfin
 {
@@ -38,7 +37,9 @@ class SetOfDirichletBC;
 
 enum BCMethod
 {
-  topological, geometric, pointwise
+  topological,
+  geometric,
+  pointwise
 };
 
 /**
@@ -67,69 +68,79 @@ enum BCMethod
  *  system the boundary condition should be specified.
  */
 
-class DirichletBC: public BoundaryCondition
+class DirichletBC : public BoundaryCondition
 {
 
 public:
-
   /// Create boundary condition for sub domain
-  DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
-              BCMethod method = topological);
+  DirichletBC( Coefficient &     g,
+               Mesh &            mesh,
+               const SubDomain & sub_domain,
+               BCMethod          method = topological );
 
   /// Create boundary condition for multiple coefficients and sub domains
-  DirichletBC( Array< std::pair< Coefficient & , SubDomain const & > > conds,
-               Mesh& mesh, BCMethod method = topological);
+  DirichletBC( Array< std::pair< Coefficient &, SubDomain const & > > conds,
+               Mesh &                                                 mesh,
+               BCMethod method = topological );
 
   /// Create sub system boundary condition for sub domain
-  DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
-              const SubSystem& sub_system, BCMethod method = topological);
+  DirichletBC( Coefficient &     g,
+               Mesh &            mesh,
+               const SubDomain & sub_domain,
+               const SubSystem & sub_system,
+               BCMethod          method = topological );
 
   /// Destructor
   ~DirichletBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
+  void apply( GenericMatrix &      A,
+              GenericVector &      b,
+              BilinearForm const & form ) override;
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             BilinearForm const& form) override;
+  void apply( GenericMatrix &       A,
+              GenericVector &       b,
+              GenericVector const & x,
+              BilinearForm const &  form ) override;
 
 private:
-
   /// Apply boundary conditions
-  void apply_impl(GenericMatrix& A, GenericVector& b, const GenericVector* x,
-                  BilinearForm const& form);
+  void apply_impl( GenericMatrix &       A,
+                   GenericVector &       b,
+                   const GenericVector * x,
+                   BilinearForm const &  form );
 
   ///
-  inline void sync(Time const& t) override
+  inline void sync( Time const & t ) override
   {
-    for ( uint c = 0; c < conditions.size(); ++c )
-      conditions[c].first(t);
+    for ( size_t c = 0; c < conditions.size(); ++c )
+      conditions[c].first( t );
   }
 
   // Compute boundary values for facet (topological approach)
-  void computeBCTopological(_map<uint, real>& boundary_values,
-                            FiniteElementSpace const& space,
-                            SubSystem const& sub_system);
+  void computeBCTopological( _map< size_t, real > &     boundary_values,
+                             FiniteElementSpace const & space,
+                             SubSystem const &          sub_system );
 
   // Compute boundary values for facet (geometrical approach)
-  void computeBCGeometric(_map<uint, real>& boundary_values,
-                          FiniteElementSpace const& space,
-                          SubSystem const& sub_system);
+  void computeBCGeometric( _map< size_t, real > &     boundary_values,
+                           FiniteElementSpace const & space,
+                           SubSystem const &          sub_system );
 
   // Compute boundary values for facet (pointwise approach)
-  void computeBCPointwise(_map<uint, real>& boundary_values,
-                          FiniteElementSpace const& space,
-                          SubSystem const& sub_system);
+  void computeBCPointwise( _map< size_t, real > &     boundary_values,
+                           FiniteElementSpace const & space,
+                           SubSystem const &          sub_system );
 
   // array of coefficient-subdomain pairs
-  Array< std::pair< Coefficient & , SubDomain const & > > conditions;
+  Array< std::pair< Coefficient &, SubDomain const & > > conditions;
 
   // Search method
   BCMethod method_;
 
   // Boundary facets, stored as triplets (cell, local facet number, #condition)
-  Array<uint> entities_;
+  Array< size_t > entities_;
 };
 
 } /* namespace dolfin */

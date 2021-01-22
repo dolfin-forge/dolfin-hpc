@@ -7,8 +7,8 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <sstream>
@@ -239,12 +239,12 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
        // file.read( ( char * ) cells, ( mesh_hdr.nuchkp_headerchkp_headerm_centities ) * sizeof( uint ) );
 #endif
 
-        Array< uint > v;
-        uint ci = 0;
-        for ( uint i = 0; i < mesh_hdr.num_centities; i += mesh_hdr.num_entities )
+        Array< size_t > v;
+        size_t ci = 0;
+        for ( size_t i = 0; i < mesh_hdr.num_centities; i += mesh_hdr.num_entities )
         {
           v.clear();
-          for ( uint j = 0; j < mesh_hdr.num_entities; ++j )
+          for ( size_t j = 0; j < mesh_hdr.num_entities; ++j )
           {
             v.push_back( cells[i + j] );
           }

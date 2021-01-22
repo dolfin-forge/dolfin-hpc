@@ -20,7 +20,6 @@ class Cell;
 class Coefficient : public ufc::function
 {
 public:
-
   /// Constructor
   Coefficient() = default;
 
@@ -30,36 +29,42 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const override = 0;
+  void evaluate( real *            values,
+                 const real *      coordinates,
+                 const ufc::cell & cell ) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given points in cell
-  virtual void evaluate(uint n, real* values, const real* coordinates,
-                        const ufc::cell& cell) const = 0;
+  virtual void evaluate( size_t            n,
+                         real *            values,
+                         const real *      coordinates,
+                         const ufc::cell & cell ) const = 0;
 
   /// Evaluate function at given point
-  virtual void eval(real* values, const real* x) const = 0;
+  virtual void eval( real * values, const real * x ) const = 0;
 
   /// Return the rank of the value space
-  virtual auto rank() const -> uint = 0;
+  virtual auto rank() const -> size_t = 0;
 
   /// Return the dimension of the value space for axis i
-  virtual auto dim(uint i) const -> uint = 0;
+  virtual auto dim( size_t i ) const -> size_t = 0;
 
   // Return the value size
-  virtual auto value_size() const -> uint = 0;
+  virtual auto value_size() const -> size_t = 0;
 
   /// Interpolate function to finite element space on cell
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell) const = 0;
+  virtual void interpolate( real *                      coefficients,
+                            const ufc::cell &           cell,
+                            const ufc::finite_element & finite_element,
+                            const Cell &                dolfin_cell ) const = 0;
 
   /// Interpolate function to finite element space on facet
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const = 0;
+  virtual void interpolate( real *                      coefficients,
+                            const ufc::cell &           cell,
+                            const ufc::finite_element & finite_element,
+                            const Cell &                dolfin_cell,
+                            size_t                      facet ) const = 0;
 
   /// Synchronize values
   virtual void sync() = 0;
@@ -70,34 +75,35 @@ public:
   //---------------------------------------------------------------------------
 
   /// Delegate time dependence
-  auto operator()(Time const& t) -> Coefficient&
+  auto operator()( Time const & t ) -> Coefficient &
   {
-    this->sync(t);
+    this->sync( t );
     return *this;
   }
 
   ///
-  template<class T>
-  auto compatible(T const& other) -> bool
+  template < class T >
+  auto compatible( T const & other ) -> bool
   {
-    return compatible(*this, other);
+    return compatible( *this, other );
   }
 
   ///
-  template<class T>
-  static auto compatible(Coefficient const& a, T const& b) -> bool
+  template < class T >
+  static auto compatible( Coefficient const & a, T const & b ) -> bool
   {
     // Check value shape compatibility
-    if (a.rank() != b.rank())
+    if ( a.rank() != b.rank() )
     {
-      warning("Coefficient: rank mismatch %u != %u", a.rank(), b.rank());
+      warning( "Coefficient: rank mismatch %u != %u", a.rank(), b.rank() );
       return false;
     }
-    for (uint i = 0; i < a.rank(); ++i)
+    for ( size_t i = 0; i < a.rank(); ++i )
     {
-      if (a.dim(i) != b.dim(i))
+      if ( a.dim( i ) != b.dim( i ) )
       {
-        warning("Coefficient: dim(%u) mismatch %u != %u", i, a.dim(i), b.dim(i));
+        warning(
+          "Coefficient: dim(%u) mismatch %u != %u", i, a.dim( i ), b.dim( i ) );
         return false;
       }
     }
@@ -105,18 +111,16 @@ public:
   }
 
 private:
-
   /// Time dependency hook
-  virtual void sync(Time const& t) = 0;
-
+  virtual void sync( Time const & t ) = 0;
 };
 //-----------------------------------------------------------------------------
-inline auto Coefficient::value_size() const -> uint
+inline auto Coefficient::value_size() const -> size_t
 {
-  uint size = 1;
-  for (uint i = 0; i < this->rank(); ++i)
+  size_t size = 1;
+  for ( size_t i = 0; i < this->rank(); ++i )
   {
-    size *= this->dim(i);
+    size *= this->dim( i );
   }
   return size;
 }

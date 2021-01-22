@@ -16,42 +16,51 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(Space const& space, uint size) :
-    space_(space.clone()),
-    dim_(space.dim()),
-    size_(0),
-    coordinates_(Array<real>(size_, 0.0)),
-    abs_tol_(Array<real>(dim_ + 1, 0.0)),
-    timestamp_(0)
+
+MeshGeometry::MeshGeometry( Space const & space, size_t size )
+  : space_( space.clone() )
+  , dim_( space.dim() )
+  , size_( 0 )
+  , coordinates_( Array< real >( size_, 0.0 ) )
+  , abs_tol_( Array< real >( dim_ + 1, 0.0 ) )
+  , timestamp_( 0 )
 {
-  resize(size);
+  resize( size );
 }
+
 //-----------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(MeshGeometry const& other) :
-    space_(other.space_->clone()),
-    dim_(other.dim_),
-    size_(other.size_),
-    coordinates_(other.coordinates_),
-    abs_tol_(other.abs_tol_),
-    timestamp_(other.timestamp_)
+
+MeshGeometry::MeshGeometry( MeshGeometry const & other )
+  : space_( other.space_->clone() )
+  , dim_( other.dim_ )
+  , size_( other.size_ )
+  , coordinates_( other.coordinates_ )
+  , abs_tol_( other.abs_tol_ )
+  , timestamp_( other.timestamp_ )
 {
 }
+
 //-----------------------------------------------------------------------------
+
 MeshGeometry::~MeshGeometry()
 {
   if ( space_ )
     delete space_;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator=(MeshGeometry const& other) -> MeshGeometry &
+
+auto MeshGeometry::operator=( MeshGeometry const & other ) -> MeshGeometry &
 {
-  MeshGeometry tmp(other);
+  MeshGeometry tmp( other );
   swap( *this, tmp );
 
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator==(MeshGeometry const& other) const -> bool
+
+auto MeshGeometry::operator==( MeshGeometry const & other ) const -> bool
 {
   if ( *space_ != *other.space_ )
   {
@@ -76,29 +85,35 @@ auto MeshGeometry::operator==(MeshGeometry const& other) const -> bool
 
   return true;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator!=(MeshGeometry const& other) const -> bool
+
+auto MeshGeometry::operator!=( MeshGeometry const & other ) const -> bool
 {
-  return !(*this == other);
+  return !( *this == other );
 }
+
 //-----------------------------------------------------------------------------
-void swap( MeshGeometry& a, MeshGeometry& b )
+
+void swap( MeshGeometry & a, MeshGeometry & b )
 {
   using std::swap;
 
-  swap(a.space_       , b.space_);
-  swap(a.dim_         , b.dim_);
-  swap(a.size_        , b.size_);
-  swap(a.coordinates_ , b.coordinates_);
-  swap(a.abs_tol_     , b.abs_tol_);
-  swap(a.timestamp_   , b.timestamp_);
+  swap( a.space_, b.space_ );
+  swap( a.dim_, b.dim_ );
+  swap( a.size_, b.size_ );
+  swap( a.coordinates_, b.coordinates_ );
+  swap( a.abs_tol_, b.abs_tol_ );
+  swap( a.timestamp_, b.timestamp_ );
 }
+
 //-----------------------------------------------------------------------------
-void MeshGeometry::resize(uint size)
+
+void MeshGeometry::resize( size_t size )
 {
-  if (size != size_)
+  if ( size != size_ )
   {
-    if (size)
+    if ( size )
     {
       // PointCells have dim == 0, so special treatment is necessary
       coordinates_.resize( ( dim_ > 0 ) ? dim_ * size : size );
@@ -112,101 +127,117 @@ void MeshGeometry::resize(uint size)
   }
   update_token();
 }
+
 //-----------------------------------------------------------------------------
+
 void MeshGeometry::finalize()
 {
-  if( size_ > 0 && coordinates_.empty() )
+  if ( size_ > 0 && coordinates_.empty() )
   {
-    error("MeshGeometry : empty coordinates for non-empty geometry");
+    error( "MeshGeometry : empty coordinates for non-empty geometry" );
   }
   // Invalidate dependencies
   update_token();
 }
+
 //-----------------------------------------------------------------------------
-void MeshGeometry::set_abs_tolerance(uint dim, real atol)
+
+void MeshGeometry::set_abs_tolerance( size_t dim, real atol )
 {
-  dolfin_assert(dim <= dim_);
-  if(atol <= 0.0)
+  dolfin_assert( dim <= dim_ );
+  if ( atol <= 0.0 )
   {
-    warning("MeshGeometry : tolerance '%g' for dimension %u is non-positive",
-            atol, dim);
+    warning( "MeshGeometry : tolerance '%g' for dimension %u is non-positive",
+             atol,
+             dim );
   }
-  abs_tol_[dim] = std::fabs(atol);
+  abs_tol_[dim] = std::fabs( atol );
 }
 
 //-----------------------------------------------------------------------------
-void MeshGeometry::assign(Array<real> const& coordinates)
+
+void MeshGeometry::assign( Array< real > const & coordinates )
 {
-  if(coordinates.size() % dim_)
+  if ( coordinates.size() % dim_ )
   {
-    error("MeshGeometry : size mismatch in coordinates assignment");
+    error( "MeshGeometry : size mismatch in coordinates assignment" );
   }
   coordinates_.resize( coordinates.size() );
-  std::copy(coordinates.begin(), coordinates.end(), coordinates_.begin());
+  std::copy( coordinates.begin(), coordinates.end(), coordinates_.begin() );
   size_ = coordinates.size() / dim_;
 }
+
 //-----------------------------------------------------------------------------
-void MeshGeometry::remap(Array<uint> const& mapping)
+
+void MeshGeometry::remap( Array< size_t > const & mapping )
 {
-  if (mapping.size() != size_)
+  if ( mapping.size() != size_ )
   {
-    error("MeshGeometry : size mismatch for remapping of coordinates ");
+    error( "MeshGeometry : size mismatch for remapping of coordinates " );
   }
 
   // Reorder coordinates w.r.t old -> new index mapping
-  Array<real> xcpy( dim_ * size_, 0.0 );
-  for (uint i = 0; i < size_; ++i)
+  Array< real > xcpy( dim_ * size_, 0.0 );
+  for ( size_t i = 0; i < size_; ++i )
   {
     real const * x = coordinates_.data() + i * dim_;
-    std::copy(x, x + dim_, xcpy.data() + mapping[i] * dim_);
+    std::copy( x, x + dim_, xcpy.data() + mapping[i] * dim_ );
   }
   coordinates_ = xcpy;
 
   // Invalidate dependencies
   update_token();
 }
+
 //-----------------------------------------------------------------------------
-void MeshGeometry::assign(MeshGeometry const& other, Array<uint> const& mapping)
+
+void MeshGeometry::assign( MeshGeometry const &    other,
+                           Array< size_t > const & mapping )
 {
-  if (this == &other)
+  if ( this == &other )
   {
-    error("MeshGeometry : assignment of coordinates to self");
+    error( "MeshGeometry : assignment of coordinates to self" );
   }
-  if (other.dim() != dim_)
+  if ( other.dim() != dim_ )
   {
-    error("MeshGeometry : dimension mismatch for assignment of coordinates ");
+    error( "MeshGeometry : dimension mismatch for assignment of coordinates " );
   }
-  if (mapping.size() != size_)
+  if ( mapping.size() != size_ )
   {
-    error("MeshGeometry : size mismatch for assignment of coordinates ");
+    error( "MeshGeometry : size mismatch for assignment of coordinates " );
   }
-  for (uint i = 0; i < mapping.size(); ++i)
+  for ( size_t i = 0; i < mapping.size(); ++i )
   {
-    std::copy(other.x(mapping[i]), other.x(mapping[i]) + dim_,
-              coordinates_.data() + i * dim_);
+    std::copy( other.x( mapping[i] ),
+               other.x( mapping[i] ) + dim_,
+               coordinates_.data() + i * dim_ );
   }
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator*=(real const a) -> MeshGeometry&
+
+auto MeshGeometry::operator*=( real const a ) -> MeshGeometry &
 {
   typedef Array< real >::iterator CoordIter;
-	for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
+  for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
-		*it *= a;
+    *it *= a;
   }
 
-	return *this;
+  return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator/=(real const a) -> MeshGeometry&
+
+auto MeshGeometry::operator/=( real const a ) -> MeshGeometry &
 {
-  if(small(a))
+  if ( small( a ) )
   {
-    error("MeshGeometry : dividing coordinates by zero");
+    error( "MeshGeometry : dividing coordinates by zero" );
   }
   real const b = 1.0 / a;
 
-  using CoordIter = Array<real>::iterator;
+  using CoordIter = Array< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -214,10 +245,12 @@ auto MeshGeometry::operator/=(real const a) -> MeshGeometry&
   }
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator+=(real const a) -> MeshGeometry&
+
+auto MeshGeometry::operator+=( real const a ) -> MeshGeometry &
 {
-  using CoordIter = Array<real>::iterator;
+  using CoordIter = Array< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -225,10 +258,12 @@ auto MeshGeometry::operator+=(real const a) -> MeshGeometry&
   }
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator-=(real const a) -> MeshGeometry&
+
+auto MeshGeometry::operator-=( real const a ) -> MeshGeometry &
 {
-  using CoordIter = Array<real>::iterator;
+  using CoordIter = Array< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -237,14 +272,16 @@ auto MeshGeometry::operator-=(real const a) -> MeshGeometry&
 
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator+=(Point const& p) -> MeshGeometry&
+
+auto MeshGeometry::operator+=( Point const & p ) -> MeshGeometry &
 {
-  using CoordIter = Array<real>::iterator;
+  using CoordIter = Array< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
-    for (uint i = 0; i < dim_; ++i)
+    for ( size_t i = 0; i < dim_; ++i )
     {
       *it += p[i];
       ++it;
@@ -252,14 +289,16 @@ auto MeshGeometry::operator+=(Point const& p) -> MeshGeometry&
   }
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator-=(Point const& p) -> MeshGeometry&
+
+auto MeshGeometry::operator-=( Point const & p ) -> MeshGeometry &
 {
-  using CoordIter = Array<real>::iterator;
+  using CoordIter = Array< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
-    for (uint i = 0; i < dim_; ++i)
+    for ( size_t i = 0; i < dim_; ++i )
     {
       *it += p[i];
       ++it;
@@ -268,46 +307,56 @@ auto MeshGeometry::operator-=(Point const& p) -> MeshGeometry&
 
   return *this;
 }
+
 //-----------------------------------------------------------------------------
+
 auto MeshGeometry::token() const -> int
 {
   return timestamp_ ^ size_;
 }
+
 //-----------------------------------------------------------------------------
+
 void MeshGeometry::update_token()
 {
-  timestamp_ = std::time(nullptr);
+  timestamp_ = std::time( nullptr );
 }
+
 //-----------------------------------------------------------------------------
+
 void MeshGeometry::disp() const
 {
-  section("MeshGeometry");
-  prm("dimension" , dim_);
-  prm("size"      , size_);
+  section( "MeshGeometry" );
+  prm( "dimension", dim_ );
+  prm( "size", size_ );
   end();
 }
+
 //-----------------------------------------------------------------------------
+
 void MeshGeometry::dump() const
 {
-  for (uint i = 0; i < size_; ++i)
+  for ( size_t i = 0; i < size_; ++i )
   {
     cout << i << ":";
-    for (uint d = 0; d < dim_; ++d)
+    for ( size_t d = 0; d < dim_; ++d )
     {
-      cout << " " << x(i)[d];
+      cout << " " << x( i )[d];
     }
     cout << "\n";
   }
 }
+
 //-----------------------------------------------------------------------------
-auto MeshGeometry::operator>>(Array<real>&) const -> MeshGeometry const&
+
+auto MeshGeometry::operator>>( Array< real > & ) const -> MeshGeometry const &
 {
   error( "MeshGeometry::operator>> unimplemented / deprecated." );
   // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);
   // A %= dim_;
   return *this;
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
-

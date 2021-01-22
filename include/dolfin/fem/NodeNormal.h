@@ -29,19 +29,23 @@ class NodeNormal : public BoundaryNormal
 {
 
 public:
-
   enum Type
   {
-    none, unit, facet
+    none,
+    unit,
+    facet
   };
 
   /// Create normal, tangents for the boundary of mesh
-  NodeNormal( Mesh& mesh, Type w = unit,
-              real alpha = dolfin_get<real>("NodeNormal alpha") );
+  NodeNormal( Mesh & mesh,
+              Type   w     = unit,
+              real   alpha = dolfin_get< real >( "NodeNormal alpha" ) );
 
   /// Create normal, tangents for the boundary of mesh for given subdomain
-  NodeNormal( Mesh& mesh, SubDomain const& subdomain, Type w = none,
-              real alpha = dolfin_get<real>("NodeNormal alpha") );
+  NodeNormal( Mesh &            mesh,
+              SubDomain const & subdomain,
+              Type              w = none,
+              real alpha          = dolfin_get< real >( "NodeNormal alpha" ) );
 
   /// Destructor
   ~NodeNormal() override = default;
@@ -50,19 +54,18 @@ public:
   void compute() override;
 
   /// Returns the node type
-  auto node_type(uint node_id) const -> uint;
+  auto node_type( size_t node_id ) const -> size_t;
 
 private:
-
   /// Cleanup
   void clear();
 
   /// Compute boundary normal basis
-  void compute(Mesh& mesh, Array<Function>& basis);
+  void compute( Mesh & mesh, Array< Function > & basis );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  Mesh& mesh_;
+  Mesh & mesh_;
 
   SubDomain const * const subdomain_;
 
@@ -74,9 +77,8 @@ private:
   Type const type_;
 
   ///
-  _map<uint, uint> node_type_;
+  _map< size_t, size_t > node_type_;
 };
 
 }
 #endif
-

@@ -67,7 +67,7 @@ void OFFFile::operator>>(Mesh& mesh)
   for (uint c = 0; c < num_entities[1]; ++c)
   {
     get_next_line(off, line);
-    std::vector<uint> v;
+    std::vector<size_t> v;
 
     // A line contains the type + connectivities
     split_line(line, v);

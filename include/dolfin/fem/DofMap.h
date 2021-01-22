@@ -4,7 +4,6 @@
 #ifndef __DOLFIN_DOF_MAP_H
 #define __DOLFIN_DOF_MAP_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofNumbering.h>
@@ -43,9 +42,9 @@ public:
   DofMap( DofMap const & dofmap, size_t i );
 
   /// Create dof map on a subspace for given subsystem
-  DofMap( DofMap const &          dofmap,
-          Array< size_t > const & sub_system,
-          size_t &                offset );
+  DofMap( DofMap const &                dofmap,
+          std::vector< size_t > const & sub_system,
+          size_t &                      offset );
 
   /// Destructor
   ~DofMap() override;
@@ -57,10 +56,12 @@ public:
   //--- Instantiation using the dofmap cache
 
   /// Acquire dofmap from cache for i-th function of the form.
-  static auto acquire( Mesh & mesh, Form const & form, size_t const i ) -> DofMap &;
+  static auto acquire( Mesh & mesh, Form const & form, size_t const i )
+    -> DofMap &;
 
   /// Acquire dofmap from cache for the given UFC dofmap.
-  static auto acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner ) -> DofMap &;
+  static auto acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+    -> DofMap &;
 
   /// Release a token for the given dofmap
   static void release( DofMap & dofmap );
@@ -78,7 +79,8 @@ public:
 
   /// Return the dimension of the global finite element function space
   auto global_dimension(
-    std::vector< size_t > const & num_global_mesh_entities ) const -> size_t override;
+    std::vector< size_t > const & num_global_mesh_entities ) const
+    -> size_t override;
 
   /// Return the dimension of the local finite element function space
   /// Return the number of dofs with global support (i.e. global constants)
@@ -119,7 +121,8 @@ public:
   // void tabulate_coordinates(real** coordinates,
   //                           const ufc::cell& ufc_cell) const override;
 
-  /// Tabulate the local-to-local mapping of dofs on the closure of entity (d, i)
+  /// Tabulate the local-to-local mapping of dofs on the closure of entity (d,
+  /// i)
   void tabulate_entity_closure_dofs( size_t * dofs,
                                      size_t   d,
                                      size_t   i ) const override;
@@ -150,39 +153,41 @@ public:
   void tabulate_dofs( size_t * dofs, UFCCell const & ufc_cell ) const;
 
   /// Extract sub dof map
-  auto create_sub_dofmap( Array< size_t > const & sub_system ) const -> ufc::dofmap *;
+  auto create_sub_dofmap( std::vector< size_t > const & sub_system ) const
+    -> ufc::dofmap *;
 
   /// Extract sub dof map and compute the offset local to the reference element
-  auto create_sub_dofmap( Array< size_t > const & sub_system,
-                                   size_t &                local_offset ) const -> ufc::dofmap *;
+  auto create_sub_dofmap( std::vector< size_t > const & sub_system,
+                          size_t & local_offset ) const -> ufc::dofmap *;
 
-  static auto create_sub_dofmap( ufc::dofmap const &     dofmap,
-                                          Array< size_t > const & sub_system,
-                                          size_t & local_offset ) -> ufc::dofmap *;
-
-  /// Get sub dof maps offset (for a mixed element)
-  auto sub_dofmaps_dimensions() const -> Array< size_t > const &;
+  static auto create_sub_dofmap( ufc::dofmap const &           dofmap,
+                                 std::vector< size_t > const & sub_system,
+                                 size_t & local_offset ) -> ufc::dofmap *;
 
   /// Get sub dof maps offset (for a mixed element)
-  auto sub_dofmaps_offsets() const -> Array< size_t > const &;
+  auto sub_dofmaps_dimensions() const -> std::vector< size_t > const &;
+
+  /// Get sub dof maps offset (for a mixed element)
+  auto sub_dofmaps_offsets() const -> std::vector< size_t > const &;
 
   /// Get list of scalar dofmaps ordered by entries
-  auto flatten() const -> Array< ufc::dofmap const * > const &;
+  auto flatten() const -> std::vector< ufc::dofmap const * > const &;
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
-  static void flatten( ufc::dofmap const *            dofmap,
-                       Array< ufc::dofmap const * > & stack,
-                       size_t                         maxlevel );
+  static void flatten( ufc::dofmap const *                  dofmap,
+                       std::vector< ufc::dofmap const * > & stack,
+                       size_t                               maxlevel );
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
-  static void flatten( ufc::dofmap const *            dofmap,
-                       Array< ufc::dofmap const * > & stack );
+  static void flatten( ufc::dofmap const *                  dofmap,
+                       std::vector< ufc::dofmap const * > & stack );
 
   /// Return if the dofmap can be seen as a vector element dofmap
   auto is_vectorizable() const -> bool;
 
   /// Return if the list of dofmap can be seen as a vector element
-  static auto can_vectorize( Array< ufc::dofmap const * > flattened ) -> bool;
+  static auto can_vectorize( std::vector< ufc::dofmap const * > flattened )
+    -> bool;
 
   /// Unique identifier
   auto hash() const -> std::string const &;
@@ -201,7 +206,8 @@ public:
   //--- Management of periodic dofs mapping
 
   /// Return local to global mapping
-  auto periodic_mapping( FiniteElementSpace const & space ) const -> PeriodicDofsMapping const &;
+  auto periodic_mapping( FiniteElementSpace const & space ) const
+    -> PeriodicDofsMapping const &;
 
   //--- Dof ownership
 
@@ -225,11 +231,12 @@ public:
   //---
 
   /// Returns the dofmap signature corresponding to a given finite element
-  static auto make_signature( std::string const & finite_element ) -> std::string const;
+  static auto make_signature( std::string const & finite_element )
+    -> std::string const;
 
   /// Create unique string identifiers for dofmap from UFC dofmap
-  static auto make_hash( Mesh &              mesh,
-                                      ufc::dofmap const & ufc_dofmap ) -> std::string const;
+  static auto make_hash( Mesh & mesh, ufc::dofmap const & ufc_dofmap )
+    -> std::string const;
 
   //--- Debugging
 
@@ -292,14 +299,16 @@ inline auto DofMap::operator!=( DofMap const & other ) const -> bool
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::acquire( Mesh & mesh, Form const & form, size_t const i ) -> DofMap &
+inline auto DofMap::acquire( Mesh & mesh, Form const & form, size_t const i )
+  -> DofMap &
 {
   return DofMapCache::instance().acquire( mesh, form, i );
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner ) -> DofMap &
+inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+  -> DofMap &
 {
   return DofMapCache::instance().acquire( mesh, dofmap, owner );
 }
@@ -479,14 +488,15 @@ inline auto DofMap::is_vectorizable() const -> bool
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::sub_dofmaps_dimensions() const -> Array< size_t > const &
+inline auto DofMap::sub_dofmaps_dimensions() const
+  -> std::vector< size_t > const &
 {
   return sub_dofmaps_dims_;
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::sub_dofmaps_offsets() const -> Array< size_t > const &
+inline auto DofMap::sub_dofmaps_offsets() const -> std::vector< size_t > const &
 {
   return sub_dofmaps_offs_;
 }
@@ -541,16 +551,16 @@ inline auto DofMap::hash() const -> std::string const &
 
 //-----------------------------------------------------------------------------
 
-inline auto
-  DofMap::make_signature( std::string const & finite_element ) -> std::string const
+inline auto DofMap::make_signature( std::string const & finite_element )
+  -> std::string const
 {
   return "FFC dofmap for " + finite_element;
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::make_hash( Mesh &              mesh,
-                                            ufc::dofmap const & ufc_dofmap ) -> std::string const
+inline auto DofMap::make_hash( Mesh & mesh, ufc::dofmap const & ufc_dofmap )
+  -> std::string const
 {
   return std::string( ufc_dofmap.signature() ) + mesh.hash();
 }

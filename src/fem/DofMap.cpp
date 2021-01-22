@@ -3,15 +3,15 @@
 
 #include <dolfin/fem/DofMap.h>
 
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/fem/FiniteElementSpace.h>
-#include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Vertex.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
 
 #include <cstring>
 
@@ -19,7 +19,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DofMap::DofMap(Mesh& mesh, ufc::form const& form, uint const i) :
+DofMap::DofMap(Mesh& mesh, ufc::form const& form, size_t const i) :
     MeshDependent(mesh),
     offset_(0),
     ufc_dofmap_(form.create_dofmap(i)),
@@ -43,7 +43,7 @@ DofMap::DofMap(Mesh& mesh, ufc::dofmap& dofmap, bool const owner) :
 }
 
 //-----------------------------------------------------------------------------
-DofMap::DofMap(DofMap const& dofmap, uint i) :
+DofMap::DofMap(DofMap const& dofmap, size_t i) :
     MeshDependent(dofmap.mesh()),
     offset_(0),
     ufc_dofmap_(dofmap.create_sub_dofmap(i)),
@@ -58,7 +58,7 @@ DofMap::DofMap(DofMap const& dofmap, uint i) :
 }
 
 //-----------------------------------------------------------------------------
-DofMap::DofMap(DofMap const& dofmap, Array<uint> const& subsystem, uint& offset) :
+DofMap::DofMap(DofMap const& dofmap, Array<size_t> const& subsystem, size_t& offset) :
     MeshDependent(dofmap.mesh()),
     offset_(0),
     ufc_dofmap_(dofmap.create_sub_dofmap(subsystem, offset_)),
@@ -107,10 +107,10 @@ auto
 }
 
 //-----------------------------------------------------------------------------
-auto DofMap::create_sub_dofmap(Array<uint> const& sub_system) const -> ufc::dofmap*
+auto DofMap::create_sub_dofmap(Array<size_t> const& sub_system) const -> ufc::dofmap*
 {
   // Reset offset
-  uint local_offset = 0;
+  size_t local_offset = 0;
 
   // Recursively extract sub dof map
   ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
@@ -123,8 +123,8 @@ auto DofMap::create_sub_dofmap(Array<uint> const& sub_system) const -> ufc::dofm
 }
 
 //-----------------------------------------------------------------------------
-auto DofMap::create_sub_dofmap(Array<uint> const& sub_system,
-                                       uint& local_offset) const -> ufc::dofmap*
+auto DofMap::create_sub_dofmap(Array<size_t> const& sub_system,
+                                       size_t& local_offset) const -> ufc::dofmap*
 {
   // Reset offset
   local_offset = 0;
@@ -141,8 +141,8 @@ auto DofMap::create_sub_dofmap(Array<uint> const& sub_system,
 
 //-----------------------------------------------------------------------------
 auto DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
-                                       Array<uint> const& sub_system,
-                                       uint& local_offset) -> ufc::dofmap*
+                                       Array<size_t> const& sub_system,
+                                       size_t& local_offset) -> ufc::dofmap*
 {
   // Check that a sub system has been specified
   if (sub_system.size() == 0)
@@ -165,7 +165,7 @@ auto DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   }
 
   // Add to offset if necessary
-  for (uint i = 0; i < sub_system[0]; i++)
+  for (size_t i = 0; i < sub_system[0]; i++)
   {
     ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
     local_offset += ufc_sub_dofmap->num_element_dofs();
@@ -179,8 +179,8 @@ auto DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   if (sub_system.size() == 1) return sub_dofmap;
 
   // Otherwise, recursively extract the sub sub system
-  Array<uint> sub_sub_system;
-  for (uint i = 1; i < sub_system.size(); i++)
+  Array<size_t> sub_sub_system;
+  for (size_t i = 1; i < sub_system.size(); i++)
   {
     sub_sub_system.push_back(sub_system[i]);
   }
@@ -202,12 +202,12 @@ void DofMap::init()
              numbering_->offset(), numbering_->size());
 
   // Information for mixed elements
-  uint const nb_sub = this->num_sub_dofmaps();
+  size_t const nb_sub = this->num_sub_dofmaps();
   if (nb_sub > 0)
   {
     // Set offsets and local dimensions
-    uint off = 0;
-    for (uint i = 0; i < nb_sub; ++i)
+    size_t off = 0;
+    for (size_t i = 0; i < nb_sub; ++i)
     {
       ufc::dofmap * subdm = this->create_sub_dofmap(i);
       sub_dofmaps_dims_.push_back(subdm->num_element_dofs());
@@ -235,7 +235,7 @@ auto DofMap::flatten() const -> Array<ufc::dofmap const *> const&
 
 //-----------------------------------------------------------------------------
 void DofMap::flatten(ufc::dofmap const * dofmap,
-                     Array<ufc::dofmap const *>& stack, uint maxlevel)
+                     Array<ufc::dofmap const *>& stack, size_t maxlevel)
 {
   // Single root element or max level is set to zero, return immediately
   if (dofmap->num_sub_dofmaps() == 0 || maxlevel == 0)
@@ -244,7 +244,7 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
     return;
   }
   // Go one level down
-  for (uint s = 0; s < dofmap->num_sub_dofmaps(); ++s)
+  for (size_t s = 0; s < dofmap->num_sub_dofmaps(); ++s)
   {
     ufc::dofmap const * sub = dofmap->create_sub_dofmap(s);
     if (sub->num_sub_dofmaps() == 0)
@@ -271,7 +271,7 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
     return;
   }
   // Go one level down
-  for (uint s = 0; s < dofmap->num_sub_dofmaps(); ++s)
+  for (size_t s = 0; s < dofmap->num_sub_dofmaps(); ++s)
   {
     ufc::dofmap const * sub = dofmap->create_sub_dofmap(s);
     if (sub->num_sub_dofmaps() == 0)
@@ -291,7 +291,7 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
 auto DofMap::can_vectorize(Array<ufc::dofmap const *> flattened) -> bool
 {
   bool ret = true;
-  for (uint s = 1; s < flattened.size(); ++s)
+  for (size_t s = 1; s < flattened.size(); ++s)
   {
     if (std::strcmp(flattened[0]->signature(), flattened[s]->signature()) != 0)
     {
@@ -337,7 +337,7 @@ auto DofMap::check(bool throw_error) -> bool
   BoundaryMesh& boundary = mesh().interior_boundary();
   Mesh& mesh = this->mesh();
   MeshDistributedData& distdata = mesh.distdata();
-  uint const tdim = mesh.topology_dimension();
+  size_t const tdim = mesh.topology_dimension();
 
   if (this->num_facet_dofs() == 0)
   {
@@ -345,21 +345,21 @@ auto DofMap::check(bool throw_error) -> bool
   }
 
   //
-  _ordered_set<uint> shared_owned;
-  typedef _ordered_map<uint, std::pair<uint, uint> > EntitiesDofMap;
+  _ordered_set<size_t> shared_owned;
+  typedef _ordered_map<size_t, std::pair<size_t, size_t> > EntitiesDofMap;
   EntitiesDofMap shared_owned_entities;
   Cell c0(mesh, 0);
   UFCCell ufc_cell(c0);
-  uint * cell_dofs = new uint[this->num_element_dofs()];
-  uint * num_entity_dofs = new uint[tdim];
-  for (uint d = 0; d < tdim; ++d)
+  size_t * cell_dofs = new size_t[this->num_element_dofs()];
+  size_t * num_entity_dofs = new size_t[tdim];
+  for (size_t d = 0; d < tdim; ++d)
   {
     mesh.init(tdim, d);
     mesh.init(mesh.type().facet_dim(), d);
     num_entity_dofs[d] = ufc_dofmap_->num_entity_dofs(d);
   }
-  uint const num_facet_dofs = this->num_facet_dofs();
-  uint * loc_entity_dofs = new uint[this->num_facet_dofs()];
+  size_t const num_facet_dofs = this->num_facet_dofs();
+  size_t * loc_entity_dofs = new size_t[this->num_facet_dofs()];
   for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
   {
     Facet f(boundary.mesh(), boundary.facet_index(*bcell));
@@ -371,13 +371,13 @@ auto DofMap::check(bool throw_error) -> bool
     this->tabulate_dofs(cell_dofs, ufc_cell);
 
     // Check that all shared facet dofs are shared
-    uint const local_facet = cell.index(f);
+    size_t const local_facet = cell.index(f);
     ufc_dofmap_->tabulate_facet_dofs(loc_entity_dofs, local_facet);
-    _ordered_set<uint> shared_facet_dofs;
-    _ordered_set<uint> local_facet_dofs;
-    for (uint dof = 0; dof < num_facet_dofs; ++dof)
+    _ordered_set<size_t> shared_facet_dofs;
+    _ordered_set<size_t> local_facet_dofs;
+    for (size_t dof = 0; dof < num_facet_dofs; ++dof)
     {
-      uint gdof = cell_dofs[loc_entity_dofs[dof]];
+      size_t gdof = cell_dofs[loc_entity_dofs[dof]];
       if (!is_shared(gdof))
       {
         error("Dof with local_index %u on shared facet is not shared",
@@ -388,9 +388,9 @@ auto DofMap::check(bool throw_error) -> bool
     }
 
     // Get boundary facet dofs
-    uint const facet_dim = mesh.type().facet_dim();
+    size_t const facet_dim = mesh.type().facet_dim();
     ufc_dofmap_->tabulate_entity_dofs(loc_entity_dofs, facet_dim, local_facet);
-    for (uint dof = 0; dof < num_entity_dofs[facet_dim]; ++dof)
+    for (size_t dof = 0; dof < num_entity_dofs[facet_dim]; ++dof)
     {
       dolfin_assert(is_shared(cell_dofs[loc_entity_dofs[dof]]));
       if (!is_ghost(cell_dofs[loc_entity_dofs[dof]]))
@@ -402,20 +402,20 @@ auto DofMap::check(bool throw_error) -> bool
             error("Non-ghosted dof's facet is ghosted");
           }
           shared_owned_entities[cell_dofs[loc_entity_dofs[dof]]] = std::pair<
-              uint, uint>(distdata[f.dim()].get_global(f.index()), f.dim());
+              size_t, size_t>(distdata[f.dim()].get_global(f.index()), f.dim());
         }
         shared_owned.insert(cell_dofs[loc_entity_dofs[dof]]);
       }
     }
 
     // Check lower dimensional entities of boundary facet
-    for (uint d = 0; d < (facet_dim); ++d)
+    for (size_t d = 0; d < (facet_dim); ++d)
     {
       for (MeshEntityIterator m(f, d); !m.end(); ++m)
       {
         dolfin_assert(m->is_shared());
         // Get the dof indices for the entity
-        uint local_index = cell.index(*m);
+        size_t local_index = cell.index(*m);
         MeshEntity e(mesh, d, cell.entities(d)[local_index]);
         if (!distdata[e.dim()].is_shared(e.index()))
         {
@@ -423,7 +423,7 @@ auto DofMap::check(bool throw_error) -> bool
         }
         ufc_dofmap_->tabulate_entity_dofs(loc_entity_dofs, d, local_index);
 
-        for (uint dof = 0; dof < num_entity_dofs[d]; ++dof)
+        for (size_t dof = 0; dof < num_entity_dofs[d]; ++dof)
         {
           if (local_facet_dofs.count(loc_entity_dofs[dof]) == 0)
           {
@@ -431,7 +431,7 @@ auto DofMap::check(bool throw_error) -> bool
                   "Entity of dim %u with local index %u",
                   d, cell.index(*m));
           }
-          uint gdof = cell_dofs[loc_entity_dofs[dof]];
+          size_t gdof = cell_dofs[loc_entity_dofs[dof]];
           if (shared_facet_dofs.count(gdof) == 0)
           {
             error("Dof index is not a shared facet dof:\n"
@@ -447,7 +447,7 @@ auto DofMap::check(bool throw_error) -> bool
               {
                 error("Non-ghosted dof's entity of dim %u is ghosted", d);
               }
-              shared_owned_entities[gdof] = std::pair<uint, uint>(
+              shared_owned_entities[gdof] = std::pair<size_t, size_t>(
                   distdata[m->dim()].get_global(m->index()), m->dim());
             }
             shared_owned.insert(gdof);
@@ -463,10 +463,10 @@ auto DofMap::check(bool throw_error) -> bool
 #if HAVE_MPI
 
   // Simple version
-  uint rank = dolfin::MPI::rank();
-  uint pe_size = dolfin::MPI::size();
+  size_t rank = dolfin::MPI::rank();
+  size_t pe_size = dolfin::MPI::size();
 
-  Array<uint> sendbuf;
+  Array<size_t> sendbuf;
   if (distributed_by_entities_)
   {
     for (EntitiesDofMap::const_iterator it = shared_owned_entities.begin();
@@ -480,7 +480,7 @@ auto DofMap::check(bool throw_error) -> bool
   else
   {
 #ifdef __SUNPRO_CC
-    for (_ordered_set<uint>::iterator it = shared_owned.begin();
+    for (_ordered_set<size_t>::iterator it = shared_owned.begin();
         it != shared_owned.end(); ++it)
     {
       sendbuf.push_back(*it);
@@ -493,25 +493,25 @@ auto DofMap::check(bool throw_error) -> bool
   int maxrev_count = sendbuf.size();
   MPI::all_reduce_in_place<MPI::max>( maxrev_count );
   dolfin_assert(maxrev_count > 0);
-  Array< uint > recvbuf( maxrev_count );
+  Array< size_t > recvbuf( maxrev_count );
 
-  _set<uint> owned_more;
-  for (uint p = 1; p < pe_size; ++p)
+  _set<size_t> owned_more;
+  for (size_t p = 1; p < pe_size; ++p)
   {
     int src = (rank - p + pe_size) % pe_size;
     int dest = (rank + p) % pe_size;
 
     //
     int recv_count = MPI::sendrecv( sendbuf, dest, recvbuf, src, 0);
-    for (uint i = 0; i < uint(recv_count);)
+    for (size_t i = 0; i < size_t(recv_count);)
     {
       if (distributed_by_entities_)
       {
-        uint const idx = recvbuf[i++];
-        uint const dim = recvbuf[i++];
+        size_t const idx = recvbuf[i++];
+        size_t const dim = recvbuf[i++];
         if (distdata[dim].has_global(idx))
         {
-          uint loc_id = distdata[dim].get_local(idx);
+          size_t loc_id = distdata[dim].get_local(idx);
           if (!distdata[dim].is_ghost(loc_id))
           {
             if (throw_error)
@@ -525,7 +525,7 @@ auto DofMap::check(bool throw_error) -> bool
           }
         }
       }
-      uint const dof = recvbuf[i++];
+      size_t const dof = recvbuf[i++];
       if (is_shared(dof) && !is_ghost(dof))
       {
         owned_more.insert(dof);

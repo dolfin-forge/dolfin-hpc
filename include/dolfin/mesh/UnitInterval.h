@@ -18,9 +18,7 @@ class UnitInterval : public Mesh
 {
 
 public:
-
-  UnitInterval(uint nx);
-
+  UnitInterval( size_t nx );
 };
 
 } /* namespace dolfin */

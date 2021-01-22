@@ -21,12 +21,10 @@ libdolfin_mesh_la_SOURCES = \
 			MeshDistributedData.cpp\
 			MeshEditor.cpp\
 			MeshEntity.cpp\
-			MeshEntityIterator.cpp\
 			MeshGeometry.cpp\
 			MeshOrdering.cpp\
 			MeshPartition.cpp\
 			MeshQuality.cpp\
-			MeshQualityFunction.cpp\
 			MeshRenumber.cpp\
 			MeshSmoother.cpp\
 			MeshSmoothing.cpp\

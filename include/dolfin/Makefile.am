@@ -156,7 +156,6 @@ nobase_pkginclude_HEADERS = \
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
-				mesh/AffineMapping.h \
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
@@ -187,7 +186,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/entities/MeshEntity.h\
 				mesh/entities/Vertex.h\
 				mesh/EntityKey.h\
-				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
 				mesh/EuclideanSpace.h \
 				mesh/FaceKey.h\
@@ -196,7 +194,9 @@ nobase_pkginclude_HEADERS = \
 				mesh/IntersectionDetector.h\
 				mesh/LoadBalancer.h\
 				mesh/MappedManifold.h \
-				mesh/Mapping.h \
+				mesh/mappings/EquiAffineMapping.h \
+				mesh/mappings/Mapping.h \
+				mesh/mappings/AffineMapping.h \
 				mesh/Mesh.h\
 				mesh/MeshData.h\
 				mesh/MeshDependent.h\

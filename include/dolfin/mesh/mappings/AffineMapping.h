@@ -8,7 +8,7 @@
 #ifndef __DOLFIN_AFFINE_MAPPING_H
 #define __DOLFIN_AFFINE_MAPPING_H
 
-#include <dolfin/mesh/Mapping.h>
+#include <dolfin/mesh/mappings/Mapping.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>

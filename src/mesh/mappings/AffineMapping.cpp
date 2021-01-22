@@ -1,7 +1,7 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
 
-#include <dolfin/mesh/AffineMapping.h>
+#include <dolfin/mesh/mappings/AffineMapping.h>
 
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshGeometry.h>

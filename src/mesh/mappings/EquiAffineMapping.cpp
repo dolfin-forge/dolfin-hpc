@@ -1,7 +1,7 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
 
-#include <dolfin/mesh/EquiAffineMapping.h>
+#include <dolfin/mesh/mappings/EquiAffineMapping.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Mesh.h>

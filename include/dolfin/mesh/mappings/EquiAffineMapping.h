@@ -6,7 +6,7 @@
 #ifndef __DOLFIN_EQUI_AFFINE_MAPPING_H
 #define __DOLFIN_EQUI_AFFINE_MAPPING_H
 
-#include <dolfin/mesh/Mapping.h>
+#include <dolfin/mesh/mappings/Mapping.h>
 
 #include <dolfin/mesh/Point.h>
 

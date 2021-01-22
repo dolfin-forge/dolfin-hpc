@@ -2,7 +2,7 @@
 #ifndef DOLFIN_MESH_QUALITY_H
 #define DOLFIN_MESH_QUALITY_H
 
-#include <dolfin/mesh/EquiAffineMapping.h>
+#include <dolfin/mesh/mappings/EquiAffineMapping.h>
 #include <dolfin/mesh/MeshDependent.h>
 #include <dolfin/mesh/MeshValues.h>
 

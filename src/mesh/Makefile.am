@@ -1,16 +1,15 @@
-SUBDIRS=celltypes entities
+SUBDIRS=celltypes entities mappings
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 
 libdolfin_mesh_la_LIBADD = celltypes/libdolfin_mesh_celltypes.la\
-                           entities/libdolfin_mesh_entities.la
-libdolfin_mesh_la_SOURCES = AffineMapping.cpp\
-                            BoundaryMesh.cpp\
+                           entities/libdolfin_mesh_entities.la\
+                           mappings/libdolfin_mesh_mappings.la
+libdolfin_mesh_la_SOURCES = BoundaryMesh.cpp\
                             Box.cpp\
                             Connectivity.cpp\
                             DMesh.cpp\
-                            EquiAffineMapping.cpp\
                             EuclideanBasis.cpp\
                             GeometricPredicates.cpp\
                             GTSInterface.cpp\

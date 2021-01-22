@@ -398,6 +398,7 @@ AC_CONFIG_FILES([Makefile
                  src/mesh/celltypes/Makefile\
                  src/mesh/entities/Makefile\
                  src/mesh/mappings/Makefile\
+                 src/mesh/unitmeshes/Makefile\
                  src/parameter/Makefile\
                  src/quadrature/Makefile\
                  src/dolfin.pc\

@@ -1,7 +1,7 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/UnitSphere.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/EuclideanSpace.h>
@@ -12,14 +12,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UnitSphere::UnitSphere( size_t nx )
+UnitCube::UnitCube( size_t nx, size_t ny, size_t nz )
   : Mesh( TetrahedronCell(), EuclideanSpace( 3 ) )
 {
-
-  message( "UnitSphere is Experimental: It could have a bad quality mesh" );
-
-  size_t ny = nx;
-  size_t nz = nx;
 
   if ( nx < 1 || ny < 1 || nz < 1 )
   {
@@ -33,24 +28,18 @@ UnitSphere::UnitSphere( size_t nx )
 
   // Create vertices
   editor.init_vertices( ( nx + 1 ) * ( ny + 1 ) * ( nz + 1 ) );
-  size_t vertex    = 0;
-  real   trns_x[3] = { 0.0 };
+  size_t vertex = 0;
+  real   x[3]   = { 0.0 };
   for ( size_t iz = 0; iz <= nz; iz++ )
   {
-    real const z =
-      -1.0 + static_cast< real >( iz ) * 2.0 / static_cast< real >( nz );
+    x[2] = static_cast< real >( iz ) / static_cast< real >( nz );
     for ( size_t iy = 0; iy <= ny; iy++ )
     {
-      real const y =
-        -1.0 + static_cast< real >( iy ) * 2.0 / static_cast< real >( ny );
+      x[1] = static_cast< real >( iy ) / static_cast< real >( ny );
       for ( size_t ix = 0; ix <= nx; ix++ )
       {
-        real const x =
-          -1.0 + static_cast< real >( ix ) * 2.0 / static_cast< real >( nx );
-        trns_x[0] = transformx( x, y, z );
-        trns_x[1] = transformy( x, y, z );
-        trns_x[2] = transformz( x, y, z );
-        editor.add_vertex( vertex++, trns_x );
+        x[0] = static_cast< real >( ix ) / static_cast< real >( nx );
+        editor.add_vertex( vertex++, x );
       }
     }
   }
@@ -89,72 +78,6 @@ UnitSphere::UnitSphere( size_t nx )
 
   // Close mesh editor
   editor.close();
-}
-//-----------------------------------------------------------------------------
-auto UnitSphere::transformx( real x, real y, real z ) -> real
-{
-  real retrn = 0.0;
-  if ( x || y || z )
-
-  {
-    retrn = x * max( fabs( x ), fabs( y ), fabs( z ) )
-            / sqrt( x * x + y * y + z * z );
-  }
-  else
-  {
-    retrn = x;
-  }
-  return retrn;
-}
-//-----------------------------------------------------------------------------
-auto UnitSphere::transformy( real x, real y, real z ) -> real
-{
-  real retrn = 0.0;
-  if ( x || y || z )
-  {
-    retrn = y * max( fabs( x ), fabs( y ), fabs( z ) )
-            / sqrt( x * x + y * y + z * z );
-  }
-  else
-  {
-    retrn = y;
-  }
-  return retrn;
-}
-//-----------------------------------------------------------------------------
-auto UnitSphere::transformz( real x, real y, real z ) -> real
-{
-  real retrn = 0.0;
-  // maxn transformation
-  if ( x || y || z )
-  {
-    retrn = z * max( fabs( x ), fabs( y ), fabs( z ) )
-            / sqrt( x * x + y * y + z * z );
-  }
-  else
-  {
-    retrn = z;
-  }
-  return retrn;
-}
-//-----------------------------------------------------------------------------
-auto UnitSphere::max( real x, real y, real z ) -> real
-{
-  real rtrn = 0.0;
-
-  if ( ( x >= y ) && ( x >= z ) )
-  {
-    rtrn = x;
-  }
-  else if ( ( y >= x ) && ( y >= z ) )
-  {
-    rtrn = y;
-  }
-  else
-  {
-    rtrn = z;
-  }
-  return rtrn;
 }
 //-----------------------------------------------------------------------------
 

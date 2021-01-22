@@ -5,9 +5,9 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
-#include <dolfin/mesh/UnitCube.h>
-#include <dolfin/mesh/UnitInterval.h>
-#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
+#include <dolfin/mesh/unitmeshes/UnitInterval.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
 
 #include "../../elements/element_library.inc"
 

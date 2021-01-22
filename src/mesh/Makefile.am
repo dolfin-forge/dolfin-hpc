@@ -1,11 +1,13 @@
-SUBDIRS=celltypes entities mappings
+SUBDIRS=celltypes entities mappings unitmeshes
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 
 libdolfin_mesh_la_LIBADD = celltypes/libdolfin_mesh_celltypes.la\
                            entities/libdolfin_mesh_entities.la\
-                           mappings/libdolfin_mesh_mappings.la
+                           mappings/libdolfin_mesh_mappings.la\
+                           unitmeshes/libdolfin_mesh_unitmeshes.la
+
 libdolfin_mesh_la_SOURCES = BoundaryMesh.cpp\
                             Box.cpp\
                             Connectivity.cpp\
@@ -36,10 +38,5 @@ libdolfin_mesh_la_SOURCES = BoundaryMesh.cpp\
                             StructuredGrid.cpp\
                             SubDomain.cpp\
                             UniformRefinement.cpp\
-                            UnitCube.cpp\
-                            UnitDisk.cpp\
-                            UnitInterval.cpp\
-                            UnitSphere.cpp\
-                            UnitSquare.cpp\
                             VertexNormal.cpp\
                             ZoltanInterface.cpp

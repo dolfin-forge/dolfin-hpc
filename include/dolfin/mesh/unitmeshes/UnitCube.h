@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_UNIT_CUBE_H
 #define __DOLFIN_UNIT_CUBE_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {

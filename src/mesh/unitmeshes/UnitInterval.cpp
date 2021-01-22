@@ -1,7 +1,7 @@
 // Copyright (C) 2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/UnitInterval.h>
+#include <dolfin/mesh/unitmeshes/UnitInterval.h>
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/LinearDistribution.h>

@@ -1,7 +1,7 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/EuclideanSpace.h>

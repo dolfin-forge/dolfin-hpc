@@ -156,11 +156,6 @@ nobase_pkginclude_HEADERS = \
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
-				mesh/algorithm.h \
-				mesh/BarycentricPoint.h\
-				mesh/BoundaryMesh.h\
-				mesh/BoundingBox.h\
-				mesh/Box.h\
 				mesh/celltypes/CellType.h\
 				mesh/celltypes/HexahedronCell.h\
 				mesh/celltypes/IntervalCell.h\
@@ -168,23 +163,36 @@ nobase_pkginclude_HEADERS = \
 				mesh/celltypes/QuadrilateralCell.h\
 				mesh/celltypes/TetrahedronCell.h\
 				mesh/celltypes/TriangleCell.h\
-				mesh/Connectivity.h\
-				mesh/DMesh.h\
-				mesh/dolfin_mesh.h\
-				mesh/DomainBoundary.h\
-				mesh/EdgeKey.h\
 				mesh/entities/Cell.h\
 				mesh/entities/Edge.h\
 				mesh/entities/Face.h\
 				mesh/entities/Facet.h\
+				mesh/entities/MeshEntity.h\
+				mesh/entities/Vertex.h\
 				mesh/entities/iterators/CellIterator.h\
 				mesh/entities/iterators/EdgeIterator.h\
 				mesh/entities/iterators/FaceIterator.h\
 				mesh/entities/iterators/FacetIterator.h\
 				mesh/entities/iterators/MeshEntityIterator.h\
 				mesh/entities/iterators/VertexIterator.h\
-				mesh/entities/MeshEntity.h\
-				mesh/entities/Vertex.h\
+				mesh/mappings/EquiAffineMapping.h \
+				mesh/mappings/Mapping.h \
+				mesh/mappings/AffineMapping.h\
+				mesh/unitmeshes/UnitCube.h\
+				mesh/unitmeshes/UnitDisk.h\
+				mesh/unitmeshes/UnitInterval.h\
+				mesh/unitmeshes/UnitSphere.h\
+				mesh/unitmeshes/UnitSquare.h\
+				mesh/algorithm.h \
+				mesh/BarycentricPoint.h\
+				mesh/BoundaryMesh.h\
+				mesh/BoundingBox.h\
+				mesh/Box.h\
+				mesh/Connectivity.h\
+				mesh/DMesh.h\
+				mesh/dolfin_mesh.h\
+				mesh/DomainBoundary.h\
+				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EuclideanBasis.h \
 				mesh/EuclideanSpace.h \
@@ -194,9 +202,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/IntersectionDetector.h\
 				mesh/LoadBalancer.h\
 				mesh/MappedManifold.h \
-				mesh/mappings/EquiAffineMapping.h \
-				mesh/mappings/Mapping.h \
-				mesh/mappings/AffineMapping.h \
 				mesh/Mesh.h\
 				mesh/MeshData.h\
 				mesh/MeshDependent.h\
@@ -227,11 +232,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/StructuredGrid.h\
 				mesh/SubDomain.h\
 				mesh/UniformRefinement.h\
-				mesh/UnitCube.h\
-				mesh/UnitDisk.h\
-				mesh/UnitInterval.h\
-				mesh/UnitSphere.h\
-				mesh/UnitSquare.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\

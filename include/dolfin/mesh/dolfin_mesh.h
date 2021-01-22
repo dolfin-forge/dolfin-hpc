@@ -22,11 +22,11 @@
 #include <dolfin/mesh/Rectangle.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/UnitCube.h>
-#include <dolfin/mesh/UnitDisk.h>
-#include <dolfin/mesh/UnitInterval.h>
-#include <dolfin/mesh/UnitSphere.h>
-#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
+#include <dolfin/mesh/unitmeshes/UnitDisk.h>
+#include <dolfin/mesh/unitmeshes/UnitInterval.h>
+#include <dolfin/mesh/unitmeshes/UnitSphere.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Edge.h>
 #include <dolfin/mesh/entities/Face.h>

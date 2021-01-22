@@ -9,6 +9,7 @@
 #include <dolfin/mesh/EntityKey.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
 
 #include <algorithm>
 #include <ctime>

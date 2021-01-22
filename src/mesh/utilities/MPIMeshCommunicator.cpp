@@ -1,7 +1,7 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MPIMeshCommunicator.h>
+#include <dolfin/mesh/utilities/MPIMeshCommunicator.h>
 
 #include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>

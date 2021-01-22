@@ -7,14 +7,14 @@
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/MeshData.h>
-#include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/Space.h>
-#include <dolfin/mesh/UniformRefinement.h>
 #include <dolfin/mesh/celltypes/TetrahedronCell.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
+#include <dolfin/mesh/utilities/MPIMeshCommunicator.h>
+#include <dolfin/mesh/utilities/MeshPartition.h>
+#include <dolfin/mesh/utilities/UniformRefinement.h>
 
 #include <sstream>
 

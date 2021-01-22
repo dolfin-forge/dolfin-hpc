@@ -7,12 +7,12 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Vertex.h>
 #include <dolfin/mesh/entities/iterators/CellIterator.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PARMETIS

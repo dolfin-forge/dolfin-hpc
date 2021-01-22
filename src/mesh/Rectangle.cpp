@@ -5,7 +5,6 @@
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/EuclideanSpace.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin

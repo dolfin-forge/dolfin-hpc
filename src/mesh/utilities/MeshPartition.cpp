@@ -1,13 +1,13 @@
 // Copyright (C) 2007 Magnus Vikstrom.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshPartition.h>
+#include <dolfin/mesh/utilities/MeshPartition.h>
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
 #include <dolfin/mesh/ZoltanInterface.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
 namespace dolfin

@@ -12,12 +12,12 @@
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/mesh/LoadBalancer.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
-#include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/entities/iterators/CellIterator.h>
 #include <dolfin/mesh/entities/iterators/EdgeIterator.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
+#include <dolfin/mesh/utilities/MPIMeshCommunicator.h>
+#include <dolfin/mesh/utilities/RivaraRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <algorithm>

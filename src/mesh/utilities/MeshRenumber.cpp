@@ -3,7 +3,7 @@
 
 // Rewritten to fix distribution bugs and use distributed data class.
 
-#include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
 
 #include <dolfin/common/SharedIterator.h>
 #include <dolfin/main/MPI.h>

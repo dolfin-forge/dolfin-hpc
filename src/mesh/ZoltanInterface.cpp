@@ -4,10 +4,10 @@
 #include <dolfin/mesh/ZoltanInterface.h>
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Facet.h>
 #include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_ZOLTAN

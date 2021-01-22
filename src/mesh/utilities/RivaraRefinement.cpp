@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/utilities/RivaraRefinement.h>
 
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/LoadBalancer.h>

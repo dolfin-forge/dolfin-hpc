@@ -8,7 +8,7 @@
 
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/Function.h>
-#include <dolfin/mesh/MeshQuality.h>
+#include <dolfin/mesh/utilities/MeshQuality.h>
 
 namespace dolfin
 {

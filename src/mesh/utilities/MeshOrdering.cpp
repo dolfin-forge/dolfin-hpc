@@ -1,7 +1,7 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/MeshOrdering.h>
+#include <dolfin/mesh/utilities/MeshOrdering.h>
 
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>

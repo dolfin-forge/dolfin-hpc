@@ -1,7 +1,7 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/UniformRefinement.h>
+#include <dolfin/mesh/utilities/UniformRefinement.h>
 
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>

@@ -1,5 +1,5 @@
 
-#include <dolfin/mesh/MeshQuality.h>
+#include <dolfin/mesh/utilities/MeshQuality.h>
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Point.h>

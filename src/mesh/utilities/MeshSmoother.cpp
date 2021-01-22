@@ -3,16 +3,16 @@
 
 // Refactoring of classes from UNICORN.
 
-#include <dolfin/mesh/MeshSmoother.h>
+#include <dolfin/mesh/utilities/MeshSmoother.h>
 
 #include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/MeshQuality.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Facet.h>
 #include <dolfin/mesh/entities/Vertex.h>
 #include <dolfin/mesh/entities/iterators/CellIterator.h>
 #include <dolfin/mesh/entities/iterators/FacetIterator.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
+#include <dolfin/mesh/utilities/MeshQuality.h>
 
 namespace dolfin
 {

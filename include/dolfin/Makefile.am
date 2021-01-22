@@ -183,6 +183,16 @@ nobase_pkginclude_HEADERS = \
 				mesh/unitmeshes/UnitInterval.h\
 				mesh/unitmeshes/UnitSphere.h\
 				mesh/unitmeshes/UnitSquare.h\
+				mesh/utilities/MeshOrdering.h\
+				mesh/utilities/MeshPartition.h\
+				mesh/utilities/MeshQuality.h\
+				mesh/utilities/MeshQualityFunction.h\
+				mesh/utilities/MeshRenumber.h\
+				mesh/utilities/MeshSmoother.h\
+				mesh/utilities/MeshSmoothing.h\
+				mesh/utilities/MPIMeshCommunicator.h\
+				mesh/utilities/RivaraRefinement.h\
+				mesh/utilities/UniformRefinement.h\
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
@@ -209,29 +219,19 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshEditor.h\
 				mesh/MeshFunction.h\
 				mesh/MeshGeometry.h\
-				mesh/MeshOrdering.h\
-				mesh/MeshPartition.h\
-				mesh/MeshQuality.h\
-				mesh/MeshQualityFunction.h\
-				mesh/MeshRenumber.h\
-				mesh/MeshSmoother.h\
-				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
 				mesh/MeshValues.h\
 				mesh/MetisInterface.h\
-				mesh/MPIMeshCommunicator.h\
 				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\
 				mesh/predicates_init.h\
 				mesh/Rectangle.h\
 				mesh/RefinementPattern.h\
-				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
 				mesh/Simplex.h \
 				mesh/Space.h \
 				mesh/StructuredGrid.h\
 				mesh/SubDomain.h\
-				mesh/UniformRefinement.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\

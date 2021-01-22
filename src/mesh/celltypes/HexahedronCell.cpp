@@ -1,7 +1,7 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/celltypes/HexahedronCell.h>
 
 #include <dolfin/common/maybe_unused.h>
 #include <dolfin/mesh/MeshEditor.h>

@@ -6,7 +6,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
 
 namespace dolfin
 {

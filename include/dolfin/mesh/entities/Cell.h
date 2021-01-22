@@ -7,9 +7,9 @@
 #include <dolfin/common/GhostIterator.h>
 #include <dolfin/common/OwnedIterator.h>
 #include <dolfin/common/SharedIterator.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/mesh/entities/MeshEntity.h>
 
 namespace dolfin

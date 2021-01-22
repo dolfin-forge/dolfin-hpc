@@ -8,7 +8,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/BoundingBox.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 namespace dolfin
 {

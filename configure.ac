@@ -395,6 +395,8 @@ AC_CONFIG_FILES([Makefile
                  src/main/Makefile\
                  src/math/Makefile\
                  src/mesh/Makefile\
+                 src/mesh/celltypes/Makefile\
+                 src/mesh/entities/Makefile\
                  src/parameter/Makefile\
                  src/quadrature/Makefile\
                  src/dolfin.pc\

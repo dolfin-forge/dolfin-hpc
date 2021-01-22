@@ -6,7 +6,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 namespace dolfin
 {

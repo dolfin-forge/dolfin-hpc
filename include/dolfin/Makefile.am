@@ -156,31 +156,36 @@ nobase_pkginclude_HEADERS = \
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
-				mesh/entities/iterators/CellIterator.h\
-				mesh/entities/iterators/EdgeIterator.h\
-				mesh/entities/iterators/FaceIterator.h\
-				mesh/entities/iterators/FacetIterator.h\
-				mesh/entities/iterators/MeshEntityIterator.h\
-				mesh/entities/iterators/VertexIterator.h\
-				mesh/entities/Cell.h\
-				mesh/entities/Edge.h\
-				mesh/entities/Face.h\
-				mesh/entities/Facet.h\
-				mesh/entities/MeshEntity.h\
-				mesh/entities/Vertex.h\
 				mesh/AffineMapping.h \
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\
 				mesh/Box.h\
-				mesh/CellType.h\
-				mesh/CellTypes.h\
+				mesh/celltypes/CellType.h\
+				mesh/celltypes/HexahedronCell.h\
+				mesh/celltypes/IntervalCell.h\
+				mesh/celltypes/PointCell.h\
+				mesh/celltypes/QuadrilateralCell.h\
+				mesh/celltypes/TetrahedronCell.h\
+				mesh/celltypes/TriangleCell.h\
 				mesh/Connectivity.h\
 				mesh/DMesh.h\
 				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
 				mesh/EdgeKey.h\
+				mesh/entities/Cell.h\
+				mesh/entities/Edge.h\
+				mesh/entities/Face.h\
+				mesh/entities/Facet.h\
+				mesh/entities/iterators/CellIterator.h\
+				mesh/entities/iterators/EdgeIterator.h\
+				mesh/entities/iterators/FaceIterator.h\
+				mesh/entities/iterators/FacetIterator.h\
+				mesh/entities/iterators/MeshEntityIterator.h\
+				mesh/entities/iterators/VertexIterator.h\
+				mesh/entities/MeshEntity.h\
+				mesh/entities/Vertex.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
@@ -188,9 +193,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/FaceKey.h\
 				mesh/GeometricPredicates.h\
 				mesh/GTSInterface.h\
-				mesh/HexahedronCell.h\
 				mesh/IntersectionDetector.h\
-				mesh/IntervalCell.h\
 				mesh/LoadBalancer.h\
 				mesh/MappedManifold.h \
 				mesh/Mapping.h \
@@ -214,9 +217,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/MPIMeshCommunicator.h\
 				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\
-				mesh/PointCell.h\
 				mesh/predicates_init.h\
-				mesh/QuadrilateralCell.h\
 				mesh/Rectangle.h\
 				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
@@ -225,8 +226,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/Space.h \
 				mesh/StructuredGrid.h\
 				mesh/SubDomain.h\
-				mesh/TetrahedronCell.h\
-				mesh/TriangleCell.h\
 				mesh/UniformRefinement.h\
 				mesh/UnitCube.h\
 				mesh/UnitDisk.h\

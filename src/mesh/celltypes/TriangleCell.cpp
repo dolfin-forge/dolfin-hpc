@@ -1,7 +1,7 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>

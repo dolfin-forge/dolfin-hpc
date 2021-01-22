@@ -12,8 +12,8 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/Space.h>
-#include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/UniformRefinement.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <sstream>

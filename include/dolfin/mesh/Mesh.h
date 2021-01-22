@@ -7,10 +7,10 @@
 #include <dolfin/common/Variable.h>
 #include <dolfin/common/types.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <string>

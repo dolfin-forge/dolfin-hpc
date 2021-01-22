@@ -4,7 +4,7 @@
 
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofNumbering.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Space.h>

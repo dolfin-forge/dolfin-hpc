@@ -1,7 +1,7 @@
 // Copyright (C) 2007-2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/PointCell.h>
+#include <dolfin/mesh/celltypes/PointCell.h>
 
 #include <dolfin/common/maybe_unused.h>
 #include <dolfin/math/basic.h>

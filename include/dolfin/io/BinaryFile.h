@@ -5,8 +5,7 @@
 #define __DOLFIN_BINARY_FILE_H
 
 #include <dolfin/io/GenericFile.h>
-
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 #include <string>
 
@@ -19,7 +18,6 @@
 namespace dolfin
 {
 
-class CellType;
 class Vector;
 
 class BinaryFile : public GenericFile

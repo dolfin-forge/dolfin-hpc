@@ -6,8 +6,8 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/LinearDistribution.h>
 #include <dolfin/mesh/EuclideanSpace.h>
-#include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/celltypes/IntervalCell.h>
 
 namespace dolfin
 {

@@ -4,9 +4,9 @@
 #include <dolfin/mesh/EquiAffineMapping.h>
 
 #include <dolfin/common/constants.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Edge.h>
 #include <dolfin/mesh/entities/Face.h>

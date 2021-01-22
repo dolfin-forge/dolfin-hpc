@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_TRIANGLE_CELL_H
 #define __DOLFIN_TRIANGLE_CELL_H
 
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/mesh/entities/Cell.h>
 
 namespace dolfin

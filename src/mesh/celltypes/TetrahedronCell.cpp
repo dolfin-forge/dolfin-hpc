@@ -1,7 +1,7 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/TetrahedronCell.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/maybe_unused.h>

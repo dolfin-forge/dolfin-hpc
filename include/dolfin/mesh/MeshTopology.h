@@ -19,10 +19,10 @@
 #include <dolfin/common/Tokenized.h>
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 namespace dolfin
 {

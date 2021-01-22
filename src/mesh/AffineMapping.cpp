@@ -3,9 +3,9 @@
 
 #include <dolfin/mesh/AffineMapping.h>
 
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Edge.h>
 #include <dolfin/mesh/entities/Face.h>
@@ -112,7 +112,6 @@ void AffineMapping::map_to_reference_cell( real const * x, real * xref ) const
   }
 }
 
-
 //-----------------------------------------------------------------------------
 
 void AffineMapping::updateInterval( Cell const & cell )
@@ -125,13 +124,12 @@ void AffineMapping::updateInterval( Cell const & cell )
 
   // Get coordinates
   std::vector< size_t > const & vertices = cell.entities( 0 );
-  MeshGeometry const &    geom     = cell.mesh().geometry();
+  MeshGeometry const &          geom     = cell.mesh().geometry();
   std::copy(
     &geom.x( vertices[0] )[0], &geom.x( vertices[0] )[0] + gdim_, &p[0][0] );
   std::copy(
     &geom.x( vertices[1] )[0], &geom.x( vertices[1] )[0] + gdim_, &p[1][0] );
 }
-
 
 //-----------------------------------------------------------------------------
 
@@ -146,7 +144,7 @@ void AffineMapping::updateTriangle( Cell const & cell )
 
   // Get coordinates
   std::vector< size_t > const & vertices = cell.entities( 0 );
-  MeshGeometry const &    geom     = cell.mesh().geometry();
+  MeshGeometry const &          geom     = cell.mesh().geometry();
   std::copy(
     &geom.x( vertices[0] )[0], &geom.x( vertices[0] )[0] + gdim_, &p[0][0] );
   std::copy(
@@ -169,7 +167,7 @@ void AffineMapping::updateTetrahedron( Cell const & cell )
 
   // Get coordinates
   std::vector< size_t > const & vertices = cell.entities( 0 );
-  MeshGeometry const &    geom     = cell.mesh().geometry();
+  MeshGeometry const &          geom     = cell.mesh().geometry();
   std::copy(
     &geom.x( vertices[0] )[0], &geom.x( vertices[0] )[0] + gdim_, &p[0][0] );
   std::copy(

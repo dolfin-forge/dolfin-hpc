@@ -1,17 +1,17 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/HexahedronCell.h>
-#include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/celltypes/HexahedronCell.h>
+#include <dolfin/mesh/celltypes/IntervalCell.h>
+#include <dolfin/mesh/celltypes/PointCell.h>
+#include <dolfin/mesh/celltypes/QuadrilateralCell.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Vertex.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>

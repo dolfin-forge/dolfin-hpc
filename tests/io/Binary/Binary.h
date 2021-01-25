@@ -101,6 +101,9 @@ DOLFIN_START_TEST( test_BinaryFile_Mesh )
       f2 >> mesh2;
     }
 
+    mesh1.init();
+    mesh2.init();
+
     ck_assert( mesh1 == mesh2 );
   }
 }

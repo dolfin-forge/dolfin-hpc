@@ -31,7 +31,7 @@ Connectivity::Connectivity( std::vector< size_t > const & valency )
   {
     min_degree_     = std::min( min_degree_, valency[e] );
     max_degree_     = std::max( max_degree_, valency[e] );
-    connections_[e] = std::vector< size_t >( valency[e], 0. );
+    connections_[e] = std::vector< size_t >( valency[e], 0 );
   }
 }
 
@@ -129,10 +129,7 @@ auto Connectivity::operator==( Connectivity const & other ) const -> bool
 #if DEBUG
         warning( "Connectivity : != connections" );
         message( "First differing entry '[%u][%u]' : %u != %u",
-                 e,
-                 f,
-                 connections_[e][f],
-                 other.connections_[e][f] );
+                 e, f, connections_[e][f], other.connections_[e][f] );
 #endif
         return false;
       }

@@ -531,8 +531,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       bswap( cell_data.data(), cell_data.data() + cell_data.size() );
     }
 
-    std::vector< size_t > cell_data2( cell_data.size() );
-    std::copy( cell_data.begin(), cell_data.end(), cell_data2.begin() );
+    std::vector< size_t > cell_data2( cell_data.begin(), cell_data.end() );
 
     for (uint c = 0; c < num_cells; ++c)
     {
@@ -871,7 +870,8 @@ void BinaryFile::operator<<(Mesh& mesh)
     fp.write( reinterpret_cast<const char*>( &num_cells ), sizeof(uint));
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      fp.write( reinterpret_cast<const char*>( c->entities(0).data() ),
+      std::vector< uint > ctmp( c->entities(0).begin(), c->entities(0).end() );
+      fp.write( reinterpret_cast<const char*>( ctmp.data() ),
                 num_cellvertices * sizeof(uint) );
     }
 

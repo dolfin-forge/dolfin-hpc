@@ -52,7 +52,7 @@ public:
     //---
     if ( ufc_dofmap.num_element_dofs() != mesh.type().num_entities( 0 ) )
     {
-      error( "CG1sNumbering : local dimension %u != %u",
+      warning( "CG1sNumbering : local dimension %u != %u",
              ufc_dofmap.num_element_dofs(),
              mesh.type().num_entities( 0 ) );
     }

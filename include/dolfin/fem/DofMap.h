@@ -443,7 +443,14 @@ inline auto DofMap::num_sub_dofmaps() const -> size_t
 
 inline auto DofMap::create_sub_dofmap( size_t i ) const -> ufc::dofmap *
 {
-  return ufc_dofmap_->create_sub_dofmap( i );
+  if ( ufc_dofmap_-> num_sub_dofmaps() == 0 )
+  {
+    return ufc_dofmap_->create();
+  }
+  else
+  {
+    return ufc_dofmap_->create_sub_dofmap( i );
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -17,11 +17,14 @@ void test( std::string file )
 
   Mesh mesh( file );
 
-  ufc::finite_element * element =
-    create_finite_element( "FiniteElement('Lagrange', triangle, 1)" );
+  std::string const element_str =   "VectorElement(FiniteElement('Lagrange', "
+                                  + mesh.type().str() + ", 1), dim="
+                                  + std::to_string( mesh.geometry_dimension() )
+                                  + ")";
+  std::string const dofmap_str  = "FFC dofmap for " + element_str;
 
-  ufc::dofmap * dofmap = create_dof_map(
-    "FFC dofmap for FiniteElement('Lagrange', triangle, 1)" );
+  ufc::finite_element * element = create_finite_element( element_str.c_str() );
+  ufc::dofmap *         dofmap  = create_dof_map( dofmap_str.c_str() );
 
   FiniteElementSpace Vh( mesh, element, *dofmap, true );
 

@@ -593,7 +593,14 @@ inline auto FiniteElement::num_sub_elements() const -> size_t
 inline auto FiniteElement::create_sub_element( size_t i ) const
   -> ufc::finite_element *
 {
-  return ufc_finite_element_->create_sub_element( i );
+  if ( ufc_finite_element_-> num_sub_elements() == 0 )
+  {
+    return ufc_finite_element_->create();
+  }
+  else
+  {
+    return ufc_finite_element_->create_sub_element( i );
+  }
 }
 
 //-----------------------------------------------------------------------------

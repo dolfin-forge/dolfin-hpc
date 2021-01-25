@@ -498,7 +498,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 void Function::InitializeVector()
 {
   // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( element_->topological_dimension(),
+  std::vector< size_t > num_entities( element_->topological_dimension() + 1,
                                       0 );
   for ( size_t d = 0; d <= element_->topological_dimension(); ++d )
   {

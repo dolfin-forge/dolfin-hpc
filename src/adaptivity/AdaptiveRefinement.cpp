@@ -138,7 +138,7 @@ void refine_and_project( Mesh &                     mesh,
   for ( size_t f = 0; f < functions.size(); ++f )
   {
     Function *   func    = functions[f].second;
-    size_t const num_sub = func->space().element()->num_sub_elements();
+    size_t const num_sub = func->space().element().num_sub_elements();
 
     if ( num_sub == 0 )
     {
@@ -183,7 +183,7 @@ void refine_and_project( Mesh &                     mesh,
   for ( size_t f = 0; f < functions.size(); ++f )
   {
     FiniteElementSpace const & space   = functions[f].second->space();
-    size_t const               num_sub = space.element()->num_sub_elements();
+    size_t const               num_sub = space.element().num_sub_elements();
 
     std::vector< Function > post;
     /// @todo Invalid for scalar functions due to the zero subspace assumption
@@ -352,8 +352,8 @@ void project( Mesh &                    new_mesh,
   dolfin_set( "GTS Tolerance", 1e-10 );
   dolfin_set( "Geometrical Tolerance Tetrahedron", 1e-8 );
 
-  if ( not( space.element()->family() == Element::Family::CG )
-       or ( space.element()->degree() != 1 ) )
+  if ( not( space.element().family() == Element::Family::CG )
+       or ( space.element().degree() != 1 ) )
   {
     error( "AdaptiveRefinement::project only implemented for P1" );
   }

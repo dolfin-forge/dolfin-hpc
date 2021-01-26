@@ -12,6 +12,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/Value.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/la/Matrix.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
@@ -149,51 +150,49 @@ struct DirichletBoundary : public SubDomain
 DOLFIN_START_TEST( test_BinaryFile_Poisson )
 {
   // FIXME reintroduce once ffc can generate dolfin-hpc bindings
-  // {
-  //   //------------------------------------------------------------------------
+  {
+    //------------------------------------------------------------------------
 
-  //   // Create mesh
-  //   // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
-  //   UnitSquare mesh( 32, 32 );
+    // Create mesh
+    // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.bin");
+    UnitSquare mesh( 32, 32 );
 
-  //   // Create coefficients
-  //   Analytic< Source > f( mesh );
-  //   Analytic< Flux >   g( mesh );
+    // Create coefficients
+    Analytic< Source > f( mesh );
+    Analytic< Flux >   g( mesh );
 
-  //   // Create boundary condition
-  //   Constant          u0( 0.0 );
-  //   DirichletBoundary boundary;
-  //   DirichletBC       bc( u0, mesh, boundary );
+    // Create boundary condition
+    Constant          u0( 0.0 );
+    DirichletBoundary boundary;
+    DirichletBC       bc( u0, mesh, boundary );
 
-  //   // Define PDE
-  //   Poisson::BilinearForm a( mesh );
-  //   Poisson::LinearForm   L( mesh, f, g );
+    // Define PDE
+    Poisson::BilinearForm a( mesh );
+    Poisson::LinearForm   L( mesh, f, g );
 
-  //   // Solve PDE
-  //   Matrix A;
-  //   Vector b;
+    // Solve PDE
+    Matrix A;
+    Vector b;
 
-  //   a.assemble( A, true );
-  //   L.assemble( b, true );
-  //   bc.apply( A, b, a );
+    a.assemble( A, true );
+    L.assemble( b, true );
+    bc.apply( A, b, a );
 
-  //   Function     u( a.trial_space() );
-  //   KrylovSolver solver( bicgstab, bjacobi );
+    Function     u( a.trial_space() );
+    // KrylovSolver solver( bicgstab, bjacobi );
 
-  //   solver.solve( A, u.vector(), b );
-  //   u.sync();
+    // solver.solve( A, u.vector(), b );
+    // u.sync();
 
-  //   u.disp();
+    BinaryFile( "u.bin" ) << u;
 
-  //   BinaryFile( "u.bin" ) << u;
+    message( "vector l2  norm: %e", u.vector().norm() );
+    message( "vector inf norm: %e", u.vector().max() );
 
-  //   message( "vector l2  norm: %e", u.vector().norm() );
-  //   message( "vector inf norm: %e", u.vector().max() );
+    Function v( a.trial_space() );
 
-  //   Function v( a.trial_space() );
-
-  //   BinaryFile( "u000000.bin" ) >> v;
-  // }
+    BinaryFile( "u000000.bin" ) >> v;
+  }
 }
 DOLFIN_END_TEST
 //--------------------------------------------------------------------------

@@ -38,10 +38,10 @@ public:
   //--- Coefficient INTERFACE -------------------------------------------------
 
   ///
-  inline void evaluate(uint n, real* values, const real* coordinates,
+  inline void evaluate(size_t n, real* values, const real* coordinates,
                        const ufc::cell& cell) const
   {
-    for (uint i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
     {
       static_cast<T const *>(this)->evaluate(&values[i*value_size()],
                                              &coordinates[i*cell.geometric_dimension],
@@ -56,19 +56,19 @@ public:
   }
 
   /// Return the rank of the value space
-  inline uint rank() const
+  inline size_t rank() const
   {
     return VS_.rank();
   }
 
   /// Return the dimension of the value space for axis i
-  inline uint dim(uint i) const
+  inline size_t dim(size_t i) const
   {
     return VS_.dim(i);
   }
 
   // Return the value size
-  inline uint value_size() const
+  inline size_t value_size() const
   {
     return VS_.value_size();
   }
@@ -85,7 +85,7 @@ public:
   /// Interpolate function to finite element space on facet
   inline  void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
+                           const Cell& dolfin_cell, size_t facet) const
   {
     this->facet_ = facet;
     dolfin_assert(coefficients);

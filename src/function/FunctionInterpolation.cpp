@@ -54,7 +54,7 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element()->evaluate_dofs(&block1[dof], UE,
+      F1.space().element().evaluate_dofs(&block1[dof], UE,
                                           S1.cell.coordinates.data(),
                                           0, S1.cell);
       dof += S1.local_dimension;
@@ -82,7 +82,7 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element()->evaluate_dofs(&block1[dof], F0,
+      F1.space().element().evaluate_dofs(&block1[dof], F0,
                                          S1.cell.coordinates.data(),
                                          0, S1.cell);
       dof += S1.local_dimension;
@@ -104,7 +104,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
   {
     // Analytical expression and flattened space (naive implementation)
     std::vector<ufc::finite_element const*> const& Sflt =
-        F1.space().element()->flatten();
+        F1.space().element().flatten();
     ScratchSpace S1(F1.space());
 
     size_t dof = 0;
@@ -141,7 +141,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element()->evaluate_dofs(&block1[dof], F0,
+      F1.space().element().evaluate_dofs(&block1[dof], F0,
                                           S1.cell.coordinates.data(),
                                           0, S1.cell);
       dof += S1.local_dimension;
@@ -212,7 +212,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   bool const is_distributed = M0.is_distributed() || M1.is_distributed();
 #if HAVE_MPI
   bool const just_first_coords = Vh1.is_flattenable()
-      && Vh1.element()->is_vectorizable();
+      && Vh1.element().is_vectorizable();
 #endif
 
   //--- Collect on-proc and off-proc dofs
@@ -324,7 +324,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     //
     dolfin_assert(dofs_indices0.size() / S1.size == dofs_xcoords0.size() / gdim1);
   }
-  else if (Vh1.is_flattenable() && Vh1.element()->is_vectorizable())
+  else if (Vh1.is_flattenable() && Vh1.element().is_vectorizable())
   {
     // This implementation assumes a scalar function for which
     // components are approximated in a discrete space other than CG1 and DG0.

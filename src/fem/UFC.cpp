@@ -34,26 +34,52 @@ void UFC::init( ufc::form const & form, Mesh & mesh, DofMapSet const & dofmaps )
   }
 
   // Create cell integrals
-  cell_integrals = new ufc::cell_integral *[form.max_cell_subdomain_id()];
-  for ( size_t i = 0; i < form.max_cell_subdomain_id(); ++i )
+  if ( form.max_cell_subdomain_id() != 0 )
   {
-    cell_integrals[i] = form.create_cell_integral( i );
+    cell_integrals = new ufc::cell_integral *[form.max_cell_subdomain_id()];
+    for ( size_t i = 0; i < form.max_cell_subdomain_id(); ++i )
+    {
+      cell_integrals[i] = form.create_cell_integral( i );
+    }
+  }
+  else
+  {
+    cell_integrals    = new ufc::cell_integral *[1];
+    cell_integrals[0] = form.create_default_cell_integral();
   }
 
   // Create exterior facet integrals
-  exterior_facet_integrals =
-    new ufc::exterior_facet_integral *[form.max_exterior_facet_subdomain_id()];
-  for ( size_t i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
+  if ( form.max_exterior_facet_subdomain_id() != 0 )
   {
-    exterior_facet_integrals[i] = form.create_exterior_facet_integral( i );
+    exterior_facet_integrals =
+      new ufc::exterior_facet_integral *[form
+                                           .max_exterior_facet_subdomain_id()];
+    for ( size_t i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
+    {
+      exterior_facet_integrals[i] = form.create_exterior_facet_integral( i );
+    }
+  }
+  else
+  {
+    exterior_facet_integrals    = new ufc::exterior_facet_integral *[1];
+    exterior_facet_integrals[0] = form.create_default_exterior_facet_integral();
   }
 
   // Create interior facet integrals
-  interior_facet_integrals =
-    new ufc::interior_facet_integral *[form.max_interior_facet_subdomain_id()];
-  for ( size_t i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
+  if ( form.max_interior_facet_subdomain_id() != 0 )
   {
-    interior_facet_integrals[i] = form.create_interior_facet_integral( i );
+    interior_facet_integrals =
+      new ufc::interior_facet_integral *[form
+                                           .max_interior_facet_subdomain_id()];
+    for ( size_t i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
+    {
+      interior_facet_integrals[i] = form.create_interior_facet_integral( i );
+    }
+  }
+  else
+  {
+    interior_facet_integrals    = new ufc::interior_facet_integral *[1];
+    interior_facet_integrals[0] = form.create_default_interior_facet_integral();
   }
 
   // Initialize cells with first cell in mesh

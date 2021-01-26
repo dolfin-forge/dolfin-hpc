@@ -56,7 +56,7 @@ Function::Function(Form& form, size_t i) :
     TimeDependent(),
     mesh_(&form.dofmaps()[i].mesh()),
     discrete_space_(new FiniteElementSpace(form, i)),
-    element_(discrete_space_->element()),
+    element_(&discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -76,7 +76,7 @@ Function::Function(FiniteElementSpace const& space) :
     TimeDependent(),
     mesh_(&space.mesh()),
     discrete_space_(new FiniteElementSpace(space)),
-    element_(discrete_space_->element()),
+    element_(&discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -97,7 +97,7 @@ Function::Function(SubFunction const& sub_function) :
     mesh_(&sub_function.function().mesh()),
     discrete_space_(new FiniteElementSpace(sub_function.function().space(),
                                            sub_function.index())),
-    element_(discrete_space_->element()),
+    element_(&discrete_space_->element()),
     dofmap_(&discrete_space_->dofmap()),
     scratch(new ScratchSpace(*discrete_space_)),
     X_(new Vector()),
@@ -181,7 +181,7 @@ void Function::init(Form& form, size_t i)
   //
   clear();
   discrete_space_ = new FiniteElementSpace(form, i);
-  element_ = discrete_space_->element();
+  element_ = &discrete_space_->element();
   dofmap_ = &discrete_space_->dofmap();
   scratch = new ScratchSpace(*discrete_space_);
   X_ = new Vector();
@@ -203,7 +203,7 @@ void Function::init(FiniteElementSpace const& space)
   //
   clear();
   discrete_space_ = new FiniteElementSpace(space);
-  element_ = discrete_space_->element();
+  element_ = &discrete_space_->element();
   dofmap_ = &discrete_space_->dofmap();
   scratch = new ScratchSpace(*discrete_space_);
   X_ = new Vector();
@@ -626,7 +626,7 @@ auto Function::operator=(Function const& other) -> Function&
   {
     const_cast<Mesh *&>(mesh_) = other.mesh_;
     discrete_space_ = new FiniteElementSpace(*other.discrete_space_);
-    element_ = discrete_space_->element();
+    element_ = &discrete_space_->element();
     dofmap_ = &discrete_space_->dofmap();
     scratch = new ScratchSpace(*discrete_space_);
     X_ = new Vector();

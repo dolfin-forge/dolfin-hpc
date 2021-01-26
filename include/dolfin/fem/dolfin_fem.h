@@ -15,7 +15,6 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/Functional.h>
-#include <dolfin/fem/FunctionSpaceMap.h>
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/fem/PeriodicBC.h>

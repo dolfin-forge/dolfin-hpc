@@ -29,9 +29,9 @@ void BilinearForm::check(GenericMatrix const& A, GenericVector const& b) const
 {
   // FIXME num_entities should maybe be stored somewhere else
   std::vector< size_t > num_entities_M(
-    this->test_space().element()->topological_dimension(), 0 );
+    this->test_space().element().topological_dimension(), 0 );
   std::vector< size_t > num_entities_N(
-    this->trial_space().element()->topological_dimension(), 0 );
+    this->trial_space().element().topological_dimension(), 0 );
 
   for ( uint d = 0; d <= num_entities_M.size(); ++d )
     if ( this->mesh().topology().connectivity( d ) )

@@ -11,13 +11,15 @@
 
 #include "../../elements/element_library.inc"
 
+#include "../../demo/pde/poisson/Poisson.h"
+
 using namespace dolfin;
 
 void test_finite_element_space( FiniteElementSpace const & space )
 {
   using namespace ElementLibrary;
 
-  FiniteElement const & element = *space.element();
+  FiniteElement const & element = space.element();
 
   // check FiniteElement
   {
@@ -90,53 +92,55 @@ void test_finite_element_space( FiniteElementSpace const & space )
 //----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_FiniteElementSpace )
 {
-  using namespace ElementLibrary;
-
-  // okay, so this is not super exact, but we just expect the dofmap and element
-  // signatures in the element library to be in the correct order that each pair
-  // creates a finite element space
-  size_t const nelements = sizeof( elements ) / sizeof( char * );
-  size_t const ndofmaps  = sizeof( dofmaps ) / sizeof( char * );
-  ck_assert( nelements == ndofmaps );
-
-  for ( size_t i = 0; i < nelements; ++i )
   {
-    // create ufc::finite element
-    ufc::finite_element * element = create_finite_element( elements[i] );
+    using namespace ElementLibrary;
 
-    // create ufc::dofmap
-    ufc::dofmap * dofmap = create_dof_map( dofmaps[i] );
+    // okay, so this is not super exact, but we just expect the dofmap and element
+    // signatures in the element library to be in the correct order that each pair
+    // creates a finite element space
+    size_t const nelements = sizeof( elements ) / sizeof( char * );
+    size_t const ndofmaps  = sizeof( dofmaps ) / sizeof( char * );
+    ck_assert( nelements == ndofmaps );
 
-    Mesh m;
-    if ( element->geometric_dimension() == 1 )
+    for ( size_t i = 0; i < nelements; ++i )
     {
-      m = UnitInterval( 8 );
-    }
-    else if ( element->geometric_dimension() == 2 )
-    {
-      m = UnitSquare( 8, 8 );
-    }
-    else if ( element->geometric_dimension() == 3 )
-    {
-      m = UnitCube( 8, 8, 8 );
-    }
+      // create ufc::finite element
+      ufc::finite_element * element = create_finite_element( elements[i] );
 
-    // FIXME try-catch should be removed, once CG1s is fixed
-    try
-    {
-      // create FiniteElementSpace and transfer ownership
-      FiniteElementSpace space( m, element, *dofmap, false );
+      // create ufc::dofmap
+      ufc::dofmap * dofmap = create_dof_map( dofmaps[i] );
 
-      // test this FiniteElementSpace and its subspaces recursively
-      test_finite_element_space( space );
-    }
-    catch ( std::exception & e )
-    {
-      message( "Checked:\n%s\n%s\nCaught:\n%s", elements[i], dofmaps[i], e.what() );
-    }
+      Mesh m;
+      if ( element->geometric_dimension() == 1 )
+      {
+        m = UnitInterval( 8 );
+      }
+      else if ( element->geometric_dimension() == 2 )
+      {
+        m = UnitSquare( 8, 8 );
+      }
+      else if ( element->geometric_dimension() == 3 )
+      {
+        m = UnitCube( 8, 8, 8 );
+      }
 
-    delete element;
-    delete dofmap;
+      // FIXME try-catch should be removed, once CG1s is fixed
+      try
+      {
+        // create FiniteElementSpace and transfer ownership
+        FiniteElementSpace space( m, element, *dofmap, false );
+
+        // test this FiniteElementSpace and its subspaces recursively
+        test_finite_element_space( space );
+      }
+      catch ( std::exception & e )
+      {
+        message( "Checked:\n%s\n%s\nCaught:\n%s", elements[i], dofmaps[i], e.what() );
+      }
+
+      delete element;
+      delete dofmap;
+    }
   }
 }
 DOLFIN_END_TEST

@@ -3,14 +3,12 @@
 
 // DOLFIN mesh interface
 
-#include <dolfin/mesh/AffineMapping.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Box.h>
 #include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/DomainBoundary.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LoadBalancer.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
@@ -20,13 +18,14 @@
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Rectangle.h>
-#include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/unitmeshes/UnitCube.h>
-#include <dolfin/mesh/unitmeshes/UnitDisk.h>
-#include <dolfin/mesh/unitmeshes/UnitInterval.h>
-#include <dolfin/mesh/unitmeshes/UnitSphere.h>
-#include <dolfin/mesh/unitmeshes/UnitSquare.h>
+#include <dolfin/mesh/celltypes/CellType.h>
+#include <dolfin/mesh/celltypes/HexahedronCell.h>
+#include <dolfin/mesh/celltypes/IntervalCell.h>
+#include <dolfin/mesh/celltypes/PointCell.h>
+#include <dolfin/mesh/celltypes/QuadrilateralCell.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/entities/Edge.h>
 #include <dolfin/mesh/entities/Face.h>
@@ -39,5 +38,23 @@
 #include <dolfin/mesh/entities/iterators/FacetIterator.h>
 #include <dolfin/mesh/entities/iterators/MeshEntityIterator.h>
 #include <dolfin/mesh/entities/iterators/VertexIterator.h>
+#include <dolfin/mesh/mappings/AffineMapping.h>
+#include <dolfin/mesh/mappings/EquiAffineMapping.h>
+#include <dolfin/mesh/mappings/Mapping.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
+#include <dolfin/mesh/unitmeshes/UnitDisk.h>
+#include <dolfin/mesh/unitmeshes/UnitInterval.h>
+#include <dolfin/mesh/unitmeshes/UnitSphere.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
+#include <dolfin/mesh/utilities/MeshOrdering.h>
+#include <dolfin/mesh/utilities/MeshPartition.h>
+#include <dolfin/mesh/utilities/MeshQualityFunction.h>
+#include <dolfin/mesh/utilities/MeshQuality.h>
+#include <dolfin/mesh/utilities/MeshRenumber.h>
+#include <dolfin/mesh/utilities/MeshSmoother.h>
+#include <dolfin/mesh/utilities/MeshSmoothing.h>
+#include <dolfin/mesh/utilities/MPIMeshCommunicator.h>
+#include <dolfin/mesh/utilities/RivaraRefinement.h>
+#include <dolfin/mesh/utilities/UniformRefinement.h>
 
 #endif /* __DOLFIN_HEADER_MESH_H */

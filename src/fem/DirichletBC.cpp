@@ -125,7 +125,7 @@ void DirichletBC::apply_impl( GenericMatrix &       A,
   // Check compatibility of function g and the test (sub)space
   FiniteElementSpace const & space = form.trial_space();
   ufc::finite_element *      fe =
-    space.element()->create_sub_element( this->sub_system() );
+    space.element().create_sub_element( this->sub_system() );
 
   for ( size_t c = 0; c < conditions.size(); ++c )
   {

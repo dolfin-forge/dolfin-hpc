@@ -4,14 +4,10 @@
 #ifndef __DOLFIN_UFC_REFERENCE_CELL_H
 #define __DOLFIN_UFC_REFERENCE_CELL_H
 
-#include <dolfin/ufc/ufc.h>
-
-//#include <dolfin/config/dolfin_config.h>
-//#include <dolfin/common/types.h>
-//#include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Cell.h>
-//#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/main/MPI.h>
+
+#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {
@@ -76,31 +72,31 @@ public:
     geometric_dimension = cell.mesh().geometry_dimension();
 
     // Set entity indices
-    entity_indices = new uint*[topological_dimension + 1];
-    entity_indices[topological_dimension] = new uint[1];
+    entity_indices = new size_t*[topological_dimension + 1];
+    entity_indices[topological_dimension] = new size_t[1];
     entity_indices[topological_dimension][0] = cell.index();
 
     // Two different cases
     if (MPI::size() == 1)
     {
       // Single process, pointer to mesh topological data
-      for (uint d = 0; d < topological_dimension; d++)
+      for (size_t d = 0; d < topological_dimension; d++)
         entity_indices[d] = cell.entities(d).data();
     }
     else
     {
       // Parallel case, store topological data in object
-      for (uint d = 0; d < topological_dimension; d++)
+      for (size_t d = 0; d < topological_dimension; d++)
       {
-        entity_indices[d] = new uint[cell.num_entities(d)];
-        for (uint i = 0; i < cell.num_entities(d); i++)
+        entity_indices[d] = new size_t[cell.num_entities(d)];
+        for (size_t i = 0; i < cell.num_entities(d); i++)
           entity_indices[d][i] = cell.entities(d)[i];
       }
     }
 
     /// Set vertex coordinates
     coordinates = new real*[num_vertices];
-    for (uint i = 0; i < num_vertices; i++)
+    for (size_t i = 0; i < num_vertices; i++)
       coordinates[i] = new real[3];
 
     switch (topological_dimension)
@@ -147,7 +143,7 @@ public:
     {
       if (MPI::size() > 1)
       {
-        for (uint i = 0; i < (topological_dimension + 1); i++)
+        for (size_t i = 0; i < (topological_dimension + 1); i++)
           delete[] entity_indices[i];
         delete[] entity_indices;
       }
@@ -171,7 +167,7 @@ public:
 private:
 
   // Number of cell vertices
-  uint num_vertices{0};
+  size_t num_vertices{0};
 
 };
 

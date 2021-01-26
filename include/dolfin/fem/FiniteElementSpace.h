@@ -80,7 +80,7 @@ public:
     -> Cell &; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
-  auto element() const -> FiniteElement const *;
+  auto element() const -> FiniteElement const &;
 
   /// Return the dofmap
   auto dofmap() const -> DofMap const &;
@@ -148,9 +148,9 @@ inline auto FiniteElementSpace::cell() const -> Cell &
 
 //-----------------------------------------------------------------------------
 
-inline auto FiniteElementSpace::element() const -> FiniteElement const *
+inline auto FiniteElementSpace::element() const -> FiniteElement const &
 {
-  return finite_element_;
+  return *finite_element_;
 }
 
 //-----------------------------------------------------------------------------

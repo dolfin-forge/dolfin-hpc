@@ -90,7 +90,7 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
     }
     delete[] block;
   }
-  else if (Wh.element()->is_vectorizable())
+  else if (Wh.element().is_vectorizable())
   {
     size_t ii = 0;
     size_t offset = 0;

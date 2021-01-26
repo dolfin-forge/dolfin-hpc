@@ -116,7 +116,7 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
 {
   message( 1,
            "NodeNormal : compute P%u node normal",
-           basis[0].space().element()->degree() );
+           basis[0].space().element().degree() );
   clear();
   BoundaryMesh & boundary = mesh.exterior_boundary();
 
@@ -140,9 +140,9 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
 
   FiniteElementSpace const & spaceN   = basis[0].space();
   DofMap const &             dofmapN  = spaceN.dofmap();
-  FiniteElement const &      elementN = *spaceN.element();
+  FiniteElement const &      elementN = spaceN.element();
   ScratchSpace               scratchN( spaceN );
-  size_t const               value_size = spaceN.element()->value_size();
+  size_t const               value_size = spaceN.element().value_size();
   dolfin_assert( value_size == gdim );
   size_t const num_facet_dofs            = dofmapN.num_facet_dofs();
   size_t const num_facet_nodes           = num_facet_dofs / value_size;

@@ -21,6 +21,5 @@
 #include <dolfin/fem/SlipBC.h>
 #include <dolfin/fem/SlipFrictionBC.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/fem/UFCCoefficient.h>
 
 #endif /* __DOLFIN_HEADER_FEM_H */

@@ -8,7 +8,6 @@
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/fem/UFC.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/SubDomain.h>

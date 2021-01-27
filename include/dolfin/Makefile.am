@@ -67,8 +67,6 @@ nobase_pkginclude_HEADERS = \
 				fem/SubSystem.h\
 				fem/UFC.h\
 				fem/UFCCell.h\
-				fem/UFCCoefficient.h\
-				fem/UFCExpression.h\
 				fem/UFCHalo.h\
 				function/Analytic.h\
 				function/Constant.h\
@@ -246,6 +244,5 @@ nobase_pkginclude_HEADERS = \
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
 				quadrature/RadauQuadrature.h\
-				quadrature/UFCReferenceCell.h\
 				ufc/ufc.h\
 				ufc/ufc_geometry.h

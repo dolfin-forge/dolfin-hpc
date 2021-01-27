@@ -7,7 +7,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/fem/UFCExpression.h>
+#include <dolfin/function/Expression.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
@@ -20,6 +20,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 void FunctionInterpolation::compute(GenericFunction const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
@@ -37,6 +38,27 @@ void FunctionInterpolation::compute(GenericFunction const& F0, Function& F1)
 }
 
 //-----------------------------------------------------------------------------
+
+struct EvalExpression : ufc::function
+{
+  EvalExpression(Expression const& E) :
+    E_(E)
+  {
+  }
+
+  ///
+  inline void evaluate(real* values, const real* coordinates,
+                       const ufc::cell&) const override
+  {
+    E_.eval(values, coordinates);
+  }
+
+private:
+
+  Expression const& E_;
+};
+
+
 void FunctionInterpolation::compute(Expression const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
@@ -47,14 +69,14 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
   {
     // Just assume that the coefficient can be evaluated on a ufc::cell
     ScratchSpace S1(F1.space());
-    UFCExpression UE(F0);
+    EvalExpression EE(F0);
     size_t dof = 0;
     real * block1 = F1.create_block();
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element().evaluate_dofs(&block1[dof], UE,
+      F1.space().element().evaluate_dofs(&block1[dof], EE,
                                           S1.cell.coordinates.data(),
                                           0, S1.cell);
       dof += S1.local_dimension;

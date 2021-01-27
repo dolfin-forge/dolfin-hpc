@@ -5,7 +5,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/la/JANPACKFactory.h>
 #include <dolfin/la/JANPACKMat.h>
 #include <dolfin/la/JANPACKVec.h>
@@ -53,7 +53,7 @@ JANPACKMat::JANPACKMat(const JANPACKMat& A):
 //-----------------------------------------------------------------------------
 JANPACKMat::~JANPACKMat()
 {
-  jp_mat_free(A);    
+  jp_mat_free(A);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::init(uint M, uint N)
@@ -196,7 +196,7 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   jp_spmv(const_cast<jp_mat_type *>(A), xx.vec(), yy.vec());
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
+void JANPACKMat::getrow(uint row, std::vector<uint>& columns, std::vector<real>& values) const
 {
 
   uint  n, *c = 0;
@@ -207,7 +207,7 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
   jp_mat_getrow(const_cast<jp_mat_type *>(A), row, c, v, &n);
 
-  // Assign values to Arrays
+  // Assign values to std::vectors
   columns.assign(reinterpret_cast<uint*>(c),
 		 reinterpret_cast<uint*>(c + n));
   values.assign(v, v + n);
@@ -217,8 +217,8 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::setrow(uint row, const Array<uint>& columns,
-			const Array<real>& values)
+void JANPACKMat::setrow(uint row, const std::vector<uint>& columns,
+			const std::vector<real>& values)
 {
   set(&values[0], 1, &row, columns.size(), &columns[0]);
 }

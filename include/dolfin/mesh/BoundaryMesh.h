@@ -11,7 +11,7 @@
 #ifndef __DOLFIN_BOUNDARY_MESH_H
 #define __DOLFIN_BOUNDARY_MESH_H
 
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDependent.h>
 #include <dolfin/mesh/entities/Cell.h>
@@ -102,8 +102,8 @@ private:
   bool const boundary_of_boundary_;
 
   ///
-  Array< size_t > cell_map_;
-  Array< size_t > vertex_map_;
+  std::vector< size_t > cell_map_;
+  std::vector< size_t > vertex_map_;
 
   ///
   SubDomain const * subdomain_;

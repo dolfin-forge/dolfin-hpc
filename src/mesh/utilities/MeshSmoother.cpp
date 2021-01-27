@@ -169,7 +169,7 @@ void MeshSmoother::submesh( Mesh &                      sub,
     }
   }
 
-  Array< size_t > cell_vertices( cell_type.num_entities( 0 ) );
+  std::vector< size_t > cell_vertices( cell_type.num_entities( 0 ) );
   for ( CellIterator c( mesh ); !c.end(); ++c )
   {
     Cell & cell = *c;

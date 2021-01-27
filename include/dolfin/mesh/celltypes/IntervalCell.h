@@ -227,9 +227,9 @@ inline auto IntervalCell::volume( MeshEntity const & entity ) const -> real
   MeshGeometry const & geometry = entity.mesh().geometry();
 
   // Get the coordinates of the two vertices
-  Array< size_t > const & vertices = entity.entities( 0 );
-  real const *            x0       = geometry.x( vertices[0] );
-  real const *            x1       = geometry.x( vertices[1] );
+  std::vector< size_t > const & vertices = entity.entities( 0 );
+  real const *                  x0       = geometry.x( vertices[0] );
+  real const *                  x1       = geometry.x( vertices[1] );
 
   // Compute length of interval (line segment)
   real sum = 0.0;
@@ -269,11 +269,11 @@ inline void IntervalCell::midpoint( MeshEntity const & entity, real * p ) const
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[1][0] );
 
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
-  real const *            x0       = geometry.x( vertices[0] );
-  real const *            x1       = geometry.x( vertices[1] );
-  size_t const            gdim     = geometry.dim();
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
+  real const *                  x0       = geometry.x( vertices[0] );
+  real const *                  x1       = geometry.x( vertices[1] );
+  size_t const                  gdim     = geometry.dim();
   for ( size_t d = 0; d < gdim; ++d )
   {
     p[d] = 0.5 * ( x0[d] + x1[d] );
@@ -286,8 +286,8 @@ inline void
 {
   dolfin_assert( cell.type() == this->cell_type );
 
-  MeshGeometry const &    geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = cell.entities( 0 );
+  MeshGeometry const &          geometry = cell.mesh().geometry();
+  std::vector< size_t > const & vertices = cell.entities( 0 );
 
   Point p0 = geometry.point( vertices[facet] );
   Point p1 = geometry.point( vertices[( facet + 1 ) % 2] );
@@ -307,8 +307,8 @@ inline auto IntervalCell::intersects( MeshEntity const & e,
   dolfin_assert( e.num_entities( 0 ) == NE[1][0] );
 
   // Get the coordinates of the vertices
-  MeshGeometry const &    geometry = e.mesh().geometry();
-  Array< size_t > const & vertices = e.entities( 0 );
+  MeshGeometry const &          geometry = e.mesh().geometry();
+  std::vector< size_t > const & vertices = e.entities( 0 );
 
   // Create points
   Point v0 = geometry.point( vertices[0] );

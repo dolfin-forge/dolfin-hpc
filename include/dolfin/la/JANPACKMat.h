@@ -80,10 +80,10 @@ namespace dolfin
     real norm(std::string norm_type = "frobenius") const;
 
     /// Get non-zero values of given row
-    void getrow(uint row, Array<uint>& columns, Array<real>& values) const;
+    void getrow(uint row, std::vector<uint>& columns, std::vector<real>& values) const;
 
     /// Set values for given row
-    void setrow(uint row, const Array<uint>& columns, const Array<real>& values);
+    void setrow(uint row, const std::vector<uint>& columns, const std::vector<real>& values);
 
     /// Set given rows to zero
     void zero(uint m, const uint* rows);

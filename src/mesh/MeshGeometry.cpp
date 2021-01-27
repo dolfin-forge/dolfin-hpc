@@ -3,8 +3,8 @@
 
 #include <dolfin/mesh/MeshGeometry.h>
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/constants.h>
+#include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 #include <dolfin/math/basic.h>
 
@@ -21,8 +21,8 @@ MeshGeometry::MeshGeometry( Space const & space, size_t size )
   : space_( space.clone() )
   , dim_( space.dim() )
   , size_( 0 )
-  , coordinates_( Array< real >( size_, 0.0 ) )
-  , abs_tol_( Array< real >( dim_ + 1, 0.0 ) )
+  , coordinates_( std::vector< real >( size_, 0.0 ) )
+  , abs_tol_( std::vector< real >( dim_ + 1, 0.0 ) )
   , timestamp_( 0 )
 {
   resize( size );
@@ -156,7 +156,7 @@ void MeshGeometry::set_abs_tolerance( size_t dim, real atol )
 
 //-----------------------------------------------------------------------------
 
-void MeshGeometry::assign( Array< real > const & coordinates )
+void MeshGeometry::assign( std::vector< real > const & coordinates )
 {
   if ( coordinates.size() % dim_ )
   {
@@ -169,7 +169,7 @@ void MeshGeometry::assign( Array< real > const & coordinates )
 
 //-----------------------------------------------------------------------------
 
-void MeshGeometry::remap( Array< size_t > const & mapping )
+void MeshGeometry::remap( std::vector< size_t > const & mapping )
 {
   if ( mapping.size() != size_ )
   {
@@ -177,7 +177,7 @@ void MeshGeometry::remap( Array< size_t > const & mapping )
   }
 
   // Reorder coordinates w.r.t old -> new index mapping
-  Array< real > xcpy( dim_ * size_, 0.0 );
+  std::vector< real > xcpy( dim_ * size_, 0.0 );
   for ( size_t i = 0; i < size_; ++i )
   {
     real const * x = coordinates_.data() + i * dim_;
@@ -191,8 +191,8 @@ void MeshGeometry::remap( Array< size_t > const & mapping )
 
 //-----------------------------------------------------------------------------
 
-void MeshGeometry::assign( MeshGeometry const &    other,
-                           Array< size_t > const & mapping )
+void MeshGeometry::assign( MeshGeometry const &          other,
+                           std::vector< size_t > const & mapping )
 {
   if ( this == &other )
   {
@@ -218,7 +218,7 @@ void MeshGeometry::assign( MeshGeometry const &    other,
 
 auto MeshGeometry::operator*=( real const a ) -> MeshGeometry &
 {
-  typedef Array< real >::iterator CoordIter;
+  typedef std::vector< real >::iterator CoordIter;
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
     *it *= a;
@@ -237,7 +237,7 @@ auto MeshGeometry::operator/=( real const a ) -> MeshGeometry &
   }
   real const b = 1.0 / a;
 
-  using CoordIter = Array< real >::iterator;
+  using CoordIter = std::vector< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -250,7 +250,7 @@ auto MeshGeometry::operator/=( real const a ) -> MeshGeometry &
 
 auto MeshGeometry::operator+=( real const a ) -> MeshGeometry &
 {
-  using CoordIter = Array< real >::iterator;
+  using CoordIter = std::vector< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -263,7 +263,7 @@ auto MeshGeometry::operator+=( real const a ) -> MeshGeometry &
 
 auto MeshGeometry::operator-=( real const a ) -> MeshGeometry &
 {
-  using CoordIter = Array< real >::iterator;
+  using CoordIter = std::vector< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); ++it )
   {
@@ -277,7 +277,7 @@ auto MeshGeometry::operator-=( real const a ) -> MeshGeometry &
 
 auto MeshGeometry::operator+=( Point const & p ) -> MeshGeometry &
 {
-  using CoordIter = Array< real >::iterator;
+  using CoordIter = std::vector< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
@@ -294,7 +294,7 @@ auto MeshGeometry::operator+=( Point const & p ) -> MeshGeometry &
 
 auto MeshGeometry::operator-=( Point const & p ) -> MeshGeometry &
 {
-  using CoordIter = Array< real >::iterator;
+  using CoordIter = std::vector< real >::iterator;
 
   for ( CoordIter it = coordinates_.begin(); it != coordinates_.end(); )
   {
@@ -349,7 +349,8 @@ void MeshGeometry::dump() const
 
 //-----------------------------------------------------------------------------
 
-auto MeshGeometry::operator>>( Array< real > & ) const -> MeshGeometry const &
+auto MeshGeometry::operator>>( std::vector< real > & ) const
+  -> MeshGeometry const &
 {
   error( "MeshGeometry::operator>> unimplemented / deprecated." );
   // A.assign(coordinates_.data(), coordinates_.data() + dim_ * size_);

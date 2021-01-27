@@ -4,7 +4,6 @@ nobase_pkginclude_HEADERS = \
 				adaptivity/AdaptiveRefinement.h\
 				adaptivity/dolfin_adaptivity.h\
 				common/AdjacentMapping.h\
-				common/Array.h\
 				common/assert.h\
 				common/byteswap.h\
 				common/Check.h\

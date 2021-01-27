@@ -7,8 +7,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-auto EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
-                             Array<real> const& W, real cosalpha_max,
+auto EuclideanBasis::compute(uint gdim, Point B[], std::vector<real> const& N,
+                             std::vector<real> const& W, real cosalpha_max,
                              bool weighted) -> uint
 {
   if (N.size() != W.size() * gdim)
@@ -18,8 +18,8 @@ auto EuclideanBasis::compute(uint gdim, Point B[], Array<real> const& N,
   }
 
   //--- Determine vertex type by discriminating surfaces ----------------
-  Array<Point> nS;
-  Array<real> wS;
+  std::vector<Point> nS;
+  std::vector<real> wS;
   _ordered_set<uint> Rnormals;
   uint const num_facets = W.size();
   _ordered_set<uint>::iterator it = Rnormals.begin();

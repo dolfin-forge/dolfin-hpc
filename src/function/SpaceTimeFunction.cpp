@@ -179,10 +179,10 @@ auto SpaceTimeFunction::filename( std::string const & basename, size_t id )
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::load( real t, std::string const & sname, Function & w )
 {
-  real          st;
-  size_t        sp;
-  size_t        offset[3] = { 0, 0, 0 };
-  Array< real > values( w.vector().local_size() );
+  real                st;
+  size_t              sp;
+  size_t              offset[3] = { 0, 0, 0 };
+  std::vector< real > values( w.vector().local_size() );
 
 #ifdef ENABLE_MPIIO
   MPI_File            fh;

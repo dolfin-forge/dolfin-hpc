@@ -244,7 +244,7 @@ void ZoltanInterface::partitionZoltanEdgeList( void *        data,
   size_t rank    = MPI::rank();
   size_t pe_size = MPI::size();
 
-  Array< size_t > * glb_facet = new Array< size_t >[pe_size];
+  std::vector< size_t > * glb_facet = new std::vector< size_t >[pe_size];
   for ( SharedIterator f( dist ); f.valid(); ++f )
   {
     size_t const adj_rank = *( f.adj().begin() );

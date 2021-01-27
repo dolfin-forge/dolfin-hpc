@@ -71,8 +71,8 @@ void VertexNormal::getFacetData( VertexNormal::Type type,
                                  Mesh &             mesh,
                                  BoundaryMesh &     boundary,
                                  Vertex &           bvertex,
-                                 Array< real > &    normals,
-                                 Array< real > &    weights )
+                                 std::vector< real > &    normals,
+                                 std::vector< real > &    weights )
 {
   size_t const tdim = mesh.topology_dimension();
   size_t const gdim = mesh.geometry_dimension();
@@ -106,8 +106,8 @@ void VertexNormal::getFacetData( VertexNormal::Type type,
 //-----------------------------------------------------------------------------
 struct VertexData
 {
-  Array< real > facet_normals;
-  Array< real > facet_weights;
+  std::vector< real > facet_normals;
+  std::vector< real > facet_weights;
 
   VertexData()
     : facet_normals()
@@ -132,8 +132,8 @@ void VertexNormal::computeNormal( Mesh & mesh )
   int rank = dolfin::MPI::rank();
 #endif
   int                      pe_size = dolfin::MPI::size();
-  Array< Array< size_t > > u_sendbuff( pe_size );
-  Array< Array< real > >   r_sendbuff( pe_size );
+  std::vector< std::vector< size_t > > u_sendbuff( pe_size );
+  std::vector< std::vector< real > >   r_sendbuff( pe_size );
 
   //--- Collect shared data ---------------------------------------------------
   if ( mesh.is_distributed() )
@@ -158,8 +158,8 @@ void VertexNormal::computeNormal( Mesh & mesh )
         {
           if ( ddv.is_ghost( loc_id ) )
           {
-            Array< real > normals;
-            Array< real > weights;
+            std::vector< real > normals;
+            std::vector< real > weights;
             getFacetData( type_, mesh, boundary, *bvertex, normals, weights );
             size_t const owner = ddv.get_owner( loc_id );
             u_sendbuff[owner].push_back( ddv.get_global( loc_id ) );
@@ -205,8 +205,8 @@ void VertexNormal::computeNormal( Mesh & mesh )
     dolfin_assert( maxrecvcount[1] > 0 );
 
     // For each process
-    Array< size_t > u_recvbuff( maxrecvcount[0] );
-    Array< real >   r_recvbuff( maxrecvcount[1] );
+    std::vector< size_t > u_recvbuff( maxrecvcount[0] );
+    std::vector< real >   r_recvbuff( maxrecvcount[1] );
     for ( int j = 1; j < pe_size; ++j )
     {
       size_t src  = ( rank - j + pe_size ) % pe_size;
@@ -268,8 +268,8 @@ void VertexNormal::computeNormal( Mesh & mesh )
       }
 
       //--- Get facet normals and weights -----------------------------------
-      Array< real > N;
-      Array< real > W;
+      std::vector< real > N;
+      std::vector< real > W;
       getFacetData( type_, mesh, boundary, *bvertex, N, W );
       if ( v.is_shared() )
       {
@@ -341,8 +341,8 @@ void VertexNormal::computeNormal( Mesh & mesh )
     dolfin_assert( maxrecvcount[1] > 0 );
 
     // For each process
-    Array< size_t > u_recvbuff( maxrecvcount[0] );
-    Array< real >   r_recvbuff( maxrecvcount[1] );
+    std::vector< size_t > u_recvbuff( maxrecvcount[0] );
+    std::vector< real >   r_recvbuff( maxrecvcount[1] );
 
     for ( int j = 1; j < pe_size; ++j )
     {

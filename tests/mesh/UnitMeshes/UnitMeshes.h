@@ -2,7 +2,6 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Array.h>
 #include <dolfin/mesh/Box.h>
 #include <dolfin/mesh/unitmeshes/UnitCube.h>
 #include <dolfin/mesh/unitmeshes/UnitDisk.h>
@@ -35,7 +34,7 @@ DOLFIN_START_TEST( test_UnitSquare )
   dolfin::uint const Ny = 4;
 
   // Square
-  Array< UnitSquare::Type > types;
+  std::vector< UnitSquare::Type > types;
   types.push_back( UnitSquare::right );
   types.push_back( UnitSquare::left );
   types.push_back( UnitSquare::crisscross );
@@ -81,11 +80,11 @@ DOLFIN_START_TEST( test_UnitDisk )
 {
   // Disk
   dolfin::uint const      Nx = 2;
-  Array< UnitDisk::Type > types;
+  std::vector< UnitDisk::Type > types;
   types.push_back( UnitDisk::right );
   types.push_back( UnitDisk::left );
   types.push_back( UnitDisk::crisscross );
-  Array< UnitDisk::Transformation > trans;
+  std::vector< UnitDisk::Transformation > trans;
   trans.push_back( UnitDisk::maxn );
   trans.push_back( UnitDisk::sumn );
   trans.push_back( UnitDisk::rotsumn );

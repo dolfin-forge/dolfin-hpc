@@ -18,6 +18,7 @@ namespace dolfin
  */
 
 //-----------------------------------------------------------------------------
+
 class MeshData
 {
 
@@ -63,7 +64,7 @@ class MeshData
   template < class V, class E >
   struct array : public data_array
   {
-    using type = Array< MeshValues< V, E > * >;
+    using type = std::vector< MeshValues< V, E > * >;
     type data;
     auto size() const -> uint override
     {

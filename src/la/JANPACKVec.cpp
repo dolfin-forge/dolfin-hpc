@@ -5,12 +5,11 @@
 
 #ifdef HAVE_JANPACK
 
-#include <dolfin/math/basic.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/common/types.h>
 #include <dolfin/la/JANPACKFactory.h>
-
-#include <dolfin/common/Array.h>
+#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/log/dolfin_log.h>
+#include <dolfin/math/basic.h>
 
 #include <string>
 
@@ -338,7 +337,7 @@ void JANPACKVec::init_ghosted(uint n, _ordered_set<uint>& indices,
   uint32_t range[2];
   jp_vec_range(x_, range);
 
-  Array<uint32_t> ghost_indices;
+  std::vector<uint32_t> ghost_indices;
   _ordered_set<uint32_t>::iterator sit;
   for(sit = indices.begin(); sit != indices.end(); ++sit) {
     if( *sit < (uint32_t) range[0] || *sit >= (uint32_t) range[1] ) {

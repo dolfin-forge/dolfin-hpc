@@ -148,7 +148,7 @@ BoundaryMesh::BoundaryMesh( BoundaryMesh &    boundary,
   {
 
     size_t const    num_verts = boundary.vertex_map_.size();
-    Array< size_t > boundary_vertices( num_verts, num_verts );
+    std::vector< size_t > boundary_vertices( num_verts, num_verts );
     for ( CellIterator c( boundary ); !c.end(); ++c )
     {
       bool const on_boundary = !c->is_shared();
@@ -179,7 +179,7 @@ BoundaryMesh::BoundaryMesh( BoundaryMesh &    boundary,
     //
     size_t const    d                  = mesh.type().facet_dim();
     size_t const    num_facet_vertices = mesh.type().num_vertices( d );
-    Array< size_t > facet_vertices( num_facet_vertices );
+    std::vector< size_t > facet_vertices( num_facet_vertices );
     for ( size_t i = 0; i < cell_map_.size(); ++i )
     {
       Cell c( boundary, cell_map_[i] );
@@ -266,8 +266,8 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
     vertex_map_.clear();
 
     size_t const             pe_size = PE::size();
-    Array< Array< size_t > > shared_vertices( pe_size );
-    Array< size_t >          boundary_vertices( num_verts, num_verts );
+    std::vector< std::vector< size_t > > shared_vertices( pe_size );
+    std::vector< size_t >          boundary_vertices( num_verts, num_verts );
     for ( FacetIterator f( mesh ); !f.end(); ++f )
     {
       // Boundary facets are connected to exactly one cell
@@ -334,7 +334,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
       _set< size_t > const &  vadjs    = distdata.get_adj_ranks();
       size_t                  recvmax  = max_array_size( shared_vertices );
       MPI::all_reduce_in_place< MPI::max >( recvmax );
-      Array< size_t > recvbuf( recvmax );
+      std::vector< size_t > recvbuf( recvmax );
       int             recvcount;
 
       _set< size_t > added_vertices( vertex_map_.begin(), vertex_map_.end() );
@@ -391,7 +391,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
     editor.init_cells( cell_map_.size() );
     size_t const     d                  = mesh.type().facet_dim();
     size_t const     num_facet_vertices = mesh.type().num_vertices( d );
-    Array< size_t >  facet_vertices( num_facet_vertices );
+    std::vector< size_t >  facet_vertices( num_facet_vertices );
     CellType const & celltype = mesh.type();
     for ( size_t i = 0; i < cell_map_.size(); ++i )
     {

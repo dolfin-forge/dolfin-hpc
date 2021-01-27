@@ -5,7 +5,6 @@
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/common/Array.h>
 #include <dolfin/la/PETScFactory.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>

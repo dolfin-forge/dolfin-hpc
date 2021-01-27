@@ -79,15 +79,15 @@ auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
     size_t const              num_entity_vertices = cev.max_degree();
     EntityKey                 key( num_entity_vertices );
     _map< EntityKey, size_t > entity_map;
-    Array< Array< size_t > >  sendbuf( pe_size );
+    std::vector< std::vector< size_t > >  sendbuf( pe_size );
 
     // Collect entities with a common adjacent to shared vertices
     _set< size_t > adjs;
-    Array< bool >  used_entities( topology.size( d ), false );
+    std::vector< bool >  used_entities( topology.size( d ), false );
     for ( SharedIterator it( vdata ); it.valid(); ++it )
     {
       dolfin_assert( it.index() < cve.order() );
-      Array< size_t > const & v_entities = cve[it.index()];
+      std::vector< size_t > const & v_entities = cve[it.index()];
       for ( size_t e = 0; e < cve.degree( it.index() ); ++e )
       {
         size_t const entity_index = v_entities[e];
@@ -98,7 +98,7 @@ auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
         used_entities[entity_index] = true;
 
         // Skip entities with a non-shared vertex
-        Array< size_t > const & vertices = cev[entity_index];
+        std::vector< size_t > const & vertices = cev[entity_index];
         dolfin_assert( vertices[0] != vertices[1] );
         bool all_shared = true;
         for ( size_t v = 0; v < num_entity_vertices; ++v )
@@ -147,7 +147,7 @@ auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
     size_t recvmax = max_array_size( sendbuf );
     MPI::all_reduce_in_place< MPI::max >( recvmax );
     // recvmap.reserve( recvmax );
-    Array< size_t > recvbuf( recvmax );
+    std::vector< size_t > recvbuf( recvmax );
     for ( size_t j = 1; j < pe_size; ++j )
     {
       size_t src = ( rank - j + pe_size ) % pe_size;
@@ -204,7 +204,7 @@ auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
     // Exchange ghost entities
     sendbuf.clear();
     sendbuf.resize( pe_size );
-    Array< Array< size_t > > ghostid( pe_size );
+    std::vector< std::vector< size_t > > ghostid( pe_size );
     edata.set_range( cev.order() - edata.num_ghost() );
     size_t current_index = edata.offset();
     for ( size_t i = 0; i < cev.order(); ++i )
@@ -236,8 +236,8 @@ auto MeshRenumber::renumber( MeshTopology & topology ) -> bool
     recvmax = edata.num_shared() - edata.num_ghost();
     recvbuf.clear();
     recvbuf.resize( recvmax );
-    Array< size_t > sendbuf_back( recvmax );
-    Array< size_t > recvbuf_back( edata.num_ghost() );
+    std::vector< size_t > sendbuf_back( recvmax );
+    std::vector< size_t > recvbuf_back( edata.num_ghost() );
     for ( size_t j = 1; j < pe_size; ++j )
     {
       int src = ( rank - j + pe_size ) % pe_size;

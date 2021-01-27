@@ -17,25 +17,27 @@
 #include <unordered_set>
 #endif
 
+#include <algorithm>
 #include <cfloat>
 #include <complex>
 #include <cstdint>
 #include <limits>
 #include <map>
 #include <set>
+#include <vector>
 
 namespace dolfin
 {
 
 // Real numbers
-using real    = double;
+using real = double;
 
 // Unsigned integers
-using uint    = unsigned int;
-using size_t  = std::size_t;
+using uint   = unsigned int;
+using size_t = std::size_t;
 
 // Index type (at least 64bit)
-using uidx    = uint64_t;
+using uidx = uint64_t;
 
 // Complex numbers
 using complex = std::complex< double >;
@@ -125,6 +127,45 @@ using _set = std::unordered_set< Key, Hash, Comp, Alloc >;
 
 //-----------------------------------------------------------------------------
 
+template < typename T >
+void destruct( std::vector< T * > & objects )
+{
+  for ( T * element : objects )
+    if ( element != nullptr )
+      delete element;
+
+  objects.clear();
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T, typename Iterator >
+inline void append( std::vector< T > & array, Iterator begin, Iterator end )
+{
+#ifdef __SUNPRO_CC
+  for ( Iterator it = begin; it != end; ++it )
+  {
+    array.push_back( *it );
+  }
+#else
+  array.insert( array.end(), begin, end );
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline auto max_array_size( std::vector< std::vector< T > > const & arrays )
+  -> uint
+{
+  return std::max_element( arrays.begin(), arrays.end(),
+           []( std::vector< T > const & a, std::vector< T > const & b ) {
+             return a.size() < b.size();
+           } )->size();
+}
+
+//-----------------------------------------------------------------------------
+
 /// Facility to compare object through pointers
 template < class T >
 auto objptrcmp( T const * p0, T const * p1 ) -> bool
@@ -133,12 +174,15 @@ auto objptrcmp( T const * p0, T const * p1 ) -> bool
   {
     return true;
   }
-  else if ( ( p0 == nullptr && p1 != nullptr ) || ( p0 != nullptr && p1 == nullptr ) )
+  else if ( ( p0 == nullptr && p1 != nullptr )
+            || ( p0 != nullptr && p1 == nullptr ) )
   {
     return false;
   }
   return ( *p0 == *p1 );
 }
+
+//-----------------------------------------------------------------------------
 
 } // end namespace dolfin
 

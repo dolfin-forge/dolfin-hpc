@@ -28,6 +28,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 auto onEntity( Point & p, MeshEntity & entity ) -> bool
 {
   // Check if the coordinates are on the same line as the line segment
@@ -88,6 +89,7 @@ auto onEntity( Point & p, MeshEntity & entity ) -> bool
 }
 
 //-----------------------------------------------------------------------------
+
 PeriodicDofsMapping::PeriodicDofsMapping( FiniteElementSpace const & space )
   : space_( space )
   , max_local_dimension_( 0 )
@@ -102,9 +104,11 @@ PeriodicDofsMapping::PeriodicDofsMapping( FiniteElementSpace const & space )
 }
 
 //-----------------------------------------------------------------------------
+
 PeriodicDofsMapping::~PeriodicDofsMapping() = default;
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::init()
 {
   if ( !space_.mesh().has_periodic_constraint() )
@@ -129,7 +133,7 @@ void PeriodicDofsMapping::init()
   // Collect facets with one vertex inside the subdomain
   BoundaryMesh & boundary = mesh.exterior_boundary();
 
-  Array< MappedManifold * > const & manifold_list = mesh.periodic_mappings();
+  std::vector< MappedManifold * > const & manifold_list = mesh.periodic_mappings();
   size_t                              totalcardGnI  = 0;
   for ( MappedManifold * manifold : manifold_list )
   {
@@ -147,15 +151,15 @@ void PeriodicDofsMapping::init()
   // dolfin_assert(max_numGdofs > 0);
   size_t *          Gdofs_indices = nullptr;
   real *          Gdofs_xcoords = nullptr;
-  Array< size_t > * Hdofs_indices = nullptr;
-  Array< real > * Hdofs_xcoords = nullptr;
+  std::vector< size_t > * Hdofs_indices = nullptr;
+  std::vector< real > * Hdofs_xcoords = nullptr;
   // Avoid allocating zero size array
   if ( max_numGdofs > 0 )
   {
     Gdofs_indices = new size_t[max_numGdofs];
     Gdofs_xcoords = new real[max_numGdofs * gdim];
-    Hdofs_indices = new Array< size_t >[max_numGdofs];
-    Hdofs_xcoords = new Array< real >[max_numGdofs];
+    Hdofs_indices = new std::vector< size_t >[max_numGdofs];
+    Hdofs_xcoords = new std::vector< real >[max_numGdofs];
   }
 
   // UFC dofmap data structures
@@ -170,7 +174,7 @@ void PeriodicDofsMapping::init()
   size_t * facet_dofsG = new size_t[num_facet_dofs];
   size_t * facet_dofsH = new size_t[num_facet_dofs];
 
-  for ( Array< MappedManifold * >::const_iterator it = manifold_list.begin();
+  for ( std::vector< MappedManifold * >::const_iterator it = manifold_list.begin();
         it != manifold_list.end();
         ++it )
   {
@@ -277,7 +281,7 @@ void PeriodicDofsMapping::init()
         if ( mapped.inside( &xG[0], true ) && ( Hdofs_.count( dofH ) == 0 )
              && ( Idofs_.count( dofH ) == 0 ) )
         {
-          Array< size_t > matching_facets;
+          std::vector< size_t > matching_facets;
           boundary.intersector().overlap( xG, matching_facets );
           if ( !matching_facets.empty() )
           {
@@ -346,11 +350,11 @@ void PeriodicDofsMapping::init()
       int  u_recvdata_maxi = 0;
       MPI::all_reduce< MPI::max >( u_recvdata_size, u_recvdata_maxi );
       size_t *        u_recvbuff = new size_t[u_recvdata_maxi];
-      Array< size_t > u_sendbuff;
+      std::vector< size_t > u_sendbuff;
       int           r_recvdata_size = u_recvdata_size * gdim;
       int           r_recvdata_maxi = u_recvdata_maxi * gdim;
       real *        r_recvbuff      = new real[r_recvdata_maxi];
-      Array< real > r_sendbuff;
+      std::vector< real > r_sendbuff;
 
       size_t * u_offsets = new size_t[pe_size];
       size_t * r_offsets = new size_t[pe_size];
@@ -388,7 +392,7 @@ void PeriodicDofsMapping::init()
             std::copy(
               &r_recvbuff[ii * gdim], &r_recvbuff[ii * gdim] + gdim, &xG[0] );
 
-            Array< size_t > matching_facets;
+            std::vector< size_t > matching_facets;
             manifold.intersector().overlap( xG, matching_facets );
             if ( !matching_facets.empty() )
             {
@@ -489,8 +493,8 @@ void PeriodicDofsMapping::init()
           {
             error( "No G dof %d sent from rank %d", dof, src );
           }
-          Array< size_t > & Hidx = Hdofs_indices[itG->second];
-          Array< real > & Hxcs = Hdofs_xcoords[itG->second];
+          std::vector< size_t > & Hidx = Hdofs_indices[itG->second];
+          std::vector< real > & Hxcs = Hdofs_xcoords[itG->second];
           _set< size_t >    existing( Hidx.begin(), Hidx.end() );
           for ( size_t i = 0; i < nbH; ++i )
           {
@@ -545,11 +549,11 @@ void PeriodicDofsMapping::init()
                &Gdofs_indices[ii * gdim] + gdim,
                &Gxcoords_[ii * maxgdim] );
     //
-    Array< size_t > const & Hidx      = Hdofs_indices[iG];
+    std::vector< size_t > const & Hidx      = Hdofs_indices[iG];
     size_t const            num_Hdofs = Hidx.size();
     Hcount_[ii]                     = num_Hdofs;
     std::copy( &Hidx[0], &Hidx[0] + num_Hdofs, &Hindices_[offset] );
-    Array< real > const & Hxcs = Hdofs_xcoords[iG];
+    std::vector< real > const & Hxcs = Hdofs_xcoords[iG];
     dolfin_assert( Hxcs.size() == gdim * Hidx.size() );
     for ( size_t jj = 0; jj < num_Hdofs; ++jj )
     {
@@ -578,6 +582,7 @@ void PeriodicDofsMapping::init()
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::clear()
 {
   max_local_dimension_ = 0;
@@ -599,6 +604,7 @@ void PeriodicDofsMapping::clear()
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::tabulate_dofs( size_t   Gdof,
                                          size_t * Hdofs,
                                          size_t & count ) const
@@ -617,6 +623,7 @@ void PeriodicDofsMapping::tabulate_dofs( size_t   Gdof,
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::tabulate_dofs( size_t   i,
                                          size_t * Gdof,
                                          size_t * Hdofs,
@@ -629,6 +636,7 @@ void PeriodicDofsMapping::tabulate_dofs( size_t   i,
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::tabulate_coordinates( size_t    Gdof,
                                                 real *  Gcoords,
                                                 real ** Hcoords,
@@ -656,6 +664,7 @@ void PeriodicDofsMapping::tabulate_coordinates( size_t    Gdof,
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::tabulate_coordinates( size_t    i,
                                                 size_t *  Gdof,
                                                 real *  Gcoords,
@@ -677,6 +686,7 @@ void PeriodicDofsMapping::tabulate_coordinates( size_t    i,
 }
 
 //-----------------------------------------------------------------------------
+
 void PeriodicDofsMapping::disp() const
 {
   section( "PeriodicDofsMapping" );

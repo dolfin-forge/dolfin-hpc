@@ -12,13 +12,13 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshDistributedData::MeshDistributedData(uint dim) :
     dim_(dim),
-    data_(Array<DistributedData>(dim_ + 1))
+    data_(std::vector<DistributedData>(dim_ + 1))
 {
 }
 //-----------------------------------------------------------------------------
 MeshDistributedData::MeshDistributedData(MeshDistributedData const& other) :
     dim_(other.dim_),
-    data_(Array<DistributedData>(dim_ + 1))
+    data_(std::vector<DistributedData>(dim_ + 1))
 {
   for (uint i = 0; i <= dim_; ++i)
   {

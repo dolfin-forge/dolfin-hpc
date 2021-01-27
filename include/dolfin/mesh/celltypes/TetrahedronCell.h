@@ -190,8 +190,8 @@ inline auto TetrahedronCell::orientation( Cell const & cell ) const -> size_t
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &    geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = cell.entities( 0 );
+  MeshGeometry const &          geometry = cell.mesh().geometry();
+  std::vector< size_t > const & vertices = cell.entities( 0 );
 
   real const * v0 = geometry.x( vertices[0] );
   real const * v1 = geometry.x( vertices[1] );
@@ -251,8 +251,8 @@ inline auto TetrahedronCell::volume( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -283,8 +283,8 @@ inline auto TetrahedronCell::diameter( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -325,8 +325,8 @@ inline auto TetrahedronCell::circumradius( MeshEntity const & entity ) const
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the four vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -389,8 +389,8 @@ inline void TetrahedronCell::midpoint( MeshEntity const & entity,
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -418,7 +418,7 @@ inline void
   real const * p0 = geometry.x( cell.entities( 0 )[facet] );
 
   // Get coordinates of facet vertices
-  Array< size_t > const & vertices = f.entities( 0 );
+  std::vector< size_t > const & vertices = f.entities( 0 );
 
   real const * p1 = geometry.x( vertices[0] );
   real const * p2 = geometry.x( vertices[1] );
@@ -457,8 +457,8 @@ inline auto TetrahedronCell::facet_area( Cell const & cell, size_t facet ) const
   Facet  f( c.mesh(), c.entities( 2 )[facet] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &    geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = f.entities( 0 );
+  MeshGeometry const &          geometry = cell.mesh().geometry();
+  std::vector< size_t > const & vertices = f.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );

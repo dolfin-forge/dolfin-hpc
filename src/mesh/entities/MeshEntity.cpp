@@ -121,7 +121,7 @@ void MeshEntity::disp() const
     cout << d << ": ";
     if ( topology.connectivity( tdim_, d ) )
     {
-      Array< size_t > const & entities = topology( tdim_, d )[index_];
+      std::vector< size_t > const & entities = topology( tdim_, d )[index_];
       size_t const            size     = topology( tdim_, d ).degree( index_ );
       for ( size_t i = 0; i < size; ++i )
       {
@@ -130,7 +130,7 @@ void MeshEntity::disp() const
         {
           continue;
         }
-        Array< size_t > const & verts = topology( d, 0 )[entities[i]];
+        std::vector< size_t > const & verts = topology( d, 0 )[entities[i]];
         size_t const            vsize = topology( d, 0 ).degree( entities[i] );
         cout << " ( ";
         for ( size_t v = 0; v < vsize; ++v )

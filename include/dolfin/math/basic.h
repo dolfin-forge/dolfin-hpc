@@ -4,7 +4,6 @@
 #ifndef __DOLFIN_BASIC_H
 #define __DOLFIN_BASIC_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>
 
@@ -135,31 +134,14 @@ static inline real gamma( double const x )
 {
   int    n = x < 1.5 ? -( ( int ) ( 2.5 - x ) ) : ( int ) ( x - 1.5 );
   double w = x - ( n + 2 );
-  double y =
-    ( ( ( ( ( ( ( ( ( ( ( ( -1.99542863674e-7 * w + 1.337767384067e-6 ) * w
-                          - 2.591225267689e-6 )
-                          * w
-                        - 1.7545539395205e-5 )
-                        * w
-                      + 1.45596568617526e-4 )
-                      * w
-                    - 3.60837876648255e-4 )
-                    * w
-                  - 8.04329819255744e-4 )
-                  * w
-                + 0.008023273027855346 )
-                * w
-              - 0.017645244547851414 )
-              * w
-            - 0.024552490005641278 )
-            * w
-          + 0.19109110138763841 )
-          * w
-        - 0.233093736421782878 )
-        * w
-      - 0.422784335098466784 )
-      * w
-    + 0.99999999999999999;
+  double y = ( ( ( ( ( ( ( ( ( ( ( (
+               - 1.99542863674e-7       * w + 1.337767384067e-6    ) * w
+               - 2.591225267689e-6 )    * w - 1.7545539395205e-5   ) * w
+               + 1.45596568617526e-4 )  * w - 3.60837876648255e-4  ) * w
+               - 8.04329819255744e-4 )  * w + 0.008023273027855346 ) * w
+               - 0.017645244547851414 ) * w - 0.024552490005641278 ) * w
+               + 0.19109110138763841 )  * w - 0.233093736421782878 ) * w
+               - 0.422784335098466784 ) * w + 0.99999999999999999;
   if ( n > 0 )
   {
     w = x - 1;
@@ -242,10 +224,11 @@ static inline void range( Iterator begin, Iterator end, T v = T(), int s = 1 )
 }
 
 /// e0 contains e1
-static inline bool contains( Array< size_t > const & e0,
-                             Array< size_t > const & e1 )
+static inline bool contains( std::vector< size_t > const & e0,
+                             std::vector< size_t > const & e1 )
 {
-  for ( Array< size_t >::const_iterator e = e1.begin(); e != e1.end(); ++e )
+  for ( std::vector< size_t >::const_iterator e = e1.begin(); e != e1.end();
+        ++e )
     if ( e0.end() == std::find( e0.begin(), e0.end(), *e ) )
       return false;
   return true;

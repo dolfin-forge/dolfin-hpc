@@ -80,7 +80,7 @@ namespace dolfin
       LabelList<Mesh> mesh_list_;
       LabelList<GenericFunction> function_list_;
       _map<std::string, std::string> function_mesh_map_;
-      Array<libsimPipeline*> pipelines_;
+      std::vector<libsimPipeline*> pipelines_;
     };
 
     // Simulation (insitu) data

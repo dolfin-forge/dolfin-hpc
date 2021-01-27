@@ -4,7 +4,6 @@
 #ifndef __DOLFIN_FINITE_ELEMENT_H
 #define __DOLFIN_FINITE_ELEMENT_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/ufc/ufc.h>
@@ -47,8 +46,8 @@ public:
   FiniteElement( ufc::finite_element const & element, size_t const i );
 
   /// Create subelement of the given element for given subsystem
-  FiniteElement( ufc::finite_element const & element,
-                 Array< size_t > const &     sub_system );
+  FiniteElement( ufc::finite_element const &   element,
+                 std::vector< size_t > const & sub_system );
 
   /// Copy constructor
   explicit FiniteElement( FiniteElement const & other );
@@ -235,31 +234,31 @@ public:
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
   /// Recursively extract sub finite element
-  static auto create_sub_element( ufc::finite_element const & finite_element,
-                                  Array< size_t > const &     sub_system )
+  static auto create_sub_element( ufc::finite_element const &   finite_element,
+                                  std::vector< size_t > const & sub_system )
     -> ufc::finite_element *;
 
   /// Create sub finite element of given finite element
-  auto create_sub_element( Array< size_t > const & sub_system ) const
+  auto create_sub_element( std::vector< size_t > const & sub_system ) const
     -> ufc::finite_element *;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  auto sub_value_dimensions( size_t i ) const -> Array< size_t > const &;
+  auto sub_value_dimensions( size_t i ) const -> std::vector< size_t > const &;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  auto sub_value_offsets( size_t i ) const -> Array< size_t > const &;
+  auto sub_value_offsets( size_t i ) const -> std::vector< size_t > const &;
 
   /// Get list of scalar finite elements ordered by entries
-  auto flatten() const -> Array< ufc::finite_element const * > const &;
+  auto flatten() const -> std::vector< ufc::finite_element const * > const &;
 
   /// Create flatten representation finite element (append sub elements)
-  static void flatten( ufc::finite_element const *            element,
-                       Array< ufc::finite_element const * > & stack,
-                       size_t                                 maxlevel );
+  static void flatten( ufc::finite_element const *                  element,
+                       std::vector< ufc::finite_element const * > & stack,
+                       size_t                                       maxlevel );
 
   /// Create flatten representation finite element (append sub elements)
-  static void flatten( ufc::finite_element const *            element,
-                       Array< ufc::finite_element const * > & stack );
+  static void flatten( ufc::finite_element const *                  element,
+                       std::vector< ufc::finite_element const * > & stack );
 
   /// Check if the element can be seen as a vector element
   auto is_vectorizable() const -> bool;
@@ -275,13 +274,13 @@ private:
   ufc::finite_element const * ufc_finite_element_;
 
   //
-  Array< size_t > * sub_value_dims_;
+  std::vector< size_t > * sub_value_dims_;
 
   //
-  Array< size_t > * sub_value_offs_;
+  std::vector< size_t > * sub_value_offs_;
 
   //
-  mutable Array< ufc::finite_element const * > flattened_;
+  mutable std::vector< ufc::finite_element const * > flattened_;
 };
 
 //-----------------------------------------------------------------------------
@@ -593,7 +592,7 @@ inline auto FiniteElement::num_sub_elements() const -> size_t
 inline auto FiniteElement::create_sub_element( size_t i ) const
   -> ufc::finite_element *
 {
-  if ( ufc_finite_element_-> num_sub_elements() == 0 )
+  if ( ufc_finite_element_->num_sub_elements() == 0 )
   {
     return ufc_finite_element_->create();
   }
@@ -628,9 +627,8 @@ inline auto FiniteElement::operator!=( FiniteElement const & other ) const
 
 //-----------------------------------------------------------------------------
 
-inline auto
-  FiniteElement::create_sub_element( Array< size_t > const & sub_system ) const
-  -> ufc::finite_element *
+inline auto FiniteElement::create_sub_element(
+  std::vector< size_t > const & sub_system ) const -> ufc::finite_element *
 {
   return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
 }
@@ -638,7 +636,7 @@ inline auto
 //-----------------------------------------------------------------------------
 
 inline auto FiniteElement::sub_value_dimensions( size_t i ) const
-  -> Array< size_t > const &
+  -> std::vector< size_t > const &
 {
   return sub_value_dims_[i];
 }
@@ -646,7 +644,7 @@ inline auto FiniteElement::sub_value_dimensions( size_t i ) const
 //-----------------------------------------------------------------------------
 
 inline auto FiniteElement::sub_value_offsets( size_t i ) const
-  -> Array< size_t > const &
+  -> std::vector< size_t > const &
 {
   return sub_value_offs_[i];
 }
@@ -654,7 +652,7 @@ inline auto FiniteElement::sub_value_offsets( size_t i ) const
 //-----------------------------------------------------------------------------
 
 inline auto FiniteElement::flatten() const
-  -> Array< ufc::finite_element const * > const &
+  -> std::vector< ufc::finite_element const * > const &
 {
   if ( flattened_.empty() )
   {

@@ -3,7 +3,7 @@
 
 #include <dolfin/common/DistributedData.h>
 
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/common/GhostIterator.h>
 #include <dolfin/common/OwnedIterator.h>

@@ -68,12 +68,12 @@ void TriangleCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 2, 1 ) );
 
     // Get edges
-    Array< size_t > const & cell_edges = topology( 2, 1 )[i];
+    std::vector< size_t > const & cell_edges = topology( 2, 1 )[i];
 
     // Sort vertices on each edge
     for ( size_t i = 0; i < 3; ++i )
     {
-      Array< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
+      std::vector< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
       std::sort( edge_vertices.data(), edge_vertices.data() + 2 );
     }
   }
@@ -81,7 +81,7 @@ void TriangleCell::order_entities( MeshTopology & topology, size_t i ) const
   // Sort local vertices on cell in ascending order, connectivity 2 - 0
   if ( topology.connectivity( 2, 0 ) )
   {
-    Array< size_t > & cell_vertices = topology( 2, 0 )[i];
+    std::vector< size_t > & cell_vertices = topology( 2, 0 )[i];
     std::sort( cell_vertices.data(), cell_vertices.data() + 3 );
   }
 
@@ -91,8 +91,8 @@ void TriangleCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 2, 1 ) );
 
     // Get cell vertices and edges
-    Array< size_t > const & cell_vertices = topology( 2, 0 )[i];
-    Array< size_t > &       cell_edges    = topology( 2, 1 )[i];
+    std::vector< size_t > const & cell_vertices = topology( 2, 0 )[i];
+    std::vector< size_t > &       cell_edges    = topology( 2, 1 )[i];
 
     // Loop over vertices on cell
     for ( size_t i = 0; i < 3; ++i )
@@ -100,7 +100,7 @@ void TriangleCell::order_entities( MeshTopology & topology, size_t i ) const
       // Loop over edges on cell
       for ( size_t j = i; j < 3; ++j )
       {
-        Array< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[j]];
+        std::vector< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[j]];
 
         // Check if the ith vertex of the cell is non-incident with edge j
         if ( std::count( edge_vertices.data(),
@@ -164,9 +164,9 @@ void TriangleCell::refine_cell( Cell &       cell,
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( !e.empty() );
 
   // Compute indices for the six new vertices
@@ -199,7 +199,7 @@ void TriangleCell::normal( Cell const & cell, size_t facet, real * n ) const
   // Get coordinates of opposite vertex
   real const * p0 = geometry.x( c.entities( 0 )[facet] );
   // Get coordinates of edge vertices
-  Array< size_t > const & vertices = f.entities( 0 );
+  std::vector< size_t > const & vertices = f.entities( 0 );
   real const *            p1       = geometry.x( vertices[0] );
   real const *            p2       = geometry.x( vertices[1] );
   size_t const            gdim     = geometry.dim();
@@ -253,7 +253,7 @@ auto TriangleCell::facet_area( Cell const & cell, size_t facet ) const -> real
   Cell &                  c = const_cast< Cell & >( cell );
   Facet                   f( c.mesh(), c.entities( 1 )[facet] );
   MeshGeometry const &    geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = f.entities( 0 );
+  std::vector< size_t > const & vertices = f.entities( 0 );
   real const *            p0       = geometry.x( vertices[0] );
   real const *            p1       = geometry.x( vertices[1] );
   // Compute distance between vertices
@@ -449,16 +449,16 @@ auto TriangleCell::findEdge( size_t i, Cell const & cell ) const -> size_t
   // Ordering convention for edges (order of non-incident vertices)
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( not v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( not e.empty() );
 
   // Look for edge satisfying ordering convention
   MeshTopology const & topology = cell.mesh().topology();
   for ( size_t j = 0; j < 3; ++j )
   {
-    Array< size_t > const & ev = topology( 1, 0 )[e[j]];
+    std::vector< size_t > const & ev = topology( 1, 0 )[e[j]];
     dolfin_assert( !ev.empty() );
     if ( ev[0] != v[i] && ev[1] != v[i] )
     {
@@ -479,7 +479,7 @@ auto TriangleCell::check( Cell & cell ) const -> bool
   // UFC convention: cell -> vertices in ascending order
   // These connectivities should always exist, catching assertion if it is not
   // the case is the right behaviour
-  Array< size_t > const & cell_verts = cell.entities( 0 );
+  std::vector< size_t > const & cell_verts = cell.entities( 0 );
   dolfin_assert( not cell_verts.empty() );
   size_t const num_cell_verts = this->num_vertices( this->dim() );
   if ( !is_sorted( cell_verts.data(), cell_verts.data() + num_cell_verts ) )
@@ -493,14 +493,14 @@ auto TriangleCell::check( Cell & cell ) const -> bool
   // Check edge -> incident vertices mapping
   if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array< size_t > const & v = cell.entities( 0 );
+    std::vector< size_t > const & v = cell.entities( 0 );
     dolfin_assert( !v.empty() );
-    Array< size_t > const & e = cell.entities( 1 );
+    std::vector< size_t > const & e = cell.entities( 1 );
     dolfin_assert( !e.empty() );
     MeshTopology const & topology = cell.mesh().topology();
     for ( size_t i = 0; i < 3; ++i )
     {
-      Array< size_t > const & ev = topology( 1, 0 )[e[i]];
+      std::vector< size_t > const & ev = topology( 1, 0 )[e[i]];
       dolfin_assert( not ev.empty() );
       for ( size_t j = 0; j < 2; ++j )
       {

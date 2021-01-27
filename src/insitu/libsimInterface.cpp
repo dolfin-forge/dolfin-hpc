@@ -3,7 +3,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/insitu/libsimInterface.h>
@@ -166,7 +166,7 @@ void libsimInterface::batchRender(real t, uint tstep)
   VisItUpdatePlots();
 
   // Execute all insitu pipelines
-  for(Array<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
+  for(std::vector<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
       it != InsituData_.pipelines_.end(); it++)
   {
     (*it)->exec(InsituData_.t_, InsituData_.tstep_);

@@ -160,13 +160,13 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 3, 1 ) );
 
     // Get edges
-    Array< size_t > const & cell_edges = topology( 3, 1 )[i];
+    std::vector< size_t > const & cell_edges = topology( 3, 1 )[i];
     dolfin_assert( cell_edges.size() >= 12 );
 
     // Sort vertices on each edge
     for ( size_t i = 0; i < 12; ++i )
     {
-      Array< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
+      std::vector< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
       dolfin_assert( edge_vertices.size() >= 2 );
       std::sort( edge_vertices.data(), edge_vertices.data() + 2 );
     }
@@ -178,13 +178,13 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 3, 2 ) );
 
     // Get facets
-    Array< size_t > const & cell_facets = topology( 3, 2 )[i];
+    std::vector< size_t > const & cell_facets = topology( 3, 2 )[i];
     dolfin_assert( cell_facets.size() >= 6 );
 
     // Sort vertices on each facet
     for ( size_t i = 0; i < 6; ++i )
     {
-      Array< size_t > & facet_vertices = topology( 2, 0 )[cell_facets[i]];
+      std::vector< size_t > & facet_vertices = topology( 2, 0 )[cell_facets[i]];
       dolfin_assert( facet_vertices.size() >= 4 );
       std::sort( facet_vertices.data(), facet_vertices.data() + 4 );
     }
@@ -199,17 +199,17 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 1, 0 ) );
 
     // Get facet numbers
-    Array< size_t > const & cell_facets = topology( 2, 1 )[i];
+    std::vector< size_t > const & cell_facets = topology( 2, 1 )[i];
 
     // Loop over facets on cell
     for ( size_t i = 0; i < 6; ++i )
     {
       // For each facet number get the global vertex numbers
       // Facet
-      Array< size_t > const & facet_vertices = topology( 2, 0 )[cell_facets[i]];
+      std::vector< size_t > const & facet_vertices = topology( 2, 0 )[cell_facets[i]];
 
       // For each facet number get the global edge number
-      Array< size_t > & cell_edges = topology( 2, 1 )[cell_facets[i]];
+      std::vector< size_t > & cell_edges = topology( 2, 1 )[cell_facets[i]];
 
       // Loop over vertices on facet
       size_t m = 0;
@@ -219,7 +219,7 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
         for ( size_t k( m ); k < 4; ++k )
         {
           // For each edge number get the global vertex numbers
-          Array< size_t > const & edge_vertices =
+          std::vector< size_t > const & edge_vertices =
             topology( 1, 0 )[cell_edges[k]];
 
           // Check if the jth vertex of facet i is non-incident on edge k
@@ -247,8 +247,8 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 1, 0 ) );
 
     // Get cell vertices and edge numbers
-    Array< size_t > const & cell_vertices = topology( 3, 0 )[i];
-    Array< size_t > &       cell_edges    = topology( 3, 1 )[i];
+    std::vector< size_t > const & cell_vertices = topology( 3, 0 )[i];
+    std::vector< size_t > &       cell_edges    = topology( 3, 1 )[i];
 
     // Loop two vertices on cell as a lexicographical tuple
     size_t m = 0;
@@ -260,7 +260,7 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
       for ( size_t k = m; k < 12; ++k )
       {
         // Get local vertices on edge
-        Array< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[k]];
+        std::vector< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[k]];
 
         // Check if the ith and jth vertex of the cell are non-incident on edge
         // k
@@ -288,8 +288,8 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
     dolfin_assert( topology.connectivity( 2, 0 ) );
 
     // Get cell vertices and facet numbers
-    Array< size_t > const & cell_vertices = topology( 3, 0 )[i];
-    Array< size_t > &       cell_facets   = topology( 3, 2 )[i];
+    std::vector< size_t > const & cell_vertices = topology( 3, 0 )[i];
+    std::vector< size_t > &       cell_facets   = topology( 3, 2 )[i];
 
     //
     size_t m = 0;
@@ -303,7 +303,7 @@ void HexahedronCell::order_entities( MeshTopology & topology, size_t i ) const
       // Loop facets on cell
       for ( size_t k = m; k < 6; ++k )
       {
-        Array< size_t > const & facet_vertices =
+        std::vector< size_t > const & facet_vertices =
           topology( 2, 0 )[cell_facets[k]];
 
         // Check if the ith vertex of the cell is non-incident on facet j
@@ -341,7 +341,7 @@ void HexahedronCell::order_facet( size_t vertices[], Facet & facet ) const
   // Find facet, it is outward oriented by definition.
   // NOTE: Keep consistency with create_entities.
   size_t                  facet_index = cell.index( facet );
-  Array< size_t > const & v           = cell.entities( 0 );
+  std::vector< size_t > const & v           = cell.entities( 0 );
   switch ( facet_index )
   {
     case 0:
@@ -407,11 +407,11 @@ void HexahedronCell::refine_cell( Cell &       cell,
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( !e.empty() );
-  Array< size_t > const & f = cell.entities( 2 );
+  std::vector< size_t > const & f = cell.entities( 2 );
   dolfin_assert( !f.empty() );
 
   // Compute indices for the twenty-seven new vertices
@@ -557,17 +557,17 @@ auto HexahedronCell::check( Cell & cell ) const -> bool
 
   //
   MeshTopology const &    topology = cell.mesh().topology();
-  Array< size_t > const & v        = cell.entities( 0 );
+  std::vector< size_t > const & v        = cell.entities( 0 );
   dolfin_assert( !v.empty() );
 
   // Check edge -> incident vertices mapping
   if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array< size_t > const & e = cell.entities( 1 );
+    std::vector< size_t > const & e = cell.entities( 1 );
     dolfin_assert( !e.empty() );
     for ( size_t i = 0; i < 12; ++i )
     {
-      Array< size_t > const & ev = topology( 1, 0 )[e[i]];
+      std::vector< size_t > const & ev = topology( 1, 0 )[e[i]];
       dolfin_assert( ev.size() >= 2 );
       for ( size_t j = 0; j < 2; ++j )
       {
@@ -587,11 +587,11 @@ auto HexahedronCell::check( Cell & cell ) const -> bool
   // Check face -> incident vertices mapping
   if ( cell.mesh().topology().connectivity( 2, 0 ) )
   {
-    Array< size_t > const & f = cell.entities( 2 );
+    std::vector< size_t > const & f = cell.entities( 2 );
     dolfin_assert( f.size() >= 6 );
     for ( size_t i = 0; i < 6; ++i )
     {
-      Array< size_t > const & fv = topology( 2, 0 )[f[i]];
+      std::vector< size_t > const & fv = topology( 2, 0 )[f[i]];
       dolfin_assert( fv.size() >= 4 );
       for ( size_t j = 0; j < 4; ++j )
       {
@@ -619,16 +619,16 @@ auto HexahedronCell::findEdge( size_t i, Cell const & cell ) const -> size_t
   // Ordering convention for edges (order of non-incident vertices)
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( !e.empty() );
 
   // Look for edge satisfying ordering convention
   MeshTopology const & topology = cell.mesh().topology();
   for ( size_t j = 0; j < 12; ++j )
   {
-    Array< size_t > const & ev = topology( 1, 0 )[e[j]];
+    std::vector< size_t > const & ev = topology( 1, 0 )[e[j]];
     dolfin_assert( not ev.empty() );
     // Check incident pairs instead of non-incident quadruples
     size_t const v0 = v[EIV[i][0]];
@@ -650,9 +650,9 @@ auto HexahedronCell::findFace( size_t i, Cell const & cell ) const -> size_t
   // Ordering convention for faces (order of non-incident vertices)
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
-  Array< size_t > const & f = cell.entities( 2 );
+  std::vector< size_t > const & f = cell.entities( 2 );
   dolfin_assert( !f.empty() );
 
   // Look for edge satisfying ordering convention
@@ -663,7 +663,7 @@ auto HexahedronCell::findFace( size_t i, Cell const & cell ) const -> size_t
   size_t const         v3       = v[FNV[i][3]];
   for ( size_t j = 0; j < 6; ++j )
   {
-    Array< size_t > const & fv = topology( 2, 0 )[f[j]];
+    std::vector< size_t > const & fv = topology( 2, 0 )[f[j]];
     dolfin_assert( not fv.empty() );
     if ( fv[0] != v0 && fv[0] != v1 && fv[0] != v2 && fv[0] != v3 && fv[1] != v0
          && fv[1] != v1 && fv[1] != v2 && fv[1] != v3 && fv[2] != v0

@@ -327,7 +327,7 @@ void BinaryFile::operator>>(LabelList<Function>& f)
     }
 
     uint size = u->value_size() * u->mesh().topology().num_owned(0);
-    Array< real > values( size );
+    std::vector< real > values( size );
 
     MPI::file_read_at_all( fh, values.data(), size,
                            byte_offset + u->vector().offset() * sizeof(real) );
@@ -404,12 +404,12 @@ void BinaryFile::write_function(
 
     // Allocate memory for function values at vertices
     uint size = mesh.size(0) * u->value_size();
-    Array< real > values( size );
+    std::vector< real > values( size );
     uint offset = u->vector().offset();
 
     if ((u->vector().local_size() / value_dim) != mesh.topology().num_owned(0))
     {
-      Array< real > interp_values( size );
+      std::vector< real > interp_values( size );
 
       // Get function values at vertices
       u->interpolate_vertex_values(interp_values.data());
@@ -604,8 +604,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Parse cells: cells are assigned to processes based on the ownership of
     // the first vertex.
-    Array<atomic_cell> cells;
-    Array< Array<uint> > non_local_cells( pe_size );
+    std::vector<atomic_cell> cells;
+    std::vector< std::vector<uint> > non_local_cells( pe_size );
     _ordered_set<uint> owned_vertices;
     atomic_cell cell(num_cellvertices);
     for (uint * c = cell_buffer; c !=(cell_buffer + cell_data);
@@ -643,7 +643,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       uint buff_size = max_array_size( non_local_cells );
       MPI::all_reduce_in_place<MPI::max>( buff_size, comm );
-      Array< uint > recv_buffer( buff_size );
+      std::vector< uint > recv_buffer( buff_size );
 
       // Exchange data
       for (uint i = 1; i < pe_size; ++i)
@@ -725,7 +725,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     }
 
     // Sort ghost vertices by owner and clear the set (not needed anymore)
-    Array< Array<uint> > ghosts( pe_size );
+    std::vector< std::vector<uint> > ghosts( pe_size );
     for ( uint const & gvert : ghosted_vertices )
       ghosts[vdist.owner(gvert)].push_back(gvert);
 
@@ -736,13 +736,13 @@ void BinaryFile::operator>>(Mesh& mesh)
       uint buff_size = max_array_size( ghosts );
       MPI::all_reduce_in_place<MPI::max>( buff_size );
 
-      Array< uint > recv_buffer( buff_size );
+      std::vector< uint > recv_buffer( buff_size );
 
-      Array< uint > send_new_owner( buff_size );
-      Array< uint > recv_new_owner( buff_size );
+      std::vector< uint > send_new_owner( buff_size );
+      std::vector< uint > recv_new_owner( buff_size );
 
-      Array< real > send_buffer_coords( buff_size * gdim );
-      Array< real > recv_buffer_coords( buff_size * gdim );
+      std::vector< real > send_buffer_coords( buff_size * gdim );
+      std::vector< real > recv_buffer_coords( buff_size * gdim );
 
       // Exchange data
       _map<uint, uint> new_owner;
@@ -804,8 +804,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Add cell connectivities
     uint local_cell_index = 0;
-    Array< size_t > connectivity( num_cellvertices );
-    for (Array<atomic_cell>::iterator it = cells.begin();
+    std::vector< size_t > connectivity( num_cellvertices );
+    for (std::vector<atomic_cell>::iterator it = cells.begin();
          it != cells.end(); ++local_cell_index, ++it)
     {
       mesh.distdata()[0].get_local(it->size ,it->v, connectivity.data());

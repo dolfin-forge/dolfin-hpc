@@ -4,9 +4,8 @@
 #ifndef __DOLFIN_MESH_DISTRIBUTED_DATA_H
 #define __DOLFIN_MESH_DISTRIBUTED_DATA_H
 
-#include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/common/DistributedData.h>
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {
@@ -25,36 +24,35 @@ class MeshDistributedData
 {
 
 public:
-
   /// Constructor
-  MeshDistributedData(uint dim);
+  MeshDistributedData( uint dim );
 
   /// Copy constructor
-  MeshDistributedData(MeshDistributedData const& other);
+  MeshDistributedData( MeshDistributedData const & other );
 
   /// Destructor
   ~MeshDistributedData();
 
   /// Assignment
-  auto operator=(MeshDistributedData const& other) -> MeshDistributedData&;
+  auto operator=( MeshDistributedData const & other ) -> MeshDistributedData &;
 
   /// Equality
-  auto operator==(MeshDistributedData const& other) const -> bool;
+  auto operator==( MeshDistributedData const & other ) const -> bool;
 
   /// Non-equality
-  auto operator!=(MeshDistributedData const& other) const -> bool;
+  auto operator!=( MeshDistributedData const & other ) const -> bool;
 
   /// Access to distributed data
-  inline auto operator[](uint dim) -> DistributedData&
+  inline auto operator[]( uint dim ) -> DistributedData &
   {
-    dolfin_assert(dim <= dim_);
+    dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
   /// Access to distributed data (const)
-  inline auto operator[](uint dim) const -> DistributedData const&
+  inline auto operator[]( uint dim ) const -> DistributedData const &
   {
-    dolfin_assert(dim <= dim_);
+    dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
@@ -65,7 +63,6 @@ public:
   void disp() const;
 
 private:
-
   /// Clear
   void clear();
 
@@ -73,8 +70,7 @@ private:
   uint dim_;
 
   // Distributed data
-  Array<DistributedData> data_;
-
+  std::vector< DistributedData > data_;
 };
 
 } /* namespace dolfin */

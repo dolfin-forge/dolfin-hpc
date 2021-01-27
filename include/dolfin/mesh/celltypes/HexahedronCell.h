@@ -195,12 +195,12 @@ inline auto HexahedronCell::orientation( Cell const & cell ) const -> size_t
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get the coordinates of vertices v0, v1, v3 and v4
-  MeshGeometry const &    geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = cell.entities( 0 );
-  real const *            v0       = geometry.x( vertices[0] );
-  real const *            v1       = geometry.x( vertices[1] );
-  real const *            v3       = geometry.x( vertices[3] );
-  real const *            v4       = geometry.x( vertices[4] );
+  MeshGeometry const &          geometry = cell.mesh().geometry();
+  std::vector< size_t > const & vertices = cell.entities( 0 );
+  real const *                  v0       = geometry.x( vertices[0] );
+  real const *                  v1       = geometry.x( vertices[1] );
+  real const *                  v3       = geometry.x( vertices[3] );
+  real const *                  v4       = geometry.x( vertices[4] );
 
   // Check whether (v0v1, v0v3, v0v4) is counter-clockwise
   real const S = +( ( v1[1] - v0[1] ) * ( v3[2] - v0[2] )
@@ -257,12 +257,12 @@ inline auto HexahedronCell::volume( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
-  real const *            v0       = geometry.x( vertices[0] );
-  real const *            v1       = geometry.x( vertices[1] );
-  real const *            v3       = geometry.x( vertices[3] );
-  real const *            v4       = geometry.x( vertices[4] );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
+  real const *                  v0       = geometry.x( vertices[0] );
+  real const *                  v1       = geometry.x( vertices[1] );
+  real const *                  v3       = geometry.x( vertices[3] );
+  real const *                  v4       = geometry.x( vertices[4] );
 
   // Compute mixed product of (v0v1, v0v3, v0v4)
   real const S = +( ( v1[1] - v0[1] ) * ( v3[2] - v0[2] )
@@ -284,16 +284,16 @@ inline auto HexahedronCell::diameter( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
-  real const *            x0       = geometry.x( vertices[0] );
-  real const *            x1       = geometry.x( vertices[1] );
-  real const *            x2       = geometry.x( vertices[2] );
-  real const *            x3       = geometry.x( vertices[3] );
-  real const *            x4       = geometry.x( vertices[4] );
-  real const *            x5       = geometry.x( vertices[5] );
-  real const *            x6       = geometry.x( vertices[6] );
-  real const *            x7       = geometry.x( vertices[7] );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
+  real const *                  x0       = geometry.x( vertices[0] );
+  real const *                  x1       = geometry.x( vertices[1] );
+  real const *                  x2       = geometry.x( vertices[2] );
+  real const *                  x3       = geometry.x( vertices[3] );
+  real const *                  x4       = geometry.x( vertices[4] );
+  real const *                  x5       = geometry.x( vertices[5] );
+  real const *                  x6       = geometry.x( vertices[6] );
+  real const *                  x7       = geometry.x( vertices[7] );
 
   // Compute maximum diagonal
   real d0 = 0.0;
@@ -333,16 +333,16 @@ inline void HexahedronCell::midpoint( MeshEntity const & entity,
   dolfin_assert( entity.num_entities( 0 ) == NE[3][0] );
 
   // Get the coordinates of the vertices
-  MeshGeometry const &    geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
-  real const *            x0       = geometry.x( vertices[0] );
-  real const *            x1       = geometry.x( vertices[1] );
-  real const *            x2       = geometry.x( vertices[2] );
-  real const *            x3       = geometry.x( vertices[3] );
-  real const *            x4       = geometry.x( vertices[4] );
-  real const *            x5       = geometry.x( vertices[5] );
-  real const *            x6       = geometry.x( vertices[6] );
-  real const *            x7       = geometry.x( vertices[7] );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
+  real const *                  x0       = geometry.x( vertices[0] );
+  real const *                  x1       = geometry.x( vertices[1] );
+  real const *                  x2       = geometry.x( vertices[2] );
+  real const *                  x3       = geometry.x( vertices[3] );
+  real const *                  x4       = geometry.x( vertices[4] );
+  real const *                  x5       = geometry.x( vertices[5] );
+  real const *                  x6       = geometry.x( vertices[6] );
+  real const *                  x7       = geometry.x( vertices[7] );
   for ( size_t i = 0; i < geometry.dim(); ++i )
   {
     p[i] =
@@ -365,10 +365,10 @@ inline void
   real const * vf = geometry.x( c.entities( 0 )[FNV[facet][0]] );
 
   // vertices on the facet
-  Array< size_t > const & vertices = f.entities( 0 );
-  real const *            v0       = geometry.x( vertices[FIV[facet][0]] );
-  real const *            v1       = geometry.x( vertices[FIV[facet][1]] );
-  real const *            v3       = geometry.x( vertices[FIV[facet][3]] );
+  std::vector< size_t > const & vertices = f.entities( 0 );
+  real const *                  v0 = geometry.x( vertices[FIV[facet][0]] );
+  real const *                  v1 = geometry.x( vertices[FIV[facet][1]] );
+  real const *                  v3 = geometry.x( vertices[FIV[facet][3]] );
 
   // Vector normal to facet
   n[0] = +( v1[1] - v0[1] ) * ( v3[2] - v0[2] )

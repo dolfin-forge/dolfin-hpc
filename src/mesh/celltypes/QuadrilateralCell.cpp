@@ -79,12 +79,12 @@ void QuadrilateralCell::order_entities( MeshTopology & topology,
     dolfin_assert( topology.connectivity( 2, 1 ) );
 
     // Get edges
-    Array< size_t > const & cell_edges = topology( 2, 1 )[i];
+    std::vector< size_t > const & cell_edges = topology( 2, 1 )[i];
 
     // Sort vertices on each edge
     for ( size_t i = 0; i < 4; ++i )
     {
-      Array< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
+      std::vector< size_t > & edge_vertices = topology( 1, 0 )[cell_edges[i]];
       std::sort( edge_vertices.data(), edge_vertices.data() + 2 );
     }
   }
@@ -98,8 +98,8 @@ void QuadrilateralCell::order_entities( MeshTopology & topology,
     dolfin_assert( topology.connectivity( 2, 1 ) );
 
     // Get cell vertices and edges
-    Array< size_t > const & cell_vertices = topology( 2, 0 )[i];
-    Array< size_t > &       cell_edges    = topology( 2, 1 )[i];
+    std::vector< size_t > const & cell_vertices = topology( 2, 0 )[i];
+    std::vector< size_t > &       cell_edges    = topology( 2, 1 )[i];
 
     // Loop on non-incident vertices on cell as lexicographical pairs
     // (i, j): (0,1) (0,3) (1,2) (2,3)
@@ -113,7 +113,7 @@ void QuadrilateralCell::order_entities( MeshTopology & topology,
       for ( size_t k = m; k < 4; ++k )
       {
         // Get local vertices on edge
-        Array< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[k]];
+        std::vector< size_t > const & edge_vertices = topology( 1, 0 )[cell_edges[k]];
 
         // Check if the ith and jth vertex of the cell are non-incident on edge
         // k
@@ -181,9 +181,9 @@ void QuadrilateralCell::refine_cell( Cell &       cell,
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( !e.empty() );
 
   // Compute indices for the nine new vertices
@@ -291,14 +291,14 @@ auto QuadrilateralCell::check( Cell & cell ) const -> bool
   // Check edge -> incident vertices mapping
   if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array< size_t > const & v = cell.entities( 0 );
+    std::vector< size_t > const & v = cell.entities( 0 );
     dolfin_assert( not v.empty() );
-    Array< size_t > const & e = cell.entities( 1 );
+    std::vector< size_t > const & e = cell.entities( 1 );
     dolfin_assert( not e.empty() );
     MeshTopology const & topology = cell.mesh().topology();
     for ( size_t i = 0; i < 4; ++i )
     {
-      Array< size_t > const & ev = topology( 1, 0 )[e[i]];
+      std::vector< size_t > const & ev = topology( 1, 0 )[e[i]];
       dolfin_assert( ev.size() >= 2 );
       for ( size_t j = 0; j < 2; ++j )
       {
@@ -323,9 +323,9 @@ auto QuadrilateralCell::findEdge( size_t i, Cell const & cell ) const -> size_t
   // Ordering convention for edges (order of non-incident vertices)
 
   // Get vertices and edges
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( not v.empty() );
-  Array< size_t > const & e = cell.entities( 1 );
+  std::vector< size_t > const & e = cell.entities( 1 );
   dolfin_assert( not e.empty() );
 
   // Look for edge satisfying ordering convention
@@ -334,7 +334,7 @@ auto QuadrilateralCell::findEdge( size_t i, Cell const & cell ) const -> size_t
   size_t const         v1       = v[ENV[i][1]];
   for ( size_t j = 0; j < 4; ++j )
   {
-    Array< size_t > const & ev = topology( 1, 0 )[e[j]];
+    std::vector< size_t > const & ev = topology( 1, 0 )[e[j]];
     dolfin_assert( not ev.empty() );
     if ( ev[0] != v0 && ev[0] != v1 && ev[1] != v0 && ev[1] != v1 )
     {

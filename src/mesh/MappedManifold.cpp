@@ -34,13 +34,13 @@ void MappedManifold::init()
   size_t const gdim = globalmesh.geometry_dimension();
   MeshEditor editor(*this, boundary.type().cellType(),
                     boundary.geometry_dimension());
-  Array<size_t> mm_vertices(boundary.size(0),boundary.size(0));
+  std::vector<size_t> mm_vertices(boundary.size(0),boundary.size(0));
   size_t const invalid_vertex_index = mm_vertices.size();
-  Array<real> mm_coordinates(gdim * mm_vertices.size());
+  std::vector<real> mm_coordinates(gdim * mm_vertices.size());
   size_t const num_cell_vertices = boundary.type().num_entities(0);
-  Array<size_t> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);
+  std::vector<size_t> mm_cell_vertices(boundary.num_cells() * num_cell_vertices);
 
-  Array<size_t> localGH;
+  std::vector<size_t> localGH;
 
   //
   size_t mm_cell_count = 0;
@@ -88,7 +88,7 @@ void MappedManifold::init()
           subdomainG_.map(v->x(), &mm_coordinates[mm_vertex_count * gdim]);
           ++mm_vertex_count;
 
-          Array<size_t> matching_facets;
+          std::vector<size_t> matching_facets;
           boundary.intersector().overlap(x1, matching_facets);
           if(!matching_facets.empty())
           {
@@ -131,7 +131,7 @@ void MappedManifold::init()
   }
 
   // Create cells (boundary mesh is already ordered)
-  Array<size_t> cell_vertices(num_cell_vertices);
+  std::vector<size_t> cell_vertices(num_cell_vertices);
   for (size_t c = 0; c < mm_cell_count; ++c)
   {
     // Add cell

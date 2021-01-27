@@ -2656,16 +2656,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 0
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 0
     // optimize:                    True
     // precision:                   16
@@ -2744,16 +2744,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 2
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 2
     // optimize:                    True
     // precision:                   16
@@ -2831,16 +2831,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 2
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 2
     // optimize:                    True
     // precision:                   16
@@ -3413,8 +3413,8 @@ public:
     return form_;
   }
 
-  /// Return array of coefficients
-  dolfin::Array<dolfin::Coefficient*> const& coefficients() const
+  /// Return vector of coefficients
+  std::vector<dolfin::Coefficient*> const& coefficients() const
   {
     return coefficients_;
   }
@@ -3433,8 +3433,8 @@ private:
   // UFC form
   poisson_form_0 form_;
 
-  /// Array of coefficients
-  dolfin::Array<dolfin::Coefficient*> coefficients_;
+  /// vector of coefficients
+  std::vector<dolfin::Coefficient*> coefficients_;
 
 };
 
@@ -3461,8 +3461,8 @@ public:
     return form_;
   }
 
-  /// Return array of coefficients
-  dolfin::Array<dolfin::Coefficient*> const& coefficients() const
+  /// Return vector of coefficients
+  std::vector<dolfin::Coefficient*> const& coefficients() const
   {
     return coefficients_;
   }
@@ -3488,8 +3488,8 @@ private:
   // UFC form
   poisson_form_1 form_;
 
-  /// Array of coefficients
-  dolfin::Array<dolfin::Coefficient*> coefficients_;
+  /// vector of coefficients
+  std::vector<dolfin::Coefficient*> coefficients_;
 
 };
 

@@ -18,8 +18,8 @@
 #ifndef __DOLFIN_VERTEX_NORMAL_H
 #define __DOLFIN_VERTEX_NORMAL_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/constants.h>
+#include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
@@ -83,12 +83,12 @@ private:
   auto basis( size_t i, size_t j ) -> MeshValues< real, Vertex > &;
 
   //
-  void getFacetData( VertexNormal::Type type,
-                     Mesh &             mesh,
-                     BoundaryMesh &     boundary,
-                     Vertex &           bvertex,
-                     Array< real > &    normals,
-                     Array< real > &    weights );
+  void getFacetData( VertexNormal::Type    type,
+                     Mesh &                mesh,
+                     BoundaryMesh &        boundary,
+                     Vertex &              bvertex,
+                     std::vector< real > & normals,
+                     std::vector< real > & weights );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
@@ -101,7 +101,7 @@ private:
   SubDomain const * const subdomain_;
 
   //
-  Array< MeshValues< real, Vertex > > basis_;
+  std::vector< MeshValues< real, Vertex > > basis_;
 
   // Define vertex type: 1 surface, 2 edge, 3 surface
   MeshValues< size_t, Vertex > vertex_type_;

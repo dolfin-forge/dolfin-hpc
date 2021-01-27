@@ -4,9 +4,8 @@
 #ifndef __DOLFIN_TEST_H
 #define __DOLFIN_TEST_H
 
+#include <dolfin/common/types.h>
 #include <dolfin/main/Startup.h>
-
-#include <dolfin/common/Array.h>
 
 #include <iostream>
 #include <string>
@@ -19,29 +18,28 @@ class Test : public Startup
 
   struct Args
   {
-    uint debug_level{0};
+    uint        debug_level { 0 };
     std::string mesh_file;
-    bool benchmark{false};
+    bool        benchmark { false };
 
     Args()
-      : mesh_file("")
+      : mesh_file( "" )
     {
     }
   };
 
 public:
+  ///
+  Test( int argc, char * argv[] );
 
   ///
-  Test(int argc, char *argv[]);
-
-  ///
-  Test(std::string const& dir = "");
+  Test( std::string const & dir = "" );
 
   ///
   void print_args();
 
   ///
-  void begin(std::string const& name);
+  void begin( std::string const & name );
 
   ///
   void end();
@@ -52,18 +50,16 @@ public:
   Args args;
 
 private:
-
   ///
-  void init(int argc, char *argv[]);
+  void init( int argc, char * argv[] );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  bool btest_{false};
-  std::string const dir_;
-  Array<std::pair<std::string, real> > timings_;
-  real total_{0.0};
-  uint padding_{0};
-
+  bool                                          btest_ { false };
+  std::string const                             dir_;
+  std::vector< std::pair< std::string, real > > timings_;
+  real                                          total_ { 0.0 };
+  uint                                          padding_ { 0 };
 };
 
 } /* namespace dolfin */

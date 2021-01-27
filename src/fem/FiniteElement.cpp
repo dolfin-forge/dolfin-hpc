@@ -34,8 +34,8 @@ FiniteElement::FiniteElement( ufc::finite_element const & element,
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( ufc::finite_element const & element,
-                              Array< size_t > const &     sub_system )
+FiniteElement::FiniteElement( ufc::finite_element const &   element,
+                              std::vector< size_t > const & sub_system )
   : ufc_finite_element_(
     FiniteElement::create_sub_element( element, sub_system ) )
   , sub_value_dims_( nullptr )
@@ -96,8 +96,8 @@ void FiniteElement::Initialize()
 
   // Add sub value dimensions for mixed elements, packed by axis
   size_t const max_dim = ufc_finite_element_->value_rank() + 1;
-  sub_value_dims_      = new Array< size_t >[max_dim];
-  sub_value_offs_      = new Array< size_t >[max_dim];
+  sub_value_dims_      = new std::vector< size_t >[max_dim];
+  sub_value_offs_      = new std::vector< size_t >[max_dim];
   size_t nb_subs       = this->num_sub_elements();
   if ( nb_subs > 0 )
   {
@@ -130,8 +130,8 @@ void FiniteElement::Initialize()
 //-----------------------------------------------------------------------------
 
 auto FiniteElement::create_sub_element(
-  const ufc::finite_element & finite_element,
-  Array< size_t > const &     sub_system ) -> ufc::finite_element *
+  const ufc::finite_element &   finite_element,
+  std::vector< size_t > const & sub_system ) -> ufc::finite_element *
 {
   // If the subsystem is empty return self
   if ( sub_system.size() == 0 )
@@ -165,7 +165,7 @@ auto FiniteElement::create_sub_element(
   }
 
   // Otherwise, recursively extract the sub sub system
-  Array< size_t > sub_sub_system;
+  std::vector< size_t > sub_sub_system;
   for ( size_t i = 1; i < sub_system.size(); i++ )
   {
     sub_sub_system.push_back( sub_system[i] );
@@ -179,9 +179,9 @@ auto FiniteElement::create_sub_element(
 
 //-----------------------------------------------------------------------------
 
-void FiniteElement::flatten( ufc::finite_element const *            element,
-                             Array< ufc::finite_element const * > & stack,
-                             size_t                                 maxlevel )
+void FiniteElement::flatten( ufc::finite_element const * element,
+                             std::vector< ufc::finite_element const * > & stack,
+                             size_t maxlevel )
 {
   // Single root element or max level is set to zero, return immediately
   if ( element->num_sub_elements() == 0 || maxlevel == 0 )
@@ -208,8 +208,9 @@ void FiniteElement::flatten( ufc::finite_element const *            element,
 
 //-----------------------------------------------------------------------------
 
-void FiniteElement::flatten( ufc::finite_element const *            element,
-                             Array< ufc::finite_element const * > & stack )
+void FiniteElement::flatten(
+  ufc::finite_element const *                  element,
+  std::vector< ufc::finite_element const * > & stack )
 {
   // Single root element or max level is set to zero, return immediately
   if ( element->num_sub_elements() == 0 )
@@ -238,8 +239,8 @@ void FiniteElement::flatten( ufc::finite_element const *            element,
 
 auto FiniteElement::is_vectorizable() const -> bool
 {
-  bool                                         ret = true;
-  Array< ufc::finite_element const * > const & flt = this->flatten();
+  bool                                               ret = true;
+  std::vector< ufc::finite_element const * > const & flt = this->flatten();
   for ( size_t s = 1; s < flt.size(); ++s )
   {
     if ( std::strcmp( flt[0]->signature(), flt[s]->signature() ) != 0 )

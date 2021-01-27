@@ -150,14 +150,14 @@ void Checkpoint::load_parametersystem( std::string filename )
 #ifdef ENABLE_MPIIO
   // load ParameterSystem
   byte_offset += MPI::file_read_at_all( file, param_size, byte_offset );
-  Array< char > p( param_size / sizeof( char ) );
+  std::vector< char > p( param_size / sizeof( char ) );
   byte_offset += MPI::file_read_at_all( file, &p[0],
                                         param_size, byte_offset, param_size );
 #else
   error("Checkpointing is only implemented with MPI I/O enabled.");
   // load ParameterSystem
   // file.read( static_cast< char * >( &param_size ), sizeof( uint ) );
-  // Array< char > p( param_size / sizeof( char ) );
+  // std::vector< char > p( param_size / sizeof( char ) );
   // file.read( static_cast< char * >( p.data() ), param_size );
 #endif
 
@@ -208,7 +208,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
 
       // load coords
       {
-        Array< real > coords( mesh_hdr.num_coords, 0.0 );
+        std::vector< real > coords( mesh_hdr.num_coords, 0.0 );
 
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
@@ -228,7 +228,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
       // load cells
       {
         editor.init_cells( mesh_hdr.num_cells );
-        Array< uint > cells( mesh_hdr.num_centities, 0 );
+        std::vector< uint > cells( mesh_hdr.num_centities, 0 );
 
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
@@ -239,7 +239,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
        // file.read( ( char * ) cells, ( mesh_hdr.nuchkp_headerchkp_headerm_centities ) * sizeof( uint ) );
 #endif
 
-        Array< size_t > v;
+        std::vector< size_t > v;
         size_t ci = 0;
         for ( size_t i = 0; i < mesh_hdr.num_centities; i += mesh_hdr.num_entities )
         {
@@ -254,7 +254,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
 
       if ( MPI::size() > 1 )
       {
-        Array< uint > mapping( _mesh.size( 0 ) );
+        std::vector< uint > mapping( _mesh.size( 0 ) );
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
                          file, mapping.data(), mesh_hdr.num_vertices,
@@ -266,7 +266,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
         for ( VertexIterator v( _mesh ); !v.end(); ++v )
           _mesh.distdata()[0].set_map( v->index(), mapping[v->index()] );
 
-        Array< uint > ghosts( 2 * mesh_hdr.num_ghosts );
+        std::vector< uint > ghosts( 2 * mesh_hdr.num_ghosts );
 #ifdef ENABLE_MPIIO
         byte_offset += MPI::file_read_at_all(
                          file, ghosts.data(), 2 * mesh_hdr.num_ghosts,
@@ -337,7 +337,7 @@ void Checkpoint::load( std::string filename, FunctionMap const & func )
 #endif
 
     // load data
-    Array< real > values( function_hdr.offset[1] );
+    std::vector< real > values( function_hdr.offset[1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
                      byte_offset + function_hdr.offset[0] * sizeof( real ),
@@ -397,7 +397,7 @@ void Checkpoint::load( std::string filename, VectorMap const & vec )
 #endif
 
     // load data
-    Array< real > values( vector_hdr.offset[1] );
+    std::vector< real > values( vector_hdr.offset[1] );
 #ifdef ENABLE_MPIIO
     byte_offset += MPI::file_read_at_all( file, values.data(), values.size(),
                      byte_offset + vector_hdr.offset[0] * sizeof( real ),
@@ -464,21 +464,21 @@ auto Checkpoint::get_header() const -> Checkpoint::CheckpointHeader const &
 
 //-----------------------------------------------------------------------------
 
-auto Checkpoint::get_mesh_header() const -> Array< Checkpoint::MeshHeader > const &
+auto Checkpoint::get_mesh_header() const -> std::vector< Checkpoint::MeshHeader > const &
 {
   return mesh_header;
 }
 
 //-----------------------------------------------------------------------------
 
-auto Checkpoint::get_function_header() const -> Array< Checkpoint::FunctionHeader > const &
+auto Checkpoint::get_function_header() const -> std::vector< Checkpoint::FunctionHeader > const &
 {
   return functions_header;
 }
 
 //-----------------------------------------------------------------------------
 
-auto Checkpoint::get_vector_header() const -> Array< Checkpoint::VectorHeader > const &
+auto Checkpoint::get_vector_header() const -> std::vector< Checkpoint::VectorHeader > const &
 {
   return vectors_header;
 }
@@ -623,7 +623,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
                      hdr.num_coords, byte_offset + hdr.offsets[0] * sizeof( real ),
                      hdr.displacement[0] );
 
-    Array< uint > cell_data;
+    std::vector< uint > cell_data;
     for ( uint c1 = 0; c1 < mesh.cells().size(); ++c1 )
       append( cell_data, mesh.cells()[c1].begin(), mesh.cells()[c1].end() );
 
@@ -640,7 +640,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
 
     if ( MPI::size() > 1 )
     {
-      Array< uint > mapping( mesh.size( 0 ) );
+      std::vector< uint > mapping( mesh.size( 0 ) );
       for ( VertexIterator v( mesh ); !v.end(); ++v )
       {
         mapping[v->index()] = v->global_index();
@@ -653,7 +653,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, MeshMap & meshes 
       // file.write( static_cast< char * >( mapping.data(), hdr.num_vertices * sizeof( uint ) ) );
 #endif
 
-      Array< uint > ghosts( 2 * hdr.num_ghosts );
+      std::vector< uint > ghosts( 2 * hdr.num_ghosts );
       uint * gp     = &ghosts[0];
       for ( GhostIterator g( mesh.distdata()[0] ); g.valid(); ++g )
       {
@@ -683,7 +683,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset,
   {
     dolfin_assert( i < chkp_header.num_functions );
 
-    Array< real > values( functions_header[i].offset[1] );
+    std::vector< real > values( functions_header[i].offset[1] );
     f->second->vector().get( values.data() );
 
 #ifdef ENABLE_MPIIO
@@ -717,7 +717,7 @@ void Checkpoint::write( stream_t file, offset_t & byte_offset, VectorMap & vec )
   {
     dolfin_assert( i < chkp_header.num_vectors );
 
-    Array< real > values( vectors_header[i].offset[1] );
+    std::vector< real > values( vectors_header[i].offset[1] );
     v->second->get( values.data() );
 
 #ifdef ENABLE_MPIIO

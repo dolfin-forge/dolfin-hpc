@@ -55,7 +55,7 @@ void IntervalCell::order_entities( MeshTopology & topology, size_t i ) const
   // Sort local vertices in ascending order, connectivity 1 - 0
   if ( topology.connectivity( 1, 0 ) )
   {
-    Array< size_t > & cell_vertices = topology( 1, 0 )[i];
+    std::vector< size_t > & cell_vertices = topology( 1, 0 )[i];
     std::sort( cell_vertices.data(), cell_vertices.data() + 2 );
   }
 }
@@ -67,7 +67,7 @@ void IntervalCell::refine_cell( Cell &       cell,
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get vertices
-  Array< size_t > const & v = cell.entities( 0 );
+  std::vector< size_t > const & v = cell.entities( 0 );
   dolfin_assert( !v.empty() );
 
   // Add midpoint vertex
@@ -128,7 +128,7 @@ auto IntervalCell::check( Cell & cell ) const -> bool
   // Check that cell vertices are in ascending order (so are edge vertices then)
   if ( cell.mesh().topology().connectivity( 1, 0 ) )
   {
-    Array< size_t > const & cell_verts = cell.entities( 0 );
+    std::vector< size_t > const & cell_verts = cell.entities( 0 );
     dolfin_assert( not cell_verts.empty() );
     if ( cell_verts[1] < cell_verts[0] )
     {

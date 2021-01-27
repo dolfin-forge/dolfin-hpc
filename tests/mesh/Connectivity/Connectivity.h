@@ -2,7 +2,6 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Array.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Connectivity.h>
 
@@ -42,7 +41,7 @@ void check_regular_connectivity()
 
     // Perform left remapping
     {
-      Array< size_t > L( C.order() );
+      std::vector< size_t > L( C.order() );
       if ( C.order() )
         range( L.data(), L.data() + L.size(), L.size() - 1, -1 );
       C.remap_l( L );
@@ -60,7 +59,7 @@ void check_regular_connectivity()
 
     // Perform right remapping
     {
-      Array< size_t > R( C.entries() );
+      std::vector< size_t > R( C.entries() );
       if ( C.entries() )
         range( R.data(), R.data() + R.size(), R.size() - 1, -1 );
       C.remap_r( R );
@@ -94,9 +93,9 @@ DOLFIN_START_TEST( test_Connectivity )
       error( "Iteration on empty connectivity" );
     }
     // Empty remappings
-    Array< size_t > L;
+    std::vector< size_t > L;
     C0.remap_l( L );
-    Array< size_t > R;
+    std::vector< size_t > R;
     C0.remap_r( R );
   }
   //--- Create 2-connectivity, verify basic data, and remap
@@ -125,11 +124,11 @@ DOLFIN_START_TEST( test_Connectivity )
     ck_assert_uint_eq( C[3][0], 3 );
     ck_assert_uint_eq( C[3][1], 4 );
 
-    Array< Array< size_t > > connect;
+    std::vector< std::vector< size_t > > connect;
     connect << C;
     Connectivity D( connect );
     ck_assert( C == D );
-    Array< size_t > L( 4 );
+    std::vector< size_t > L( 4 );
     L[0] = 3;
     L[1] = 2;
     L[2] = 1;
@@ -145,7 +144,7 @@ DOLFIN_START_TEST( test_Connectivity )
     ck_assert_uint_eq( C[0][0], 3 );
     ck_assert_uint_eq( C[0][1], 4 );
 
-    Array< size_t > R( 5 );
+    std::vector< size_t > R( 5 );
     R[0] = 4;
     R[1] = 3;
     R[2] = 2;

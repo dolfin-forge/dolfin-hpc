@@ -26,61 +26,63 @@ class UFC;
 class DofMapSet
 {
 public:
-
   /// Create set of dof maps
-  DofMapSet(Form const& form, Mesh& mesh);
+  DofMapSet( Form const & form, Mesh & mesh );
 
   /// Destructor
   ~DofMapSet();
 
   /// Update set of dof maps for given form
-  void update(Form const& form, Mesh& mesh);
+  void update( Form const & form, Mesh & mesh );
 
   /// Return number of dof maps
   auto size() const -> uint;
 
   /// Return the mesh on which dof maps have been initialized
-  auto mesh() const -> Mesh const&;
+  auto mesh() const -> Mesh const &;
 
   /// Return dof map for argument function i
-  auto operator[](uint i) const -> DofMap&;
+  auto operator[]( uint i ) const -> DofMap &;
 
 private:
-
   // Consistency checking
-  void Check(ufc::form const& form, Mesh& mesh);
+  void Check( ufc::form const & form, Mesh & mesh );
 
   // Release dof maps
   void ReleaseAll();
 
-  // Array of dof maps for current form
-  Array<DofMap*> dof_map_set;
+  // std::vector of dof maps for current form
+  std::vector< DofMap * > dof_map_set;
 
   // Mesh
-  Mesh const& mesh_;
-
+  Mesh const & mesh_;
 };
 
 //-----------------------------------------------------------------------------
+
 inline auto DofMapSet::size() const -> uint
 {
   return dof_map_set.size();
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto DofMapSet::mesh() const -> Mesh const &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto DofMapSet::operator[]( uint i ) const -> DofMap &
 {
   dolfin_assert( dof_map_set.size() > 0 );
   dolfin_assert( i < dof_map_set.size() );
   return *dof_map_set[i];
 }
-}
+
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif
-

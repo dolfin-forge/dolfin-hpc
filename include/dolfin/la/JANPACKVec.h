@@ -164,7 +164,7 @@ namespace dolfin
     // against x due to the opaque interface
     bool is_init;
 
-    //    Array<int> ghost_indices;
+    //    std::vector<int> ghost_indices;
 #if (sun || __sun)
     _ordered_map<int, int> mapping;
 #else

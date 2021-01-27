@@ -12,8 +12,8 @@
 #ifndef __DOLFIN_NODENORMAL_H
 #define __DOLFIN_NODENORMAL_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/constants.h>
+#include <dolfin/common/types.h>
 #include <dolfin/fem/BoundaryNormal.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/BoundaryMesh.h>
@@ -61,7 +61,7 @@ private:
   void clear();
 
   /// Compute boundary normal basis
-  void compute( Mesh & mesh, Array< Function > & basis );
+  void compute( Mesh & mesh, std::vector< Function > & basis );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 

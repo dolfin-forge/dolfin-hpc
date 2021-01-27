@@ -63,7 +63,8 @@ public:
   auto orientation( Cell const & cell ) const -> size_t override;
 
   /// Create entities e of given topological dimension from vertices v
-  void create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
+  void
+    create_entities( size_t ** e, size_t dim, size_t const * v ) const override;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
   void order_entities( MeshTopology & topology, size_t i ) const override;
@@ -72,7 +73,8 @@ public:
   void order_facet( size_t vertices[], Facet & facet ) const override;
 
   /// Return if mesh connectivities require ordering
-  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const -> bool override;
+  auto connectivity_needs_ordering( size_t d0, size_t d1 ) const
+    -> bool override;
 
   /// Initialize mesh connectivities required by ordering
   void initialize_connectivities( Mesh & mesh ) const override;
@@ -80,8 +82,9 @@ public:
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Refine cell uniformly
-  void
-    refine_cell( Cell & cell, MeshEditor & editor, size_t & current_cell ) const override;
+  void refine_cell( Cell &       cell,
+                    MeshEditor & editor,
+                    size_t &     current_cell ) const override;
 
   /// Number of cells created by refinement pattern
   auto num_refined_cells() const -> size_t override;
@@ -114,7 +117,8 @@ public:
   auto facet_area( Cell const & cell, size_t facet ) const -> real override;
 
   /// Check if point p intersects the entity
-  auto intersects( MeshEntity const & e, Point const & p ) const -> bool override;
+  auto intersects( MeshEntity const & e, Point const & p ) const
+    -> bool override;
 
   /// Check if points line connecting p1 and p2 cuts the entity
   auto intersects( MeshEntity const & e,
@@ -179,11 +183,11 @@ inline auto TriangleCell::orientation( Cell const & cell ) const -> size_t
   dolfin_assert( cell.type() == this->cell_type );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = cell.mesh().geometry();
-  Array< size_t > const & vertices = cell.entities( 0 );
-  real const *          v0       = geometry.x( vertices[0] );
-  real const *          v1       = geometry.x( vertices[1] );
-  real const *          v2       = geometry.x( vertices[2] );
+  MeshGeometry const &          geometry = cell.mesh().geometry();
+  std::vector< size_t > const & vertices = cell.entities( 0 );
+  real const *                  v0       = geometry.x( vertices[0] );
+  real const *                  v1       = geometry.x( vertices[1] );
+  real const *                  v2       = geometry.x( vertices[2] );
   return ( ( ( v1[0] - v0[0] ) * ( v2[1] - v0[1] )
              - ( v1[1] - v0[1] ) * ( v2[0] - v0[0] ) )
                < 0.0
@@ -192,7 +196,8 @@ inline auto TriangleCell::orientation( Cell const & cell ) const -> size_t
 }
 
 //-----------------------------------------------------------------------------
-inline auto TriangleCell::connectivity_needs_ordering( size_t d0, size_t d1 ) const -> bool
+inline auto TriangleCell::connectivity_needs_ordering( size_t d0,
+                                                       size_t d1 ) const -> bool
 {
   dolfin_assert( d0 <= TD && d1 <= TD );
   return ( d0 > 0 && d0 > d1 );
@@ -226,8 +231,8 @@ inline auto TriangleCell::volume( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -273,8 +278,8 @@ inline auto TriangleCell::diameter( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -295,14 +300,15 @@ inline auto TriangleCell::diameter( MeshEntity const & entity ) const -> real
 }
 
 //-----------------------------------------------------------------------------
-inline auto TriangleCell::circumradius( MeshEntity const & entity ) const -> real
+inline auto TriangleCell::circumradius( MeshEntity const & entity ) const
+  -> real
 {
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -335,8 +341,8 @@ inline auto TriangleCell::inradius( MeshEntity const & entity ) const -> real
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
   // Get the coordinates of the three vertices
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );
@@ -369,8 +375,8 @@ inline void TriangleCell::midpoint( MeshEntity const & entity, real * p ) const
   dolfin_assert( entity.dim() == TD );
   dolfin_assert( entity.num_entities( 0 ) == NE[2][0] );
 
-  MeshGeometry const &  geometry = entity.mesh().geometry();
-  Array< size_t > const & vertices = entity.entities( 0 );
+  MeshGeometry const &          geometry = entity.mesh().geometry();
+  std::vector< size_t > const & vertices = entity.entities( 0 );
 
   real const * x0 = geometry.x( vertices[0] );
   real const * x1 = geometry.x( vertices[1] );

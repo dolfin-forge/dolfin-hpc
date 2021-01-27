@@ -845,13 +845,7 @@ void DMesh::renumber_glb( _map< size_t, size_t > & new_global )
   for ( size_t i = 0; i < pe_size; i++ )
   {
     size_t send_size = ghost_buffer[i].size();
-    MPI::check_error( MPI_Reduce( &send_size,
-                                  &recv_size_gh,
-                                  1,
-                                  MPI_UNSIGNED,
-                                  MPI_SUM,
-                                  i,
-                                  MPI::DOLFIN_COMM ) );
+    MPI::reduce< MPI::sum >( &send_size, &recv_size_gh, 1, i );
   }
 
   size_t * recv_ghost = new size_t[recv_size_gh];

@@ -101,8 +101,7 @@ void distribute( MeshValues< size_t, Vertex > & dist )
   for ( size_t j = 0; j < pe_size; ++j )
   {
     size_t s = sendbuf_vgindex[j].size();
-    MPI::check_error( MPI_Reduce(
-      &s, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j, distdata.comm() ) );
+    MPI::reduce< MPI::sum >( &s, &recvmax_v, 1, j, distdata.comm() );
   }
   size_t recvmax_x = recvmax_v * gdim;
   // Resize vertex indices
@@ -318,10 +317,8 @@ void distribute( MeshValues< size_t, Cell > & dist, MeshData * D )
   size_t recvmax[2] = { 0, 0 };
   for ( size_t j = 0; j < pe_size; ++j )
   {
-    size_t sendcnt[2] = { static_cast< size_t >( send_cells[j].size() ),
-                          static_cast< size_t >( send_vgindex[j].size() ) };
-    MPI::check_error(
-      MPI_Reduce( sendcnt, recvmax, 2, MPI_UNSIGNED, MPI_SUM, j, comm ) );
+    size_t sendcnt[2] = { send_cells[j].size(), send_vgindex[j].size() };
+    MPI::reduce< MPI::sum >( sendcnt, recvmax, 2, j, comm );
   }
 
   // Resize cell vertices array to fit new cells
@@ -700,8 +697,8 @@ void check( Mesh & mesh )
     for ( size_t j = 0; j < pe_size; ++j )
     {
       size_t s = sbuf[j].size();
-      MPI::check_error(
-        MPI_Reduce( &s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm() ) );
+      MPI::reduce< MPI::sum >( &s, &recv_max, 1, j, dist.comm() );
+
       // Check that no duplicate global entity was added
       _ordered_set< size_t > global_indices( sbuf[j].begin(), sbuf[j].end() );
       if ( global_indices.size() != sbuf[j].size() )
@@ -775,8 +772,8 @@ void check( Mesh & mesh )
     for ( size_t j = 0; j < pe_size; ++j )
     {
       size_t s = sbuf[j].size();
-      MPI::check_error(
-        MPI_Reduce( &s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm() ) );
+      MPI::reduce< MPI::sum >( &s, &recv_max, 1, j, dist.comm() );
+
       // Check that no duplicate global entity was added
       _ordered_set< size_t > global_indices( sbuf[j].begin(), sbuf[j].end() );
       if ( global_indices.size() != sbuf[j].size() )

@@ -65,8 +65,7 @@ void SubDomain::mark( MeshValues< size_t, Entity > & sub_domains,
     for ( size_t j = 0; j < pe_size; ++j )
     {
       int send_size = sendbuf[j].size();
-      MPI::check_error( MPI_Reduce(
-        &send_size, &recv_size, 1, MPI_INT, MPI_SUM, j, distdata.comm() ) );
+      MPI::reduce< MPI::sum >( &send_size, &recv_size, 1, j, distdata.comm() );
     }
     std::vector< size_t > recvbuf( recv_size );
     for ( size_t j = 1; j < pe_size; ++j )

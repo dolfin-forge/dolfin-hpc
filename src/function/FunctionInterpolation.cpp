@@ -542,12 +542,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       size_t count = dof1recvcount[src];
       if (count > 0)
       {
-        MPI::check_error( MPI_Irecv(&dofs_indicesF[offsetF], count, MPI_UNSIGNED,
-                                    src, 0, dolfin::MPI::DOLFIN_COMM,
-                                    &u_req_recv[recv_id]) );
-        MPI::check_error( MPI_Irecv(&dofs_cvaluesF[offsetF], count, MPI_DOUBLE,
-                                    src, 0, dolfin::MPI::DOLFIN_COMM,
-                                    &r_req_recv[recv_id]) );
+        MPI::check_error( MPI_Irecv(&dofs_indicesF[offsetF], count,
+                                    MPI_type< size_t >::value, src, 0,
+                                    MPI::DOLFIN_COMM, &u_req_recv[recv_id]) );
+        MPI::check_error( MPI_Irecv(&dofs_cvaluesF[offsetF], count,
+                                    MPI_type< real >::value, src, 0,
+                                    MPI::DOLFIN_COMM, &r_req_recv[recv_id]) );
         offsetF += count;
         ++recv_id;
       }
@@ -589,12 +589,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
             // Evaluate
             F0.evaluate(&dofs_cvalues1[nodei * S1.size], &p[0], ufc0);
           }
-          MPI::check_error( MPI_Isend(&dofs_indices1[offset1], count, MPI_UNSIGNED,
-                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
-                                      &u_req_send[send_id]) );
-          MPI::check_error( MPI_Isend(&dofs_cvalues1[offset1], count, MPI_DOUBLE,
-                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
-                                      &r_req_send[send_id]) );
+          MPI::check_error( MPI_Isend(&dofs_indices1[offset1], count,
+                                      MPI_type< size_t >::value, dest, 0,
+                                      MPI::DOLFIN_COMM, &u_req_send[send_id]) );
+          MPI::check_error( MPI_Isend(&dofs_cvalues1[offset1], count,
+                                      MPI_type< real >::value, dest, 0,
+                                      MPI::DOLFIN_COMM, &r_req_send[send_id]) );
           offset1 += count;
           ++send_id;
         }

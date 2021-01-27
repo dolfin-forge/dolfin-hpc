@@ -1057,8 +1057,7 @@ void DistributedData::check_ghost()
   for ( size_t j = 0; j < pe_size; ++j )
   {
     size_t s = buffer[j].size();
-    MPI::check_error(
-      MPI_Reduce( &s, &recvmax, 1, MPI_UNSIGNED, MPI_MAX, j, comm() ) );
+    MPI::reduce< MPI::sum >( &s, &recvmax, 1, j, comm() );
   }
   std::vector< size_t > recvbuf( recvmax );
   for ( size_t j = 1; j < pe_size; ++j )

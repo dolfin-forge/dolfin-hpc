@@ -27,9 +27,6 @@ namespace dolfin
 /// This class provides utility functions for easy access of the number of
 /// processes and current process number.
 
-template < int R, typename T >
-struct helper;
-
 class MPI
 {
 
@@ -99,8 +96,8 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template < typename T >
-  static auto
-    bcast( T * x, int n, int r, Communicator & comm = MPI::DOLFIN_COMM ) -> int;
+  static auto bcast( T * x, int n, int r,
+                     Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template < typename T >
@@ -111,28 +108,36 @@ public:
                           Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
-  template < int R, typename T >
+  template < int Op, typename T >
   static auto all_reduce( T x, T & r, Communicator & comm = MPI::DOLFIN_COMM )
     -> int;
 
   //// Wrap in a template function to allow use of functors
-  template < int R, typename T >
+  template < int Op, typename T >
   static auto all_reduce( T *            x,
                           T *            r,
                           size_t         count,
                           Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
-  template < int R, typename T >
+  template < int Op, typename T >
   static auto all_reduce_in_place( T &            r,
                                    Communicator & comm = MPI::DOLFIN_COMM )
     -> int;
 
   //// Wrap in a template function to allow use of functors
-  template < int R, typename T >
+  template < int Op, typename T >
   static auto all_reduce_in_place( std::vector< T > & data,
                                    Communicator &     comm = MPI::DOLFIN_COMM )
     -> int;
+
+
+  template < int Op, typename T >
+  static auto reduce( T const *      sendbuf,
+                      T *            recvbuf,
+                      int            count,
+                      int            root,
+                      Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
   template < typename T >
@@ -309,95 +314,137 @@ inline auto MPI::all_gather( T *            sendbuf,
 //-----------------------------------------------------------------------------
 // unfortunately c++ does not allow partial function template specialization
 // so we have to move the  template to a helper class
-template < int R, typename T >
+template < int Op, typename T >
 struct helper
 {
-  inline static auto
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int;
+  inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
+                             int root, MPI::Communicator & comm ) -> int;
 
-  inline static auto
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int;
+  inline static auto all_reduce( T * x, T * r, int count,
+                                 MPI::Communicator & comm ) -> int;
+
+  inline static auto all_reduce_in_place( T * r, int count,
+                                          MPI::Communicator & comm ) -> int;
 };
 
 template < typename T >
 struct helper< MPI::sum, T >
 {
-  inline static auto
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
+                             int root, MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error(
-      MPI_Allreduce( x, r, count, MPI_type< T >::value, MPI_SUM, comm ) );
+    return MPI::check_error( MPI_Reduce( sendbuf, recvbuf, count,
+                                         MPI_type< T >::value,
+                                         MPI_SUM, root, comm ) );
   }
 
-  inline static auto
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto all_reduce( T * x, T * r, int count,
+                                 MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error( MPI_Allreduce(
-      MPI_IN_PLACE, r, count, MPI_type< T >::value, MPI_SUM, comm ) );
+    return MPI::check_error( MPI_Allreduce( x, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_SUM, comm ) );
+  }
+
+  inline static auto all_reduce_in_place( T * r, int count,
+                                          MPI::Communicator & comm ) -> int
+  {
+    return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_SUM, comm ) );
   }
 };
 
 template < typename T >
 struct helper< MPI::min, T >
 {
-  inline static auto
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
+                             int root, MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error(
-      MPI_Allreduce( x, r, count, MPI_type< T >::value, MPI_MIN, comm ) );
+    return MPI::check_error( MPI_Reduce( sendbuf, recvbuf, count,
+                                         MPI_type< T >::value,
+                                         MPI_MIN, root, comm ) );
   }
 
-  inline static auto
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto all_reduce( T * x, T * r, int count,
+                                 MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error( MPI_Allreduce(
-      MPI_IN_PLACE, r, count, MPI_type< T >::value, MPI_MIN, comm ) );
+    return MPI::check_error( MPI_Allreduce( x, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_MIN, comm ) );
+  }
+
+  inline static auto all_reduce_in_place( T * r, int count,
+                                          MPI::Communicator & comm ) -> int
+  {
+    return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_MIN, comm ) );
   }
 };
 
 template < typename T >
 struct helper< MPI::max, T >
 {
-  inline static auto
-    all_reduce( T * x, T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
+                             int root, MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error(
-      MPI_Allreduce( x, r, count, MPI_type< T >::value, MPI_MAX, comm ) );
+    return MPI::check_error( MPI_Reduce( sendbuf, recvbuf, count,
+                                         MPI_type< T >::value,
+                                         MPI_MAX, root, comm ) );
   }
 
-  inline static auto
-    all_reduce_in_place( T * r, int count, MPI::Communicator & comm ) -> int
+  inline static auto all_reduce( T * x, T * r, int count,
+                                 MPI::Communicator & comm ) -> int
   {
-    return MPI::check_error( MPI_Allreduce(
-      MPI_IN_PLACE, r, count, MPI_type< T >::value, MPI_MAX, comm ) );
+    return MPI::check_error( MPI_Allreduce( x, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_MAX, comm ) );
+  }
+
+  inline static auto all_reduce_in_place( T * r, int count,
+                                          MPI::Communicator & comm ) -> int
+  {
+    return MPI::check_error( MPI_Allreduce( MPI_IN_PLACE, r, count,
+                                            MPI_type< T >::value,
+                                            MPI_MAX, comm ) );
   }
 };
 
-template < int R, typename T >
-inline auto MPI::all_reduce( T x, T & r, Communicator & comm ) -> int
+
+template < int Op, typename T >
+inline auto MPI::reduce( T const * sendbuf, T * recvbuf,
+                         int count, int root, Communicator & comm ) -> int
 {
-  return helper< R, T >::all_reduce( &x, &r, 1, comm );
+  return helper< Op, T >::reduce( sendbuf, recvbuf, count, root, comm );
 }
 
-template < int R, typename T >
+template < int Op, typename T >
+inline auto MPI::all_reduce( T x, T & r, Communicator & comm ) -> int
+{
+  return helper< Op, T >::all_reduce( &x, &r, 1, comm );
+}
+
+template < int Op, typename T >
 inline auto MPI::all_reduce( T * x, T * r, size_t count, Communicator & comm )
   -> int
 {
-  return helper< R, T >::all_reduce( x, r, count, comm );
+  return helper< Op, T >::all_reduce( x, r, count, comm );
 }
 
-template < int R, typename T >
+template < int Op, typename T >
 inline auto MPI::all_reduce_in_place( T & r, Communicator & comm ) -> int
 {
-  return helper< R, T >::all_reduce_in_place( &r, 1, comm );
+  return helper< Op, T >::all_reduce_in_place( &r, 1, comm );
 }
 
-template < int R, typename T >
+template < int Op, typename T >
 inline auto MPI::all_reduce_in_place( std::vector< T > & data,
                                       Communicator &     comm ) -> int
 {
-  return helper< R, T >::all_reduce_in_place( data.data(), data.size(), comm );
+  return helper< Op, T >::all_reduce_in_place( data.data(), data.size(), comm );
 }
+
 //-----------------------------------------------------------------------------
 template <>
 inline auto MPI::sendrecv( bool *         sendbuf,
@@ -645,7 +692,7 @@ inline int MPI::all_gather( T *, int, T *, int, Communicator & )
 }
 
 //-----------------------------------------------------------------------------
-template < int R, typename T >
+template < int Op, typename T >
 inline int MPI::all_reduce( T x, T & r, Communicator & )
 {
   r = x;

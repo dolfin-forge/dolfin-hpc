@@ -349,7 +349,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
       {
         MPI::check_error( MPI_Send( &shared_vertices[( *adj )][0],
                                     shared_vertices[( *adj )].size(),
-                                    MPI_UNSIGNED,
+                                    MPI_type< size_t >::value,
                                     ( *adj ),
                                     0,
                                     MPI::DOLFIN_COMM ) );
@@ -360,12 +360,12 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
       {
         MPI::check_error( MPI_Recv( recvbuf.data(),
                                     recvbuf.size(),
-                                    MPI_UNSIGNED,
+                                    MPI_type< size_t >::value,
                                     ( *adj ),
                                     0,
                                     MPI::DOLFIN_COMM,
                                     &status ) );
-        MPI::check_error( MPI_Get_count( &status, MPI_UNSIGNED, &recvcount ) );
+        MPI::check_error( MPI_Get_count( &status, MPI_type< size_t >::value, &recvcount ) );
         for ( int k = 0; k < recvcount; ++k )
         {
           dolfin_assert( distdata.has_global( recvbuf[k] ) );

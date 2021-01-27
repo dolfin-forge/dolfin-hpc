@@ -393,10 +393,11 @@ void Function::interpolate_vertex_values(real* values) const
         dst = (rank + j) % pe_size;
 
         MPI::check_error( MPI_Sendrecv(sendbuf[dst].data(), sendbuf[dst].size(),
-                                       MPI_UNSIGNED, dst, 1, recvbuf.data(),
-                                       recvbuf.size(), MPI_DOUBLE, src, 1,
+                                       MPI_type< real >::value, dst, 1,
+                                       recvbuf.data(), recvbuf.size(),
+                                       MPI_type< size_t >::value, src, 1,
                                        MPI::DOLFIN_COMM, &status) );
-        MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
+        MPI::check_error( MPI_Get_count(&status, MPI_type< size_t >::value, &recvcount) );
 
         // Add contributions, just simplified this part with mappings
         std::vector<size_t> recvmapping = dist0.shared_mapping().from(src);

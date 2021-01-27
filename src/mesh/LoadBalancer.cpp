@@ -708,21 +708,18 @@ void LoadBalancer::process_reassignment( MeshFunction< size_t > & partitions,
   size_t   m = pe_size * pe_size;
   size_t * SiM =
     new size_t[m]; // FIXME, this should only be needon on rank == 0
-  //  MPI_Gather(sim_row, pe_size, MPI_UNSIGNED,
-  //	     SiM, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM);
+  //  MPI_Gather(sim_row, pe_size, MPI_type< size_t >::value,
+  //	     SiM, pe_size, MPI_type< size_t >::value, 0, MPI::DOLFIN_COMM);
 
   MPI::all_gather( sim_row, pe_size, SiM, pe_size );
 
   size_t * sorted = new size_t[m];
   pradixsort_matrix( &sorted_indices[0], &SiM[0], pe_size );
-  MPI::check_error( MPI_Gather( sorted_indices,
-                                pe_size,
-                                MPI_UNSIGNED,
-                                sorted,
-                                pe_size,
-                                MPI_UNSIGNED,
-                                0,
-                                MPI::DOLFIN_COMM ) );
+  MPI::check_error( MPI_Gather( sorted_indices, pe_size,
+                                MPI_type< size_t >::value,
+                                sorted, pe_size,
+                                MPI_type< size_t >::value,
+                                0, MPI::DOLFIN_COMM ) );
 
   size_t * map = new size_t[pe_size];
 
@@ -763,8 +760,7 @@ void LoadBalancer::process_reassignment( MeshFunction< size_t > & partitions,
     delete[] unassigned_y;
   }
 
-  MPI::check_error(
-    MPI_Bcast( map, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM ) );
+  MPI::bcast( map, pe_size, 0 );
 
   // Reassign processors
   for ( size_t i = 0; i < partitions.size(); i++ )
@@ -804,8 +800,7 @@ auto LoadBalancer::computational_gain( Mesh &                       mesh,
 
   size_t w_new;
   for ( size_t i = 0; i < pe_size; i++ )
-    MPI::check_error( MPI_Reduce(
-      &tmp_w[i], &w_new, 1, MPI_UNSIGNED, MPI_SUM, i, MPI::DOLFIN_COMM ) );
+    MPI::reduce< MPI::sum >( &tmp_w[i], &w_new, 1, i );
 
   size_t w_oldmax, w_newmax;
   MPI::all_reduce< MPI::max >( w_old, w_oldmax );
@@ -913,8 +908,9 @@ void LoadBalancer::pradixsort_matrix( size_t * res, size_t * Matrix, size_t m )
     offset = 0;
     for ( size_t j = 0; j < 256; j++ )
     {
-      MPI::check_error( MPI_Scan(
-        &count[j], &glb_scan, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM ) );
+      MPI::check_error( MPI_Scan( &count[j], &glb_scan, 1,
+                                  MPI_type< size_t >::value, MPI_SUM,
+                                  MPI::DOLFIN_COMM ) );
       map[j] = glb_scan + offset;
       offset += glb_count[j];
     }

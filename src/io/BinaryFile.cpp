@@ -1151,8 +1151,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
     for (uint i = 0; i < pe_size; ++i)
     {
       send_size = ghost_buff[i].size();
-      MPI::check_error( MPI_Reduce(&send_size, &recv_size_gh, 1, MPI_UNSIGNED,
-                                   MPI_SUM, i, MPI::DOLFIN_COMM) );
+      MPI::reduce< MPI::sum >( &send_size, &recv_size_gh, 1, i );
     }
     uint *recv_ghost = new uint[recv_size_gh];
     real *recv_buff = new real[recv_size];

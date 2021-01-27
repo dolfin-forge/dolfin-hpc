@@ -234,22 +234,19 @@ void TimeSeries::loadData(std::string const&)
     data_size[0] = times.size();
     data_size[1] = value_size_;
     dolfin_assert(value_size_ == values_.size());
-    MPI::check_error( MPI_Bcast(&data_size[0], 2, MPI_UNSIGNED, 0,
-                                dolfin::MPI::DOLFIN_COMM) );
+    MPI::bcast( &data_size[0], 2, 0 );
 
     // Discrete times
     int tcount = data_size[0];
     times.resize(tcount);
-    MPI::check_error( MPI_Bcast(&times[0], tcount, MPI_DOUBLE, 0,
-                                dolfin::MPI::DOLFIN_COMM) );
+    MPI::bcast( &times[0], tcount, 0 );
 
     // Data values
     int vcount = data_size[0] * data_size[1];
     value_size_ = data_size[1];
     values_.resize(value_size_);
     data_values_.resize(vcount);
-    MPI::check_error( MPI_Bcast(&data_values_[0], vcount, MPI_DOUBLE, 0,
-                                dolfin::MPI::DOLFIN_COMM) );
+    MPI::bcast( &data_values_[0], vcount, 0 );
 #endif
   }
 

@@ -46,12 +46,12 @@ SharedMapping::SharedMapping( DistributedData const & data )
     AdjacentMapping & amap = it.second;
 
     // Update bounds
-    send_max_ = std::max( send_max_, ( size_t ) amap.send.size() );
-    send_min_ = std::min( send_min_, ( size_t ) amap.send.size() );
+    send_max_ = std::max( send_max_, amap.send.size() );
+    send_min_ = std::min( send_min_, amap.send.size() );
     //
     MPI::check_error( MPI_Isend( amap.send.data(),
                                  amap.send.size(),
-                                 MPI_UNSIGNED,
+                                 MPI_type< size_t >::value,
                                  it.first,
                                  0,
                                  data.comm(),
@@ -60,7 +60,7 @@ SharedMapping::SharedMapping( DistributedData const & data )
     amap.recv.resize( amap.send.size() );
     MPI::check_error( MPI_Irecv( amap.recv.data(),
                                  amap.recv.size(),
-                                 MPI_UNSIGNED,
+                                 MPI_type< size_t >::value,
                                  it.first,
                                  0,
                                  data.comm(),
@@ -84,7 +84,7 @@ SharedMapping::SharedMapping( DistributedData const & data )
     int               recvcount = 0;
 
     MPI::check_error( MPI_Wait( &recvreq[i], &status[i] ) );
-    MPI::check_error( MPI_Get_count( &status[i], MPI_UNSIGNED, &recvcount ) );
+    MPI::check_error( MPI_Get_count( &status[i], MPI_type< size_t >::value, &recvcount ) );
 
     if ( static_cast< size_t >( recvcount ) != amap.recv.size() )
     {

@@ -100,14 +100,14 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     const size_t local_facet = cell.index(*facet);
 
     // Tabulate dofs on cell
-    space.dofmap().tabulate_dofs(scratch.dofs, scratch.cell);
+    space.dofmap().tabulate_dofs(scratch.dofs.data(), scratch.cell);
 
     // Tabulate coordinates on cell
     scratch.finite_element->tabulate_dof_coordinates( scratch.coordinates.data(),
                                                       scratch.cell.coordinates.data() );
 
     // Tabulate which dofs are on the facet
-    scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
+    scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs.data(), local_facet);
 
     // Iterate over facet dofs
     for (size_t i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)

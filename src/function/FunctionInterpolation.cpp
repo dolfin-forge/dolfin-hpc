@@ -142,7 +142,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
       {
         for (size_t ii = 0; ii < Sflt[leaf]->space_dimension(); ++ii)
         {
-          F0.evaluate(S1.values, &S1.coordinates[Space::MAX_DIMENSION*(celldof++)], S1.cell);
+          F0.evaluate(S1.values.data(), &S1.coordinates[Space::MAX_DIMENSION*(celldof++)], S1.cell);
           block1[dof++] = S1.values[leaf];
         }
       }
@@ -251,7 +251,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       {
         Cell c1(M1, v1->entities(tdim1)[0]);
         S1.cell.update(c1);
-        dm1.tabulate_dofs(S1.dofs, S1.cell);
+        dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
         std::vector<size_t> & vid = c1.entities(0);
         size_t vpos = 0;
         while (vid[vpos] != v1->index())
@@ -306,7 +306,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {
       S1.cell.update(*c1);
-      dm1.tabulate_dofs(S1.dofs, S1.cell);
+      dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
       Point p = c1->midpoint();
       std::vector<size_t> M0cells;
       M0.intersector().overlap(p, M0cells);
@@ -358,7 +358,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {
       S1.cell.update(*c1);
-      dm1.tabulate_dofs(S1.dofs, S1.cell);
+      dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
       S1.finite_element->tabulate_dof_coordinates(S1.coordinates.data(),
                                                   S1.cell.coordinates.data());
 

@@ -13,8 +13,6 @@ namespace dolfin
 
 class Cell;
 class FiniteElementSpace;
-class FiniteElement;
-class DofMap;
 class SubSystem;
 
 /**
@@ -27,16 +25,29 @@ class SubSystem;
 class ScratchSpace
 {
 public:
+  // Constructor
+  ScratchSpace( FiniteElementSpace const & space );
+
+  // Copy constructor
+  ScratchSpace( ScratchSpace const & other );
+
+  // Move constructor
+  ScratchSpace( ScratchSpace && other );
 
   // Constructor
-  ScratchSpace(FiniteElementSpace const& space);
-
-  // Constructor
-  ScratchSpace(FiniteElementSpace const& space, SubSystem const& sub_system);
+  ScratchSpace( FiniteElementSpace const & space,
+                SubSystem const &          sub_system );
 
   // Destructor
   ~ScratchSpace();
 
+  // Copy assignement operator
+  ScratchSpace & operator=( ScratchSpace & other );
+
+  // Move assignement operator
+  ScratchSpace & operator=( ScratchSpace && other );
+
+public:
   // UFC Cell
   UFCCell cell;
 
@@ -68,40 +79,30 @@ public:
   size_t const geometric_dimension;
 
   // Local array for mapping of dofs
-  size_t * const dofs;
+  std::vector< size_t > dofs;
 
   // Local array for mapping of facet dofs
-  size_t * const facet_dofs;
+  std::vector< size_t > facet_dofs;
 
   // Local array for values
-  real * const values;
+  std::vector< real > values;
 
   // Local array for expansion coefficients
-  real * const coefficients;
+  std::vector< real > coefficients;
 
   // Local array for basis values
-  real * const basis_values;
+  std::vector< real > basis_values;
 
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
   // Local array for all basis values
-  real ** const all_basis_values;
+  std::vector< std::vector< real > > all_basis_values;
 #endif
 
   // Local array for coordinates
   std::vector< real > coordinates;
 
 private:
-
-  // Copy constructor
-  ScratchSpace(ScratchSpace const& other);
-
-  /// FIXME this should now be present in the ufc::FE interface
-  auto value_size(ufc::finite_element const& finite_element) -> size_t;
-
-  void init();
-
   bool const owner_;
-
 };
 
 } /* namespace dolfin */

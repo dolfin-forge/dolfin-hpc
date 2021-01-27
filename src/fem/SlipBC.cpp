@@ -251,7 +251,7 @@ void SlipBC::applySlipBC_P1( GenericMatrix &      A,
         {
           // Get the component dofs of N for the given node
           size_t voff = 0;
-          Ndofmap.tabulate_dofs( scratch.dofs, scratch.cell );
+          Ndofmap.tabulate_dofs( scratch.dofs.data(), scratch.cell );
           for ( size_t i = 0; i < scratch.size; ++i, voff += vdim )
           {
             node_Ndofs.push_back( scratch.dofs[voff + vindex] );
@@ -311,13 +311,13 @@ void SlipBC::applySlipBC( GenericMatrix &      A,
       scratch.finite_element->tabulate_dof_coordinates(
         scratch.coordinates.data(), scratch.cell.coordinates.data() );
       // Attention, local-to-local mapping.
-      scratch.dof_map->tabulate_facet_dofs( scratch.facet_dofs, local_facet );
+      scratch.dof_map->tabulate_facet_dofs( scratch.facet_dofs.data(), local_facet );
 
       // Tabulate full space and nodenormal space if needed
       Udofmap.tabulate_dofs( fulldofs.data(), scratch.cell );
       if ( !same_space )
       {
-        Ndofmap.tabulate_dofs( scratch.dofs, scratch.cell );
+        Ndofmap.tabulate_dofs( scratch.dofs.data(), scratch.cell );
       }
 
       // Apply slipbc on each non ghosted facet dof node of the subspace

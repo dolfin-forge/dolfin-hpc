@@ -241,8 +241,8 @@ void Function::evaluate(size_t n, real* values, const real* x,
   UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
 
   // Get expansion coefficients on cell
-  dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
-  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+  dofmap_->tabulate_dofs(scratch->dofs.data(), *ufc_cell);
+  X_->get(scratch->coefficients.data(), scratch->local_dimension, scratch->dofs.data());
   std::fill_n(values, n * scratch->size, 0.0);
   for (size_t q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
   {
@@ -268,7 +268,7 @@ void Function::evaluate(size_t n, real* values, const real* x,
     for (size_t i = 0; i < element_->space_dimension(); ++i)
     {
       // FIXME cell_orientation needs a correct value here
-      element_->evaluate_basis(i, scratch->basis_values, x,
+      element_->evaluate_basis(i, scratch->basis_values.data(), x,
                                ufc_cell->coordinates.data(), 0);
       for (size_t j = 0; j < scratch->size; ++j)
       {
@@ -330,16 +330,16 @@ void Function::interpolate_vertex_values(real* values) const
       scratch->cell.update(*cell);
 
       // Tabulate dofs
-      dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+      dofmap_->tabulate_dofs(scratch->dofs.data(), scratch->cell);
 
       // Pick values from global vector
-      X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+      X_->get(scratch->coefficients.data(), scratch->local_dimension, scratch->dofs.data());
 
       // Interpolate values at the vertices
       // Values are packed by vertex and not by subspace (if any)
       // FIXME find a form, where more tha vertex_values and dof_values are used,
       // to make sure the arguments here are correct
-      element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
+      element_->interpolate_vertex_values(vertex_values, scratch->coefficients.data(),
                                          scratch->cell.coordinates.data(), 0);
 
       // Sum values to array of vertex values
@@ -439,16 +439,16 @@ void Function::interpolate_vertex_values(real* values) const
       scratch->cell.update(*cell);
 
       // Tabulate dofs
-      dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+      dofmap_->tabulate_dofs(scratch->dofs.data(), scratch->cell);
 
       // Pick values from global vector
-      X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+      X_->get(scratch->coefficients.data(), scratch->local_dimension, scratch->dofs.data());
 
       // Interpolate values at the vertices
       // Values are packed by vertex and not by subspace (if any)
       // FIXME find a form, where more tha vertex_values and dof_values are used,
       // to make sure the arguments here are correct
-      element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
+      element_->interpolate_vertex_values(vertex_values, scratch->coefficients.data(),
                                          scratch->cell.coordinates.data(), 0);
 
       // Copy values to array of vertex values
@@ -477,7 +477,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
   MAYBE_UNUSED(finite_element);
 
   // Tabulate dofs
-  dofmap_->tabulate_dofs(scratch->dofs, cell, dolfin_cell);
+  dofmap_->tabulate_dofs(scratch->dofs.data(), cell, dolfin_cell);
 
   // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
@@ -492,7 +492,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
   }
 #endif
 
-  X_->get(coefficients, scratch->local_dimension, scratch->dofs);
+  X_->get(coefficients, scratch->local_dimension, scratch->dofs.data());
 }
 
 //-----------------------------------------------------------------------------
@@ -536,7 +536,7 @@ void Function::InitializeGhosts()
     scratch->cell.update(*cell);
 
     // Tabulate dofs
-    dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+    dofmap_->tabulate_dofs(scratch->dofs.data(), scratch->cell);
 
     for (size_t j = 0; j < element_->space_dimension(); ++j)
     {

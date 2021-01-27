@@ -29,7 +29,7 @@ public:
 
   inline auto operator->() -> Vertex *;
   inline auto operator*() -> Vertex &;
-  inline auto operator[]( uint i ) -> Vertex &;
+  inline auto operator[]( size_t i ) -> Vertex &;
 };
 
 //-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ inline auto VertexIterator::operator*() -> Vertex &
 
 //-----------------------------------------------------------------------------
 
-inline auto VertexIterator::operator[]( uint i ) -> Vertex &
+inline auto VertexIterator::operator[]( size_t i ) -> Vertex &
 {
   return static_cast< Vertex & >( MeshEntityIterator::operator[]( i ) );
 }

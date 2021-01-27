@@ -18,9 +18,9 @@ public:
   /// Create time series from data
   TimeSeries( std::string const &     filename,
               std::pair< real, real > interval,
-              uint                    N,
+              size_t                  N,
               real                    k,
-              uint                    degree = 1 );
+              size_t                  degree = 1 );
 
   /// Destructor
   ~TimeSeries();
@@ -38,10 +38,10 @@ public:
   auto values() -> real *;
 
   /// Return number of values
-  auto value_size() const -> uint;
+  auto value_size() const -> size_t;
 
   /// Return the number of samples registered
-  auto num_samples() const -> uint;
+  auto num_samples() const -> size_t;
 
   /// Return the time interval of the data samples
   auto sampling_interval() const -> std::pair< real, real >;
@@ -60,22 +60,22 @@ private:
   std::pair< real, real > const timespan_;
   real const                    measure_;
   real const                    timestep_;
-  uint const                    degree_;
+  size_t const                  degree_;
 
   // Data attributes
-  uint                value_size_;
+  size_t              value_size_;
   std::vector< real > values_;
 
   // Data interval and sampling
   std::fstream            data_file_;
   std::vector< real >     data_values_;
   std::pair< real, real > data_timespan_;
-  uint                    num_intervals_;
+  size_t                  num_intervals_;
 
-  _ordered_map< real, uint > discrete_times_;
-  real                       t0_;
-  real                       t1_;
-  uint                       index_;
+  _ordered_map< real, size_t > discrete_times_;
+  real                         t0_;
+  real                         t1_;
+  size_t                       index_;
 };
 
 } /* namespace dolfin */

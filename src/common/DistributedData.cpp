@@ -500,7 +500,7 @@ void DistributedData::set_size( size_t num_local, size_t num_global /* = 0 */ )
   // Create arrays if they do not exist
   if ( cached_numbering_.empty() and ( num_local > 0 ) )
   {
-    cached_numbering_ = std::vector< size_t >( num_local, DOLFIN_UINT_UNDEF );
+    cached_numbering_ = std::vector< size_t >( num_local, DOLFIN_SIZE_T_UNDEF );
   }
   if ( cached_ownership_.empty() and ( num_local > 0 ) )
   {
@@ -520,7 +520,7 @@ void DistributedData::set_map( size_t local_index,
   {
     dolfin_assert( local_index < cached_numbering_.size() );
     /* Do not allow remapping by default */
-    if ( allow_remap && cached_numbering_[local_index] != DOLFIN_UINT_UNDEF
+    if ( allow_remap && cached_numbering_[local_index] != DOLFIN_SIZE_T_UNDEF
          && cached_numbering_[local_index] != global_index )
     {
       // warning("DistributedData : remap %u", local_index);

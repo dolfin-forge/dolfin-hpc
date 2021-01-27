@@ -11,9 +11,9 @@
 
 #define BINARY_MAGIC_V1 0xBABE
 #define BINARY_MAGIC_V2 0xB4B3
-#define BINARY_MAGIC    BINARY_MAGIC_V2
-#define FNAME_LENGTH    256
-#define BINARY_VERSION  2
+#define BINARY_MAGIC BINARY_MAGIC_V2
+#define FNAME_LENGTH 256
+#define BINARY_VERSION 2
 
 namespace dolfin
 {
@@ -24,35 +24,34 @@ class BinaryFile : public GenericFile
 {
 
 public:
+  ///
+  BinaryFile( const std::string filename );
 
   ///
-  BinaryFile(const std::string filename);
-
-  ///
-  BinaryFile(const std::string filename, real const& t);
+  BinaryFile( const std::string filename, real const & t );
 
   ///
   ~BinaryFile() override = default;
 
   /// Input
-  void operator>>(GenericVector& x) override;
-  void operator>>(Mesh& mesh) override;
-  void operator>>(Function& f) override;
-  void operator>>(LabelList<Function>& f) override;
-  void operator>>(MeshFunction<bool>& meshfunction) override;
-  void operator>>(MeshFunction<int>& meshfunction) override;
-  void operator>>(MeshFunction<uint>& meshfunction) override;
-  void operator>>(MeshFunction<real>& meshfunction) override;
+  void operator>>( GenericVector & x ) override;
+  void operator>>( Mesh & mesh ) override;
+  void operator>>( Function & f ) override;
+  void operator>>( LabelList< Function > & f ) override;
+  void operator>>( MeshFunction< bool > & meshfunction ) override;
+  void operator>>( MeshFunction< int > & meshfunction ) override;
+  void operator>>( MeshFunction< size_t > & meshfunction ) override;
+  void operator>>( MeshFunction< real > & meshfunction ) override;
 
   /// Output
-  void operator<<(GenericVector& x) override;
-  void operator<<(Mesh& mesh) override;
-  void operator<<(Function& u) override;
-  void operator<<(LabelList<Function>& f) override;
-  void operator<<(MeshFunction<bool>& meshfunction) override;
-  void operator<<(MeshFunction<int>& meshfunction) override;
-  void operator<<(MeshFunction<uint>& meshfunction) override;
-  void operator<<(MeshFunction<real>& meshfunction) override;
+  void operator<<( GenericVector & x ) override;
+  void operator<<( Mesh & mesh ) override;
+  void operator<<( Function & u ) override;
+  void operator<<( LabelList< Function > & f ) override;
+  void operator<<( MeshFunction< bool > & meshfunction ) override;
+  void operator<<( MeshFunction< int > & meshfunction ) override;
+  void operator<<( MeshFunction< size_t > & meshfunction ) override;
+  void operator<<( MeshFunction< real > & meshfunction ) override;
 
   /// Overload GenericFile
   void read() override;
@@ -68,9 +67,9 @@ public:
 
   using BinaryFileHeader = struct
   {
-    uint32_t magic;
-    uint32_t bendian;
-    uint32_t pe_size;
+    uint32_t      magic;
+    uint32_t      bendian;
+    uint32_t      pe_size;
     Binary_data_t type;
   };
 
@@ -79,34 +78,34 @@ public:
   {
     uint32_t dim;
     uint32_t size;
-    real t;
-    char name[FNAME_LENGTH];
+    real     t;
+    char     name[FNAME_LENGTH];
   };
 #endif
 
 private:
+  template < typename T >
+  void write_meshfunction( MeshFunction< T > & meshfunction );
 
-  template<typename T>
-    void write_meshfunction(MeshFunction<T>& meshfunction);
+  template < class T >
+  void read_meshfunction( MeshFunction< T > & meshfunction );
 
-  template<class T>
-    void read_meshfunction(MeshFunction<T>& meshfunction);
+  void nameUpdate( const int counter );
 
-  void nameUpdate(const int counter);
+  void write_function( LabelList< Function > & f );
 
-  void write_function(LabelList<Function>& f);
-
-  auto hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size) -> bool;
+  auto hdr_check( BinaryFileHeader & hdr, Binary_data_t type, size_t pe_size )
+    -> bool;
 
 #ifdef ENABLE_MPIIO
-  void bswap_func_hdr(BinaryFunctionHeader& hdr);
+  void bswap_func_hdr( BinaryFunctionHeader & hdr );
 #endif
 
   /// Returns binary file cell type identifier for given DOLFIN cell type
-  auto cell_type(uint version, CellType::Type const type) -> uint;
+  auto cell_type( size_t version, CellType::Type const type ) -> size_t;
 
   /// Returns DOLFIN cell type for given binary file cell type identifier
-  auto cell_type(uint version, uint const type) -> CellType::Type;
+  auto cell_type( size_t version, size_t const type ) -> CellType::Type;
 
   // Function filename
   std::string bin_filename_;
@@ -117,8 +116,7 @@ private:
 #endif
 
   // Version number of the binary file
-  uint version_;
-
+  size_t version_;
 };
 
 } /* namespace dolfin */

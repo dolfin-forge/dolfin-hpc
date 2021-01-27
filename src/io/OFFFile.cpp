@@ -16,11 +16,14 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 OFFFile::OFFFile( std::string const filename )
   : GenericFile( "OFF", filename )
 {
 }
+
 //-----------------------------------------------------------------------------
+
 void OFFFile::operator>>( Mesh & mesh )
 {
   std::ifstream off( filename.c_str() );
@@ -43,7 +46,7 @@ void OFFFile::operator>>( Mesh & mesh )
   // 0: vertex
   // 1: faces
   // 2: lines (ignored)
-  std::vector< uint > num_entities;
+  std::vector< size_t > num_entities;
   get_next_line( off, line );
   split_line( line, num_entities );
 
@@ -55,7 +58,7 @@ void OFFFile::operator>>( Mesh & mesh )
   editor.init_cells( num_entities[1] );
 
   // Get vertices
-  for ( uint v = 0; v < num_entities[0]; ++v )
+  for ( size_t v = 0; v < num_entities[0]; ++v )
   {
     get_next_line( off, line );
     std::vector< real > coords;
@@ -64,7 +67,7 @@ void OFFFile::operator>>( Mesh & mesh )
   }
 
   // Get face connectivities
-  for ( uint c = 0; c < num_entities[1]; ++c )
+  for ( size_t c = 0; c < num_entities[1]; ++c )
   {
     get_next_line( off, line );
     std::vector< size_t > v;
@@ -88,7 +91,9 @@ void OFFFile::operator>>( Mesh & mesh )
   // Close filestream
   off.close();
 }
+
 //-----------------------------------------------------------------------------
+
 void OFFFile::get_next_line( std::ifstream & filestream, std::string & line )
 {
   // Skip leading comments
@@ -102,4 +107,6 @@ void OFFFile::get_next_line( std::ifstream & filestream, std::string & line )
   }
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin

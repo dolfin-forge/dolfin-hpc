@@ -8,6 +8,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 struct FaceKey : public _ordered_set<EdgeKey>
 {
   /// An face contains a bunch of vertices
@@ -22,20 +24,20 @@ struct FaceKey : public _ordered_set<EdgeKey>
     _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
-    uint const * v = f.entities(0);
-    uint const n = f.num_entities(0);
-    for (uint i = 0; i < n; ++i)
+    size_t const * v = f.entities(0);
+    size_t const n = f.num_entities(0);
+    for (size_t i = 0; i < n; ++i)
     {
       this->insert(EdgeKey(v[i % n], v[(i + 1) % n]));
     }
   }
 
   /// An face contains a bunch of vertices
-  FaceKey(uint n, uint const * v) :
+  FaceKey(size_t n, size_t const * v) :
     _ordered_set<EdgeKey>(),
     idx(std::rand())
   {
-    for (uint i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
     {
       this->insert(EdgeKey(v[i % n], v[(i + 1) % n]));
     }
@@ -45,9 +47,9 @@ struct FaceKey : public _ordered_set<EdgeKey>
   inline void set(Face const& f)
   {
     this->clear();
-    uint const * v = f.entities(0);
-    uint const n = f.num_entities(0);
-    for (uint i = 0; i < n; ++i)
+    size_t const * v = f.entities(0);
+    size_t const n = f.num_entities(0);
+    for (size_t i = 0; i < n; ++i)
     {
       this->insert(EdgeKey(v[i % n], v[(i + 1) % n]));
     }
@@ -55,10 +57,10 @@ struct FaceKey : public _ordered_set<EdgeKey>
   }
 
   /// Construct a key from face vertices
-  inline void set(uint n, uint const * v)
+  inline void set(size_t n, size_t const * v)
   {
     this->clear();
-    for (uint i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
     {
       this->insert(EdgeKey(v[i % n], v[(i + 1) % n]));
     }
@@ -78,9 +80,11 @@ struct FaceKey : public _ordered_set<EdgeKey>
   }
 
   ///
-  uint idx;
+  size_t idx;
 
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

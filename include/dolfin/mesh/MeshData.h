@@ -45,7 +45,7 @@ class MeshData
   template < class E >
   static inline auto entity() -> Entity;
 
-  using key = std::pair< uint, uint >;
+  using key = std::pair< size_t, size_t >;
 
   template < class V, class E >
   struct type : public key
@@ -58,7 +58,7 @@ class MeshData
 
   struct data_array
   {
-    virtual auto size() const -> uint = 0;
+    virtual auto size() const -> size_t = 0;
   };
 
   template < class V, class E >
@@ -66,7 +66,7 @@ class MeshData
   {
     using type = std::vector< MeshValues< V, E > * >;
     type data;
-    auto size() const -> uint override
+    auto size() const -> size_t override
     {
       return data.size();
     };
@@ -119,15 +119,15 @@ public:
 
   // Return number of function of given type in data
   template < class V, class E >
-  auto size() -> uint
+  auto size() -> size_t
   {
     return lookup< V, E >().size();
   }
 
   // Return total number of functions
-  auto size() const -> uint
+  auto size() const -> size_t
   {
-    uint s = 0;
+    size_t s = 0;
     for ( Store::const_iterator it = S_.begin(); it != S_.end(); ++it )
     {
       s += it->second->size();
@@ -137,7 +137,7 @@ public:
 
   // Count number of function instances in data
   template < class V, class E >
-  auto count( MeshValues< V, E > & function ) -> uint
+  auto count( MeshValues< V, E > & function ) -> size_t
   {
     if ( &M_ != &function.mesh() )
     {
@@ -165,7 +165,7 @@ public:
     }
 
     //
-    auto pos() -> uint
+    auto pos() -> size_t
     {
       return ( i_ - b_ );
     }

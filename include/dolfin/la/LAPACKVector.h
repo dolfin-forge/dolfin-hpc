@@ -4,13 +4,15 @@
 #ifndef __DOLFIN_LAPACK_VECTOR_H
 #define __DOLFIN_LAPACK_VECTOR_H
 
-#include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
+#include <dolfin/common/types.h>
 
 #include <string>
 
 namespace dolfin
 {
+
+//-----------------------------------------------------------------------------
 
 /// This class provides a simple wrapper for matrix data for use
 /// with LAPACK (column-major ordering).
@@ -21,15 +23,14 @@ namespace dolfin
 class LAPACKVector : public Variable
 {
 public:
-
   /// Create M x N matrix
-  LAPACKVector(uint M);
+  LAPACKVector( size_t M );
 
   /// Destructor
   ~LAPACKVector();
 
   /// Return size of vector
-  auto size() const -> uint
+  auto size() const -> size_t
   {
     return M_;
   }
@@ -40,30 +41,30 @@ public:
   }
 
   /// Access entry i
-  auto operator[](uint i) -> double&
+  auto operator[]( size_t i ) -> double &
   {
     return values_[i];
   }
 
   /// Access entry i, const version
-  auto operator[](uint i) const -> double
+  auto operator[]( size_t i ) const -> double
   {
     return values_[i];
   }
 
   /// Return informal string representation (pretty-print)
-  auto str(bool verbose) const -> std::string;
+  auto str( bool verbose ) const -> std::string;
 
 private:
-
   // Number of rows and columns
-  uint M_;
+  size_t M_;
 
   // Values, stored column-major
   double * values_;
-
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

@@ -8,7 +8,8 @@
 namespace dolfin
 {
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 template < class T >
 struct Label : public std::pair< T *, std::string >
 {
@@ -18,7 +19,8 @@ struct Label : public std::pair< T *, std::string >
   }
 };
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 template < class T >
 struct LabelList : public std::vector< Label< T > >
 {
@@ -37,18 +39,18 @@ struct LabelList : public std::vector< Label< T > >
   {
   }
 
-  LabelList( uint n, Label< T > & l )
+  LabelList( size_t n, Label< T > & l )
     : std::vector< Label< T > >( n, l )
   {
   }
 
-  LabelList( uint n, Label< T > l )
+  LabelList( size_t n, Label< T > l )
     : std::vector< Label< T > >( n, l )
   {
   }
 };
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

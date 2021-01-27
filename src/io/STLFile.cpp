@@ -15,10 +15,11 @@ namespace dolfin
 {
 
 //--- Implementation detail ---------------------------------------------------
+
 struct stl_vertex
 {
   double v[3];
-  uint   index;
+  size_t index;
 
   auto operator<( const stl_vertex & other ) const -> bool
   {
@@ -35,6 +36,7 @@ struct stl_vertex
 };
 
 //-----------------------------------------------------------------------------
+
 STLFile::STLFile( const std::string filename )
   : GenericFile( "STL", filename )
   , min( Point( -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX, -DOLFIN_REAL_MAX ) )
@@ -42,24 +44,27 @@ STLFile::STLFile( const std::string filename )
 {
 }
 //-----------------------------------------------------------------------------
+
 void STLFile::set_min( Point const & min_ )
 {
   min = min_;
 }
 //-----------------------------------------------------------------------------
+
 void STLFile::set_max( Point const & max_ )
 {
   max = max_;
 }
 //-----------------------------------------------------------------------------
+
 void STLFile::operator>>( Mesh & mesh )
 {
   std::array< char, 80 > hdr;
   std::array< float, 3 > data;
-  uint  ntri = 0;
+  size_t                 ntri = 0;
 
-  struct stl_vertex              V[3];
-  _ordered_set< stl_vertex >     vertices;
+  struct stl_vertex                      V[3];
+  _ordered_set< stl_vertex >             vertices;
   std::vector< std::array< size_t, 3 > > cells;
 
   std::ifstream fp( filename.c_str(), std::ifstream::binary );
@@ -70,15 +75,15 @@ void STLFile::operator>>( Mesh & mesh )
   ntri = bswap( ntri );
 #endif
 
-  uint v_index = 0;
-  uint c_index = 0;
-  for ( uint i = 0; i < ntri; ++i )
+  size_t v_index = 0;
+  size_t c_index = 0;
+  for ( size_t i = 0; i < ntri; ++i )
   {
     /* Normal */
     fp.read( reinterpret_cast< char * >( &data ), 3 * sizeof( float ) );
 
     // load data from file
-    for ( uint j = 0; j < 3; ++j )
+    for ( size_t j = 0; j < 3; ++j )
     {
       /* Vertex v1 v2 v3 */
       fp.read( reinterpret_cast< char * >( &data ), 3 * sizeof( float ) );
@@ -97,9 +102,9 @@ void STLFile::operator>>( Mesh & mesh )
     // check if at least one of the three vertices are inside the bounding box
     bool inside = false;
 
-    for ( uint j = 0; j < 3; ++j )
+    for ( size_t j = 0; j < 3; ++j )
     {
-      if (     ( V[j].v[0] >= min[0] and V[j].v[0] <= max[0] )
+      if ( ( V[j].v[0] >= min[0] and V[j].v[0] <= max[0] )
            and ( V[j].v[1] >= min[1] and V[j].v[1] <= max[1] )
            and ( V[j].v[2] >= min[2] and V[j].v[2] <= max[2] ) )
       {
@@ -112,7 +117,7 @@ void STLFile::operator>>( Mesh & mesh )
     {
       cells.resize( cells.size() + 1 );
 
-      for ( uint j = 0; j < 3; ++j )
+      for ( size_t j = 0; j < 3; ++j )
       {
         if ( vertices.find( V[j] ) != vertices.end() )
         {
@@ -137,7 +142,7 @@ void STLFile::operator>>( Mesh & mesh )
 
   // add vertices
   editor.init_cells( cells.size() );
-  for ( uint i = 0; i < cells.size(); ++i )
+  for ( size_t i = 0; i < cells.size(); ++i )
   {
     editor.add_cell( c_index++, &cells[i][0] );
   }
@@ -151,6 +156,7 @@ void STLFile::operator>>( Mesh & mesh )
 
   editor.close();
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

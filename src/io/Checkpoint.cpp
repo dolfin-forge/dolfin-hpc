@@ -48,7 +48,7 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
 
   // deserialize ParameterSystem
   std::string parameters  = ParameterSystem::parameters.serialize();
-  uint        param_size  = parameters.size() * sizeof( char );
+  size_t        param_size  = parameters.size() * sizeof( char );
 
   fill_headers( t, param_size, meshes, func, vec );
 
@@ -145,7 +145,7 @@ void Checkpoint::load_parametersystem( std::string filename )
   stream_t file = load_file( filename );
 
   offset_t byte_offset = chkp_header.offset_psystem;
-  uint     param_size  = 0;
+  size_t     param_size  = 0;
 
 #ifdef ENABLE_MPIIO
   // load ParameterSystem
@@ -164,7 +164,7 @@ void Checkpoint::load_parametersystem( std::string filename )
   ParameterSystem::parameters.deserialize( std::string( p.data(), p.size() ) );
   message( 1, "Checkpoint: Loaded ParameterSystem from time %g", chkp_header.time );
 
-  n_ = dolfin_get<uint>( "checkpoint_id" );
+  n_ = dolfin_get<size_t>( "checkpoint_id" );
 
   close_file( file );
 }
@@ -176,7 +176,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
   stream_t file = load_file( filename );
 
   offset_t byte_offset = chkp_header.offset_mesh;
-  uint     loaded_count = 0;
+  size_t     loaded_count = 0;
   mesh_header.resize( chkp_header.num_meshes );
 
   if ( chkp_header.pe_size != MPI::size() )
@@ -219,7 +219,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
         // file.read( ( char * ) coords, ( mesh_hdr.num_coords ) * sizeof( real ) );
  #endif
 
-        for ( uint i = 0; i < mesh_hdr.num_coords; i += mesh_hdr.gdim )
+        for ( size_t i = 0; i < mesh_hdr.num_coords; i += mesh_hdr.gdim )
         {
           editor.add_vertex( i / mesh_hdr.gdim, coords.data() + i );
         }
@@ -275,7 +275,7 @@ void Checkpoint::load( std::string filename, MeshMap const & meshes )
 #else
        // file.read( ( char * ) ghosts.data(), 2 * mesh_hdr.num_ghosts * sizeof( uint ) );
 #endif
-        for ( uint i = 0; i < 2 * mesh_hdr.num_ghosts; i += 2 )
+        for ( size_t i = 0; i < 2 * mesh_hdr.num_ghosts; i += 2 )
         {
           _mesh.distdata()[0].set_ghost( ghosts[i], ghosts[i + 1] );
         }
@@ -485,7 +485,7 @@ auto Checkpoint::get_vector_header() const -> std::vector< Checkpoint::VectorHea
 
 //-----------------------------------------------------------------------------
 
-void Checkpoint::fill_headers( real const t, uint param_size, MeshMap & meshes,
+void Checkpoint::fill_headers( real const t, size_t param_size, MeshMap & meshes,
                                FunctionMap & func, VectorMap & vec )
 {
   // mesh header

@@ -103,9 +103,9 @@ struct __logstream : protected std::streambuf, public std::ostream
   }
 
   /// Output n char
-  auto nputc(uint n, char c) -> __logstream&
+  auto nputc(size_t n, char c) -> __logstream&
   {
-    for (uint i = 0; i < n; ++i) put(c);
+    for (size_t i = 0; i < n; ++i) put(c);
     return *this;
   }
 
@@ -380,10 +380,10 @@ private:
   std::streambuf *       sb_;
   std::ostringstream     os_;
 
-  static constexpr uint LINEWIDTH = 256;
-  static constexpr uint INDENTTAB = 2;
-  static constexpr uint INDENTMIN = 0;
-  static constexpr uint INDENTMAX = 128;
+  static constexpr size_t LINEWIDTH = 256;
+  static constexpr size_t INDENTTAB = 2;
+  static constexpr size_t INDENTMIN = 0;
+  static constexpr size_t INDENTMAX = 128;
 
   auto overflow(std::streambuf::int_type c) -> std::streambuf::int_type override
   {
@@ -410,7 +410,7 @@ private:
   }
 
   char W_c_;
-  uint  W_i_;
+  size_t  W_i_;
   int  W_v_;
   char W_t_[LINEWIDTH];
 

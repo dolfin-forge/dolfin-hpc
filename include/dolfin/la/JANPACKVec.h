@@ -23,6 +23,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
   class JANPACKVec : public GenericVector, public Variable
   {
   public:
@@ -31,7 +33,7 @@ namespace dolfin
     JANPACKVec();
 
     /// Create vector of size N
-    explicit JANPACKVec(uint N, bool distributed);
+    explicit JANPACKVec(size_t N, bool distributed);
 
     /// Copy constructor
     explicit JANPACKVec(const JANPACKVec& x);
@@ -51,37 +53,37 @@ namespace dolfin
     void apply(FinalizeType finaltype=FINALIZE);
 
     /// Display tensor
-    void disp(uint precision=2) const;
+    void disp(size_t precision=2) const;
 
     //--- Implementation of the GenericVector interface ---
 
     /// Initialize vector of size N
-    void init(uint N);
+    void init(size_t N);
 
     /// Initialize vector of size N and distribute if specified
-    void init(uint N, bool distributed);
+    void init(size_t N, bool distributed);
 
     ///
-    void init_ghosted(uint n, _ordered_set<uint>& indices,
-		      _ordered_map<uint, uint>& map);
+    void init_ghosted(size_t n, _ordered_set<size_t>& indices,
+		      _ordered_map<size_t, size_t>& map);
 
     /// Return size of vector
-    uint size() const;
+    size_t size() const;
 
     /// Return local size of vector
-    uint local_size() const;
+    size_t local_size() const;
 
     /// Return rank's offset into vector
-    uint offset() const;
+    size_t offset() const;
 
     /// Get block of values
-    void get(real* block, uint m, const uint* rows) const;
+    void get(real* block, size_t m, const size_t* rows) const;
 
     /// Set block of values
-    void set(const real* block, uint m, const uint* rows);
+    void set(const real* block, size_t m, const size_t* rows);
 
     /// Add block of values
-    void add(const real* block, uint m, const uint* rows);
+    void add(const real* block, size_t m, const size_t* rows);
 
     /// Get all values
     void get(real* values) const;
@@ -174,7 +176,9 @@ namespace dolfin
 
   };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif
 

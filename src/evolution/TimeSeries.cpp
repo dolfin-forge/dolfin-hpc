@@ -19,9 +19,9 @@ namespace dolfin
 
 TimeSeries::TimeSeries( std::string const &     filename,
                         std::pair< real, real > interval,
-                        uint                    N,
+                        size_t                  N,
                         real                    k,
-                        uint                    degree )
+                        size_t                  degree )
   : filename_( filename )
   , timespan_( interval )
   , measure_( interval.second - interval.first )
@@ -32,7 +32,7 @@ TimeSeries::TimeSeries( std::string const &     filename,
   , data_file_()
   , data_values_()
   , data_timespan_( timespan_ )
-  , num_intervals_( std::min( N, uint( std::floor( measure_ / k ) ) ) )
+  , num_intervals_( std::min( N, size_t( std::floor( measure_ / k ) ) ) )
   , discrete_times_()
   , t0_( 0.0 )
   , t1_( 0.0 )
@@ -66,8 +66,8 @@ void TimeSeries::eval( real t )
   if ( !data_values_.empty() )
   {
     // Find element in U_files so that element < t
-    _ordered_map< real, uint >::iterator it1;
-    _ordered_map< real, uint >::iterator it0;
+    _ordered_map< real, size_t >::iterator it1;
+    _ordered_map< real, size_t >::iterator it0;
 
     // Select it1 such that the time t1 is just after t
     it1 = discrete_times_.upper_bound( t );
@@ -100,8 +100,8 @@ void TimeSeries::eval( real t )
       error( "Trying to evaluate data outside the defined time span." );
     }
 
-    uint idx0 = it0->second;
-    uint idx1 = it1->second;
+    size_t idx0 = it0->second;
+    size_t idx1 = it1->second;
 
     // Compute weights (linear Lagrange interpolation)
     real w0 = ( t1_ - t ) / ( t1_ - t0_ );
@@ -112,7 +112,7 @@ void TimeSeries::eval( real t )
     message(
       1, "TimeSeries S1: t = %8f ; sample = %6d; w1 = %8f", t1_, idx1, w1 );
     // Compute interpolated value for each entry
-    for ( uint i = 0; i < value_size_; ++i )
+    for ( size_t i = 0; i < value_size_; ++i )
     {
       values_[i] = w0 * data_values_[idx0 * value_size_ + i]
                    + w1 * data_values_[idx1 * value_size_ + i];
@@ -150,7 +150,7 @@ void TimeSeries::write( real t )
     message( "Save time series at t = %8f", t );
     std::stringstream ss;
     ss << t;
-    for ( uint i = 0; i < value_size_; ++i )
+    for ( size_t i = 0; i < value_size_; ++i )
     {
       ss << "\t" << values_[i];
     }
@@ -168,7 +168,7 @@ auto TimeSeries::values() -> real *
 
 //-----------------------------------------------------------------------------
 
-auto TimeSeries::value_size() const -> uint
+auto TimeSeries::value_size() const -> size_t
 {
   dolfin_assert( value_size_ == values_.size() );
   return value_size_;
@@ -176,7 +176,7 @@ auto TimeSeries::value_size() const -> uint
 
 //-----------------------------------------------------------------------------
 
-auto TimeSeries::num_samples() const -> uint
+auto TimeSeries::num_samples() const -> size_t
 {
   return discrete_times_.size();
 }
@@ -232,7 +232,7 @@ void TimeSeries::loadData( std::string const & )
     {
       data_file_ >> time;
       times.push_back( time );
-      for ( uint i = 0; i < value_size_; ++i )
+      for ( size_t i = 0; i < value_size_; ++i )
       {
         data_file_ >> value;
         data_values_.push_back( value );
@@ -246,7 +246,7 @@ void TimeSeries::loadData( std::string const & )
   {
 #ifdef HAVE_MPI
     // Value size and number of samples
-    uint data_size[2];
+    size_t data_size[2];
     data_size[0] = times.size();
     data_size[1] = value_size_;
     dolfin_assert( value_size_ == values_.size() );

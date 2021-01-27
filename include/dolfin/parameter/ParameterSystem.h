@@ -96,10 +96,10 @@ inline void ParameterSystem::set( std::string key, int const & value )
 //-----------------------------------------------------------------------------
 
 template <>
-inline void ParameterSystem::set( std::string key, uint const & value )
+inline void ParameterSystem::set( std::string key, size_t const & value )
 {
   delete_parameter( key );
-  ( *this )[key] = new parameter< uint >( value, Parameter::uint_t );
+  ( *this )[key] = new parameter< size_t >( value, Parameter::size_t_t );
 }
 
 //-----------------------------------------------------------------------------
@@ -144,8 +144,8 @@ inline auto ParameterSystem::get( std::string const & key ) const -> bool
       case Parameter::int_t:
         return dynamic_cast< parameter< int > const * >( &p )->get();
         break;
-      case Parameter::uint_t:
-        return dynamic_cast< parameter< uint > const * >( &p )->get();
+      case Parameter::size_t_t:
+        return dynamic_cast< parameter< size_t > const * >( &p )->get();
         break;
       case Parameter::real_t:
       case Parameter::string_t:
@@ -178,8 +178,8 @@ inline auto ParameterSystem::get( std::string const & key ) const -> int
       case Parameter::int_t:
         return dynamic_cast< parameter< int > const * >( &p )->get();
         break;
-      case Parameter::uint_t:
-        return dynamic_cast< parameter< uint > const * >( &p )->get();
+      case Parameter::size_t_t:
+        return dynamic_cast< parameter< size_t > const * >( &p )->get();
         break;
       case Parameter::real_t:
         return dynamic_cast< parameter< real > const * >( &p )->get();
@@ -200,7 +200,7 @@ inline auto ParameterSystem::get( std::string const & key ) const -> int
 //-----------------------------------------------------------------------------
 
 template <>
-inline auto ParameterSystem::get( std::string const & key ) const -> uint
+inline auto ParameterSystem::get( std::string const & key ) const -> size_t
 {
   if ( defined( key ) )
   {
@@ -214,8 +214,8 @@ inline auto ParameterSystem::get( std::string const & key ) const -> uint
       case Parameter::int_t:
         return dynamic_cast< parameter< int > const * >( &p )->get();
         break;
-      case Parameter::uint_t:
-        return dynamic_cast< parameter< uint > const * >( &p )->get();
+      case Parameter::size_t_t:
+        return dynamic_cast< parameter< size_t > const * >( &p )->get();
         break;
       case Parameter::real_t:
         return dynamic_cast< parameter< real > const * >( &p )->get();
@@ -223,13 +223,13 @@ inline auto ParameterSystem::get( std::string const & key ) const -> uint
       case Parameter::string_t:
       default:
         error( "Unknown parameter \"%s\".", key.c_str() );
-        return uint(); // dummy
+        return size_t(); // dummy
     }
   }
   else
   {
     error( "Unknown parameter \"%s\".", key.c_str() );
-    return uint(); // dummy
+    return size_t(); // dummy
   }
 }
 
@@ -250,8 +250,8 @@ inline auto ParameterSystem::get( std::string const & key ) const -> real
       case Parameter::int_t:
         return dynamic_cast< parameter< int > const * >( &p )->get();
         break;
-      case Parameter::uint_t:
-        return dynamic_cast< parameter< uint > const * >( &p )->get();
+      case Parameter::size_t_t:
+        return dynamic_cast< parameter< size_t > const * >( &p )->get();
         break;
       case Parameter::real_t:
         return dynamic_cast< parameter< real > const * >( &p )->get();
@@ -285,7 +285,7 @@ inline auto ParameterSystem::get( std::string const & key ) const -> std::string
         break;
       case Parameter::bool_t:
       case Parameter::int_t:
-      case Parameter::uint_t:
+      case Parameter::size_t_t:
       case Parameter::real_t:
       default:
         error( "Unknown parameter \"%s\".", key.c_str() );

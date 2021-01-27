@@ -12,6 +12,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  BoundingBox
  *
@@ -24,11 +26,11 @@ class BoundingBox
 
 public:
   /// Create unit bounding box in R^d
-  BoundingBox( uint d = dolfin::Space::MAX_DIMENSION )
+  BoundingBox( size_t d = dolfin::Space::MAX_DIMENSION )
     : D_( d )
     , BOX_( new Point[D_ + 1] )
   {
-    for ( uint i = 1; i <= D_; ++i )
+    for ( size_t i = 1; i <= D_; ++i )
     {
       BOX_[i][i - 1] = 1.0;
     }
@@ -39,7 +41,7 @@ public:
     : D_( other.D_ )
     , BOX_( new Point[D_ + 1] )
   {
-    for ( uint i = 1; i <= D_; ++i )
+    for ( size_t i = 1; i <= D_; ++i )
     {
       BOX_[i][i - 1] = 1.0;
     }
@@ -52,10 +54,10 @@ public:
   };
 
   /// Access i-the point
-  auto operator[]( uint i ) -> Point &;
+  auto operator[]( size_t i ) -> Point &;
 
   /// Access i-the point
-  auto operator[]( uint i ) const -> Point const &;
+  auto operator[]( size_t i ) const -> Point const &;
 
   /// Assignment
   auto operator=( BoundingBox const & other ) -> BoundingBox &;
@@ -70,7 +72,7 @@ public:
   auto operator*=( real const a ) -> BoundingBox &;
 
   /// Scaling along axis
-  auto scale( uint axis, real const a ) -> BoundingBox &;
+  auto scale( size_t axis, real const a ) -> BoundingBox &;
 
   /// Dilatation
   auto operator*=( Point const & p ) -> BoundingBox &;
@@ -82,25 +84,28 @@ public:
   void disp() const;
 
 private:
-  uint const    D_;
+  size_t const    D_;
   Point * const BOX_;
 };
 
 //-----------------------------------------------------------------------------
-inline auto BoundingBox::operator[]( uint i ) -> Point &
+
+inline auto BoundingBox::operator[]( size_t i ) -> Point &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline auto BoundingBox::operator[]( uint i ) const -> Point const &
+
+inline auto BoundingBox::operator[]( size_t i ) const -> Point const &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::operator=( BoundingBox const & other ) -> BoundingBox &
 {
   if ( this != &other )
@@ -109,7 +114,7 @@ inline auto BoundingBox::operator=( BoundingBox const & other ) -> BoundingBox &
     {
       error( "BoundingBox : trying to assign with different dimensions" );
     }
-    for ( uint i = 0; i <= D_; ++i )
+    for ( size_t i = 0; i <= D_; ++i )
     {
       BOX_[i] = other.BOX_[i];
     }
@@ -118,9 +123,10 @@ inline auto BoundingBox::operator=( BoundingBox const & other ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::operator+=( Point const & p ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] += p;
   }
@@ -128,9 +134,10 @@ inline auto BoundingBox::operator+=( Point const & p ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::operator-=( Point const & p ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] -= p;
   }
@@ -138,10 +145,11 @@ inline auto BoundingBox::operator-=( Point const & p ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::operator*=( real const a ) -> BoundingBox &
 {
   Point c = this->centroid();
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] = c + a * ( BOX_[i] - c );
   }
@@ -149,9 +157,10 @@ inline auto BoundingBox::operator*=( real const a ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
-inline auto BoundingBox::scale( uint axis, real const a ) -> BoundingBox &
+
+inline auto BoundingBox::scale( size_t axis, real const a ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i][axis] *= a;
   }
@@ -159,12 +168,13 @@ inline auto BoundingBox::scale( uint axis, real const a ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::operator*=( Point const & p ) -> BoundingBox &
 {
   Point c = this->centroid();
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
-    for ( uint d = 0; d < Point::MAX_SIZE; ++d )
+    for ( size_t d = 0; d < Point::MAX_SIZE; ++d )
     {
       BOX_[i][d] = c[d] + p[d] * ( BOX_[i][d] - c[d] );
     }
@@ -173,10 +183,11 @@ inline auto BoundingBox::operator*=( Point const & p ) -> BoundingBox &
 }
 
 //-----------------------------------------------------------------------------
+
 inline auto BoundingBox::centroid() const -> Point
 {
   Point c( BOX_[0] );
-  for ( uint i = 1; i <= D_; ++i )
+  for ( size_t i = 1; i <= D_; ++i )
   {
     c += 0.5 * ( BOX_[i] - BOX_[0] );
   }
@@ -184,12 +195,13 @@ inline auto BoundingBox::centroid() const -> Point
 }
 
 //-----------------------------------------------------------------------------
+
 inline void BoundingBox::disp() const
 {
   section( "BoundingBox" );
   message( "Dimension : %d", D_ );
   section( "Points" );
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     cout << BOX_[i] << "\n";
   }

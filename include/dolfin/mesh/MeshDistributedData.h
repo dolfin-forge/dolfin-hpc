@@ -13,6 +13,8 @@ namespace dolfin
 class Mesh;
 class MeshEntity;
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  MeshDistributedData
  *
@@ -25,7 +27,7 @@ class MeshDistributedData
 
 public:
   /// Constructor
-  MeshDistributedData( uint dim );
+  MeshDistributedData( size_t dim );
 
   /// Copy constructor
   MeshDistributedData( MeshDistributedData const & other );
@@ -43,21 +45,21 @@ public:
   auto operator!=( MeshDistributedData const & other ) const -> bool;
 
   /// Access to distributed data
-  inline auto operator[]( uint dim ) -> DistributedData &
+  inline auto operator[]( size_t dim ) -> DistributedData &
   {
     dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
   /// Access to distributed data (const)
-  inline auto operator[]( uint dim ) const -> DistributedData const &
+  inline auto operator[]( size_t dim ) const -> DistributedData const &
   {
     dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
   /// Return topological dimension of the distributed data
-  auto dim() const -> uint;
+  auto dim() const -> size_t;
 
   /// Display basic information
   void disp() const;
@@ -67,11 +69,13 @@ private:
   void clear();
 
   // Topological dimensions
-  uint dim_;
+  size_t dim_;
 
   // Distributed data
   std::vector< DistributedData > data_;
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

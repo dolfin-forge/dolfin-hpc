@@ -20,9 +20,9 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Test::Test(int argc, char *argv[]) :
     Startup(argc, argv),
-    
+
     dir_("")
-    
+
 {
   init(argc, argv);
 }
@@ -85,7 +85,7 @@ void Test::begin(std::string const& name)
   }
   btest_ = true;
   timings_.push_back(std::pair<std::string, real >(name, 0.0));
-  padding_ = std::max(padding_, (uint) name.size());
+  padding_ = std::max(padding_, name.size());
   std::stringstream ss;
   ss << "Test " << timings_.size() << " : " << name;
   message(ss.str());

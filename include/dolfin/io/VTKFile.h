@@ -4,13 +4,16 @@
 #ifndef __DOLFIN_PVTK_FILE_H
 #define __DOLFIN_PVTK_FILE_H
 
+#include <dolfin/io/GenericFile.h>
+
 #include <fstream>
 #include <string>
 #include <vector>
-#include "GenericFile.h"
 
 namespace dolfin
 {
+
+//----------------------------------------------------------------------------
 
 /**
  *  @class  VTKFile
@@ -22,72 +25,70 @@ namespace dolfin
 class VTKFile : public GenericFile
 {
 public:
+  ///
+  VTKFile( const std::string filename );
 
   ///
-  VTKFile(const std::string filename);
-
-  ///
-  VTKFile(const std::string filename, real const& t);
+  VTKFile( const std::string filename, real const & t );
 
   ///
   ~VTKFile() override = default;
 
   /// Write mesh
-  void operator<<(Mesh& mesh) override;
+  void operator<<( Mesh & mesh ) override;
 
   /// Write mesh function containing integers
-  void operator<<(MeshFunction<int>& meshfunction) override;
+  void operator<<( MeshFunction< int > & meshfunction ) override;
 
   /// Write mesh function containing unsigned integers
-  void operator<<(MeshFunction<uint>& meshfunction) override;
+  void operator<<( MeshFunction< size_t > & meshfunction ) override;
 
   /// Write mesh function containing doubles
-  void operator<<(MeshFunction<real>& meshfunction) override;
+  void operator<<( MeshFunction< real > & meshfunction ) override;
 
   /// Write mesh function containing booleans
-  void operator<<(MeshFunction<bool>& meshfunction) override;
+  void operator<<( MeshFunction< bool > & meshfunction ) override;
 
   /// Write function
-  void operator<<(Function& u) override;
+  void operator<<( Function & u ) override;
 
   /// Write list of functions
-  void operator<<(LabelList<Function>& f) override;
+  void operator<<( LabelList< Function > & f ) override;
 
   /// Overload GenericFile
   void read() override;
   void write() override;
 
   /// Compute base64 encoded stream for VTK
-  template<typename T>
-    void encode_stream(std::stringstream& stream,
-                       const std::vector<T>& data) const;
+  template < typename T >
+  void encode_stream( std::stringstream &      stream,
+                      const std::vector< T > & data ) const;
 
 private:
-
-  void write_dataset(LabelList<Function>& f);
+  void write_dataset( LabelList< Function > & f );
 
   // Compute base64 encoded stream for VTK
-  template<typename T>
-    void encode_inline_base64(std::stringstream& stream,
-                              const std::vector<T>& data) const;
+  template < typename T >
+  void encode_inline_base64( std::stringstream &      stream,
+                             const std::vector< T > & data ) const;
 
   // Compute compressed base64 encoded stream for VTK
-  template<typename T>
-    void encode_inline_compressed_base64(std::stringstream& stream,
-                                         const std::vector<T>& data) const;
+  template < typename T >
+  void encode_inline_compressed_base64( std::stringstream &      stream,
+                                        const std::vector< T > & data ) const;
 
-  void MeshWrite(Mesh& mesh) const;
-  void ResultsWrite(LabelList<Function> f) const;
-  void pvdFileWrite(uint u, bool parallel);
-  void pvtuFileWrite(bool mesh_function, uint const dim);
-  void pvtuFileWriteFunction(LabelList<Function> f);
-  void VTKHeaderOpen(Mesh& mesh) const;
+  void MeshWrite( Mesh & mesh ) const;
+  void ResultsWrite( LabelList< Function > f ) const;
+  void pvdFileWrite( size_t u, bool parallel );
+  void pvtuFileWrite( bool mesh_function, size_t const dim );
+  void pvtuFileWriteFunction( LabelList< Function > f );
+  void VTKHeaderOpen( Mesh & mesh ) const;
   void VTKHeaderClose() const;
-  void vtuNameUpdate(const int counter);
-  void pvtuNameUpdate(const int counter);
+  void vtuNameUpdate( const int counter );
+  void pvtuNameUpdate( const int counter );
 
-  template<class T>
-    void MeshFunctionWrite(MeshFunction<T>& meshfunction);
+  template < class T >
+  void MeshFunctionWrite( MeshFunction< T > & meshfunction );
 
   // Most recent position in pvd file
   std::ios::pos_type mark;
@@ -100,9 +101,10 @@ private:
 
   // Current time
   real const * const _t;
-
 };
 
-}
+//----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

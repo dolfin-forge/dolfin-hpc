@@ -13,12 +13,12 @@ class EuclideanBasis
 
 public:
   ///
-  static auto compute( uint                        gdim,
+  static auto compute( size_t                      gdim,
                        Point                       B[],
                        std::vector< real > const & N,
                        std::vector< real > const & W,
                        real                        cosalpha_max,
-                       bool                        weighted ) -> uint;
+                       bool                        weighted ) -> size_t;
 };
 
 } /* namespace dolfin */

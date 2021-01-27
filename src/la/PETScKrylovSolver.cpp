@@ -24,6 +24,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 // Monitor function
 auto monitor( KSP, int iteration, real rnorm, void * ) -> int
 {
@@ -32,13 +34,16 @@ auto monitor( KSP, int iteration, real rnorm, void * ) -> int
 }
 
 //-----------------------------------------------------------------------------
+
 PETScKrylovSolver::PETScKrylovSolver( SolverType method, PreconditionerType pc )
   : method( method )
   , pc_petsc( pc )
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
+
 PETScKrylovSolver::PETScKrylovSolver( SolverType            method,
                                       PETScPreconditioner & preconditioner )
   : method( method )
@@ -52,7 +57,9 @@ PETScKrylovSolver::PETScKrylovSolver( SolverType            method,
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
+
 PETScKrylovSolver::~PETScKrylovSolver()
 {
   // Destroy solver environment.
@@ -64,14 +71,16 @@ PETScKrylovSolver::~PETScKrylovSolver()
     KSPDestroy( ksp );
 #endif
 }
+
 //-----------------------------------------------------------------------------
+
 auto PETScKrylovSolver::solve( const PETScMatrix & A,
                                        PETScVector &       x,
-                                       const PETScVector & b ) -> dolfin::uint
+                                       const PETScVector & b ) -> dolfin::size_t
 {
   // Check dimensions
-  uint M = A.size( 0 );
-  uint N = A.size( 1 );
+  size_t M = A.size( 0 );
+  size_t N = A.size( 1 );
   if ( N != b.size() )
   {
     error( "Non-matching dimensions for linear system." );
@@ -196,14 +205,16 @@ auto PETScKrylovSolver::solve( const PETScMatrix & A,
 
   return num_iterations;
 }
+
 //-----------------------------------------------------------------------------
+
 auto PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
                                        PETScVector &             x,
-                                       const PETScVector &       b ) -> dolfin::uint
+                                       const PETScVector &       b ) -> dolfin::size_t
 {
   // Check dimensions
-  uint M = A.size( 0 );
-  uint N = A.size( 1 );
+  size_t M = A.size( 0 );
+  size_t N = A.size( 1 );
   if ( N != b.size() )
   {
     error( "Non-matching dimensions for linear system." );
@@ -319,13 +330,17 @@ auto PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
 
   return num_iterations;
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovSolver::disp() const
 {
   KSPView( ksp, PETSC_VIEWER_STDOUT_WORLD );
 }
+
 //-----------------------------------------------------------------------------
-void PETScKrylovSolver::init( uint M, uint N )
+
+void PETScKrylovSolver::init( size_t M, size_t N )
 {
   // Check if we need to reinitialize
   if ( ksp != nullptr && M == this->M && N == this->N )
@@ -365,7 +380,9 @@ void PETScKrylovSolver::init( uint M, uint N )
   // Set preconditioner
   //  setPETScPreconditioner();
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovSolver::readParameters()
 {
   // Don't do anything if not initialized
@@ -377,7 +394,7 @@ void PETScKrylovSolver::readParameters()
                     dolfin_get< real >( "Krylov relative tolerance" ),
                     dolfin_get< real >( "Krylov absolute tolerance" ),
                     dolfin_get< real >( "Krylov divergence limit" ),
-                    dolfin_get< uint >( "Krylov maximum iterations" ) );
+                    dolfin_get< size_t >( "Krylov maximum iterations" ) );
 
   // Set nonzero shift for preconditioner
   if ( !pc_dolfin )
@@ -396,7 +413,9 @@ void PETScKrylovSolver::readParameters()
   // Remember that we have read parameters
   parameters_read = true;
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovSolver::setSolver()
 {
   // Don't do anything for default method
@@ -407,7 +426,9 @@ void PETScKrylovSolver::setSolver()
   KSPType ksp_type = getType( method );
   KSPSetType( ksp, ksp_type );
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovSolver::setPETScPreconditioner()
 {
   // Treat special case DOLFIN user-defined preconditioner
@@ -453,7 +474,9 @@ void PETScKrylovSolver::setPETScPreconditioner()
   // Set preconditioner
   PCSetType( pc, PETScPreconditioner::getType( pc_petsc ) );
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovSolver::writeReport( int num_iterations )
 {
   // Check if we should write the report
@@ -487,7 +510,9 @@ void PETScKrylovSolver::writeReport( int num_iterations )
              num_iterations );
   }
 }
+
 //-----------------------------------------------------------------------------
+
 auto PETScKrylovSolver::getType( SolverType method ) const -> KSPType
 {
   switch ( method )
@@ -505,8 +530,9 @@ auto PETScKrylovSolver::getType( SolverType method ) const -> KSPType
       return KSPGMRES;
   }
 }
+
 //-----------------------------------------------------------------------------
 
-}
+} // namespace dolfin
 
 #endif

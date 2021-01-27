@@ -25,7 +25,7 @@ public:
 
   inline auto operator->() -> Edge *;
   inline auto operator*() -> Edge &;
-  inline auto operator[]( uint i ) -> Edge &;
+  inline auto operator[]( size_t i ) -> Edge &;
 };
 
 //-----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ inline auto EdgeIterator::operator*() -> Edge &
 
 //-----------------------------------------------------------------------------
 
-inline auto EdgeIterator::operator[]( uint i ) -> Edge &
+inline auto EdgeIterator::operator[]( size_t i ) -> Edge &
 {
   return static_cast< Edge & >( MeshEntityIterator::operator[]( i ) );
 }

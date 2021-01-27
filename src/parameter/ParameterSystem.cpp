@@ -101,16 +101,16 @@ ParameterSystem::~ParameterSystem()
 
 //-----------------------------------------------------------------------------
 
-auto ParameterSystem::get(std::string const& key) const -> Parameter const &
+auto ParameterSystem::get( std::string const & key ) const -> Parameter const &
 {
-  const_iterator p = this->find(key);
+  const_iterator p = this->find( key );
 
-  if (p == this->end())
+  if ( p == this->end() )
   {
-    error("Unknown parameter \"%s\".", key.c_str());
+    error( "Unknown parameter \"%s\".", key.c_str() );
   }
 
-  return *(p->second);
+  return *( p->second );
 }
 
 //-----------------------------------------------------------------------------
@@ -118,14 +118,14 @@ auto ParameterSystem::get(std::string const& key) const -> Parameter const &
 auto ParameterSystem::get_type( std::string const & key ) -> Parameter::Type
 {
   dolfin_assert( this->defined( key ) );
-  return (*this)[key]->type();
+  return ( *this )[key]->type();
 }
 
 //-----------------------------------------------------------------------------
 
-auto ParameterSystem::defined(std::string const& key) const -> bool
+auto ParameterSystem::defined( std::string const & key ) const -> bool
 {
-  return (this->count(key) > 0);
+  return ( this->count( key ) > 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ auto ParameterSystem::to_json() const -> std::string
   for ( ParameterSystem::value_type const & param : *this )
   {
     if ( not first_line )
-      ss <<",\n";
+      ss << ",\n";
 
     ss << "\t\"" << param.first << "\": ";
     switch ( param.second->type() )
@@ -149,8 +149,8 @@ auto ParameterSystem::to_json() const -> std::string
       case Parameter::int_t:
         ss << this->get< int >( param.first );
         break;
-      case Parameter::uint_t:
-        ss << this->get< uint >( param.first );
+      case Parameter::size_t_t:
+        ss << this->get< size_t >( param.first );
         break;
       case Parameter::real_t:
         ss << this->get< real >( param.first );
@@ -180,13 +180,14 @@ auto ParameterSystem::serialize() const -> std::string
     switch ( param.second->type() )
     {
       case Parameter::bool_t:
-        ss << "\"" << std::boolalpha << this->get< bool >( param.first ) << "\";";
+        ss << "\"" << std::boolalpha << this->get< bool >( param.first )
+           << "\";";
         break;
       case Parameter::int_t:
         ss << "\"" << this->get< int >( param.first ) << "\";";
         break;
-      case Parameter::uint_t:
-        ss << "\"" << this->get< uint >( param.first ) << "\";";
+      case Parameter::size_t_t:
+        ss << "\"" << this->get< size_t >( param.first ) << "\";";
         break;
       case Parameter::real_t:
         ss << "\"" << this->get< real >( param.first ) << "\";";
@@ -211,17 +212,19 @@ void ParameterSystem::deserialize( std::string const & parameters )
   {
     dolfin_assert( parameters[pos] == '\"' );
 
-    std::string name( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
+    std::string name(
+      parameters, pos + 1, parameters.find( "\";", pos ) - pos - 1 );
     pos += name.size() + 3;
 
-    dolfin_assert( parameters[pos+1] == ';' );
+    dolfin_assert( parameters[pos + 1] == ';' );
 
-    std::string type( parameters, pos, parameters.find(";", pos ) - pos );
+    std::string type( parameters, pos, parameters.find( ";", pos ) - pos );
     pos += type.size() + 1;
 
     dolfin_assert( parameters[pos] == '\"' );
 
-    std::string value( parameters, pos + 1, parameters.find("\";", pos ) - pos - 1 );
+    std::string value(
+      parameters, pos + 1, parameters.find( "\";", pos ) - pos - 1 );
     pos += value.size() + 3;
 
     switch ( std::atoi( type.c_str() ) )
@@ -237,8 +240,8 @@ void ParameterSystem::deserialize( std::string const & parameters )
       case Parameter::int_t:
         this->set( name, std::atoi( value.c_str() ) );
         break;
-      case Parameter::uint_t:
-        this->set( name, static_cast< uint >( std::atoi( value.c_str() ) ) );
+      case Parameter::size_t_t:
+        this->set( name, static_cast< size_t >( std::atoi( value.c_str() ) ) );
         break;
       case Parameter::real_t:
         this->set( name, static_cast< real >( std::atof( value.c_str() ) ) );
@@ -249,7 +252,6 @@ void ParameterSystem::deserialize( std::string const & parameters )
       default:
         warning( "\"Unknown Parameter Type\";" );
     }
-
   }
 }
 
@@ -269,8 +271,8 @@ void ParameterSystem::disp() const
       case Parameter::int_t:
         ss << this->get< int >( param.first );
         break;
-      case Parameter::uint_t:
-        ss << this->get< uint >( param.first );
+      case Parameter::size_t_t:
+        ss << this->get< size_t >( param.first );
         break;
       case Parameter::real_t:
         ss << this->get< real >( param.first );

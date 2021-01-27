@@ -969,7 +969,7 @@ void BinaryFile::operator<<(MeshFunction<int>& meshfunction)
   write_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator<<(MeshFunction<uint>& meshfunction)
+void BinaryFile::operator<<(MeshFunction<size_t>& meshfunction)
 {
   write_meshfunction(meshfunction);
 }
@@ -1070,7 +1070,7 @@ void BinaryFile::operator>>(MeshFunction<int>& meshfunction)
   read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator>>(MeshFunction<uint>& meshfunction)
+void BinaryFile::operator>>(MeshFunction<size_t>& meshfunction)
 {
   read_meshfunction(meshfunction);
 }
@@ -1201,7 +1201,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
 //-----------------------------------------------------------------------------
 auto BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
-                           uint pe_size) -> bool
+                           size_t pe_size) -> bool
 {
 
   bool byteswap = false;
@@ -1267,7 +1267,7 @@ void BinaryFile::bswap_func_hdr(BinaryFunctionHeader& hdr)
 #endif
 
 //-----------------------------------------------------------------------------
-auto BinaryFile::cell_type(uint version, CellType::Type const type) -> uint
+auto BinaryFile::cell_type(size_t version, CellType::Type const type) -> size_t
 {
   switch (version)
     {
@@ -1319,7 +1319,7 @@ auto BinaryFile::cell_type(uint version, CellType::Type const type) -> uint
 }
 
 //-----------------------------------------------------------------------------
-auto BinaryFile::cell_type(uint version, uint const type) -> CellType::Type
+auto BinaryFile::cell_type(size_t version, size_t const type) -> CellType::Type
 {
   switch (version)
     {

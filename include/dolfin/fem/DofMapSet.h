@@ -19,6 +19,8 @@ class Form;
 class Mesh;
 class UFC;
 
+//-----------------------------------------------------------------------------
+
 /// This class provides storage and caching of (precomputed) dof
 /// maps and enables reuse of already computed dof maps with equal
 /// signatures.
@@ -36,13 +38,13 @@ public:
   void update( Form const & form, Mesh & mesh );
 
   /// Return number of dof maps
-  auto size() const -> uint;
+  auto size() const -> size_t;
 
   /// Return the mesh on which dof maps have been initialized
   auto mesh() const -> Mesh const &;
 
   /// Return dof map for argument function i
-  auto operator[]( uint i ) const -> DofMap &;
+  auto operator[]( size_t i ) const -> DofMap &;
 
 private:
   // Consistency checking
@@ -60,7 +62,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMapSet::size() const -> uint
+inline auto DofMapSet::size() const -> size_t
 {
   return dof_map_set.size();
 }
@@ -74,7 +76,7 @@ inline auto DofMapSet::mesh() const -> Mesh const &
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMapSet::operator[]( uint i ) const -> DofMap &
+inline auto DofMapSet::operator[]( size_t i ) const -> DofMap &
 {
   dolfin_assert( dof_map_set.size() > 0 );
   dolfin_assert( i < dof_map_set.size() );

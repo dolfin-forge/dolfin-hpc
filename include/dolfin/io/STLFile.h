@@ -11,6 +11,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  * @class STLFile
  * @brief Provides a serial reader for mesh stored in STL binary format.
@@ -37,6 +39,8 @@ private:
   Point max;
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

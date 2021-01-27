@@ -36,7 +36,7 @@ namespace dolfin
     }
 
     /// Solve linear system Ax = b
-    uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
+    size_t solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
     {
       Timer timer("AMG solver");
 

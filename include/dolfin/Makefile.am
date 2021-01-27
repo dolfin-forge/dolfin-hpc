@@ -46,7 +46,6 @@ nobase_pkginclude_HEADERS = \
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
 				fem/Functional.h\
-				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
 				fem/NodeNormal.h\
 				fem/numbering/CG1s.h\

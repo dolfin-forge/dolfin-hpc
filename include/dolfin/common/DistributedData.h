@@ -404,7 +404,7 @@ inline auto DistributedData::has_local( size_t local_index ) const -> size_t
   {
     dolfin_assert( global_.size() == 0 );
     dolfin_assert( local_index < cached_numbering_.size() );
-    return cached_numbering_[local_index] != DOLFIN_UINT_UNDEF;
+    return cached_numbering_[local_index] != DOLFIN_SIZE_T_UNDEF;
   }
   return ( global_.count( local_index ) > 0 );
 }
@@ -417,7 +417,7 @@ inline auto DistributedData::get_global( size_t local_index ) const -> size_t
   {
     dolfin_assert( global_.size() == 0 );
     dolfin_assert( local_index < cached_numbering_.size() );
-    dolfin_assert( cached_numbering_[local_index] != DOLFIN_UINT_UNDEF );
+    dolfin_assert( cached_numbering_[local_index] != DOLFIN_SIZE_T_UNDEF );
     return cached_numbering_[local_index];
   }
   dolfin_assert( global_.count( local_index ) > 0 );
@@ -436,7 +436,7 @@ inline auto DistributedData::get_global( size_t         n,
     for ( size_t i = 0; i < n; ++i )
     {
       dolfin_assert( local_indices[i] < cached_numbering_.size() );
-      dolfin_assert( cached_numbering_[local_indices[i]] != DOLFIN_UINT_UNDEF );
+      dolfin_assert( cached_numbering_[local_indices[i]] != DOLFIN_SIZE_T_UNDEF );
       global_indices[i] = cached_numbering_[local_indices[i]];
     }
   }

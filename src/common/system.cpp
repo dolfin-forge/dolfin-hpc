@@ -22,7 +22,7 @@ namespace dolfin
 
 auto filename( std::string const & name,
                std::string const & ext,
-               uint                counter,
+               size_t              counter,
                int                 width ) -> std::string
 {
   std::stringstream ss;
@@ -32,7 +32,7 @@ auto filename( std::string const & name,
 
 //-----------------------------------------------------------------------------
 
-auto strcounter( uint counter, int width ) -> std::string
+auto strcounter( size_t counter, int width ) -> std::string
 {
   std::stringstream ss;
   ss << std::setfill( '0' ) << std::setw( width ) << counter;
@@ -186,7 +186,7 @@ void dirs( int n, std::string & dirname )
   // Get directory from top of the stack
   if ( n >= 0 )
   {
-    if ( dirstack().size() <= uint( n ) )
+    if ( dirstack().size() <= size_t( n ) )
     {
       error( "Invalid access to directory stack" );
     }
@@ -195,7 +195,7 @@ void dirs( int n, std::string & dirname )
   // Get directory from bottom of the stack
   else
   {
-    if ( dirstack().size() < uint( n ) )
+    if ( dirstack().size() < size_t( n ) )
     {
       error( "Invalid access to directory stack" );
     }

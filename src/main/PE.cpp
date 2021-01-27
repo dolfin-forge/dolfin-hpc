@@ -9,19 +9,21 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-auto PE::rank() -> uint
+auto PE::rank() -> size_t
 {
 #if HAVE_MPI
-  if (SubSystemsManager::active(SubSystemsManager::mpi)) return MPI::rank();
+  if ( SubSystemsManager::active( SubSystemsManager::mpi ) )
+    return MPI::rank();
 #endif
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-auto PE::size() -> uint
+auto PE::size() -> size_t
 {
 #if HAVE_MPI
-  if (SubSystemsManager::active(SubSystemsManager::mpi)) return MPI::size();
+  if ( SubSystemsManager::active( SubSystemsManager::mpi ) )
+    return MPI::size();
 #endif
   return 1;
 }

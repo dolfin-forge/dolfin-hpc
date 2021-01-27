@@ -21,7 +21,7 @@ public:
     bool_t   = 0,
     real_t   = 1,
     int_t    = 2,
-    uint_t   = 3,
+    size_t_t = 3,
     string_t = 4
   };
 

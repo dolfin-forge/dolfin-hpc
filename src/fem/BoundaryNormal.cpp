@@ -10,6 +10,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
@@ -20,6 +21,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
 }
 
 //-----------------------------------------------------------------------------
+
 BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary),
     boundary_(&boundary.exterior_boundary()),
@@ -30,6 +32,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
 }
 
 //-----------------------------------------------------------------------------
+
 BoundaryNormal::~BoundaryNormal()
 {
   if (local_boundary_)
@@ -39,10 +42,11 @@ BoundaryNormal::~BoundaryNormal()
 }
 
 //-----------------------------------------------------------------------------
+
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
-  uint gdim = space.mesh().geometry_dimension();
-  for (uint i = 0; i < gdim; ++i)
+  size_t gdim = space.mesh().geometry_dimension();
+  for (size_t i = 0; i < gdim; ++i)
   {
     basis_[i].init(space);
   }
@@ -59,10 +63,11 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 }
 
 //-----------------------------------------------------------------------------
+
 void BoundaryNormal::write(std::string const& filename)
 {
   LabelList<Function> fields;
-  for (uint i = 0; i < mesh_.geometry_dimension(); ++i)
+  for (size_t i = 0; i < mesh_.geometry_dimension(); ++i)
   {
     std::stringstream ss;
     ss << "E" << i;
@@ -74,4 +79,6 @@ void BoundaryNormal::write(std::string const& filename)
   message("Saved node normal basis and node type in %s.", filename.c_str());
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin

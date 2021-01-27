@@ -17,25 +17,30 @@ class SubSystemsManager
 {
 
   // Singleton instance
-  static auto instance() -> SubSystemsManager&
+  static auto instance() -> SubSystemsManager &
   {
     static SubSystemsManager instance_;
     return instance_;
   }
 
 public:
-
   // Subsystem state mask
-  enum Type { mpi       = 1,
-              petsc     = 2,
-              petscmpi  = 4,
-              janpack   = 8,
-              zoltan    = 16 };
+  enum Type
+  {
+    mpi      = 1,
+    petsc    = 2,
+    petscmpi = 4,
+    janpack  = 8,
+    zoltan   = 16
+  };
 
   //-------------------------------------------------------------------------
-  static auto start(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0) -> int
+  static auto start( int    argc    = 0,
+                     char * argv[]  = nullptr,
+                     size_t n       = 0,
+                     long   w_limit = 0 ) -> int
   {
-    return SubSystemsManager::instance().init(argc, argv, n, w_limit);
+    return SubSystemsManager::instance().init( argc, argv, n, w_limit );
   }
 
   //-------------------------------------------------------------------------
@@ -45,9 +50,9 @@ public:
   }
 
   //-------------------------------------------------------------------------
-  static inline auto active(SubSystemsManager::Type s) -> bool
+  static inline auto active( SubSystemsManager::Type s ) -> bool
   {
-    return SubSystemsManager::instance().iset(s);
+    return SubSystemsManager::instance().iset( s );
   }
 
   //-------------------------------------------------------------------------
@@ -56,7 +61,8 @@ public:
     static SubSystemsManager::Type const flag = mpi;
 
     /// Initialize MPI
-    static auto init(int argc = 0, char* argv[] = nullptr, uint n = 0) -> bool;
+    static auto init( int argc = 0, char * argv[] = nullptr, size_t n = 0 )
+      -> bool;
 
     /// Finalize MPI
     static auto fini() -> bool;
@@ -74,7 +80,7 @@ public:
     static SubSystemsManager::Type const flag = petsc;
 
     /// Initialize PETSc with command-line arguments
-    static auto init(int argc = 0, char* argv[] = nullptr) -> bool;
+    static auto init( int argc = 0, char * argv[] = nullptr ) -> bool;
 
     /// Finalize PETSc
     static auto fini() -> bool;
@@ -101,7 +107,7 @@ public:
     static SubSystemsManager::Type const flag = zoltan;
 
     /// Initialize PETSc with command-line arguments
-    static auto init(int argc = 0, char* argv[] = nullptr) -> bool;
+    static auto init( int argc = 0, char * argv[] = nullptr ) -> bool;
 
     /// Finalize PETSc
     static auto fini() -> bool;
@@ -115,41 +121,54 @@ public:
 
   //--- ALARM ---------------------------------------------------------------
 
-  static auto timer() -> alarm&
+  static auto timer() -> alarm &
   {
     return SubSystemsManager::instance().alarm_handler();
   }
 
 private:
-
-  auto init(int argc = 0, char* argv[] = nullptr, uint n = 0, long w_limit = 0) -> int;
+  auto init( int    argc    = 0,
+             char * argv[]  = nullptr,
+             size_t n       = 0,
+             long   w_limit = 0 ) -> int;
   auto fini() -> int;
 
   // Constructor
   SubSystemsManager() = default;
 
   // Copy constructor
-  SubSystemsManager(SubSystemsManager const& other);
+  SubSystemsManager( SubSystemsManager const & other );
 
   // Destructor
   ~SubSystemsManager();
 
   /// State control
-  void init(SubSystemsManager::Type s) { state_ = (state_ & s) + (state_ | s); }
+  void init( SubSystemsManager::Type s )
+  {
+    state_ = ( state_ & s ) + ( state_ | s );
+  }
 
-  void fini(SubSystemsManager::Type s) { state_ &= (1 ^ s); }
+  void fini( SubSystemsManager::Type s )
+  {
+    state_ &= ( 1 ^ s );
+  }
 
-  auto iset(SubSystemsManager::Type s) const -> bool { return (state_ & s) == s; }
+  auto iset( SubSystemsManager::Type s ) const -> bool
+  {
+    return ( state_ & s ) == s;
+  }
 
-  auto alarm_handler() -> alarm& { return timer_; }
+  auto alarm_handler() -> alarm &
+  {
+    return timer_;
+  }
 
   // State variable
-  int count_{0};
-  int state_{0};
+  int count_ { 0 };
+  int state_ { 0 };
 
   // Alarm handler
   alarm timer_;
-
 };
 
 } /* namespace dolfin */

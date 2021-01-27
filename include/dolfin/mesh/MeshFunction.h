@@ -19,6 +19,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  MeshFunction
  *
@@ -32,37 +34,35 @@ namespace dolfin
  *
  *          MeshFunctions are default initialized to the zero value of the
  *          underlying type:
- *            - bool : false
- *            - uint : 0
- *            - real : 0.0
+ *            - bool   : false
+ *            - size_t : 0
+ *            - real   : 0.0
  */
 
-template<class T>
+template < class T >
 class MeshFunction
 {
 
 public:
-
   /// Copy constructor
-  explicit
-  MeshFunction(MeshFunction<T> const& other) :
-      mesh_(nullptr),
-      dim_(0),
-      size_(0),
-      values_(nullptr)
+  explicit MeshFunction( MeshFunction< T > const & other )
+    : mesh_( nullptr )
+    , dim_( 0 )
+    , size_( 0 )
+    , values_( nullptr )
   {
-    MeshFunction<T>::operator=(other);
+    MeshFunction< T >::operator=( other );
   }
 
   /// Copy constructor
-  template <class V>
-  MeshFunction(MeshFunction<V> const& other) :
-      mesh_(nullptr),
-      dim_(0),
-      size_(0),
-      values_(nullptr)
+  template < class V >
+  MeshFunction( MeshFunction< V > const & other )
+    : mesh_( nullptr )
+    , dim_( 0 )
+    , size_( 0 )
+    , values_( nullptr )
   {
-    MeshFunction<T>::operator=(other);
+    MeshFunction< T >::operator=( other );
   }
 
   /// Destructor
@@ -74,66 +74,68 @@ public:
   ///
   auto empty() const -> bool
   {
-    return (values_ == nullptr);
+    return ( values_ == nullptr );
   }
 
   /// Assignment operator
-  auto operator=(MeshFunction<T> const& other) -> MeshFunction<T>&
+  auto operator=( MeshFunction< T > const & other ) -> MeshFunction< T > &
   {
-    if(this != &other)
+    if ( this != &other )
     {
-      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
+      if ( this->mesh_ != &other.mesh() || this->size_ != other.size() )
       {
-        init(other.mesh_, other.dim_, other.size_);
+        init( &other.mesh(), other.dim(), other.size() );
       }
-      this->dim_ = other.dim_;
-      std::copy(other.values_, other.values_ + size_, values_);
+      this->dim_  = other.dim();
+      T const & v = other( 0 );
+      std::copy( &v, &v + size_, values_ );
     }
     return *this;
   }
 
   /// Required for assignment operator
-  friend class MeshFunction<bool>;
-  friend class MeshFunction<int>;
-  friend class MeshFunction<uint>;
-  friend class MeshFunction<float>;
-  friend class MeshFunction<real>;
+  friend class MeshFunction< bool >;
+  friend class MeshFunction< int >;
+  friend class MeshFunction< size_t >;
+  friend class MeshFunction< float >;
+  friend class MeshFunction< real >;
 
   /// Assignment conversion operator
-  template <class V>
-  auto operator=(MeshFunction<V> const& other) -> MeshFunction<T>&
+  template < class V >
+  auto operator=( MeshFunction< V > const & other ) -> MeshFunction< T > &
   {
-    if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
+    if ( this->mesh_ != &other.mesh() || this->size_ != other.size() )
     {
-      init(other.mesh_, other.dim_, other.size_);
+      init( &other.mesh(), other.dim(), other.size() );
     }
-    this->dim_ = other.dim_;
-    std::transform(other.values_, other.values_ + size_, values_, cast<V>() );
+    this->dim_  = other.dim();
+    V const & v = other( 0 );
+    std::transform( &v, &v + size_, values_, cast< V >() );
     return *this;
   }
 
   /// Equality
-  auto operator==(MeshFunction<T> const& other) -> bool
+  auto operator==( MeshFunction< T > const & other ) -> bool
   {
-    if(this == &other)
+    if ( this == &other )
     {
       return true;
     }
-    if (dim_ != other.dim_)
+    if ( dim_ != other.dim() )
     {
       return false;
     }
-    if (size_ != other.size_)
+    if ( size_ != other.size() )
     {
       return false;
     }
-    if (size_ == 0)
+    if ( size_ == 0 )
     {
       return true;
     }
-    for (uint i = 0; i < size_; ++i)
+    for ( size_t i = 0; i < size_; ++i )
     {
-      if (values_[i] != other.values_[i])
+      if ( values_[i] != other.values_[i] )
       {
         return false;
       }
@@ -142,28 +144,28 @@ public:
   }
 
   /// Equality with cast
-  template <class V>
-  auto operator==(MeshFunction<V> const& other) -> bool
+  template < class V >
+  auto operator==( MeshFunction< V > const & other ) -> bool
   {
-    if(this == &other)
+    if ( this == &other )
     {
       return true;
     }
-    if (dim_ != other.dim_)
+    if ( dim_ != other.dim_ )
     {
       return false;
     }
-    if (size_ != other.size_)
+    if ( size_ != other.size_ )
     {
       return false;
     }
-    if (size_ == 0)
+    if ( size_ == 0 )
     {
       return true;
     }
-    for (uint i = 0; i < size_; ++i)
+    for ( size_t i = 0; i < size_; ++i )
     {
-      if (values_[i] != cast<V>(other.values_[i]))
+      if ( values_[i] != cast< V >( other.values_[i] ) )
       {
         return false;
       }
@@ -172,93 +174,93 @@ public:
   }
 
   /// Equality
-  auto operator!=(MeshFunction<T> const& other) -> bool
+  auto operator!=( MeshFunction< T > const & other ) -> bool
   {
-    return !(*this == other);
+    return !( *this == other );
   }
 
   /// Return mesh associated with mesh function
-  inline auto mesh() const -> Mesh&
+  inline auto mesh() const -> Mesh &
   {
-    dolfin_assert(mesh_);
+    dolfin_assert( mesh_ );
     return *mesh_;
   }
 
   /// Return topological dimension
-  inline auto dim() const -> uint
+  inline auto dim() const -> size_t
   {
     return dim_;
   }
 
   /// Return size (number of entities)
-  inline auto size() const -> uint
+  inline auto size() const -> size_t
   {
     return size_;
   }
 
   /// Access value at given index
-  inline auto operator()(uidx index) -> T&
+  inline auto operator()( uidx index ) -> T &
   {
-    dolfin_assert(values_);
-    dolfin_assert(index < size_);
+    dolfin_assert( values_ );
+    dolfin_assert( index < size_ );
     return values_[index];
   }
 
   /// Access value at given index (const)
-  inline auto operator()(uidx index) const -> T const&
+  inline auto operator()( uidx index ) const -> T const &
   {
-    dolfin_assert(values_);
-    dolfin_assert(index < size_);
+    dolfin_assert( values_ );
+    dolfin_assert( index < size_ );
     return values_[index];
   }
 
   /// Return value at given entity
-  inline auto operator()(MeshEntity& entity) -> T&
+  inline auto operator()( MeshEntity & entity ) -> T &
   {
-    dolfin_assert(values_);
-    dolfin_assert(&entity.mesh() == mesh_);
-    dolfin_assert(entity.dim() == dim_);
-    dolfin_assert(entity.index() < size_);
+    dolfin_assert( values_ );
+    dolfin_assert( &entity.mesh() == mesh_ );
+    dolfin_assert( entity.dim() == dim_ );
+    dolfin_assert( entity.index() < size_ );
     return values_[entity.index()];
   }
 
   /// Return value at given entity
-  inline auto operator()(MeshEntity& entity) const -> T const&
+  inline auto operator()( MeshEntity & entity ) const -> T const &
   {
-    dolfin_assert(values_);
-    dolfin_assert(&entity.mesh() == mesh_);
-    dolfin_assert(entity.dim() == dim_);
-    dolfin_assert(entity.index() < size_);
+    dolfin_assert( values_ );
+    dolfin_assert( &entity.mesh() == mesh_ );
+    dolfin_assert( entity.dim() == dim_ );
+    dolfin_assert( entity.index() < size_ );
     return values_[entity.index()];
   }
 
   /// Set all values to given value
-  auto operator=(T const& value) -> MeshFunction<T>&
+  auto operator=( T const & value ) -> MeshFunction< T > &
   {
-    dolfin_assert(!((values_ == nullptr) && (size_>0)));
-    std::fill_n(values_, size_, value);
+    dolfin_assert( !( ( values_ == nullptr ) && ( size_ > 0 ) ) );
+    std::fill_n( values_, size_, value );
     return *this;
   }
 
   /// Swap instances
-  friend void swap( MeshFunction<T>& a, MeshFunction<T>& b )
+  friend void swap( MeshFunction< T > & a, MeshFunction< T > & b )
   {
     using std::swap;
 
-		swap( a.mesh_,   b.mesh_   );
-		swap( a.dim_,    b.dim_    );
-		swap( a.size_,   b.size_   );
-		swap( a.values_, b.values_ );
-	}
+    swap( a.mesh_, b.mesh_ );
+    swap( a.dim_, b.dim_ );
+    swap( a.size_, b.size_ );
+    swap( a.values_, b.values_ );
+  }
 
   /// Display mesh function data
   void disp() const
   {
-    section("MeshFunction");
+    section( "MeshFunction" );
     cout << "Topological dimension: " << dim_ << "\n";
     cout << "Number of values     : " << size_ << "\n";
     cout << "\n";
-    for (uint i = 0; i < size_; ++i)
+    for ( size_t i = 0; i < size_; ++i )
     {
       cout << "(" << dim_ << ", " << i << "): " << values_[i] << "\n";
     }
@@ -266,51 +268,52 @@ public:
   }
 
 protected:
-
   /// Create scalar mesh function on given mesh of given dimension
-  MeshFunction(Mesh& mesh, uint dim, T val = static_cast<T>(0)) :
-      mesh_(nullptr),
-      dim_(0),
-      size_(0),
-      values_(nullptr)
+  MeshFunction( Mesh & mesh, size_t dim, T val = static_cast< T >( 0 ) )
+    : mesh_( nullptr )
+    , dim_( 0 )
+    , size_( 0 )
+    , values_( nullptr )
   {
-    init(&mesh, dim, mesh.size(dim));
-    std::fill_n(values_, size_, val);
+    init( &mesh, dim, mesh.size( dim ) );
+    std::fill_n( values_, size_, val );
   }
 
   /// Initialize mesh function for given topological dimension of given size
-  void init(Mesh * mesh, uint dim, uint size)
+  void init( Mesh * mesh, size_t dim, size_t size )
   {
     mesh_ = mesh;
-    dim_ = dim;
+    dim_  = dim;
     size_ = size;
     delete[] values_;
     values_ = nullptr;
-    if(size_ > 0)
+    if ( size_ > 0 )
     {
       values_ = new T[size];
     }
   }
 
   /// Cast operators
-  template<class V>
+  template < class V >
   struct cast
   {
-    inline T operator()(V x) const { return static_cast<T>(x); }
+    inline T operator()( V x ) const
+    {
+      return static_cast< T >( x );
+    }
   };
 
   /// The mesh
   Mesh * mesh_;
 
   /// Topological dimension
-  uint dim_;
+  size_t dim_;
 
   /// Number of mesh entities
-  uint size_;
+  size_t size_;
 
   /// Values at the set of mesh entities
   T * values_;
-
 };
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
@@ -319,46 +322,70 @@ protected:
 // Licensed under the GNU LGPL Version 2.1.
 /// Helper function that performs symmetric rounding to closest integer
 
-template<> template<> inline
-auto MeshFunction<bool>::cast<float>::operator()(float x) const -> bool
+template <>
+template <>
+inline auto MeshFunction< bool >::cast< float >::operator()( float x ) const
+  -> bool
 {
-  return static_cast<bool>(x > 0);
+  return static_cast< bool >( x > 0 );
 }
 
-template<> template<> inline
-bool MeshFunction<bool>::cast<real>::operator()(real x) const
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline bool MeshFunction< bool >::cast< real >::operator()( real x ) const
 {
-  return static_cast<bool>(x > 0);
+  return static_cast< bool >( x > 0 );
 }
 
-template<> template<> inline
-auto MeshFunction<int>::cast<float>::operator()(float x) const -> int
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline auto MeshFunction< int >::cast< float >::operator()( float x ) const
+  -> int
 {
-  return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
+  return static_cast< int >( ( x > 0 ) ? std::floor( x + 0.5 )
+                                       : std::ceil( x - 0.5 ) );
 }
 
-template<> template<> inline
-int MeshFunction<int>::cast<real>::operator()(real x) const
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline int MeshFunction< int >::cast< real >::operator()( real x ) const
 {
-  return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
+  return static_cast< int >( ( x > 0 ) ? std::floor( x + 0.5 )
+                                       : std::ceil( x - 0.5 ) );
 }
 
-template<> template<> inline
-uint MeshFunction<uint>::cast<float>::operator()(float x) const
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline size_t MeshFunction< size_t >::cast< float >::operator()( float x ) const
 {
-  return static_cast<uint>(std::floor(x + 0.5));
+  return static_cast< size_t >( std::floor( x + 0.5 ) );
 }
 
-template<> template<> inline
-auto MeshFunction<uint>::cast<real>::operator()(real x) const -> uint
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline auto MeshFunction< size_t >::cast< real >::operator()( real x ) const
+  -> size_t
 {
-  return static_cast<uint>(std::floor(x + 0.5));
+  return static_cast< size_t >( std::floor( x + 0.5 ) );
 }
 
-template<> template<> inline
-uint MeshFunction<uint>::cast<int>::operator()(int x) const
+//-----------------------------------------------------------------------------
+
+template <>
+template <>
+inline size_t MeshFunction< size_t >::cast< int >::operator()( int x ) const
 {
-  return static_cast<uint>((x > 0) ? x : 0);
+  return static_cast< size_t >( ( x > 0 ) ? x : 0 );
 }
 
 //-----------------------------------------------------------------------------

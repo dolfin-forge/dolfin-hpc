@@ -64,7 +64,7 @@ SubSystemsManager::~SubSystemsManager()
   SubSystemsManager::fini();
 }
 //-----------------------------------------------------------------------------
-auto SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit) -> int
+auto SubSystemsManager::init(int argc, char* argv[], size_t n, long w_limit) -> int
 {
   if (count_ == 0 )
   {
@@ -134,7 +134,7 @@ void SubSystemsManager::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-auto SubSystemsManager::MPI::init(int argc, char* argv[], uint n) -> bool
+auto SubSystemsManager::MPI::init(int argc, char* argv[], size_t n) -> bool
 {
 #ifdef HAVE_MPI
 

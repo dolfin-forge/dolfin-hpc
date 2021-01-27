@@ -139,7 +139,7 @@ public:
 
 private:
   void fill_headers( real const    t,
-                     uint          param_size,
+                     size_t        param_size,
                      MeshMap &     meshes,
                      FunctionMap & func,
                      VectorMap &   vec );
@@ -153,7 +153,7 @@ private:
   void close_file( stream_t & file );
 
 private:
-  uint n_ { 0 };
+  size_t n_ { 0 };
 
   CheckpointHeader              chkp_header;
   std::vector< MeshHeader >     mesh_header;

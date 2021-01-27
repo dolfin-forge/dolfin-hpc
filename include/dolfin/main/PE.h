@@ -9,6 +9,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  PE
  *
@@ -22,18 +24,19 @@ struct PE
   static inline auto parallel() -> bool
   {
 #if HAVE_MPI
-    return SubSystemsManager::active(SubSystemsManager::mpi);
+    return SubSystemsManager::active( SubSystemsManager::mpi );
 #endif
     return false;
   }
 
   /// Returns the rank of the calling process in the execution context.
-  static auto rank() -> uint;
+  static auto rank() -> size_t;
 
   /// Returns the number of processes in the execution context.
-  static auto size() -> uint;
-
+  static auto size() -> size_t;
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

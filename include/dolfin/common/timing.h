@@ -9,18 +9,28 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /// Start timing
-void tic();
+auto tic() -> void;
+
+//-----------------------------------------------------------------------------
 
 /// Return elapsed CPU time
 auto toc() -> real;
 
+//-----------------------------------------------------------------------------
+
 /// Return and display elapsed CPU time at given verbose level
-auto tocd( uint level = 0 ) -> real;
+auto tocd( size_t level = 0 ) -> real;
+
+//-----------------------------------------------------------------------------
 
 /// Return current CPU time used by process
 auto time() -> real;
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

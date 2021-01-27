@@ -30,7 +30,7 @@ auto toc() -> real
   return t;
 }
 //-----------------------------------------------------------------------------
-auto tocd( uint level ) -> real
+auto tocd( size_t level ) -> real
 {
   real const elapsed_time = toc();
   message( level, "Elapsed time: %8e seconds", elapsed_time );

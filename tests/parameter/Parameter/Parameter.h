@@ -23,10 +23,10 @@ DOLFIN_START_TEST( test_parameter )
   //---
   message( "uint" );
   {
-    parameter< uint > Q( 23, Parameter::uint_t );
+    parameter< uint > Q( 23, Parameter::size_t_t );
     message( "Q = %u", Q.get() );
     ck_assert( Q.get() == 23 );
-    parameter< uint > R( 42, Parameter::uint_t );
+    parameter< uint > R( 42, Parameter::size_t_t );
     message( "E = %u", R.get() );
     ck_assert( R.get() == 42 );
     ck_assert( Q.get() != R.get() );

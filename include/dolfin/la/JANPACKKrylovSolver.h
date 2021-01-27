@@ -19,7 +19,7 @@
 
 #include <janpack/krylov_solver.h>
 
-namespace dolfin 
+namespace dolfin
 {
   /// Forward declarations
   class JANPACKMat;
@@ -33,10 +33,10 @@ namespace dolfin
     JANPACKKrylovSolver(SolverType method=default_solver, PreconditionerType pc=default_pc);
 
     ~JANPACKKrylovSolver();
- 
+
     /// Solve linear system Ax = b and return number of iterations
-    uint solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b); 
-    
+    size_t solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b);
+
   private:
 
     /// Krylov method
@@ -47,7 +47,7 @@ namespace dolfin
 
     /// DOLFIN PETScPreconditioner
     PreconditionerType pc_janpack;
-    
+
     bool ksp_init;
 
     // JANPACK ksp data
@@ -57,7 +57,7 @@ namespace dolfin
 #else
     char ksp[JP_KSP_SIZE_T];
 #endif
-    
+
   };
 }
 

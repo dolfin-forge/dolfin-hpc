@@ -24,7 +24,7 @@ public:
 
   inline auto operator->() -> Facet *;
   inline auto operator*() -> Facet &;
-  inline auto operator[]( uint i ) -> Facet &;
+  inline auto operator[]( size_t i ) -> Facet &;
 };
 
 //-----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ inline auto FacetIterator::operator*() -> Facet &
 
 //-----------------------------------------------------------------------------
 
-inline auto FacetIterator::operator[]( uint i ) -> Facet &
+inline auto FacetIterator::operator[]( size_t i ) -> Facet &
 {
   return static_cast< Facet & >( MeshEntityIterator::operator[]( i ) );
 }

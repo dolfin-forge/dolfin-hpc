@@ -4,73 +4,79 @@
 #ifndef __DOLFIN_LU_SOLVER_H
 #define __DOLFIN_LU_SOLVER_H
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Timer.h>
 #include "GenericMatrix.h"
 #include "GenericVector.h"
 #include "PETScLUSolver.h"
 #include "PETScMatrix.h"
-
+#include <dolfin/common/Timer.h>
+#include <dolfin/config/dolfin_config.h>
 
 namespace dolfin
 {
 
-  class LUSolver
-  {
+//-----------------------------------------------------------------------------
+
+class LUSolver
+{
 
   /// LU solver for the built-in LA backends.
 
-  public:
+public:
+  LUSolver()
+  {
+  }
 
-    LUSolver()  {}
+  ~LUSolver()
+  {
+    delete petsc_solver;
+  }
 
-    ~LUSolver()
-    {
-      delete petsc_solver;
-    }
-
-    auto solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b) -> uint
-    {
-      Timer timer("LU solver");
+  auto solve( const GenericMatrix & A,
+              GenericVector &       x,
+              const GenericVector & b ) -> size_t
+  {
+    Timer timer( "LU solver" );
 
 #ifdef HAVE_PETSC
-      if (A.has_type<PETScMatrix>())
+    if ( A.has_type< PETScMatrix >() )
+    {
+      if ( !petsc_solver )
       {
-        if (!petsc_solver)
-        {
-          petsc_solver = new PETScLUSolver();
-        }
-        return petsc_solver->solve(A.down_cast<PETScMatrix>(), x.down_cast<PETScVector>(), b.down_cast<PETScVector>());
+        petsc_solver = new PETScLUSolver();
       }
+      return petsc_solver->solve( A.down_cast< PETScMatrix >(),
+                                  x.down_cast< PETScVector >(),
+                                  b.down_cast< PETScVector >() );
+    }
 #endif
-      error("No default LU solver for given backend");
-      return 0;
-    }
+    error( "No default LU solver for given backend" );
+    return 0;
+  }
 
-    auto factorize(const GenericMatrix&) -> uint
-    {
+  auto factorize( const GenericMatrix & ) -> size_t
+  {
 
-      error("No matrix factorization for given backend.");
-      return 0;
+    error( "No matrix factorization for given backend." );
+    return 0;
+  }
 
-    }
+  auto factorized_solve( GenericVector &, const GenericVector & ) -> size_t
+  {
+    error( "No factorized LU solver for given backend." );
+    return 0;
+  }
 
-    auto factorized_solve(GenericVector&, const GenericVector&) -> uint
-    {
-      error("No factorized LU solver for given backend.");
-      return 0;
-    }
-
-  private:
-
-    // PETSc Solver
+private:
+  // PETSc Solver
 #ifdef HAVE_PETSC
-    PETScLUSolver* petsc_solver{nullptr};
+  PETScLUSolver * petsc_solver { nullptr };
 #else
-    int* petsc_solver;
+  int * petsc_solver;
 #endif
+};
 
-  };
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

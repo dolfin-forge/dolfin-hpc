@@ -18,7 +18,7 @@ class Test : public Startup
 
   struct Args
   {
-    uint        debug_level { 0 };
+    size_t      debug_level { 0 };
     std::string mesh_file;
     bool        benchmark { false };
 
@@ -59,7 +59,7 @@ private:
   std::string const                             dir_;
   std::vector< std::pair< std::string, real > > timings_;
   real                                          total_ { 0.0 };
-  uint                                          padding_ { 0 };
+  size_t                                        padding_ { 0 };
 };
 
 } /* namespace dolfin */

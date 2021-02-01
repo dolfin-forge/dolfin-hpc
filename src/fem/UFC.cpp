@@ -86,23 +86,12 @@ UFC::UFC( Form const & form )
     // Initialize local sizes
     local_sizes[i] = form.dofmaps()[i].local_size();
 
+    dolfin_assert( form.mesh().num_entities().size()
+                   == finite_elements[i]->topological_dimension() + 1 );
+
     // Initialize global dimensions
-    {
-      // FIXME is i the correct here?
-      ufc::finite_element * fe = finite_elements[i];
-
-      // FIXME num_entities should maybe be stored somewhere else
-      std::vector< size_t > num_entities( fe->topological_dimension() + 1, 0 );
-      for ( size_t d = 0; d <= fe->topological_dimension(); ++d )
-      {
-        if ( form.mesh().topology().connectivity( d ) )
-        {
-          num_entities[d] = form.mesh().topology().global_size( d );
-        }
-      }
-
-      global_dimensions[i] = form.dofmaps()[i].global_dimension( num_entities );
-    }
+    global_dimensions[i] =
+      form.dofmaps()[i].global_dimension( form.mesh().num_entities() );
 
     // Initialize dofs
     dofs[i] = new size_t[local_dimensions[i]];

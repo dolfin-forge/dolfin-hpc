@@ -88,16 +88,6 @@ public:
     size_t const nb_facet_dofs = ufc_dofmap.num_facet_dofs();
     size_t *     facet_dofs    = new size_t[nb_facet_dofs];
 
-    // FIXME num_entities should maybe be stored somewhere else
-    std::vector< size_t > num_entities( tdim + 1, 0 );
-    for ( size_t d = 0; d <= tdim; ++d )
-    {
-      if ( mesh.topology().connectivity( d ) )
-      {
-        num_entities[d] = mesh.topology().global_size( d );
-      }
-    }
-
     // Initialize random number generator differently on each process
     // FIXME: if the ghosts are randomly generated for a given mesh then
     // two instances for the same mesh and same numbering have different
@@ -118,7 +108,7 @@ public:
       Cell  c( mesh, f.entities( tdim )[0] );
 
       ufc_cell.update( c );
-      ufc_dofmap.tabulate_dofs( dofs, num_entities, ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
       size_t local_facet = c.index( f );
       ufc_dofmap.tabulate_facet_dofs( facet_dofs, local_facet );
 
@@ -171,7 +161,7 @@ public:
     for ( CellIterator cell( mesh ); !cell.end(); ++cell )
     {
       ufc_cell.update( *cell );
-      ufc_dofmap.tabulate_dofs( dofs, num_entities, ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
       for ( size_t i = 0; i < local_dim; ++i )
       {
         if ( ufc_ghosts.find( dofs[i] ) == ufc_ghosts.end() )

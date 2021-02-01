@@ -57,6 +57,7 @@ Mesh::Mesh( Mesh const & other )
   , intersection_detector_( copyptr( other.intersection_detector_ ) )
   , extent_min_( other.extent_min_ )
   , extent_max_( other.extent_max_ )
+  , num_entities_( other.num_entities_ )
   , timestamp_( other.timestamp_ )
 {
   for ( MappedManifold * m : other.periodic_mappings_ )
@@ -98,15 +99,16 @@ auto swap( Mesh & a, Mesh & b ) -> void
 {
   using std::swap;
 
-  swap( a.topology_, b.topology_ );
-  swap( a.geometry_, b.geometry_ );
-  swap( a.exterior_boundary_, b.exterior_boundary_ );
-  swap( a.interior_boundary_, b.interior_boundary_ );
+  swap( a.topology_,              b.topology_ );
+  swap( a.geometry_,              b.geometry_ );
+  swap( a.exterior_boundary_,     b.exterior_boundary_ );
+  swap( a.interior_boundary_,     b.interior_boundary_ );
   swap( a.intersection_detector_, b.intersection_detector_ );
-  swap( a.periodic_mappings_, b.periodic_mappings_ );
-  swap( a.extent_min_, b.extent_min_ );
-  swap( a.extent_max_, b.extent_max_ );
-  swap( a.timestamp_, b.timestamp_ );
+  swap( a.periodic_mappings_,     b.periodic_mappings_ );
+  swap( a.extent_min_,            b.extent_min_ );
+  swap( a.extent_max_,            b.extent_max_ );
+  swap( a.num_entities_,          b.num_entities_ );
+  swap( a.timestamp_,             b.timestamp_ );
 }
 
 //-----------------------------------------------------------------------------
@@ -176,6 +178,21 @@ auto Mesh::extent_update() -> void
   extent_min_ = min_;
   extent_max_ = max_;
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+auto Mesh::num_entities_update() -> void
+{
+  num_entities_.resize( topology_dimension() + 1 );
+
+  for ( size_t d = 0; d <= topology_dimension(); ++d )
+  {
+    if ( topology_.connectivity( d ) )
+    {
+      num_entities_[d] = topology_.global_size( d );
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------

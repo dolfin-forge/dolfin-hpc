@@ -498,18 +498,8 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void Function::InitializeVector()
 {
-  // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( element_->topological_dimension() + 1,
-                                      0 );
-  for ( size_t d = 0; d <= element_->topological_dimension(); ++d )
-  {
-    if ( mesh_->topology().connectivity( d ) )
-    {
-      num_entities[d] = mesh_->topology().global_size( d );
-    }
-  }
-
-  if (X_->size() != dofmap_->global_dimension( num_entities ))
+  dolfin_assert( element_->topological_dimension() + 1 == mesh_->num_entities().size() );
+  if ( X_->size() != dofmap_->global_dimension( mesh_->num_entities() ) )
   {
     // Specific case in serial local_size == global_dimension
     X_->init(dofmap_->local_size());

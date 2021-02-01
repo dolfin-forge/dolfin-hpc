@@ -32,43 +32,22 @@ public:
                              ufc::cell const & ufc_cell,
                              Cell const & ) const override
   {
-    // FIXME num_entities should maybe be stored somewhere else
-    size_t const          tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim + 1, 0 );
-    for ( size_t d = 0; d <= tdim; ++d )
-    {
-      if ( mesh.topology().connectivity( d ) )
-      {
-        num_entities[d] = mesh.topology().global_size( d );
-      }
-    }
-
-    ufc_dofmap.tabulate_dofs( dofs, num_entities, ufc_cell.entity_indices );
+    ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
   }
 
   ///
   inline void build() override
   {
     DofNumbering::init();
+
     //---
     if ( mesh.is_distributed() )
     {
       error( "SerialNumbering : can only be used for a serial mesh" );
     }
+
     //---
-
-    // FIXME num_entities should maybe be stored somewhere else
-    size_t const          tdim = mesh.topology_dimension();
-    std::vector< size_t > num_entities( tdim + 1, 0 );
-    for ( size_t d = 0; d <= tdim; ++d )
-    {
-      if ( mesh.topology().connectivity( d ) )
-      {
-        num_entities[d] = mesh.topology().global_size( d );
-      }
-    }
-
-    set_range( 0, ufc_dofmap.global_dimension( num_entities ) );
+    set_range( 0, ufc_dofmap.global_dimension( mesh.num_entities() ) );
   }
 
   ///

@@ -164,19 +164,8 @@ inline auto FiniteElementSpace::dofmap() const -> DofMap const &
 
 inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 {
-  // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( finite_element_->topological_dimension() + 1,
-                                      0 );
-  for ( size_t d = 0; d <= finite_element_->topological_dimension(); ++d )
-  {
-    if ( mesh_.topology().connectivity( d ) )
-    {
-      num_entities[d] = mesh_.topology().global_size( d );
-    }
-  }
-
   return ( mesh_.num_global_cells() * dof_map_.num_element_dofs() )
-         == dof_map_.global_dimension( num_entities );
+         == dof_map_.global_dimension( mesh_.num_entities() );
 }
 
 //-----------------------------------------------------------------------------

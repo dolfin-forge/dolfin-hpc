@@ -103,23 +103,13 @@ public:
     size_t * entity_dofs       = new size_t[max_num_entity_dof];
     size_t * facet_dofs        = new size_t[ufc_dofmap.num_facet_dofs()];
 
-    // FIXME num_entities should maybe be stored somewhere else
-    std::vector< size_t > num_entities( tdim + 1, 0 );
-    for ( size_t d = 0; d <= tdim; ++d )
-    {
-      if ( mesh.topology().connectivity( d ) )
-      {
-        num_entities[d] = mesh.topology().global_size( d );
-      }
-    }
-
     size_t       ii = 0;
     CellIterator cell( mesh );
     UFCCell      ufc_cell( *cell );
     for ( ; !cell.end(); ++cell )
     {
       ufc_cell.update( *cell );
-      ufc_dofmap.tabulate_dofs( dofs, num_entities, ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
 
       // Create mapping from dof to dofmap offset
       for ( size_t i = 0; i < ufc_dofmap.num_element_dofs(); ++i )

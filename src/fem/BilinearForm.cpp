@@ -31,24 +31,9 @@ BilinearForm::~BilinearForm()
 void BilinearForm::check( GenericMatrix const & A,
                           GenericVector const & b ) const
 {
-  // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities_M(
-    this->test_space().element().topological_dimension()+1, 0 );
-  std::vector< size_t > num_entities_N(
-    this->trial_space().element().topological_dimension()+1, 0 );
-
-  for ( size_t d = 0; d <= this->test_space().element().topological_dimension(); ++d )
-    if ( this->mesh().topology().connectivity( d ) )
-      num_entities_M[d] = this->mesh().topology().global_size( d );
-
-  for ( size_t d = 0; d <= this->trial_space().element().topological_dimension(); ++d )
-    if ( this->mesh().topology().connectivity( d ) )
-      num_entities_N[d] = this->mesh().topology().global_size( d );
-
-  size_t const M =
-    this->test_space().dofmap().global_dimension( num_entities_M );
-  size_t const N =
-    this->trial_space().dofmap().global_dimension( num_entities_N );
+  std::vector< size_t > const & n_entities = this->mesh().num_entities();
+  size_t const M = this->test_space().dofmap().global_dimension( n_entities );
+  size_t const N = this->trial_space().dofmap().global_dimension( n_entities );
 
   if ( A.size( 0 ) != A.size( 1 ) )
   {

@@ -109,6 +109,12 @@ public:
   /// update the mesh extent
   auto extent_update() -> void;
 
+  /// number of entities in all topological dimensions
+  auto num_entities() const -> std::vector< size_t > const &;
+
+  /// update number of entities in all topological dimensions
+  auto num_entities_update() -> void;
+
   //--- TOPOLOGY --------------------------------------------------------------
 
   /// Return mesh topology (non-const version)
@@ -284,6 +290,8 @@ private:
 
   Point extent_min_;
   Point extent_max_;
+
+  std::vector< size_t > num_entities_;
 
   int timestamp_;
 };
@@ -475,6 +483,14 @@ inline auto Mesh::extent_min() const -> Point const &
 inline auto Mesh::extent_max() const -> Point const &
 {
   return extent_max_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Mesh::num_entities() const -> std::vector< size_t > const &
+{
+  dolfin_assert( num_entities_.size() == topology_dimension() + 1 );
+  return num_entities_;
 }
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------

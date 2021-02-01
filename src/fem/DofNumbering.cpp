@@ -31,15 +31,7 @@ auto DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap) -> DofNumbering *
   std::vector<ufc::dofmap const*> flattened( 1, nullptr );
   flattened.resize( 0 );
 
-  // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( tdim+1, 0 );
-  for ( size_t d = 0; d <= tdim; ++d )
-  {
-    if ( mesh.topology().connectivity( d ) )
-    {
-      num_entities[d] = mesh.topology().global_size( d );
-    }
-  }
+  std::vector< size_t > const & num_entities = mesh.num_entities();
 
   ///
   DofMap::flatten(&ufc_dofmap, flattened);
@@ -184,10 +176,6 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   {
     error("DofNumbering::init : invalid topological dimension.");
   }
-  // if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
-  // {
-  //   error("DofNumbering::init : invalid geometrical dimension.");
-  // }
   if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {
     error("DofNumbering::init : topological dimension != geometric dimension.\n"
@@ -203,18 +191,8 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     }
   }
 
-  // FIXME num_entities should maybe be stored somewhere else
-  std::vector< size_t > num_entities( ufc_dofmap.topological_dimension()+1, 0 );
-  for ( size_t d = 0; d <= ufc_dofmap.topological_dimension(); ++d )
-  {
-    if ( mesh.topology().connectivity( d ) )
-    {
-      num_entities[d] = mesh.topology().global_size( d );
-    }
-  }
-
-  message(1, "DofNumbering: initialized UFC dofmap with global dimension %u",
-          ufc_dofmap.global_dimension(num_entities));
+  message( 1, "DofNumbering: initialized UFC dofmap with global dimension %u",
+           ufc_dofmap.global_dimension( mesh.num_entities() ) );
 }
 
 //-----------------------------------------------------------------------------

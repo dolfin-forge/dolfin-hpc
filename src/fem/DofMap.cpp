@@ -324,14 +324,6 @@ auto DofMap::can_vectorize( std::vector< ufc::dofmap const * > flattened )
 
 //-----------------------------------------------------------------------------
 
-auto DofMap::renumbered() const -> bool
-{
-  // FIXME:
-  return ( true );
-}
-
-//-----------------------------------------------------------------------------
-
 void DofMap::disp() const
 {
   section( "DofMap" );

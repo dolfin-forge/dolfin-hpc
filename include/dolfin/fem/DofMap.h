@@ -217,16 +217,8 @@ public:
   /// Return is the dof is ghosted, return false if the index is not known (!)
   auto is_ghost( size_t index ) const -> bool;
 
-  //--- Debugging
-
-  /// Return renumbering (used for testing)
-  auto get_map() const -> _ordered_map< size_t, size_t >;
-
   /// Display mapping
   void disp() const;
-
-  /// Return if the dof map has been renumbered
-  auto renumbered() const -> bool;
 
   //---
 
@@ -237,8 +229,6 @@ public:
   /// Create unique string identifiers for dofmap from UFC dofmap
   static auto make_hash( Mesh & mesh, ufc::dofmap const & ufc_dofmap )
     -> std::string const;
-
-  //--- Debugging
 
   /// Check consistency of ghosted entities
   auto check( bool throw_error = false ) -> bool;
@@ -276,9 +266,6 @@ private:
 
   // Periodic dofs mapping
   mutable PeriodicDofsMapping * periodic_dofmap_;
-
-  // Provide easy access to map for testing
-  _ordered_map< size_t, size_t > map_;
 };
 
 //--- INLINES -----------------------------------------------------------------
@@ -526,13 +513,6 @@ inline auto DofMap::dofsmapping() const -> size_t const *
 inline auto DofMap::dofsmapping_size() const -> size_t
 {
   return numbering_->block_size();
-}
-
-//-----------------------------------------------------------------------------
-
-inline auto DofMap::get_map() const -> _ordered_map< size_t, size_t >
-{
-  return map_;
 }
 
 //-----------------------------------------------------------------------------

@@ -168,12 +168,13 @@ private:
   void clear();
 
   // Initialize M x N matrix with a given number of nonzeros per row
-  void init( size_t M, size_t N, const size_t * nz );
+  void init( size_t M, size_t N, std::vector< size_t > const & nz );
 
   // Initialize M x N matrix with a given number of nonzeros per row diagonal
   // and off-diagonal
-  void
-    init( size_t M, size_t N, const size_t * d_nzrow, const size_t * o_nzrow );
+  void init( size_t M, size_t N,
+             std::vector< size_t > const & d_nzrow,
+             std::vector< size_t > const & o_nzrow );
 
   ///
   void getrows_offproc( _ordered_set< size_t > const & rows );
@@ -204,8 +205,8 @@ inline void PETScMatrix::init( size_t M, size_t N )
 //-----------------------------------------------------------------------------
 inline auto PETScMatrix::size( size_t dim ) const -> size_t
 {
-  int M = 0;
-  int N = 0;
+  PetscInt M = 0;
+  PetscInt N = 0;
   MatGetSize( A, &M, &N );
   return ( dim == 0 ? M : N );
 }
@@ -225,12 +226,15 @@ inline void PETScMatrix::get( real *         block,
                               size_t const * cols ) const
 {
   dolfin_assert( A );
-  MatGetValues( A,
-                static_cast< int >( m ),
-                reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                static_cast< int >( n ),
-                reinterpret_cast< int * >( const_cast< size_t * >( cols ) ),
-                block );
+
+  PetscInt M_ = m;
+  PetscInt N_ = n;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+  std::vector< PetscInt > cols_( cols, cols + n );
+
+  MatGetValues( A, M_, rows_.data(), N_, cols_.data(), block );
 }
 //-----------------------------------------------------------------------------
 inline void PETScMatrix::set( real const *   block,
@@ -240,13 +244,15 @@ inline void PETScMatrix::set( real const *   block,
                               size_t const * cols )
 {
   dolfin_assert( A );
-  MatSetValues( A,
-                static_cast< int >( m ),
-                reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                static_cast< int >( n ),
-                reinterpret_cast< int * >( const_cast< size_t * >( cols ) ),
-                block,
-                INSERT_VALUES );
+
+  PetscInt M_ = m;
+  PetscInt N_ = n;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+  std::vector< PetscInt > cols_( cols, cols + n );
+
+  MatSetValues( A, M_, rows_.data(), N_, cols_.data(), block, INSERT_VALUES );
 }
 //-----------------------------------------------------------------------------
 inline void PETScMatrix::add( real const *   block,
@@ -256,13 +262,15 @@ inline void PETScMatrix::add( real const *   block,
                               size_t const * cols )
 {
   dolfin_assert( A );
-  MatSetValues( A,
-                static_cast< int >( m ),
-                reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                static_cast< int >( n ),
-                reinterpret_cast< int * >( const_cast< size_t * >( cols ) ),
-                block,
-                ADD_VALUES );
+
+  PetscInt M_ = m;
+  PetscInt N_ = n;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+  std::vector< PetscInt > cols_( cols, cols + n );
+
+  MatSetValues( A, M_, rows_.data(), N_, cols_.data(), block, ADD_VALUES );
 }
 //-----------------------------------------------------------------------------
 inline void PETScMatrix::setrow( size_t                        row,

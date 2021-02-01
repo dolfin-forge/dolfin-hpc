@@ -65,18 +65,20 @@ void PETScVector::init( size_t N, bool distributed )
 
   clear();
 
+  PetscInt N_ = N;
+
   // Create vector
   if ( distributed && PE::size() > 1 )
   {
     is_distributed_ = true;
 #ifdef HAVE_MPI
-    VecCreateMPI( MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x_ );
+    VecCreateMPI( MPI::DOLFIN_COMM, N_, PETSC_DETERMINE, &x_ );
 #endif
   }
   else
   {
     VecCreate( PETSC_COMM_SELF, &x_ );
-    VecSetSizes( x_, PETSC_DECIDE, N );
+    VecSetSizes( x_, PETSC_DECIDE, N_ );
     VecSetFromOptions( x_ );
   }
   // Set all entries to zero
@@ -142,19 +144,24 @@ void PETScVector::get( real * block, size_t m, const size_t * rows ) const
 {
   dolfin_assert( x_ );
 
+  PetscInt M_ = m;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+
   if ( is_ghosted_ )
   {
-    int low, high;
+    PetscInt low, high;
     Vec xl;
     VecGetOwnershipRange( x_, &low, &high );
     VecGhostGetLocalForm( x_, &xl );
 
-    int * tmp = new int[m];
+    std::vector< PetscInt > tmp( m );
     for ( size_t i = 0; i < m; i++ )
     {
-      if ( ( int ) rows[i] < high && ( int ) rows[i] >= low )
+      if ( rows_[i] < high && rows_[i] >= low )
       {
-        tmp[i] = rows[i] - low;
+        tmp[i] = rows_[i] - low;
       }
       else
       {
@@ -164,17 +171,12 @@ void PETScVector::get( real * block, size_t m, const size_t * rows ) const
         tmp[i] = it->second;
       }
     }
-    VecGetValues( xl, static_cast< int >( m ), tmp, block );
+    VecGetValues( xl, M_, tmp.data(), block );
     VecGhostRestoreLocalForm( x_, &xl );
-
-    delete[] tmp;
   }
   else
   {
-    VecGetValues( x_,
-                  static_cast< int >( m ),
-                  reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                  block );
+    VecGetValues( x_, M_, rows_.data(), block );
   }
 }
 //-----------------------------------------------------------------------------
@@ -257,22 +259,22 @@ void PETScVector::init_ghosted( size_t,
     apply();
   }
 
-  int local_size, size, low, high;
+  PetscInt local_size, size, low, high;
   VecGetSize( x_, &size );
   VecGetLocalSize( x_, &local_size );
   VecGetOwnershipRange( x_, &low, &high );
 
   mapping_.clear();
 
-  int *  rows   = new int[local_size];
-  real * values = new real[local_size];
+  std::vector < PetscInt > rows( local_size );
+  std::vector <real >      values( local_size );
   for ( int i = 0; i < local_size; i++ )
   {
     rows[i]           = low + i;
     mapping_[low + i] = i;
   }
 
-  VecGetValues( x_, local_size, rows, values );
+  VecGetValues( x_, local_size, rows.data(), values.data() );
 
   if ( is_ghosted_ && map.size() > 0 )
   {
@@ -290,29 +292,25 @@ void PETScVector::init_ghosted( size_t,
   VecDestroy( x_ );
 #endif
 
-  std::vector< int >               ghost_indices;
-  int                              num_ghost = local_size;
-  _ordered_set< size_t >::iterator sit;
-  for ( sit = indices.begin(); sit != indices.end(); ++sit )
+  std::vector< PetscInt > ghost_indices;
+  PetscInt                num_ghost = local_size;
+
+  for ( size_t const & index : indices )
   {
-    if ( *sit < ( size_t ) low || *sit >= ( size_t ) high )
+    if ( index < static_cast< size_t >( low )
+         or index >= static_cast< size_t >( high ) )
     {
-      ghost_indices.push_back( ( int ) *sit );
-      mapping_[( int ) *sit] = num_ghost++;
+      ghost_indices.push_back( index );
+      mapping_[index] = num_ghost++;
     }
   }
 
 #ifdef HAVE_MPI
-  VecCreateGhost( MPI::DOLFIN_COMM,
-                  local_size,
-                  size,
-                  ( int ) ghost_indices.size(),
-                  ( const int * ) &ghost_indices[0],
-                  &x_ );
+  num_ghost = ghost_indices.size();
+  VecCreateGhost( MPI::DOLFIN_COMM, local_size, size,
+                  num_ghost, ghost_indices.data(), &x_ );
 #endif
-  VecSetValues( x_, local_size, rows, values, INSERT_VALUES );
-  delete[] rows;
-  delete[] values;
+  VecSetValues( x_, local_size, rows.data(), values.data(), INSERT_VALUES );
 
   is_ghosted_ = true;
   apply();

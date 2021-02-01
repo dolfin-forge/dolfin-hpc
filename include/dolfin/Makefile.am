@@ -81,6 +81,7 @@ nobase_pkginclude_HEADERS = \
 				function/SubFunction.h\
 				function/Value.h\
 				function/ValueSpace.h\
+				function/Zero.h\
 				insitu/dolfin_insitu.h\
 				insitu/libsimInterface.h\
 				insitu/libsimPipeline.h\

@@ -91,10 +91,9 @@ int main()
   bc.apply(A, b, a);
 
   Function u(a.trial_space());
-  KrylovSolver solver(bicgstab, bjacobi);
 
+  KrylovSolver solver(bicgstab, bjacobi);
   solver.solve(A, u.vector(), b);
-  u.sync();
 
   message("vector l2  norm: %e", u.vector().norm());
   message("vector inf norm: %e", u.vector().max());

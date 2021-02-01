@@ -1,8 +1,10 @@
-#ifndef __LICORNE_FUNCTION_REAL_H_
-#define __LICORNE_FUNCTION_REAL_H_
+
+#ifndef __DOLFIN_FUNCTION_REAL_H_
+#define __DOLFIN_FUNCTION_REAL_H_
 
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/function/ValueSpace.h>
+#include <dolfin/log/log.h>
 
 namespace dolfin
 {
@@ -211,4 +213,4 @@ private:
 
 } // end namespace dolfin
 
-#endif /* __LICORNE_FUNCTION_REAL_H_ */
+#endif /* __DOLFIN_FUNCTION_REAL_H_ */

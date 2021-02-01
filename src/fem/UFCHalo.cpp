@@ -21,37 +21,14 @@ namespace dolfin
 UFCHalo::UFCHalo( UFC &                                ufc,
                   std::vector< Coefficient * > const & coefficients,
                   DofMapSet const &                    dof_map_set )
-  : cell0( ufc.cell0 )
-  , cell1( ufc.cell1 )
-  , macro_w( ufc.macro_w )
-  , facet0( ufc.facet0 )
-  , facet1( ufc.facet1 )
-  , macro_dofs( ufc.macro_dofs )
-  , ufc_( ufc )
+  : ufc_( ufc )
   , mesh_( const_cast< Mesh & >( dof_map_set.mesh() ) )
   , coefficients_( coefficients )
   , dof_map_set_( dof_map_set )
   , rank_offsets_()
   , facet_map_()
   , r_packet_size_( 0 )
-  , r_data0_( nullptr )
-  , r_data1_( nullptr )
   , u_packet_size_( 0 )
-  , u_data0_( nullptr )
-  , u_data1_( nullptr )
-{
-  //
-  init();
-}
-
-//-----------------------------------------------------------------------------
-UFCHalo::~UFCHalo()
-{
-  clear();
-}
-
-//-----------------------------------------------------------------------------
-void UFCHalo::init()
 {
   // Early exit as nothing has to be done.
   if ( !mesh_.is_distributed() )
@@ -69,10 +46,12 @@ void UFCHalo::init()
   size_t const num_cell_vertices      = mesh_.type().num_entities( 0 );
   size_t const coordinates_data_size  = num_cell_vertices * gdim;
   size_t       coefficients_data_size = 0;
+
   for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
   {
     coefficients_data_size += ufc_.coefficient_elements[i]->space_dimension();
   }
+
   size_t dofs_data_size = 0;
   for ( size_t i = 0; i < ufc_.form.rank(); ++i )
   {
@@ -82,6 +61,7 @@ void UFCHalo::init()
   // Separate real and size_t data types to avoid copy of dof indices and casts
   // vertex coordinates + coefficients values
   r_packet_size_ = coordinates_data_size + coefficients_data_size;
+
   // local facet index + arguments dof indices
   u_packet_size_ = 1 + dofs_data_size;
 
@@ -109,9 +89,8 @@ void UFCHalo::init()
     // Maps local shared ordering to adjacent shared ordering
     std::vector< size_t > const & adjmap = distdata.shared_mapping().to( ark );
 
-    size_t off0            = rank_offset + facet_offsets[ark];
-    size_t off1            = rank_offset + adjmap[facet_offsets[ark]];
-    facet_map_[sh.index()] = FacetOffsets( off0, off1 );
+    facet_map_[sh.index()] = FacetOffsets( rank_offset + facet_offsets[ark],
+                                           rank_offset + adjmap[facet_offsets[ark]] );
 
     // Increment current facet index for the given adjacent rank
     ++facet_offsets[ark];
@@ -119,16 +98,24 @@ void UFCHalo::init()
   //
   dolfin_assert( facet_map_.size() == num_shared_facets );
 
-  r_data0_ = new real[num_shared_facets * r_packet_size_];
-  u_data0_ = new size_t[num_shared_facets * u_packet_size_];
-  r_data1_ = new real[num_shared_facets * r_packet_size_];
-  u_data1_ = new size_t[num_shared_facets * u_packet_size_];
+  r_data0_.resize( num_shared_facets * r_packet_size_ );
+  u_data0_.resize( num_shared_facets * u_packet_size_ );
+  r_data1_.resize( num_shared_facets * r_packet_size_ );
+  u_data1_.resize( num_shared_facets * u_packet_size_ );
 
   // Fill data structures
   this->update( coefficients_, dof_map_set_ );
 }
 
 //-----------------------------------------------------------------------------
+
+UFCHalo::~UFCHalo()
+{
+  clear();
+}
+
+//-----------------------------------------------------------------------------
+
 void UFCHalo::update( Facet & facet )
 {
 
@@ -155,8 +142,8 @@ void UFCHalo::update( Facet & facet )
   {
     for ( size_t dim = 0; dim < gdim; ++dim, ++r0, ++r1 )
     {
-      cell0.coordinates[dim * Space::MAX_DIMENSION] = *r0;
-      cell1.coordinates[dim * Space::MAX_DIMENSION] = *r1;
+      ufc_.cell0.coordinates[i * Space::MAX_DIMENSION + dim] = *r0;
+      ufc_.cell1.coordinates[i * Space::MAX_DIMENSION + dim] = *r1;
     }
   }
 
@@ -164,9 +151,9 @@ void UFCHalo::update( Facet & facet )
   for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
   {
     size_t const spacedim = ufc_.coefficient_elements[i]->space_dimension();
-    std::copy( r0, r0 + spacedim, macro_w[i] );
+    std::copy( r0, r0 + spacedim, ufc_.macro_w[i] );
     r0 += spacedim;
-    std::copy( r1, r1 + spacedim, macro_w[i] + spacedim );
+    std::copy( r1, r1 + spacedim, ufc_.macro_w[i] + spacedim );
     r1 += spacedim;
   }
 
@@ -175,18 +162,18 @@ void UFCHalo::update( Facet & facet )
   size_t * u1 = &u_data1_[u_packet_size_ * it->second.second];
 
   // Update local facet indices
-  facet0 = *u0;
+  ufc_.facet0 = *u0;
   ++u0;
-  facet1 = *u1;
+  ufc_.facet1 = *u1;
   ++u1;
 
   // Update UFC dofs indices for each dimension, needs copy for the moment
   for ( size_t i = 0; i < ufc_.form.rank(); ++i )
   {
     size_t const localdim = ufc_.local_dimensions[i];
-    std::copy( u0, u0 + localdim, macro_dofs[i] );
+    std::copy( u0, u0 + localdim, ufc_.macro_dofs[i] );
     u0 += localdim;
-    std::copy( u1, u1 + localdim, macro_dofs[i] + localdim );
+    std::copy( u1, u1 + localdim, ufc_.macro_dofs[i] + localdim );
     u1 += localdim;
   }
 }
@@ -215,21 +202,18 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
   {
     error( "UFCHalo: invalid number of coefficients passed as arguments:\n"
            "Expected: %d ; Provided: %d",
-           ufc_.form.num_coefficients(),
-           coefficients.size() );
+           ufc_.form.num_coefficients(), coefficients.size() );
   }
 
   //
-  size_t rank    = dolfin::MPI::rank();
-  size_t pe_size = dolfin::MPI::size();
+  size_t const rank    = MPI::rank();
+  size_t const pe_size = MPI::size();
 
   // Loop over shared facets to collect data following shared iterator ordering
   size_t const num_cell_vertices = mesh_.type().num_entities( 0 );
-  for ( FacetMap::const_iterator it = facet_map_.begin();
-        it != facet_map_.end();
-        ++it )
+  for( FacetMap::value_type const & facet_offset : facet_map_ )
   {
-    Facet facet( mesh, it->first );
+    Facet facet( mesh, facet_offset.first );
 
     // Create cell
     Cell   cell( mesh, facet.entities( tdim )[0] );
@@ -237,8 +221,8 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
     ufc_.cell.update( cell );
 
     // Set arrays offset
-    real *   r_entry = &r_data0_[it->second.first * r_packet_size_];
-    size_t * u_entry = &u_data0_[it->second.first * u_packet_size_];
+    real *   r_entry = &r_data0_[facet_offset.second.first * r_packet_size_];
+    size_t * u_entry = &u_data0_[facet_offset.second.first * u_packet_size_];
 
     // Collect data for shared facet contribution
     // TODO: implement proper serialization functions
@@ -253,8 +237,9 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
     // Interpolate coefficients on cell
     for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
     {
-      coefficients[i]->interpolate(
-        r_entry, ufc_.cell, *ufc_.coefficient_elements[i], cell, cell_facet );
+      coefficients[i]->interpolate( r_entry, ufc_.cell,
+                                    *ufc_.coefficient_elements[i],
+                                    cell, cell_facet );
       r_entry += ufc_.coefficient_elements[i]->space_dimension();
     }
 
@@ -271,29 +256,23 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
   }
 
   // Exchange data to fill halo data arrays: facet blocks are written directly
-  for ( int j = 1; j < ( int ) pe_size; ++j )
+  for ( size_t j = 1; j < pe_size; ++j )
   {
     int src = ( rank - j + pe_size ) % pe_size;
     int dst = ( rank + j ) % pe_size;
 
-    size_t num_send_facets = distdata.shared_mapping().to( dst ).size();
-    size_t num_recv_facets = distdata.shared_mapping().from( src ).size();
-    size_t send_offset     = rank_offsets_[dst];
-    size_t recv_offset     = rank_offsets_[src];
+    size_t const num_send_facets = distdata.shared_mapping().to( dst ).size();
+    size_t const num_recv_facets = distdata.shared_mapping().from( src ).size();
 
-    real * r_sendbuf   = &r_data0_[send_offset * r_packet_size_];
-    real * r_recvbuf   = &r_data1_[recv_offset * r_packet_size_];
-    int    r_sendcount = num_send_facets * r_packet_size_;
-    int    r_recvcount = num_recv_facets * r_packet_size_;
-    MPI::sendrecv(
-      &r_sendbuf[0], r_sendcount, dst, &r_recvbuf[0], r_recvcount, src, 1 );
+    MPI::sendrecv( r_data0_.data() + rank_offsets_[dst] * r_packet_size_,
+                   num_send_facets * r_packet_size_, dst,
+                   r_data1_.data() + rank_offsets_[src] * r_packet_size_,
+                   num_recv_facets * r_packet_size_, src, 1 );
 
-    size_t * u_sendbuf   = &u_data0_[send_offset * u_packet_size_];
-    size_t * u_recvbuf   = &u_data1_[recv_offset * u_packet_size_];
-    int      u_sendcount = num_send_facets * u_packet_size_;
-    int      u_recvcount = num_recv_facets * u_packet_size_;
-    MPI::sendrecv(
-      &u_sendbuf[0], u_sendcount, dst, &u_recvbuf[0], u_recvcount, src, 1 );
+    MPI::sendrecv( u_data0_.data() + rank_offsets_[dst] * u_packet_size_,
+                   num_send_facets * u_packet_size_, dst,
+                   u_data1_.data() + rank_offsets_[src] * u_packet_size_,
+                   num_recv_facets * u_packet_size_, src, 1 );
   }
 
 #else
@@ -307,11 +286,9 @@ void UFCHalo::disp() const
   section( "UFCHalo" );
   prm( "Facet map size", facet_map_.size() );
   prm( "Adjacent ranks", rank_offsets_.size() );
-  for ( _map< size_t, size_t >::const_iterator it = rank_offsets_.begin();
-        it != rank_offsets_.end();
-        ++it )
+  for ( std::pair< size_t const, size_t > const & offset : rank_offsets_ )
   {
-    cout << "\tproc " << it->first << " : " << it->second << "\n";
+    cout << "\tproc " << offset.first << " : " << offset.second << "\n";
   }
   prm( "Size of real data packet", r_packet_size_ );
   prm( "Size of size_t data packet", u_packet_size_ );
@@ -323,14 +300,6 @@ void UFCHalo::clear()
 {
   rank_offsets_.clear();
   facet_map_.clear();
-  delete[] r_data0_;
-  r_data0_ = nullptr;
-  delete[] u_data0_;
-  u_data0_ = nullptr;
-  delete[] r_data1_;
-  r_data1_ = nullptr;
-  delete[] u_data1_;
-  u_data1_ = nullptr;
 }
 
 } /* namespace dolfin */

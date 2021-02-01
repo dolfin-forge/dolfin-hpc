@@ -238,21 +238,23 @@ OPENMP_PRAGMA( for )
     // Interpolate coefficients on cell
     for (size_t c = 0; c < coef_size; ++c)
     {
-      coefficients[c]->interpolate(ufc.w[c], ufc.cell, *ufc.coefficient_elements[c], cell);
+      coefficients[c]->interpolate( ufc.w[c], ufc.cell,
+                                    *ufc.coefficient_elements[c], cell);
     }
 
     // Tabulate dofs for each dimension
     for (size_t d = 0; d < form_rank; ++d)
     {
-      dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell);
+      dofmaps[d].tabulate_dofs( ufc.dofs[d], ufc.cell );
     }
 
     // Tabulate cell tensor
     // FIXME last argument (cell_orientation) needs an actual value
-    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell.coordinates.data(), 0);
+    integral->tabulate_tensor( ufc.A.data(), ufc.w.data(),
+                               ufc.cell.coordinates.data(), 0 );
 
     // Add entries to global tensor
-    A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
+    A.add( ufc.A.data(), ufc.local_dimensions.data(), ufc.dofs.data() );
   }
 
   tocd(1);
@@ -330,11 +332,11 @@ OPENMP_PRAGMA( for )
 
     // Tabulate exterior facet tensor
     // FIXME last argument (cell_orientation) needs an actual value
-    integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell.coordinates.data(),
-                              local_facet, 0);
+    integral->tabulate_tensor( ufc.A.data(), ufc.w.data(),
+                               ufc.cell.coordinates.data(), local_facet, 0 );
 
     // Add entries to global tensor
-    A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
+    A.add( ufc.A.data(), ufc.local_dimensions.data(), ufc.dofs.data() );
   }
 
   tocd(1);
@@ -414,15 +416,6 @@ OPENMP_PRAGMA( for )
         size_t const offset = ufc.local_dimensions[d];
         dofmaps[d].tabulate_dofs(ufc.macro_dofs[d] + offset, ufc.cell1);
       }
-
-      // FIXME last two arguments (cell_orientation) need an actual value
-      integral->tabulate_tensor(ufc.macro_A, ufc.macro_w,
-                                ufc.cell0.coordinates.data(),
-                                ufc.cell1.coordinates.data(),
-                                ufc.facet0, ufc.facet1, 0, 0);
-
-      // Add entries to global tensor
-      A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
     }
     // Interprocess facet
     else if (facet.is_shared())
@@ -431,17 +424,19 @@ OPENMP_PRAGMA( for )
       // contributions from cell1 are fetched from adjacent ranks.
       // Implementation updates pointers to coordinates, but has to copy dofs
       // and coefficients until data structures are reworked.
-      halo.update(facet);
-
-      // FIXME last two arguments (cell_orientation) need an actual value
-      integral->tabulate_tensor(ufc.macro_A, halo.macro_w,
-                                halo.cell0.coordinates.data(),
-                                halo.cell1.coordinates.data(),
-                                halo.facet0, halo.facet1, 0, 0);
-
-      // Add entries to global tensor
-      A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
+      halo.update( facet );
     }
+
+    // FIXME last two arguments (cell_orientation) need an actual value
+    integral->tabulate_tensor( ufc.macro_A.data(), ufc.macro_w.data(),
+                               ufc.cell0.coordinates.data(),
+                               ufc.cell1.coordinates.data(),
+                               ufc.facet0, ufc.facet1, 0, 0 );
+
+    // Add entries to global tensor
+    A.add( ufc.macro_A.data(),
+           ufc.macro_local_dimensions.data(),
+           ufc.macro_dofs.data() );
   }
 
   tocd(1);

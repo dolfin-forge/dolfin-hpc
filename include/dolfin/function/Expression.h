@@ -29,15 +29,7 @@ public:
   virtual auto dim( size_t i ) const -> size_t = 0;
 
   // Return the value size
-  inline auto value_size() const -> size_t
-  {
-    size_t size = 1;
-    for ( size_t i = 0; i < this->rank(); ++i )
-    {
-      size *= this->dim( i );
-    }
-    return size;
-  }
+  virtual auto value_size() const -> size_t = 0;
 
 protected:
   /// Create user-defined function

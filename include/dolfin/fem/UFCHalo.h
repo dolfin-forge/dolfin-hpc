@@ -53,18 +53,7 @@ public:
   ///
   void disp() const;
 
-  //--- PUBLIC ATTRIBUTES -----------------------------------------------------
-  // Just expose references to attributes of the underlying UFC instance
-  UFCCell &  cell0;
-  UFCCell &  cell1;
-  real **&   macro_w;
-  size_t &   facet0;
-  size_t &   facet1;
-  size_t **& macro_dofs;
-
 private:
-  ///
-  void init();
 
   ///
   void update( std::vector< Coefficient * > const & coefficients,
@@ -81,23 +70,23 @@ private:
   _map< size_t, size_t > rank_offsets_;
 
   // Maps the index in the halo data structure to the local facet index
-  typedef std::pair< size_t, size_t >  FacetOffsets;
-  typedef _map< size_t, FacetOffsets > FacetMap;
-  FacetMap                             facet_map_;
+  using FacetOffsets = std::pair< size_t, size_t >;
+  using FacetMap     = _map< size_t, FacetOffsets >;
+  FacetMap facet_map_;
 
   // Data: Vertex coordinates + Coefficients values
   size_t r_packet_size_;
 
   // Ordered by adjacent rank
-  real * r_data0_;
-  real * r_data1_;
+  std::vector< real > r_data0_;
+  std::vector< real > r_data1_;
 
   // Data: Local facet index + Arguments dof indices
   size_t u_packet_size_;
 
   // Ordered by adjacent rank
-  size_t * u_data0_;
-  size_t * u_data1_;
+  std::vector< size_t > u_data0_;
+  std::vector< size_t > u_data1_;
 };
 
 } /* namespace dolfin */

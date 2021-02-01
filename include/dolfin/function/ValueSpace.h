@@ -1,5 +1,6 @@
-#ifndef __LICORNE_FUNCTION_VALUE_SPACE_H_
-#define __LICORNE_FUNCTION_VALUE_SPACE_H_
+
+#ifndef __DOLFIN_FUNCTION_VALUE_SPACE_H_
+#define __DOLFIN_FUNCTION_VALUE_SPACE_H_
 
 #include <dolfin/common/types.h>
 
@@ -18,26 +19,25 @@ public:
   }
 
   /// Return the rank of the value space
-  static inline size_t rank()
+  static inline auto rank() -> size_t
   {
     return RANK;
   }
 
   /// Return the dimension of the value space for axis i
-  static inline size_t dim( size_t i )
+  static inline auto dim( size_t i ) -> size_t
   {
-    return ( i < RANK ? DIM[i] : 1 );
+    return ( i == 0 ) ? I : ( ( i == 1 ) ? J : 1 );
   }
 
   /// Return value size
-  static inline size_t value_size()
+  static inline auto value_size() -> size_t
   {
     return SIZE;
   }
 
 private:
   static constexpr size_t SIZE { I * J };
-  static constexpr size_t DIM[2] { I, J };
   static constexpr size_t RANK { ( I > 1 ) ? ( J > 1 ? 2 : 1 ) : 0 };
 };
 
@@ -45,4 +45,4 @@ private:
 
 } // end namespace dolfin
 
-#endif /* __LICORNE_FUNCTION_VALUE_SPACE_H_ */
+#endif /* __DOLFIN_FUNCTION_VALUE_SPACE_H_ */

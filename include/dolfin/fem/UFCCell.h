@@ -24,7 +24,7 @@ public:
   UFCCell();
 
   /// Create UFC cell from DOLFIN cell
-  UFCCell( Cell & dolfin_cell );
+  UFCCell( Cell const & dolfin_cell );
 
   /// Copy constructor
   UFCCell( UFCCell const & other );
@@ -37,7 +37,7 @@ public:
   inline auto operator*() const -> Cell const &;
 
   // Initialize UFC cell data
-  auto init( Cell & cell ) -> void;
+  auto init( Cell const & cell ) -> void;
 
   // Update cell entities to global indices and coordinates
   auto update( Cell & cell ) -> void;
@@ -68,7 +68,7 @@ inline UFCCell::UFCCell()
 
 //-----------------------------------------------------------------------------
 
-inline UFCCell::UFCCell( Cell & dolfin_cell )
+inline UFCCell::UFCCell( Cell const & dolfin_cell )
   : ufc::cell()
   , cell_( &dolfin_cell )
 {
@@ -134,7 +134,7 @@ inline auto UFCCell::shape( CellType::Type type ) -> ufc::shape
 
 //-----------------------------------------------------------------------------
 
-inline auto UFCCell::init( Cell & cell ) -> void
+inline auto UFCCell::init( Cell const & cell ) -> void
 {
   // Update dolfin cell pointer
   this->cell_ = &cell;

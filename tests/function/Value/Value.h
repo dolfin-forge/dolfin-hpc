@@ -3,6 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/function/Value.h>
+#include <dolfin/function/Zero.h>
 
 using namespace dolfin;
 

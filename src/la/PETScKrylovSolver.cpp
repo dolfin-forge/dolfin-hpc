@@ -50,8 +50,8 @@ PETScKrylovSolver::PETScKrylovSolver( SolverType            method,
   , pc_petsc( default_pc )
   , pc_dolfin( &preconditioner )
   , ksp( nullptr )
-  , M( 0 )
-  , N( 0 )
+  , M_( 0 )
+  , N_( 0 )
   , parameters_read( false )
   , pc_set( false )
 {
@@ -75,8 +75,8 @@ PETScKrylovSolver::~PETScKrylovSolver()
 //-----------------------------------------------------------------------------
 
 auto PETScKrylovSolver::solve( const PETScMatrix & A,
-                                       PETScVector &       x,
-                                       const PETScVector & b ) -> dolfin::size_t
+                               PETScVector &       x,
+                               const PETScVector & b ) -> dolfin::size_t
 {
   // Check dimensions
   size_t M = A.size( 0 );
@@ -209,8 +209,8 @@ auto PETScKrylovSolver::solve( const PETScMatrix & A,
 //-----------------------------------------------------------------------------
 
 auto PETScKrylovSolver::solve( const PETScKrylovMatrix & A,
-                                       PETScVector &             x,
-                                       const PETScVector &       b ) -> dolfin::size_t
+                               PETScVector &             x,
+                               const PETScVector &       b ) -> dolfin::size_t
 {
   // Check dimensions
   size_t M = A.size( 0 );
@@ -343,12 +343,12 @@ void PETScKrylovSolver::disp() const
 void PETScKrylovSolver::init( size_t M, size_t N )
 {
   // Check if we need to reinitialize
-  if ( ksp != nullptr && M == this->M && N == this->N )
+  if ( ksp != nullptr && M_ == M && N_ == N )
     return;
 
   // Save size of system
-  this->M = M;
-  this->N = N;
+  M_ = M;
+  N_ = N;
 
   // Destroy old solver environment if necessary
   if ( ksp != nullptr )

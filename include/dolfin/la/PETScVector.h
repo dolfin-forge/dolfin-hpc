@@ -217,22 +217,26 @@ inline void
   PETScVector::set( const real * block, size_t m, const size_t * rows )
 {
   dolfin_assert( x_ );
-  VecSetValues( x_,
-                static_cast< int >( m ),
-                reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                block,
-                INSERT_VALUES );
+
+  PetscInt M_ = m;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+
+  VecSetValues( x_, M_, rows_.data(), block, INSERT_VALUES );
 }
 //-----------------------------------------------------------------------------
 inline void
   PETScVector::add( const real * block, size_t m, const size_t * rows )
 {
   dolfin_assert( x_ );
-  VecSetValues( x_,
-                static_cast< int >( m ),
-                reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-                block,
-                ADD_VALUES );
+
+  PetscInt M_ = m;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+
+  VecSetValues( x_, M_, rows_.data(), block, ADD_VALUES );
 }
 //-----------------------------------------------------------------------------
 inline void PETScVector::apply( FinalizeType )
@@ -259,7 +263,7 @@ inline auto PETScVector::size() const -> size_t
 {
   if ( x_ == nullptr )
     return 0;
-  int n = 0;
+  PetscInt n = 0;
   VecGetSize( x_, &n );
   return static_cast< size_t >( n );
 }
@@ -267,7 +271,7 @@ inline auto PETScVector::size() const -> size_t
 inline auto PETScVector::local_size() const -> size_t
 {
   dolfin_assert( x_ );
-  int n = 0;
+  PetscInt n = 0;
   VecGetLocalSize( x_, &n );
   return static_cast< size_t >( n );
 }
@@ -275,7 +279,7 @@ inline auto PETScVector::local_size() const -> size_t
 inline auto PETScVector::offset() const -> size_t
 {
   dolfin_assert( x_ );
-  int low, high;
+  PetscInt low, high;
   VecGetOwnershipRange( x_, &low, &high );
   return static_cast< size_t >( low );
 }

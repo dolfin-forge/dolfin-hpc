@@ -27,30 +27,29 @@ class UFC
 {
 
 public:
-
   /// Constructor
-  UFC(Form const& form);
+  UFC( Form const & form );
 
   /// Destructor
   ~UFC();
 
+  // Form
+  ufc::form const & form;
+
   // Array of finite elements for primary arguments
-  ufc::finite_element** finite_elements;
+  std::vector< ufc::finite_element * > finite_elements;
 
   // Array of finite elements for coefficients
-  ufc::finite_element** coefficient_elements;
+  std::vector< ufc::finite_element * > coefficient_elements;
 
   // Array of cell integrals
-  ufc::cell_integral** cell_integrals;
+  std::vector< ufc::cell_integral * > cell_integrals;
 
   // Array of exterior facet integrals
-  ufc::exterior_facet_integral** exterior_facet_integrals;
+  std::vector< ufc::exterior_facet_integral * > exterior_facet_integrals;
 
   // Array of interior facet integrals
-  ufc::interior_facet_integral** interior_facet_integrals;
-
-  // Form
-  ufc::form const& form;
+  std::vector< ufc::interior_facet_integral * > interior_facet_integrals;
 
   // Current cell
   UFCCell cell;
@@ -64,39 +63,34 @@ public:
   size_t facet1;
 
   // Local tensor
-  real* A;
+  std::vector< real > A;
 
   // Local tensor for macro element
-  real* macro_A;
+  std::vector< real > macro_A;
 
   // Array of local dimensions for each argument
-  size_t* local_dimensions;
+  std::vector< size_t > local_dimensions;
 
   // Array of local dimensions of macro element for primary arguments
-  size_t* macro_local_dimensions;
+  std::vector< size_t > macro_local_dimensions;
 
   // Array of local dofmap sizes
-  size_t* local_sizes;
+  std::vector< size_t > local_sizes;
 
   // Array of global dimensions for primary arguments
-  size_t* global_dimensions;
+  std::vector< size_t > global_dimensions;
 
   // Array of mapped dofs for primary arguments
-  size_t** dofs;
+  std::vector< size_t * > dofs;
 
   // Array of mapped dofs of macro element for primary arguments
-  size_t** macro_dofs;
+  std::vector< size_t * > macro_dofs;
 
   // Array of coefficients
-  real** w;
+  std::vector< real * > w;
 
   // Array of coefficients on macro element
-  real** macro_w;
-
-private:
-
-  void init(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set);
-
+  std::vector< real * > macro_w;
 };
 
 } /* namespace dolfin */

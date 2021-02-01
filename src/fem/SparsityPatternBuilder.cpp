@@ -30,7 +30,9 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   tic();
 
   // Initialise sparsity pattern
-  sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions, ufc.local_sizes);
+  sparsity_pattern.init( ufc.form.rank(),
+                         ufc.global_dimensions.data(),
+                         ufc.local_sizes.data() );
 
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
@@ -61,7 +63,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       }
 
       // Fill sparsity pattern.
-      sparsity_pattern.insert(ufc.local_dimensions, ufc.dofs);
+      sparsity_pattern.insert( ufc.local_dimensions.data(), ufc.dofs.data() );
     }
   }
 
@@ -98,7 +100,8 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       }
 
       // Fill sparsity pattern.
-      sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
+      sparsity_pattern.insert( ufc.macro_local_dimensions.data(),
+                               ufc.macro_dofs.data() );
     }
   }
 

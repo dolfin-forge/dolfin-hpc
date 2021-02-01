@@ -85,8 +85,8 @@ private:
   KSP ksp { nullptr };
 
   /// Size of old system (need to reinitialize when changing)
-  size_t M { 0 };
-  size_t N { 0 };
+  size_t M_ { 0 };
+  size_t N_ { 0 };
 
   /// True if we have read parameters
   bool parameters_read { false };

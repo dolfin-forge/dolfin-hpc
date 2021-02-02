@@ -31,24 +31,26 @@ BilinearForm::~BilinearForm()
 void BilinearForm::check( GenericMatrix const & A,
                           GenericVector const & b ) const
 {
-  std::vector< size_t > const & n_entities = this->mesh().num_entities();
-  size_t const M = this->test_space().dofmap().global_dimension( n_entities );
-  size_t const N = this->trial_space().dofmap().global_dimension( n_entities );
+  size_t const M = this->test_space().dofmap().global_dimension();
+  size_t const N = this->trial_space().dofmap().global_dimension();
 
   if ( A.size( 0 ) != A.size( 1 ) )
   {
     error( "Only square linear system are supported." );
   }
+
   if ( M != A.size( 0 ) )
   {
     error( "Incorrect dimension 0 of matrix for given test space.\n"
            "Space  : %u ; Matrix : %u", M, A.size( 0 ) );
   }
+
   if ( N != A.size( 1 ) )
   {
     error( "Incorrect dimension 1 of matrix for given trial space\n"
            "Space  : %u ; Matrix : %u", N, A.size( 1 ) );
   }
+
   if ( M != b.size() )
   {
     error( "Incorrect dimension of vector for given test space\n"

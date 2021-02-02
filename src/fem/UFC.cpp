@@ -86,12 +86,8 @@ UFC::UFC( Form const & form )
     // Initialize local sizes
     local_sizes[i] = form.dofmaps()[i].local_size();
 
-    dolfin_assert( form.mesh().num_entities().size()
-                   == finite_elements[i]->topological_dimension() + 1 );
-
     // Initialize global dimensions
-    global_dimensions[i] =
-      form.dofmaps()[i].global_dimension( form.mesh().num_entities() );
+    global_dimensions[i] = form.dofmaps()[i].global_dimension();
 
     // Initialize dofs
     dofs[i] = new size_t[local_dimensions[i]];

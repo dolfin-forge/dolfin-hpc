@@ -165,7 +165,7 @@ inline auto FiniteElementSpace::dofmap() const -> DofMap const &
 inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 {
   return ( mesh_.num_global_cells() * dof_map_.num_element_dofs() )
-         == dof_map_.global_dimension( mesh_.num_entities() );
+         == dof_map_.global_dimension();
 }
 
 //-----------------------------------------------------------------------------

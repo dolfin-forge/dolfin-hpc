@@ -82,6 +82,9 @@ public:
     std::vector< size_t > const & num_global_mesh_entities ) const
     -> size_t override;
 
+  /// Return the dimension of the global finite element function space
+  auto global_dimension() const -> size_t;
+
   /// Return the dimension of the local finite element function space
   /// Return the number of dofs with global support (i.e. global constants)
   auto num_global_support_dofs() const -> size_t override;
@@ -334,6 +337,16 @@ inline auto DofMap::global_dimension(
   std::vector< size_t > const & num_global_mesh_entities ) const -> size_t
 {
   return ufc_dofmap_->global_dimension( num_global_mesh_entities );
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto DofMap::global_dimension() const -> size_t
+{
+  dolfin_assert( this->mesh().num_entities().size()
+                 >= this->topological_dimension() + 1 );
+
+  return ufc_dofmap_->global_dimension( this->mesh().num_entities() );
 }
 
 //-----------------------------------------------------------------------------

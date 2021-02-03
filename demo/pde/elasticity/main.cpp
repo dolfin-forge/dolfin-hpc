@@ -131,15 +131,13 @@ int main()
   bcl.apply( A, b, a );
   bcr.apply( A, b, a );
 
-  Function     u( a.trial_space() );
-  LinearSolver solver;
+  Function u( a.trial_space() );
 
+  LinearSolver solver;
   solver.solve( A, u.vector(), b );
-  u.sync();
 
   // Save solution to VTK format
-  File vtk_file( "elasticity.pvd" );
-  vtk_file << u;
+  File( "elasticity.pvd" ) << u;
 
   dolfin_finalize();
 

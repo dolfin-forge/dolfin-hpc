@@ -4,19 +4,19 @@
 #include <dolfin/fem/PeriodicBC.h>
 
 #include <dolfin/common/constants.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/entities/Vertex.h>
-#include <dolfin/mesh/entities/Cell.h>
-#include <dolfin/mesh/entities/Facet.h>
-#include <dolfin/mesh/entities/iterators/FacetIterator.h>
-#include <dolfin/mesh/PeriodicSubDomain.h>
-#include <dolfin/la/GenericMatrix.h>
-#include <dolfin/la/GenericVector.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/SubSystem.h>
+#include <dolfin/la/GenericMatrix.h>
+#include <dolfin/la/GenericVector.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/PeriodicSubDomain.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
 
 #include <vector>
 
@@ -27,14 +27,18 @@ namespace dolfin
 // coordinates are considered equal if equal to within round-off.
 struct lt_coordinate
 {
-  auto operator()(const std::vector<real>& x, const std::vector<real>& y) const -> bool
+  auto operator()( const std::vector< real > & x,
+                   const std::vector< real > & y ) const -> bool
   {
-    if (x.size() > (y.size() + DOLFIN_EPS)) return false;
+    if ( x.size() > ( y.size() + DOLFIN_EPS ) )
+      return false;
 
-    for (unsigned int i = 0; i < x.size(); i++)
+    for ( size_t i = 0; i < x.size(); ++i )
     {
-      if (x[i] < (y[i] - DOLFIN_EPS)) return true;
-      else if (x[i] > (y[i] + DOLFIN_EPS)) return false;
+      if ( x[i] < ( y[i] - DOLFIN_EPS ) )
+        return true;
+      else if ( x[i] > ( y[i] + DOLFIN_EPS ) )
+        return false;
     }
 
     return false;
@@ -42,26 +46,31 @@ struct lt_coordinate
 };
 
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain) :
-    BoundaryCondition("Periodic", mesh, sub_domain)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
-                       SubSystem const& sub_system) :
-    BoundaryCondition("Periodic", mesh, sub_domain, sub_system)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       BilinearForm const& form)
-{
-  message("Applying periodic boundary conditions to linear system.");
 
-  PeriodicSubDomain const& subdomain =
-      static_cast<PeriodicSubDomain const&>(this->sub_domain());
+PeriodicBC::PeriodicBC( Mesh & mesh, PeriodicSubDomain const & sub_domain )
+  : BoundaryCondition( "Periodic", mesh, sub_domain )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+PeriodicBC::PeriodicBC( Mesh &                    mesh,
+                        PeriodicSubDomain const & sub_domain,
+                        SubSystem const &         sub_system )
+  : BoundaryCondition( "Periodic", mesh, sub_domain, sub_system )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+void PeriodicBC::apply( GenericMatrix &      A,
+                        GenericVector &      b,
+                        BilinearForm const & form )
+{
+  message( "Applying periodic boundary conditions to linear system." );
+
+  PeriodicSubDomain const & subdomain =
+    static_cast< PeriodicSubDomain const & >( this->sub_domain() );
 
   /// @todo Make this work for non-scalar subsystems, like vector-valued
   /// Lagrange where more than one per element is associated with
@@ -71,186 +80,168 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   size_t const tdim = mesh().geometry_dimension();
 
   // Table of mappings from coordinates to dofs
-  _ordered_map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
-  typedef _ordered_map<std::vector<real>, std::pair<int, int>, lt_coordinate>::iterator iterator;
-  std::vector<real> xx(gdim);
+  using coord2dofs_mapping_t = _ordered_map< std::vector< real >,
+                                             std::pair< size_t, size_t >,
+                                             lt_coordinate >;
 
-  // Array used for mapping coordinates
-  real * y = new real[gdim];
-  for (size_t i = 0; i < gdim; i++)
-  {
-    y[i] = 0.0;
-  }
+  using coords2dofs_it = coord2dofs_mapping_t::iterator;
+
+
+  coord2dofs_mapping_t coord_dofs;
+
+  // vectors used for mapping coordinates
+  std::vector< real > xx( gdim, 0.0 );
+  std::vector< real > y( gdim, 0.0 );
 
   // Make sure we have the facet - cell connectivity
-  mesh().init(mesh().type().facet_dim(), tdim);
+  mesh().init( mesh().type().facet_dim(), tdim );
 
   // Create local data for application of boundary conditions
-  FiniteElementSpace const& space = form.trial_space();
-  ScratchSpace scratch(space);
+  FiniteElementSpace const & space = form.trial_space();
+  ScratchSpace               scratch( space );
 
   // Iterate over the facets of the mesh
-  for (FacetIterator facet(mesh()); !facet.end(); ++facet)
+  for ( FacetIterator facet( mesh() ); !facet.end(); ++facet )
   {
     // Get cell to which facet belongs (there may be two, but pick first)
-    Cell cell(mesh(), facet->entities(tdim)[0]);
-    scratch.cell.update(cell);
+    Cell cell( mesh(), facet->entities( tdim )[0] );
+    scratch.cell.update( cell );
 
     // Get local index of facet with respect to the cell
-    const size_t local_facet = cell.index(*facet);
+    size_t const local_facet = cell.index( *facet );
 
     // Tabulate dofs on cell
-    space.dofmap().tabulate_dofs(scratch.dofs.data(), scratch.cell);
+    space.dofmap().tabulate_dofs( scratch.dofs.data(), scratch.cell );
 
     // Tabulate coordinates on cell
-    scratch.finite_element->tabulate_dof_coordinates( scratch.coordinates.data(),
-                                                      scratch.cell.coordinates.data() );
+    scratch.finite_element->tabulate_dof_coordinates(
+      scratch.coordinates.data(), scratch.cell.coordinates.data() );
 
     // Tabulate which dofs are on the facet
-    scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs.data(), local_facet);
+    scratch.dof_map->tabulate_facet_dofs( scratch.facet_dofs.data(),
+                                          local_facet );
 
     // Iterate over facet dofs
-    for (size_t i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
+    for ( size_t i = 0; i < scratch.dof_map->num_facet_dofs(); ++i )
     {
       // Get dof and coordinate of dof
-      size_t const dof = scratch.offset + scratch.facet_dofs[i];
-      int const global_dof = static_cast<int>(scratch.dofs[dof]);
-      real * x = &scratch.coordinates[scratch.facet_dofs[i]*Space::MAX_DIMENSION];
+      size_t const dof        = scratch.offset + scratch.facet_dofs[i];
+      size_t const global_dof = scratch.dofs[dof];
+      real *       x = &scratch.coordinates[scratch.facet_dofs[i] * gdim];
 
       // Map coordinate from H to G
-      for (size_t j = 0; j < gdim; j++)
-      {
-        y[j] = x[j];
-      }
-      subdomain.map(x, y);
+      std::copy( x, x + gdim, y.begin() );
+      subdomain.map( x, y.data() );
 
       // Check if coordinate is inside the domain G or in H
-      const bool on_boundary = facet->num_entities(tdim) == 1;
+      bool const on_boundary = facet->num_entities( tdim ) == 1;
 
       // G dof
-      if (subdomain.inside(x, on_boundary))
+      if ( subdomain.inside( x, on_boundary ) )
       {
         // Copy coordinate to std::vector
-        for (size_t j = 0; j < gdim; j++)
-        {
-          xx[j] = x[j];
-        }
+        std::copy( x, x + gdim, xx.begin() );
 
         // Check if coordinate exists from before
-        iterator it = coordinate_dofs.find(xx);
-        if (it != coordinate_dofs.end())
+        coords2dofs_it it = coord_dofs.find( xx );
+        if ( it != coord_dofs.end() )
         {
-          // Check that we don't have more than one dof per coordinate
-          /*
-           if (it->second.first != -1)
-           {
-           cout << "Coordinate: x =";
-           for (size_t j = 0; j < gdim; j++)
-           cout << " " << xx[j];
-           cout << "\n";
-           cout << "Degrees of freedom: " << it->second.first << " " << global_dof << "\n";
-           error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
-           }
-           */
+          // // Check that we don't have more than one dof per coordinate
+          // if ( it->second.first != DOLFIN_SIZE_T_UNDEF )
+          // {
+          //   cout << "Coordinate: x =";
+          //   for ( size_t j = 0; j < gdim; j++ )
+          //     cout << " " << xx[j];
+          //   cout << "\nDegrees of freedom: ";
+          //   cout << it->second.first << " " << global_dof << "\n";
+          //   error( "More than one dof associated with coordinate. Did you "
+          //          "forget to specify the subsystem?" );
+          // }
           it->second.first = global_dof;
         }
         else
         {
           // Doesn't exist, so create new pair (with illegal second value)
-          std::pair<int, int> dofs(global_dof, -1);
-          coordinate_dofs[xx] = dofs;
+          coord_dofs[xx] = std::make_pair( global_dof, DOLFIN_SIZE_T_UNDEF );
         }
       }
       // H dof
-      else if (subdomain.inside(y, on_boundary))
+      else if ( subdomain.inside( y.data(), on_boundary ) )
       {
         // y = F(x) is in G, so coordinate x is in H
 
         // Copy coordinate to std::vector
-        for (size_t j = 0; j < gdim; j++)
-          xx[j] = y[j];
+        std::copy( y.data(), y.data() + gdim, xx.begin() );
 
         // Check if coordinate exists from before
-        iterator it = coordinate_dofs.find(xx);
-        if (it != coordinate_dofs.end())
+        coords2dofs_it it = coord_dofs.find( xx );
+        if ( it != coord_dofs.end() )
         {
           // Check that we don't have more than one dof per coordinate
-          /*
-           if (it->second.second != -1)
-           {
-           cout << "Coordinate: x =";
-           for (size_t j = 0; j < gdim; j++)
-           cout << " " << xx[j];
-           cout << "\n";
-           cout << "Degrees of freedom: " << it->second.second << " " << global_dof << "\n";
-           error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
-           }
-           */
+          // if ( it->second.second != DOLFIN_SIZE_T_UNDEF )
+          // {
+          //   cout << "Coordinate: x =";
+          //   for ( size_t j = 0; j < gdim; j++ )
+          //     cout << " " << xx[j];
+          //   cout << "\nDegrees of freedom: ";
+          //   cout << it->second.second << " " << global_dof << "\n";
+          //   error( "More than one dof associated with coordinate. Did you "
+          //          "forget to specify the subsystem?" );
+          // }
           it->second.second = global_dof;
         }
         else
         {
           // Doesn't exist, so create new pair (with illegal first value)
-          std::pair<int, int> dofs(-1, global_dof);
-          coordinate_dofs[xx] = dofs;
+          coord_dofs[xx] = std::make_pair( DOLFIN_SIZE_T_UNDEF, global_dof );
         }
       }
     }
   }
 
   // Given pairs <dofG, dofH>
-
   // Insert 1 at (dof0, dof0)
-  size_t* rows = new size_t[coordinate_dofs.size()];
-  size_t i = 0;
-  for (iterator it = coordinate_dofs.begin(); it != coordinate_dofs.end(); ++it)
+  std::vector< size_t > rows( coord_dofs.size() );
+  size_t                i = 0;
+  for ( coords2dofs_it it = coord_dofs.begin(); it != coord_dofs.end(); ++it )
   {
-    rows[i++] = static_cast<size_t>(it->second.first);
+    rows[i++] = it->second.first;
   }
-  A.ident(coordinate_dofs.size(), rows);
+  A.ident( coord_dofs.size(), rows.data() );
 
   // Insert -1 at (dof0, dof1) and 0 on right-hand side
-  size_t* cols = new size_t[1];
-  real* vals = new real[1];
-  real* zero = new real[1];
-  for (iterator it = coordinate_dofs.begin(); it != coordinate_dofs.end(); ++it)
+  real const vals = -1.0;
+  real const zero = 0.0;
+
+  for ( coords2dofs_it it = coord_dofs.begin(); it != coord_dofs.end(); ++it )
   {
     // Check that we got both dofs
-    const int dof0 = it->second.first;
-    const int dof1 = it->second.second;
-    if (dof0 == -1 || dof1 == -1)
+    size_t const & dof0 = it->second.first;
+    size_t const & dof1 = it->second.second;
+
+    if ( dof0 == DOLFIN_SIZE_T_UNDEF or dof1 == DOLFIN_SIZE_T_UNDEF )
     {
       cout << "At coordinate: x =";
-      for (size_t j = 0; j < gdim; j++)
+      for ( size_t j = 0; j < gdim; j++ )
         cout << " " << it->first[j];
       cout << "\n";
-      error(
-          "Unable to find a pair of matching dofs for periodic boundary condition.");
+      error( "PeriodicBC : Unable to find a pair of matching dofs for "
+             "periodic boundary condition." );
     }
 
     /// @todo Perhaps this can be done more efficiently?
 
     // Set x_i - x_j = 0
-    rows[0] = static_cast<size_t>(dof0);
-    cols[0] = static_cast<size_t>(dof1);
-    vals[0] = -1;
-    zero[0] = 0.0;
-
-    A.set(vals, 1, rows, 1, cols);
-    b.set(zero, 1, rows);
+    A.set( &vals, 1, &dof0, 1, &dof1 );
+    b.set( &zero, 1, &dof0 );
   }
-  delete[] rows;
-  delete[] cols;
-  delete[] vals;
-  delete[] zero;
-  delete[] y;
 
   // Apply changes
   A.apply();
   b.apply();
 
   /*
-  //FIXME: For the moment just test preallocation
+  //For the moment just test preallocation
   if(A.rank() == 2)
   {
     //
@@ -284,13 +275,17 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   }
   */
 }
+
 //-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix&, GenericVector&,
-                       const GenericVector&, BilinearForm const&)
+
+void PeriodicBC::apply( GenericMatrix &,
+                        GenericVector &,
+                        const GenericVector &,
+                        BilinearForm const & )
 {
-  error("Periodic boundary conditions not implemented for nonlinear systems.");
+  error( "PeriodicBC : not implemented for nonlinear systems." );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
-

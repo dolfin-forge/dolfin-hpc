@@ -76,12 +76,16 @@ EXTRA_DIST = data/meshes/aneurysm.bin\
              demo/mesh/meshfunction/main.cpp\
              demo/mesh/subdomains/Makefile\
              demo/mesh/subdomains/main.cpp\
-             demo/pde/dg/poisson/main.cpp\
-             demo/pde/dg/poisson/Makefile\
-             demo/pde/dg/poisson/P1Projection.ufl\
-             demo/pde/dg/poisson/P1Projection.h\
-             demo/pde/dg/poisson/Poisson.ufl\
-             demo/pde/dg/poisson/Poisson.h\
+             demo/pde/bcs/main.cpp\
+             demo/pde/bcs/Makefile\
+             demo/pde/bcs/Poisson.ufl\
+             demo/pde/bcs/Poisson.h\
+             demo/pde/dg/main.cpp\
+             demo/pde/dg/Makefile\
+             demo/pde/dg/P1Projection.ufl\
+             demo/pde/dg/P1Projection.h\
+             demo/pde/dg/Poisson.ufl\
+             demo/pde/dg/Poisson.h\
              demo/pde/elasticity/main.cpp\
              demo/pde/elasticity/Elasticity.ufl\
              demo/pde/elasticity/Makefile\
@@ -97,9 +101,9 @@ EXTRA_DIST = data/meshes/aneurysm.bin\
              demo/pde/poisson/Poisson.h\
              demo/pde/poisson/UnitSquareMesh_32x32.bin\
              demo/pde/stokes/Stokes2D.h\
-             demo/pde/stokes/taylor-hood/Makefile\
-             demo/pde/stokes/taylor-hood/Stokes.ufl\
-             demo/pde/stokes/taylor-hood/Stokes.h\
-             demo/pde/stokes/taylor-hood/main.cpp\
+             demo/pde/stokes/Makefile\
+             demo/pde/stokes/Stokes.ufl\
+             demo/pde/stokes/Stokes.h\
+             demo/pde/stokes/main.cpp\
              demo/quadrature/main.cpp\
              demo/quadrature/Makefile

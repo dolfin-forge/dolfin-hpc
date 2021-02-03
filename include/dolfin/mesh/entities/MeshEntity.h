@@ -53,10 +53,12 @@ public:
     -> size_t; //!< @tod remove this function
 
   /// Copy global indices of mesh entities to array
-  auto get_entities( size_t dim, size_t * indices ) const -> void;
+  auto get_entities( size_t dim, std::vector< size_t > & indices ) const
+    -> void;
 
   /// Copy global indices of mesh entities to array
-  auto get_entities( size_t ** indices ) const -> void;
+  auto get_entities( std::vector< std::vector< size_t > > & indices ) const
+    -> void;
 
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
@@ -89,10 +91,12 @@ public:
   auto global_index() const -> size_t;
 
   /// Copy global indices of mesh entities to array
-  auto get_global_entities( size_t dim, size_t * indices ) const -> void;
+  auto get_global_entities( size_t dim, std::vector< size_t > & indices ) const
+    -> void;
 
   /// Copy global indices of mesh entities to array
-  auto get_global_entities( size_t ** indices ) const -> void;
+  auto get_global_entities( std::vector< std::vector< size_t > > & indices ) const
+    -> void;
 
   /// Return if the mesh entity is owned
   auto is_owned() const -> bool;
@@ -207,25 +211,29 @@ inline auto MeshEntity::entities( size_t dim ) const
 
 //-----------------------------------------------------------------------------
 
-inline auto MeshEntity::get_entities( size_t dim, size_t * indices ) const
+inline auto MeshEntity::get_entities( size_t                  dim,
+                                      std::vector< size_t > & indices ) const
   -> void
 {
   std::vector< size_t > const & e = topology_( tdim_, dim )[index_];
-  dolfin_assert( indices != nullptr );
-  std::copy( e.begin(), e.end(), indices );
+  dolfin_assert( not indices.empty() );
+  std::copy( e.begin(), e.end(), indices.begin() );
 }
 
 //-----------------------------------------------------------------------------
 
-inline auto MeshEntity::get_entities( size_t ** indices ) const -> void
+inline auto MeshEntity::get_entities(
+  std::vector< std::vector< size_t > > & indices ) const -> void
 {
-  dolfin_assert( indices != nullptr );
+  dolfin_assert( not indices.empty() );
+
   for ( size_t dim = 0; dim < tdim_; ++dim )
   {
     std::vector< std::vector< size_t > > const & e = topology_( tdim_, dim )();
-    dolfin_assert( indices[dim] != nullptr );
-    std::copy( e[index_].begin(), e[index_].end(), indices[dim] );
+    dolfin_assert( not indices[dim].empty() );
+    std::copy( e[index_].begin(), e[index_].end(), indices[dim].begin() );
   }
+
   indices[tdim_][0] = index_;
 }
 
@@ -264,15 +272,17 @@ inline auto MeshEntity::global_index() const -> size_t
 
 //-----------------------------------------------------------------------------
 
-inline auto MeshEntity::get_global_entities( size_t   dim,
-                                             size_t * indices ) const -> void
+inline auto MeshEntity::get_global_entities( size_t                  dim,
+                                             std::vector< size_t > & indices ) const
+  -> void
 {
   // Get list of entities for given topological dimension
   if ( topology_.distributed() )
   {
     Connectivity const & mc = topology_( tdim_, dim );
-    distdata_[dim].get_global(
-      mc.degree( index_ ), mc[index_].data(), indices );
+    distdata_[dim].get_global( mc.degree( index_ ),
+                               mc[index_].data(),
+                               indices.data() );
   }
   else
   {
@@ -282,7 +292,8 @@ inline auto MeshEntity::get_global_entities( size_t   dim,
 
 //-----------------------------------------------------------------------------
 
-inline auto MeshEntity::get_global_entities( size_t ** indices ) const -> void
+inline auto MeshEntity::get_global_entities(
+  std::vector< std::vector< size_t > > & indices ) const -> void
 {
   // Get list of entities for given topological dimension
   if ( topology_.distributed() )
@@ -291,7 +302,7 @@ inline auto MeshEntity::get_global_entities( size_t ** indices ) const -> void
     {
       Connectivity const & mc = topology_( tdim_, d );
       distdata_[d].get_global(
-        mc.degree( index_ ), mc[index_].data(), indices[d] );
+        mc.degree( index_ ), mc[index_].data(), indices[d].data() );
     }
     indices[tdim_][0] = distdata_[tdim_].get_global( index_ );
   }

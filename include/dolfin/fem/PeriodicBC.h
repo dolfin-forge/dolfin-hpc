@@ -5,19 +5,19 @@
 #define __DOLFIN_PERIODIC_BC_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/fem/SubSystem.h>
 #include <dolfin/fem/BoundaryCondition.h>
+#include <dolfin/fem/SubSystem.h>
 
 namespace dolfin
 {
 
-class DofMap;
 class Mesh;
-class SubDomain;
-class Form;
+class BilinearForm;
 class GenericMatrix;
 class GenericVector;
 class PeriodicSubDomain;
+
+//-----------------------------------------------------------------------------
 
 /// This class specifies the interface for setting periodic boundary
 /// conditions for partial differential equations,
@@ -36,30 +36,34 @@ class PeriodicSubDomain;
 /// optional set of parameters may be used to specify for which sub
 /// system the boundary condition should be specified.
 
-class PeriodicBC: public BoundaryCondition
+class PeriodicBC : public BoundaryCondition
 {
 public:
-
   /// Create periodic boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain);
+  PeriodicBC( Mesh & mesh, PeriodicSubDomain const & sub_domain );
 
   /// Create sub system boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
-             SubSystem const& sub_system);
+  PeriodicBC( Mesh &                    mesh,
+              PeriodicSubDomain const & sub_domain,
+              SubSystem const &         sub_system );
 
   /// Destructor
   ~PeriodicBC() override = default;
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) override;
+  void apply( GenericMatrix &      A,
+              GenericVector &      b,
+              BilinearForm const & form ) override;
 
-  /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             BilinearForm const& form) override;
-
-private:
-
+  /// Apply boundary condition to linear system for a nonlinear problem (not
+  /// implemented)
+  void apply( GenericMatrix &       A,
+              GenericVector &       b,
+              const GenericVector & x,
+              BilinearForm const &  form ) override;
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

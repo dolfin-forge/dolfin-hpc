@@ -190,7 +190,7 @@ inline auto UFCCell::update( Cell & cell ) -> void
   this->cell_ = &cell;
 
 #if ENABLE_P1_OPTIMIZATIONS
-  cell.get_global_entities( 0, entity_indices[0].data() );
+  cell.get_global_entities( 0, entity_indices[0] );
 #else
   cell.get_global_entities( entity_indices );
 #endif

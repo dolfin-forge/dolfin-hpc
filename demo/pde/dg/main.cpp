@@ -36,9 +36,8 @@ struct Source : public Value< Source, 1 >
 
 int main()
 {
-
   dolfin_init();
-  
+
   // Create mesh
   UnitSquare mesh( 64, 64 );
 
@@ -53,13 +52,12 @@ int main()
   Function u( a.trial_space() );
   Matrix   A;
   Vector   b;
+
   a.assemble( A, true );
   L.assemble( b, true );
 
   KrylovSolver solver( bicgstab, bjacobi );
-
   solver.solve( A, u.vector(), b );
-  u.sync();
 
   // Project solution onto continuous basis for post-processing
   P1Projection::BilinearForm a_proj( mesh );
@@ -68,16 +66,16 @@ int main()
 
   Matrix A_proj;
   Vector b_proj;
+
   a_proj.assemble( A_proj, true );
   L_proj.assemble( b_proj, true );
+
   solver.solve( A_proj, u_proj.vector(), b_proj );
-  u_proj.sync();
 
   // Save solution to file
-  File file( "poisson.pvd" );
-  file << u_proj;
+  File( "poisson.pvd" ) << u_proj;
 
   dolfin_finalize();
-  
+
   return 0;
 }

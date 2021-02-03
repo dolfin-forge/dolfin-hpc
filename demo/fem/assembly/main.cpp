@@ -7,7 +7,7 @@
 
 #include <dolfin/common/Test.h>
 #include <dolfin/la/Matrix.h>
-#include <dolfin/mesh/UnitCube.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
 
 #include "ReactionDiffusion.h"
 
@@ -19,12 +19,12 @@ int main()
 
   // Create mesh and form
   UnitCube mesh(20, 20, 20);
-  ReactionDiffusion::BilinearForm a(mesh); 
+  ReactionDiffusion::BilinearForm a(mesh);
 
   // Assemble matrix
   Matrix A;
   a.assemble(A, true);
   message("|A| = %e", A.norm());
- 
+
   return 0;
 }

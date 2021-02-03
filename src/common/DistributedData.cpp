@@ -228,9 +228,8 @@ void DistributedData::finalize()
     {
       if ( shared_.size() > 0 )
       {
-        error(
-          "DistributedData : no mapping was provided and some entities set "
-          "as shared: impossible to devise a linear numbering." );
+        error( "DistributedData : no mapping was provided and some entities "
+               "set as shared: impossible to devise a linear numbering." );
       }
 
       // Either local size or the range can be used but if both are provided
@@ -238,10 +237,8 @@ void DistributedData::finalize()
       if ( range_size_ != cached_numbering_.size() )
       {
         error( "DistributedData : no ghost entries defined while size of local"
-               "  size and range are not equal\n"
-               " (local size) %u != %u (range)",
-               cached_numbering_.size(),
-               range_size_ );
+               "  size and range are not equal\n(local size) %u != %u (range)",
+               cached_numbering_.size(), range_size_ );
       }
 
       // Numbering incrementally and set all as owned
@@ -255,12 +252,8 @@ void DistributedData::finalize()
       // Global renumbering is not necessary
       valid_numbering = true;
 
-      message( 1,
-               "DistributedData : generated linear mapping in range [%u, %u[ "
-               "for rank %u",
-               offset_,
-               offset_ + range_size_,
-               rank_ );
+      message( 1, "DistributedData : generated linear mapping in range [%u, %u["
+                  " for rank %u", offset_, offset_ + range_size_, rank_ );
     }
 
     // At this point mappings exist and local-to-global is cached.
@@ -269,8 +262,7 @@ void DistributedData::finalize()
     {
       error( "DistributedData : size mismatch between local-to-global (%u) and "
              "and global-to-local (%u) mappings",
-             cached_numbering_.size(),
-             local_.size() );
+             cached_numbering_.size(), local_.size() );
     }
 
     // Cache ownership if needed
@@ -311,8 +303,7 @@ void DistributedData::assign( DistributedData const &       other,
   {
     error( "DistributedData : assignment requires mapping size (%u) lower than "
            "or equal to the local size of other distributed data (%u)",
-           mapping.size(),
-           other.local_size() );
+           mapping.size(), other.local_size() );
   }
 
   cached_numbering_ = std::vector< size_t >( mapping.size() );

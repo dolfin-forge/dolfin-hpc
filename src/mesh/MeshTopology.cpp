@@ -224,9 +224,7 @@ auto MeshTopology::finalize() -> void
         if ( this->size( d ) != ddata.local_size() )
         {
           error( "MeshEditor : vertex size mismatch between topology '%u' and "
-                 "distributed data '%u'",
-                 this->size( d ),
-                 ddata.local_size() );
+                 "distributed data '%u'", this->size( d ), ddata.local_size() );
         }
       }
     }

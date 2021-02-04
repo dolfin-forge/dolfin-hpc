@@ -307,7 +307,7 @@ inline auto Function::mesh() const -> Mesh &
 inline auto Function::rank() const -> size_t
 {
   dolfin_assert( fe_space_ != nullptr );
-  return fe_space_->element().value_rank();
+  return fe_space_->element()().value_rank();
 }
 
 //-----------------------------------------------------------------------------
@@ -315,7 +315,7 @@ inline auto Function::rank() const -> size_t
 inline auto Function::dim( size_t i ) const -> size_t
 {
   dolfin_assert( fe_space_ != nullptr );
-  return fe_space_->element().value_dimension( i );
+  return fe_space_->element()().value_dimension( i );
 }
 
 //-----------------------------------------------------------------------------
@@ -385,7 +385,7 @@ inline auto Function::decompose() -> std::vector< Function * >
 inline auto Function::num_sub_functions() const -> size_t
 {
   dolfin_assert( fe_space_ != nullptr );
-  return fe_space_->element().num_sub_elements();
+  return fe_space_->element()().num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------

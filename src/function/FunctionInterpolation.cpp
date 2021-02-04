@@ -76,9 +76,9 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element().evaluate_dofs(&block1[dof], EE,
-                                          S1.cell.coordinates.data(),
-                                          0, S1.cell);
+      F1.space().element()().evaluate_dofs(&block1[dof], EE,
+                                           S1.cell.coordinates.data(),
+                                           0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -104,9 +104,9 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element().evaluate_dofs(&block1[dof], F0,
-                                         S1.cell.coordinates.data(),
-                                         0, S1.cell);
+      F1.space().element()().evaluate_dofs(&block1[dof], F0,
+                                           S1.cell.coordinates.data(),
+                                           0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -163,9 +163,9 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     {
       S1.cell.update(*cell);
       // FIXME orientation (0) needs to be correctly set here ?!
-      F1.space().element().evaluate_dofs(&block1[dof], F0,
-                                          S1.cell.coordinates.data(),
-                                          0, S1.cell);
+      F1.space().element()().evaluate_dofs(&block1[dof], F0,
+                                           S1.cell.coordinates.data(),
+                                           0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);

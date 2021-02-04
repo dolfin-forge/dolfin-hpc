@@ -24,33 +24,33 @@ void test_finite_element_space( FiniteElementSpace const & space )
   // check FiniteElement
   {
     ufc::finite_element * ufc_element =
-      create_finite_element( element.signature() );
+      create_finite_element( element().signature() );
 
-    ck_assert( strcmp( ufc_element->signature(), element.signature() ) == 0 );
-    ck_assert( strcmp( ufc_element->family(), element.family() ) == 0 );
+    ck_assert( strcmp( ufc_element->signature(), element().signature() ) == 0 );
+    ck_assert( strcmp( ufc_element->family(), element().family() ) == 0 );
 
-    ck_assert( ufc_element->cell_shape() == element.cell_shape() );
+    ck_assert( ufc_element->cell_shape() == element().cell_shape() );
     ck_assert( ufc_element->topological_dimension()
-               == element.topological_dimension() );
+               == element().topological_dimension() );
     ck_assert( ufc_element->geometric_dimension()
-               == element.geometric_dimension() );
-    ck_assert( ufc_element->space_dimension() == element.space_dimension() );
-    ck_assert( ufc_element->value_rank() == element.value_rank() );
+               == element().geometric_dimension() );
+    ck_assert( ufc_element->space_dimension() == element().space_dimension() );
+    ck_assert( ufc_element->value_rank() == element().value_rank() );
     ck_assert( ufc_element->value_dimension( 0 )
-               == element.value_dimension( 0 ) );
-    ck_assert( ufc_element->value_size() == element.value_size() );
+               == element().value_dimension( 0 ) );
+    ck_assert( ufc_element->value_size() == element().value_size() );
     ck_assert( ufc_element->reference_value_rank()
-               == element.reference_value_rank() );
+               == element().reference_value_rank() );
     ck_assert( ufc_element->reference_value_dimension( 0 )
-               == element.reference_value_dimension( 0 ) );
+               == element().reference_value_dimension( 0 ) );
     ck_assert( ufc_element->reference_value_size()
-               == element.reference_value_size() );
-    ck_assert( ufc_element->degree() == element.degree() );
+               == element().reference_value_size() );
+    ck_assert( ufc_element->degree() == element().degree() );
     element.is_vectorizable();
 
-    for ( size_t i = 0; i < element.num_sub_elements(); ++i )
+    for ( size_t i = 0; i < element().num_sub_elements(); ++i )
     {
-      ufc::finite_element * sub = element.create_sub_element( i );
+      ufc::finite_element * sub = element().create_sub_element( i );
       delete sub;
     }
 

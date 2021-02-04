@@ -67,7 +67,7 @@ FiniteElement::FiniteElement( CellType const &, Form & form, size_t const i )
 //-----------------------------------------------------------------------------
 
 FiniteElement::FiniteElement( FiniteElement const & other )
-  : ufc_finite_element_( other.create() )
+  : ufc_finite_element_( other().create() )
   , sub_value_dims_( nullptr )
 {
   Initialize();
@@ -98,7 +98,7 @@ void FiniteElement::Initialize()
   size_t const max_dim = ufc_finite_element_->value_rank() + 1;
   sub_value_dims_      = new std::vector< size_t >[max_dim];
   sub_value_offs_      = new std::vector< size_t >[max_dim];
-  size_t nb_subs       = this->num_sub_elements();
+  size_t nb_subs       = ufc_finite_element_->num_sub_elements();
   if ( nb_subs > 0 )
   {
     size_t * off = new size_t[max_dim];
@@ -121,7 +121,7 @@ void FiniteElement::Initialize()
   {
     for ( size_t a = 0; a < max_dim; ++a )
     {
-      sub_value_dims_[a].push_back( value_dimension( a ) );
+      sub_value_dims_[a].push_back( ufc_finite_element_->value_dimension( a ) );
       sub_value_offs_[a].push_back( 0 );
     }
   }

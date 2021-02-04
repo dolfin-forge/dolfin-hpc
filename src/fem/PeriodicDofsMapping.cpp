@@ -200,8 +200,8 @@ void PeriodicDofsMapping::init()
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
       dofmap.tabulate_facet_dofs( facet_dofsG, facet_posI );
-      element.tabulate_dof_coordinates( coordinatesG.data(),
-                                        ufc_cell0.coordinates.data() );
+      element().tabulate_dof_coordinates( coordinatesG.data(),
+                                          ufc_cell0.coordinates.data() );
 
       for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
@@ -225,8 +225,8 @@ void PeriodicDofsMapping::init()
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
       dofmap.tabulate_facet_dofs( facet_dofsG, facet_posG );
-      element.tabulate_dof_coordinates( coordinatesG.data(),
-                                        ufc_cell0.coordinates.data() );
+      element().tabulate_dof_coordinates( coordinatesG.data(),
+                                          ufc_cell0.coordinates.data() );
 
       for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
@@ -266,8 +266,8 @@ void PeriodicDofsMapping::init()
       ufc_cell1.update( cellH );
       dofmap.tabulate_dofs( dofsH, ufc_cell1 );
       dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
-      element.tabulate_dof_coordinates( coordinatesH.data(),
-                                        ufc_cell1.coordinates.data() );
+      element().tabulate_dof_coordinates( coordinatesH.data(),
+                                          ufc_cell1.coordinates.data() );
 
       for ( size_t ii = 0; ii < num_facet_dofs; ++ii )
       {
@@ -415,8 +415,8 @@ void PeriodicDofsMapping::init()
                 ufc_cell1.update( cell );
                 dofmap.tabulate_dofs( dofsH, ufc_cell1 );
                 dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
-                element.tabulate_dof_coordinates( coordinatesH.data(),
-                                                  ufc_cell1.coordinates.data() );
+                element().tabulate_dof_coordinates( coordinatesH.data(),
+                                                    ufc_cell1.coordinates.data() );
 
                 for ( size_t jj = 0; jj < num_facet_dofs; ++jj )
                 {

@@ -17,7 +17,7 @@ namespace dolfin
 ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
   : cell( space.cell() )
   , offset( 0 )
-  , finite_element( &space.element() )
+  , finite_element( &space.element()() )
   , dof_map( &space.dofmap() )
   , size( finite_element->value_size() )
   , space_dimension( finite_element->space_dimension() )

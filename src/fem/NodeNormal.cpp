@@ -116,7 +116,7 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
 {
   message( 1,
            "NodeNormal : compute P%u node normal",
-           basis[0].space().element().degree() );
+           basis[0].space().element()().degree() );
   clear();
   BoundaryMesh & boundary = mesh.exterior_boundary();
 
@@ -142,7 +142,7 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
   DofMap const &             dofmapN  = spaceN.dofmap();
   FiniteElement const &      elementN = spaceN.element();
   ScratchSpace               scratchN( spaceN );
-  size_t const               value_size = spaceN.element().value_size();
+  size_t const               value_size = spaceN.element()().value_size();
   dolfin_assert( value_size == gdim );
   size_t const num_facet_dofs            = dofmapN.num_facet_dofs();
   size_t const num_facet_nodes           = num_facet_dofs / value_size;
@@ -169,8 +169,8 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
          || subdomain_->inside( &( bcell->midpoint() )[0], on_boundary ) )
     {
       scratchN.cell.update( cell );
-      elementN.tabulate_dof_coordinates( scratchN.coordinates.data(),
-                                         scratchN.cell.coordinates.data() );
+      elementN().tabulate_dof_coordinates( scratchN.coordinates.data(),
+                                           scratchN.cell.coordinates.data() );
     }
     else
     {
@@ -179,8 +179,8 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
       {
         // Tabulate dofs on facet restriction
         scratchN.cell.update( cell );
-        elementN.tabulate_dof_coordinates( scratchN.coordinates.data(),
-                                           scratchN.cell.coordinates.data() );
+        elementN().tabulate_dof_coordinates( scratchN.coordinates.data(),
+                                             scratchN.cell.coordinates.data() );
         dofmapN.tabulate_entity_dofs( scratchN.facet_dofs.data(), fdim, local_facet );
         for ( size_t i = 0; i < num_restricted_facet_dofs; ++i )
         {

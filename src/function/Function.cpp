@@ -246,10 +246,10 @@ void Function::evaluate(size_t n, real* values, const real* x,
 //         values[j] += scratch_->coefficients[i] * scratch_->all_basis_values[i][j];
 // #else
     // Compute linear combination
-    for (size_t i = 0; i < fe_space_->element().space_dimension(); ++i)
+    for (size_t i = 0; i < fe_space_->element()().space_dimension(); ++i)
     {
       // FIXME cell_orientation needs a correct value here
-      fe_space_->element().evaluate_basis(i, scratch_->basis_values.data(), x,
+      fe_space_->element()().evaluate_basis(i, scratch_->basis_values.data(), x,
                                ufc_cell->coordinates.data(), 0);
       for (size_t j = 0; j < scratch_->size; ++j)
       {
@@ -322,8 +322,8 @@ void Function::interpolate_vertex_values(real* values) const
       // Values are packed by vertex and not by subspace (if any)
       // FIXME find a form, where more tha vertex_values and dof_values are used,
       // to make sure the arguments here are correct
-      fe_space_->element().interpolate_vertex_values(vertex_values, scratch_->coefficients.data(),
-                                         scratch_->cell.coordinates.data(), 0);
+      fe_space_->element()().interpolate_vertex_values(vertex_values, scratch_->coefficients.data(),
+                                                       scratch_->cell.coordinates.data(), 0);
 
       // Sum values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
@@ -431,8 +431,8 @@ void Function::interpolate_vertex_values(real* values) const
       // Values are packed by vertex and not by subspace (if any)
       // FIXME find a form, where more tha vertex_values and dof_values are used,
       // to make sure the arguments here are correct
-      fe_space_->element().interpolate_vertex_values(vertex_values, scratch_->coefficients.data(),
-                                         scratch_->cell.coordinates.data(), 0);
+      fe_space_->element()().interpolate_vertex_values(vertex_values, scratch_->coefficients.data(),
+                                                       scratch_->cell.coordinates.data(), 0);
 
       // Copy values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
@@ -483,7 +483,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 
 void Function::InitializeVector()
 {
-  dolfin_assert( fe_space_->element().topological_dimension() + 1 == mesh_->num_entities().size() );
+  dolfin_assert( fe_space_->element()().topological_dimension() + 1 == mesh_->num_entities().size() );
   if ( X_->size() != fe_space_->dofmap().global_dimension( mesh_->num_entities() ) )
   {
     // Specific case in serial local_size == global_dimension
@@ -517,7 +517,7 @@ void Function::InitializeGhosts()
     // Tabulate dofs
     fe_space_->dofmap().tabulate_dofs(scratch_->dofs.data(), scratch_->cell);
 
-    for (size_t j = 0; j < fe_space_->element().space_dimension(); ++j)
+    for (size_t j = 0; j < fe_space_->element()().space_dimension(); ++j)
     {
       indices.insert(scratch_->dofs[j]);
     }

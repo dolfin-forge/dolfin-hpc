@@ -173,7 +173,7 @@ inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 {
   return is_cellwise_defined()
-         && ( dof_map_.num_element_dofs() == finite_element_->value_size() );
+         && ( dof_map_.num_element_dofs() == this->element()().value_size() );
 }
 
 //-----------------------------------------------------------------------------
@@ -181,8 +181,8 @@ inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 inline auto FiniteElementSpace::is_vertex_based() const -> bool
 {
   /// @todo Only a particular case.
-  return ( finite_element_->family() == Element::Family::CG )
-         and ( finite_element_->degree() == 1 );
+  return ( this->element()().family() == Element::Family::CG )
+         and ( this->element()().degree() == 1 );
 }
 
 //-----------------------------------------------------------------------------
@@ -191,11 +191,11 @@ inline auto FiniteElementSpace::is_flattenable() const -> bool
 {
   /// @todo Only a particular case.
   size_t value_size = 1;
-  for ( size_t i = 0; i < finite_element_->value_rank(); ++i )
+  for ( size_t i = 0; i < this->element()().value_rank(); ++i )
   {
-    value_size *= finite_element_->value_dimension( i );
+    value_size *= this->element()().value_dimension( i );
   }
-  return ( finite_element_->flatten().size() == value_size );
+  return ( this->element().flatten().size() == value_size );
 }
 
 //-----------------------------------------------------------------------------

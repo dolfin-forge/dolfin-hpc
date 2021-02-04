@@ -52,7 +52,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
                                         size_t const               i )
   : mesh_( space.mesh() )
   , cell_( space.cell() )
-  , finite_element_( new FiniteElement( space.element(), i ) )
+  , finite_element_( new FiniteElement( space.element()(), i ) )
   , dof_map_( DofMap::acquire( space.mesh(),
                                *space.dofmap().create_sub_dofmap( i ),
                                true ) )
@@ -65,7 +65,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
                                         SubSystem const &          sub )
   : mesh_( space.mesh() )
   , cell_( space.cell() )
-  , finite_element_( new FiniteElement( space.element(), sub ) )
+  , finite_element_( new FiniteElement( space.element()(), sub ) )
   , dof_map_( DofMap::acquire( space.mesh(),
                                *space.dofmap().create_sub_dofmap( sub ),
                                true ) )
@@ -128,7 +128,7 @@ auto FiniteElementSpace::flatten() const -> std::vector< FiniteElementSpace * >
 auto FiniteElementSpace::disp() const -> void
 {
   section( "FiniteElementSpace" );
-  prm( "Finite element", this->element().signature() );
+  prm( "Finite element", this->element()().signature() );
   prm( "Dof map", this->dofmap().signature() );
   end();
 }

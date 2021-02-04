@@ -54,7 +54,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
   , cell_( space.cell() )
   , finite_element_( new FiniteElement( space.element()(), i ) )
   , dof_map_( DofMap::acquire( space.mesh(),
-                               *space.dofmap().create_sub_dofmap( i ),
+                               *space.dofmap()().create_sub_dofmap( i ),
                                true ) )
 {
 }
@@ -79,7 +79,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                     other_mesh,
   : mesh_( other_mesh )
   , cell_( space.cell() )
   , finite_element_( &space.element() )
-  , dof_map_( DofMap::acquire( other_mesh, *space.dofmap().create(), true ) )
+  , dof_map_( DofMap::acquire( other_mesh, *space.dofmap()().create(), true ) )
 
 {
   if ( other_mesh.type().cellType() != space.cell().type() )
@@ -94,7 +94,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & other )
   : mesh_( other.mesh() )
   , cell_( other.cell() )
   , finite_element_( &other.element() )
-  , dof_map_( DofMap::acquire( other.mesh(), *other.dofmap().create(), true ) )
+  , dof_map_( DofMap::acquire( other.mesh(), *other.dofmap()().create(), true ) )
 {
 }
 
@@ -128,8 +128,8 @@ auto FiniteElementSpace::flatten() const -> std::vector< FiniteElementSpace * >
 auto FiniteElementSpace::disp() const -> void
 {
   section( "FiniteElementSpace" );
-  prm( "Finite element", this->element()().signature() );
-  prm( "Dof map", this->dofmap().signature() );
+  prm( "Finite element", element()().signature() );
+  prm( "Dof map", dofmap()().signature() );
   end();
 }
 

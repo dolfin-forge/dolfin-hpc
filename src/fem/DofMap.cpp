@@ -49,7 +49,7 @@ DofMap::DofMap( Mesh & mesh, ufc::dofmap & dofmap, bool const owner )
 DofMap::DofMap( DofMap const & dofmap, size_t i )
   : MeshDependent( dofmap.mesh() )
   , offset_( 0 )
-  , ufc_dofmap_( dofmap.create_sub_dofmap( i ) )
+  , ufc_dofmap_( dofmap().create_sub_dofmap( i ) )
   , numbering_( DofNumbering::create( dofmap.mesh(), *ufc_dofmap_ ) )
   , hash_( make_hash( mesh(), *ufc_dofmap_ ) )
   , periodic_dofmap_( nullptr )
@@ -209,20 +209,20 @@ auto DofMap::create_sub_dofmap( ufc::dofmap const &           dofmap,
 void DofMap::init()
 {
   // Build the DOLFIN dofmap
-  message( 1, "DofMap: init dofmap for signature:\n %s", signature() );
+  message( 1, "DofMap: init dofmap for signature:\n %s", ufc_dofmap_->signature() );
   numbering_->build();
   message( 1, "DofMap: offset = %u; size = %u",
            numbering_->offset(), numbering_->size() );
 
   // Information for mixed elements
-  size_t const nb_sub = this->num_sub_dofmaps();
+  size_t const nb_sub = ufc_dofmap_->num_sub_dofmaps();
   if ( nb_sub > 0 )
   {
     // Set offsets and local dimensions
     size_t off = 0;
     for ( size_t i = 0; i < nb_sub; ++i )
     {
-      ufc::dofmap * subdm = this->create_sub_dofmap( i );
+      ufc::dofmap * subdm = ufc_dofmap_->create_sub_dofmap( i );
       sub_dofmaps_dims_.push_back( subdm->num_element_dofs() );
       sub_dofmaps_offs_.push_back( off );
       off += subdm->num_element_dofs();
@@ -231,7 +231,7 @@ void DofMap::init()
   }
   else
   {
-    sub_dofmaps_dims_ = { this->num_element_dofs() };
+    sub_dofmaps_dims_ = { ufc_dofmap_->num_element_dofs() };
     sub_dofmaps_offs_ = { 0 };
   }
 }
@@ -345,7 +345,7 @@ auto DofMap::check( bool throw_error ) -> bool
   bool ret = true;
 
   message( "Check dofs distribution" );
-  message( "signature   : %s", this->signature() );
+  message( "signature   : %s", ufc_dofmap_->signature() );
   bool distributed_by_entities_ = true;
   message( "by entities : %d", distributed_by_entities_ );
   // FIXME:
@@ -355,7 +355,7 @@ auto DofMap::check( bool throw_error ) -> bool
   MeshDistributedData & distdata = mesh.distdata();
   size_t const          tdim     = mesh.topology_dimension();
 
-  if ( this->num_facet_dofs() == 0 )
+  if ( ufc_dofmap_->num_facet_dofs() == 0 )
   {
     return true;
   }
@@ -366,7 +366,7 @@ auto DofMap::check( bool throw_error ) -> bool
   EntitiesDofMap shared_owned_entities;
   Cell           c0( mesh, 0 );
   UFCCell        ufc_cell( c0 );
-  size_t *       cell_dofs       = new size_t[this->num_element_dofs()];
+  size_t *       cell_dofs       = new size_t[ufc_dofmap_->num_element_dofs()];
   size_t *       num_entity_dofs = new size_t[tdim];
   for ( size_t d = 0; d < tdim; ++d )
   {
@@ -374,8 +374,8 @@ auto DofMap::check( bool throw_error ) -> bool
     mesh.init( mesh.type().facet_dim(), d );
     num_entity_dofs[d] = ufc_dofmap_->num_entity_dofs( d );
   }
-  size_t const num_facet_dofs  = this->num_facet_dofs();
-  size_t *     loc_entity_dofs = new size_t[this->num_facet_dofs()];
+  size_t const num_facet_dofs  = ufc_dofmap_->num_facet_dofs();
+  size_t *     loc_entity_dofs = new size_t[ufc_dofmap_->num_facet_dofs()];
   for ( CellIterator bcell( boundary ); !bcell.end(); ++bcell )
   {
     Facet f( boundary.mesh(), boundary.facet_index( *bcell ) );

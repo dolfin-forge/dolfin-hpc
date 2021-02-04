@@ -94,7 +94,7 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
       // Tabulate dofs for each dimension on macro element
       for (size_t i = 0; i < ufc.form.rank(); ++i)
       {
-        const size_t offset = dof_map_set[i].num_element_dofs();
+        const size_t offset = dof_map_set[i]().num_element_dofs();
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i], ufc.cell0);
         dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1);
       }
@@ -109,18 +109,18 @@ void build( GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
   // Only for square systems
   if(mesh.has_periodic_constraint())
   {
-    bool has_facet_dofs = (dof_map_set[0].num_facet_dofs() > 0);
+    bool has_facet_dofs = (dof_map_set[0]().num_facet_dofs() > 0);
     bool is_square = true;
     for (size_t i = 1; i < ufc.form.rank(); ++i)
     {
-      has_facet_dofs |= (dof_map_set[i].num_facet_dofs() > 0);
+      has_facet_dofs |= (dof_map_set[i]().num_facet_dofs() > 0);
       is_square &= (dof_map_set[i] == dof_map_set[i - 1]);
     }
 
     if(has_facet_dofs)
     {
       // FIXME is this the correct space?!
-      FiniteElementSpace space( mesh, ufc.finite_elements[0], dof_map_set[0] );
+      FiniteElementSpace space( mesh, ufc.finite_elements[0], dof_map_set[0]() );
       PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping( space );
       size_t local_dim[2];
       local_dim[0] = 1;

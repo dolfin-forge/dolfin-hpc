@@ -61,27 +61,27 @@ void test_finite_element_space( FiniteElementSpace const & space )
 
   // check DofMap
   {
-    ufc::dofmap * ufc_dofmap = create_dof_map( dofmap.signature() );
+    ufc::dofmap * ufc_dofmap = create_dof_map( dofmap().signature() );
 
-    ck_assert( strcmp( ufc_dofmap->signature(), dofmap.signature() ) == 0 );
+    ck_assert( strcmp( ufc_dofmap->signature(), dofmap().signature() ) == 0 );
     ck_assert( ufc_dofmap->needs_mesh_entities( 0 )
-               == dofmap.needs_mesh_entities( 0 ) );
+               == dofmap().needs_mesh_entities( 0 ) );
     ck_assert( ufc_dofmap->topological_dimension()
-               == dofmap.topological_dimension() );
+               == dofmap().topological_dimension() );
     ck_assert( ufc_dofmap->num_global_support_dofs()
-               == dofmap.num_global_support_dofs() );
+               == dofmap().num_global_support_dofs() );
     ck_assert( ufc_dofmap->num_element_support_dofs()
-               == dofmap.num_element_support_dofs() );
-    ck_assert( ufc_dofmap->num_element_dofs() == dofmap.num_element_dofs() );
-    ck_assert( ufc_dofmap->num_facet_dofs() == dofmap.num_facet_dofs() );
+               == dofmap().num_element_support_dofs() );
+    ck_assert( ufc_dofmap->num_element_dofs() == dofmap().num_element_dofs() );
+    ck_assert( ufc_dofmap->num_facet_dofs() == dofmap().num_facet_dofs() );
     ck_assert( ufc_dofmap->num_entity_dofs( 0 )
-               == dofmap.num_entity_dofs( 0 ) );
+               == dofmap().num_entity_dofs( 0 ) );
     ck_assert( ufc_dofmap->num_entity_closure_dofs( 0 )
-               == dofmap.num_entity_closure_dofs( 0 ) );
+               == dofmap().num_entity_closure_dofs( 0 ) );
 
-    for ( size_t i = 0; i < dofmap.num_sub_dofmaps(); ++i )
+    for ( size_t i = 0; i < dofmap().num_sub_dofmaps(); ++i )
     {
-      ufc::dofmap * sub = dofmap.create_sub_dofmap( i );
+      ufc::dofmap * sub = dofmap().create_sub_dofmap( i );
       delete sub;
     }
 

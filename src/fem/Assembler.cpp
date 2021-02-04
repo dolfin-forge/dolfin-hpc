@@ -461,7 +461,7 @@ void initializePeriodicDofs(GenericTensor& A,
     Matrix& matA = static_cast<Matrix&>(A);
     // FIXME is this the correct space?!
     Mesh & mesh = const_cast<Mesh&>( dofmaps.mesh() );
-    FiniteElementSpace space( mesh, ufc.finite_elements[0], dofmaps[0] );
+    FiniteElementSpace space( mesh, ufc.finite_elements[0], dofmaps[0]() );
     PeriodicDofsMapping const& pdm = dofmaps[0].periodic_mapping( space );
     real * block = new real[pdm.max_local_dimension() + 1];
     std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);

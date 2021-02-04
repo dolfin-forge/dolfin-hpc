@@ -76,11 +76,11 @@ UFC::UFC( Form const & form )
     finite_elements[i] = form().create_finite_element( i );
 
     // Initialize local dimensions
-    local_dimensions[i] = form.dofmaps()[i].num_element_dofs();
+    local_dimensions[i] = form.dofmaps()[i]().num_element_dofs();
     num_entries_A *= local_dimensions[i];
 
     // Initialize local dimensions for macro element
-    macro_local_dimensions[i] = 2 * form.dofmaps()[i].num_element_dofs();
+    macro_local_dimensions[i] = 2 * form.dofmaps()[i]().num_element_dofs();
     num_entries_macro_A *= macro_local_dimensions[i];
 
     // Initialize local sizes

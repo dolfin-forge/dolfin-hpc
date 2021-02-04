@@ -222,7 +222,7 @@ void DirichletBC::computeBCTopological( _map< size_t, real > & boundary_values,
 
   // Iterate over facets
   DofMap const &        dof_map = space.dofmap();
-  std::vector< size_t > cell_dofs( dof_map.num_element_dofs() );
+  std::vector< size_t > cell_dofs( dof_map().num_element_dofs() );
   ScratchSpace          scratch( space, sub_system );
   for ( std::vector< size_t >::const_iterator it = entities_.begin();
         it != entities_.end(); )
@@ -278,7 +278,7 @@ void DirichletBC::computeBCGeometric( _map< size_t, real > & boundary_values,
 
   // Iterate over facets
   DofMap const &        dof_map = space.dofmap();
-  std::vector< size_t > cell_dofs( dof_map.num_element_dofs() );
+  std::vector< size_t > cell_dofs( dof_map().num_element_dofs() );
   ScratchSpace          scratch( space, sub_system );
   CellType * facet_type = mesh().type().create( mesh().type().facetType() );
   Point      xdof;
@@ -349,7 +349,7 @@ void DirichletBC::computeBCPointwise( _map< size_t, real > & boundary_values,
 {
   // Iterate over cells
   DofMap const &        dof_map = space.dofmap();
-  std::vector< size_t > cell_dofs( dof_map.num_element_dofs() );
+  std::vector< size_t > cell_dofs( dof_map().num_element_dofs() );
   ScratchSpace          scratch( space, sub_system );
   boundary_values.reserve( entities_.size() );
 

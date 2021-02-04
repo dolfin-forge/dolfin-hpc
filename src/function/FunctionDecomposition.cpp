@@ -121,7 +121,7 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
     for (size_t i = 0; i < Si.size(); ++i)
     {
       FiniteElementSpace const& Vhi = (*Si[i]).space();
-      local_dim[i] = Vhi.dofmap().num_element_dofs();
+      local_dim[i] = Vhi.dofmap()().num_element_dofs();
       celldofs[i] = Vhi.dofmap().dofsmapping();
     }
     real * block = F.create_block();

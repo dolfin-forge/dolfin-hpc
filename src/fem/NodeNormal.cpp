@@ -144,9 +144,9 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
   ScratchSpace               scratchN( spaceN );
   size_t const               value_size = spaceN.element()().value_size();
   dolfin_assert( value_size == gdim );
-  size_t const num_facet_dofs            = dofmapN.num_facet_dofs();
+  size_t const num_facet_dofs            = dofmapN().num_facet_dofs();
   size_t const num_facet_nodes           = num_facet_dofs / value_size;
-  size_t const num_restricted_facet_dofs = dofmapN.num_entity_dofs( fdim );
+  size_t const num_restricted_facet_dofs = dofmapN().num_entity_dofs( fdim );
 
   // The implementation works only for dofs located on the exterior boundary
   bool const on_boundary = true;
@@ -181,7 +181,7 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
         scratchN.cell.update( cell );
         elementN().tabulate_dof_coordinates( scratchN.coordinates.data(),
                                              scratchN.cell.coordinates.data() );
-        dofmapN.tabulate_entity_dofs( scratchN.facet_dofs.data(), fdim, local_facet );
+        dofmapN().tabulate_entity_dofs( scratchN.facet_dofs.data(), fdim, local_facet );
         for ( size_t i = 0; i < num_restricted_facet_dofs; ++i )
         {
           size_t loc_dof = scratchN.facet_dofs[i];
@@ -221,7 +221,7 @@ void NodeNormal::compute( Mesh & mesh, std::vector< Function > & basis )
     // Set valid dofs within the current facet
     _ordered_set< size_t > ghost_nodes;
     dofmapN.tabulate_dofs( scratchN.dofs.data(), scratchN.cell, cell );
-    dofmapN.tabulate_facet_dofs( scratchN.facet_dofs.data(), local_facet );
+    dofmapN().tabulate_facet_dofs( scratchN.facet_dofs.data(), local_facet );
     for ( size_t f_n = 0; f_n < num_facet_nodes; ++f_n )
     {
       size_t dof0 = scratchN.facet_dofs[f_n];

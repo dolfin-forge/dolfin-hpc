@@ -94,7 +94,7 @@ Function::Function( SubFunction const & sub_function )
   // Copy subvector, naive implementation
   Function& gFunc = sub_function.function();
   DofMap const& gDm = gFunc.space().dofmap();
-  size_t const gLocalDim = gDm.num_element_dofs();
+  size_t const gLocalDim = gDm().num_element_dofs();
   size_t const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
   size_t const thisLocalDim = scratch_->local_dimension;
 
@@ -484,7 +484,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 void Function::InitializeVector()
 {
   dolfin_assert( fe_space_->element()().topological_dimension() + 1 == mesh_->num_entities().size() );
-  if ( X_->size() != fe_space_->dofmap().global_dimension( mesh_->num_entities() ) )
+  if ( X_->size() != fe_space_->dofmap().global_dimension() )
   {
     // Specific case in serial local_size == global_dimension
     X_->init(fe_space_->dofmap().local_size());

@@ -338,8 +338,7 @@ void project( Mesh &                    new_mesh,
 
   std::vector< real >   vv( projected.vector().local_size() );
   std::vector< size_t > indices( projected.vector().local_size() );
-  std::vector< size_t > local_indices(
-    projected.space().dofmap().num_element_dofs() );
+  std::vector< size_t > local_indices( space.dofmap()().num_element_dofs() );
   size_t                     i = 0;
   MeshValues< bool, Vertex > processed( new_mesh, false );
 

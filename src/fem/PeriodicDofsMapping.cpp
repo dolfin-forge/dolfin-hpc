@@ -144,7 +144,7 @@ void PeriodicDofsMapping::init()
 
   //--- Setup data structures -----------------------------------------------
   _ordered_map< size_t, size_t > Gdofs_map;
-  size_t const                 num_facet_dofs = dofmap.num_facet_dofs();
+  size_t const                 num_facet_dofs = dofmap().num_facet_dofs();
   size_t const                 max_numGdofs   = num_facet_dofs * totalcardGnI;
   size_t                       Gcount         = 0;
   size_t                       Hcount         = 0;
@@ -165,7 +165,7 @@ void PeriodicDofsMapping::init()
   // UFC dofmap data structures
   UFCCell             ufc_cell0( c0 );
   UFCCell             ufc_cell1( c0 );
-  size_t const          local_dimension = dofmap.num_element_dofs();
+  size_t const          local_dimension = dofmap().num_element_dofs();
   size_t *              dofsG           = new size_t[local_dimension];
   size_t *              dofsH           = new size_t[local_dimension];
   std::vector< real > coordinatesG( local_dimension * maxgdim, 0.0 );
@@ -199,7 +199,7 @@ void PeriodicDofsMapping::init()
       size_t  facet_posI = cell.index( facet );
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
-      dofmap.tabulate_facet_dofs( facet_dofsG, facet_posI );
+      dofmap().tabulate_facet_dofs( facet_dofsG, facet_posI );
       element().tabulate_dof_coordinates( coordinatesG.data(),
                                           ufc_cell0.coordinates.data() );
 
@@ -224,7 +224,7 @@ void PeriodicDofsMapping::init()
       size_t  facet_posG = cell.index( facet );
       ufc_cell0.update( cell );
       dofmap.tabulate_dofs( dofsG, ufc_cell0 );
-      dofmap.tabulate_facet_dofs( facet_dofsG, facet_posG );
+      dofmap().tabulate_facet_dofs( facet_dofsG, facet_posG );
       element().tabulate_dof_coordinates( coordinatesG.data(),
                                           ufc_cell0.coordinates.data() );
 
@@ -265,7 +265,7 @@ void PeriodicDofsMapping::init()
       size_t  facet_posH = cellH.index( facetH );
       ufc_cell1.update( cellH );
       dofmap.tabulate_dofs( dofsH, ufc_cell1 );
-      dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
+      dofmap().tabulate_facet_dofs( facet_dofsH, facet_posH );
       element().tabulate_dof_coordinates( coordinatesH.data(),
                                           ufc_cell1.coordinates.data() );
 
@@ -301,7 +301,7 @@ void PeriodicDofsMapping::init()
               size_t  facet_posG = cellG.index( facetG );
               ufc_cell0.update( cellG );
               dofmap.tabulate_dofs( dofsG, ufc_cell0 );
-              dofmap.tabulate_facet_dofs( facet_dofsG, facet_posG );
+              dofmap().tabulate_facet_dofs( facet_dofsG, facet_posG );
 
               for ( size_t jj = 0; jj < num_facet_dofs; ++jj )
               {
@@ -414,7 +414,7 @@ void PeriodicDofsMapping::init()
                 size_t  facet_posH = cell.index( facet );
                 ufc_cell1.update( cell );
                 dofmap.tabulate_dofs( dofsH, ufc_cell1 );
-                dofmap.tabulate_facet_dofs( facet_dofsH, facet_posH );
+                dofmap().tabulate_facet_dofs( facet_dofsH, facet_posH );
                 element().tabulate_dof_coordinates( coordinatesH.data(),
                                                     ufc_cell1.coordinates.data() );
 

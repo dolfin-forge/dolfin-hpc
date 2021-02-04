@@ -24,11 +24,11 @@ auto Form::check( std::vector< Coefficient * > const & coefficients ) const
   -> bool
 {
   // Check that we get the correct number of coefficients
-  if ( coefficients.size() != this->num_coefficients() )
+  if ( coefficients.size() != this->form().num_coefficients() )
   {
     error( "Incorrect number of coefficients: %d given but %d required.",
            coefficients.size(),
-           this->num_coefficients() );
+           this->form().num_coefficients() );
   }
 
   // Check that all coefficients have valid value dimensions
@@ -45,7 +45,7 @@ auto Form::check( std::vector< Coefficient * > const & coefficients ) const
              this->coefficient_name( i ).c_str() );
     }
 
-    ufc::finite_element * fe = this->create_finite_element( i + this->rank() );
+    ufc::finite_element * fe = this->form().create_finite_element( i + this->form().rank() );
     Function * fptr = dynamic_cast< Function * >( this->coefficients()[i] );
     if ( fptr != nullptr )
     {
@@ -102,9 +102,9 @@ auto Form::check( std::vector< Coefficient * > const & coefficients ) const
   }
 
   // Check that the cell dimension matches the mesh dimension
-  if ( this->rank() + this->num_coefficients() > 0 )
+  if ( this->form().rank() + this->form().num_coefficients() > 0 )
   {
-    ufc::finite_element * element = this->create_finite_element( 0 );
+    ufc::finite_element * element = this->form().create_finite_element( 0 );
     dolfin_assert( element );
     CellType::Type celltype = mesh().type().cellType();
     ufc::shape     shape    = element->cell_shape();
@@ -151,7 +151,7 @@ void Form::init( std::vector< Coefficient * > & coefficients,
                  CoefficientMap &               map )
 {
   coefficients.clear();
-  for ( size_t i = 0; i < this->num_coefficients(); ++i )
+  for ( size_t i = 0; i < this->form().num_coefficients(); ++i )
   {
     std::string   name = this->coefficient_name( i );
     Coefficient * c    = map[name];
@@ -171,16 +171,16 @@ void Form::init( std::vector< Coefficient * > & coefficients,
 //----------------------------------------------------------------------------
 void Form::init( std::vector< Coefficient * > & coefficients )
 {
-  if ( coefficients.size() != this->num_coefficients() )
+  if ( coefficients.size() != this->form().num_coefficients() )
   {
     error( "Form : invalid number of coefficients" );
   }
-  for ( size_t i = 0; i < this->num_coefficients(); ++i )
+  for ( size_t i = 0; i < this->form().num_coefficients(); ++i )
   {
     Function * fptr = dynamic_cast< Function * >( this->coefficients()[i] );
     if ( fptr != nullptr && fptr->empty() )
     {
-      fptr->init( *this, this->rank() + i );
+      fptr->init( *this, this->form().rank() + i );
       dolfin_assert( !fptr->empty() );
     }
   }

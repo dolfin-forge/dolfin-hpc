@@ -100,15 +100,15 @@ void assemble(GenericTensor& A, Form& form,
 
 OPENMP_PRAGMA( master )
   {
-    if ( form.has_cell_integrals() )
+    if ( form().has_cell_integrals() )
     {
       cell_domains = new MeshValues<size_t, Cell>(mesh);
       (*cell_domains) = 1;
       sub_domain.mark(*cell_domains, 0);
     }
 
-    if ( form.has_exterior_facet_integrals() or
-         form.has_interior_facet_integrals() )
+    if ( form().has_exterior_facet_integrals() or
+         form().has_interior_facet_integrals() )
     {
       facet_domains = new MeshValues<size_t, Facet>(mesh);
       (*facet_domains) = 1;

@@ -50,7 +50,7 @@ FiniteElement::FiniteElement( CellType const &, Form & form, size_t const i )
   , sub_value_dims_( nullptr )
 {
   // Check argument
-  size_t const num_arguments = form.rank() + form.num_coefficients();
+  size_t const num_arguments = form().rank() + form().num_coefficients();
   if ( i >= num_arguments )
   {
     error( "Illegal function index %d. Form only has %d arguments.",
@@ -59,7 +59,7 @@ FiniteElement::FiniteElement( CellType const &, Form & form, size_t const i )
   }
 
   // Create finite element
-  ufc_finite_element_ = form.create_finite_element( i );
+  ufc_finite_element_ = form().create_finite_element( i );
 
   Initialize();
 }

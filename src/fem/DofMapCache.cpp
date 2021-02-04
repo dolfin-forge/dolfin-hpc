@@ -49,7 +49,7 @@ auto DofMapCache::acquire( Mesh & mesh, Form const & form, size_t const & i )
   form.update_dofmaps();
 
   // Create UFC dof map for the i-th coefficient to get the signature
-  ufc::dofmap * ufc_dofmap = form.create_dofmap( i );
+  ufc::dofmap * ufc_dofmap = form().create_dofmap( i );
 
   // Do not transfer ownership to the possibly created dofmap
   // The UFC dofmap is cloned as member attribute of the DOLFIN dofmap

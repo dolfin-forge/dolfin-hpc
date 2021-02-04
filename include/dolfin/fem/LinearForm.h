@@ -25,7 +25,7 @@ public:
   LinearForm(Mesh& mesh);
 
   /// Destructor
-  ~LinearForm() override;
+  ~LinearForm();
 
   /// Test space
   auto test_space() const -> FiniteElementSpace const&;

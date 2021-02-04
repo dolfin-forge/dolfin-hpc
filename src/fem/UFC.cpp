@@ -12,68 +12,68 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UFC::UFC( Form const & form )
-  : form( form )
-  , finite_elements( form.rank() )
-  , coefficient_elements( form.num_coefficients() )
-  , cell_integrals( std::max( form.max_cell_subdomain_id(), 1ul ) )
+  : form( form() )
+  , finite_elements( form().rank() )
+  , coefficient_elements( form().num_coefficients() )
+  , cell_integrals( std::max( form().max_cell_subdomain_id(), 1ul ) )
   , exterior_facet_integrals(
-      std::max( form.max_exterior_facet_subdomain_id(), 1ul ) )
+      std::max( form().max_exterior_facet_subdomain_id(), 1ul ) )
   , interior_facet_integrals(
-      std::max( form.max_interior_facet_subdomain_id(), 1ul ) )
+      std::max( form().max_interior_facet_subdomain_id(), 1ul ) )
   , cell( Cell( form.mesh(), 0 ) )
   , cell0( Cell( form.mesh(), 0 ) )
   , cell1( Cell( form.mesh(), 0 ) )
   , facet0( 0 )
   , facet1( 0 )
-  , local_dimensions( form.rank() )
-  , macro_local_dimensions( form.rank() )
-  , local_sizes( form.rank() )
-  , global_dimensions( form.rank() )
-  , dofs( form.rank() )
-  , macro_dofs( form.rank() )
-  , w( form.num_coefficients() )
-  , macro_w( form.num_coefficients() )
+  , local_dimensions( form().rank() )
+  , macro_local_dimensions( form().rank() )
+  , local_sizes( form().rank() )
+  , global_dimensions( form().rank() )
+  , dofs( form().rank() )
+  , macro_dofs( form().rank() )
+  , w( form().num_coefficients() )
+  , macro_w( form().num_coefficients() )
 {
   // Create cell integrals
-  if ( form.max_cell_subdomain_id() != 0 )
+  if ( form().max_cell_subdomain_id() != 0 )
   {
-    for ( size_t i = 0; i < form.max_cell_subdomain_id(); ++i )
-      cell_integrals[i] = form.create_cell_integral( i );
+    for ( size_t i = 0; i < form().max_cell_subdomain_id(); ++i )
+      cell_integrals[i] = form().create_cell_integral( i );
   }
   else
   {
-    cell_integrals[0] = form.create_default_cell_integral();
+    cell_integrals[0] = form().create_default_cell_integral();
   }
 
   // Create exterior facet integrals
-  if ( form.max_exterior_facet_subdomain_id() != 0 )
+  if ( form().max_exterior_facet_subdomain_id() != 0 )
   {
-    for ( size_t i = 0; i < form.max_exterior_facet_subdomain_id(); ++i )
-      exterior_facet_integrals[i] = form.create_exterior_facet_integral( i );
+    for ( size_t i = 0; i < form().max_exterior_facet_subdomain_id(); ++i )
+      exterior_facet_integrals[i] = form().create_exterior_facet_integral( i );
   }
   else
   {
-    exterior_facet_integrals[0] = form.create_default_exterior_facet_integral();
+    exterior_facet_integrals[0] = form().create_default_exterior_facet_integral();
   }
 
   // Create interior facet integrals
-  if ( form.max_interior_facet_subdomain_id() != 0 )
+  if ( form().max_interior_facet_subdomain_id() != 0 )
   {
-    for ( size_t i = 0; i < form.max_interior_facet_subdomain_id(); ++i )
-      interior_facet_integrals[i] = form.create_interior_facet_integral( i );
+    for ( size_t i = 0; i < form().max_interior_facet_subdomain_id(); ++i )
+      interior_facet_integrals[i] = form().create_interior_facet_integral( i );
   }
   else
   {
-    interior_facet_integrals[0] = form.create_default_interior_facet_integral();
+    interior_facet_integrals[0] = form().create_default_interior_facet_integral();
   }
 
   size_t num_entries_A       = 1;
   size_t num_entries_macro_A = 1;
 
-  for ( size_t i = 0; i < form.rank(); ++i )
+  for ( size_t i = 0; i < form().rank(); ++i )
   {
     // Create finite elements
-    finite_elements[i] = form.create_finite_element( i );
+    finite_elements[i] = form().create_finite_element( i );
 
     // Initialize local dimensions
     local_dimensions[i] = form.dofmaps()[i].num_element_dofs();
@@ -105,10 +105,10 @@ UFC::UFC( Form const & form )
   macro_A.resize( num_entries_macro_A, 0. );
 
   // Initialize coefficients
-  for ( size_t i = 0; i < form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form().num_coefficients(); ++i )
   {
     // Create finite elements for coefficients
-    coefficient_elements[i] = form.create_finite_element( form.rank() + i );
+    coefficient_elements[i] = form().create_finite_element( form().rank() + i );
     w[i] = new real[coefficient_elements[i]->space_dimension()];
     std::fill_n( w[i], coefficient_elements[i]->space_dimension(), 0. );
 

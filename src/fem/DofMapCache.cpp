@@ -53,7 +53,7 @@ auto DofMapCache::acquire( Mesh & mesh, Form const & form, size_t const & i )
 
   // Do not transfer ownership to the possibly created dofmap
   // The UFC dofmap is cloned as member attribute of the DOLFIN dofmap
-  DofMap * ret = &acquire( mesh, *ufc_dofmap, false );
+  DofMap * ret = &acquire( mesh, *ufc_dofmap );
 
   // Delete UFC dof map as it is not longer used
   delete ufc_dofmap;
@@ -63,7 +63,7 @@ auto DofMapCache::acquire( Mesh & mesh, Form const & form, size_t const & i )
 
 //-----------------------------------------------------------------------------
 
-auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap const & dofmap )
   -> DofMap &
 {
   DofMap *              ret = nullptr;
@@ -73,7 +73,7 @@ auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
   if ( it == cache_.end() )
   {
     // Create DOLFIN dofmap and insert in map
-    ret = new DofMap( mesh, dofmap, owner );
+    ret = new DofMap( mesh, dofmap );
     cache_.insert( item_t( h, token_t( ret ) ) );
 
     if ( rlist_.find( ret ) == rlist_.end() )
@@ -105,13 +105,6 @@ auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
       error( ss.str() );
     }
     it->second.count++;
-
-    // Ownership was transfered but the dofmap already exists, the UFC dofmap
-    // passed as argument will not be used.
-    if ( owner )
-    {
-      delete &dofmap;
-    }
   }
   return *ret;
 }

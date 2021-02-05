@@ -33,10 +33,7 @@ public:
   DofMap( Mesh & mesh, ufc::form const & form, size_t const i );
 
   /// Create dof map on mesh from UFC object
-  /// Ownership of the UFC object is transfered to the instance if the boolean
-  /// is set to true, otherwise a clone of the dofmap is created.
-  /// In any case the instance the member attribute will be destroyed.
-  DofMap( Mesh & mesh, ufc::dofmap & dofmap, bool const owner );
+  explicit DofMap( Mesh & mesh, ufc::dofmap const & dofmap );
 
   /// Create dof map on a subspace
   DofMap( DofMap const & dofmap, size_t i );
@@ -54,8 +51,8 @@ public:
   auto operator!=( DofMap const & other ) const -> bool;
 
   // FIXME make this only const again
-  auto operator()() const -> ufc::dofmap const & { return *ufc_dofmap_; }
-  auto operator()() -> ufc::dofmap & { return *ufc_dofmap_; }
+  auto ufc() const -> ufc::dofmap const & { return *ufc_dofmap_; }
+  auto ufc() -> ufc::dofmap & { return *ufc_dofmap_; }
 
   //--- Instantiation using the dofmap cache
 
@@ -64,15 +61,13 @@ public:
     -> DofMap &;
 
   /// Acquire dofmap from cache for the given UFC dofmap.
-  static auto acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+  static auto acquire( Mesh & mesh, ufc::dofmap const & dofmap )
     -> DofMap &;
 
   /// Release a token for the given dofmap
   static void release( DofMap & dofmap );
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
-
-  auto global_dimension() const -> size_t;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
   /// FIXME
@@ -105,11 +100,6 @@ public:
 
   /// Get list of scalar dofmaps ordered by entries
   auto flatten() const -> std::vector< ufc::dofmap const * > const &;
-
-  /// Create flatten representation of given dofmap (append sub dofmaps)
-  static void flatten( ufc::dofmap const *                  dofmap,
-                       std::vector< ufc::dofmap const * > & stack,
-                       size_t                               maxlevel );
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
   static void flatten( ufc::dofmap const *                  dofmap,
@@ -167,17 +157,27 @@ public:
   auto check( bool throw_error = false ) -> bool;
 
 private:
-  /// Initialize
-  void init();
+  // UFC dof map
+  ufc::dofmap * const ufc_dofmap_;
 
+public:
+    std::string const signature;
+    size_t const tdim;
+    size_t const global_dim;
+    size_t const num_sub_dofmaps;
+    size_t const num_global_support_dofs;
+    size_t const num_element_support_dofs;
+    size_t const num_element_dofs;
+    size_t const num_facet_dofs;
+    std::vector< size_t > const num_entity_dofs;
+    std::vector< size_t > const num_entity_closure_dofs;
+
+private:
   /// Build dof numbering
   void build();
 
   // Forward declaration of offset to be update at creation of ufc::dofmap
   size_t offset_;
-
-  // UFC dof map
-  ufc::dofmap * const ufc_dofmap_;
 
   // Use type to allow optimization of dof map ordering
   DofNumbering * const numbering_;
@@ -192,10 +192,7 @@ private:
   std::vector< size_t > sub_dofmaps_offs_;
 
   //
-  mutable std::vector< ufc::dofmap const * > flattened_;
-
-  //
-  size_t num_leaf_spaces_;
+  std::vector< ufc::dofmap const * > flattened_;
 
   // Periodic dofs mapping
   mutable PeriodicDofsMapping * periodic_dofmap_;
@@ -227,10 +224,10 @@ inline auto DofMap::acquire( Mesh & mesh, Form const & form, size_t const i )
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner )
+inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap const & dofmap )
   -> DofMap &
 {
-  return DofMapCache::instance().acquire( mesh, dofmap, owner );
+  return DofMapCache::instance().acquire( mesh, dofmap );
 }
 
 //-----------------------------------------------------------------------------
@@ -241,12 +238,6 @@ inline void DofMap::release( DofMap & dofmap )
 }
 
 //-----------------------------------------------------------------------------
-
-
-inline auto DofMap::global_dimension() const -> size_t
-{
-  return ufc_dofmap_->global_dimension( mesh().num_entities() );
-}
 
 inline void DofMap::tabulate_dofs( size_t *          dofs,
                                    ufc::cell const & ufc_cell,
@@ -286,6 +277,14 @@ inline auto DofMap::sub_dofmaps_offsets() const -> std::vector< size_t > const &
 {
   return sub_dofmaps_offs_;
 }
+
+//-----------------------------------------------------------------------------
+
+inline auto DofMap::flatten() const -> std::vector< ufc::dofmap const * > const &
+{
+  return flattened_;
+}
+
 //-----------------------------------------------------------------------------
 
 inline auto DofMap::local_size() const -> size_t

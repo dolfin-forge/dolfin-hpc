@@ -20,44 +20,196 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-DofMap::DofMap( Mesh & mesh, ufc::form const & form, size_t const i )
-  : MeshDependent( mesh )
-  , offset_( 0 )
-  , ufc_dofmap_( form.create_dofmap( i ) )
-  , numbering_( DofNumbering::create( mesh, *ufc_dofmap_ ) )
-  , hash_( make_hash( mesh, *ufc_dofmap_ ) )
-  , periodic_dofmap_( nullptr )
+namespace helper
 {
-  init();
+
+inline auto init_nedofs( ufc::dofmap const & ufc_dofmap )
+  -> std::vector< size_t >
+{
+  // FIXME +1 doesnt hurt here, but is not the cleanest
+  std::vector< size_t > nedofs( ufc_dofmap.topological_dimension() + 1 );
+
+  for ( size_t i = 0; i < nedofs.size(); ++i )
+    nedofs[i] = ufc_dofmap.num_entity_dofs( i );
+
+  return nedofs;
 }
 
 //-----------------------------------------------------------------------------
 
-DofMap::DofMap( Mesh & mesh, ufc::dofmap & dofmap, bool const owner )
+inline auto init_necdofs( ufc::dofmap const & ufc_dofmap )
+  -> std::vector< size_t >
+{
+  // FIXME +1 doesnt hurt here, but is not the cleanest
+  std::vector< size_t > necdofs( ufc_dofmap.topological_dimension() + 1 );
+
+  for ( size_t i = 0; i < necdofs.size(); ++i )
+    necdofs[i] = ufc_dofmap.num_entity_closure_dofs( i );
+
+  return necdofs;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto init_flattened( ufc::dofmap const & ufc_dofmap )
+  -> std::vector< ufc::dofmap const * >
+{
+  std::vector< ufc::dofmap const * > flt;
+  DofMap::flatten( &ufc_dofmap, flt );
+  return flt;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto init_sddims( ufc::dofmap const & ufc_dofmap )
+  -> std::vector< size_t >
+{
+  std::vector< size_t > sddims;
+
+  // Information for mixed elements
+  size_t const nb_sub = ufc_dofmap.num_sub_dofmaps();
+  if ( nb_sub > 0 )
+  {
+    // Set local dimensions
+    for ( size_t i = 0; i < nb_sub; ++i )
+    {
+      ufc::dofmap * subdm = ufc_dofmap.create_sub_dofmap( i );
+      sddims.push_back( subdm->num_element_dofs() );
+      delete subdm;
+    }
+  }
+  else
+  {
+    sddims = { ufc_dofmap.num_element_dofs() };
+  }
+
+  return sddims;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto init_sdoffs( ufc::dofmap const & ufc_dofmap )
+  -> std::vector< size_t >
+{
+  std::vector< size_t > sdoffs;
+
+  // Information for mixed elements
+  size_t const nb_sub = ufc_dofmap.num_sub_dofmaps();
+  if ( nb_sub > 0 )
+  {
+    // Set offsets and local dimensions
+    size_t off = 0;
+    for ( size_t i = 0; i < nb_sub; ++i )
+    {
+      ufc::dofmap * subdm = ufc_dofmap.create_sub_dofmap( i );
+      sdoffs.push_back( off );
+      off += subdm->num_element_dofs();
+      delete subdm;
+    }
+  }
+  else
+  {
+    sdoffs = { 0 };
+  }
+
+  return sdoffs;
+}
+
+//-----------------------------------------------------------------------------
+
+} // namespace helper
+
+//-----------------------------------------------------------------------------
+
+DofMap::DofMap( Mesh & mesh, ufc::form const & form, size_t const i )
   : MeshDependent( mesh )
+  , ufc_dofmap_( form.create_dofmap( i ) )
+  , signature( ufc_dofmap_->signature() )
+  , tdim( ufc_dofmap_->topological_dimension() )
+  , global_dim( ufc_dofmap_->global_dimension( this->mesh().num_entities() ) )
+  , num_sub_dofmaps( ufc_dofmap_->num_sub_dofmaps() )
+  , num_global_support_dofs( ufc_dofmap_->num_global_support_dofs() )
+  , num_element_support_dofs( ufc_dofmap_->num_element_support_dofs() )
+  , num_element_dofs( ufc_dofmap_->num_element_dofs() )
+  , num_facet_dofs( ufc_dofmap_->num_facet_dofs() )
+  , num_entity_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , num_entity_closure_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
   , offset_( 0 )
-  , ufc_dofmap_( ( owner ? &dofmap : dofmap.create() ) )
   , numbering_( DofNumbering::create( mesh, *ufc_dofmap_ ) )
   , hash_( make_hash( mesh, *ufc_dofmap_ ) )
+  , sub_dofmaps_dims_( helper::init_sddims( *ufc_dofmap_ ) )
+  , sub_dofmaps_offs_( helper::init_sdoffs( *ufc_dofmap_ ) )
+  , flattened_( helper::init_flattened( *ufc_dofmap_ ) )
   , periodic_dofmap_( nullptr )
 {
-  init();
+  // Build the DOLFIN dofmap
+  message( 1, "DofMap: init dofmap for signature:\n %s", signature.c_str() );
+  numbering_->build();
+  message( 1, "DofMap: offset = %u; size = %u",
+           numbering_->offset(), numbering_->size() );
+}
+
+//-----------------------------------------------------------------------------
+
+DofMap::DofMap( Mesh & mesh, ufc::dofmap const & dofmap )
+  : MeshDependent( mesh )
+  , ufc_dofmap_( dofmap.create() )
+  , signature( ufc_dofmap_->signature() )
+  , tdim( ufc_dofmap_->topological_dimension() )
+  , global_dim( ufc_dofmap_->global_dimension( this->mesh().num_entities() ) )
+  , num_sub_dofmaps( ufc_dofmap_->num_sub_dofmaps() )
+  , num_global_support_dofs( ufc_dofmap_->num_global_support_dofs() )
+  , num_element_support_dofs( ufc_dofmap_->num_element_support_dofs() )
+  , num_element_dofs( ufc_dofmap_->num_element_dofs() )
+  , num_facet_dofs( ufc_dofmap_->num_facet_dofs() )
+  , num_entity_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , num_entity_closure_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , offset_( 0 )
+  , numbering_( DofNumbering::create( mesh, *ufc_dofmap_ ) )
+  , hash_( make_hash( mesh, *ufc_dofmap_ ) )
+  , sub_dofmaps_dims_( helper::init_sddims( *ufc_dofmap_ ) )
+  , sub_dofmaps_offs_( helper::init_sdoffs( *ufc_dofmap_ ) )
+  , flattened_( helper::init_flattened( *ufc_dofmap_ ) )
+  , periodic_dofmap_( nullptr )
+{
+  // Build the DOLFIN dofmap
+  message( 1, "DofMap: init dofmap for signature:\n %s", signature.c_str() );
+  numbering_->build();
+  message( 1, "DofMap: offset = %u; size = %u",
+           numbering_->offset(), numbering_->size() );
 }
 
 //-----------------------------------------------------------------------------
 
 DofMap::DofMap( DofMap const & dofmap, size_t i )
   : MeshDependent( dofmap.mesh() )
+  , ufc_dofmap_( dofmap.ufc().create_sub_dofmap( i ) )
+  , signature( ufc_dofmap_->signature() )
+  , tdim( ufc_dofmap_->topological_dimension() )
+  , global_dim( ufc_dofmap_->global_dimension( this->mesh().num_entities() ) )
+  , num_sub_dofmaps( ufc_dofmap_->num_sub_dofmaps() )
+  , num_global_support_dofs( ufc_dofmap_->num_global_support_dofs() )
+  , num_element_support_dofs( ufc_dofmap_->num_element_support_dofs() )
+  , num_element_dofs( ufc_dofmap_->num_element_dofs() )
+  , num_facet_dofs( ufc_dofmap_->num_facet_dofs() )
+  , num_entity_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , num_entity_closure_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
   , offset_( 0 )
-  , ufc_dofmap_( dofmap().create_sub_dofmap( i ) )
-  , numbering_( DofNumbering::create( dofmap.mesh(), *ufc_dofmap_ ) )
-  , hash_( make_hash( mesh(), *ufc_dofmap_ ) )
+  , numbering_( DofNumbering::create( this->mesh(), *ufc_dofmap_ ) )
+  , hash_( make_hash( this->mesh(), *ufc_dofmap_ ) )
+  , sub_dofmaps_dims_( helper::init_sddims( *ufc_dofmap_ ) )
+  , sub_dofmaps_offs_( helper::init_sdoffs( *ufc_dofmap_ ) )
+  , flattened_( helper::init_flattened( *ufc_dofmap_ ) )
   , periodic_dofmap_( nullptr )
 {
-  message( 1, "DofMap: Extracted dof map for subspace: %s",
-           ufc_dofmap_->signature() );
+  message(
+    1, "DofMap: Extracted dofmap for subspace: %s", ufc_dofmap_->signature() );
 
-  init();
+  // Build the DOLFIN dofmap
+  message( 1, "DofMap: init dofmap for signature:\n %s", signature.c_str() );
+  numbering_->build();
+  message( 1, "DofMap: offset = %u; size = %u",
+           numbering_->offset(), numbering_->size() );
 }
 
 //-----------------------------------------------------------------------------
@@ -66,21 +218,38 @@ DofMap::DofMap( DofMap const &                dofmap,
                 std::vector< size_t > const & subsystem,
                 size_t &                      offset )
   : MeshDependent( dofmap.mesh() )
-  , offset_( 0 )
   , ufc_dofmap_( dofmap.create_sub_dofmap( subsystem, offset_ ) )
-  , numbering_( DofNumbering::create( dofmap.mesh(), *ufc_dofmap_ ) )
-  , hash_( make_hash( mesh(), *ufc_dofmap_ ) )
+  , signature( ufc_dofmap_->signature() )
+  , tdim( ufc_dofmap_->topological_dimension() )
+  , global_dim( ufc_dofmap_->global_dimension( this->mesh().num_entities() ) )
+  , num_sub_dofmaps( ufc_dofmap_->num_sub_dofmaps() )
+  , num_global_support_dofs( ufc_dofmap_->num_global_support_dofs() )
+  , num_element_support_dofs( ufc_dofmap_->num_element_support_dofs() )
+  , num_element_dofs( ufc_dofmap_->num_element_dofs() )
+  , num_facet_dofs( ufc_dofmap_->num_facet_dofs() )
+  , num_entity_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , num_entity_closure_dofs( helper::init_nedofs( *ufc_dofmap_ ) )
+  , offset_( 0 )
+  , numbering_( DofNumbering::create( this->mesh(), *ufc_dofmap_ ) )
+  , hash_( make_hash( this->mesh(), *ufc_dofmap_ ) )
+  , sub_dofmaps_dims_( helper::init_sddims( *ufc_dofmap_ ) )
+  , sub_dofmaps_offs_( helper::init_sdoffs( *ufc_dofmap_ ) )
+  , flattened_( helper::init_flattened( *ufc_dofmap_ ) )
   , periodic_dofmap_( nullptr )
 {
   // Check that dof map has not be re-ordered
   offset = offset_;
-  message( 1, "DofMap: Extracted dof map for sub system: %s",
-           ufc_dofmap_->signature() );
+  message( 1, "DofMap: Extracted dofmap for sub system: %s", signature.c_str() );
   message( 1, "DofMap: Offset for sub system: %d", offset );
 
   // Reset offset
   offset_ = 0;
-  init();
+
+  // Build the DOLFIN dofmap
+  message( 1, "DofMap: init dofmap for signature:\n %s", signature.c_str() );
+  numbering_->build();
+  message( 1, "DofMap: offset = %u; size = %u",
+           numbering_->offset(), numbering_->size() );
 }
 
 //-----------------------------------------------------------------------------
@@ -100,7 +269,6 @@ DofMap::~DofMap()
 }
 
 //-----------------------------------------------------------------------------
-
 
 auto DofMap::periodic_mapping( FiniteElementSpace const & space ) const
   -> PeriodicDofsMapping const &
@@ -206,78 +374,6 @@ auto DofMap::create_sub_dofmap( ufc::dofmap const &           dofmap,
 
 //-----------------------------------------------------------------------------
 
-void DofMap::init()
-{
-  // Build the DOLFIN dofmap
-  message( 1, "DofMap: init dofmap for signature:\n %s", ufc_dofmap_->signature() );
-  numbering_->build();
-  message( 1, "DofMap: offset = %u; size = %u",
-           numbering_->offset(), numbering_->size() );
-
-  // Information for mixed elements
-  size_t const nb_sub = ufc_dofmap_->num_sub_dofmaps();
-  if ( nb_sub > 0 )
-  {
-    // Set offsets and local dimensions
-    size_t off = 0;
-    for ( size_t i = 0; i < nb_sub; ++i )
-    {
-      ufc::dofmap * subdm = ufc_dofmap_->create_sub_dofmap( i );
-      sub_dofmaps_dims_.push_back( subdm->num_element_dofs() );
-      sub_dofmaps_offs_.push_back( off );
-      off += subdm->num_element_dofs();
-      delete subdm;
-    }
-  }
-  else
-  {
-    sub_dofmaps_dims_ = { ufc_dofmap_->num_element_dofs() };
-    sub_dofmaps_offs_ = { 0 };
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-auto DofMap::flatten() const -> std::vector< ufc::dofmap const * > const &
-{
-  if ( flattened_.empty() )
-  {
-    flatten( ufc_dofmap_, flattened_ );
-  }
-  return flattened_;
-}
-
-//-----------------------------------------------------------------------------
-
-void DofMap::flatten( ufc::dofmap const *                  dofmap,
-                      std::vector< ufc::dofmap const * > & stack,
-                      size_t                               maxlevel )
-{
-  // Single root element or max level is set to zero, return immediately
-  if ( dofmap->num_sub_dofmaps() == 0 || maxlevel == 0 )
-  {
-    stack.push_back( dofmap->create() );
-    return;
-  }
-  // Go one level down
-  for ( size_t s = 0; s < dofmap->num_sub_dofmaps(); ++s )
-  {
-    ufc::dofmap const * sub = dofmap->create_sub_dofmap( s );
-    if ( sub->num_sub_dofmaps() == 0 )
-    {
-      // Leaf dofmap
-      stack.push_back( sub );
-    }
-    else
-    {
-      // Branch
-      DofMap::flatten( sub, stack, maxlevel - 1 );
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
-
 void DofMap::flatten( ufc::dofmap const *                  dofmap,
                       std::vector< ufc::dofmap const * > & stack )
 {
@@ -309,17 +405,15 @@ void DofMap::flatten( ufc::dofmap const *                  dofmap,
 auto DofMap::can_vectorize( std::vector< ufc::dofmap const * > flattened )
   -> bool
 {
-  bool ret = true;
   for ( size_t s = 1; s < flattened.size(); ++s )
   {
     if ( std::strcmp( flattened[0]->signature(), flattened[s]->signature() )
          != 0 )
     {
-      ret = false;
-      break;
+      return false;
     }
   }
-  return ret;
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -328,12 +422,15 @@ void DofMap::disp() const
 {
   section( "DofMap" );
   begin( "ufc::dofmap info" );
-  prm( "Signature", ufc_dofmap_->signature() );
-  // prm("Global dimension"    , ufc_dofmap_->global_dimension( num_entities ));
-  prm( "Local dimension", ufc_dofmap_->num_element_dofs() );
-  // prm("Geometric dimension" , ufc_dofmap_->geometric_dimension());
-  prm( "Number of subdofmaps", ufc_dofmap_->num_sub_dofmaps() );
-  prm( "Number of facet dofs", ufc_dofmap_->num_facet_dofs() );
+  prm( "Signature",              signature );
+  prm( "Topological dimension",  tdim );
+  prm( "Global dimension",       global_dim );
+  prm( "# global support dofs",  num_global_support_dofs );
+  prm( "# element support dofs", num_element_support_dofs );
+  prm( "# element dofs",         num_element_dofs );
+  prm( "# facet dofs",           num_facet_dofs );
+  prm( "# entity dofs",          to_string( num_entity_dofs ) );
+  prm( "# entity closure dofs",  to_string( num_entity_closure_dofs ) );
   end();
   end();
 }
@@ -345,7 +442,7 @@ auto DofMap::check( bool throw_error ) -> bool
   bool ret = true;
 
   message( "Check dofs distribution" );
-  message( "signature   : %s", ufc_dofmap_->signature() );
+  message( "signature   : %s", signature.c_str() );
   bool distributed_by_entities_ = true;
   message( "by entities : %d", distributed_by_entities_ );
   // FIXME:

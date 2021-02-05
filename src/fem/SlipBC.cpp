@@ -116,7 +116,7 @@ void SlipBC::apply( GenericMatrix &      A,
     {
       _ordered_set< size_t > rows;
       DofMap const &         fulldofmap = fullspace.dofmap();
-      std::vector< size_t >  celldofs( fulldofmap().num_element_dofs() );
+      std::vector< size_t >  celldofs( fulldofmap.num_element_dofs );
 
       for ( CellIterator c( mesh ); !c.end(); ++c )
       {
@@ -193,7 +193,7 @@ void SlipBC::applySlipBC_P1( GenericMatrix &      A,
   {
     // Used to get the global dof indices
     DofMap const &        Udofmap = form.test_space().dofmap();
-    std::vector< size_t > fulldofs( Udofmap().num_element_dofs() );
+    std::vector< size_t > fulldofs( Udofmap.num_element_dofs );
 
     // If any, to get the node id
     bool const     same_space = ( sub_system().depth() == 0 );
@@ -280,7 +280,7 @@ void SlipBC::applySlipBC( GenericMatrix &      A,
   if ( boundary.num_cells() != 0 )
   {
     DofMap const &        Udofmap = form.test_space().dofmap();
-    std::vector< size_t > fulldofs( Udofmap().num_element_dofs() );
+    std::vector< size_t > fulldofs( Udofmap.num_element_dofs );
 
     // If any, to get the node id defined as the dof of the first normal comp.
     bool const     same_space = ( sub_system().depth() == 0 );

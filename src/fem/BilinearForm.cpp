@@ -31,8 +31,8 @@ BilinearForm::~BilinearForm()
 void BilinearForm::check( GenericMatrix const & A,
                           GenericVector const & b ) const
 {
-  size_t const M = this->test_space().dofmap().global_dimension();
-  size_t const N = this->trial_space().dofmap().global_dimension();
+  size_t const M = this->test_space().dofmap().global_dim;
+  size_t const N = this->trial_space().dofmap().global_dim;
 
   if ( A.size( 0 ) != A.size( 1 ) )
   {

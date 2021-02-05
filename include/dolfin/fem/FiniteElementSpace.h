@@ -43,15 +43,10 @@ public:
   /// Create space from i-th coefficient space of given form
   FiniteElementSpace( Form & form, size_t const i );
 
-  /// Create space from i-th coefficient element of given form but on the mesh
-  /// provided as argument
-  FiniteElementSpace( Mesh & mesh, Form & form, size_t const i );
-
   /// Create space from UFC finite element
   explicit FiniteElementSpace( Mesh &                      mesh,
                                ufc::finite_element const * element,
-                               ufc::dofmap &               dofmap,
-                               bool                        owner = false );
+                               ufc::dofmap &               dofmap );
 
   /// Create a finite element space from ith subspace of given space
   FiniteElementSpace( FiniteElementSpace const & space, size_t const i );
@@ -164,8 +159,8 @@ inline auto FiniteElementSpace::dofmap() const -> DofMap const &
 
 inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 {
-  return ( mesh_.num_global_cells() * dof_map_().num_element_dofs() )
-         == dof_map_.global_dimension();
+  return ( mesh_.num_global_cells() * dof_map_.num_element_dofs )
+         == dof_map_.global_dim;
 }
 
 //-----------------------------------------------------------------------------
@@ -173,7 +168,7 @@ inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 {
   return is_cellwise_defined()
-         && ( dof_map_().num_element_dofs() == element()().value_size() );
+         and ( dof_map_.num_element_dofs == element().value_size );
 }
 
 //-----------------------------------------------------------------------------
@@ -181,8 +176,8 @@ inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 inline auto FiniteElementSpace::is_vertex_based() const -> bool
 {
   /// @todo Only a particular case.
-  return ( element()().family() == Element::Family::CG )
-         and ( element()().degree() == 1 );
+  return ( element().family == Element::Family::CG )
+         and ( element().degree == 1 );
 }
 
 //-----------------------------------------------------------------------------
@@ -191,9 +186,9 @@ inline auto FiniteElementSpace::is_flattenable() const -> bool
 {
   /// @todo Only a particular case.
   size_t value_size = 1;
-  for ( size_t i = 0; i < element()().value_rank(); ++i )
+  for ( size_t i = 0; i < element().value_rank; ++i )
   {
-    value_size *= element()().value_dimension( i );
+    value_size *= element().value_dims[i];
   }
   return ( element().flatten().size() == value_size );
 }

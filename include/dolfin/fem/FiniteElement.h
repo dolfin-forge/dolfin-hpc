@@ -33,20 +33,15 @@ class FiniteElement
 {
 
 public:
-  /// Create finite element from given coefficient space of form
-  FiniteElement( CellType const & cell, Form & form, size_t const i );
-
   /// Create finite element from UFC object
-  /// Ownership of the UFC object is transfered to the instance if the boolean
-  /// is set to true, otherwise a clone of the finite element is created.
-  /// In any case the instance the member attribute will be destroyed.
-  FiniteElement( ufc::finite_element const & element, bool const owner );
+  explicit FiniteElement( ufc::finite_element const & ufc_element );
 
   /// Create the i-th subelement of the given element
-  FiniteElement( ufc::finite_element const & element, size_t const i );
+  explicit FiniteElement( ufc::finite_element const & ufc_element,
+                          size_t const i );
 
   /// Create subelement of the given element for given subsystem
-  FiniteElement( ufc::finite_element const &   element,
+  FiniteElement( ufc::finite_element const &   ufc_element,
                  std::vector< size_t > const & sub_system );
 
   /// Copy constructor
@@ -59,7 +54,7 @@ public:
   auto operator==( FiniteElement const & other ) const -> bool;
   auto operator!=( FiniteElement const & other ) const -> bool;
 
-  auto operator()() const -> ufc::finite_element const & { return *ufc_finite_element_; }
+  auto ufc() const -> ufc::finite_element const & { return *element; }
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
@@ -83,11 +78,6 @@ public:
 
   /// Create flatten representation finite element (append sub elements)
   static void flatten( ufc::finite_element const *                  element,
-                       std::vector< ufc::finite_element const * > & stack,
-                       size_t                                       maxlevel );
-
-  /// Create flatten representation finite element (append sub elements)
-  static void flatten( ufc::finite_element const *                  element,
                        std::vector< ufc::finite_element const * > & stack );
 
   /// Check if the element can be seen as a vector element
@@ -98,19 +88,34 @@ public:
   void disp() const;
 
 private:
-  void Initialize();
+  ufc::finite_element const * const element;
 
+public:
+  std::string const signature;
+  std::string const family;
+
+  ufc::shape const shape;
+
+  size_t const degree;
+  size_t const tdim;
+  size_t const gdim;
+  size_t const space_dim;
+  size_t const num_sub_elements;
+
+  size_t const                value_rank;
+  size_t const                value_size;
+  std::vector< size_t > const value_dims;
+
+  size_t const                ref_value_rank;
+  size_t const                ref_value_size;
+  std::vector< size_t > const ref_value_dims;
+
+private:
   //--- ATTRIBUTES ------------------------------------------------------------
-  ufc::finite_element const * ufc_finite_element_;
 
-  //
-  std::vector< size_t > * sub_value_dims_;
-
-  //
-  std::vector< size_t > * sub_value_offs_;
-
-  //
-  mutable std::vector< ufc::finite_element const * > flattened_;
+  std::vector< std::vector< size_t > > const sub_value_dims_;
+  std::vector< std::vector< size_t > > const sub_value_offs_;
+  std::vector< ufc::finite_element const * > flattened_;
 };
 
 //-----------------------------------------------------------------------------
@@ -126,7 +131,7 @@ inline auto FiniteElement::operator!=( FiniteElement const & other ) const
 inline auto FiniteElement::create_sub_element(
   std::vector< size_t > const & sub_system ) const -> ufc::finite_element *
 {
-  return FiniteElement::create_sub_element( *ufc_finite_element_, sub_system );
+  return FiniteElement::create_sub_element( *element, sub_system );
 }
 
 //-----------------------------------------------------------------------------
@@ -150,10 +155,6 @@ inline auto FiniteElement::sub_value_offsets( size_t i ) const
 inline auto FiniteElement::flatten() const
   -> std::vector< ufc::finite_element const * > const &
 {
-  if ( flattened_.empty() )
-  {
-    flatten( ufc_finite_element_, flattened_ );
-  }
   return flattened_;
 }
 

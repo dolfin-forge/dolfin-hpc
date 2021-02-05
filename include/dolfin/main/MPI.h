@@ -313,9 +313,9 @@ inline auto MPI::all_gather( T *            sendbuf,
 }
 //-----------------------------------------------------------------------------
 // unfortunately c++ does not allow partial function template specialization
-// so we have to move the  template to a helper class
+// so we have to move the  template to a mpi_helper class
 template < int Op, typename T >
-struct helper
+struct mpi_helper
 {
   inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
                              int root, MPI::Communicator & comm ) -> int;
@@ -328,7 +328,7 @@ struct helper
 };
 
 template < typename T >
-struct helper< MPI::sum, T >
+struct mpi_helper< MPI::sum, T >
 {
   inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
                              int root, MPI::Communicator & comm ) -> int
@@ -356,7 +356,7 @@ struct helper< MPI::sum, T >
 };
 
 template < typename T >
-struct helper< MPI::min, T >
+struct mpi_helper< MPI::min, T >
 {
   inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
                              int root, MPI::Communicator & comm ) -> int
@@ -384,7 +384,7 @@ struct helper< MPI::min, T >
 };
 
 template < typename T >
-struct helper< MPI::max, T >
+struct mpi_helper< MPI::max, T >
 {
   inline static auto reduce( T const * sendbuf, T * recvbuf, int count,
                              int root, MPI::Communicator & comm ) -> int
@@ -416,33 +416,33 @@ template < int Op, typename T >
 inline auto MPI::reduce( T const * sendbuf, T * recvbuf,
                          int count, int root, Communicator & comm ) -> int
 {
-  return helper< Op, T >::reduce( sendbuf, recvbuf, count, root, comm );
+  return mpi_helper< Op, T >::reduce( sendbuf, recvbuf, count, root, comm );
 }
 
 template < int Op, typename T >
 inline auto MPI::all_reduce( T x, T & r, Communicator & comm ) -> int
 {
-  return helper< Op, T >::all_reduce( &x, &r, 1, comm );
+  return mpi_helper< Op, T >::all_reduce( &x, &r, 1, comm );
 }
 
 template < int Op, typename T >
 inline auto MPI::all_reduce( T * x, T * r, size_t count, Communicator & comm )
   -> int
 {
-  return helper< Op, T >::all_reduce( x, r, count, comm );
+  return mpi_helper< Op, T >::all_reduce( x, r, count, comm );
 }
 
 template < int Op, typename T >
 inline auto MPI::all_reduce_in_place( T & r, Communicator & comm ) -> int
 {
-  return helper< Op, T >::all_reduce_in_place( &r, 1, comm );
+  return mpi_helper< Op, T >::all_reduce_in_place( &r, 1, comm );
 }
 
 template < int Op, typename T >
 inline auto MPI::all_reduce_in_place( std::vector< T > & data,
                                       Communicator &     comm ) -> int
 {
-  return helper< Op, T >::all_reduce_in_place( data.data(), data.size(), comm );
+  return mpi_helper< Op, T >::all_reduce_in_place( data.data(), data.size(), comm );
 }
 
 //-----------------------------------------------------------------------------

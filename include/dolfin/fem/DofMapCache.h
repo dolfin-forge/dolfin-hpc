@@ -65,7 +65,7 @@ protected:
   auto acquire( Mesh & mesh, Form const & form, size_t const & i ) -> DofMap &;
 
   /// Return a dofmap for the UFC dofmap object
-  auto acquire( Mesh & mesh, ufc::dofmap & dofmap, bool owner ) -> DofMap &;
+  auto acquire( Mesh & mesh, ufc::dofmap const & dofmap ) -> DofMap &;
 
   ///
   void release( DofMap & dofmap );

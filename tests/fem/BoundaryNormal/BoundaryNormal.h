@@ -26,7 +26,10 @@ void test( std::string file )
   ufc::finite_element * element = create_finite_element( element_str.c_str() );
   ufc::dofmap *         dofmap  = create_dof_map( dofmap_str.c_str() );
 
-  FiniteElementSpace Vh( mesh, element, *dofmap, true );
+  FiniteElementSpace Vh( mesh, element, *dofmap );
+
+  delete element;
+  delete dofmap;
 
   NodeNormal nn( mesh );
   nn.init( Vh );

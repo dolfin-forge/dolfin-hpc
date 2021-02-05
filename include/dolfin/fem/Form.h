@@ -139,7 +139,12 @@ inline auto Form::create_space( size_t i ) const -> FiniteElementSpace *
   ufc::dofmap *         test_d = this->form().create_dofmap( i );
   // For an argument the mesh is the one passed to the form and for coefficient
   // the mesh passed to the function.
-  return new FiniteElementSpace( dofmaps()[i].mesh(), test_f, *test_d, true );
+  FiniteElementSpace * space = new FiniteElementSpace( dofmaps()[i].mesh(),
+                                                       test_f, *test_d ); // FIXME
+  delete test_f;
+  delete test_d;
+
+  return space;
 }
 
 //----------------------------------------------------------------------------

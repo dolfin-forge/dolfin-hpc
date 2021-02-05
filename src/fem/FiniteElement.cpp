@@ -3,8 +3,9 @@
 
 #include <dolfin/fem/FiniteElement.h>
 
+#include <dolfin/common/assert.h>
 #include <dolfin/fem/Elements.h>
-#include <dolfin/fem/Form.h>
+#include <dolfin/log/log.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -14,117 +15,216 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( ufc::finite_element const & element,
-                              bool const                  owner )
-  : ufc_finite_element_( ( owner ? &element : element.create() ) )
-  , sub_value_dims_( nullptr )
+namespace helper
 {
-  Initialize();
+
+inline auto init_vdims( ufc::finite_element const & ufc_element )
+  -> std::vector< size_t >
+{
+  std::vector< size_t > vdims( ufc_element.value_size() );
+
+  for ( size_t i = 0; i < vdims.size(); ++i )
+    vdims[i] = ufc_element.value_dimension( i );
+
+  return vdims;
 }
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( ufc::finite_element const & element,
-                              size_t const                i )
-  : ufc_finite_element_( element.create_sub_element( i ) )
-  , sub_value_dims_( nullptr )
+inline auto init_rvdims( ufc::finite_element const & ufc_element )
+  -> std::vector< size_t >
 {
-  Initialize();
+  std::vector< size_t > rvdims( ufc_element.reference_value_size() );
+
+  for ( size_t i = 0; i < rvdims.size(); ++i )
+    rvdims[i] = ufc_element.reference_value_dimension( i );
+
+  return rvdims;
 }
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( ufc::finite_element const &   element,
-                              std::vector< size_t > const & sub_system )
-  : ufc_finite_element_(
-    FiniteElement::create_sub_element( element, sub_system ) )
-  , sub_value_dims_( nullptr )
+inline auto init_flattened( ufc::finite_element const & ufc_element )
+  -> std::vector< ufc::finite_element const * >
 {
-  Initialize();
+  std::vector< ufc::finite_element const * > flt;
+  FiniteElement::flatten( &ufc_element, flt );
+
+  return flt;
 }
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( CellType const &, Form & form, size_t const i )
-  : ufc_finite_element_( nullptr )
-  , sub_value_dims_( nullptr )
+inline auto init_sv_dims( ufc::finite_element const & ufc_element )
+  -> std::vector< std::vector< size_t > >
 {
-  // Check argument
-  size_t const num_arguments = form().rank() + form().num_coefficients();
-  if ( i >= num_arguments )
+  std::vector< std::vector< size_t > > svd( ufc_element.value_rank() + 1 );
+
+  // Add sub value dimensions for mixed elements, packed by axis
+  size_t const nb_subs = ufc_element.num_sub_elements();
+  if ( nb_subs > 0 )
   {
-    error( "Illegal function index %d. Form only has %d arguments.",
-           i,
-           num_arguments );
+    for ( size_t e = 0; e < nb_subs; ++e )
+    {
+      ufc::finite_element * sub_fe = ufc_element.create_sub_element( e );
+      for ( size_t a = 0; a < svd.size(); ++a )
+      {
+        svd[a].push_back( sub_fe->value_dimension( a ) );
+      }
+      delete sub_fe;
+    }
+  }
+  else
+  {
+    for ( size_t a = 0; a < svd.size(); ++a )
+    {
+      svd[a].push_back( ufc_element.value_dimension( a ) );
+    }
   }
 
-  // Create finite element
-  ufc_finite_element_ = form().create_finite_element( i );
+  return svd;
+}
 
-  Initialize();
+//-----------------------------------------------------------------------------
+
+inline auto init_sv_offs( ufc::finite_element const & ufc_element )
+  -> std::vector< std::vector< size_t > >
+{
+  std::vector< std::vector< size_t > > svo( ufc_element.value_rank() + 1 );
+
+  // Add sub value dimensions for mixed elements, packed by axis
+  size_t const nb_subs = ufc_element.num_sub_elements();
+  if ( nb_subs > 0 )
+  {
+    std::vector< size_t > off( svo.size(), 0 );
+    for ( size_t e = 0; e < nb_subs; ++e )
+    {
+      ufc::finite_element * sub_fe = ufc_element.create_sub_element( e );
+      for ( size_t a = 0; a < svo.size(); ++a )
+      {
+        svo[a].push_back( off[a] );
+        off[a] += sub_fe->value_dimension( a );
+      }
+      delete sub_fe;
+    }
+  }
+  else
+  {
+    for ( size_t a = 0; a < svo.size(); ++a )
+    {
+      svo[a].push_back( 0 );
+    }
+  }
+
+  return svo;
+}
+
+} // namespace helper
+
+//-----------------------------------------------------------------------------
+
+FiniteElement::FiniteElement( ufc::finite_element const & ufc_element )
+  : element( ufc_element.create() )
+  , signature( element->signature() )
+  , family( element->family() )
+  , shape( element->cell_shape() )
+  , degree( element->degree() )
+  , tdim( element->topological_dimension() )
+  , gdim( element->geometric_dimension() )
+  , space_dim( element->space_dimension() )
+  , num_sub_elements( element->num_sub_elements() )
+  , value_rank( element->value_rank() )
+  , value_size( element->value_size() )
+  , value_dims( helper::init_vdims( *element ) )
+  , ref_value_rank( element->reference_value_rank() )
+  , ref_value_size( element->reference_value_size() )
+  , ref_value_dims( helper::init_vdims( *element ) )
+  , sub_value_dims_( helper::init_sv_dims( *element ) )
+  , sub_value_offs_( helper::init_sv_offs( *element ) )
+  , flattened_( helper::init_flattened( *element ) )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+FiniteElement::FiniteElement( ufc::finite_element const & ufc_element,
+                              size_t const                i )
+  : element( ufc_element.create_sub_element( i ) )
+  , signature( element->signature() )
+  , family( element->family() )
+  , shape( element->cell_shape() )
+  , degree( element->degree() )
+  , tdim( element->topological_dimension() )
+  , gdim( element->geometric_dimension() )
+  , space_dim( element->space_dimension() )
+  , num_sub_elements( element->num_sub_elements() )
+  , value_rank( element->value_rank() )
+  , value_size( element->value_size() )
+  , value_dims( helper::init_vdims( *element ) )
+  , ref_value_rank( element->reference_value_rank() )
+  , ref_value_size( element->reference_value_size() )
+  , ref_value_dims( helper::init_vdims( *element ) )
+  , sub_value_dims_( helper::init_sv_dims( *element ) )
+  , sub_value_offs_( helper::init_sv_offs( *element ) )
+  , flattened_( helper::init_flattened( *element ) )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+FiniteElement::FiniteElement( ufc::finite_element const &   ufc_element,
+                              std::vector< size_t > const & sub_system )
+  : element( FiniteElement::create_sub_element( ufc_element, sub_system ) )
+  , signature( element->signature() )
+  , family( element->family() )
+  , shape( element->cell_shape() )
+  , degree( element->degree() )
+  , tdim( element->topological_dimension() )
+  , gdim( element->geometric_dimension() )
+  , space_dim( element->space_dimension() )
+  , num_sub_elements( element->num_sub_elements() )
+  , value_rank( element->value_rank() )
+  , value_size( element->value_size() )
+  , value_dims( helper::init_vdims( *element ) )
+  , ref_value_rank( element->reference_value_rank() )
+  , ref_value_size( element->reference_value_size() )
+  , ref_value_dims( helper::init_vdims( *element ) )
+  , sub_value_dims_( helper::init_sv_dims( *element ) )
+  , sub_value_offs_( helper::init_sv_offs( *element ) )
+  , flattened_( helper::init_flattened( *element ) )
+{
 }
 
 //-----------------------------------------------------------------------------
 
 FiniteElement::FiniteElement( FiniteElement const & other )
-  : ufc_finite_element_( other().create() )
-  , sub_value_dims_( nullptr )
+  : element( other.ufc().create() )
+  , signature( element->signature() )
+  , family( element->family() )
+  , shape( element->cell_shape() )
+  , degree( element->degree() )
+  , tdim( element->topological_dimension() )
+  , gdim( element->geometric_dimension() )
+  , space_dim( element->space_dimension() )
+  , num_sub_elements( element->num_sub_elements() )
+  , value_rank( element->value_rank() )
+  , value_size( element->value_size() )
+  , value_dims( helper::init_vdims( *element ) )
+  , ref_value_rank( element->reference_value_rank() )
+  , ref_value_size( element->reference_value_size() )
+  , ref_value_dims( helper::init_vdims( *element ) )
+  , sub_value_dims_( helper::init_sv_dims( *element ) )
+  , sub_value_offs_( helper::init_sv_offs( *element ) )
+  , flattened_( helper::init_flattened( *element ) )
 {
-  Initialize();
 }
 
 //-----------------------------------------------------------------------------
 
 FiniteElement::~FiniteElement()
 {
-  while ( !flattened_.empty() )
-  {
-    delete flattened_.back();
-    flattened_.pop_back();
-  }
-  delete[] sub_value_dims_;
-  delete[] sub_value_offs_;
-  delete ufc_finite_element_;
-  ufc_finite_element_ = nullptr;
-}
-
-//-----------------------------------------------------------------------------
-
-void FiniteElement::Initialize()
-{
-  dolfin_assert( ufc_finite_element_ );
-
-  // Add sub value dimensions for mixed elements, packed by axis
-  size_t const max_dim = ufc_finite_element_->value_rank() + 1;
-  sub_value_dims_      = new std::vector< size_t >[max_dim];
-  sub_value_offs_      = new std::vector< size_t >[max_dim];
-  size_t nb_subs       = ufc_finite_element_->num_sub_elements();
-  if ( nb_subs > 0 )
-  {
-    size_t * off = new size_t[max_dim];
-    std::fill_n( off, max_dim, 0 );
-    for ( size_t e = 0; e < nb_subs; ++e )
-    {
-      ufc::finite_element * sub_fe =
-        ufc_finite_element_->create_sub_element( e );
-      for ( size_t a = 0; a < max_dim; ++a )
-      {
-        sub_value_dims_[a].push_back( sub_fe->value_dimension( a ) );
-        sub_value_offs_[a].push_back( off[a] );
-        off[a] += sub_fe->value_dimension( a );
-      }
-      delete sub_fe;
-    }
-    delete[] off;
-  }
-  else
-  {
-    for ( size_t a = 0; a < max_dim; ++a )
-    {
-      sub_value_dims_[a].push_back( ufc_finite_element_->value_dimension( a ) );
-      sub_value_offs_[a].push_back( 0 );
-    }
-  }
+  delete element;
+  destruct( flattened_ );
 }
 
 //-----------------------------------------------------------------------------
@@ -179,35 +279,6 @@ auto FiniteElement::create_sub_element(
 
 //-----------------------------------------------------------------------------
 
-void FiniteElement::flatten( ufc::finite_element const * element,
-                             std::vector< ufc::finite_element const * > & stack,
-                             size_t maxlevel )
-{
-  // Single root element or max level is set to zero, return immediately
-  if ( element->num_sub_elements() == 0 || maxlevel == 0 )
-  {
-    stack.push_back( element->create() );
-    return;
-  }
-  // Go one level down
-  for ( size_t s = 0; s < element->num_sub_elements(); ++s )
-  {
-    ufc::finite_element const * sub = element->create_sub_element( s );
-    if ( sub->num_sub_elements() == 0 )
-    {
-      // Leaf element
-      stack.push_back( sub );
-    }
-    else
-    {
-      // Branch
-      FiniteElement::flatten( sub, stack, maxlevel - 1 );
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
-
 void FiniteElement::flatten(
   ufc::finite_element const *                  element,
   std::vector< ufc::finite_element const * > & stack )
@@ -256,42 +327,48 @@ auto FiniteElement::is_vectorizable() const -> bool
 
 void FiniteElement::disp() const
 {
-  std::string shape;
-  switch ( ufc_finite_element_->cell_shape() )
+  std::string shape_;
+  switch ( element->cell_shape() )
   {
     case ufc::shape::interval:
-      shape = "interval";
+      shape_ = "interval";
       break;
     case ufc::shape::triangle:
-      shape = "triangle";
+      shape_ = "triangle";
       break;
     case ufc::shape::quadrilateral:
-      shape = "quadrilateral";
+      shape_ = "quadrilateral";
       break;
     case ufc::shape::tetrahedron:
-      shape = "tetrahedron";
+      shape_ = "tetrahedron";
       break;
     case ufc::shape::hexahedron:
-      shape = "hexahedron";
+      shape_ = "hexahedron";
       break;
     case ufc::shape::vertex:
-      shape = "vertex";
+      shape_ = "vertex";
       break;
     default:
-      shape = "unknown shape";
+      shape_ = "unknown shape";
       break;
   }
 
   section( "FiniteElement" );
   begin( "ufc::finite_element info" );
-  prm( "Signature", ufc_finite_element_->signature() );
-  prm( "Cell shape", shape.c_str() );
-  prm( "Topological dimension", ufc_finite_element_->topological_dimension() );
-  prm( "Geometric dimension", ufc_finite_element_->geometric_dimension() );
-  prm( "Space dimension", ufc_finite_element_->space_dimension() );
-  prm( "Value rank", ufc_finite_element_->value_rank() );
-  prm( "Value dimension", ufc_finite_element_->value_dimension( 0 ) );
-  prm( "Nb of sub elements", ufc_finite_element_->num_sub_elements() );
+  prm( "Signature",             signature );
+  prm( "Family",                family );
+  prm( "Cell shape",            shape_ );
+  prm( "Degree",                degree );
+  prm( "Topological dimension", tdim );
+  prm( "Geometric dimension",   gdim );
+  prm( "Space dimension",       space_dim );
+  prm( "Value rank",            value_rank );
+  prm( "Value size",            value_size );
+  prm( "Value dimension",       to_string( value_dims ) );
+  prm( "Ref. Value rank",       ref_value_rank );
+  prm( "Ref. Value size",       ref_value_size );
+  prm( "Ref. Value dimension",  to_string( ref_value_dims ) );
+  prm( "# of sub elements",     num_sub_elements );
   end();
   end();
 }

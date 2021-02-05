@@ -53,7 +53,7 @@ auto Form::check( std::vector< Coefficient * > const & coefficients ) const
       {
         error( "Coefficient %i is empty", i );
       }
-      else if ( strcmp( fptr->space().element()().signature(), fe->signature() )
+      else if ( strcmp( fptr->space().element().signature.c_str(), fe->signature() )
                 != 0 )
       {
         error( "Mismatch of discrete space for Coefficient %i", i );

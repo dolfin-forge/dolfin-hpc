@@ -103,7 +103,7 @@ void section( std::string msg );
 //-----------------------------------------------------------------------------
 
 template < typename T >
-inline void prm( char const * k, T v )
+inline void prm( char const * k, T const & v )
 {
   cout << std::setw( 24 ) << k << ": " << v << "\n";
 }
@@ -129,6 +129,25 @@ void mark( char const * msg = "" );
 auto verbose() -> int;
 auto verbose( int n ) -> int;
 auto silence() -> int;
+
+//-----------------------------------------------------------------------------
+
+template< typename T >
+std::string to_string( std::vector< T > const & vec )
+{
+  std::stringstream sstr;
+  sstr << "[ ";
+
+  if ( vec.size() != 0 )
+  {
+    for ( size_t i = 1; i < vec.size(); ++i )
+      sstr << vec[i-1] << ", ";
+    sstr << vec.back() << " ";
+  }
+
+  sstr << "]";
+  return sstr.str();
+}
 
 //-----------------------------------------------------------------------------
 

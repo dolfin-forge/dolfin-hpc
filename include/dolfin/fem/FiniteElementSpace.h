@@ -8,7 +8,8 @@
 #include <dolfin/fem/Elements.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/mesh/entities/Cell.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 #include <string>
 

@@ -241,6 +241,4 @@ nobase_pkginclude_HEADERS = \
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
-				quadrature/RadauQuadrature.h\
-				ufc/ufc.h\
-				ufc/ufc_geometry.h
+				quadrature/RadauQuadrature.h

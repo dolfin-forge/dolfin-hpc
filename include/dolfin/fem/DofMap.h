@@ -10,7 +10,8 @@
 #include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/MeshDependent.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {

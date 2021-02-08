@@ -6,7 +6,8 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/evolution/Time.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {

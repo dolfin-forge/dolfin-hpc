@@ -6,7 +6,8 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 #include <cstring>
 #include <string>

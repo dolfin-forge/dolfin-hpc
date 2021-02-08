@@ -7,9 +7,15 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/ufc/ufc.h>
 
 #include <string>
+
+namespace ufc
+{
+
+class dofmap;
+
+} // namespace ufc
 
 namespace dolfin
 {

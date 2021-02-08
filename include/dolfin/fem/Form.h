@@ -7,7 +7,8 @@
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/UFCCache.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 #include <string>
 #include <vector>

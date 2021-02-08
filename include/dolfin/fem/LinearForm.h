@@ -7,7 +7,6 @@
 #include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/Form.h>
-#include <dolfin/ufc/ufc.h>
 
 namespace dolfin
 {

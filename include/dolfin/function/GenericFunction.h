@@ -6,7 +6,14 @@
 
 #include <dolfin/common/Variable.h>
 #include <dolfin/fem/Coefficient.h>
-#include <dolfin/ufc/ufc.h>
+
+namespace ufc
+{
+
+class cell;
+class finite_element;
+
+} // namespace ufc
 
 namespace dolfin
 {

@@ -9,7 +9,8 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/MeshDistributedData.h>
-#include <dolfin/ufc/ufc.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {

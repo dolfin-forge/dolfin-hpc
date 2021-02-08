@@ -25,18 +25,18 @@ namespace Assembler
 {
 
 /// Assemble tensor from given variational form
-void assemble(GenericTensor& A, Form& form, bool reset_tensor);
+void assemble( GenericTensor & A, Form & form, bool reset_tensor );
 
 /// Assemble tensor from given variational form over a sub domain
-void assemble(GenericTensor& A, Form& form, SubDomain const& sub_domain,
-              bool reset_tensor);
+void assemble( GenericTensor & A, Form & form,
+               SubDomain const & sub_domain, bool reset_tensor );
 
 /// Assemble tensor from given variational form over sub domains
-void assemble(GenericTensor& A, Form& form,
-              MeshValues<size_t, Cell> const& cell_domains,
-              MeshValues<size_t, Facet> const& exterior_facet_domains,
-              MeshValues<size_t, Facet> const& interior_facet_domains,
-              bool reset_tensor);
+void assemble( GenericTensor & A, Form & form,
+               MeshValues< size_t, Cell > const &  cell_domains,
+               MeshValues< size_t, Facet > const & exterior_facet_domains,
+               MeshValues< size_t, Facet > const & interior_facet_domains,
+               bool reset_tensor );
 
 } // end namespace Assembler
 

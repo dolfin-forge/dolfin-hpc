@@ -13,27 +13,24 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-FiniteElementSpace::FiniteElementSpace( Form & form, size_t const i )
-  : mesh_( form.dofmaps()[i].mesh() )
-  , cell_( mesh_, 0 )
-  // , finite_element_( new FiniteElement( mesh_.type(), form, i ) )
-  , dof_map_( DofMap::acquire( mesh_, form, i ) )
-{
-  // FIXME
-  ufc::finite_element * fe = form.form().create_finite_element( i );
-  finite_element_ = new FiniteElement( *fe );
-  delete fe;
-}
+
+FiniteElementSpace::FiniteElementSpace( FiniteElement const & element,
+                                        DofMap &              dof )
+  : mesh_( dof.mesh() )
+  , cell_( dof.mesh(), 0 )
+  , finite_element_( new FiniteElement( element ) )
+  , dof_map_( DofMap::acquire( mesh_, dof.ufc(), false ) )
+{}
 
 //-----------------------------------------------------------------------------
 
 FiniteElementSpace::FiniteElementSpace( Mesh &                      mesh,
                                         ufc::finite_element const * element,
-                                        ufc::dofmap &               dofmap )
+                                        ufc::dofmap const &         dofmap )
   : mesh_( mesh )
   , cell_( mesh, 0 )
   , finite_element_( new FiniteElement( *element ) )
-  , dof_map_( DofMap::acquire( mesh, dofmap ) )
+  , dof_map_( DofMap::acquire( mesh, dofmap, false ) )
 {
 }
 
@@ -45,7 +42,8 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
   , cell_( space.cell() )
   , finite_element_( new FiniteElement( space.element().ufc(), i ) )
   , dof_map_( DofMap::acquire( space.mesh(),
-                               *space.dofmap().ufc().create_sub_dofmap( i ) ) ) // FIXME memleak
+                               *space.dofmap().ufc().create_sub_dofmap( i ),
+                               true ) )
 {
 }
 
@@ -57,7 +55,8 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
   , cell_( space.cell() )
   , finite_element_( new FiniteElement( space.element().ufc(), sub ) )
   , dof_map_( DofMap::acquire( space.mesh(),
-                               *space.dofmap().create_sub_dofmap( sub ) ) ) // FIXME memleak
+                               *space.dofmap().create_sub_dofmap( sub ),
+                               true ) )
 {
 }
 
@@ -68,7 +67,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                     other_mesh,
   : mesh_( other_mesh )
   , cell_( space.cell() )
   , finite_element_( &space.element() )
-  , dof_map_( DofMap::acquire( other_mesh, *space.dofmap().ufc().create() ) ) // FIXME memleak
+  , dof_map_( DofMap::acquire( other_mesh, space.dofmap().ufc(), false ) )
 {
   if ( other_mesh.type().cellType() != space.cell().type() )
   {
@@ -82,7 +81,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & other )
   : mesh_( other.mesh() )
   , cell_( other.cell() )
   , finite_element_( &other.element() )
-  , dof_map_( DofMap::acquire( other.mesh(), *other.dofmap().ufc().create() ) ) // FIXME memleak
+  , dof_map_( DofMap::acquire( other.mesh(), other.dofmap().ufc(), false ) )
 {
 }
 
@@ -98,16 +97,15 @@ FiniteElementSpace::~FiniteElementSpace()
 auto FiniteElementSpace::flatten() const -> std::vector< FiniteElementSpace * >
 {
   std::vector< FiniteElementSpace * >        flt;
-  std::vector< ufc::finite_element const * > flt_fe =
-    finite_element_->flatten();
-  std::vector< ufc::dofmap const * > flt_dm = dof_map_.flatten();
+  std::vector< ufc::finite_element const * > flt_fe = finite_element_->flatten();
+  std::vector< ufc::dofmap const * >         flt_dm = dof_map_.flatten();
 
   dolfin_assert( flt_fe.size() == flt_dm.size() );
   for ( size_t s = 0; s < flt_fe.size(); ++s )
   {
-    flt.push_back( new FiniteElementSpace( mesh_, flt_fe[s]->create(),
-                                           *flt_dm[s]->create() ) ); // FIXME memleak
+    flt.push_back( new FiniteElementSpace( mesh_, flt_fe[s], *flt_dm[s] ) );
   }
+
   return flt;
 }
 

@@ -4,9 +4,9 @@
 #ifndef __DOLFIN_BILINEAR_FORM_H
 #define __DOLFIN_BILINEAR_FORM_H
 
-#include <dolfin/fem/Form.h>
-#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/CoefficientMap.h>
+#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/ufc/ufc.h>
 
 namespace dolfin
@@ -18,59 +18,48 @@ class GenericVector;
 class BilinearForm : public Form
 {
 public:
-
   using Coefficients = Form::Coefficients;
 
-  static inline auto name() -> std::string { return "BilinearForm"; }
+  static inline auto name() -> std::string
+  {
+    return "BilinearForm";
+  }
 
   /// Constructor
-  BilinearForm(Mesh& mesh);
+  BilinearForm( Mesh & mesh );
 
   /// Destructor
   ~BilinearForm();
 
   /// Trial space
-  auto trial_space() const -> FiniteElementSpace const&;
+  auto trial_space() const -> FiniteElementSpace const &;
 
   /// Test space
-  auto test_space() const -> FiniteElementSpace const&;
+  auto test_space() const -> FiniteElementSpace const &;
 
   /// Check whether linear system's dimensions match discrete spaces
-  void check(GenericMatrix const& A, GenericVector const& b) const;
+  void check( GenericMatrix const & A, GenericVector const & b ) const;
 
   /// Creator function
-  template <class E> static inline
-  auto create(Mesh& mesh, Coefficients& coefs) -> typename E::BilinearForm *
+  template < class E >
+  static inline auto create( Mesh & mesh, Coefficients & coefs ) ->
+    typename E::BilinearForm *
   {
-    return new typename E::BilinearForm(mesh, coefs);
+    return new typename E::BilinearForm( mesh, coefs );
   }
-
-private:
-
-  mutable FiniteElementSpace * test_space_;
-  mutable FiniteElementSpace * trial_space_;
-
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-inline auto BilinearForm::trial_space() const -> FiniteElementSpace const&
+inline auto BilinearForm::trial_space() const -> FiniteElementSpace const &
 {
-  if (!trial_space_)
-  {
-    trial_space_ = this->create_space(1);
-  }
-  return *trial_space_;
+  return Form::spaces()[1];
 }
 
 //-----------------------------------------------------------------------------
-inline auto BilinearForm::test_space() const -> FiniteElementSpace const&
+inline auto BilinearForm::test_space() const -> FiniteElementSpace const &
 {
-  if (!test_space_)
-  {
-    test_space_ = this->create_space(0);
-  }
-  return *test_space_;
+  return Form::spaces()[0];
 }
 
 //-----------------------------------------------------------------------------

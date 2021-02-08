@@ -43,16 +43,25 @@ public:
           std::vector< size_t > const & sub_system,
           size_t &                      offset );
 
+  /// Copy constructor
+  DofMap( DofMap const & copy );
+
+  /// Move constructor
+  DofMap( DofMap && move ) = delete;
+
   /// Destructor
   ~DofMap() override;
+
+  /// assignement operators
+  auto operator=( DofMap const & copy ) = delete;
+  auto operator=( DofMap && move ) = delete;
 
   /// Check if the element definitions are identical
   auto operator==( DofMap const & other ) const -> bool;
   auto operator!=( DofMap const & other ) const -> bool;
 
-  // FIXME make this only const again
+  /// access ufc interface
   auto ufc() const -> ufc::dofmap const & { return *ufc_dofmap_; }
-  auto ufc() -> ufc::dofmap & { return *ufc_dofmap_; }
 
   //--- Instantiation using the dofmap cache
 
@@ -61,7 +70,7 @@ public:
     -> DofMap &;
 
   /// Acquire dofmap from cache for the given UFC dofmap.
-  static auto acquire( Mesh & mesh, ufc::dofmap const & dofmap )
+  static auto acquire( Mesh & mesh, ufc::dofmap const & dofmap, bool owner )
     -> DofMap &;
 
   /// Release a token for the given dofmap
@@ -161,16 +170,16 @@ private:
   ufc::dofmap * const ufc_dofmap_;
 
 public:
-    std::string const signature;
-    size_t const tdim;
-    size_t const global_dim;
-    size_t const num_sub_dofmaps;
-    size_t const num_global_support_dofs;
-    size_t const num_element_support_dofs;
-    size_t const num_element_dofs;
-    size_t const num_facet_dofs;
-    std::vector< size_t > const num_entity_dofs;
-    std::vector< size_t > const num_entity_closure_dofs;
+  std::string const signature;
+  size_t const tdim;
+  size_t const global_dim;
+  size_t const num_sub_dofmaps;
+  size_t const num_global_support_dofs;
+  size_t const num_element_support_dofs;
+  size_t const num_element_dofs;
+  size_t const num_facet_dofs;
+  std::vector< size_t > const num_entity_dofs;
+  std::vector< size_t > const num_entity_closure_dofs;
 
 private:
   /// Build dof numbering
@@ -224,10 +233,10 @@ inline auto DofMap::acquire( Mesh & mesh, Form const & form, size_t const i )
 
 //-----------------------------------------------------------------------------
 
-inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap const & dofmap )
+inline auto DofMap::acquire( Mesh & mesh, ufc::dofmap const & dofmap, bool owner )
   -> DofMap &
 {
-  return DofMapCache::instance().acquire( mesh, dofmap );
+  return DofMapCache::instance().acquire( mesh, dofmap, owner );
 }
 
 //-----------------------------------------------------------------------------

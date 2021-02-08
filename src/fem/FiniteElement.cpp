@@ -197,24 +197,24 @@ FiniteElement::FiniteElement( ufc::finite_element const &   ufc_element,
 
 //-----------------------------------------------------------------------------
 
-FiniteElement::FiniteElement( FiniteElement const & other )
-  : element( other.ufc().create() )
-  , signature( element->signature() )
-  , family( element->family() )
-  , shape( element->cell_shape() )
-  , degree( element->degree() )
-  , tdim( element->topological_dimension() )
-  , gdim( element->geometric_dimension() )
-  , space_dim( element->space_dimension() )
-  , num_sub_elements( element->num_sub_elements() )
-  , value_rank( element->value_rank() )
-  , value_size( element->value_size() )
-  , value_dims( helper::init_vdims( *element ) )
-  , ref_value_rank( element->reference_value_rank() )
-  , ref_value_size( element->reference_value_size() )
-  , ref_value_dims( helper::init_vdims( *element ) )
-  , sub_value_dims_( helper::init_sv_dims( *element ) )
-  , sub_value_offs_( helper::init_sv_offs( *element ) )
+FiniteElement::FiniteElement( FiniteElement const & copy )
+  : element( copy.ufc().create() )
+  , signature( copy.signature )
+  , family( copy.family )
+  , shape( copy.shape )
+  , degree( copy.degree )
+  , tdim( copy.tdim )
+  , gdim( copy.gdim )
+  , space_dim( copy.space_dim )
+  , num_sub_elements( copy.num_sub_elements )
+  , value_rank( copy.value_rank )
+  , value_size( copy.value_size )
+  , value_dims( copy.value_dims )
+  , ref_value_rank( copy.ref_value_rank )
+  , ref_value_size( copy.ref_value_size )
+  , ref_value_dims( copy.ref_value_dims )
+  , sub_value_dims_( copy.sub_value_dims_ )
+  , sub_value_offs_( copy.sub_value_offs_ )
   , flattened_( helper::init_flattened( *element ) )
 {
 }
@@ -223,7 +223,9 @@ FiniteElement::FiniteElement( FiniteElement const & other )
 
 FiniteElement::~FiniteElement()
 {
-  delete element;
+  if ( element != nullptr  )
+    delete element;
+
   destruct( flattened_ );
 }
 

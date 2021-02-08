@@ -308,22 +308,23 @@ void SparsityPattern::apply()
   tic();
 
   /// Collect entries per owner
-  size_t const                         rank    = MPI::rank();
-  size_t const                         pe_size = MPI::size();
+  size_t const rank    = MPI::rank();
+  size_t const pe_size = MPI::size();
+  size_t       owner   = 0;
+  size_t       sendmax = 0;
+
   std::vector< std::vector< size_t > > sendbuf( pe_size );
-  size_t                               owner   = 0;
-  size_t                               sendmax = 0;
+
   for ( _ordered_map< size_t, _ordered_set< size_t > >::const_iterator it =
-          r_entries_.begin();
-        it != r_entries_.end();
-        ++it )
+          r_entries_.begin(); it != r_entries_.end(); ++it )
   {
     // Increment owner when jumping to another range
     while ( range_[0][owner + 1] <= it->first )
     {
-      sendmax = std::max( sendmax, ( size_t ) sendbuf[owner].size() );
+      sendmax = std::max( sendmax, sendbuf[owner].size() );
       ++owner;
     }
+
     dolfin_assert( range_[0][owner] <= it->first );
     dolfin_assert( it->first < range_[0][owner + 1] );
 
@@ -334,7 +335,8 @@ void SparsityPattern::apply()
                            it->second.begin(),
                            it->second.end() );
   }
-  size_t recvmax = std::max( sendmax, ( size_t ) sendbuf[owner].size() );
+
+  size_t recvmax = std::max( sendmax, sendbuf[owner].size() );
   MPI::all_reduce_in_place< MPI::max >( recvmax );
   if ( recvmax == 0 )
   {

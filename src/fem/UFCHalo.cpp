@@ -5,9 +5,7 @@
 
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/fem/Coefficient.h>
-#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Form.h>
-#include <dolfin/fem/UFC.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/entities/Facet.h>
 
@@ -18,44 +16,43 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UFCHalo::UFCHalo( UFC &                                ufc,
-                  std::vector< Coefficient * > const & coefficients,
-                  DofMapSet const &                    dof_map_set )
-  : ufc_( ufc )
-  , mesh_( const_cast< Mesh & >( dof_map_set.mesh() ) )
-  , coefficients_( coefficients )
-  , dof_map_set_( dof_map_set )
+UFCHalo::UFCHalo( Form & form )
+  : facet0( 0 )
+  , facet1( 0 )
+  , cell0( Cell( form.mesh(), 0 ) )
+  , cell1( Cell( form.mesh(), 0 ) )
+  , form_( form )
   , rank_offsets_()
   , facet_map_()
   , r_packet_size_( 0 )
   , u_packet_size_( 0 )
 {
   // Early exit as nothing has to be done.
-  if ( !mesh_.is_distributed() )
+  if ( not form_.mesh().is_distributed() )
   {
     return;
   }
 
   // Clear data structures and define data padding
   clear();
-  size_t const      gdim      = mesh_.geometry_dimension();
-  size_t const      facet_dim = mesh_.type().facet_dim();
-  DistributedData & distdata  = mesh_.distdata()[facet_dim];
+  size_t const      gdim      = form_.mesh().geometry_dimension();
+  size_t const      facet_dim = form_.mesh().type().facet_dim();
+  DistributedData & distdata  = form_.mesh().distdata()[facet_dim];
 
   //
-  size_t const num_cell_vertices      = mesh_.type().num_entities( 0 );
+  size_t const num_cell_vertices      = form_.mesh().type().num_entities( 0 );
   size_t const coordinates_data_size  = num_cell_vertices * gdim;
   size_t       coefficients_data_size = 0;
 
-  for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form_.num_coefficients(); ++i )
   {
-    coefficients_data_size += ufc_.coefficient_elements[i]->space_dimension();
+    coefficients_data_size += form.elements()[form.rank() + i].space_dim;
   }
 
   size_t dofs_data_size = 0;
-  for ( size_t i = 0; i < ufc_.form.rank(); ++i )
+  for ( size_t i = 0; i < form_.rank(); ++i )
   {
-    dofs_data_size += ufc_.local_dimensions[i];
+    dofs_data_size += form_.dofmaps()[i]->num_element_dofs;
   }
 
   // Separate real and size_t data types to avoid copy of dof indices and casts
@@ -104,7 +101,7 @@ UFCHalo::UFCHalo( UFC &                                ufc,
   u_data1_.resize( num_shared_facets * u_packet_size_ );
 
   // Fill data structures
-  this->update( coefficients_, dof_map_set_ );
+  update();
 }
 
 //-----------------------------------------------------------------------------
@@ -137,23 +134,23 @@ void UFCHalo::update( Facet & facet )
   real * r1 = &r_data1_[r_packet_size_ * it->second.second];
 
   // Update pointers to coordinates
-  size_t const gdim = mesh_.geometry_dimension();
-  for ( size_t i = 0; i < mesh_.type().num_entities( 0 ); ++i )
+  size_t const gdim = form_.mesh().geometry_dimension();
+  for ( size_t i = 0; i < form_.mesh().type().num_entities( 0 ); ++i )
   {
     for ( size_t dim = 0; dim < gdim; ++dim, ++r0, ++r1 )
     {
-      ufc_.cell0.coordinates[i * Space::MAX_DIMENSION + dim] = *r0;
-      ufc_.cell1.coordinates[i * Space::MAX_DIMENSION + dim] = *r1;
+      cell0.coordinates[i * Space::MAX_DIMENSION + dim] = *r0;
+      cell1.coordinates[i * Space::MAX_DIMENSION + dim] = *r1;
     }
   }
 
   // Update UFC expansion coefficients, needs copy for the moment
-  for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
+  for ( size_t i = 0; i < form_.num_coefficients(); ++i )
   {
-    size_t const spacedim = ufc_.coefficient_elements[i]->space_dimension();
-    std::copy( r0, r0 + spacedim, ufc_.macro_w[i] );
+    size_t const spacedim = form_.elements()[form_.rank() + i].space_dim;
+    std::copy( r0, r0 + spacedim, form_.cache().macro_w[i] );
     r0 += spacedim;
-    std::copy( r1, r1 + spacedim, ufc_.macro_w[i] + spacedim );
+    std::copy( r1, r1 + spacedim, form_.cache().macro_w[i] + spacedim );
     r1 += spacedim;
   }
 
@@ -162,27 +159,26 @@ void UFCHalo::update( Facet & facet )
   size_t * u1 = &u_data1_[u_packet_size_ * it->second.second];
 
   // Update local facet indices
-  ufc_.facet0 = *u0;
+  facet0 = *u0;
   ++u0;
-  ufc_.facet1 = *u1;
+  facet1 = *u1;
   ++u1;
 
   // Update UFC dofs indices for each dimension, needs copy for the moment
-  for ( size_t i = 0; i < ufc_.form.rank(); ++i )
+  for ( size_t i = 0; i < form_.rank(); ++i )
   {
-    size_t const localdim = ufc_.local_dimensions[i];
-    std::copy( u0, u0 + localdim, ufc_.macro_dofs[i] );
+    size_t const localdim = form_.dofmaps()[i]->num_element_dofs;
+    std::copy( u0, u0 + localdim, form_.cache().macro_dofs[i] );
     u0 += localdim;
-    std::copy( u1, u1 + localdim, ufc_.macro_dofs[i] + localdim );
+    std::copy( u1, u1 + localdim, form_.cache().macro_dofs[i] + localdim );
     u1 += localdim;
   }
 }
 
 //-----------------------------------------------------------------------------
-void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
-                      DofMapSet const &                    dof_map_set )
+void UFCHalo::update()
 {
-  Mesh & mesh = dof_map_set[0].mesh();
+  Mesh & mesh = form_.mesh();
 
   if ( !mesh.is_distributed() )
   {
@@ -192,25 +188,17 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
 #ifdef HAVE_MPI
 
   size_t const      tdim      = mesh.topology_dimension();
-  size_t const      gdim      = mesh.geometry_dimension();
   size_t const      facet_dim = mesh.type().facet_dim();
   DistributedData & distdata  = mesh.distdata()[facet_dim];
 
   // Exchange of data for contribution of halo macro elements
-
-  if ( coefficients.size() != ufc_.form.num_coefficients() )
-  {
-    error( "UFCHalo: invalid number of coefficients passed as arguments:\n"
-           "Expected: %d ; Provided: %d",
-           ufc_.form.num_coefficients(), coefficients.size() );
-  }
 
   //
   size_t const rank    = MPI::rank();
   size_t const pe_size = MPI::size();
 
   // Loop over shared facets to collect data following shared iterator ordering
-  size_t const num_cell_vertices = mesh_.type().num_entities( 0 );
+  size_t const num_cell_vertices = mesh.type().num_entities( 0 );
   for( FacetMap::value_type const & facet_offset : facet_map_ )
   {
     Facet facet( mesh, facet_offset.first );
@@ -218,7 +206,7 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
     // Create cell
     Cell   cell( mesh, facet.entities( tdim )[0] );
     size_t cell_facet = cell.index( facet );
-    ufc_.cell.update( cell );
+    form_.cache().cell.update( cell );
 
     // Set arrays offset
     real *   r_entry = &r_data0_[facet_offset.second.first * r_packet_size_];
@@ -226,21 +214,22 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
 
     // Collect data for shared facet contribution
     // TODO: implement proper serialization functions
+    size_t const cell_gdim = form_.cache().cell.geometric_dimension;
     for ( size_t i = 0; i < num_cell_vertices; ++i )
     {
-      std::copy( &ufc_.cell.coordinates[i * Space::MAX_DIMENSION],
-                 &ufc_.cell.coordinates[i * Space::MAX_DIMENSION] + gdim,
+      std::copy( &form_.cache().cell.coordinates[i * cell_gdim],
+                 &form_.cache().cell.coordinates[i * cell_gdim] + cell_gdim,
                  r_entry );
       r_entry += tdim;
     }
 
     // Interpolate coefficients on cell
-    for ( size_t i = 0; i < ufc_.form.num_coefficients(); ++i )
+    for ( size_t i = 0; i < form_.num_coefficients(); ++i )
     {
-      coefficients[i]->interpolate( r_entry, ufc_.cell,
-                                    *ufc_.coefficient_elements[i],
-                                    cell, cell_facet );
-      r_entry += ufc_.coefficient_elements[i]->space_dimension();
+      FiniteElement const & fe = form_.elements()[form_.rank() + i];
+      form_.coefficients()[i]->interpolate( r_entry, form_.cache().cell,
+                                            fe.ufc(), cell, cell_facet );
+      r_entry += fe.space_dim;
     }
 
     // Add local facet index
@@ -248,10 +237,10 @@ void UFCHalo::update( std::vector< Coefficient * > const & coefficients,
     ++u_entry;
 
     // Tabulate dofs for each dimension on macro element
-    for ( size_t i = 0; i < ufc_.form.rank(); ++i )
+    for ( size_t i = 0; i < form_.rank(); ++i )
     {
-      dof_map_set[i].tabulate_dofs( u_entry, ufc_.cell, cell );
-      u_entry += ufc_.local_dimensions[i];
+      form_.dofmaps()[i]->tabulate_dofs( u_entry, form_.cache().cell, cell );
+      u_entry += form_.dofmaps()[i]->num_element_dofs;
     }
   }
 

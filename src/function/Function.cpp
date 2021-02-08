@@ -48,21 +48,6 @@ Function::Function( Mesh & mesh )
 
 //-----------------------------------------------------------------------------
 
-Function::Function( Form & form, size_t i )
-  : GenericFunction()
-  , TimeDependent()
-  , mesh_( &form.dofmaps()[i].mesh() )
-  , fe_space_( new FiniteElementSpace( form, i ) )
-  , scratch_( new ScratchSpace( *fe_space_ ) )
-  , X_( new Vector() )
-  , renumbered_( false )
-{
-  // Initialise function
-  InitializeVector();
-}
-
-//-----------------------------------------------------------------------------
-
 Function::Function( FiniteElementSpace const & space )
   : GenericFunction()
   , TimeDependent()
@@ -150,15 +135,17 @@ void Function::init(Form& form, size_t i)
 {
   if(mesh_ == nullptr)
   {
-    const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i].mesh();
+    const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i]->mesh();
   }
-  if(mesh_ != &form.dofmaps()[i].mesh())
+
+  if(mesh_ != &form.dofmaps()[i]->mesh())
   {
     error("Function : mesh mismatch between function and coefficient %d", i);
   }
+
   //
   clear();
-  fe_space_ = new FiniteElementSpace(form, i);
+  fe_space_ = new FiniteElementSpace( form.spaces()[i] );
   scratch_ = new ScratchSpace(*fe_space_);
   X_ = new Vector();
   //
@@ -248,9 +235,9 @@ void Function::evaluate(size_t n, real* values, const real* x,
     // Compute linear combination
     for (size_t i = 0; i < fe_space_->element().space_dim; ++i)
     {
-      // FIXME cell_orientation needs a correct value here
-      fe_space_->element().ufc().evaluate_basis(i, scratch_->basis_values.data(), x,
-                                                ufc_cell->coordinates.data(), 0);
+      fe_space_->element().ufc().evaluate_basis( i, scratch_->basis_values.data(),
+                                                 x, ufc_cell->coordinates.data(),
+                                                 ufc_cell->orientation );
       for (size_t j = 0; j < scratch_->size; ++j)
       {
         values[j] += scratch_->coefficients[i] * scratch_->basis_values[j];

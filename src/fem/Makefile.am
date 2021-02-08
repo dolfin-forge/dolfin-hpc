@@ -9,7 +9,6 @@ libdolfin_fem_la_SOURCES = \
 			DirichletBC.cpp\
 			DofMap.cpp\
 			DofMapCache.cpp\
-			DofMapSet.cpp\
 			DofNumbering.cpp\
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
@@ -24,5 +23,5 @@ libdolfin_fem_la_SOURCES = \
 			SlipFrictionBC.cpp\
 			SparsityPatternBuilder.cpp\
 			SubSystem.cpp\
-			UFC.cpp \
+			UFCCache.cpp \
 			UFCHalo.cpp

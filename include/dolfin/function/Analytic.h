@@ -142,7 +142,6 @@ public:
   {
     dolfin_assert( coefficients != nullptr );
 
-    // FIXME this is probably not the smartest way to do it
     size_t const                  gdim     = cell.mesh().geometry_dimension();
     std::vector< size_t > const & vertices = cell.entities( 0 );
     std::vector< double >         coordinates;
@@ -154,8 +153,8 @@ public:
         coordinates.push_back( coords[c] );
     }
 
-    finite_element.evaluate_dofs(
-      coefficients, *this, coordinates.data(), 0, ufc_cell );
+    finite_element.evaluate_dofs( coefficients, *this,
+                                  coordinates.data(), 0, ufc_cell );
   }
 
   /// Interpolate function to finite element space on facet
@@ -167,7 +166,6 @@ public:
   {
     dolfin_assert( coefficients != nullptr );
 
-    // FIXME this is probably not the smartest way to do it
     size_t const                  gdim     = cell.mesh().geometry_dimension();
     std::vector< size_t > const & vertices = cell.entities( 0 );
     std::vector< double >         coordinates;
@@ -179,8 +177,8 @@ public:
         coordinates.push_back( coords[c] );
     }
 
-    finite_element.evaluate_dofs(
-      coefficients, *this, coordinates.data(), 0, ufc_cell );
+    finite_element.evaluate_dofs( coefficients, *this,
+                                  coordinates.data(), 0, ufc_cell );
   }
 
   /// Display basic information

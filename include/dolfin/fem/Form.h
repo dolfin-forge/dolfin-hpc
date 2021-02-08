@@ -5,8 +5,8 @@
 #define __DOLFIN_FORM_H
 
 #include <dolfin/fem/Coefficient.h>
-#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/UFCCache.h>
 #include <dolfin/ufc/ufc.h>
 
 #include <string>
@@ -31,7 +31,7 @@ public:
   Form( Mesh & mesh );
 
   /// Destructor
-  ~Form() = default;
+  ~Form();
 
   /// Return UFC form
   virtual auto form() const -> ufc::form const & = 0;
@@ -48,22 +48,51 @@ public:
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 
+  /// access ufc interface
   auto operator()() const -> ufc::form const & { return this->form(); }
 
   /// Return mesh
   auto mesh() const -> Mesh &;
 
-  /// Return DofMapSet
-  auto dofmaps() const -> DofMapSet &;
+  auto spaces() const -> std::vector< FiniteElementSpace > const &;
+  auto elements() const -> std::vector< FiniteElement > const &;
+  auto dofmaps() const -> std::vector< DofMap * > const &;
+
+  auto cache() -> UFCCache &;
+
+  auto signature() const -> std::string const &;
+  auto rank() const -> size_t const &;
+  auto num_coefficients() const -> size_t const &;
+
+  auto cell_integrals() const
+    -> std::vector< ufc::cell_integral const * > const &;
+
+  auto exterior_facet_integrals() const
+    -> std::vector< ufc::exterior_facet_integral const * > const &;
+
+  auto interior_facet_integrals() const
+    -> std::vector< ufc::interior_facet_integral const * > const &;
+
+  auto vertex_integrals() const
+    -> std::vector< ufc::vertex_integral const * > const &;
+
+  auto custom_integrals() const
+    -> std::vector< ufc::custom_integral const * > const &;
+
+  auto cutcell_integrals() const
+    -> std::vector< ufc::cutcell_integral const * > const &;
+
+  auto interface_integrals() const
+    -> std::vector< ufc::interface_integral const * > const &;
+
+  auto overlap_integrals() const
+    -> std::vector< ufc::overlap_integral const * > const &;
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
-  /// Create function space for i-th function (arguments + coefficients)
-  auto create_space( size_t i ) const -> FiniteElementSpace *;
-
   /// Create function space for given coefficient
   auto create_coefficient_space( std::string const & name ) const
-    -> FiniteElementSpace *;
+    -> FiniteElementSpace const &;
 
   /// Check dimension and rank of coefficients
   auto check( std::vector< Coefficient * > const & coefficients ) const -> bool;
@@ -87,19 +116,25 @@ private:
   // Mesh
   Mesh & mesh_;
 
-  // Degree of freedom maps
-  mutable DofMapSet dof_map_set_;
+  std::vector< FiniteElementSpace > spaces_;
+  std::vector< FiniteElement >      elements_;
+  std::vector< DofMap * >           dofmaps_;
+
+  UFCCache cache_;
+
+  std::string signature_ { "" };
+  size_t      rank_ { DOLFIN_SIZE_T_UNDEF };
+  size_t      num_coefficients_ { DOLFIN_SIZE_T_UNDEF };
+
+  std::vector< ufc::cell_integral const * >           cell_integrals_;
+  std::vector< ufc::exterior_facet_integral const * > exterior_facet_integrals_;
+  std::vector< ufc::interior_facet_integral const * > interior_facet_integrals_;
+  std::vector< ufc::vertex_integral const * >         vertex_integrals_;
+  std::vector< ufc::custom_integral const * >         custom_integrals_;
+  std::vector< ufc::cutcell_integral const * >        cutcell_integrals_;
+  std::vector< ufc::interface_integral const * >      interface_integrals_;
+  std::vector< ufc::overlap_integral const * >        overlap_integrals_;
 };
-
-//--- INLINES -----------------------------------------------------------------
-
-inline void Form::update_dofmaps() const
-{
-  if ( dof_map_set_.size() == 0 )
-  {
-    dof_map_set_.update( *this, mesh_ );
-  }
-}
 
 //-----------------------------------------------------------------------------
 
@@ -110,10 +145,118 @@ inline auto Form::mesh() const -> Mesh &
 
 //-----------------------------------------------------------------------------
 
-inline auto Form::dofmaps() const -> DofMapSet &
+inline auto Form::spaces() const -> std::vector< FiniteElementSpace > const &
 {
-  this->update_dofmaps();
-  return dof_map_set_;
+  dolfin_assert( not spaces_.empty() );
+  return spaces_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::elements() const -> std::vector< FiniteElement > const &
+{
+  dolfin_assert( not elements_.empty() );
+  return elements_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::dofmaps() const -> std::vector< DofMap * > const &
+{
+  dolfin_assert( not dofmaps_.empty() );
+  return dofmaps_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::cache() -> UFCCache &
+{
+  return cache_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::signature() const -> std::string const &
+{
+  return signature_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::rank() const -> size_t const &
+{
+  return rank_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::num_coefficients() const -> size_t const &
+{
+  return num_coefficients_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::cell_integrals() const
+  -> std::vector< ufc::cell_integral const * > const &
+{
+  return cell_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::exterior_facet_integrals() const
+  -> std::vector< ufc::exterior_facet_integral const * > const &
+{
+  return exterior_facet_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::interior_facet_integrals() const
+  -> std::vector< ufc::interior_facet_integral const * > const &
+{
+  return interior_facet_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::vertex_integrals() const
+  -> std::vector< ufc::vertex_integral const * > const &
+{
+  return vertex_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::custom_integrals() const
+  -> std::vector< ufc::custom_integral const * > const &
+{
+  return custom_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::cutcell_integrals() const
+  -> std::vector< ufc::cutcell_integral const * > const &
+{
+  return cutcell_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::interface_integrals() const
+  -> std::vector< ufc::interface_integral const * > const &
+{
+  return interface_integrals_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Form::overlap_integrals() const
+  -> std::vector< ufc::overlap_integral const * > const &
+{
+  return overlap_integrals_;
 }
 
 //-----------------------------------------------------------------------------
@@ -133,26 +276,10 @@ inline auto Form::coefficient_index( std::string const & name ) const -> size_t
 
 //----------------------------------------------------------------------------
 
-inline auto Form::create_space( size_t i ) const -> FiniteElementSpace *
-{
-  ufc::finite_element * test_f = this->form().create_finite_element( i );
-  ufc::dofmap *         test_d = this->form().create_dofmap( i );
-  // For an argument the mesh is the one passed to the form and for coefficient
-  // the mesh passed to the function.
-  FiniteElementSpace * space = new FiniteElementSpace( dofmaps()[i].mesh(),
-                                                       test_f, *test_d ); // FIXME
-  delete test_f;
-  delete test_d;
-
-  return space;
-}
-
-//----------------------------------------------------------------------------
-
 inline auto Form::create_coefficient_space( std::string const & name ) const
-  -> FiniteElementSpace *
+  -> FiniteElementSpace const &
 {
-  return this->create_space( this->form().rank() + this->coefficient_index( name ) );
+  return spaces_[ this->form().rank() + this->coefficient_index( name ) ];
 }
 
 //-----------------------------------------------------------------------------

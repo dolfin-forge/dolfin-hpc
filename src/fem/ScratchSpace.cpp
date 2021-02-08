@@ -44,10 +44,8 @@ ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
 ScratchSpace::ScratchSpace( ScratchSpace const & other )
   : cell( other.cell )
   , offset( 0 )
-  , finite_element( other.owner_ ? other.finite_element->create()
-                                 : other.finite_element ) // FIXME
-  , dof_map( other.owner_ ? other.dof_map->create()
-                          : other.dof_map )
+  , finite_element( other.finite_element->create() )
+  , dof_map( other.dof_map->create() )
   , size( other.size )
   , space_dimension( other.space_dimension )
   , local_dimension( other.local_dimension )
@@ -63,7 +61,7 @@ ScratchSpace::ScratchSpace( ScratchSpace const & other )
   , all_basis_values( other.all_basis_values )
 #endif
   , coordinates( other.coordinates )
-  , owner_( other.owner_ )
+  , owner_( true )
 {
 }
 

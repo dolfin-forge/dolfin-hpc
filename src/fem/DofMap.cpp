@@ -26,7 +26,7 @@ namespace helper
 inline auto init_nedofs( ufc::dofmap const & ufc_dofmap )
   -> std::vector< size_t >
 {
-  // FIXME +1 doesnt hurt here, but is not the cleanest
+  // +1 doesnt hurt here, but it is not the cleanest
   std::vector< size_t > nedofs( ufc_dofmap.topological_dimension() + 1 );
 
   for ( size_t i = 0; i < nedofs.size(); ++i )
@@ -40,7 +40,7 @@ inline auto init_nedofs( ufc::dofmap const & ufc_dofmap )
 inline auto init_necdofs( ufc::dofmap const & ufc_dofmap )
   -> std::vector< size_t >
 {
-  // FIXME +1 doesnt hurt here, but is not the cleanest
+  // +1 doesnt hurt here, but it is not the cleanest
   std::vector< size_t > necdofs( ufc_dofmap.topological_dimension() + 1 );
 
   for ( size_t i = 0; i < necdofs.size(); ++i )
@@ -254,6 +254,31 @@ DofMap::DofMap( DofMap const &                dofmap,
 
 //-----------------------------------------------------------------------------
 
+DofMap::DofMap( DofMap const & copy )
+  : MeshDependent( copy.mesh() )
+  , ufc_dofmap_( copy.ufc_dofmap_->create() )
+  , signature( copy.signature )
+  , tdim( copy.tdim )
+  , global_dim( copy.global_dim )
+  , num_sub_dofmaps( copy.num_sub_dofmaps )
+  , num_global_support_dofs( copy.num_global_support_dofs )
+  , num_element_support_dofs( copy.num_element_support_dofs )
+  , num_element_dofs( copy.num_element_dofs )
+  , num_facet_dofs( copy.num_facet_dofs )
+  , num_entity_dofs( copy.num_entity_dofs )
+  , num_entity_closure_dofs( copy.num_entity_closure_dofs )
+  , offset_( copy.offset_ )
+  , numbering_( DofNumbering::create( this->mesh(), *ufc_dofmap_ ) )
+  , hash_( copy.hash_ )
+  , sub_dofmaps_dims_( copy.sub_dofmaps_dims_ )
+  , sub_dofmaps_offs_( copy.sub_dofmaps_offs_ )
+  , flattened_( helper::init_flattened( *ufc_dofmap_ ) )
+  , periodic_dofmap_( nullptr )
+{
+}
+
+//-----------------------------------------------------------------------------
+
 DofMap::~DofMap()
 {
   if ( ufc_dofmap_ != nullptr )
@@ -445,8 +470,7 @@ auto DofMap::check( bool throw_error ) -> bool
   message( "signature   : %s", signature.c_str() );
   bool distributed_by_entities_ = true;
   message( "by entities : %d", distributed_by_entities_ );
-  // FIXME:
-  // Check if a dof is owned twice, send to everyone to make sure
+  // FIXME Check if a dof is owned twice, send to everyone to make sure
   BoundaryMesh &        boundary = mesh().interior_boundary();
   Mesh &                mesh     = this->mesh();
   MeshDistributedData & distdata = mesh.distdata();

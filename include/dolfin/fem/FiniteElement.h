@@ -45,15 +45,22 @@ public:
                  std::vector< size_t > const & sub_system );
 
   /// Copy constructor
-  explicit FiniteElement( FiniteElement const & other );
+  FiniteElement( FiniteElement const & copy );
 
-  ///
+  /// Move constructor
+  FiniteElement( FiniteElement && move ) = delete;
+
+  /// Destructor
   ~FiniteElement();
+
+  auto operator=( FiniteElement const & copy ) = delete;
+  auto operator=( FiniteElement && move ) = delete;
 
   /// Check if the element definitions are identical
   auto operator==( FiniteElement const & other ) const -> bool;
   auto operator!=( FiniteElement const & other ) const -> bool;
 
+  /// access ufc interface
   auto ufc() const -> ufc::finite_element const & { return *element; }
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
@@ -88,35 +95,43 @@ public:
   void disp() const;
 
 private:
-  ufc::finite_element const * const element;
+  ufc::finite_element const * element{ nullptr };
 
 public:
-  std::string const signature;
-  std::string const family;
+  std::string const signature{};
+  std::string const family{};
 
-  ufc::shape const shape;
+  ufc::shape const shape{ ufc::shape::vertex };
 
-  size_t const degree;
-  size_t const tdim;
-  size_t const gdim;
-  size_t const space_dim;
-  size_t const num_sub_elements;
+  size_t const degree{ DOLFIN_SIZE_T_UNDEF };
+  size_t const tdim{ DOLFIN_SIZE_T_UNDEF };
+  size_t const gdim{ DOLFIN_SIZE_T_UNDEF };
+  size_t const space_dim{ DOLFIN_SIZE_T_UNDEF };
+  size_t const num_sub_elements{ DOLFIN_SIZE_T_UNDEF };
 
-  size_t const                value_rank;
-  size_t const                value_size;
-  std::vector< size_t > const value_dims;
+  size_t const                value_rank{ DOLFIN_SIZE_T_UNDEF };
+  size_t const                value_size{ DOLFIN_SIZE_T_UNDEF };
+  std::vector< size_t > const value_dims{};
 
-  size_t const                ref_value_rank;
-  size_t const                ref_value_size;
-  std::vector< size_t > const ref_value_dims;
+  size_t const                ref_value_rank{ DOLFIN_SIZE_T_UNDEF };
+  size_t const                ref_value_size{ DOLFIN_SIZE_T_UNDEF };
+  std::vector< size_t > const ref_value_dims{};
 
 private:
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  std::vector< std::vector< size_t > > const sub_value_dims_;
-  std::vector< std::vector< size_t > > const sub_value_offs_;
-  std::vector< ufc::finite_element const * > flattened_;
+  std::vector< std::vector< size_t > >       sub_value_dims_{};
+  std::vector< std::vector< size_t > >       sub_value_offs_{};
+  std::vector< ufc::finite_element const * > flattened_{};
 };
+
+//-----------------------------------------------------------------------------
+
+inline auto FiniteElement::operator==( FiniteElement const & other ) const
+  -> bool
+{
+  return other.signature == this->signature;
+}
 
 //-----------------------------------------------------------------------------
 

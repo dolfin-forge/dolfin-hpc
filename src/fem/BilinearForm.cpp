@@ -13,8 +13,6 @@ namespace dolfin
 
 BilinearForm::BilinearForm( Mesh & mesh )
   : Form( mesh )
-  , test_space_( nullptr )
-  , trial_space_( nullptr )
 {
 }
 
@@ -22,8 +20,6 @@ BilinearForm::BilinearForm( Mesh & mesh )
 
 BilinearForm::~BilinearForm()
 {
-  delete test_space_;
-  delete trial_space_;
 }
 
 //-----------------------------------------------------------------------------

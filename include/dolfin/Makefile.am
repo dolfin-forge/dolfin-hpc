@@ -38,7 +38,6 @@ nobase_pkginclude_HEADERS = \
 				fem/DirichletBC.h\
 				fem/DofMap.h\
 				fem/DofMapCache.h\
-				fem/DofMapSet.h\
 				fem/DofNumbering.h\
 				fem/dolfin_fem.h\
 				fem/Elements.h\
@@ -63,7 +62,7 @@ nobase_pkginclude_HEADERS = \
 				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\
 				fem/SubSystem.h\
-				fem/UFC.h\
+				fem/UFCCache.h\
 				fem/UFCCell.h\
 				fem/UFCHalo.h\
 				function/Analytic.h\

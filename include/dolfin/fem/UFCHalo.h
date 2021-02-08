@@ -9,14 +9,12 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
+#include <dolfin/fem/Form.h>
 
 namespace dolfin
 {
 
-class DofMapSet;
 class Facet;
-class Coefficient;
-class Mesh;
 class UFC;
 
 /**
@@ -40,9 +38,7 @@ class UFCHalo
 
 public:
   /// Constructor
-  UFCHalo( UFC &                                ufc,
-           std::vector< Coefficient * > const & coefficients,
-           DofMapSet const &                    dof_map_set );
+  UFCHalo( Form & form );
 
   ///
   ~UFCHalo();
@@ -53,18 +49,22 @@ public:
   ///
   void disp() const;
 
+  // facet indices
+  size_t facet0;
+  size_t facet1;
+
+  // Current pair of cells of macro element
+  UFCCell cell0;
+  UFCCell cell1;
+
 private:
 
   ///
-  void update( std::vector< Coefficient * > const & coefficients,
-               DofMapSet const &                    dof_map_set );
+  void update();
 
   void clear();
 
-  UFC &                                ufc_;
-  Mesh &                               mesh_;
-  std::vector< Coefficient * > const & coefficients_;
-  DofMapSet const &                    dof_map_set_;
+  Form & form_;
 
   // Store rank offsets, implemented by accumulating shared facet counts
   _map< size_t, size_t > rank_offsets_;

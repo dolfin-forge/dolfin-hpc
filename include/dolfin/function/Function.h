@@ -47,10 +47,6 @@ class SubFunction;
 class Function : public GenericFunction, public TimeDependent
 {
 public:
-  /// Create discrete function for argument function i of form
-  /// The discrete space is defined on the i-th coefficient mesh.
-  Function( Form & form, size_t i );
-
   /// Create discrete function from given  discrete space
   Function( FiniteElementSpace const & space );
 

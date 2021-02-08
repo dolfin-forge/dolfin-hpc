@@ -41,19 +41,14 @@ DofMapCache::~DofMapCache()
 auto DofMapCache::acquire( Mesh & mesh, Form const & form, size_t const & i )
   -> DofMap &
 {
-  // Update dof maps of form:
-  // This triggers creation of a dof map set if needed and acquistion of a token
-  // for each coefficient of the form.
-  // If the dof map set has been created the call just return without doing
-  // anything.
-  form.update_dofmaps();
+  dolfin_assert( not form.dofmaps().empty() );
 
   // Create UFC dof map for the i-th coefficient to get the signature
   ufc::dofmap * ufc_dofmap = form().create_dofmap( i );
 
   // Do not transfer ownership to the possibly created dofmap
   // The UFC dofmap is cloned as member attribute of the DOLFIN dofmap
-  DofMap * ret = &acquire( mesh, *ufc_dofmap );
+  DofMap * ret = &acquire( mesh, *ufc_dofmap, false );
 
   // Delete UFC dof map as it is not longer used
   delete ufc_dofmap;
@@ -63,7 +58,7 @@ auto DofMapCache::acquire( Mesh & mesh, Form const & form, size_t const & i )
 
 //-----------------------------------------------------------------------------
 
-auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap const & dofmap )
+auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap const & dofmap, bool owner )
   -> DofMap &
 {
   DofMap *              ret = nullptr;
@@ -89,22 +84,27 @@ auto DofMapCache::acquire( Mesh & mesh, ufc::dofmap const & dofmap )
   {
     // The dofmap has already been created
     ret = it->second.item;
-    dolfin_assert( ret );
+    dolfin_assert( ret != nullptr );
 
     // Check hash consistency
     std::string const dm_h = ret->hash();
     if ( h != dm_h )
     {
       disp();
-      std::stringstream ss;
-      ss << std::endl
-         << "DofMap@" << ret << std::endl
-         << "Signature to be inserted  : " << h << std::endl
-         << "Signature of DofMap       : " << dm_h << std::endl
-         << "DofMap object refers to two different signatures";
-      error( ss.str() );
+      error("DofMap@%p\n"
+            "Signature to be inserted  : %s\n"
+            "Signature of DofMap       : %s\n"
+            "DofMap object refers to two different signatures",
+            ret, h.c_str(), dm_h.c_str() );
     }
     it->second.count++;
+
+    // Ownership was transfered but the dofmap already exists, the UFC dofmap
+    // passed as argument will not be used.
+    if ( owner )
+    {
+      delete &dofmap;
+    }
   }
   return *ret;
 }
@@ -119,7 +119,7 @@ void DofMapCache::release( DofMap & dofmap )
 
   if ( it == rlist_.end() )
   {
-    error( "Trying to release inexistent DofMap" );
+    error( "Trying to release inexistent DofMap (%s)", h.c_str() );
   }
   else
   {
@@ -127,17 +127,16 @@ void DofMapCache::release( DofMap & dofmap )
     {
       disp();
       std::stringstream ss;
-      ss << std::endl
-         << "DofMap@" << &dofmap << std::endl
-         << "Signature to be released     : " << h << std::endl
-         << "Signature already registered : " << expected_h << std::endl
-         << "DofMap object refers to two different signatures";
-      error( ss.str() );
+      error("DofMap@%p\n"
+            "Signature to be inserted  : %s\n"
+            "Signature of DofMap       : %s\n"
+            "DofMap object refers to two different signatures",
+            &dofmap, h.c_str(), expected_h.c_str() );
     }
     container_t::iterator dm_it    = cache_.find( expected_h );
     token_t &             dm_token = dm_it->second;
     dm_token.count--;
-    // message("Release dofmap: %s",h.c_str());
+
     if ( dm_token.count == 0 )
     {
       delete dm_token.item;

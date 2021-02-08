@@ -9,7 +9,6 @@
 #include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/DirichletBC.h>
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Elements.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>

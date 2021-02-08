@@ -40,13 +40,12 @@ class FiniteElementSpace
 {
 
 public:
-  /// Create space from i-th coefficient space of given form
-  FiniteElementSpace( Form & form, size_t const i );
+  FiniteElementSpace( FiniteElement const & element, DofMap & dof );
 
   /// Create space from UFC finite element
   explicit FiniteElementSpace( Mesh &                      mesh,
                                ufc::finite_element const * element,
-                               ufc::dofmap &               dofmap );
+                               ufc::dofmap const &         dofmap );
 
   /// Create a finite element space from ith subspace of given space
   FiniteElementSpace( FiniteElementSpace const & space, size_t const i );
@@ -62,6 +61,9 @@ public:
 
   /// Destructor
   ~FiniteElementSpace();
+
+  auto operator=( FiniteElementSpace const & ) = delete;
+  auto operator=( FiniteElementSpace && ) = delete;
 
   /// Check if the finite element space definitions are identical
   auto operator==( FiniteElementSpace const & other ) const -> bool;

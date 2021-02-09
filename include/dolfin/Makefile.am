@@ -78,6 +78,7 @@ nobase_pkginclude_HEADERS = \
 				function/Real.h\
 				function/SpaceTimeFunction.h\
 				function/SubFunction.h\
+				function/UserCoefficient.h\
 				function/Value.h\
 				function/ValueSpace.h\
 				function/Zero.h\

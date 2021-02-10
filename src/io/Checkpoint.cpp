@@ -48,7 +48,7 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
 
   // deserialize ParameterSystem
   std::string parameters  = ParameterSystem::parameters.serialize();
-  size_t        param_size  = parameters.size() * sizeof( char );
+  uint        param_size  = parameters.size() * sizeof( char );
 
   fill_headers( t, param_size, meshes, func, vec );
 
@@ -145,7 +145,7 @@ void Checkpoint::load_parametersystem( std::string filename )
   stream_t file = load_file( filename );
 
   offset_t byte_offset = chkp_header.offset_psystem;
-  size_t     param_size  = 0;
+  uint     param_size  = 0;
 
 #ifdef ENABLE_MPIIO
   // load ParameterSystem

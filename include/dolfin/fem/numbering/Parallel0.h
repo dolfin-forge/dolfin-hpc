@@ -108,7 +108,8 @@ public:
       Cell  c( mesh, f.entities( tdim )[0] );
 
       ufc_cell.update( c );
-      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.topology().num_entities(),
+                                ufc_cell.entity_indices );
       size_t local_facet = c.index( f );
       ufc_dofmap.tabulate_facet_dofs( facet_dofs, local_facet );
 
@@ -161,7 +162,8 @@ public:
     for ( CellIterator cell( mesh ); !cell.end(); ++cell )
     {
       ufc_cell.update( *cell );
-      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.topology().num_entities(),
+                                ufc_cell.entity_indices );
       for ( size_t i = 0; i < local_dim; ++i )
       {
         if ( ufc_ghosts.find( dofs[i] ) == ufc_ghosts.end() )

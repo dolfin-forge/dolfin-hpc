@@ -109,7 +109,8 @@ public:
     for ( ; !cell.end(); ++cell )
     {
       ufc_cell.update( *cell );
-      ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.topology().num_entities(),
+                                ufc_cell.entity_indices );
 
       // Create mapping from dof to dofmap offset
       for ( size_t i = 0; i < ufc_dofmap.num_element_dofs(); ++i )

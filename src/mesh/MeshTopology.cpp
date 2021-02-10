@@ -45,6 +45,7 @@ MeshTopology::MeshTopology( MeshTopology const & other )
   , type_( cloneptr( other.type_ ) )
   , dim_( other.dim_ )
   , frozen_( other.frozen_ )
+  , num_entities_( other.num_entities_ )
   , distdata_( other.distdata_ )
   , timestamp_( other.timestamp_ )
 {
@@ -83,11 +84,12 @@ auto swap( MeshTopology & a, MeshTopology & b ) -> void
   swap( static_cast< Distributed< MeshTopology > & >( a ),
         static_cast< Distributed< MeshTopology > & >( b ) );
 
-  swap( a.type_, b.type_ );
-  swap( a.dim_, b.dim_ );
-  swap( a.frozen_, b.frozen_ );
-  swap( a.distdata_, b.distdata_ );
-  swap( a.timestamp_, b.timestamp_ );
+  swap( a.type_,         b.type_ );
+  swap( a.dim_,          b.dim_ );
+  swap( a.frozen_,       b.frozen_ );
+  swap( a.num_entities_, b.num_entities_ );
+  swap( a.distdata_,     b.distdata_ );
+  swap( a.timestamp_,    b.timestamp_ );
 
   for ( size_t i = 0; i < MeshTopology::CMAX; ++i )
   {
@@ -229,6 +231,10 @@ auto MeshTopology::finalize() -> void
       }
     }
   }
+
+  // update num_entities_
+  this->num_entities_update();
+
   // Do not renumber automatically !
   // This would cause issues for boundary meshes and some mesh algorithms.
 }
@@ -258,6 +264,21 @@ auto MeshTopology::remap( size_t d0, std::vector< size_t > const & mapping )
   if ( distributed() )
   {
     distdata_[d0].remap_numbering( mapping );
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+auto MeshTopology::num_entities_update() -> void
+{
+  num_entities_.resize( dim_ + 1 );
+
+  for ( size_t d = 0; d <= dim_; ++d )
+  {
+    if ( this->connectivity( d ) )
+    {
+      num_entities_[d] = this->global_size( d );
+    }
   }
 }
 
@@ -532,7 +553,7 @@ auto MeshTopology::compute( size_t d0, size_t d1 ) const -> Connectivity const *
 auto MeshTopology::reorder() const -> void
 {
   // NOTE: ensure that boundary meshes and empty meshes are not reordered
-  if ( !frozen_ && this->connectivity( dim_ ) )
+  if ( not frozen_ and this->connectivity( dim_ ) )
   {
     MeshTopology & topology  = const_cast< MeshTopology & >( *this );
     size_t const   num_cells = this->size( dim_ );
@@ -550,10 +571,13 @@ auto MeshTopology::renumber() const -> void
   if ( distributed() )
   {
     MeshTopology & topology = const_cast< MeshTopology & >( *this );
-    if ( !MeshRenumber::renumber( topology ) )
+    if ( not MeshRenumber::renumber( topology ) )
     {
       warning( "MeshTopology: triggered mesh renumbering for nothing" );
     }
+
+    // update num_entities_
+    topology.num_entities_update();
   }
 }
 

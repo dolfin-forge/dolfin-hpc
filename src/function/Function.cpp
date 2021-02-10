@@ -470,7 +470,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 
 void Function::InitializeVector()
 {
-  dolfin_assert( fe_space_->element().tdim + 1 == mesh_->num_entities().size() );
+  dolfin_assert( fe_space_->element().tdim == mesh_->topology().dim() );
   if ( X_->size() != fe_space_->dofmap().global_dim )
   {
     // Specific case in serial local_size == global_dimension

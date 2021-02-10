@@ -32,7 +32,8 @@ public:
                              ufc::cell const & ufc_cell,
                              Cell const & ) const override
   {
-    ufc_dofmap.tabulate_dofs( dofs, mesh.num_entities(), ufc_cell.entity_indices );
+    ufc_dofmap.tabulate_dofs( dofs, mesh.topology().num_entities(),
+                              ufc_cell.entity_indices );
   }
 
   ///
@@ -47,7 +48,7 @@ public:
     }
 
     //---
-    set_range( 0, ufc_dofmap.global_dimension( mesh.num_entities() ) );
+    set_range( 0, ufc_dofmap.global_dimension( mesh.topology().num_entities() ) );
   }
 
   ///

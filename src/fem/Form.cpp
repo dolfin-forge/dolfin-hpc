@@ -179,8 +179,6 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   // init FiniteElementSpaces
   if ( spaces_.empty() )
   {
-    mesh_.num_entities_update();
-
     for ( size_t i = 0; i < rank_ + num_coefficients_ ; ++i )
     {
       // create FiniteElement

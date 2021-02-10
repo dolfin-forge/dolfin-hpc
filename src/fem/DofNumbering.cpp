@@ -40,7 +40,7 @@ auto DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap) -> DofNumbering *
   // UFC dofmap should be initialized to compute the global dimension
   DofNumbering::init(mesh, ufc_dofmap);
 
-  std::vector< size_t > const & num_entities = mesh.num_entities();
+  std::vector< size_t > const & num_entities = mesh.topology().num_entities();
 
   // Real
   if (ufc_dofmap.global_dimension(num_entities) == ufc_dofmap.num_element_dofs())
@@ -191,11 +191,8 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     }
   }
 
-  // update global mesh entities
-  mesh.num_entities_update();
-
   message( 1, "DofNumbering: initialized UFC dofmap with global dimension %u",
-           ufc_dofmap.global_dimension( mesh.num_entities() ) );
+           ufc_dofmap.global_dimension( mesh.topology().num_entities() ) );
 }
 
 //-----------------------------------------------------------------------------

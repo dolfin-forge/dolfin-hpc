@@ -96,22 +96,28 @@ public:
   //--- Connectivity ----------------------------------------------------------
 
   /// Return connectivity for given pair of topological dimensions
-  inline auto operator()( size_t d0, size_t d1 ) -> Connectivity &;
+  auto operator()( size_t d0, size_t d1 ) -> Connectivity &;
 
   /// Return connectivity for given pair of topological dimensions
-  inline auto operator()( size_t d0, size_t d1 ) const -> Connectivity const &;
+  auto operator()( size_t d0, size_t d1 ) const -> Connectivity const &;
 
   /// Return topological dimension
-  inline auto dim() const -> size_t;
+  auto dim() const -> size_t;
+
+  /// number of entities in all topological dimensions
+  auto num_entities() const -> std::vector< size_t > const &;
+
+  /// update number of entities in all topological dimensions
+  auto num_entities_update() -> void;
 
   /// Return number of entities in the local topology for given dimension
-  inline auto size( size_t dim ) const -> size_t;
+  auto size( size_t dim ) const -> size_t;
 
   /// Return pointer to connectivity for given pair
-  inline auto connectivity( size_t d0, size_t d1 = 0 ) -> Connectivity *;
+  auto connectivity( size_t d0, size_t d1 = 0 ) -> Connectivity *;
 
   /// Return pointer to connectivity for given pair (const)
-  inline auto connectivity( size_t d0, size_t d1 = 0 ) const
+  auto connectivity( size_t d0, size_t d1 = 0 ) const
     -> Connectivity const *;
 
   //--- Distributed data ------------------------------------------------------
@@ -169,11 +175,15 @@ private:
 public:
   /// Force renumbering of mesh topology entities
   /// @todo public for the moment but this just legacy of bad design
-  void renumber() const;
+  /// FIXME this shouldnt be const, but this class is somehow built to not care
+  /// about that...
+  auto renumber() const -> void;
 
 private:
   /// Force reordering of mesh topology connectivities
-  void reorder() const;
+  /// FIXME this shouldnt be const, but this class is somehow built to not care
+  /// about that...
+  auto reorder() const -> void;
 
   ///
   CellType const * type_;
@@ -183,6 +193,9 @@ private:
 
   // Topology cannot be modified
   bool frozen_;
+
+  // number of entities in each (connectivity) dimension
+  std::vector< size_t > num_entities_;
 
   /// Connectivity for pairs of topological dimensions
   mutable Connectivity * C_[CMAX][CMAX];
@@ -228,6 +241,14 @@ inline auto MeshTopology::operator()( size_t d0, size_t d1 ) const
 inline auto MeshTopology::dim() const -> size_t
 {
   return dim_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto MeshTopology::num_entities() const -> std::vector< size_t > const &
+{
+  dolfin_assert( num_entities_.size() == dim_ + 1 );
+  return num_entities_;
 }
 
 //-----------------------------------------------------------------------------

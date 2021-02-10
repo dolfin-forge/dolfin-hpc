@@ -258,7 +258,6 @@ auto MeshEditor::close() -> void
   mesh_.topology().finalize();
   mesh_.geometry().finalize();
   mesh_.extent_update();
-  mesh_.num_entities_update();
 
   // Clear data
   clear();

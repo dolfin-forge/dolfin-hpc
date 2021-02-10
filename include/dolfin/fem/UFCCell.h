@@ -48,7 +48,7 @@ public:
   auto init( Cell const & cell ) -> void;
 
   // Update cell entities to global indices and coordinates
-  auto update( Cell & cell ) -> void;
+  auto update( Cell const & cell ) -> void;
 
   ///
   static auto shape( CellType::Type type ) -> ufc::shape;
@@ -249,7 +249,7 @@ inline auto UFCCell::init( Cell const & cell ) -> void
 
 //-----------------------------------------------------------------------------
 
-inline auto UFCCell::update( Cell & cell ) -> void
+inline auto UFCCell::update( Cell const & cell ) -> void
 {
   // Update dolfin cell pointer
   this->cell_ = &cell;

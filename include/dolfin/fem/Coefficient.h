@@ -115,7 +115,9 @@ private:
   /// Time dependency hook
   virtual void sync( Time const & t ) = 0;
 };
+
 //-----------------------------------------------------------------------------
+
 inline auto Coefficient::value_size() const -> size_t
 {
   size_t size = 1;
@@ -125,7 +127,9 @@ inline auto Coefficient::value_size() const -> size_t
   }
   return size;
 }
+
 //-----------------------------------------------------------------------------
+
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_COEFFICIENT_H */

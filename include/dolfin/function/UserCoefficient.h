@@ -24,12 +24,13 @@ class UserCoefficient : public Coefficient
 {
 
 public:
+
   //--- UFC INTERFACE ---------------------------------------------------------
 
   ///
   auto evaluate( real *            values,
                  real const *      coordinates,
-                 ufc::cell const & cell ) const -> void;
+                 ufc::cell const & cell ) const -> void override;
 
   //--- Coefficient INTERFACE -------------------------------------------------
 
@@ -37,7 +38,7 @@ public:
   auto evaluate( size_t            n,
                  real *            values,
                  real const *      coordinates,
-                 ufc::cell const & cell ) const -> void;
+                 ufc::cell const & cell ) const -> void override;
 
   /// Evaluate function at given point coordinate, cell is searched for
   auto eval( real *, const real * ) const -> void override;
@@ -55,24 +56,26 @@ public:
   auto interpolate( real *                      coefficients,
                     const ufc::cell &           cell,
                     const ufc::finite_element & finite_element,
-                    const Cell & ) const -> void;
+                    const Cell & ) const -> void override;
 
   /// Interpolate function to finite element space on facet
   auto interpolate( real *                      coefficients,
                     const ufc::cell &           cell,
                     const ufc::finite_element & finite_element,
                     const Cell &,
-                    size_t ) const -> void;
+                    size_t ) const -> void override;
 
   /// Display basic information
-  auto disp() const -> void;
+  auto disp() const -> void override;
 
   /// Synchronize
-  auto sync() -> void;
+  auto sync() -> void override;
 
-private:
+protected:
   /// Default time dependency hook
-  virtual auto sync( Time const & ) -> void;
+  virtual auto sync( Time const & ) -> void override;
+
+  mutable UFCCell ufc_cell_;
 };
 
 //-----------------------------------------------------------------------------
@@ -149,13 +152,25 @@ inline auto UserCoefficient< Functor, I, J >::value_size() const
 template < typename Functor, size_t I, size_t J >
 inline auto UserCoefficient< Functor, I, J >::interpolate(
   real *                      coefficients,
-  const ufc::cell &           cell,
+  const ufc::cell &           ufc_cell,
   const ufc::finite_element & finite_element,
-  const Cell & ) const
+  const Cell &                cell ) const
   -> void
 {
   dolfin_assert( coefficients != nullptr );
-  finite_element.evaluate_dofs( coefficients, *this, cell );
+
+  if ( ufc_cell_.coordinates.empty() )
+  {
+    ufc_cell_.init( cell );
+  }
+  else
+  {
+    ufc_cell_.update( cell );
+  }
+
+  finite_element.evaluate_dofs( coefficients, *this,
+                                ufc_cell_.coordinates.data(),
+                                ufc_cell_.orientation, ufc_cell );
 }
 
 //-----------------------------------------------------------------------------
@@ -163,14 +178,26 @@ inline auto UserCoefficient< Functor, I, J >::interpolate(
 template < typename Functor, size_t I, size_t J >
 inline auto UserCoefficient< Functor, I, J >::interpolate(
   real *                      coefficients,
-  const ufc::cell &           cell,
+  const ufc::cell &           ufc_cell,
   const ufc::finite_element & finite_element,
-  const Cell &,
+  const Cell &                cell,
   size_t ) const
   -> void
 {
   dolfin_assert( coefficients != nullptr );
-  finite_element.evaluate_dofs( coefficients, *this, cell );
+
+  if ( ufc_cell_.coordinates.empty() )
+  {
+    ufc_cell_.init( cell );
+  }
+  else
+  {
+    ufc_cell_.update( cell );
+  }
+
+  finite_element.evaluate_dofs( coefficients, *this,
+                                ufc_cell_.coordinates.data(),
+                                ufc_cell_.orientation, ufc_cell );
 }
 
 //-----------------------------------------------------------------------------

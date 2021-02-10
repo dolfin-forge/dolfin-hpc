@@ -1,6 +1,7 @@
 #ifndef __DOLFIN_FUNCTION_ANALYTIC_H_
 #define __DOLFIN_FUNCTION_ANALYTIC_H_
 
+#include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/GenericFunction.h>
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
@@ -19,6 +20,7 @@ public:
   /// Constructor
   Analytic< T >( Mesh & mesh )
     : mesh_( mesh )
+    , ufc_cell_( Cell( mesh_, 0 ) )
     , evaluant_()
   {
   }
@@ -26,6 +28,7 @@ public:
   /// Constructor
   Analytic< T >( Mesh & mesh, T expr )
     : mesh_( mesh )
+    , ufc_cell_( Cell( mesh_, 0 ) )
     , evaluant_( expr )
   {
   }
@@ -38,6 +41,7 @@ public:
   /// Copy constructor
   Analytic< T >( Analytic< T > const & other )
     : mesh_( const_cast< Mesh & >( other.mesh_ ) )
+    , ufc_cell_( other.ufc_cell_ )
     , evaluant_( other.evaluant_ )
   {
   }
@@ -141,20 +145,11 @@ public:
                            const Cell &                cell ) const
   {
     dolfin_assert( coefficients != nullptr );
-
-    size_t const                  gdim     = cell.mesh().geometry_dimension();
-    std::vector< size_t > const & vertices = cell.entities( 0 );
-    std::vector< double >         coordinates;
-    for ( size_t i = 0; i < cell.num_entities( 0 ); ++i )
-    {
-      double const * coords = cell.mesh().geometry().x( vertices[i] );
-
-      for ( size_t c = 0; c < gdim; ++c )
-        coordinates.push_back( coords[c] );
-    }
+    ufc_cell_.update( cell );
 
     finite_element.evaluate_dofs( coefficients, *this,
-                                  coordinates.data(), 0, ufc_cell );
+                                  ufc_cell_.coordinates.data(),
+                                  ufc_cell_.orientation, ufc_cell );
   }
 
   /// Interpolate function to finite element space on facet
@@ -165,20 +160,11 @@ public:
                            size_t ) const
   {
     dolfin_assert( coefficients != nullptr );
-
-    size_t const                  gdim     = cell.mesh().geometry_dimension();
-    std::vector< size_t > const & vertices = cell.entities( 0 );
-    std::vector< double >         coordinates;
-    for ( size_t i = 0; i < cell.num_entities( 0 ); ++i )
-    {
-      double const * coords = cell.mesh().geometry().x( vertices[i] );
-
-      for ( size_t c = 0; c < gdim; ++c )
-        coordinates.push_back( coords[c] );
-    }
+    ufc_cell_.update( cell );
 
     finite_element.evaluate_dofs( coefficients, *this,
-                                  coordinates.data(), 0, ufc_cell );
+                                  ufc_cell_.coordinates.data(),
+                                  ufc_cell_.orientation, ufc_cell );
   }
 
   /// Display basic information
@@ -212,8 +198,9 @@ private:
     evaluant_( t );
   }
 
-  Mesh & mesh_;
-  T      evaluant_;
+  Mesh &          mesh_;
+  mutable UFCCell ufc_cell_;
+  T               evaluant_;
 };
 
 //-----------------------------------------------------------------------------

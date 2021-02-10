@@ -425,6 +425,9 @@ AC_CONFIG_FILES([site-packages/Makefile])
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
                  doc/progr_reference/Makefile])
 
+# add default warning flags
+CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
+
 AC_OUTPUT
 
 # Display help text

@@ -3,6 +3,7 @@
 
 #include <dolfin/io/Checkpoint.h>
 
+#include <dolfin/common/timing.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Mesh.h>
@@ -39,6 +40,8 @@ namespace dolfin
 void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
                         FunctionMap & func, VectorMap & vec )
 {
+  tic();
+
   dolfin_set( "checkpoint_id", n_ );
   dolfin_set( "checkpoint_time", t );
 
@@ -82,6 +85,8 @@ void Checkpoint::write( std::string filename, real const t, MeshMap & meshes,
   write( file, byte_offset, vec );
 
   close_file( file );
+
+  message( "Writing checkpoint (%s) took %f seconds.", filename.c_str(), toc() );
 }
 
 //-----------------------------------------------------------------------------

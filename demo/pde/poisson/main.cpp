@@ -101,5 +101,7 @@ int main()
   // Save solution to file
   File( "poisson.pvd" ) << u;
 
+  dolfin_finalize();
+
   return 0;
 }

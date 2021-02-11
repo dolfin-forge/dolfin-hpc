@@ -169,7 +169,7 @@ ScratchSpace & ScratchSpace::operator=( ScratchSpace && other )
   coefficients = std::move( other.coefficients );
   basis_values = std::move( other.basis_values );
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-  all_basis_values = std::move( other.all_basis_values =;
+  all_basis_values = std::move( other.all_basis_values );
 #endif
   coordinates  = std::move( other.coordinates );
 

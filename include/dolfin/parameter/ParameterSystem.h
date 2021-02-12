@@ -40,6 +40,9 @@ public:
 
   auto get_type( std::string const & key ) -> Parameter::Type;
 
+  /// remove Parameter from the ParameterSystem
+  void delete_parameter( std::string const & key );
+
   /// Check if parameter with given key has been defined
   auto defined( std::string const & key ) const -> bool;
 
@@ -60,9 +63,6 @@ private:
 
   /// Get Parameter with given key
   auto get( std::string const & key ) const -> Parameter const &;
-
-  /// cleanup Parameter
-  void delete_parameter( std::string const & key );
 };
 
 //-----------------------------------------------------------------------------

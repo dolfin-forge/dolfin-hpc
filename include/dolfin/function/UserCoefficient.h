@@ -25,13 +25,6 @@ class UserCoefficient : public Coefficient
 
 public:
 
-  //--- UFC INTERFACE ---------------------------------------------------------
-
-  ///
-  auto evaluate( real *            values,
-                 real const *      coordinates,
-                 ufc::cell const & cell ) const -> void override;
-
   //--- Coefficient INTERFACE -------------------------------------------------
 
   ///
@@ -82,19 +75,6 @@ protected:
 
 template < typename Functor, size_t I, size_t J >
 inline auto
-  UserCoefficient< Functor, I, J >::evaluate( real *            values,
-                                              const real *      coordinates,
-                                              const ufc::cell & cell ) const
-  -> void
-{
-  Functor const * func = static_cast< Functor const * >( this );
-  func->evaluate( values, coordinates, static_cast< UFCCell const & >( cell ) );
-}
-
-//-----------------------------------------------------------------------------
-
-template < typename Functor, size_t I, size_t J >
-inline auto
   UserCoefficient< Functor, I, J >::evaluate( size_t            n,
                                               real *            values,
                                               const real *      coordinates,
@@ -107,7 +87,7 @@ inline auto
   {
     func->evaluate( &values[i * value_size()],
                     &coordinates[i * cell.geometric_dimension],
-                    static_cast< UFCCell const & >( cell ) );
+                    cell );
   }
 }
 
@@ -184,20 +164,7 @@ inline auto UserCoefficient< Functor, I, J >::interpolate(
   size_t ) const
   -> void
 {
-  dolfin_assert( coefficients != nullptr );
-
-  if ( ufc_cell_.coordinates.empty() )
-  {
-    ufc_cell_.init( cell );
-  }
-  else
-  {
-    ufc_cell_.update( cell );
-  }
-
-  finite_element.evaluate_dofs( coefficients, *this,
-                                ufc_cell_.coordinates.data(),
-                                ufc_cell_.orientation, ufc_cell );
+  this->interpolate( coefficients, ufc_cell, finite_element, cell );
 }
 
 //-----------------------------------------------------------------------------

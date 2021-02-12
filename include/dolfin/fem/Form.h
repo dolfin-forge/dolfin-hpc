@@ -32,7 +32,7 @@ public:
   Form( Mesh & mesh );
 
   /// Destructor
-  ~Form();
+  virtual ~Form();
 
   /// Return UFC form
   virtual auto form() const -> ufc::form const & = 0;

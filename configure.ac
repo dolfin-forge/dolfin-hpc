@@ -143,9 +143,8 @@ AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
 # UFL is now default
-# PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
-# CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
-# AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
+PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.4.0])
+CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 
 # Checks for libraries.
 AX_ZLIB

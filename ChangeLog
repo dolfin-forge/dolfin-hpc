@@ -1,4 +1,6 @@
 0.9.4-hpc [2021-XX-YY]
+ - switched to new versions of ffc-hpc (1.2.0), ufl-hpc (1.2.0) and fiat-hpc (1.6.0)
+ - ufc.h is now part of ffc-hpc
 0.9.3-hpc [2020-11-24]
  - C++14 is now required to build DOLFIN HPC
  - STL file reader can now only load data in a certain bounding box to reduce

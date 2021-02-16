@@ -14,9 +14,8 @@ BlueGene/L and Cray XT6-XE6 systems.
 
 The package dependencies of DOLFIN HPC 0.9.4 are:
 
-    * ufc 2.2.0-hpc (https://bitbucket.org/adaptivesimulations/ufc2-hpc)
-    * ffc 1.1.0-hpc (https://bitbucket.org/adaptivesimulations/ffc-hpc)
-    * ufl 1.1.0-hpc (https://bitbucket.org/adaptivesimulations/ufl-hpc)
+    * ffc 1.2.0-hpc (https://bitbucket.org/adaptivesimulations/ffc-hpc)
+    * ufl 1.2.0-hpc (https://bitbucket.org/adaptivesimulations/ufl-hpc)
     * ParMETIS
     * Supported LA-backend (currently PETSc or JANPACK)
 
@@ -31,5 +30,3 @@ these steps:
 
 DOLFIN HPC can be build with various options, issue ./configure --help
 to list all of them.
-
-

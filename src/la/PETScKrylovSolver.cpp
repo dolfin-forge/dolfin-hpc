@@ -519,6 +519,8 @@ auto PETScKrylovSolver::getType( SolverType method ) const -> KSPType
   {
     case bicgstab:
       return KSPBCGS;
+    case pipebicgstab:
+      return KSPPIPEBCGS;
     case cg:
       return KSPCG;
     case default_solver:

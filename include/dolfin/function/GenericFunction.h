@@ -64,15 +64,13 @@ public:
 
   /// Interpolate function to finite element space on cell
   void interpolate( real *                      coefficients,
-                    const ufc::cell &           cell,
-                    const ufc::finite_element & finite_element,
-                    const Cell & dolfin_cell ) const override = 0;
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element ) const override = 0;
 
   /// Interpolate function to finite element space on facet
   void interpolate( real *                      coefficients,
-                    const ufc::cell &           cell,
-                    const ufc::finite_element & finite_element,
-                    const Cell &                dolfin_cell,
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element,
                     size_t                      facet ) const override = 0;
 
   /// Synchronize

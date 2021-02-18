@@ -13,7 +13,7 @@ namespace dolfin
 {
 
 class Mesh;
-class Cell;
+class UFCCell;
 
 /// This class serves as a base class/interface for implementations
 /// of specific function representations.
@@ -56,15 +56,13 @@ public:
 
   /// Interpolate function to finite element space on cell
   virtual void interpolate( real *                      coefficients,
-                            const ufc::cell &           cell,
-                            const ufc::finite_element & finite_element,
-                            const Cell &                dolfin_cell ) const = 0;
+                            UFCCell const &             cell,
+                            ufc::finite_element const & finite_element ) const = 0;
 
   /// Interpolate function to finite element space on facet
   virtual void interpolate( real *                      coefficients,
-                            const ufc::cell &           cell,
-                            const ufc::finite_element & finite_element,
-                            const Cell &                dolfin_cell,
+                            UFCCell const &             cell,
+                            ufc::finite_element const & finite_element,
                             size_t                      facet ) const = 0;
 
   /// Synchronize values

@@ -112,16 +112,14 @@ public:
 
   /// Interpolate function to finite element space on cell
   void interpolate( real *                      coefficients,
-                    const ufc::cell &           cell,
-                    const ufc::finite_element & finite_element,
-                    const Cell &                dolfin_cell ) const override;
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element ) const override;
 
   /// Interpolate function to finite element space on facet
   void interpolate( real *                      coefficients,
-                    const ufc::cell &           cell,
-                    const ufc::finite_element & finite_element,
-                    const Cell &                dolfin_cell,
-                    size_t                      facet ) const override;
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element,
+                    size_t ) const override;
 
   /// Synchronize values
   void sync() override;
@@ -324,12 +322,11 @@ inline auto Function::value_size() const -> size_t
 //-----------------------------------------------------------------------------
 
 inline void Function::interpolate( real *                      coefficients,
-                                   const ufc::cell &           cell,
-                                   const ufc::finite_element & finite_element,
-                                   const Cell &                dolfin_cell,
+                                   UFCCell const &             cell,
+                                   ufc::finite_element const & finite_element,
                                    size_t ) const
 {
-  interpolate( coefficients, cell, finite_element, dolfin_cell );
+  interpolate( coefficients, cell, finite_element );
 }
 
 //-----------------------------------------------------------------------------

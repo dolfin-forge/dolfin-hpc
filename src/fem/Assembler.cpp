@@ -226,8 +226,7 @@ for ( size_t i = 0; i < N; ++i )
   for ( size_t c = 0; c < coef_size; ++c )
   {
     form.coefficients()[c]->interpolate( cache.w[c], cache.cell,
-                                         form.elements()[form.rank() + c].ufc(),
-                                         cell );
+                                         form.elements()[form_rank + c].ufc() );
   }
 
   // Tabulate dofs for each dimension
@@ -320,7 +319,7 @@ for ( size_t i = 0; i < N; ++i )
   {
     form.coefficients()[c]->interpolate( cache.w[c], cache.cell,
                                          form.elements()[form.rank() + c].ufc(),
-                                         cell, local_facet );
+                                         local_facet );
   }
 
   // Tabulate dofs for each dimension
@@ -408,10 +407,10 @@ for ( size_t i = 0; i < N; ++i )
       FiniteElement const & fe = form.elements()[form.rank() + c];
 
       form.coefficients()[c]->interpolate( cache.macro_w[c], halo.cell0,
-                                           fe.ufc(), cell0, halo.facet0 );
+                                           fe.ufc(), halo.facet0 );
       size_t const offset = fe.space_dim;
       form.coefficients()[c]->interpolate( cache.macro_w[c] + offset, halo.cell1,
-                                           fe.ufc(), cell1, halo.facet1 );
+                                           fe.ufc(), halo.facet1 );
     }
 
     // Tabulate dofs for each dimension on cell1

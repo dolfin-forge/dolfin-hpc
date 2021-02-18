@@ -228,7 +228,7 @@ void UFCHalo::update()
     {
       FiniteElement const & fe = form_.elements()[form_.rank() + i];
       form_.coefficients()[i]->interpolate( r_entry, form_.cache().cell,
-                                            fe.ufc(), cell, cell_facet );
+                                            fe.ufc(), cell_facet );
       r_entry += fe.space_dim;
     }
 

@@ -439,16 +439,16 @@ void Function::interpolate_vertex_values(real* values) const
 
 //-----------------------------------------------------------------------------
 
-void Function::interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell) const
+void Function::interpolate( real *                      coefficients,
+                            UFCCell const &             cell,
+                            ufc::finite_element const & finite_element) const
 {
   // Check dimension
   dolfin_assert(finite_element.space_dimension() == scratch_->local_dimension);
   MAYBE_UNUSED(finite_element);
 
   // Tabulate dofs
-  fe_space_->dofmap().tabulate_dofs(scratch_->dofs.data(), cell, dolfin_cell);
+  fe_space_->dofmap().tabulate_dofs(scratch_->dofs.data(), cell );
 
   // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE

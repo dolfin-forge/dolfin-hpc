@@ -240,11 +240,8 @@ void DirichletBC::computeBCTopological( _map< size_t, real > & boundary_values,
     dof_map.tabulate_dofs( cell_dofs.data(), scratch.cell, cell );
 
     // Interpolate function on cell
-    conditions[c].first.interpolate( scratch.coefficients.data(),
-                                     scratch.cell,
-                                     *scratch.finite_element,
-                                     cell,
-                                     f_index );
+    conditions[c].first.interpolate( scratch.coefficients.data(), scratch.cell,
+                                     *scratch.finite_element, f_index );
 
     // Tabulate which dofs of the subdofmap are on the facet
     scratch.dof_map->tabulate_facet_dofs( scratch.facet_dofs.data(), f_index );
@@ -328,8 +325,7 @@ void DirichletBC::computeBCGeometric( _map< size_t, real > & boundary_values,
             interpolated = true;
             // Interpolate function on cell for the given (sub)element
             conditions[c_].first.interpolate( scratch.coefficients.data(),
-                                              scratch.cell,
-                                              *scratch.finite_element, *c );
+                                              scratch.cell, *scratch.finite_element );
           }
 
           // Set boundary value
@@ -382,9 +378,7 @@ void DirichletBC::computeBCPointwise( _map< size_t, real > & boundary_values,
             interpolated = true;
             // Interpolate function on cell
             conditions[c - 1].first.interpolate( scratch.coefficients.data(),
-                                                 scratch.cell,
-                                                 *scratch.finite_element,
-                                                 *cell );
+                                                 scratch.cell, *scratch.finite_element );
             break;
           }
         }

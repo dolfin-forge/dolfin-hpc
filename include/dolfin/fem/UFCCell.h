@@ -72,6 +72,14 @@ private:
 inline UFCCell::UFCCell()
   : ufc::cell()
 {
+  cell_shape            = ufc::shape::interval;
+  topological_dimension = DOLFIN_SIZE_T_UNDEF;
+  geometric_dimension   = DOLFIN_SIZE_T_UNDEF;
+  entity_indices        = {};
+  index                 = DOLFIN_SIZE_T_UNDEF;
+  local_facet           = DOLFIN_INT_UNDEF;
+  orientation           = DOLFIN_INT_UNDEF;
+  mesh_identifier       = DOLFIN_INT_UNDEF;
 }
 
 //-----------------------------------------------------------------------------
@@ -90,7 +98,20 @@ inline UFCCell::UFCCell( UFCCell const & other )
   , cell_( other.cell_ )
 {
   if ( cell_ != nullptr )
-    init( *const_cast< Cell * >( cell_ ) );
+  {
+    init( *cell_ );
+  }
+  else
+  {
+    cell_shape            = ufc::shape::interval;
+    topological_dimension = DOLFIN_SIZE_T_UNDEF;
+    geometric_dimension   = DOLFIN_SIZE_T_UNDEF;
+    entity_indices        = {};
+    index                 = DOLFIN_SIZE_T_UNDEF;
+    local_facet           = DOLFIN_INT_UNDEF;
+    orientation           = DOLFIN_INT_UNDEF;
+    mesh_identifier       = DOLFIN_INT_UNDEF;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -101,7 +122,6 @@ inline UFCCell::UFCCell( UFCCell && move )
   , coordinates( std::move( move.coordinates ) )
   , cell_( std::exchange( move.cell_, nullptr ) )
 {
-
 }
 
 //-----------------------------------------------------------------------------

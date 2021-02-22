@@ -170,7 +170,31 @@ void Form::init( std::vector< Coefficient * > & coefficients,
 
 //----------------------------------------------------------------------------
 
-void Form::init( std::vector< Coefficient * > & coefficients )
+void Form::init( std::vector< Coefficient * > const & coefficients )
+{
+  this->init();
+
+  // init coefficients
+  if ( coefficients.size() != this->form().num_coefficients() )
+  {
+    error( "Form : invalid number of coefficients" );
+  }
+  for ( size_t i = 0; i < this->form().num_coefficients(); ++i )
+  {
+    Function * fptr = dynamic_cast< Function * >( this->coefficients()[i] );
+    if ( fptr != nullptr && fptr->empty() )
+    {
+      fptr->init( *this, this->form().rank() + i );
+      dolfin_assert( !fptr->empty() );
+    }
+  }
+
+  Form::check( coefficients );
+}
+
+//----------------------------------------------------------------------------
+
+void Form::init()
 {
   signature_        = std::string( this->form().signature() );
   rank_             = this->form().rank();
@@ -202,6 +226,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create cell integrals
+  destruct( cell_integrals_ );
   if ( this->form().max_cell_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_cell_subdomain_id(); ++i )
@@ -213,6 +238,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create exterior facet integrals
+  destruct( exterior_facet_integrals_ );
   if ( this->form().max_exterior_facet_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_exterior_facet_subdomain_id(); ++i )
@@ -224,6 +250,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create interior facet integrals
+  destruct( interior_facet_integrals_ );
   if ( this->form().max_interior_facet_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_interior_facet_subdomain_id(); ++i )
@@ -235,6 +262,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create vertex integrals
+  destruct( vertex_integrals_ );
   if ( this->form().max_vertex_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_vertex_subdomain_id(); ++i )
@@ -246,6 +274,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create custom integrals
+  destruct( custom_integrals_ );
   if ( this->form().max_custom_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_custom_subdomain_id(); ++i )
@@ -257,6 +286,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create cutcell integrals
+  destruct( cutcell_integrals_ );
   if ( this->form().max_cutcell_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_cutcell_subdomain_id(); ++i )
@@ -268,6 +298,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create interface integrals
+  destruct( interface_integrals_ );
   if ( this->form().max_interface_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_interface_subdomain_id(); ++i )
@@ -279,6 +310,7 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   }
 
   // Create overlap integrals
+  destruct( overlap_integrals_ );
   if ( this->form().max_overlap_subdomain_id() > 0 )
   {
     for ( size_t i = 0; i < this->form().max_overlap_subdomain_id(); ++i )
@@ -288,23 +320,6 @@ void Form::init( std::vector< Coefficient * > & coefficients )
   {
     overlap_integrals_.push_back( this->form().create_default_overlap_integral() );
   }
-
-  // init coefficients
-  if ( coefficients.size() != this->form().num_coefficients() )
-  {
-    error( "Form : invalid number of coefficients" );
-  }
-  for ( size_t i = 0; i < this->form().num_coefficients(); ++i )
-  {
-    Function * fptr = dynamic_cast< Function * >( this->coefficients()[i] );
-    if ( fptr != nullptr && fptr->empty() )
-    {
-      fptr->init( *this, this->form().rank() + i );
-      dolfin_assert( !fptr->empty() );
-    }
-  }
-
-  Form::check( coefficients );
 }
 
 //----------------------------------------------------------------------------

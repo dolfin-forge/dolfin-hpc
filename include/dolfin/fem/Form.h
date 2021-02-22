@@ -31,6 +31,9 @@ public:
   /// Constructor
   Form( Mesh & mesh );
 
+  Form( Form const & copy ) = delete;
+  Form( Form && ) = delete;
+
   /// Destructor
   virtual ~Form();
 
@@ -107,11 +110,14 @@ public:
 protected:
 
   /// Assign coefficients from map to form coefficients
-  void init( std::vector< Coefficient * > & coefficients );
+  void init( std::vector< Coefficient * > const & coefficients );
 
   /// Assign coefficients from map to form coefficients
   void init( std::vector< Coefficient * > & coefficients,
              CoefficientMap &               map );
+
+private:
+  void init();
 
 private:
   // Mesh

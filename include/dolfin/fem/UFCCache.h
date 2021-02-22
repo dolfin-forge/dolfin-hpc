@@ -22,6 +22,8 @@ class UFCCache
 {
 public:
   UFCCache() = default;
+  UFCCache( UFCCache const & ) = delete;
+  UFCCache( UFCCache && ) = delete;
 
   /// Destructor
   ~UFCCache();

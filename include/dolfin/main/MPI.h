@@ -96,6 +96,17 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template < typename T >
+  static auto gather( T * sendbuf, int sendcount,
+                      T * recvbuf, int recvcount,
+                      int root, Communicator & comm = MPI::DOLFIN_COMM ) -> int;
+
+  //// Wrap in a template function to allow use of functors
+  template < typename T >
+  static auto bcast( std::vector< T > & buf, int root,
+                     Communicator & comm = MPI::DOLFIN_COMM ) -> int;
+
+  //// Wrap in a template function to allow use of functors
+  template < typename T >
   static auto bcast( T * x, int n, int r,
                      Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
@@ -288,6 +299,28 @@ using Comm = MPI::Communicator;
 //-----------------------------------------------------------------------------
 
 #if HAVE_MPI
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline auto MPI::gather( T * sendbuf, int sendcount,
+                         T * recvbuf, int recvcount,
+                         int root, Communicator & comm ) -> int
+{
+  return MPI::check_error( MPI_Gather( sendbuf, sendcount, MPI_type< T >::value,
+                                       recvbuf, recvcount, MPI_type< T >::value,
+                                       root, comm ) );
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline auto MPI::bcast( std::vector< T > & buf, int root,
+                        Communicator & comm ) -> int
+{
+  return MPI::check_error( MPI_Bcast( buf.data(), buf.size(),
+                                      MPI_type< T >::value, root, comm ) );
+}
 
 //-----------------------------------------------------------------------------
 template < typename T >

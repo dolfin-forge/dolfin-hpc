@@ -44,23 +44,23 @@ using complex = std::complex< double >;
 
 //-----------------------------------------------------------------------------
 
-constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
+constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::lowest();
 constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
 constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
 
-constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
+constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::lowest();
 constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
 constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
 
-constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
+constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::lowest();
 constexpr long DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
 constexpr long DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
 
-constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
+constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::lowest();
 constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
 constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
 
-constexpr size_t DOLFIN_SIZE_T_MIN   = std::numeric_limits< size_t >::min();
+constexpr size_t DOLFIN_SIZE_T_MIN   = std::numeric_limits< size_t >::lowest();
 constexpr size_t DOLFIN_SIZE_T_MAX   = std::numeric_limits< size_t >::max();
 constexpr size_t DOLFIN_SIZE_T_UNDEF = std::numeric_limits< size_t >::max();
 

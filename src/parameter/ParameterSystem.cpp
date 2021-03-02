@@ -88,6 +88,9 @@ ParameterSystem::ParameterSystem()
   set( "NodeNormal alpha", DOLFIN_PI / 2. );
   set( "NodeNormal restricted", false );
   set( "NodeNormal dump types", false );
+
+  //--- Adaptivity ---
+  set( "Adaptivity refinements", 1 );
 }
 
 //-----------------------------------------------------------------------------

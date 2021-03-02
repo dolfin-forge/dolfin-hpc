@@ -11,6 +11,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/io/BinaryFile.h>
+#include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/entities/iterators/CellIterator.h>
@@ -129,11 +130,9 @@ void refine_and_project( Mesh &                     mesh,
 
   MeshValues< size_t, Cell > & partitions = LoadBalancer::partitions( mesh );
 
-  std::vector< std::vector< Function * > >          coarse( functions.size() );
-  std::vector< std::vector< std::vector< real > > > x_values(
-    functions.size() );
-  std::vector< std::vector< std::vector< size_t > > > x_rows(
-    functions.size() );
+  std::vector< std::vector< Function * > >            coarse( functions.size() );
+  std::vector< std::vector< std::vector< real > > >   x_values( functions.size() );
+  std::vector< std::vector< std::vector< size_t > > > x_rows( functions.size() );
 
   for ( size_t f = 0; f < functions.size(); ++f )
   {
@@ -160,8 +159,9 @@ void refine_and_project( Mesh &                     mesh,
     // redistribute decomposed functions
     for ( size_t i = 0; i < num_sub; ++i )
     {
-      AdaptiveRefinement::redistribute_func(
-        mesh, *coarse[f][i], x_values[f][i], x_rows[f][i], partitions );
+      AdaptiveRefinement::redistribute_func( mesh,           *coarse[f][i],
+                                             x_values[f][i], x_rows[f][i],
+                                             partitions );
     }
   }
 
@@ -180,6 +180,36 @@ void refine_and_project( Mesh &                     mesh,
   RivaraRefinement::refine( new_mesh, cell_marker, 0.0, 0.0, 0.0, false );
   new_mesh.topology().renumber();
 
+  size_t const n_ref = dolfin_get< size_t >( "Adaptivity refinements" );
+  for ( size_t i = 1; i < n_ref; ++i )
+  {
+    MeshValues< bool, Cell > new_cell_marker( new_mesh, false );
+
+    section( "Projecting cells marked for refinement (%d of %d)", i, n_ref );
+
+    for ( CellIterator c( mesh ); !c.end(); ++c )
+    {
+      if ( cell_marker( *c ) )
+      {
+        for ( VertexIterator v( *c ); !v.end(); ++v )
+        {
+          std::vector< size_t > cells;
+          new_mesh.intersector().overlap( v->point(), cells );
+          for ( size_t j = 0; j < cells.size(); ++j )
+          {
+            Cell marked_cell( new_mesh, cells[j] );
+            new_cell_marker( marked_cell ) = true;
+          }
+        }
+      }
+    }
+
+    RivaraRefinement::refine( new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false );
+    new_mesh.topology().renumber();
+
+    end();
+  }
+
   for ( size_t f = 0; f < functions.size(); ++f )
   {
     FiniteElementSpace const & space   = functions[f].second->space();
@@ -193,8 +223,9 @@ void refine_and_project( Mesh &                     mesh,
 
       dolfin_assert( x_values[f][i].size() == x_rows[f][i].size() );
 
-      post.back().vector().set(
-        x_values[f][i].data(), x_values[f][i].size(), x_rows[f][i].data() );
+      post.back().vector().set( x_values[f][i].data(),
+                                x_values[f][i].size(),
+                                x_rows[f][i].data() );
       post.back().sync();
     }
 

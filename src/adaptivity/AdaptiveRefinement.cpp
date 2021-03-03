@@ -180,25 +180,50 @@ void refine_and_project( Mesh &                     mesh,
   RivaraRefinement::refine( new_mesh, cell_marker, 0.0, 0.0, 0.0, false );
   new_mesh.topology().renumber();
 
-  size_t const n_ref = dolfin_get< size_t >( "Adaptivity refinements" );
+  size_t const n_ref     = dolfin_get< size_t >( "Adaptivity refinements" );
+  std::string const type = dolfin_get< std::string >( "Adaptivity projection type" );
+  dolfin_assert( type == "midpoint" or type == "vertices" );
+
   for ( size_t i = 1; i < n_ref; ++i )
   {
     MeshValues< bool, Cell > new_cell_marker( new_mesh, false );
 
-    section( "Projecting cells marked for refinement (%d of %d)", i, n_ref );
+    section( "Projecting cells marked on %s for refinement (%d of %d)",
+             type.c_str(), i, n_ref-1 );
 
-    for ( CellIterator c( mesh ); !c.end(); ++c )
+    if ( type == "midpoint" )
     {
-      if ( cell_marker( *c ) )
+      // use only the midpoint of the original cell for intersection
+      for ( CellIterator c( mesh ); !c.end(); ++c )
       {
-        for ( VertexIterator v( *c ); !v.end(); ++v )
+        if ( cell_marker( *c ) )
         {
           std::vector< size_t > cells;
-          new_mesh.intersector().overlap( v->point(), cells );
+          new_mesh.intersector().overlap( c->midpoint(), cells );
           for ( size_t j = 0; j < cells.size(); ++j )
           {
             Cell marked_cell( new_mesh, cells[j] );
             new_cell_marker( marked_cell ) = true;
+          }
+        }
+      }
+    }
+    else // if ( type == "vertices" )
+    {
+      // use all vertices of the original cell for intersection
+      for ( CellIterator c( mesh ); !c.end(); ++c )
+      {
+        if ( cell_marker( *c ) )
+        {
+          for ( VertexIterator v( *c ); !v.end(); ++v )
+          {
+            std::vector< size_t > cells;
+            new_mesh.intersector().overlap( v->point(), cells );
+            for ( size_t j = 0; j < cells.size(); ++j )
+            {
+              Cell marked_cell( new_mesh, cells[j] );
+              new_cell_marker( marked_cell ) = true;
+            }
           }
         }
       }

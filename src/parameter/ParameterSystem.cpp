@@ -91,6 +91,8 @@ ParameterSystem::ParameterSystem()
 
   //--- Adaptivity ---
   set( "Adaptivity refinements", 1 );
+  // can only be "midpoint" or "vertices"
+  set( "Adaptivity projection type", "midpoint" );
 }
 
 //-----------------------------------------------------------------------------

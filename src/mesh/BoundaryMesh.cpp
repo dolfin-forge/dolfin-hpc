@@ -224,12 +224,15 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
   if ( tdim <= 1 )
   {
     vertex_map_.clear();
+
     for ( VertexIterator v( mesh ); not v.end(); ++v )
     {
       // Boundary facets are connected to exactly one cell
       bool const bndr = ( v->num_entities( tdim ) == 1 );
+
       // Interior facets are shared while exterior facets are not
       bool const shrd = v->is_shared();
+
       if ( bndr
            and ( full or ( interior and shrd ) or ( exterior and not shrd ) ) )
       {
@@ -240,6 +243,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
         }
       }
     }
+
     cell_map_ = vertex_map_;
 
     // Create boundary vertices and cells
@@ -247,11 +251,13 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
     editor.init_vertices( vertex_map_.size() );
     editor.init_cells( cell_map_.size() );
     MeshGeometry const & geom = mesh.geometry();
+
     for ( size_t i = 0; i < vertex_map_.size(); ++i )
     {
       editor.add_vertex( i, geom.x( vertex_map_[i] ) );
       editor.add_cell( i, &vertex_map_[i] );
     }
+
     // If the mesh is distributed, set global numbering and copy the ownership
     if ( mesh.is_distributed() )
     {
@@ -279,7 +285,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
 #if DEBUG
       if ( shrd and not f->has_all_vertices_shared() )
       {
-        error( "Shared facets have not all vertices shared" );
+        error( "BoundaryMesh: Shared facets have not all vertices shared" );
       }
 #endif
       if ( bndr
@@ -295,12 +301,15 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
               inside = true;
             }
           }
+
           if ( not inside )
           {
             continue;
           }
         }
+
         cell_map_.push_back( f->index() );
+
         for ( VertexIterator v( *f ); not v.end(); ++v )
         {
           size_t const vertex_index = v->index();
@@ -340,6 +349,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
 
       _set< size_t > added_vertices( vertex_map_.begin(), vertex_map_.end() );
 
+      // post all non-blocking receive operations
       for ( size_t i = 0; i < pe_size; ++i )
       {
         MPI::check_error( MPI_Irecv( recvbuf[i].data(), recvbuf[i].size(),
@@ -348,9 +358,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
                                      &recvreq[i] ) );
       }
 
-      // FIXME safety
-      MPI_Barrier( mesh.topology().comm() );
-
+      // post all non-blocking send operations
       for ( size_t i = 0; i < pe_size; ++i )
       {
         MPI::check_error( MPI_Isend( shared_vertices[i].data(),
@@ -360,11 +368,8 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
                                      &sendreq[i] ) );
       }
 
-      // FIXME safety
-      MPI_Barrier( mesh.topology().comm() );
-
+      // wait for the completion of all data that needs to be sent (maybe not needed)
       MPI::check_error( MPI_Waitall( pe_size, sendreq.data(), status.data() ) );
-
 
       for ( size_t i = 0; i < pe_size; ++i )
       {
@@ -385,53 +390,24 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
         }
       }
 
-      // // If one adjacent rank has no boundary cell but the current rank has
-      // // ghost entities owned by this rank then any algorithm based on mesh
-      // // facets is bound to fail.
-      // // Naive implementation for now, just send all the ghost vertices
-      // for ( size_t const adj : vadjs )
-      // {
-      //   MPI::check_error( MPI_Send( &shared_vertices[adj][0],
-      //                               shared_vertices[adj].size(),
-      //                               MPI_type< size_t >::value,
-      //                               adj, 0, MPI::DOLFIN_COMM ) );
-      // }
-
-      // for ( size_t const adj : vadjs )
-      // {
-      //   MPI::check_error( MPI_Recv( recvbuf.data(), recvbuf.size(),
-      //                               MPI_type< size_t >::value,
-      //                               adj, 0, MPI::DOLFIN_COMM, &status ) );
-      //   MPI::check_error( MPI_Get_count( &status, MPI_type< size_t >::value,
-      //                                    &recvcount ) );
-
-      //   for ( int k = 0; k < recvcount; ++k )
-      //   {
-      //     dolfin_assert( distdata.has_global( recvbuf[k] ) );
-      //     size_t const local_index = distdata.get_local( recvbuf[k] );
-      //     if ( added_vertices.count( local_index ) == 0 )
-      //     {
-      //       vertex_map_.push_back( local_index );
-      //       added_vertices.insert( local_index );
-      //     }
-      //   }
-      // }
-
 #endif /* HAVE_MPI */
     }
 
     // Create boundary vertices and cells
     MeshEditor editor( *this, mesh.type().facetType(), gdim );
     editor.init_vertices( vertex_map_.size() );
+
     for ( size_t i = 0; i < vertex_map_.size(); ++i )
     {
       editor.add_vertex( i, mesh.geometry().x( vertex_map_[i] ) );
     }
+
     editor.init_cells( cell_map_.size() );
-    size_t const d                  = mesh.type().facet_dim();
-    size_t const num_facet_vertices = mesh.type().num_vertices( d );
+
+    size_t const     d                  = mesh.type().facet_dim();
+    size_t const     num_facet_vertices = mesh.type().num_vertices( d );
+    CellType const & celltype           = mesh.type();
     std::vector< size_t > facet_vertices( num_facet_vertices );
-    CellType const &      celltype = mesh.type();
 
     for ( size_t i = 0; i < cell_map_.size(); ++i )
     {
@@ -440,6 +416,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
       {
         facet_vertices[v] = boundary_vertices[facet.entities( 0 )[v]];
       }
+
       // Reorder vertices so facet is right-oriented w.r.t. facet normal
       celltype.order_facet( facet_vertices.data(), facet );
       editor.add_cell( i, facet_vertices.data() );
@@ -451,6 +428,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
       this->distdata()[0].assign( mesh.distdata()[0], vertex_map_ );
       this->distdata()[d].assign( mesh.distdata()[d], cell_map_ );
     }
+
     editor.close();
   }
 

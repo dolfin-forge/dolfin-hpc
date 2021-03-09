@@ -4,10 +4,16 @@
 #ifndef __DOLFIN_GENERIC_FUNCTION_H
 #define __DOLFIN_GENERIC_FUNCTION_H
 
-#include <dolfin/fem/Coefficient.h>
 #include <dolfin/common/Variable.h>
+#include <dolfin/fem/Coefficient.h>
 
-#include <ufc.h>
+namespace ufc
+{
+
+class cell;
+class finite_element;
+
+} // namespace ufc
 
 namespace dolfin
 {
@@ -26,7 +32,6 @@ class GenericFunction : public Coefficient, public Variable
 {
 
 public:
-
   /// Constructor
   GenericFunction() = default;
 
@@ -36,35 +41,37 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const override = 0;
+  void evaluate( real *            values,
+                 const real *      coordinates,
+                 const ufc::cell & cell ) const override = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point
-  void eval(real* values, const real* x) const override = 0;
+  void eval( real * values, const real * x ) const override = 0;
 
   /// Return the rank of the value space
-  uint rank() const override = 0;
+  auto rank() const -> size_t override = 0;
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const override = 0;
+  auto dim( size_t i ) const -> size_t override = 0;
 
   // Return the value size
-  uint value_size() const override = 0;
+  auto value_size() const -> size_t override = 0;
 
   /// Interpolate function to vertices of mesh
-  virtual void interpolate_vertex_values(real* values) const = 0;
+  virtual void interpolate_vertex_values( real * values ) const = 0;
 
   /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell) const override = 0;
+  void interpolate( real *                      coefficients,
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element ) const override = 0;
 
   /// Interpolate function to finite element space on facet
-  void interpolate(real* coefficients, const ufc::cell& cell,
-                           const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const override = 0;
+  void interpolate( real *                      coefficients,
+                    UFCCell const &             cell,
+                    ufc::finite_element const & finite_element,
+                    size_t                      facet ) const override = 0;
 
   /// Synchronize
   void sync() override = 0;
@@ -75,24 +82,22 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return the mesh
-  virtual Mesh& mesh() const = 0;
+  virtual auto mesh() const -> Mesh & = 0;
 
   //---------------------------------------------------------------------------
 
   /// Delegate time dependency
-  GenericFunction& operator()(Time const& t)
+  auto operator()( Time const & t ) -> GenericFunction &
   {
-    this->sync(t);
+    this->sync( t );
     return *this;
   }
 
   //---------------------------------------------------------------------------
 
 private:
-
   /// Time dependency hook
-  void sync(Time const& t) override = 0;
-
+  void sync( Time const & t ) override = 0;
 };
 
 } /* namespace dolfin */

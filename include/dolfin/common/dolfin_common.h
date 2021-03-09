@@ -3,7 +3,6 @@
 
 // DOLFIN common classes
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/Test.h>
 #include <dolfin/common/Timer.h>
 #include <dolfin/common/Variable.h>

@@ -7,14 +7,16 @@
 #ifndef __DOLFIN_GAUSS_TENSOR_QUADRATURE_RULE_H
 #define __DOLFIN_GAUSS_TENSOR_QUADRATURE_RULE_H
 
-//#include "QuadratureRule.h"
+#include "QuadratureRule.h"
 
-namespace dolfin 
+#include <vector>
+
+namespace dolfin
 {
 
   /// Gaussian-type quadrature rule on the reference cell.
   ///
-  /// Points and weights are computed using one dimensional 
+  /// Points and weights are computed using one dimensional
   /// GaussQuadrature.
 
   class GaussTensorQuadratureRule : public QuadratureRule
@@ -26,7 +28,7 @@ namespace dolfin
       GaussTensorQuadratureRule(unsigned int dim, std::vector<unsigned int>& n);
   };
 
-  inline GaussTensorQuadratureRule::GaussTensorQuadratureRule(unsigned int dim, unsigned int degree) 
+  inline GaussTensorQuadratureRule::GaussTensorQuadratureRule(unsigned int dim, unsigned int degree)
   {
     this->dim = dim;
     fill_reference_points();
@@ -61,9 +63,9 @@ namespace dolfin
           for(unsigned int i=0; i<size_1d; ++i)
             for(unsigned int j=0; j<size_1d; ++j)
             {
-              points[i*size_1d+j][0] = .5*(1+quadratures[0]->point(i)); 
+              points[i*size_1d+j][0] = .5*(1+quadratures[0]->point(i));
               points[i*size_1d+j][1] = .25*(1-quadratures[0]->point(i))
-                *(1+quadratures[0]->point(j)); 
+                *(1+quadratures[0]->point(j));
               weights[i*size_1d+j] = 0.125*quadratures[0]->weight(i)
                 *quadratures[0]->weight(j)*(1-quadratures[0]->point(i));
             }
@@ -76,12 +78,12 @@ namespace dolfin
               for(unsigned int k=0; k<size_1d; ++k)
               {
                 const unsigned int index = (i*size_1d+j)*size_1d+k;
-                points[index][0] = .5*(1+quadratures[0]->point(i)); 
+                points[index][0] = .5*(1+quadratures[0]->point(i));
                 points[index][1] = .25*(1-quadratures[0]->point(i))
-                  *(1+quadratures[0]->point(j)); 
+                  *(1+quadratures[0]->point(j));
                 points[index][2] = .125*(1-quadratures[0]->point(i))
                   *(1-quadratures[0]->point(j))
-                  *(1+quadratures[0]->point(k)); 
+                  *(1+quadratures[0]->point(k));
                 weights[index] = 0.015625*quadratures[0]->weight(i)
                   *quadratures[0]->weight(j)*quadratures[0]->weight(k)
                   *(1-quadratures[0]->point(i))*(1-quadratures[0]->point(i))
@@ -138,9 +140,9 @@ namespace dolfin
           for(unsigned int i=0; i<quadratures[0]->size(); ++i)
             for(unsigned int j=0; j<quadratures[1]->size(); ++j)
             {
-              points[i*quadratures[0]->size()+j][0] = .5*(1+quadratures[0]->point(i)); 
+              points[i*quadratures[0]->size()+j][0] = .5*(1+quadratures[0]->point(i));
               points[i*quadratures[0]->size()+j][1] = .25*(1-quadratures[0]->point(i))
-                *(1+quadratures[0]->point(j)); 
+                *(1+quadratures[0]->point(j));
               weights[i*quadratures[0]->size()+j] = 0.125*quadratures[0]->weight(i)
                 *quadratures[1]->weight(j)*(1-quadratures[0]->point(i));
             }
@@ -154,12 +156,12 @@ namespace dolfin
               {
                 const unsigned int index = i*quadratures[0]->size() +
                   j*quadratures[1]->size() + k;
-                points[index][0] = .5*(1+quadratures[0]->point(i)); 
+                points[index][0] = .5*(1+quadratures[0]->point(i));
                 points[index][1] = .25*(1-quadratures[1]->point(i))
-                  *(1+quadratures[0]->point(j)); 
+                  *(1+quadratures[0]->point(j));
                 points[index][2] = .125*(1-quadratures[0]->point(i))
                   *(1-quadratures[1]->point(j))
-                  *(1+quadratures[2]->point(k)); 
+                  *(1+quadratures[2]->point(k));
                 weights[index] = .015625*quadratures[0]->weight(i)
                   *quadratures[1]->weight(j)*quadratures[2]->weight(k)
                   *(1-quadratures[0]->point(i))*(1-quadratures[0]->point(i))
@@ -177,6 +179,6 @@ namespace dolfin
     for(unsigned int i=0; i<quadratures.size(); ++i)
       delete quadratures[i];
   }
-  
+
 }
 #endif

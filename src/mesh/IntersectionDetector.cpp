@@ -3,12 +3,11 @@
 
 #include <dolfin/mesh/IntersectionDetector.h>
 
-#include <dolfin/common/Array.h>
 #include <dolfin/log/log.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Vertex.h>
 
 #include <algorithm>
 
@@ -16,36 +15,35 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-IntersectionDetector::IntersectionDetector(Mesh& mesh) :
-    gts(mesh)
+IntersectionDetector::IntersectionDetector( Mesh & mesh )
+  : gts( mesh )
 {
 }
 //-----------------------------------------------------------------------------
-IntersectionDetector::~IntersectionDetector()
-= default;
+IntersectionDetector::~IntersectionDetector() = default;
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Array<Point> const& points,
-                                   Array<uint>& cells) const
+void IntersectionDetector::overlap( std::vector< Point > const & points,
+                                    std::vector< size_t > &      cells ) const
 {
   // Intersect each segment with mesh
-  Array<uint> cc;
-  for (uint i = 0; i < points.size() - 1; i++)
+  std::vector< size_t > cc;
+  for ( size_t i = 0; i < points.size() - 1; i++ )
   {
-    gts.overlap(points[i], points[i + 1], cc);
+    gts.overlap( points[i], points[i + 1], cc );
   }
 
   // sort cells
-  std::sort(cc.begin(), cc.end());
+  std::sort( cc.begin(), cc.end() );
 
   // remove repeated cells
   cells.clear();
-  cells.push_back(cc[0]);
-  uint k = cc[0];
-  for (uint i = 1; i < cc.size(); i++)
+  cells.push_back( cc[0] );
+  size_t k = cc[0];
+  for ( size_t i = 1; i < cc.size(); i++ )
   {
-    if (cc[i] > k)
+    if ( cc[i] > k )
     {
-      cells.push_back(cc[i]);
+      cells.push_back( cc[i] );
       k = cc[i];
     }
   }
@@ -53,4 +51,3 @@ void IntersectionDetector::overlap(Array<Point> const& points,
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
-

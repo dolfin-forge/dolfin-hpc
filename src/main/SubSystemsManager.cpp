@@ -41,12 +41,6 @@ int SubSystemsManager::Zoltan::sema   = 0;
 int SubSystemsManager::Trilinos::sema = 0;
 
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager()
-  : count_( 0 )
-  , state_( 0 )
-{
-}
-//-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager( SubSystemsManager const & )
   : count_( 0 )
   , state_( 0 )
@@ -59,10 +53,7 @@ SubSystemsManager::~SubSystemsManager()
   SubSystemsManager::finalize();
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::initialize( int    argc,
-                                   char * argv[],
-                                   uint   n,
-                                   long   w_limit )
+auto SubSystemsManager::initialize(int argc, char* argv[], size_t n, long w_limit) -> int
 {
   if ( count_ == 0 )
   {
@@ -105,7 +96,7 @@ int SubSystemsManager::initialize( int    argc,
   return ++count_;
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::finalize()
+auto SubSystemsManager::finalize() -> int
 {
   if ( count_ > 0 )
   {
@@ -145,7 +136,7 @@ void SubSystemsManager::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::initialize( int argc, char * argv[], uint n )
+auto SubSystemsManager::MPI::initialize(int argc, char* argv[], size_t n) -> bool
 {
 #ifdef DOLFIN_HAVE_MPI
 
@@ -187,7 +178,7 @@ bool SubSystemsManager::MPI::initialize( int argc, char * argv[], uint n )
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::finalize()
+auto SubSystemsManager::MPI::finalize() -> bool
 {
 #ifdef DOLFIN_HAVE_MPI
   if ( MPI::sema == 0 )
@@ -224,7 +215,7 @@ bool SubSystemsManager::MPI::finalize()
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::initialized()
+auto SubSystemsManager::MPI::initialized() -> bool
 {
 #ifdef DOLFIN_HAVE_MPI
 
@@ -239,7 +230,7 @@ bool SubSystemsManager::MPI::initialized()
 #endif /* DOLFIN_HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
+auto SubSystemsManager::PETSc::initialize(int argc, char* argv[]) -> bool
 {
 #ifdef HAVE_PETSC
 
@@ -279,7 +270,7 @@ bool SubSystemsManager::PETSc::initialize( int argc, char * argv[] )
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::PETSc::finalize()
+auto SubSystemsManager::PETSc::finalize() -> bool
 {
 #ifdef HAVE_PETSC
 
@@ -322,7 +313,7 @@ bool SubSystemsManager::PETSc::finalize()
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::Zoltan::initialize( int argc, char * argv[] )
+auto SubSystemsManager::Zoltan::initialize(int argc, char* argv[]) -> bool
 {
 #ifdef HAVE_ZOLTAN
 
@@ -350,7 +341,7 @@ bool SubSystemsManager::Zoltan::initialize( int argc, char * argv[] )
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::Zoltan::finalize()
+auto SubSystemsManager::Zoltan::finalize() -> bool
 {
 #ifdef HAVE_ZOLTAN
 

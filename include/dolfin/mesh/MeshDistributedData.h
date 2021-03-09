@@ -4,15 +4,16 @@
 #ifndef __DOLFIN_MESH_DISTRIBUTED_DATA_H
 #define __DOLFIN_MESH_DISTRIBUTED_DATA_H
 
-#include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/common/DistributedData.h>
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
 class Mesh;
 class MeshEntity;
+
+//-----------------------------------------------------------------------------
 
 /**
  *  @class  MeshDistributedData
@@ -25,57 +26,56 @@ class MeshDistributedData
 {
 
 public:
-
   /// Constructor
-  MeshDistributedData(uint dim);
+  MeshDistributedData( size_t dim );
 
   /// Copy constructor
-  MeshDistributedData(MeshDistributedData const& other);
+  MeshDistributedData( MeshDistributedData const & other );
 
   /// Destructor
   ~MeshDistributedData();
 
   /// Assignment
-  MeshDistributedData& operator=(MeshDistributedData const& other);
+  auto operator=( MeshDistributedData const & other ) -> MeshDistributedData &;
 
   /// Equality
-  bool operator==(MeshDistributedData const& other) const;
+  auto operator==( MeshDistributedData const & other ) const -> bool;
 
   /// Non-equality
-  bool operator!=(MeshDistributedData const& other) const;
+  auto operator!=( MeshDistributedData const & other ) const -> bool;
 
   /// Access to distributed data
-  inline DistributedData& operator[](uint dim)
+  inline auto operator[]( size_t dim ) -> DistributedData &
   {
-    dolfin_assert(dim <= dim_);
+    dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
   /// Access to distributed data (const)
-  inline DistributedData const& operator[](uint dim) const
+  inline auto operator[]( size_t dim ) const -> DistributedData const &
   {
-    dolfin_assert(dim <= dim_);
+    dolfin_assert( dim <= dim_ );
     return data_[dim];
   }
 
   /// Return topological dimension of the distributed data
-  uint dim() const;
+  auto dim() const -> size_t;
 
   /// Display basic information
   void disp() const;
 
 private:
-
   /// Clear
   void clear();
 
   // Topological dimensions
-  uint dim_;
+  size_t dim_;
 
   // Distributed data
-  Array<DistributedData> data_;
-
+  std::vector< DistributedData > data_;
 };
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

@@ -12,22 +12,22 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-GenericMatrix* DefaultFactory::createMatrix() const
+auto DefaultFactory::createMatrix() const -> GenericMatrix*
 {
   return factory().createMatrix();
 }
 //-----------------------------------------------------------------------------
-GenericVector* DefaultFactory::createVector() const
+auto DefaultFactory::createVector() const -> GenericVector*
 {
   return factory().createVector();
 }
 //-----------------------------------------------------------------------------
-GenericSparsityPattern * DefaultFactory::createPattern() const
+auto DefaultFactory::createPattern() const -> GenericSparsityPattern *
 {
   return factory().createPattern();
 }
 //-----------------------------------------------------------------------------
-LinearAlgebraFactory& DefaultFactory::factory()
+auto DefaultFactory::factory() -> LinearAlgebraFactory&
 {
 
   // Get backend from parameter system

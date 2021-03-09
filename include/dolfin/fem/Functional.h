@@ -4,8 +4,8 @@
 #ifndef __DOLFIN_FUNCTIONAL_H
 #define __DOLFIN_FUNCTIONAL_H
 
-#include <dolfin/fem/Form.h>
 #include <dolfin/fem/CoefficientMap.h>
+#include <dolfin/fem/Form.h>
 
 namespace dolfin
 {
@@ -14,24 +14,26 @@ class Functional : public Form
 {
 
 public:
+  using Coefficients = Form::Coefficients;
 
-  typedef Form::Coefficients Coefficients;
-
-  static inline std::string name() { return "Functional"; }
+  static inline auto name() -> std::string
+  {
+    return "Functional";
+  }
 
   /// Constructor
-  Functional(Mesh& mesh);
+  Functional( Mesh & mesh );
 
   /// Destructor
   ~Functional() override = default;
 
   /// Creator function
-  template <class E> static inline
-  typename E::Functional * create(Mesh& mesh, Coefficients& coefs)
+  template < class E >
+  static inline auto create( Mesh & mesh, Coefficients & coefs ) ->
+    typename E::Functional *
   {
-    return new typename E::Functional(mesh, coefs);
+    return new typename E::Functional( mesh, coefs );
   }
-
 };
 
 //-----------------------------------------------------------------------------

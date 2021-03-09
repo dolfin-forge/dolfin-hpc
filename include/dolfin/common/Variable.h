@@ -18,8 +18,8 @@ public:
 
   void rename( std::string const name, std::string const label );
 
-  std::string const & name() const;
-  std::string const & label() const;
+  auto name() const -> std::string const &;
+  auto label() const -> std::string const &;
 
 private:
   std::string _name;
@@ -27,12 +27,12 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline std::string const & Variable::name() const
+inline auto Variable::name() const -> std::string const &
 {
   return _name;
 }
 //-----------------------------------------------------------------------------
-inline std::string const & Variable::label() const
+inline auto Variable::label() const -> std::string const &
 {
   return _label;
 }

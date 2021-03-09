@@ -48,11 +48,11 @@ namespace dolfin
 
   private:
 
-    static int PCApply(PC pc, Vec x, Vec y);
-    static int PCCreate(PC pc);
+    static auto PCApply(PC pc, Vec x, Vec y) -> int;
+    static auto PCCreate(PC pc) -> int;
 
     /// Return PETSc PETScPreconditioner type
-    static PCType getType(PreconditionerType pc);
+    static auto getType(PreconditionerType pc) -> PCType;
 
   };
 

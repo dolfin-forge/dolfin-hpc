@@ -21,11 +21,11 @@
 using namespace dolfin;
 
 // The function v
-struct MyFunction : public Value<MyFunction>
+struct MyFunction : public Value< MyFunction >
 {
-  void eval(real* values, const real* x) const
+  void eval( real * values, const real * x ) const
   {
-    values[0] = sin(x[0]) + cos(x[1]);
+    values[0] = sin( x[0] ) + cos( x[1] );
   }
 };
 
@@ -34,18 +34,20 @@ int main()
   dolfin_init();
 
   // Compute approximate value
-  UnitSquare mesh(16, 16);
+  UnitSquare mesh( 16, 16 );
 
-  Analytic<MyFunction> my_function( mesh );
-  EnergyNorm::Functional M(mesh, my_function);
+  Analytic< MyFunction > my_function( mesh );
+  EnergyNorm::Functional M( mesh, my_function );
+
   Scalar s;
-  Assembler::assemble(s, M, true);
+  Assembler::assemble( s, M, true );
   real value = s;
 
   // Compute exact value
-  real exact_value = 2.0 + 2.0*sin(1.0)*(1.0 - cos(1.0));
+  real exact_value = 2.0 + 2.0 * sin( 1.0 ) * ( 1.0 - cos( 1.0 ) );
 
-  message("The energy norm of v is %.15g (should be %.15g).", value, exact_value);
+  message( "The energy norm of v is %.15g (should be %.15g).",
+           value, exact_value );
 
   dolfin_finalize();
 

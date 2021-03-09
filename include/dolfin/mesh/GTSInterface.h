@@ -5,12 +5,14 @@
 #define __DOLFIN_GTS_INTERFACE_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/mesh/Point.h>
+
+#include <vector>
 
 // Forward declarations
 struct _GtsBBox;
 using GtsBBox = _GtsBBox;
+
 struct _GNode;
 using GNode = _GNode;
 
@@ -20,42 +22,47 @@ namespace dolfin
 class Mesh;
 class Cell;
 
+//-----------------------------------------------------------------------------
+
 class GTSInterface
 {
 public:
-
   ///
-  GTSInterface(Mesh& mesh);
+  GTSInterface( Mesh & mesh );
 
   ///
   ~GTSInterface();
 
   /// Compute cells overlapping c
-  void overlap(Cell& c, Array<uint>& cells) const;
+  void overlap( Cell & c, std::vector< size_t > & cells ) const;
 
   /// Compute cells overlapping p
-  void overlap(Point const& p, Array<uint>& cells) const;
+  void overlap( Point const & p, std::vector< size_t > & cells ) const;
 
   /// Compute cells overlapping bounding box constructed from p1 and p2
-  void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const;
+  void overlap( Point const &           p1,
+                Point const &           p2,
+                std::vector< size_t > & cells ) const;
 
 private:
-
   /// Construct bounding box of cell
-  GtsBBox* bboxCell(Cell&) const;
+  auto bboxCell( Cell & ) const -> GtsBBox *;
 
   /// Construct bounding box of a single point
-  GtsBBox* bboxPoint(Point const& p) const;
+  auto bboxPoint( Point const & p ) const -> GtsBBox *;
 
   /// Construct bounding box of a pair of points
-  GtsBBox* bboxPoint(Point const& p1, Point const& p2) const;
+  auto bboxPoint( Point const & p1, Point const & p2 ) const -> GtsBBox *;
 
   /// Construct hierarchical space partition tree of mesh
-  void buildCellTree(void);
+  void buildCellTree( void );
 
-  Mesh& mesh_;
+  Mesh &          mesh_;
   mutable GNode * tree_;
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namesapce dolfin
+
 #endif

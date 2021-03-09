@@ -16,19 +16,21 @@ class Distributed
 {
 public:
   //----------------------------------------------------------------------------
+
   Distributed( MPI::Communicator & comm );
 
   Distributed( Distributed const & other );
 
   //----------------------------------------------------------------------------
+
   // access data
-  MPI::Communicator &       comm();
-  MPI::Communicator const & comm() const;
+  auto comm() -> MPI::Communicator &;
+  auto comm() const -> MPI::Communicator const &;
 
-  inline uint comm_rank() const;
-  inline uint comm_size() const;
+  inline auto comm_rank() const -> size_t;
+  inline auto comm_size() const -> size_t;
 
-  inline bool distributed() const;
+  inline auto distributed() const -> bool;
 
   /// Swap instances
   friend void swap( Distributed< T > & a, Distributed< T > & b )
@@ -41,16 +43,17 @@ protected:
   //----------------------------------------------------------------------------
   virtual ~Distributed();
 
-  Distributed & operator=( Distributed const & other );
+  auto operator=( Distributed const & other ) -> Distributed &;
 
 private:
   //----------------------------------------------------------------------------
   MPI::Communicator comm_;
-  uint              comm_rank_;
-  uint              comm_size_;
+  size_t            comm_rank_;
+  size_t            comm_size_;
 };
 
 //------------------------------------------------------------------------------
+
 template < typename T >
 Distributed< T >::Distributed( MPI::Communicator & comm )
   : comm_( DOLFIN_COMM_NULL )
@@ -68,11 +71,11 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
 
     int ret = 0;
     MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
-    comm_rank_ = static_cast< uint >( ret );
+    comm_rank_ = static_cast< size_t >( ret );
 
     ret = 0;
     MPI::check_error( MPI_Comm_size( comm_, &ret ) );
-    comm_size_ = static_cast< uint >( ret );
+    comm_size_ = static_cast< size_t >( ret );
   }
 #else
   MAYBE_UNUSED( comm );
@@ -80,6 +83,7 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
 Distributed< T >::Distributed( Distributed const & other )
   : comm_( DOLFIN_COMM_NULL )
@@ -89,40 +93,46 @@ Distributed< T >::Distributed( Distributed const & other )
   *this = other;
 }
 //------------------------------------------------------------------------------
+
 template < typename T >
-MPI::Communicator & Distributed< T >::comm()
+auto Distributed< T >::comm() -> MPI::Communicator &
 {
   return comm_;
 }
 //------------------------------------------------------------------------------
+
 template < typename T >
-MPI::Communicator const & Distributed< T >::comm() const
+auto Distributed< T >::comm() const -> MPI::Communicator const &
 {
   return comm_;
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
-inline uint Distributed< T >::comm_rank() const
+inline auto Distributed< T >::comm_rank() const -> size_t
 {
   return comm_rank_;
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
-inline uint Distributed< T >::comm_size() const
+inline auto Distributed< T >::comm_size() const -> size_t
 {
   return comm_size_;
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
-inline bool Distributed< T >::distributed() const
+inline auto Distributed< T >::distributed() const -> bool
 {
   return comm_size_ > 1;
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
 Distributed< T >::~Distributed()
 {
@@ -133,11 +143,13 @@ Distributed< T >::~Distributed()
 }
 
 //------------------------------------------------------------------------------
+
 template < typename T >
-Distributed< T > & Distributed< T >::operator=( Distributed< T > const & other )
+auto Distributed< T >::operator=( Distributed< T > const & other )
+  -> Distributed< T > &
 {
-	if ( this != &other )
-	{
+  if ( this != &other )
+  {
 #if DOLFIN_HAVE_MPI
     if ( comm_ != DOLFIN_COMM_NULL )
       MPI::check_error( MPI_Comm_free( &comm_ ) );
@@ -147,16 +159,18 @@ Distributed< T > & Distributed< T >::operator=( Distributed< T > const & other )
 
       int ret = 0;
       MPI::check_error( MPI_Comm_rank( comm_, &ret ) );
-      comm_rank_ = static_cast< uint >( ret );
+      comm_rank_ = static_cast< size_t >( ret );
 
       ret = 0;
       MPI::check_error( MPI_Comm_size( comm_, &ret ) );
-      comm_size_ = static_cast< uint >( ret );
+      comm_size_ = static_cast< size_t >( ret );
     }
 #endif
   }
   return *this;
 }
+
+//------------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

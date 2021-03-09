@@ -14,23 +14,22 @@
 #ifndef __DOLFIN_MESH_TOPOLOGY_H
 #define __DOLFIN_MESH_TOPOLOGY_H
 
-#include <dolfin/common/Tokenized.h>
 #include <dolfin/common/Clonable.h>
-
-#include <dolfin/log/log.h>
-#include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/common/Distributed.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/common/Tokenized.h>
+#include <dolfin/common/types.h>
+#include <dolfin/log/log.h>
 #include <dolfin/mesh/Connectivity.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 namespace dolfin
 {
 
 class Mesh;
 class Connectivity;
+
+//-----------------------------------------------------------------------------
 
 /**
  *
@@ -48,142 +47,155 @@ class Connectivity;
  *
  */
 
-class MeshTopology: public Clonable<MeshTopology>, public Distributed<MeshTopology>
+class MeshTopology : public Clonable< MeshTopology >,
+                     public Distributed< MeshTopology >
 {
   // Set max connectivity matrix dimension
-  static uint const CMAX = 4;
+  static constexpr size_t CMAX = 4;
 
   // Save some limbo at MeshEntity construction until classes are rewritten
   friend class MeshEntity;
 
 public:
-
   /// Create mesh topology for given cell type
-  MeshTopology(CellType const& type, Comm& comm, bool frozen);
+  MeshTopology( CellType const & type, Comm & comm, bool frozen );
 
   /// Copy constructor
-  MeshTopology(MeshTopology const& other);
+  MeshTopology( MeshTopology const & other );
 
   /// Destructor
   ~MeshTopology() override;
 
   /// Swap instances
-  friend void swap( MeshTopology& a, MeshTopology& b );
+  friend auto swap( MeshTopology & a, MeshTopology & b ) -> void;
 
   /// Assignment (Disabled)
-  MeshTopology & operator=( const MeshTopology & other );
+  auto operator=( const MeshTopology & other ) -> MeshTopology &;
 
   /// Equality
-  bool operator==(MeshTopology const& other) const;
+  auto operator==( MeshTopology const & other ) const -> bool;
 
   /// Non-equality
-  bool operator!=(MeshTopology const& other) const;
+  auto operator!=( MeshTopology const & other ) const -> bool;
 
   /// Set topology entities for given dimension
   /// Optionally specify the global number of entities for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local entities will trigger an error.
-  void init(uint dim, uint nlocal, uint nglobal = 0);
+  auto init( size_t dim, size_t nlocal, size_t nglobal = 0 ) -> void;
 
   /// Finalize: check, reorder, renumber
-  void finalize();
+  auto finalize() -> void;
 
   ///
-  CellType const& type() const;
+  auto type() const -> CellType const &;
 
   /// Remap local entities of given dimension
-  void remap(uint d0,  Array<uint> const& mapping);
+  auto remap( size_t d0, std::vector< size_t > const & mapping ) -> void;
 
   //--- Connectivity ----------------------------------------------------------
 
   /// Return connectivity for given pair of topological dimensions
-  inline Connectivity& operator()(uint d0, uint d1);
+  auto operator()( size_t d0, size_t d1 ) -> Connectivity &;
 
   /// Return connectivity for given pair of topological dimensions
-  inline Connectivity const& operator()(uint d0, uint d1) const;
+  auto operator()( size_t d0, size_t d1 ) const -> Connectivity const &;
 
   /// Return topological dimension
-  inline uint dim() const;
+  auto dim() const -> size_t;
+
+  /// number of entities in all topological dimensions
+  auto num_entities() const -> std::vector< size_t > const &;
+
+  /// update number of entities in all topological dimensions
+  auto num_entities_update() -> void;
 
   /// Return number of entities in the local topology for given dimension
-  inline uint size(uint dim) const;
+  auto size( size_t dim ) const -> size_t;
 
   /// Return pointer to connectivity for given pair
-  inline Connectivity * connectivity(uint d0, uint d1 = 0);
+  auto connectivity( size_t d0, size_t d1 = 0 ) -> Connectivity *;
 
   /// Return pointer to connectivity for given pair (const)
-  inline Connectivity const * connectivity(uint d0, uint d1 = 0) const;
+  auto connectivity( size_t d0, size_t d1 = 0 ) const
+    -> Connectivity const *;
 
   //--- Distributed data ------------------------------------------------------
 
   /// Return mesh distribution data if the topology is distributed
-  MeshDistributedData& distdata();
+  auto distdata() -> MeshDistributedData &;
 
   /// Return mesh distribution data if the topology is distributed (const)
-  MeshDistributedData const& distdata() const;
+  auto distdata() const -> MeshDistributedData const &;
 
   /// Return number of entities in the global topology for given dimension
-  uint global_size(uint dim) const;
+  auto global_size( size_t dim ) const -> size_t;
 
   /// Return offset of global indices on current rank
-  uint offset(uint dim) const;
+  auto offset( size_t dim ) const -> size_t;
 
   /// Return number of given entities
-  uint num_owned(uint dim) const;
+  auto num_owned( size_t dim ) const -> size_t;
 
   /// Return number of given entities
-  uint num_shared(uint dim) const;
+  auto num_shared( size_t dim ) const -> size_t;
 
   /// Return number of given entities
-  uint num_ghost(uint dim) const;
+  auto num_ghost( size_t dim ) const -> size_t;
 
   //---------------------------------------------------------------------------
 
   /// Display data
-  void disp() const;
+  auto disp() const -> void;
 
   //--- TOKENIZED -------------------------------------------------------------
 
   /// Return token identifying the internal state of mesh topology
-  int token() const;
+  auto token() const -> int;
 
 private:
-
   /// Update token value
-  void update_token();
+  auto update_token() -> void;
 
   //---------------------------------------------------------------------------
 
   /// Compute connectivity for given pair of topological dimensions
-  Connectivity const * compute(uint d0, uint d1) const;
+  auto compute( size_t d0, size_t d1 ) const -> Connectivity const *;
 
   /// Compute entities for given topological dimension
-  Connectivity const * entities(uint di) const;
+  auto entities( size_t di ) const -> Connectivity const *;
 
   /// Compute transpose for given pair of topological dimensions
-  Connectivity const * transpose(uint d0, uint d1) const;
+  auto transpose( size_t d0, size_t d1 ) const -> Connectivity const *;
 
   /// Compute connectivity for given triple of topological dimensions
-  Connectivity const * intersection(uint d0, uint di, uint d1) const;
+  auto intersection( size_t d0, size_t di, size_t d1 ) const
+    -> Connectivity const *;
 
 public:
-
   /// Force renumbering of mesh topology entities
   /// @todo public for the moment but this just legacy of bad design
-  void renumber() const;
+  /// FIXME this shouldnt be const, but this class is somehow built to not care
+  /// about that...
+  auto renumber() const -> void;
 
 private:
   /// Force reordering of mesh topology connectivities
-  void reorder() const;
+  /// FIXME this shouldnt be const, but this class is somehow built to not care
+  /// about that...
+  auto reorder() const -> void;
 
   ///
   CellType const * type_;
 
   /// Topological dimension
-  uint dim_;
+  size_t dim_;
 
   // Topology cannot be modified
   bool frozen_;
+
+  // number of entities in each (connectivity) dimension
+  std::vector< size_t > num_entities_;
 
   /// Connectivity for pairs of topological dimensions
   mutable Connectivity * C_[CMAX][CMAX];
@@ -193,17 +205,19 @@ private:
 
   //
   int timestamp_;
-
 };
 
 //-----------------------------------------------------------------------------
-inline CellType const & MeshTopology::type() const
+
+inline auto MeshTopology::type() const -> CellType const &
 {
   dolfin_assert( type_ );
   return *type_;
 }
+
 //-----------------------------------------------------------------------------
-inline Connectivity & MeshTopology::operator()( uint d0, uint d1 )
+
+inline auto MeshTopology::operator()( size_t d0, size_t d1 ) -> Connectivity &
 {
   dolfin_assert( d0 <= dim_ && d1 <= dim_ );
   if ( !connectivity( d0, d1 ) )
@@ -212,32 +226,42 @@ inline Connectivity & MeshTopology::operator()( uint d0, uint d1 )
   }
   return *connectivity( d0, d1 );
 }
+
 //-----------------------------------------------------------------------------
-inline Connectivity const & MeshTopology::operator()( uint d0, uint d1 ) const
+
+inline auto MeshTopology::operator()( size_t d0, size_t d1 ) const
+  -> Connectivity const &
 {
   dolfin_assert( d0 <= dim_ && d1 <= dim_ );
   return *compute( d0, d1 );
 }
+
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::dim() const
+
+inline auto MeshTopology::dim() const -> size_t
 {
   return dim_;
 }
+
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::size( uint dim ) const
+
+inline auto MeshTopology::num_entities() const -> std::vector< size_t > const &
+{
+  dolfin_assert( num_entities_.size() == dim_ + 1 );
+  return num_entities_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto MeshTopology::size( size_t dim ) const -> size_t
 {
   dolfin_assert( dim <= dim_ );
   return ( *this )( dim, 0 ).order();
 }
+
 //-----------------------------------------------------------------------------
-inline Connectivity * MeshTopology::connectivity( uint d0, uint d1 )
-{
-  dolfin_assert( d0 <= dim_ );
-  dolfin_assert( d1 <= dim_ );
-  return C_[d0][d1];
-}
-//-----------------------------------------------------------------------------
-inline Connectivity const * MeshTopology::connectivity( uint d0, uint d1 ) const
+
+inline auto MeshTopology::connectivity( size_t d0, size_t d1 ) -> Connectivity *
 {
   dolfin_assert( d0 <= dim_ );
   dolfin_assert( d1 <= dim_ );
@@ -245,7 +269,18 @@ inline Connectivity const * MeshTopology::connectivity( uint d0, uint d1 ) const
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData & MeshTopology::distdata()
+
+inline auto MeshTopology::connectivity( size_t d0, size_t d1 ) const
+  -> Connectivity const *
+{
+  dolfin_assert( d0 <= dim_ );
+  dolfin_assert( d1 <= dim_ );
+  return C_[d0][d1];
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto MeshTopology::distdata() -> MeshDistributedData &
 {
   if ( not distributed() )
   {
@@ -255,7 +290,8 @@ inline MeshDistributedData & MeshTopology::distdata()
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData const & MeshTopology::distdata() const
+
+inline auto MeshTopology::distdata() const -> MeshDistributedData const &
 {
   if ( not distributed() )
   {
@@ -265,31 +301,36 @@ inline MeshDistributedData const & MeshTopology::distdata() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::global_size( uint dim ) const
+
+inline auto MeshTopology::global_size( size_t dim ) const -> size_t
 {
   return ( distributed() ? distdata_[dim].global_size() : this->size( dim ) );
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::offset( uint dim ) const
+
+inline auto MeshTopology::offset( size_t dim ) const -> size_t
 {
   return ( distributed() ? distdata_[dim].offset() : 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::num_owned( uint dim ) const
+
+inline auto MeshTopology::num_owned( size_t dim ) const -> size_t
 {
   return ( distributed() ? distdata_[dim].num_owned() : this->size( dim ) );
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::num_shared( uint dim ) const
+
+inline auto MeshTopology::num_shared( size_t dim ) const -> size_t
 {
   return ( distributed() ? distdata_[dim].num_shared() : 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::num_ghost( uint dim ) const
+
+inline auto MeshTopology::num_ghost( size_t dim ) const -> size_t
 {
   return ( distributed() ? distdata_[dim].num_ghost() : 0 );
 }

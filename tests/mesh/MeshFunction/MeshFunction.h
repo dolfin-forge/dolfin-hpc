@@ -4,12 +4,12 @@
 
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/CellTypes.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/EdgeIterator.h>
-#include <dolfin/mesh/FaceIterator.h>
-#include <dolfin/mesh/FacetIterator.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/celltypes/CellType.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/EdgeIterator.h>
+#include <dolfin/mesh/entities/iterators/FaceIterator.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 using namespace dolfin;
 

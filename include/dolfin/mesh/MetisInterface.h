@@ -21,11 +21,12 @@ namespace dolfin
 namespace MetisInterface
 {
 
-void partitionCommonMetis( Mesh &                     mesh,
-                           MeshValues< uint, Cell > & partitions,
-                           MeshValues< uint, Cell > * weight );
+void partitionCommonMetis( Mesh &                       mesh,
+                           MeshValues< size_t, Cell > & partitions,
+                           MeshValues< size_t, Cell > * weight );
 
-void partitionGeomMetis( Mesh & mesh, MeshValues< uint, Vertex > & partitions );
+void partitionGeomMetis( Mesh &                         mesh,
+                         MeshValues< size_t, Vertex > & partitions );
 
 } /* namespace MetisInterface */
 

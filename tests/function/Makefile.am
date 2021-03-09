@@ -12,6 +12,5 @@ EXTRA_DIST = Analytic/Analytic.h \
              Function/Function.h \
              Operators/Operators.h \
              Real/Real.h \
-             UFCFunction/UFCFunction.h \
              SpaceTimeFunction/SpaceTimeFunction.h \
              Value/Value.h

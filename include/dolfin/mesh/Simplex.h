@@ -6,16 +6,16 @@
 
 #include <dolfin/mesh/Mesh.h>
 
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/TriangleCell.h>
+#include <dolfin/mesh/celltypes/IntervalCell.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-template < uint D >
+template < size_t D >
 struct Simplex : public Mesh
 {
 

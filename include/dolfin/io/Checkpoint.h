@@ -4,9 +4,9 @@
 #ifndef __DOLFIN_CHECKPOINT_H
 #define __DOLFIN_CHECKPOINT_H
 
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 
 #include <fstream>
 #include <string>
@@ -40,16 +40,16 @@ public:
     CheckpointHeader() = default;
     void disp() const;
 
-    double   time{ 0.0 };
+    double   time { 0.0 };
     uint32_t magic;
-    uint32_t pe_size{ 0 };
-    uint32_t num_meshes{ 0 };
-    uint32_t num_functions{ 0 };
-    uint32_t num_vectors{ 0 };
-    offset_t offset_psystem{ 0 };
-    offset_t offset_mesh{ 0 };
-    offset_t offset_functions{ 0 };
-    offset_t offset_vectors{ 0 };
+    uint32_t pe_size { 0 };
+    uint32_t num_meshes { 0 };
+    uint32_t num_functions { 0 };
+    uint32_t num_vectors { 0 };
+    offset_t offset_psystem { 0 };
+    offset_t offset_mesh { 0 };
+    offset_t offset_functions { 0 };
+    offset_t offset_vectors { 0 };
   };
 
   struct MeshHeader
@@ -57,20 +57,20 @@ public:
     MeshHeader() = default;
     void disp() const;
 
-    CellType::Type type{ CellType::point };
-    uint32_t tdim{ 0 };
-    uint32_t gdim{ 0 };
-    uint32_t num_vertices{ 0 };
-    uint32_t num_cells{ 0 };
-    uint32_t num_entities{ 0 };
-    uint32_t num_centities{ 0 };
-    uint32_t num_coords{ 0 };
-    uint32_t num_ghosts{ 0 };
-    char     name[NAME_LENGTH];
-  #ifdef ENABLE_MPIIO
-    uint32_t offsets[4]{ 0, 0, 0, 0 };
-    uint32_t displacement[4]{ 0, 0, 0, 0 };
-  #endif
+    CellType::Type type { CellType::point };
+    uint32_t       tdim { 0 };
+    uint32_t       gdim { 0 };
+    uint32_t       num_vertices { 0 };
+    uint32_t       num_cells { 0 };
+    uint32_t       num_entities { 0 };
+    uint32_t       num_centities { 0 };
+    uint32_t       num_coords { 0 };
+    uint32_t       num_ghosts { 0 };
+    char           name[NAME_LENGTH];
+#ifdef ENABLE_MPIIO
+    uint32_t offsets[4] { 0, 0, 0, 0 };
+    uint32_t displacement[4] { 0, 0, 0, 0 };
+#endif
   };
 
   struct FunctionHeader
@@ -78,9 +78,9 @@ public:
     FunctionHeader() = default;
     void disp() const;
 
-    uint32_t dim{ 0 };
-    uint32_t size{ 0 };
-    uint32_t offset[3]{ 0, 0, 0 };
+    uint32_t dim { 0 };
+    uint32_t size { 0 };
+    uint32_t offset[3] { 0, 0, 0 };
     char     name[NAME_LENGTH];
   };
 
@@ -89,7 +89,7 @@ public:
     VectorHeader() = default;
     void disp() const;
 
-    uint32_t offset[3]{ 0, 0, 0 };
+    uint32_t offset[3] { 0, 0, 0 };
     char     name[NAME_LENGTH];
   };
 
@@ -101,8 +101,11 @@ public:
   ~Checkpoint() = default;
 
   ///
-  void write( std::string filename, real const t, MeshMap & meshes,
-              FunctionMap & func, VectorMap & vec );
+  void write( std::string   filename,
+              real const    t,
+              MeshMap &     meshes,
+              FunctionMap & func,
+              VectorMap &   vec );
 
   ///
   void load_header( std::string filename );
@@ -120,7 +123,7 @@ public:
   void load( std::string filename, VectorMap const & vec );
 
   ///
-  real time() const;
+  auto time() const -> real;
 
   ///
   void reset_counter();
@@ -129,32 +132,33 @@ public:
   void increment_counter();
 
   ///
-  CheckpointHeader        const & get_header() const;
-  Array< MeshHeader >     const & get_mesh_header() const;
-  Array< FunctionHeader > const & get_function_header() const;
-  Array< VectorHeader >   const & get_vector_header() const;
+  auto get_header() const -> CheckpointHeader const &;
+  auto get_mesh_header() const -> std::vector< MeshHeader > const &;
+  auto get_function_header() const -> std::vector< FunctionHeader > const &;
+  auto get_vector_header() const -> std::vector< VectorHeader > const &;
 
 private:
-  void fill_headers( real const t, uint param_size, MeshMap & meshes,
-                     FunctionMap & func, VectorMap & vec );
+  void fill_headers( real const    t,
+                     size_t        param_size,
+                     MeshMap &     meshes,
+                     FunctionMap & func,
+                     VectorMap &   vec );
 
   void write( stream_t file, offset_t & byte_offset, MeshMap & meshes );
-
   void write( stream_t file, offset_t & byte_offset, FunctionMap & func );
-
   void write( stream_t file, offset_t & byte_offset, VectorMap & vec );
 
-  std::string build_filename( std::string filename );
-  stream_t    load_file( std::string & filename );
-  void        close_file( stream_t & file );
+  auto build_filename( std::string filename ) -> std::string;
+  auto load_file( std::string & filename ) -> stream_t;
+  void close_file( stream_t & file );
 
 private:
-  uint n_{ 0 };
+  size_t n_ { 0 };
 
-  CheckpointHeader        chkp_header;
-  Array< MeshHeader >     mesh_header;
-  Array< FunctionHeader > functions_header;
-  Array< VectorHeader >   vectors_header;
+  CheckpointHeader              chkp_header;
+  std::vector< MeshHeader >     mesh_header;
+  std::vector< FunctionHeader > functions_header;
+  std::vector< VectorHeader >   vectors_header;
 };
 
 }

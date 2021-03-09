@@ -1,7 +1,6 @@
 #ifndef __DOLFIN_LABEL_H
 #define __DOLFIN_LABEL_H
 
-#include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 
 #include <string>
@@ -9,7 +8,8 @@
 namespace dolfin
 {
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 template < class T >
 struct Label : public std::pair< T *, std::string >
 {
@@ -19,37 +19,38 @@ struct Label : public std::pair< T *, std::string >
   }
 };
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 template < class T >
-struct LabelList : public Array< Label< T > >
+struct LabelList : public std::vector< Label< T > >
 {
   LabelList()
-    : Array< Label< T > >()
+    : std::vector< Label< T > >()
   {
   }
 
   LabelList( Label< T > & l )
-    : Array< Label< T > >( 1, l )
+    : std::vector< Label< T > >( 1, l )
   {
   }
 
   LabelList( Label< T > l )
-    : Array< Label< T > >( 1, l )
+    : std::vector< Label< T > >( 1, l )
   {
   }
 
-  LabelList( uint n, Label< T > & l )
-    : Array< Label< T > >( n, l )
+  LabelList( size_t n, Label< T > & l )
+    : std::vector< Label< T > >( n, l )
   {
   }
 
-  LabelList( uint n, Label< T > l )
-    : Array< Label< T > >( n, l )
+  LabelList( size_t n, Label< T > l )
+    : std::vector< Label< T > >( n, l )
   {
   }
 };
 
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

@@ -15,7 +15,7 @@ class CoefficientMap : public _ordered_map<std::string, Coefficient *>
 {
 public:
   /// Check if coefficient label is in the map
-  bool has(std::string const& label) const;
+  auto has(std::string const& label) const -> bool;
 
   /// Display information
   void disp() const;

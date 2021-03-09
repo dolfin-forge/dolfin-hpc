@@ -9,20 +9,25 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-uint RefinementPattern::num_refined_vertices(Mesh const& mesh) const
+
+auto RefinementPattern::num_refined_vertices( Mesh const & mesh ) const
+  -> size_t
 {
-  uint val = 0;
-  for (uint i = 0; i <= mesh.topology_dimension(); ++i)
+  size_t val = 0;
+  for ( size_t i = 0; i <= mesh.topology_dimension(); ++i )
   {
-    val += this->num_refined_vertices(i) * mesh.size(i);
+    val += this->num_refined_vertices( i ) * mesh.size( i );
   }
   return val;
 }
+
 //-----------------------------------------------------------------------------
-uint RefinementPattern::num_refined_cells(Mesh const& mesh) const
+
+auto RefinementPattern::num_refined_cells( Mesh const & mesh ) const -> size_t
 {
-  return (this->num_refined_cells() * mesh.num_cells());
+  return ( this->num_refined_cells() * mesh.num_cells() );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

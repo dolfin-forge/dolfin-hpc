@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_BOUNDARYNORMAL_H
 #define __DOLFIN_BOUNDARYNORMAL_H
 
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/function/Function.h>
 
 namespace dolfin
@@ -27,63 +27,57 @@ class BoundaryNormal
 {
 
 public:
-
   /// Return boundary mesh
-  BoundaryMesh& boundary();
+  auto boundary() -> BoundaryMesh &;
 
   /// Destructor
   virtual ~BoundaryNormal();
 
   /// Return global mesh
-  Mesh& mesh();
+  auto mesh() -> Mesh &;
 
   /// Return the basis (n, tau, 0) in 2d or (n, tau1, tau2) in 3d
-  Array<Function>& basis();
+  auto basis() -> std::vector< Function > &;
 
   /// Initialization of basis functions and node type for given space
-  void init(FiniteElementSpace const& space);
+  auto init( FiniteElementSpace const & space ) -> void;
 
   /// Write orthonormal basis and node type to file
-  void write(std::string const& filename);
+  auto write( std::string const & filename ) -> void;
 
   ///
-  virtual void compute() = 0;
+  virtual auto compute() -> void = 0;
 
 protected:
+  ///
+  BoundaryNormal( Mesh & mesh );
 
   ///
-  BoundaryNormal(Mesh& mesh);
-
-  ///
-  explicit BoundaryNormal(BoundaryMesh& boundary);
+  explicit BoundaryNormal( BoundaryMesh & boundary );
 
 private:
-
-  Mesh& mesh_;
-  BoundaryMesh * const boundary_;
-  bool const local_boundary_;
-  Array<Function> basis_;
-  Function node_type_;
-
+  Mesh &                  mesh_;
+  BoundaryMesh * const    boundary_;
+  bool const              local_boundary_;
+  std::vector< Function > basis_;
+  Function                node_type_;
 };
 
-
 //-----------------------------------------------------------------------------
-inline Mesh& BoundaryNormal::mesh()
+inline auto BoundaryNormal::mesh() -> Mesh &
 {
   return mesh_;
 }
 //-----------------------------------------------------------------------------
-inline BoundaryMesh& BoundaryNormal::boundary()
+inline auto BoundaryNormal::boundary() -> BoundaryMesh &
 {
   return *boundary_;
 }
 //-----------------------------------------------------------------------------
-inline Array<Function>& BoundaryNormal::basis()
+inline auto BoundaryNormal::basis() -> std::vector< Function > &
 {
   return basis_;
 }
 
 }
 #endif
-

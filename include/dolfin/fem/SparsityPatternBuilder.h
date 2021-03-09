@@ -7,10 +7,8 @@
 namespace dolfin
 {
 
-class DofMapSet;
-class Mesh;
+class Form;
 class GenericSparsityPattern;
-class UFC;
 
 /**
  *  @brief   provides functions to compute the sparsity pattern.
@@ -20,8 +18,8 @@ namespace SparsityPatternBuilder
 {
 
 /// Build sparsity pattern
-void build( GenericSparsityPattern & sparsity_pattern, Mesh & mesh,
-            UFC & ufc, DofMapSet const & dof_map_set );
+void build( GenericSparsityPattern & sparsity_pattern,
+            Form & form );
 
 } // end namespace SparsityPatternBuilder
 

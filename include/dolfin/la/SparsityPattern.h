@@ -8,7 +8,8 @@
 
 #include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
+
+#include <vector>
 
 namespace dolfin
 {
@@ -26,7 +27,7 @@ public:
 
   /// Create sparsity pattern for given global dimensions and local ranges.
   /// If range is a nullptr pointer the pattern is assumed to be serial.
-  SparsityPattern(uint rank, uint const * dim, uint const * range = nullptr);
+  SparsityPattern(size_t rank, size_t const * dim, size_t const * range = nullptr);
 
   /// Destructor
   ~SparsityPattern() override;
@@ -35,36 +36,36 @@ public:
 
   /// Initialize with given tensor rank, global dimensions and local ranges.
   /// If range is a nullptr pointer the pattern is assumed to be serial
-  void init(uint rank, uint const * dim, uint const * range = nullptr) override;
+  void init(size_t rank, size_t const * dim, size_t const * range = nullptr) override;
 
   /// Clear
   void clear() override;
 
   /// Insert non-zero entries
-  void insert(uint const * num, uint const * const * idx) override;
+  void insert(size_t const * num, size_t const * const * idx) override;
 
   /// Return local size for given dimension
-  uint size(uint i) const override;
+  auto size(size_t i) const -> size_t override;
 
   /// Finalize sparsity pattern (needed by most parallel la backends)
   void apply() override;
 
   /// Is blocked
-  bool is_blocked() const override;
+  auto is_blocked() const -> bool override;
 
   /// Is distributed
-  bool is_distributed() const override;
+  auto is_distributed() const -> bool override;
 
   /// Return array with number of non-zeroes per local row
-  void numNonZeroPerRow(uint nzrow[]) const override;
+  void numNonZeroPerRow(size_t nzrow[]) const override;
 
   /// Return array with number of non-zeroes per row for the given process rank
   /// and split between entries in the diagonal and off-diagonal portion of the
   /// matrix
-  void numNonZeroPerRow(uint p_rank, uint d_nzrow[], uint o_nzrow[]) const override;
+  void numNonZeroPerRow(size_t p_rank, size_t d_nzrow[], size_t o_nzrow[]) const override;
 
   /// Return total number of non-zeroes
-  uint numNonZero() const override;
+  auto numNonZero() const -> size_t override;
 
   /// Display sparsity pattern
   void disp() const override;
@@ -72,10 +73,10 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return array with row range for process rank
-  void get_range(uint p_rank, uint range[]);
+  void get_range(size_t p_rank, size_t range[]);
 
   /// Return number of local rows for process rank
-  uint range_size(uint p_rank) const;
+  auto range_size(size_t p_rank) const -> size_t;
 
   ///
   void set_blocked();
@@ -83,17 +84,17 @@ public:
 private:
 
   /// Tensor rank
-  uint rank_{0};
+  size_t rank_{0};
 
   /// Dimensions
-  uint * dim_{nullptr};
+  size_t * dim_{nullptr};
 
   /// Range -array of size + 1 where size is size + 1:
   ///    range[rank], range[rank+1] is the range for processor
-  uint ** range_{nullptr};
+  size_t ** range_{nullptr};
 
   /// Direct access to local range
-  uint ** local_range_{nullptr};
+  size_t ** local_range_{nullptr};
 
   /// Flags
   bool initialized_{false};
@@ -107,16 +108,16 @@ private:
 
   /// Diagonal portion: submatrix such that row and column
   /// indices are in-range
-  _ordered_set<uint> * d_entries_{nullptr};
-  uint d_count_{0};
+  _ordered_set<size_t> * d_entries_{nullptr};
+  size_t d_count_{0};
 
   /// Off-diagonal portion: entries such that only column indices are off-range
-  _ordered_set<uint> * o_entries_{nullptr};
-  uint o_count_{0};
+  _ordered_set<size_t> * o_entries_{nullptr};
+  size_t o_count_{0};
 
   /// Additionally provide data structure to store remote entries i,e such that
   /// row indices are not in-range
-  _ordered_map<uint, _ordered_set<uint> > r_entries_;
+  _ordered_map<size_t, _ordered_set<size_t> > r_entries_;
 
 };
 
@@ -126,29 +127,29 @@ inline void SparsityPattern::set_blocked()
   blocked_ = true;
 }
 //-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_blocked() const
+inline auto SparsityPattern::is_blocked() const -> bool
 {
   return blocked_;
 }
 //-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_distributed() const
+inline auto SparsityPattern::is_distributed() const -> bool
 {
   return distributed_;
 }
 //-----------------------------------------------------------------------------
-inline uint SparsityPattern::size( uint i ) const
+inline auto SparsityPattern::size( size_t i ) const -> size_t
 {
   return ( local_range_[i][1] - local_range_[i][0] );
 }
 //-----------------------------------------------------------------------------
-inline void SparsityPattern::get_range( uint p_rank, uint range[] )
+inline void SparsityPattern::get_range( size_t p_rank, size_t range[] )
 {
   dolfin_assert( distributed_ );
   // For a serial pattern p_rank is only zero
   std::copy( &range_[0][p_rank], &range_[0][p_rank + 1], range );
 }
 //-----------------------------------------------------------------------------
-inline uint SparsityPattern::range_size( uint p_rank ) const
+inline auto SparsityPattern::range_size( size_t p_rank ) const -> size_t
 {
   dolfin_assert( distributed_ );
   return range_[0][p_rank + 1] - range_[0][p_rank];

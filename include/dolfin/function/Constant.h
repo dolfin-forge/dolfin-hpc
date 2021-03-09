@@ -1,3 +1,4 @@
+
 #ifndef __DOLFIN_CONSTANT_H_
 #define __DOLFIN_CONSTANT_H_
 
@@ -13,168 +14,260 @@ class Constant : public Coefficient
 {
 
 public:
+  /// Constructor
+  Constant();
 
   /// Constructor
-  Constant() :
-    value_(0.0)
-  {
-  }
-
-  /// Constructor
-  Constant(real value) :
-    value_(value)
-  {
-  }
+  Constant( real value );
 
   /// Destructor
-  ~Constant()
-  {
-  }
+  ~Constant();
 
   /// Assignment
-  Constant& operator=(real const& value)
-  {
-    value_ = value;
-    return *this;
-  }
+  auto operator=( real const & value ) -> Constant &;
 
   /// Equality
-  bool operator==(Constant const& other)
-  {
-    if(value_ == other.value_)
-    {
-      return true;
-    }
-    return false;
-  }
+  auto operator==( Constant const & other ) -> bool;
 
   /// Multiply by constant real number
-  inline Constant& operator+=(real const& value)
-  {
-    value_ += value;
-    return *this;
-  }
+  auto operator+=( real const & value ) -> Constant &;
 
   /// Add a constant real number
-  inline Constant& operator-=(real const& value)
-  {
-    value_ -= value;
-    return *this;
-  }
+  auto operator-=( real const & value ) -> Constant &;
 
   /// Substract a constant real number
-  inline Constant& operator*=(real const& value)
-  {
-    value_ *= value;
-    return *this;
-  }
+  auto operator*=( real const & value ) -> Constant &;
 
   /// Divide by constant real number
-  inline Constant& operator/=(real const& value)
-  {
-    value_ /= value;
-    return *this;
-  }
-
-  ///
-  operator real() const
-  {
-    return value_;
-  }
+  auto operator/=( real const & value ) -> Constant &;
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(real* values, const real*, const ufc::cell&) const
-  {
-    values[0] = value_;
-  }
+  auto evaluate( real * values, const real *, const ufc::cell & ) const -> void override;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(uint n, real* values, const real*,const ufc::cell&) const
-  {
-    std::fill_n(values, n, value_);
-  }
+  auto evaluate( size_t n, real * values, const real *, const ufc::cell & ) const -> void override;
 
   /// Evaluate function at given point
-  inline void eval(real* values, const real*) const
-  {
-    values[0] = value_;
-  }
+  auto eval( real * values, const real * ) const -> void override;
 
   /// Return the rank of the value space
-  inline uint rank() const
-  {
-    return 0;
-  }
+  auto rank() const -> size_t override;
 
   /// Return the dimension of the value space for axis i
-  inline uint dim(uint) const
-  {
-    return 1;
-  }
+  auto dim( size_t ) const -> size_t override;
 
   /// Value size
-  inline uint value_size() const
-  {
-    return 1;
-  }
+  auto value_size() const -> size_t override;
 
   ///
-  inline Constant const& operator()(Time const&) const
-  {
-    // No-op
-    return *this;
-  }
+  auto operator()( Time const & ) const -> Constant const &;
 
   /// Interpolate function to finite element space on cell
-  inline void interpolate(real* coefficients, const ufc::cell&,
-                          const ufc::finite_element& finite_element,
-                          const Cell&) const
-  {
-    dolfin_assert(coefficients);
-    for (uint i = 0; i < finite_element.space_dimension(); ++i)
-    {
-      coefficients[i] = value_;
-    }
-  }
+  auto interpolate( real * coefficients,
+                    UFCCell const &,
+                    ufc::finite_element const & finite_element ) const
+    -> void override;
 
   /// Interpolate function to finite element space on facet
-  inline void interpolate(real* coefficients, const ufc::cell&,
-                          const ufc::finite_element& finite_element,
-                          const Cell&, uint) const
-  {
-    dolfin_assert(coefficients);
-    for (uint i = 0; i < finite_element.space_dimension(); ++i)
-    {
-      coefficients[i] = value_;
-    }
-  }
+  auto interpolate( real * coefficients,
+                    UFCCell const &,
+                    ufc::finite_element const & finite_element,
+                    size_t ) const -> void override;
 
   /// Synchronize
-  inline void sync()
-  {
-    // Do nothing
-  }
+  auto sync() -> void override;
 
   /// Display basic information
-  inline void disp() const
-  {
-    section("Constant");
-    message("Value : %f", value_);
-    end();
-    skip();
-  }
+  auto disp() const -> void override;
 
 private:
-
-  void sync(Time const&) { /* No-op */ }
+  auto sync( Time const & ) -> void override;
 
   real value_;
-
 };
+
+//-----------------------------------------------------------------------------
+
+inline Constant::Constant()
+  : value_( 0.0 )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Constant::Constant( real value )
+  : value_( value )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline Constant::~Constant()
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator=( real const & value ) -> Constant &
+{
+  value_ = value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator==( Constant const & other ) -> bool
+{
+  if ( value_ == other.value_ )
+  {
+    return true;
+  }
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator+=( real const & value ) -> Constant &
+{
+  value_ += value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator-=( real const & value ) -> Constant &
+{
+  value_ -= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator*=( real const & value ) -> Constant &
+{
+  value_ *= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator/=( real const & value ) -> Constant &
+{
+  value_ /= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::evaluate( real * values,
+                                const real *,
+                                const ufc::cell & ) const -> void
+{
+  values[0] = value_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::evaluate( size_t n,
+                                real * values,
+                                const real *,
+                                const ufc::cell & ) const -> void
+{
+  std::fill_n( values, n, value_ );
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::eval( real * values, const real * ) const -> void
+{
+  values[0] = value_;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::rank() const -> size_t
+{
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::dim( size_t ) const -> size_t
+{
+  return 1;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::value_size() const -> size_t
+{
+  return 1;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::operator()( Time const & ) const -> Constant const &
+{
+  // No-op
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto
+  Constant::interpolate( real * coefficients,
+                         UFCCell const &,
+                         ufc::finite_element const & finite_element ) const
+  -> void
+{
+  dolfin_assert( coefficients != nullptr );
+  for ( size_t i = 0; i < finite_element.space_dimension(); ++i )
+  {
+    coefficients[i] = value_;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::interpolate( real * coefficients,
+                                   UFCCell const &,
+                                   ufc::finite_element const & finite_element,
+                                   size_t ) const -> void
+{
+  dolfin_assert( coefficients );
+  for ( size_t i = 0; i < finite_element.space_dimension(); ++i )
+  {
+    coefficients[i] = value_;
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::sync() -> void
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::disp() const -> void
+{
+  section( "Constant" );
+  message( "Value : %f", value_ );
+  end();
+  skip();
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Constant::sync( Time const & ) -> void
+{
+}
+
+//-----------------------------------------------------------------------------
 
 } // end namespace dolfin
 

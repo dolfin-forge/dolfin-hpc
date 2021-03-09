@@ -9,6 +9,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  GhostIterator
  *
@@ -20,84 +22,104 @@ class GhostIterator
 
 public:
   ///
-  GhostIterator( DistributedData const & distdata )
-    : distdata_( distdata )
-    , iter_( distdata_.ghost_.begin() )
-  {
-  }
+  GhostIterator( DistributedData const & distdata );
 
   ///
   ~GhostIterator() = default;
 
   ///
-  GhostIterator & operator++();
+  auto operator++() -> GhostIterator &;
 
   ///
-  inline uint index() const;
+  inline auto index() const -> size_t;
 
   ///
-  inline uint global_index() const;
+  inline auto global_index() const -> size_t;
 
   ///
-  inline uint owner() const;
+  inline auto owner() const -> size_t;
 
   ///
-  inline bool valid() const;
+  inline auto valid() const -> bool;
 
   ///
-  inline _set< uint > const & adj() const;
+  inline auto adj() const -> _set< size_t > const &;
 
   ///
   template < class T >
-  inline void adj_enqueue( Array< Array< T > > & container, T const & value ) const;
+  inline auto adj_enqueue( std::vector< std::vector< T > > & container,
+                           T const & value ) const -> void;
 
 private:
-  DistributedData const &            distdata_;
-  _map< uint, uint >::const_iterator iter_;
+  DistributedData const &                distdata_;
+  _map< size_t, size_t >::const_iterator iter_;
 };
 
 //-----------------------------------------------------------------------------
-inline GhostIterator & GhostIterator::operator++()
+
+inline GhostIterator::GhostIterator( DistributedData const & distdata )
+  : distdata_( distdata )
+  , iter_( distdata_.ghost_.begin() )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto GhostIterator::operator++() -> GhostIterator &
 {
   ++iter_;
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::index() const
+
+inline auto GhostIterator::index() const -> size_t
 {
   return iter_->first;
 }
+
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::global_index() const
+
+inline auto GhostIterator::global_index() const -> size_t
 {
   return distdata_.get_global( iter_->first );
 }
+
 //-----------------------------------------------------------------------------
-inline uint GhostIterator::owner() const
+
+inline auto GhostIterator::owner() const -> size_t
 {
   return iter_->second;
 }
+
 //-----------------------------------------------------------------------------
-inline bool GhostIterator::valid() const
+
+inline auto GhostIterator::valid() const -> bool
 {
   return iter_ != distdata_.ghost_.end();
 }
+
 //-----------------------------------------------------------------------------
-inline _set< uint > const & GhostIterator::adj() const
+
+inline auto GhostIterator::adj() const -> _set< size_t > const &
 {
   return distdata_.shared_.find( iter_->first )->second;
 }
+
 //-----------------------------------------------------------------------------
+
 template < class T >
-inline void GhostIterator::adj_enqueue( Array< Array< T > > & container,
-                                        T const & value ) const
+inline auto
+  GhostIterator::adj_enqueue( std::vector< std::vector< T > > & container,
+                              T const & value ) const -> void
 {
-  _set< uint > const & a = distdata_.shared_.find( iter_->first )->second;
-  for ( _set< uint >::const_iterator it = a.begin(); it != a.end(); ++it )
+  _set< size_t > const & a = distdata_.shared_.find( iter_->first )->second;
+  for ( _set< size_t >::const_iterator it = a.begin(); it != a.end(); ++it )
   {
     container[*it].push_back( value );
   }
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

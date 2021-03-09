@@ -31,10 +31,10 @@ public:
   }
 
   /// Return reference to coordinate in direction i
-  inline real & operator[]( uint i );
+  inline real & operator[]( size_t i );
 
   /// Return coordinate in direction i
-  inline real operator[]( uint i ) const;
+  inline real operator[]( size_t i ) const;
 
   /// Compute transformation matrix (as row major) and translation vector
   /// with respect to a cell
@@ -52,14 +52,14 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline real & BarycentricPoint::operator[]( uint i )
+inline real & BarycentricPoint::operator[]( size_t i )
 {
   dolfin_assert( i < 3 );
   return _x[i];
 }
 
 //-----------------------------------------------------------------------------
-inline real BarycentricPoint::operator[]( uint i ) const
+inline real BarycentricPoint::operator[]( size_t i ) const
 {
   dolfin_assert( i < 3 );
   return _x[i];
@@ -70,20 +70,20 @@ inline void BarycentricPoint::getTransformation( Cell const & c,
                                                  real ** matrix,
                                                  real ** vector )
 {
-  uint         n     = c.num_entities( 0 ) - 1;
-  uint         dim   = c.mesh().geometry_dimension();
-  const uint * verts = c.entities( 0 );
+  size_t         n     = c.num_entities( 0 ) - 1;
+  size_t         dim   = c.mesh().geometry_dimension();
+  const size_t * verts = c.entities( 0 );
   real *       mat   = new real[dim * n];
   real *       vec   = new real[dim];
   std::copy( c.mesh().geometry().x( verts[n] ),
              c.mesh().geometry().x( verts[n] ) + dim,
              vec );
 
-  for ( uint i( 0 ); i < n; ++i )
+  for ( size_t i( 0 ); i < n; ++i )
   {
     Point column = c.mesh().geometry().point( verts[i] )
                    - c.mesh().geometry().point( verts[n] );
-    for ( uint row( 0 ); row < dim; ++row )
+    for ( size_t row( 0 ); row < dim; ++row )
       mat[row * n + i] = column[row];
   }
 
@@ -99,14 +99,14 @@ inline Point BarycentricPoint::point( Cell const & c,
   if ( matrix == 0 || vector == 0 )
     getTransformation( c, &matrix, &vector );
 
-  uint  n   = c.num_entities( 0 ) - 1;
-  uint  dim = c.mesh().geometry_dimension();
+  size_t  n   = c.num_entities( 0 ) - 1;
+  size_t  dim = c.mesh().geometry_dimension();
   Point p;
 
-  for ( uint row( 0 ); row < dim; ++row )
+  for ( size_t row( 0 ); row < dim; ++row )
   {
     p[row] = vector[row];
-    for ( uint col( 0 ); col < n; ++col )
+    for ( size_t col( 0 ); col < n; ++col )
       p[row] += matrix[row * n + col] * _x[col];
   }
 

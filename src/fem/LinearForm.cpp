@@ -7,16 +7,14 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-LinearForm::LinearForm(Mesh& mesh) :
-    Form(mesh),
-    test_space_(nullptr)
+LinearForm::LinearForm( Mesh & mesh )
+  : Form( mesh )
 {
 }
 
 //-----------------------------------------------------------------------------
 LinearForm::~LinearForm()
 {
-  delete test_space_;
 }
 
-}
+} // namespace dolfin

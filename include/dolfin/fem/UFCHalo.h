@@ -9,14 +9,12 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
+#include <dolfin/fem/Form.h>
 
 namespace dolfin
 {
 
-class DofMapSet;
 class Facet;
-class Coefficient;
-class Mesh;
 class UFC;
 
 /**
@@ -39,67 +37,56 @@ class UFCHalo
 {
 
 public:
-
   /// Constructor
-  UFCHalo(UFC& ufc, Array<Coefficient*> const& coefficients,
-              DofMapSet const& dof_map_set);
+  UFCHalo( Form & form );
 
   ///
   ~UFCHalo();
 
   ///
-  void update(Facet& facet);
+  void update( Facet & facet );
 
   ///
   void disp() const;
 
-  //--- PUBLIC ATTRIBUTES -----------------------------------------------------
-  // Just expose references to attributes of the underlying UFC instance
-  UFCCell& cell0;
-  UFCCell& cell1;
-  real **& macro_w;
-  uint& facet0;
-  uint& facet1;
-  uint **& macro_dofs;
+  // facet indices
+  size_t facet0;
+  size_t facet1;
+
+  // Current pair of cells of macro element
+  UFCCell cell0;
+  UFCCell cell1;
 
 private:
 
   ///
-  void init();
-
-  ///
-  void update(Array<Coefficient*> const& coefficients,
-              DofMapSet const& dof_map_set);
+  void update();
 
   void clear();
 
-  UFC& ufc_;
-  Mesh& mesh_;
-  Array<Coefficient*> const& coefficients_;
-  DofMapSet const& dof_map_set_;
+  Form & form_;
 
   // Store rank offsets, implemented by accumulating shared facet counts
-  _map<uint, uint> rank_offsets_;
+  _map< size_t, size_t > rank_offsets_;
 
   // Maps the index in the halo data structure to the local facet index
-  typedef std::pair<uint, uint> FacetOffsets;
-  typedef _map<uint, FacetOffsets > FacetMap;
+  using FacetOffsets = std::pair< size_t, size_t >;
+  using FacetMap     = _map< size_t, FacetOffsets >;
   FacetMap facet_map_;
 
   // Data: Vertex coordinates + Coefficients values
-  uint r_packet_size_;
+  size_t r_packet_size_;
 
   // Ordered by adjacent rank
-  real * r_data0_;
-  real * r_data1_;
+  std::vector< real > r_data0_;
+  std::vector< real > r_data1_;
 
   // Data: Local facet index + Arguments dof indices
-  uint u_packet_size_;
+  size_t u_packet_size_;
 
   // Ordered by adjacent rank
-  uint * u_data0_;
-  uint * u_data1_;
-
+  std::vector< size_t > u_data0_;
+  std::vector< size_t > u_data1_;
 };
 
 } /* namespace dolfin */

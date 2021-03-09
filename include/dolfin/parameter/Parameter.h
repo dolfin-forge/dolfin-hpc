@@ -21,7 +21,7 @@ public:
     bool_t   = 0,
     real_t   = 1,
     int_t    = 2,
-    uint_t   = 3,
+    size_t_t = 3,
     string_t = 4
   };
 
@@ -36,7 +36,7 @@ public:
   virtual ~Parameter() = default;
 
   /// Return type of Parameter
-  Type type() const
+  auto type() const -> Type
   {
     return type_;
   }
@@ -69,19 +69,19 @@ struct parameter : public Parameter
   ~parameter() override = default;
 
   /// Assignment
-  Parameter & set( T const & value )
+  auto set( T const & value ) -> Parameter &
   {
     this->v_ = value;
     return *this;
   }
 
   /// Access
-  T & get()
+  auto get() -> T &
   {
     return v_;
   }
 
-  T const & get() const
+  auto get() const -> T const &
   {
     return v_;
   }

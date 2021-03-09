@@ -15,18 +15,22 @@ namespace dolfin
 
 #if !defined( DOLFIN_HAVE_MPI )
 
+//-----------------------------------------------------------------------------
+
 typedef void * MPI_Datatype;
 
 template < typename T >
 struct MPI_type
 {
-	static MPI_Datatype value;
+	static MPI_Datatype const value;
 };
 
 template< typename T >
-MPI_Datatype MPI_type<T>::value = nullptr;
+MPI_Datatype const MPI_type<T>::value = nullptr;
 
 #else
+
+//-----------------------------------------------------------------------------
 
 /**
  * @brief Get the MPI Datatype associated to the C/C++ datatype
@@ -37,8 +41,63 @@ MPI_Datatype MPI_type<T>::value = nullptr;
 template < typename T >
 struct MPI_type
 {
-	static MPI_Datatype value;
+	// FIXME with c++17 this could be an inline variable, making this a bit cleaner
+	static MPI_Datatype const value;
 };
+
+//-----------------------------------------------------------------------------
+
+template <>
+MPI_Datatype const MPI_type< bool >::value;
+
+// signed integral types
+template <>
+MPI_Datatype const MPI_type< char >::value;
+
+template <>
+MPI_Datatype const MPI_type< signed char >::value;
+
+template <>
+MPI_Datatype const MPI_type< signed short int >::value;
+
+template <>
+MPI_Datatype const MPI_type< signed int >::value;
+
+template <>
+MPI_Datatype const MPI_type< signed long int >::value;
+
+template <>
+MPI_Datatype const MPI_type< signed long long >::value;
+
+// unsigned integral types
+template <>
+MPI_Datatype const MPI_type< unsigned char >::value;
+
+template <>
+MPI_Datatype const MPI_type< unsigned short int >::value;
+
+template <>
+MPI_Datatype const MPI_type< unsigned long int >::value;
+
+#if ( MPI_VERSION > 1 )
+template <>
+MPI_Datatype const MPI_type< unsigned long long >::value;
+#endif
+
+template <>
+MPI_Datatype const MPI_type< unsigned int >::value;
+
+// floating point types
+template <>
+MPI_Datatype const MPI_type< float >::value;
+
+template <>
+MPI_Datatype const MPI_type< double >::value;
+
+template <>
+MPI_Datatype const MPI_type< long double >::value;
+
+//-----------------------------------------------------------------------------
 
 #endif
 

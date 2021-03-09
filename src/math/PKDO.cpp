@@ -13,28 +13,35 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-PKDO::PKDO(uint i, uint j) :
-    i_(i),
-    j_(j)
+
+PKDO::PKDO( size_t i, size_t j )
+  : i_( i )
+  , j_( j )
 {
 }
-//-----------------------------------------------------------------------------
-real PKDO::eval(uint i, uint j, real r, real s)
-{
-  dolfin_assert(r >= 0.0);
-  dolfin_assert(s >= -1.0);
-  dolfin_assert(r + s <= 0.0);
-  real cij = std::sqrt(0.5 * (2 * i + 1) * (i + j + 1));
-  real rQ = (2 * r + s + 1) / (1 - s);
-  return cij * Jacobi::eval(i, 0, 0, rQ) * std::pow(0.5 * (1 - s), (real) i)
-      * Jacobi::eval(j, 2 * i + 1, 0, s);
-}
-//-----------------------------------------------------------------------------
-real PKDO::ddx(uint, uint, real, real)
-{
-  error("PKDO derivatives not implemented.");
-  return 0.0;
-}
+
 //-----------------------------------------------------------------------------
 
+auto PKDO::eval( size_t i, size_t j, real r, real s ) -> real
+{
+  dolfin_assert( r >= 0.0 );
+  dolfin_assert( s >= -1.0 );
+  dolfin_assert( r + s <= 0.0 );
+  real cij = std::sqrt( 0.5 * ( 2 * i + 1 ) * ( i + j + 1 ) );
+  real rQ  = ( 2 * r + s + 1 ) / ( 1 - s );
+  return cij * Jacobi::eval( i, 0, 0, rQ )
+         * std::pow( 0.5 * ( 1 - s ), ( real ) i )
+         * Jacobi::eval( j, 2 * i + 1, 0, s );
 }
+
+//-----------------------------------------------------------------------------
+
+auto PKDO::ddx( size_t, size_t, real, real ) -> real
+{
+  error( "PKDO derivatives not implemented." );
+  return 0.0;
+}
+
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin

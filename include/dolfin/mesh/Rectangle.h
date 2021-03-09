@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_RECTANGLE_H
 #define __DOLFIN_RECTANGLE_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
@@ -21,14 +21,20 @@ namespace dolfin
 class Rectangle : public Mesh
 {
 public:
-
   enum Type
   {
-    right, left, crisscross
+    right,
+    left,
+    crisscross
   };
 
-  Rectangle(real a, real b, real c, real d, uint nx, uint ny, Type type =
-                crisscross);
+  Rectangle( real   a,
+             real   b,
+             real   c,
+             real   d,
+             size_t nx,
+             size_t ny,
+             Type   type = crisscross );
 };
 
 }

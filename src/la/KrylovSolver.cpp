@@ -17,6 +17,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type)
   : solver_type(solver_type)
   , pc_type(pc_type)
@@ -24,6 +25,7 @@ KrylovSolver::KrylovSolver(SolverType solver_type, PreconditionerType pc_type)
 }
 
 //-----------------------------------------------------------------------------
+
 KrylovSolver::~KrylovSolver()
 {
   delete petsc_solver;
@@ -31,8 +33,9 @@ KrylovSolver::~KrylovSolver()
 }
 
 //-----------------------------------------------------------------------------
-uint KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
-                         const GenericVector& b)
+
+auto KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
+                         const GenericVector& b) -> size_t
 {
   Timer timer("Krylov solver");
 
@@ -66,4 +69,4 @@ uint KrylovSolver::solve(GenericMatrix const& A, GenericVector& x,
 
 //-----------------------------------------------------------------------------
 
-}
+} // namespace dolfin

@@ -2,15 +2,13 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/elements/ElementLibrary.h>
-#include <dolfin/fem/DofMap.h>
-
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_DofMap )
-  {
-  }
+{
+  // checks are in FiniteElementSpace
+}
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 

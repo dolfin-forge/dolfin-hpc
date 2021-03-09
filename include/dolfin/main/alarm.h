@@ -23,10 +23,10 @@ struct alarm
   static void action(int sig_code);
 
   // Set wall clock limit
-  bool set_limit(long wall_clock_limit);
+  auto set_limit(long wall_clock_limit) -> bool;
 
   // Return if limit is being reached
-  bool state() const;
+  auto state() const -> bool;
 
 private:
 

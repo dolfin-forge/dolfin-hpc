@@ -21,6 +21,8 @@ class PETScMatrix;
 class PETScVector;
 class PETScKrylovMatrix;
 
+//-----------------------------------------------------------------------------
+
 /// This class implements Krylov methods for linear systems
 /// of the form Ax = b. It is a wrapper for the Krylov solvers
 /// of PETSc.
@@ -28,31 +30,32 @@ class PETScKrylovMatrix;
 class PETScKrylovSolver
 {
 public:
-
   /// Create Krylov solver for a particular method and preconditioner
-  PETScKrylovSolver(SolverType method = default_solver,
-                    PreconditionerType pc = default_pc);
+  PETScKrylovSolver( SolverType         method = default_solver,
+                     PreconditionerType pc     = default_pc );
 
   /// Create Krylov solver for a particular method and PETScPreconditioner
-  PETScKrylovSolver(SolverType method,
-                    PETScPreconditioner& PETScPreconditioner);
+  PETScKrylovSolver( SolverType            method,
+                     PETScPreconditioner & PETScPreconditioner );
 
   /// Destructor
   ~PETScKrylovSolver();
 
   /// Solve linear system Ax = b and return number of iterations
-  uint solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b);
+  auto solve( const PETScMatrix & A, PETScVector & x, const PETScVector & b )
+    -> size_t;
 
   /// Solve linear system Ax = b and return number of iterations
-  uint solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b);
+  auto solve( const PETScKrylovMatrix & A,
+              PETScVector &             x,
+              const PETScVector &       b ) -> size_t;
 
   /// Display solver data
   void disp() const;
 
 private:
-
   /// Initialize KSP solver
-  void init(uint M, uint N);
+  void init( size_t M, size_t N );
 
   /// Read parameters from database
   void readParameters();
@@ -64,10 +67,10 @@ private:
   void setPETScPreconditioner();
 
   /// Report the number of iterations
-  void writeReport(int num_iterations);
+  void writeReport( int num_iterations );
 
   /// Get PETSc method identifier
-  KSPType getType(SolverType method) const;
+  auto getType( SolverType method ) const -> KSPType;
 
   /// Krylov method
   SolverType method;
@@ -76,24 +79,26 @@ private:
   PreconditionerType pc_petsc;
 
   /// DOLFIN PETScPreconditioner
-  PETScPreconditioner* pc_dolfin{ nullptr };
+  PETScPreconditioner * pc_dolfin { nullptr };
 
   /// PETSc solver pointer
-  KSP ksp{ nullptr };
+  KSP ksp { nullptr };
 
   /// Size of old system (need to reinitialize when changing)
-  uint M{ 0 };
-  uint N{ 0 };
+  size_t M_ { 0 };
+  size_t N_ { 0 };
 
   /// True if we have read parameters
-  bool parameters_read{ false };
+  bool parameters_read { false };
 
   // FIXME: Required to avoid PETSc bug with Hypre. See explanation inside
   //        PETScKrylovSolver:init(). Can be removed when PETSc is patched.
-  bool pc_set{ false };
+  bool pc_set { false };
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif
 

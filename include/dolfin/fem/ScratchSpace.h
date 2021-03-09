@@ -5,7 +5,6 @@
 #define __DOLFIN_SCRATCH_SPACE_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 
 #include <ufc.h>
@@ -15,8 +14,6 @@ namespace dolfin
 
 class Cell;
 class FiniteElementSpace;
-class FiniteElement;
-class DofMap;
 class SubSystem;
 
 /**
@@ -29,24 +26,34 @@ class SubSystem;
 class ScratchSpace
 {
 public:
+  // Constructor
+  ScratchSpace( FiniteElementSpace const & space );
+
+  // Copy constructor
+  ScratchSpace( ScratchSpace const & other );
+
+  // Move constructor
+  ScratchSpace( ScratchSpace && other );
 
   // Constructor
-  ScratchSpace(FiniteElementSpace const& space);
-
-  // Constructor
-  ScratchSpace(FiniteElementSpace const& space, SubSystem const& sub_system);
+  ScratchSpace( FiniteElementSpace const & space,
+                SubSystem const &          sub_system );
 
   // Destructor
   ~ScratchSpace();
 
-  // UFC Mesh
-  UFCMesh mesh;
+  // Copy assignement operator
+  ScratchSpace & operator=( ScratchSpace & other );
 
+  // Move assignement operator
+  ScratchSpace & operator=( ScratchSpace && other );
+
+public:
   // UFC Cell
   UFCCell cell;
 
   // Offset for sub system
-  uint offset;
+  size_t offset;
 
   // Finite element
   ufc::finite_element const * finite_element;
@@ -55,57 +62,48 @@ public:
   ufc::dofmap const * dof_map;
 
   // Value size (number of entries in tensor value)
-  uint const size;
+  size_t const size;
 
   // Reference finite element space dimension
-  uint const space_dimension;
+  size_t const space_dimension;
 
   // Reference finite element dof map dimension
-  uint const local_dimension;
+  size_t const local_dimension;
 
   // Number of subspaces of the reference finite element
-  uint const num_sub_elements;
+  size_t const num_sub_elements;
 
   // Topological dimension
-  uint const topological_dimension;
+  size_t const topological_dimension;
 
   // Geometric dimension
-  uint const geometric_dimension;
+  size_t const geometric_dimension;
 
   // Local array for mapping of dofs
-  uint * const dofs;
+  std::vector< size_t > dofs;
 
   // Local array for mapping of facet dofs
-  uint * const facet_dofs;
+  std::vector< size_t > facet_dofs;
 
   // Local array for values
-  real * const values;
+  std::vector< real > values;
 
   // Local array for expansion coefficients
-  real * const coefficients;
+  std::vector< real > coefficients;
 
   // Local array for basis values
-  real * const basis_values;
+  std::vector< real > basis_values;
 
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
   // Local array for all basis values
-  real ** const all_basis_values;
+  std::vector< std::vector< real > > all_basis_values;
 #endif
 
   // Local array for coordinates
-  real** const coordinates;
+  std::vector< real > coordinates;
 
 private:
-
-  // Copy constructor
-  ScratchSpace(ScratchSpace const& other);
-
-  uint value_size(ufc::finite_element const& finite_element);
-
-  void init();
-
   bool const owner_;
-
 };
 
 } /* namespace dolfin */

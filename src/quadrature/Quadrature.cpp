@@ -31,24 +31,24 @@ Quadrature::~Quadrature()
   weights = nullptr;
 }
 //-----------------------------------------------------------------------------
-unsigned int Quadrature::size() const
+auto Quadrature::size() const -> unsigned int
 {
   return n;
 }
 //-----------------------------------------------------------------------------
-real Quadrature::point(unsigned int i) const
+auto Quadrature::point(unsigned int i) const -> real
 {
   dolfin_assert(i < n);
   return points[i];
 }
 //-----------------------------------------------------------------------------
-real Quadrature::weight(unsigned int i) const
+auto Quadrature::weight(unsigned int i) const -> real
 {
   dolfin_assert(i < n);
   return weights[i];
 }
 //-----------------------------------------------------------------------------
-real Quadrature::measure() const
+auto Quadrature::measure() const -> real
 {
   return m;
 }

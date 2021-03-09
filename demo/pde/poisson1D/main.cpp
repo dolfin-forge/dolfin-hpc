@@ -23,56 +23,58 @@ using namespace dolfin;
 // Boundary condition
 struct DirichletBoundary : public SubDomain
 {
-	bool inside( const real * x, bool on_boundary ) const
-	{
-		// return ( std::abs( x[0] ) < DOLFIN_EPS );
+  bool inside( const real * x, bool on_boundary ) const
+  {
+    // return ( std::abs( x[0] ) < DOLFIN_EPS );
     return x[0] < DOLFIN_EPS && on_boundary;
-	}
+  }
 };
 
 // Source term
 struct Source : public Value< Source, 1 >
 {
-	void eval( real * values, const real * x ) const
-	{
-		values[0] = 9.0 * DOLFIN_PI * DOLFIN_PI * sin( 3.0 * DOLFIN_PI * x[0] );
-	}
+  void eval( real * values, const real * x ) const
+  {
+    values[0] = 9.0 * DOLFIN_PI * DOLFIN_PI * sin( 3.0 * DOLFIN_PI * x[0] );
+  }
 };
 
 int main()
 {
-	// Create mesh
-	UnitInterval mesh( 50 );
+  dolfin_init();
 
-	// Set up BCs
-	Constant          zero( 0.0 );
-	DirichletBoundary boundary;
-	DirichletBC       bc( zero, mesh, boundary );
+  // Create mesh
+  UnitInterval mesh( 50 );
 
-	// Create source
-	Analytic< Source > source( mesh );
+  // Set up BCs
+  Constant          zero( 0.0 );
+  DirichletBoundary boundary;
+  DirichletBC       bc( zero, mesh, boundary );
 
-	// Define PDE
-	Poisson::BilinearForm a( mesh );
-	Poisson::LinearForm   L( mesh, source );
+  // Create source
+  Analytic< Source > source( mesh );
 
-	// Solve PDE
-	Matrix A;
-	Vector b;
+  // Define PDE
+  Poisson::BilinearForm a( mesh );
+  Poisson::LinearForm   L( mesh, source );
 
-	a.assemble( A, true );
-	L.assemble( b, true );
-	bc.apply( A, b, a );
+  // Solve PDE
+  Matrix A;
+  Vector b;
 
-	Function     u( a.trial_space() );
-	KrylovSolver solver( bicgstab, bjacobi );
+  a.assemble( A, true );
+  L.assemble( b, true );
+  bc.apply( A, b, a );
 
-	solver.solve( A, u.vector(), b );
-	u.sync();
+  Function u( a.trial_space() );
 
-	// Save solution to file
-	File file_u( "poisson.pvd" );
-	file_u << u;
+  KrylovSolver solver( bicgstab, bjacobi );
+  solver.solve( A, u.vector(), b );
 
-	return 0;
+  // Save solution to file
+  File( "poisson.pvd" ) << u;
+
+  dolfin_finalize();
+
+  return 0;
 }

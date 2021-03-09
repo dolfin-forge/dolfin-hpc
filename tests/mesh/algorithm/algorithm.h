@@ -2,8 +2,8 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/fem/UFCCellIterator.h>
 #include <dolfin/mesh/algorithm.h>
+#include <dolfin/fem/UFCCell.h>
 
 using namespace dolfin;
 
@@ -26,11 +26,12 @@ struct Volume
 
 struct DistGlobalIndex
 {
-  uint operator()(UFCCell& cell)
+  size_t operator()(Cell& cell_)
   {
-    uint min = cell.entity_indices[0][0];
-    uint max = cell.entity_indices[0][0];
-    for (uint i = 1; i < cell.num_vertices; ++i)
+    UFCCell cell( cell_ );
+    size_t min = cell.entity_indices[0][0];
+    size_t max = cell.entity_indices[0][0];
+    for (size_t i = 1; i < cell.num_vertices; ++i)
     {
       min = std::min(min, cell.entity_indices[0][i]);
       max = std::max(max, cell.entity_indices[0][i]);
@@ -51,9 +52,9 @@ DOLFIN_START_TEST( test_algorithm )
     //---
     {
       UnitInterval mesh(42);
-      uint value = mesh.global_size(0);
-      foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
-      foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
+      size_t value = mesh.global_size(0);
+      foreach<CellIterator, std::min >(mesh, DistGlobalIndex(), value);
+      foreach<CellIterator, std::min >(mesh, DistGlobalIndex(), value);
     }
   }
 DOLFIN_END_TEST

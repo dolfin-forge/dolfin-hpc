@@ -5,16 +5,16 @@
 #define __DOLFIN_MESH_H
 
 #include <dolfin/common/Variable.h>
-
 #include <dolfin/common/types.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/celltypes/CellType.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <string>
+#include <vector>
 
 namespace dolfin
 {
@@ -24,10 +24,13 @@ class Cell;
 class IntersectionDetector;
 class MappedManifold;
 class MeshData;
-template<class T, class E, uint N = 1> struct MeshValues;
+template < class T, class E, size_t N = 1 >
+struct MeshValues;
 class PeriodicSubDomain;
 struct Space;
 class Vertex;
+
+//-----------------------------------------------------------------------------
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
 ///
@@ -62,147 +65,153 @@ class Mesh : public Variable
   friend class MeshEditor;
 
 public:
-
   /// Create empty mesh
   Mesh();
 
   /// Constructor from cell type, space, and communicator
-  Mesh(CellType const& ctype, Space const& space, Comm& comm = DOLFIN_COMM );
+  Mesh( CellType const & ctype,
+        Space const &    space,
+        Comm &           comm = DOLFIN_COMM );
 
   /// Copy constructor
-  Mesh(Mesh const& mesh);
+  Mesh( Mesh const & mesh );
 
   /// Create mesh from data file
-  Mesh(std::string const& filename);
+  Mesh( std::string const & filename );
 
   /// Destructor
   virtual ~Mesh();
 
   /// Swap instances
-  friend void swap( Mesh& a, Mesh& b );
+  friend auto swap( Mesh & a, Mesh & b ) -> void;
 
   /// Assignment
-  Mesh const& operator=(Mesh const& other);
+  auto operator=( Mesh const & other ) -> Mesh const &;
 
   /// Identity
-  bool operator ==(Mesh const& other) const;
-  bool operator !=(Mesh const& other) const;
+  auto operator==( Mesh const & other ) const -> bool;
+  auto operator!=( Mesh const & other ) const -> bool;
 
   /// Return mesh cell type
-  CellType const& type() const;
+  auto type() const -> CellType const &;
 
   /// Return mesh space
-  Space const& space() const;
+  auto space() const -> Space const &;
 
   /// Return a Point describing the minimum extent of the mesh
   /// this point might not be part of the mesh itself
-  Point const & extent_min() const;
+  auto extent_min() const -> Point const &;
 
   /// Return a Point describing the maximum extent of the mesh
   /// this point might not be part of the mesh itself
-  Point const & extent_max() const;
+  auto extent_max() const -> Point const &;
 
   /// update the mesh extent
-  void extent_update();
+  auto extent_update() -> void;
 
   //--- TOPOLOGY --------------------------------------------------------------
 
   /// Return mesh topology (non-const version)
-  MeshTopology& topology();
+  auto topology() -> MeshTopology &;
 
   /// Return mesh topology (const)
-  MeshTopology const& topology() const;
+  auto topology() const -> MeshTopology const &;
 
   /// Return topological dimension
-  uint topology_dimension() const;
+  auto topology_dimension() const -> size_t;
 
   /// Return number of entities of given topological dimension
-  uint size(uint dim) const;
+  auto size( size_t dim ) const -> size_t;
 
   /// Return number of vertices of mesh partition
-  uint num_vertices() const;
+  auto num_vertices() const -> size_t;
 
   /// Return number of cells of mesh partition
-  uint num_cells() const;
+  auto num_cells() const -> size_t;
 
   /// Return connectivity for all cells
-  Array< Array< uint > > & cells(); //!< @tod remove this function
+  //!< @tod remove this function
+  auto cells() -> std::vector< std::vector< size_t > > &;
 
   /// Return connectivity for all cells
-  Array< Array< uint > > const & cells() const; //!< @tod remove this function
+  //!< @tod remove this function
+  auto cells() const -> std::vector< std::vector< size_t > > const &;
 
   /// Compute entities of given topological dimension
-  void init(uint dim) const;
+  auto init( size_t dim ) const -> void;
 
   /// Compute connectivity between given pair of dimensions
-  void init(uint d0, uint d1) const;
+  auto init( size_t d0, size_t d1 ) const -> void;
 
   /// Compute all entities and connectivity
-  void init() const;
+  auto init() const -> void;
 
   /// Return if the topology should be reordered
-  virtual bool reordering() const { return true; }
+  virtual auto reordering() const -> bool;
 
   //---
 
   /// Return exterior boundary of the mesh
-  BoundaryMesh& exterior_boundary();
+  auto exterior_boundary() -> BoundaryMesh &;
 
   /// Return interior boundary of the mesh
-  BoundaryMesh& interior_boundary();
+  auto interior_boundary() -> BoundaryMesh &;
 
   //---
 
   //// Return if the mesh should be read/written in serial
-  bool serial_io() const;
+  auto serial_io() const -> bool;
 
   //// Return if the mesh should be read/written in parallel
-  bool parallel_io() const;
+  auto parallel_io() const -> bool;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const; //!< @todo remove this function
+  //!< @todo remove this function
+  auto is_distributed() const -> bool;
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata(); //!< @todo remove this function
+  //!< @todo remove this function
+  auto distdata() -> MeshDistributedData &;
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const; //!< @tod remove this function
+  //!< @todo remove this function
+  auto distdata() const -> MeshDistributedData const &;
 
   /// Return global number of entities of given topological dimension
-  uint global_size(uint dim) const;
+  auto global_size( size_t dim ) const -> size_t;
 
   /// Return number of vertices of global mesh
-  uint num_global_vertices() const;
+  auto num_global_vertices() const -> size_t;
 
   /// Return number of cells of global mesh
-  uint num_global_cells() const;
+  auto num_global_cells() const -> size_t;
 
   //--- GEOMETRY --------------------------------------------------------------
 
   /// Return mesh geometry (non-const version)
-  MeshGeometry& geometry();
+  auto geometry() -> MeshGeometry &;
 
   /// Return mesh geometry (const)
-  MeshGeometry const& geometry() const;
+  auto geometry() const -> MeshGeometry const &;
 
   /// Return geometric dimension
-  uint geometry_dimension() const;
+  auto geometry_dimension() const -> size_t;
 
   //---
 
   /// Return intersection detector for the mesh
-  IntersectionDetector& intersector();
+  auto intersector() -> IntersectionDetector &;
 
   //--- PERIODICITY -----------------------------------------------------------
 
   /// Return whether the mesh has periodic subdomain
-  bool has_periodic_constraint() const;
+  auto has_periodic_constraint() const -> bool;
 
   /// Add a periodic subdomain
-  void add_periodic_constraint(PeriodicSubDomain const& periodic);
+  auto add_periodic_constraint( PeriodicSubDomain const & periodic ) -> void;
 
   /// Return the list of periodic mappings
-  Array<MappedManifold *> const& periodic_mappings() const;
+  auto periodic_mappings() const -> std::vector< MappedManifold * > const &;
 
   //---------------------------------------------------------------------------
 
@@ -211,49 +220,50 @@ public:
    */
 
   /// Partition mesh into num_processes partitions
-  void partition(MeshValues<uint, Cell>& partitions);
+  auto partition( MeshValues< size_t, Cell > & partitions ) -> void;
 
   /// Partition mesh into num_partitions = numProc with weights
   /// on the vertices of the dual graph
-  void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
+  auto partition( MeshValues< size_t, Cell > & partitions,
+                  MeshValues< size_t, Cell > & weight ) -> void;
 
   /// Partition mesh into num_partitions = numProc
-  void partition_geom(MeshValues<uint, Vertex>& partitions);
+  auto partition_geom( MeshValues< size_t, Vertex > & partitions ) -> void;
 
   /*
    *  Mesh distribution routines
    */
 
   /// Distribute a mesh according to a mesh function
-  void distribute();
+  auto distribute() -> void;
 
   /// Distribute a mesh according to a mesh function
-  void distribute(MeshValues<uint, Cell>& distribution);
-  void distribute(MeshValues<uint, Vertex>& distribution);
+  auto distribute( MeshValues< size_t, Cell > & distribution ) -> void;
+  auto distribute( MeshValues< size_t, Vertex > & distribution ) -> void;
 
   /// Distribute a mesh according to a cell function and transfer data
-  void distribute(MeshValues<uint, Cell>& distribution, MeshData& data);
+  auto distribute( MeshValues< size_t, Cell > & distribution, MeshData & data )
+    -> void;
 
   /*
    *  Mesh refinement routines
    */
 
   /// Refine mesh uniformly
-  void refine();
+  auto refine() -> void;
 
   //---------------------------------------------------------------------------
 
   /// Return hash to identify the state of the mesh
-  std::string const hash() const;
+  auto hash() const -> std::string const;
 
   /// Display mesh data
-  void disp() const;
+  auto disp() const -> void;
 
   /// Check mesh consistency
-  void check() const;
+  auto check() const -> void;
 
 private:
-
   // Mesh topology
   MeshTopology topology_;
 
@@ -261,16 +271,16 @@ private:
   MeshGeometry geometry_;
 
   /// Exterior boundary mesh
-  mutable BoundaryMesh * exterior_boundary_{nullptr};
+  mutable BoundaryMesh * exterior_boundary_ { nullptr };
 
   /// Interior boundary mesh
-  mutable BoundaryMesh * interior_boundary_{nullptr};
+  mutable BoundaryMesh * interior_boundary_ { nullptr };
 
   /// Intersection detector
-  mutable IntersectionDetector * intersection_detector_{nullptr};
+  mutable IntersectionDetector * intersection_detector_ { nullptr };
 
   /// Periodic constraints
-  mutable Array<MappedManifold *> periodic_mappings_;
+  mutable std::vector< MappedManifold * > periodic_mappings_;
 
   Point extent_min_;
   Point extent_max_;
@@ -279,165 +289,201 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::operator!=( Mesh const & other ) const
+
+inline auto Mesh::operator!=( Mesh const & other ) const -> bool
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
-inline CellType const & Mesh::type() const
+
+inline auto Mesh::type() const -> CellType const &
 {
   return topology_.type();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshTopology & Mesh::topology()
+
+inline auto Mesh::topology() -> MeshTopology &
 {
   return topology_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshTopology const & Mesh::topology() const
+
+inline auto Mesh::topology() const -> MeshTopology const &
 {
   return topology_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::topology_dimension() const
+
+inline auto Mesh::topology_dimension() const -> size_t
 {
   return topology_.dim();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::size( uint dim ) const
+
+inline auto Mesh::size( size_t dim ) const -> size_t
 {
   return topology_.size( dim );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_vertices() const
+
+inline auto Mesh::num_vertices() const -> size_t
 {
   return topology_.size( 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_cells() const
+
+inline auto Mesh::num_cells() const -> size_t
 {
   return topology_.size( topology_.dim() );
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > & Mesh::cells()
+
+inline auto Mesh::cells() -> std::vector< std::vector< size_t > > &
 {
   return topology_( topology_.dim(), 0 )();
 }
 
 //-----------------------------------------------------------------------------
-inline Array< Array< uint > > const & Mesh::cells() const
+
+inline auto Mesh::cells() const -> std::vector< std::vector< size_t > > const &
 {
   return topology_( topology_.dim(), 0 )();
 }
 
 //-----------------------------------------------------------------------------
-inline void Mesh::init( uint dim ) const
+
+inline auto Mesh::reordering() const -> bool
+{
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto Mesh::init( size_t dim ) const -> void
 {
   topology_.size( dim );
 }
 
 //-----------------------------------------------------------------------------
-inline void Mesh::init( uint d0, uint d1 ) const
+
+inline auto Mesh::init( size_t d0, size_t d1 ) const -> void
 {
   topology_( d0, d1 ).order();
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::serial_io() const
+
+inline auto Mesh::serial_io() const -> bool
 {
   return ( PE::size() == 1 ) || dolfin_get< bool >( "Mesh read in serial" );
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::parallel_io() const
+
+inline auto Mesh::parallel_io() const -> bool
 {
   return !this->serial_io();
 }
 
 //-----------------------------------------------------------------------------
-inline bool Mesh::is_distributed() const
+
+inline auto Mesh::is_distributed() const -> bool
 {
   return topology().distributed();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData & Mesh::distdata()
+
+inline auto Mesh::distdata() -> MeshDistributedData &
 {
   return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshDistributedData const & Mesh::distdata() const
+
+inline auto Mesh::distdata() const -> MeshDistributedData const &
 {
   return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::global_size( uint dim ) const
+
+inline auto Mesh::global_size( size_t dim ) const -> size_t
 {
   return topology_.global_size( dim );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_global_vertices() const
+
+inline auto Mesh::num_global_vertices() const -> size_t
 {
   return topology_.global_size( 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::num_global_cells() const
+
+inline auto Mesh::num_global_cells() const -> size_t
 {
   return topology_.global_size( topology_.dim() );
 }
 
 //-----------------------------------------------------------------------------
-inline Space const & Mesh::space() const
+
+inline auto Mesh::space() const -> Space const &
 {
   return geometry_.space();
 }
 
 //-----------------------------------------------------------------------------
-inline MeshGeometry & Mesh::geometry()
+
+inline auto Mesh::geometry() -> MeshGeometry &
 {
   return geometry_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshGeometry const & Mesh::geometry() const
+
+inline auto Mesh::geometry() const -> MeshGeometry const &
 {
   return geometry_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Mesh::geometry_dimension() const
+
+inline auto Mesh::geometry_dimension() const -> size_t
 {
   return geometry_.dim();
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & Mesh::extent_min() const
+
+inline auto Mesh::extent_min() const -> Point const &
 {
   return extent_min_;
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & Mesh::extent_max() const
+
+inline auto Mesh::extent_max() const -> Point const &
 {
   return extent_max_;
 }
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
 
-template<class E>
-inline uint entity_dimension(Mesh& m) { return dimension<E>(m.type()); }
+template < class E >
+inline auto entity_dimension( Mesh & m ) -> size_t
+{
+  return dimension< E >( m.type() );
+}
 
 //-----------------------------------------------------------------------------
 

@@ -30,18 +30,17 @@ class PETScVector : public GenericVector, public PETScObject, public Variable
 {
 
 public:
-
   /// Create empty vector
   PETScVector();
 
   /// Create vector of local size N
-  explicit PETScVector(uint N, bool distributed = true);
+  explicit PETScVector( size_t N, bool distributed = true );
 
   /// Copy constructor
-  explicit PETScVector(const PETScVector& x);
+  explicit PETScVector( const PETScVector & x );
 
   /// Create vector from given PETSc Vec pointer
-  explicit PETScVector(Vec x);
+  explicit PETScVector( Vec x );
 
   /// Destructor
   ~PETScVector() override;
@@ -49,311 +48,323 @@ public:
   //--- Implementation of the GenericTensor interface ---
 
   /// Return copy of tensor
-  PETScVector* copy() const override;
+  auto copy() const -> PETScVector * override;
 
   /// Set all entries to zero and keep any sparse structure
   void zero() override;
 
   /// Finalize assembly of tensor
-  void apply(FinalizeType finaltype = FINALIZE) override;
+  void apply( FinalizeType finaltype = FINALIZE ) override;
 
   /// Display tensor
-  void disp(uint precision = 0) const override;
+  void disp( size_t precision = 0 ) const override;
 
   //--- Implementation of the GenericVector interface ---
 
   /// Initialize vector of local size N, distributed by default
-  void init(uint N) override;
+  void init( size_t N ) override;
 
   /// Initialize vector of local size N, distributed if specified
-  void init(uint N, bool distributed) override;
+  void init( size_t N, bool distributed ) override;
 
   /// Initialize ghost entries
-  void init_ghosted(uint n, _ordered_set<uint>& indices,
-                    _ordered_map<uint, uint>& map) override;
+  void init_ghosted( size_t                           n,
+                     _ordered_set< size_t > &         indices,
+                     _ordered_map< size_t, size_t > & map ) override;
 
   /// Return size of vector
-  uint size() const override;
+  auto size() const -> size_t override;
 
   /// Return local size of vector
-  uint local_size() const override;
+  auto local_size() const -> size_t override;
 
   /// Return rank's offset into vector
-  uint offset() const override;
+  auto offset() const -> size_t override;
 
   /// Get block of values
-  void get(real* block, uint m, const uint* rows) const override;
+  void get( real * block, size_t m, const size_t * rows ) const override;
 
   /// Set block of values
-  void set(const real* block, uint m, const uint* rows) override;
+  void set( const real * block, size_t m, const size_t * rows ) override;
 
   /// Add block of values
-  void add(const real* block, uint m, const uint* rows) override;
+  void add( const real * block, size_t m, const size_t * rows ) override;
 
   /// Get all values
-  void get(real* values) const override;
+  void get( real * values ) const override;
 
   /// Set all values
-  void set(real* values) override;
+  void set( real * values ) override;
 
   /// Add values to each entry
-  void add(real* values) override;
+  void add( real * values ) override;
 
   /// Add multiple of given vector (y=a*x+y)
   void axpy( real a, const GenericVector & x ) override;
 
   /// Add multiple of given vector (y=a*x+b*y)
-  void axpby( real a, const GenericVector & x,
-              real b ) override;
+  void axpby( real a, const GenericVector & x, real b ) override;
 
   /// Add multiple of given vector (w=a*x+y)
-  void waxpy( real a, const GenericVector & x,
-                      const GenericVector & y ) override;
+  void
+    waxpy( real a, const GenericVector & x, const GenericVector & y ) override;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  void axpbypcz( real a, const GenericVector & x,
-                 real b, const GenericVector & y,
-                 real c ) override;
+  void axpbypcz( real                  a,
+                 const GenericVector & x,
+                 real                  b,
+                 const GenericVector & y,
+                 real                  c ) override;
 
   /// Return inner product with given vector
-  real inner(const GenericVector& v) const override;
+  auto inner( const GenericVector & v ) const -> real override;
 
   /// Return norm of vector
-  real norm(VectorNormType type = l2) const override;
+  auto norm( VectorNormType type = l2 ) const -> real override;
 
   /// Return minimum value of vector
-  real min() const override;
+  auto min() const -> real override;
 
   /// Return maximum value of vector
-  real max() const override;
+  auto max() const -> real override;
 
   /// Return pointwise operator op of vector and given vector x
-  void pointwise(const GenericVector& x, VectorPointwiseOp op=pw_min) const override;
+  void pointwise( const GenericVector & x,
+                  VectorPointwiseOp     op = pw_min ) const override;
 
   /// Multiply vector by given number
-  PETScVector& operator*=(real a) override;
+  auto operator*=( real a ) -> PETScVector & override;
 
   /// Divide vector by given number
-  PETScVector& operator/=(real a) override;
+  auto operator/=( real a ) -> PETScVector & override;
 
   /// Multiply vector by given vector component-wise
-  PETScVector& operator*=(const GenericVector& x) override;
+  auto operator*=( const GenericVector & x ) -> PETScVector & override;
 
   /// Add given vector
-  PETScVector& operator+=(const GenericVector& x) override;
+  auto operator+=( const GenericVector & x ) -> PETScVector & override;
 
   /// Subtract given vector
-  PETScVector& operator-=(const GenericVector& x) override;
+  auto operator-=( const GenericVector & x ) -> PETScVector & override;
 
   /// Assignment operator
-  PETScVector& operator=(const GenericVector& x) override;
+  auto operator=( const GenericVector & x ) -> PETScVector & override;
 
   /// Assignment operator
-  PETScVector& operator=(real a) override;
+  auto operator=( real a ) -> PETScVector & override;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory& factory() const override;
+  auto factory() const -> LinearAlgebraFactory & override;
 
   //--- Special PETSc functions ---
 
   /// Assignment operator
-  PETScVector& operator=(PETScVector const& x);
+  auto operator=( PETScVector const & x ) -> PETScVector &;
 
   /// Return PETSc Vec pointer
-  Vec vec() const;
+  auto vec() const -> Vec;
 
-  inline bool ghosted()
+  inline auto ghosted() -> bool
   {
     return is_ghosted_;
   }
 
 private:
-
-
   //
   void clear();
 
   // PETSc Vec pointer
-  Vec x_{nullptr};
+  Vec x_ { nullptr };
 
   // True if the vector is distributed
-  bool is_distributed_{false};
+  bool is_distributed_ { false };
 
   // True if the vector has ghost points
-  bool is_ghosted_{false};
+  bool is_ghosted_ { false };
 
-  using GhostMapping = _map<int, int>;
+  using GhostMapping = _map< int, int >;
   GhostMapping mapping_;
-
 };
 
 //-----------------------------------------------------------------------------
 inline void PETScVector::clear()
 {
-  if (x_)
+  if ( x_ )
   {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    VecDestroy(&x_);
+    VecDestroy( &x_ );
 #else
-    VecDestroy(x_);
+    VecDestroy( x_ );
 #endif
-    is_ghosted_ = false;
+    is_ghosted_     = false;
     is_distributed_ = false;
   }
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::init(uint N)
+inline void PETScVector::init( size_t N )
 {
-  init(N, true);
+  init( N, true );
 }
 //-----------------------------------------------------------------------------
-inline PETScVector* PETScVector::copy() const
+inline auto PETScVector::copy() const -> PETScVector *
 {
-  return new PETScVector(*this);
+  return new PETScVector( *this );
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::set(const real* block, uint m, const uint* rows)
+inline void
+  PETScVector::set( const real * block, size_t m, const size_t * rows )
 {
-  dolfin_assert(x_);
-  VecSetValues(x_, static_cast<int>(m),
-               reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
-               INSERT_VALUES);
+  dolfin_assert( x_ );
+
+  PetscInt M_ = m;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+
+  VecSetValues( x_, M_, rows_.data(), block, INSERT_VALUES );
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::add(const real* block, uint m, const uint* rows)
+inline void
+  PETScVector::add( const real * block, size_t m, const size_t * rows )
 {
-  dolfin_assert(x_);
-  VecSetValues(x_, static_cast<int>(m),
-               reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
-               ADD_VALUES);
+  dolfin_assert( x_ );
+
+  PetscInt M_ = m;
+
+  // FIXME this is potentially costly
+  std::vector< PetscInt > rows_( rows, rows + m );
+
+  VecSetValues( x_, M_, rows_.data(), block, ADD_VALUES );
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::apply(FinalizeType)
+inline void PETScVector::apply( FinalizeType )
 {
 
-  VecAssemblyBegin(x_);
-  VecAssemblyEnd(x_);
+  VecAssemblyBegin( x_ );
+  VecAssemblyEnd( x_ );
 
-  if (is_ghosted_)
+  if ( is_ghosted_ )
   {
-    VecGhostUpdateBegin(x_, INSERT_VALUES, SCATTER_FORWARD);
-    VecGhostUpdateEnd(x_, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateBegin( x_, INSERT_VALUES, SCATTER_FORWARD );
+    VecGhostUpdateEnd( x_, INSERT_VALUES, SCATTER_FORWARD );
   }
 }
 //-----------------------------------------------------------------------------
 inline void PETScVector::zero()
 {
-  dolfin_assert(x_);
+  dolfin_assert( x_ );
   real a = 0.0;
-  VecSet(x_, a);
+  VecSet( x_, a );
 }
 //-----------------------------------------------------------------------------
-inline uint PETScVector::size() const
+inline auto PETScVector::size() const -> size_t
 {
-  if(x_ == nullptr) return 0;
-  int n = 0;
-  VecGetSize(x_, &n);
-  return static_cast<uint>(n);
+  if ( x_ == nullptr )
+    return 0;
+  PetscInt n = 0;
+  VecGetSize( x_, &n );
+  return static_cast< size_t >( n );
 }
 //-----------------------------------------------------------------------------
-inline uint PETScVector::local_size() const
+inline auto PETScVector::local_size() const -> size_t
 {
-  dolfin_assert(x_);
-  int n = 0;
-  VecGetLocalSize(x_, &n);
-  return static_cast<uint>(n);
+  dolfin_assert( x_ );
+  PetscInt n = 0;
+  VecGetLocalSize( x_, &n );
+  return static_cast< size_t >( n );
 }
 //-----------------------------------------------------------------------------
-inline uint PETScVector::offset() const
+inline auto PETScVector::offset() const -> size_t
 {
-  dolfin_assert(x_);
-  int low, high;
-  VecGetOwnershipRange(x_, &low, &high);
-  return static_cast<uint>(low);
+  dolfin_assert( x_ );
+  PetscInt low, high;
+  VecGetOwnershipRange( x_, &low, &high );
+  return static_cast< size_t >( low );
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator=(const GenericVector& v)
+inline auto PETScVector::operator=( const GenericVector & v ) -> PETScVector &
 {
-  *this = v.down_cast<PETScVector>();
+  *this = v.down_cast< PETScVector >();
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator=(PETScVector const& v)
+inline auto PETScVector::operator=( PETScVector const & v ) -> PETScVector &
 {
-  if (&v != this)
+  if ( &v != this )
   {
-    dolfin_assert(v.x_);
-    init(v.local_size(), v.is_distributed_);
-    VecCopy(v.x_, x_);
+    dolfin_assert( v.x_ );
+    init( v.local_size(), v.is_distributed_ );
+    VecCopy( v.x_, x_ );
   }
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator=(real a)
+inline auto PETScVector::operator=( real a ) -> PETScVector &
 {
-  dolfin_assert(x_);
-  VecSet(x_, a);
+  dolfin_assert( x_ );
+  VecSet( x_, a );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator*=(const GenericVector& y)
+inline auto PETScVector::operator*=( const GenericVector & y ) -> PETScVector &
 {
-  dolfin_assert(x_);
-  PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x_);
+  dolfin_assert( x_ );
+  PETScVector const & v = y.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
 
-  if (size() != v.size())
+  if ( size() != v.size() )
   {
-    error("Vectors must have the same size for componentwise multiplication.");
+    error(
+      "Vectors must have the same size for componentwise multiplication." );
   }
 
-  VecPointwiseMult(x_, x_, v.x_);
+  VecPointwiseMult( x_, x_, v.x_ );
 
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator+=(const GenericVector& x)
+inline auto PETScVector::operator+=( const GenericVector & x ) -> PETScVector &
 {
-  this->axpy(1.0, x);
+  this->axpy( 1.0, x );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator-=(const GenericVector& x)
+inline auto PETScVector::operator-=( const GenericVector & x ) -> PETScVector &
 {
-  this->axpy(-1.0, x);
+  this->axpy( -1.0, x );
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator*=(const real a)
+inline auto PETScVector::operator*=( const real a ) -> PETScVector &
 {
-  dolfin_assert(x_);
-  VecScale(x_, a);
+  dolfin_assert( x_ );
+  VecScale( x_, a );
 
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline PETScVector& PETScVector::operator/=(const real a)
+inline auto PETScVector::operator/=( const real a ) -> PETScVector &
 {
-  dolfin_assert(x_);
-  dolfin_assert(a != 0.0);
+  dolfin_assert( x_ );
+  dolfin_assert( a != 0.0 );
 
   const real b = 1.0 / a;
-  VecScale(x_, b);
+  VecScale( x_, b );
 
   return *this;
 }
 //-----------------------------------------------------------------------------
-inline real PETScVector::inner(const GenericVector& y) const
+inline auto PETScVector::inner( const GenericVector & y ) const -> real
 {
-  dolfin_assert(x_);
+  dolfin_assert( x_ );
 
-  PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x_);
+  PETScVector const & v = y.down_cast< PETScVector >();
+  dolfin_assert( v.x_ );
 
   real a;
-  VecDot(v.x_, x_, &a);
+  VecDot( v.x_, x_, &a );
 
   return a;
 }
@@ -388,8 +399,8 @@ inline void PETScVector::axpby( real a, const GenericVector & x, real b )
   VecAXPBY( x_, a, b, v.x_ );
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::waxpy( real a, const GenericVector & x,
-                                        const GenericVector & y )
+inline void
+  PETScVector::waxpy( real a, const GenericVector & x, const GenericVector & y )
 {
   dolfin_assert( x_ );
 
@@ -407,9 +418,11 @@ inline void PETScVector::waxpy( real a, const GenericVector & x,
   VecWAXPY( x_, a, v.x_, u.x_ );
 }
 //-----------------------------------------------------------------------------
-inline void PETScVector::axpbypcz( real a, const GenericVector & x,
-                                   real b, const GenericVector & y,
-                                   real c )
+inline void PETScVector::axpbypcz( real                  a,
+                                   const GenericVector & x,
+                                   real                  b,
+                                   const GenericVector & y,
+                                   real                  c )
 {
   dolfin_assert( x_ );
 
@@ -427,26 +440,26 @@ inline void PETScVector::axpbypcz( real a, const GenericVector & x,
   VecAXPBYPCZ( x_, a, b, c, v.x_, u.x_ );
 }
 //-----------------------------------------------------------------------------
-inline real PETScVector::min() const
+inline auto PETScVector::min() const -> real
 {
   real value = 0.0;
 
-  VecMin(x_, PETSC_NULL, &value);
+  VecMin( x_, PETSC_NULL, &value );
 
   return value;
 }
 //-----------------------------------------------------------------------------
-inline real PETScVector::max() const
+inline auto PETScVector::max() const -> real
 {
   real value = 0.0;
 
-  VecMax(x_, PETSC_NULL, &value);
+  VecMax( x_, PETSC_NULL, &value );
 
   return value;
 }
 
 //-----------------------------------------------------------------------------
-inline Vec PETScVector::vec() const
+inline auto PETScVector::vec() const -> Vec
 {
   return x_;
 }

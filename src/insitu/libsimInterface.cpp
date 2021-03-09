@@ -3,7 +3,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/insitu/libsimInterface.h>
@@ -150,7 +150,7 @@ void libsimInterface::shutdown()
   VisItDisconnect();
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender(real t, uint tstep)
+void libsimInterface::batchRender(real t, size_t tstep)
 {
 
   if (!InsituData_.batch_)
@@ -166,7 +166,7 @@ void libsimInterface::batchRender(real t, uint tstep)
   VisItUpdatePlots();
 
   // Execute all insitu pipelines
-  for(Array<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
+  for(std::vector<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
       it != InsituData_.pipelines_.end(); it++)
   {
     (*it)->exec(InsituData_.t_, InsituData_.tstep_);
@@ -174,7 +174,7 @@ void libsimInterface::batchRender(real t, uint tstep)
 
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
+void libsimInterface::ctrlLoop(real t, size_t tstep, int blocking)
 {
   if (InsituData_.batch_)
   {
@@ -239,12 +239,12 @@ void libsimInterface::shutdown()
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender(real, uint)
+void libsimInterface::batchRender(real, size_t)
 {
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::ctrlLoop(real, uint, int)
+void libsimInterface::ctrlLoop(real, size_t, int)
 {
   error("VisIt/libsim is required for in-situ viz");
 }

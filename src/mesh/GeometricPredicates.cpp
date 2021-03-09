@@ -668,8 +668,8 @@ static float uniformfloatrand()
 /*                                                                           */
 /*****************************************************************************/
 
-static int fast_expansion_sum_zeroelim(int elen, REAL *e,
-				       int flen, REAL *f, REAL *h)
+static auto fast_expansion_sum_zeroelim(int elen, REAL *e,
+				       int flen, REAL *f, REAL *h) -> int
      /* h cannot be e or f. */
 {
   REAL Q;
@@ -754,7 +754,7 @@ static int fast_expansion_sum_zeroelim(int elen, REAL *e,
 /*                                                                           */
 /*****************************************************************************/
 
-static int scale_expansion_zeroelim(int elen, REAL *e, REAL b, REAL *h)
+static auto scale_expansion_zeroelim(int elen, REAL *e, REAL b, REAL *h) -> int
      /* e and h cannot be the same. */
 {
   INEXACT REAL Q, sum;
@@ -802,7 +802,7 @@ static int scale_expansion_zeroelim(int elen, REAL *e, REAL b, REAL *h)
 /*                                                                           */
 /*****************************************************************************/
 
-static REAL estimate(int elen, REAL *e)
+static auto estimate(int elen, REAL *e) -> REAL
 {
   REAL Q;
   int eindex;
@@ -840,8 +840,8 @@ static REAL estimate(int elen, REAL *e)
 /*                                                                           */
 /*****************************************************************************/
 
-static REAL orient2dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
-                          REAL const detsum)
+static auto orient2dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
+                          REAL const detsum) -> REAL
 {
   INEXACT REAL acx, acy, bcx, bcy;
   REAL acxtail, acytail, bcxtail, bcytail;
@@ -921,7 +921,7 @@ static REAL orient2dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
   return(D[Dlength - 1]);
 }
 
-REAL orient2d(REAL const *pa, REAL const *pb, REAL const *pc)
+auto orient2d(REAL const *pa, REAL const *pb, REAL const *pc) -> REAL
 {
   REAL detleft, detright, det;
   REAL detsum, errbound;
@@ -992,8 +992,8 @@ REAL orient2d(REAL const *pa, REAL const *pb, REAL const *pc)
 /*                                                                           */
 /*****************************************************************************/
 
-static REAL orient3dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
-                          REAL const *pd, REAL const permanent)
+static auto orient3dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
+                          REAL const *pd, REAL const permanent) -> REAL
 {
   INEXACT REAL adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
   REAL det, errbound;
@@ -1393,7 +1393,7 @@ static REAL orient3dadapt(REAL const *pa, REAL const *pb, REAL const *pc,
   return finnow[finlength - 1];
 }
 
-REAL orient3d(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
+auto orient3d(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd) -> REAL
 {
   REAL adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
   REAL bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
@@ -1466,8 +1466,8 @@ REAL orient3d(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
 /*                                                                           */
 /*****************************************************************************/
 
-static REAL incircleadapt(REAL const *pa, REAL const *pb, REAL const *pc,
-                          REAL const *pd, REAL const permanent)
+static auto incircleadapt(REAL const *pa, REAL const *pb, REAL const *pc,
+                          REAL const *pd, REAL const permanent) -> REAL
 {
   INEXACT REAL adx, bdx, cdx, ady, bdy, cdy;
   REAL det, errbound;
@@ -2038,7 +2038,7 @@ static REAL incircleadapt(REAL const *pa, REAL const *pb, REAL const *pc,
   return finnow[finlength - 1];
 }
 
-REAL incircle(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
+auto incircle(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd) -> REAL
 {
   REAL adx, bdx, cdx, ady, bdy, cdy;
   REAL bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
@@ -2113,8 +2113,8 @@ REAL incircle(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd)
 /*                                                                           */
 /*****************************************************************************/
 
-static REAL insphereexact(REAL const *pa, REAL const *pb, REAL const *pc,
-                          REAL const *pd, REAL const *pe)
+static auto insphereexact(REAL const *pa, REAL const *pb, REAL const *pc,
+                          REAL const *pd, REAL const *pe) -> REAL
 {
   INEXACT REAL axby1, bxcy1, cxdy1, dxey1, exay1;
   INEXACT REAL bxay1, cxby1, dxcy1, exdy1, axey1;
@@ -2366,8 +2366,8 @@ static REAL insphereexact(REAL const *pa, REAL const *pb, REAL const *pc,
   return deter[deterlen - 1];
 }
 
-static REAL insphereadapt(REAL const *pa, REAL const *pb, REAL const *pc,
-                          REAL const *pd, REAL const *pe, REAL const permanent)
+static auto insphereadapt(REAL const *pa, REAL const *pb, REAL const *pc,
+                          REAL const *pd, REAL const *pe, REAL const permanent) -> REAL
 {
   INEXACT REAL aex, bex, cex, dex, aey, bey, cey, dey, aez, bez, cez, dez;
   REAL det, errbound;
@@ -2581,8 +2581,8 @@ static REAL insphereadapt(REAL const *pa, REAL const *pb, REAL const *pc,
   return insphereexact(pa, pb, pc, pd, pe);
 }
 
-REAL insphere(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd,
-              REAL const *pe)
+auto insphere(REAL const *pa, REAL const *pb, REAL const *pc, REAL const *pd,
+              REAL const *pe) -> REAL
 {
   REAL aex, bex, cex, dex;
   REAL aey, bey, cey, dey;

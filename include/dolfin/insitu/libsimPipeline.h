@@ -19,22 +19,22 @@ namespace dolfin
 {
 
   /// This class defines a visualization pipeline to be executed by libsim
-  
-  class libsimPipeline 
+
+  class libsimPipeline
   {
 
   public:
-    
+
 
     libsimPipeline() = default;
 
     ~libsimPipeline() = default;
 
     /// Execute visualization pipeline
-    virtual void exec(real t, uint tstep) const = 0;
+    virtual void exec(real t, size_t tstep) const = 0;
 
   };
-  
+
 } /* namespace dolfin */
 
 #endif

@@ -8,9 +8,14 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Mesh.h>
 
-#include <ufc.h>
-
 #include <string>
+
+namespace ufc
+{
+
+class dofmap;
+
+} // namespace ufc
 
 namespace dolfin
 {
@@ -19,6 +24,8 @@ class DofMap;
 class Form;
 class Function;
 
+//-----------------------------------------------------------------------------
+
 class DofMapCache
 {
 
@@ -26,12 +33,12 @@ class DofMapCache
 
   struct token_t
   {
-    uint count;
+    size_t         count;
     DofMap * const item;
 
-    token_t(DofMap * dm) :
-        count(1),
-        item(dm)
+    token_t( DofMap * dm )
+      : count( 1 )
+      , item( dm )
     {
     }
   };
@@ -49,30 +56,27 @@ class DofMapCache
 #endif
 
 public:
-
   ///
   void disp() const;
 
 protected:
-
   /// Meyers singleton
-  static DofMapCache& instance()
+  static auto instance() -> DofMapCache &
   {
     static DofMapCache instance_;
     return instance_;
   }
 
   /// Return a dofmap corresponding to the i-th coefficient space
-  DofMap& acquire(Mesh& mesh, Form const& form, uint const& i);
+  auto acquire( Mesh & mesh, Form const & form, size_t const & i ) -> DofMap &;
 
   /// Return a dofmap for the UFC dofmap object
-  DofMap& acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner);
+  auto acquire( Mesh & mesh, ufc::dofmap const & dofmap, bool owner ) -> DofMap &;
 
   ///
-  void release(DofMap& dofmap);
+  void release( DofMap & dofmap );
 
 private:
-
   ///
   DofMapCache();
 
@@ -80,11 +84,11 @@ private:
   ~DofMapCache();
 
   container_t cache_;
-  rlist_t rlist_;
-
+  rlist_t     rlist_;
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif /* __DOLFIN_DOF_MAP_CACHE_H */
-

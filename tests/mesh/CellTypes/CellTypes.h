@@ -3,8 +3,13 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/mesh/EuclideanSpace.h>
-#include <dolfin/mesh/CellTypes.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/celltypes/PointCell.h>
+#include <dolfin/mesh/celltypes/IntervalCell.h>
+#include <dolfin/mesh/celltypes/TriangleCell.h>
+#include <dolfin/mesh/celltypes/TetrahedronCell.h>
+#include <dolfin/mesh/celltypes/QuadrilateralCell.h>
+#include <dolfin/mesh/celltypes/HexahedronCell.h>
+#include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 
@@ -22,7 +27,7 @@ void check_reference_cell_refinement()
   me.init_cells(cell.RefinementPattern::num_refined_cells(rc0));
   me.init_vertices(cell.RefinementPattern::num_refined_vertices(rc0));
   Cell mc0(rc0, 0);
-  uint nci = 0;
+  size_t nci = 0;
   cell.refine_cell(mc0, me, nci);
   me.close();
 }

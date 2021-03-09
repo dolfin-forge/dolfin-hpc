@@ -4,53 +4,56 @@
 #ifndef __DOLFIN_JACOBI_H
 #define __DOLFIN_JACOBI_H
 
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
+#include <dolfin/log/dolfin_log.h>
 
 namespace dolfin
 {
+
+//-----------------------------------------------------------------------------
+
 /// Jacobi polynomial from FIAT 1.4.0
 
 class Jacobi
 {
 
 public:
-
-  Jacobi(uint n, real a, real b);
+  Jacobi( size_t n, real a, real b );
 
   /// Evaluation at given point
-  real operator()(real x);
+  auto operator()( real x ) -> real;
 
   /// Evaluation of derivative at given point
-  real ddx(real x);
+  auto ddx( real x ) -> real;
 
   /// Evaluation at given point with weights a , b
-  static real eval(uint n, real a, real b, real x);
+  static auto eval( size_t n, real a, real b, real x ) -> real;
 
   /// Evaluation of derivative at given point with weights a , b
-  static real ddx(uint n, real a, real b, real x);
+  static auto ddx( size_t n, real a, real b, real x ) -> real;
 
 private:
-
-  uint const n_;
-  real const a_;
-  real const b_;
-
+  size_t const n_;
+  real const   a_;
+  real const   b_;
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-inline real Jacobi::operator() (real x)
+inline auto Jacobi::operator()( real x ) -> real
 {
-  return eval(n_, a_, b_, x);
-}
-//-----------------------------------------------------------------------------
-inline real Jacobi::ddx(real x)
-{
-  return ddx(n_, a_, b_, x);
+  return eval( n_, a_, b_, x );
 }
 
+//-----------------------------------------------------------------------------
+
+inline auto Jacobi::ddx( real x ) -> real
+{
+  return ddx( n_, a_, b_, x );
 }
+
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

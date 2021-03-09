@@ -81,38 +81,38 @@ struct __logstream : protected std::streambuf, public std::ostream
   }
 
   /// Pass through streambuf to honour indent, just declare supported types
-  inline __logstream& operator<<(short          x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(int            x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(long           x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(unsigned short x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(unsigned int   x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(unsigned long  x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(unsigned long long x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(float          x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(double         x) { std::ostream::operator<<(x); return *this; }
-  inline __logstream& operator<<(long double    x) { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(short          x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(int            x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(long           x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(unsigned short x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(unsigned int   x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(unsigned long  x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(unsigned long long x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(float          x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(double         x) -> __logstream& { std::ostream::operator<<(x); return *this; }
+  inline auto operator<<(long double    x) -> __logstream& { std::ostream::operator<<(x); return *this; }
 
   /// Declare char inserter explicitly
-  inline __logstream& operator<<(char  x) { std::operator<<(*this, x); return *this;   }
+  inline auto operator<<(char  x) -> __logstream& { std::operator<<(*this, x); return *this;   }
 
   /// Pair output
   template<typename T, typename V>
-  inline __logstream& operator<<(std::pair<T, V> x)
+  inline auto operator<<(std::pair<T, V> x) -> __logstream&
   {
     return (*this) << "( " << x.first << ", " << x.second << " )";
   }
 
   /// Output n char
-  __logstream& nputc(uint n, char c)
+  auto nputc(size_t n, char c) -> __logstream&
   {
-    for (uint i = 0; i < n; ++i) put(c);
+    for (size_t i = 0; i < n; ++i) put(c);
     return *this;
   }
 
   /// Formatted output
-  __logstream& format(char const * msg, va_list aptr,
+  auto format(char const * msg, va_list aptr,
                       char const * pre = nullptr, char const * suf = nullptr,
-                      size_t * n = nullptr)
+                      size_t * n = nullptr) -> __logstream&
   {
     if (n)
     {
@@ -339,20 +339,20 @@ ret:
   //  __logstream& operator<<(std::string x);
 
   /// Manipulators
-  __logstream& operator<<(__logstream& (*fp)(__logstream&)) { return fp(*this); }
+  auto operator<<(__logstream& (*fp)(__logstream&)) -> __logstream& { return fp(*this); }
 
   /// Manipulator adapters for stream implementation
-  __logstream& operator<<(stream& (*fp)(stream&)) { fp(*this); return *this; }
+  auto operator<<(stream& (*fp)(stream&)) -> __logstream& { fp(*this); return *this; }
 
   /// Manipulator adapters for ios_base
-  __logstream& operator<<(std::ios_base& (*fp)(std::ios_base&)) { fp(*this); return *this; }
+  auto operator<<(std::ios_base& (*fp)(std::ios_base&)) -> __logstream& { fp(*this); return *this; }
 
-  __logstream& operator++() { if (W_i_ < INDENTMAX) ++W_i_; return *this; }
-  __logstream& operator--() { if (W_i_ > INDENTMIN) --W_i_; return *this; }
+  auto operator++() -> __logstream& { if (W_i_ < INDENTMAX) ++W_i_; return *this; }
+  auto operator--() -> __logstream& { if (W_i_ > INDENTMIN) --W_i_; return *this; }
 
-  int verbose() { return W_v_; }
+  auto verbose() -> int { return W_v_; }
 
-  int verbose(int n)
+  auto verbose(int n) -> int
   {
     std::swap(W_v_, n);
     if (W_v_ < 0)
@@ -362,16 +362,16 @@ ret:
     return n;
   }
 
-  int silence()
+  auto silence() -> int
   {
     return verbose(-1);
   }
 
-  int indent() { return W_i_; }
+  auto indent() -> int { return W_i_; }
 
-  int indentwidth() { return W_i_ * INDENTTAB; }
+  auto indentwidth() -> int { return W_i_ * INDENTTAB; }
 
-  int indenttab() { return INDENTTAB; }
+  auto indenttab() -> int { return INDENTTAB; }
 
 private:
 
@@ -380,12 +380,12 @@ private:
   std::streambuf *       sb_;
   std::ostringstream     os_;
 
-  static constexpr uint LINEWIDTH = 256;
-  static constexpr uint INDENTTAB = 2;
-  static constexpr uint INDENTMIN = 0;
-  static constexpr uint INDENTMAX = 128;
+  static constexpr size_t LINEWIDTH = 256;
+  static constexpr size_t INDENTTAB = 2;
+  static constexpr size_t INDENTMIN = 0;
+  static constexpr size_t INDENTMAX = 128;
 
-  std::streambuf::int_type overflow(std::streambuf::int_type c) override
+  auto overflow(std::streambuf::int_type c) -> std::streambuf::int_type override
   {
     dolfin_assert(sb_);
     if (std::streambuf::traits_type::eq_int_type(std::streambuf::traits_type::eof(), c))
@@ -410,7 +410,7 @@ private:
   }
 
   char W_c_;
-  uint  W_i_;
+  size_t  W_i_;
   int  W_v_;
   char W_t_[LINEWIDTH];
 
@@ -420,7 +420,7 @@ using LogStream = __logstream<__sink<std::ostream> >;
 //-----------------------------------------------------------------------------
 /// Pair output
 template<typename T, typename V>
-inline std::ostream& operator<<(std::ostream& ss, std::pair<T, V> x)
+inline auto operator<<(std::ostream& ss, std::pair<T, V> x) -> std::ostream&
 {
   return ss << "( " << x.first << ", " << x.second << " )";
 }

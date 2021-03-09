@@ -19,7 +19,7 @@
 #define __DOLFIN_VERTEX_NORMAL_H
 
 #include <dolfin/common/constants.h>
-#include <dolfin/common/Array.h>
+#include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
@@ -44,92 +44,96 @@ class VertexNormal
 {
 
 public:
-
   enum Type
   {
-    none, unit, facet
+    none,
+    unit,
+    facet
   };
 
   /// Copy constructor
-  VertexNormal(VertexNormal& other);
+  VertexNormal( VertexNormal & other );
 
   /// Create normal, tangents for the boundary of mesh
-  VertexNormal(Mesh& mesh, Type weight);
+  VertexNormal( Mesh & mesh, Type weight );
 
   /// Create normal, tangents for the boundary of mesh given a subdomain
-  VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight);
+  VertexNormal( Mesh & mesh, SubDomain const & subdomain, Type weight );
 
   /// Destructor
   ~VertexNormal() = default;
 
   ///
-  Mesh& mesh();
+  auto mesh() -> Mesh &;
 
   ///
-  MeshValues<real, Vertex> const& basis(uint i, uint j) const;
+  auto basis( size_t i, size_t j ) const -> MeshValues< real, Vertex > const &;
 
   ///
-  MeshValues<uint, Vertex>& vertex_type();
+  auto vertex_type() -> MeshValues< size_t, Vertex > &;
 
 private:
-
   /// Assignment [Disable]
-  VertexNormal& operator=(VertexNormal& other);
+  auto operator=( VertexNormal & other ) -> VertexNormal &;
 
   // Compute normals to the boundary nodes
-  void computeNormal(Mesh& mesh);
+  void computeNormal( Mesh & mesh );
 
   ///
-  MeshValues<real, Vertex>& basis(uint i, uint j);
+  auto basis( size_t i, size_t j ) -> MeshValues< real, Vertex > &;
 
   //
-  void getFacetData(VertexNormal::Type type, Mesh& mesh, BoundaryMesh& boundary,
-                    Vertex& bvertex, Array<real>& normals,
-                    Array<real>& weights);
+  void getFacetData( VertexNormal::Type    type,
+                     Mesh &                mesh,
+                     BoundaryMesh &        boundary,
+                     Vertex &              bvertex,
+                     std::vector< real > & normals,
+                     std::vector< real > & weights );
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
   // Global mesh
-  Mesh& mesh_;
+  Mesh & mesh_;
 
   // Global mesh
-  uint const gdim_;
+  size_t const gdim_;
 
   SubDomain const * const subdomain_;
 
   //
-  Array<MeshValues<real, Vertex> > basis_;
+  std::vector< MeshValues< real, Vertex > > basis_;
 
   // Define vertex type: 1 surface, 2 edge, 3 surface
-  MeshValues<uint, Vertex> vertex_type_;
+  MeshValues< size_t, Vertex > vertex_type_;
 
   // Maximum absolute angle between two neighbouring facets
   real const alpha_max_;
 
   Type type_;
-
 };
 
 //-----------------------------------------------------------------------------
-inline Mesh& VertexNormal::mesh()
+inline auto VertexNormal::mesh() -> Mesh &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<real, Vertex> const& VertexNormal::basis(uint i, uint j) const
+inline auto VertexNormal::basis( size_t i, size_t j ) const
+  -> MeshValues< real, Vertex > const &
 {
   return basis_[i * gdim_ + j];
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<real, Vertex>& VertexNormal::basis(uint i, uint j)
+inline auto VertexNormal::basis( size_t i, size_t j )
+  -> MeshValues< real, Vertex > &
 {
   return basis_[i * gdim_ + j];
 }
 
 //-----------------------------------------------------------------------------
-inline MeshValues<uint, Vertex>& VertexNormal::vertex_type()
+inline auto VertexNormal::vertex_type() -> MeshValues< size_t, Vertex > &
 {
   return vertex_type_;
 }

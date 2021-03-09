@@ -27,23 +27,23 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 
 // Source term
-struct Source : public Value<Source>
+struct Source : public Value< Source >
 {
-  void eval(real * value, const real* x) const
+  void eval( real * value, const real * x ) const
   {
-    real dx = x[0] - 0.5;
-    real dy = x[1] - 0.5;
-    value[0] = 500.0*std::exp(-(dx*dx + dy*dy)/0.02);
+    real dx  = x[0] - 0.5;
+    real dy  = x[1] - 0.5;
+    value[0] = 500.0 * std::exp( -( dx * dx + dy * dy ) / 0.02 );
   }
 };
 
 // Neumann boundary condition
-struct Flux : public Value<Flux>
+struct Flux : public Value< Flux >
 {
-  void eval(real * value, const real* x) const
+  void eval( real * value, const real * x ) const
   {
-    if (x[0] > DOLFIN_EPS)
-      value[0] = 25.0*std::sin(5.0*DOLFIN_PI*x[1]);
+    if ( x[0] > DOLFIN_EPS )
+      value[0] = 25.0 * std::sin( 5.0 * DOLFIN_PI * x[1] );
     else
       value[0] = 0.0;
   }
@@ -54,7 +54,7 @@ struct Flux : public Value<Flux>
 // Sub domain for Dirichlet boundary condition
 struct DirichletBoundary : public SubDomain
 {
-  bool inside(const real* x, bool on_boundary) const
+  bool inside( const real * x, bool on_boundary ) const
   {
     return x[0] < DOLFIN_EPS && on_boundary;
   }
@@ -67,40 +67,41 @@ int main()
   dolfin_init();
 
   // Create mesh
-  Mesh mesh("UnitSquareMesh_32x32.bin");
+  Mesh mesh( "UnitSquareMesh_32x32.bin" );
 
   // Create coefficients
-  Analytic<Source>  f(mesh);
-  Analytic<Flux>    g(mesh);
+  Analytic< Source > f( mesh );
+  Analytic< Flux >   g( mesh );
 
   // Create boundary condition
-  Constant u0(0.0);
+  Constant          u0( 0.0 );
   DirichletBoundary boundary;
-  DirichletBC bc(u0, mesh, boundary);
+  DirichletBC       bc( u0, mesh, boundary );
 
   // Define PDE
-  Poisson::BilinearForm a(mesh);
-  Poisson::LinearForm   L(mesh, f, g);
+  Poisson::BilinearForm a( mesh );
+  Poisson::LinearForm   L( mesh, f, g );
 
   // Solve PDE
   Matrix A;
   Vector b;
 
-  a.assemble(A, true);
-  L.assemble(b, true);
-  bc.apply(A, b, a);
+  a.assemble( A, true );
+  L.assemble( b, true );
+  bc.apply( A, b, a );
 
-  Function u(a.trial_space());
-  KrylovSolver solver(bicgstab, bjacobi);
+  Function u( a.trial_space() );
 
-  solver.solve(A, u.vector(), b);
-  u.sync();
+  KrylovSolver solver( bicgstab, bjacobi );
+  solver.solve( A, u.vector(), b );
 
-  message("vector l2  norm: %e", u.vector().norm());
-  message("vector inf norm: %e", u.vector().max());
+  message( "vector l2  norm: %e", u.vector().norm() );
+  message( "vector inf norm: %e", u.vector().max() );
 
   // Save solution to file
-  File("poisson.pvd") << u;
+  File( "poisson.pvd" ) << u;
+
+  dolfin_finalize();
 
   return 0;
 }

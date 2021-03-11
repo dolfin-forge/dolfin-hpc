@@ -10,7 +10,7 @@
 
 #include <dolfin/common/Variable.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/la/TrilinosObject.h>
+#include <dolfin/la/trilinos/TrilinosObject.h>
 
 #include <Tpetra_Vector.hpp>
 

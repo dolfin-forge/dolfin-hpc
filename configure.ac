@@ -415,6 +415,7 @@ AC_CONFIG_FILES([Makefile
                  src/la/Makefile\
                  src/la/janpack/Makefile\
                  src/la/petsc/Makefile\
+                 src/la/trilinos/Makefile\
                  src/log/Makefile\
                  src/main/Makefile\
                  src/math/Makefile\

@@ -3,7 +3,7 @@
 
 #ifdef HAVE_TRILINOS
 
-#include <dolfin/la/TrilinosVector.h>
+#include <dolfin/la/trilinos/TrilinosVector.h>
 
 #include <Teuchos_OrdinalTraits.hpp>
 

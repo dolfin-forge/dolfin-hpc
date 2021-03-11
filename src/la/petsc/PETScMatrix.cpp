@@ -5,12 +5,13 @@
 
 #ifdef HAVE_PETSC
 
+#include <dolfin/la/petsc/PETScMatrix.h>
+
 #include <dolfin/common/system.h>
 #include <dolfin/la/GenericSparsityPattern.h>
-#include <dolfin/la/PETScFactory.h>
-#include <dolfin/la/PETScMatrix.h>
-#include <dolfin/la/PETScVector.h>
 #include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/petsc/PETScFactory.h>
+#include <dolfin/la/petsc/PETScVector.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 

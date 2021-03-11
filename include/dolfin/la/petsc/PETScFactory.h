@@ -5,13 +5,13 @@
 #define __DOLFIN_PETSC_FACTORY_H
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/LinearAlgebraFactory.h>
+#include <dolfin/la/SparsityPattern.h>
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/la/LinearAlgebraFactory.h>
-#include <dolfin/la/PETScMatrix.h>
-#include <dolfin/la/PETScVector.h>
-#include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/petsc/PETScMatrix.h>
+#include <dolfin/la/petsc/PETScVector.h>
 
 namespace dolfin
 {

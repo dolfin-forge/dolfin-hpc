@@ -1,11 +1,11 @@
 // Copyright (C) 2004-2007 Johan Hoffman, Johan Jansson and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/la/PETScVector.h>
-
 #ifdef HAVE_PETSC
 
-#include <dolfin/la/PETScFactory.h>
+#include <dolfin/la/petsc/PETScVector.h>
+
+#include <dolfin/la/petsc/PETScFactory.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/PE.h>

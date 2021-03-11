@@ -8,7 +8,7 @@
 
 #ifdef HAVE_PETSC
 
-#include "PETScVector.h"
+#include <dolfin/la/petsc/PETScVector.h>
 
 #include <petscksp.h>
 #include <petscmat.h>

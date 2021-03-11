@@ -4,34 +4,36 @@
 #ifndef __DOLFIN_LINEAR_ALGEBRA_FACTORY_H
 #define __DOLFIN_LINEAR_ALGEBRA_FACTORY_H
 
-#include "GenericMatrix.h"
-#include "GenericSparsityPattern.h"
-#include "GenericVector.h"
-
 namespace dolfin
 {
 
-  class LinearAlgebraFactory
-  {
-    public:
+class GenericMatrix;
+class GenericVector;
+class GenericSparsityPattern;
 
-    /// Constructor
-    LinearAlgebraFactory() = default;
+//-----------------------------------------------------------------------------
 
-    /// Destructor
-    virtual ~LinearAlgebraFactory() = default;
+class LinearAlgebraFactory
+{
+public:
+  /// Constructor
+  LinearAlgebraFactory() = default;
 
-    /// Create empty matrix
-    virtual auto createMatrix() const -> dolfin::GenericMatrix* = 0;
+  /// Destructor
+  virtual ~LinearAlgebraFactory() = default;
 
-    /// Create empty vector
-    virtual auto createVector() const -> dolfin::GenericVector* = 0;
+  /// Create empty matrix
+  virtual auto createMatrix() const -> GenericMatrix * = 0;
 
-    /// Create empty sparsity pattern 
-    virtual auto createPattern() const -> dolfin::GenericSparsityPattern * = 0;
+  /// Create empty vector
+  virtual auto createVector() const -> GenericVector * = 0;
 
-  };
+  /// Create empty sparsity pattern
+  virtual auto createPattern() const -> GenericSparsityPattern * = 0;
+};
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

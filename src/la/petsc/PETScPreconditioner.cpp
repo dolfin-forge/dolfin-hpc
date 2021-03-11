@@ -5,8 +5,10 @@
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/la/PETScPreconditioner.h>
-#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/petsc/PETScPreconditioner.h>
+
+#include <dolfin/la/PreconditionerType.h>
+#include <dolfin/la/petsc/PETScVector.h>
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 6
 #include <petsc/private/pcimpl.h>
@@ -71,21 +73,21 @@ auto PETScPreconditioner::getType(PreconditionerType pc) -> PCType
 {
   switch (pc)
   {
-  case default_pc:
+  case PreconditionerType::default_pc:
     return "default";
-  case amg:
+  case PreconditionerType::amg:
     return PCHYPRE;
-  case icc:
+  case PreconditionerType::icc:
     return PCICC;
-  case ilu:
+  case PreconditionerType::ilu:
     return PCILU;
-  case jacobi:
+  case PreconditionerType::jacobi:
     return PCJACOBI;
-  case bjacobi:
+  case PreconditionerType::bjacobi:
     return PCBJACOBI;
-  case sor:
+  case PreconditionerType::sor:
     return PCSOR;
-  case none:
+  case PreconditionerType::none:
     return PCNONE;
   default:
     warning("Requested preconditioner unkown. Using incomplete LU.");

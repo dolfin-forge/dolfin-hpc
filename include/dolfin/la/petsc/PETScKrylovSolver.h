@@ -4,14 +4,14 @@
 #ifndef __DOLFIN_PETSC_KRYLOV_SOLVER_H
 #define __DOLFIN_PETSC_KRYLOV_SOLVER_H
 
+#include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/PreconditionerType.h>
+#include <dolfin/la/SolverType.h>
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/common/types.h>
-#include <dolfin/la/PETScPreconditioner.h>
-#include <dolfin/la/PreconditionerType.h>
-#include <dolfin/la/SolverType.h>
+#include <dolfin/la/petsc/PETScPreconditioner.h>
 
 namespace dolfin
 {
@@ -32,7 +32,7 @@ class PETScKrylovSolver
 public:
   /// Create Krylov solver for a particular method and preconditioner
   PETScKrylovSolver( SolverType         method = default_solver,
-                     PreconditionerType pc     = default_pc );
+                     PreconditionerType pc     = PreconditionerType::default_pc );
 
   /// Create Krylov solver for a particular method and PETScPreconditioner
   PETScKrylovSolver( SolverType            method,

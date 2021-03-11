@@ -26,7 +26,8 @@ class LinearSolver
 
 public:
   /// Create linear solver
-  LinearSolver( SolverType solver_type = lu, PreconditionerType pc_type = ilu );
+  LinearSolver( SolverType         solver_type = lu,
+                PreconditionerType pc_type     = PreconditionerType::ilu );
 
   /// Destructor
   ~LinearSolver();

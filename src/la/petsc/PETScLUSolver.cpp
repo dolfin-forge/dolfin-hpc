@@ -1,20 +1,18 @@
 // Copyright (C) 2005-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-
 #ifdef HAVE_PETSC
 
-#include <dolfin/la/PETScLUSolver.h>
+#include <dolfin/la/petsc/PETScLUSolver.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/petsc/PETScKrylovMatrix.h>
+#include <dolfin/la/petsc/PETScMatrix.h>
+#include <dolfin/la/petsc/PETScVector.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/la/PETScMatrix.h>
-#include <dolfin/la/PETScVector.h>
-#include <dolfin/la/PETScKrylovMatrix.h>
-#include <dolfin/parameter/parameters.h>
-
 #include <dolfin/main/MPI.h>
+#include <dolfin/parameter/parameters.h>
 
 using namespace dolfin;
 

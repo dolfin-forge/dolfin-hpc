@@ -115,14 +115,14 @@ nobase_pkginclude_HEADERS = \
 				la/LUSolver.h\
 				la/Matrix.h\
 				la/MultigridScheme.h\
-				la/PETScFactory.h\
-				la/PETScKrylovMatrix.h\
-				la/PETScKrylovSolver.h\
-				la/PETScLUSolver.h\
-				la/PETScMatrix.h\
-				la/PETScObject.h\
-				la/PETScPreconditioner.h\
-				la/PETScVector.h\
+				la/petsc/PETScFactory.h\
+				la/petsc/PETScKrylovMatrix.h\
+				la/petsc/PETScKrylovSolver.h\
+				la/petsc/PETScLUSolver.h\
+				la/petsc/PETScMatrix.h\
+				la/petsc/PETScObject.h\
+				la/petsc/PETScPreconditioner.h\
+				la/petsc/PETScVector.h\
 				la/PreconditionerType.h\
 				la/Scalar.h\
 				la/SolverType.h\

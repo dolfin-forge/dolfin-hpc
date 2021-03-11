@@ -4,15 +4,15 @@
 #ifndef __DOLFIN_PETSC_KRYLOV_MATRIX_H
 #define __DOLFIN_PETSC_KRYLOV_MATRIX_H
 
+#include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/log/dolfin_log.h>
 
 #ifdef HAVE_PETSC
 
-#include <petscmat.h>
+#include <dolfin/la/petsc/PETScObject.h>
 
-#include <dolfin/common/types.h>
-#include <dolfin/la/PETScObject.h>
-#include <dolfin/log/dolfin_log.h>
+#include <petscmat.h>
 
 namespace dolfin
 {

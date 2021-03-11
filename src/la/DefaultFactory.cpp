@@ -4,52 +4,60 @@
 #include <dolfin/la/DefaultFactory.h>
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/parameter/parameters.h>
-#include <dolfin/la/PETScFactory.h>
 #include <dolfin/la/JANPACKFactory.h>
+#include <dolfin/la/petsc/PETScFactory.h>
+#include <dolfin/parameter/parameters.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-auto DefaultFactory::createMatrix() const -> GenericMatrix*
+
+auto DefaultFactory::createMatrix() const -> GenericMatrix *
 {
   return factory().createMatrix();
 }
+
 //-----------------------------------------------------------------------------
-auto DefaultFactory::createVector() const -> GenericVector*
+
+auto DefaultFactory::createVector() const -> GenericVector *
 {
   return factory().createVector();
 }
+
 //-----------------------------------------------------------------------------
+
 auto DefaultFactory::createPattern() const -> GenericSparsityPattern *
 {
   return factory().createPattern();
 }
+
 //-----------------------------------------------------------------------------
-auto DefaultFactory::factory() -> LinearAlgebraFactory&
+
+auto DefaultFactory::factory() -> LinearAlgebraFactory &
 {
 
   // Get backend from parameter system
-  std::string backend = dolfin_get<std::string>("linear algebra backend");
+  std::string backend = dolfin_get< std::string >( "linear algebra backend" );
 
 #ifdef HAVE_PETSC
-  if (backend == "PETSc")
+  if ( backend == "PETSc" )
   {
     return PETScFactory::instance();
   }
 #endif
 
 #ifdef HAVE_JANPACK
-  if (backend == "JANPACK")
+  if ( backend == "JANPACK" )
   {
     return JANPACKFactory::instance();
   }
 #endif
 
-  error("Linear algebra backend \"" + backend + "\" not available.");
+  error( "Linear algebra backend \"" + backend + "\" not available." );
   return factory(); // Never reached :P
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

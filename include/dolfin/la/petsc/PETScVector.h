@@ -11,7 +11,7 @@
 
 #ifdef HAVE_PETSC
 
-#include <dolfin/la/PETScObject.h>
+#include <dolfin/la/petsc/PETScObject.h>
 
 #include <petscvec.h>
 

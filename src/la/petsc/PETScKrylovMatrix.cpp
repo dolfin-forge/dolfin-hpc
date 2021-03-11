@@ -1,16 +1,16 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <dolfin/config/dolfin_config.h>
-
 #ifdef HAVE_PETSC
 
-#include <iostream>
+#include <dolfin/la/petsc/PETScKrylovMatrix.h>
 
-#include <dolfin/main/MPI.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/petsc/PETScVector.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/la/PETScVector.h>
-#include <dolfin/la/PETScKrylovMatrix.h>
+#include <dolfin/main/MPI.h>
+
+#include <iostream>
 
 using namespace dolfin;
 

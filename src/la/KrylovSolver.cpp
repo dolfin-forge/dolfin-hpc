@@ -9,9 +9,9 @@
 #include <dolfin/la/JANPACKKrylovSolver.h>
 #include <dolfin/la/JANPACKMat.h>
 #include <dolfin/la/JANPACKVec.h>
-#include <dolfin/la/PETScKrylovSolver.h>
-#include <dolfin/la/PETScMatrix.h>
-#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/petsc/PETScKrylovSolver.h>
+#include <dolfin/la/petsc/PETScMatrix.h>
+#include <dolfin/la/petsc/PETScVector.h>
 
 namespace dolfin
 {

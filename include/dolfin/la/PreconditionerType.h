@@ -9,44 +9,49 @@
 namespace dolfin
 {
 
-  /// List of predefined preconditioners
+//---------------------------------------------------------------------------
 
-  enum PreconditionerType
-  {
-    none,      // No preconditioning
-    jacobi,    // Jacobi
-    bjacobi,   // Block Jacobi
-    sor,       // SOR (successive over relaxation)
-    ilu,       // Incomplete LU factorization
-    dilu,      // diagonal Incomplete LU factorization
-    icc,       // Incomplete Cholesky factorization
-    amg,       // Algebraic multigrid (through Hypre when available)
-    default_pc // Default choice of preconditioner
-  };
+/// List of predefined preconditioners
 
-  //---------------------------------------------------------------------------
-  inline static auto pc_type(std::string type) -> PreconditionerType
+enum class PreconditionerType
+{
+  none,      // No preconditioning
+  jacobi,    // Jacobi
+  bjacobi,   // Block Jacobi
+  sor,       // SOR (successive over relaxation)
+  ilu,       // Incomplete LU factorization
+  dilu,      // diagonal Incomplete LU factorization
+  icc,       // Incomplete Cholesky factorization
+  amg,       // Algebraic multigrid (through Hypre when available)
+  default_pc // Default choice of preconditioner
+};
+
+//---------------------------------------------------------------------------
+
+inline static auto pc_type( std::string type ) -> PreconditionerType
+{
+  if ( type == "none" )
+    return PreconditionerType::none;
+  else if ( type == "bjacobi" )
+    return PreconditionerType::bjacobi;
+  else if ( type == "sor" )
+    return PreconditionerType::sor;
+  else if ( type == "ilu" )
+    return PreconditionerType::ilu;
+  else if ( type == "dilu" )
+    return PreconditionerType::dilu;
+  else if ( type == "amg" )
+    return PreconditionerType::amg;
+  else
   {
-    if (type == "none")
-      return none;
-    else if (type == "bjacobi")
-      return bjacobi;
-    else if (type == "sor")
-      return sor;
-    else if (type == "ilu")
-      return ilu;
-    else if (type == "dilu")
-      return dilu;
-    else if (type == "amg")
-      return amg;
-    else
-    {
-      warning("Undefined preconditioner          "
-              "Fallback to default preconditioner");
-      return default_pc;
-    }
+    warning( "Undefined preconditioner          "
+             "Fallback to default preconditioner" );
+    return PreconditionerType::default_pc;
   }
-
 }
+
+//---------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

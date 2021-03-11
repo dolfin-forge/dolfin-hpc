@@ -195,13 +195,17 @@ DOLFIN_START_TEST( test_zero_vec )
 #include <dolfin/la/TrilinosVector.h>
 DOLFIN_START_TEST( test_trilinos )
 {
-  trilinos::Vector x;
+  // trilinos::Vector x(10);
   // x.init(VEC_SIZE);
 
   // x = 1.0;
   // x.zero();
   // ck_assert(x.max() == 0);
 
+}DOLFIN_END_TEST
+#else
+DOLFIN_START_TEST( test_trilinos )
+{
 }DOLFIN_END_TEST
 #endif
 //-----------------------------------------------------------------------------

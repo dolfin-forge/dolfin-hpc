@@ -15,7 +15,9 @@
 #include <sstream>
 
 uint32_t const CHECKPOINT_MAGIC = 0xDEADC0DE;
-#ifdef HAVE_MPI
+
+#ifdef DOLFIN_HAVE_MPI
+
 namespace dolfin
 {
 
@@ -883,4 +885,5 @@ void Checkpoint::VectorHeader::disp() const
 //-----------------------------------------------------------------------------
 
 } // end namespace dolfin
-#endif
+
+#endif // DOLFIN_HAVE_MPI

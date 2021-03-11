@@ -431,7 +431,7 @@ auto MPI::check_error( int const mpi_error ) -> int
   return mpi_error;
 }
 #endif // DEBUG
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 //-----------------------------------------------------------------------------
 void MPI::file_open( MPI_File & file, std::string const & filename,
                     int mode, Communicator & comm, MPI_Info info )

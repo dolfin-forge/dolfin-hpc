@@ -168,7 +168,7 @@ auto Mesh::extent_update() -> void
     }
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   MPI::Communicator & comm = topology().comm();
   MPI::all_reduce< MPI::min >( &min_[0], &extent_min_[0], 3, comm );
   MPI::all_reduce< MPI::max >( &max_[0], &extent_max_[0], 3, comm );

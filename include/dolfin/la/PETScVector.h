@@ -106,8 +106,7 @@ public:
   void axpby( real a, const GenericVector & x, real b ) override;
 
   /// Add multiple of given vector (w=a*x+y)
-  void
-    waxpy( real a, const GenericVector & x, const GenericVector & y ) override;
+  void waxpy( real a, const GenericVector & x, const GenericVector & y ) override;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
   void axpbypcz( real                  a,

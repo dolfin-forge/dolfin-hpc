@@ -287,9 +287,9 @@ inline auto Analytic< T >::sync( Time const & t ) -> void
 
 // Convenience functions to get wrapped evaluant
 template < class T >
-inline auto evaluant( Analytic< T > & A ) -> T &
+inline auto evaluant( Analytic< T > const & A ) -> T const &
 {
-  return static_cast< T & >( A );
+  return static_cast< T const & >( A );
 }
 
 //-----------------------------------------------------------------------------

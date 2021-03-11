@@ -5,11 +5,11 @@
 #define __DOLFIN_KRYLOV_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/la/JANPACKKrylovSolver.h>
-#include <dolfin/la/JANPACKMat.h>
-#include <dolfin/la/JANPACKVec.h>
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/SolverType.h>
+#include <dolfin/la/janpack/JANPACKKrylovSolver.h>
+#include <dolfin/la/janpack/JANPACKMat.h>
+#include <dolfin/la/janpack/JANPACKVec.h>
 #include <dolfin/la/petsc/PETScKrylovSolver.h>
 #include <dolfin/la/petsc/PETScMatrix.h>
 #include <dolfin/la/petsc/PETScVector.h>

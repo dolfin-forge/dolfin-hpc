@@ -4,7 +4,7 @@
 #include <dolfin/la/DefaultFactory.h>
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/la/JANPACKFactory.h>
+#include <dolfin/la/janpack/JANPACKFactory.h>
 #include <dolfin/la/petsc/PETScFactory.h>
 #include <dolfin/parameter/parameters.h>
 

@@ -2,21 +2,22 @@
 // Licensed under the GNU LGPL Version 2.1.
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/la/JANPACKFactory.h>
 
 #ifdef HAVE_JANPACK
+
+#include <dolfin/la/janpack/JANPACKFactory.h>
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-JANPACKMat* JANPACKFactory::createMatrix() const 
-{ 
+JANPACKMat* JANPACKFactory::createMatrix() const
+{
   JANPACKMat* jm = new JANPACKMat();
   return jm;
 }
 //-----------------------------------------------------------------------------
-JANPACKVec* JANPACKFactory::createVector() const 
-{   
+JANPACKVec* JANPACKFactory::createVector() const
+{
   JANPACKVec* jv = new JANPACKVec();
   return jv;
 }

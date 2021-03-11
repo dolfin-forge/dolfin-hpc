@@ -413,6 +413,7 @@ AC_CONFIG_FILES([Makefile
                  src/io/Makefile\
                  src/insitu/Makefile\
                  src/la/Makefile\
+                 src/la/janpack/Makefile\
                  src/la/petsc/Makefile\
                  src/log/Makefile\
                  src/main/Makefile\

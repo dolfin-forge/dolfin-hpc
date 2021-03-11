@@ -7,11 +7,11 @@
 #include <dolfin/config/dolfin_config.h>
 
 #ifdef HAVE_JANPACK
-#include <dolfin/common/types.h>
-#include <dolfin/parameter/Parametrized.h>
-#include "SolverType.h"
-#include "PreconditionerType.h"
 
+#include <dolfin/common/types.h>
+#include <dolfin/la/PreconditionerType.h>
+#include <dolfin/la/SolverType.h>
+#include <dolfin/parameter/Parametrized.h>
 
 #ifndef HAVE_JANPACK_MPI
 #include <janpack/hybrid.h>

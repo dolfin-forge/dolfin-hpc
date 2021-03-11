@@ -1,11 +1,12 @@
 // Copyright (C) 2005-2006 Ola Skavhaug.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/config/dolfin_config.h>
+
 #ifdef HAVE_PETSC
 
 #include <dolfin/la/petsc/PETScFactory.h>
 
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/petsc/PETScMatrix.h>
 #include <dolfin/la/petsc/PETScVector.h>

@@ -1,11 +1,12 @@
 // Copyright (C) 2005 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
+#include <dolfin/config/dolfin_config.h>
+
 #ifdef HAVE_PETSC
 
 #include <dolfin/la/petsc/PETScKrylovSolver.h>
 
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/la/petsc/PETScKrylovMatrix.h>
 #include <dolfin/la/petsc/PETScMatrix.h>
 #include <dolfin/la/petsc/PETScVector.h>
@@ -46,7 +47,7 @@ PETScKrylovSolver::PETScKrylovSolver( SolverType method, PreconditionerType pc )
 PETScKrylovSolver::PETScKrylovSolver( SolverType            method,
                                       PETScPreconditioner & preconditioner )
   : method( method )
-  , pc_petsc( default_pc )
+  , pc_petsc( PreconditionerType::default_pc )
   , pc_dolfin( &preconditioner )
   , ksp( nullptr )
   , M_( 0 )
@@ -438,7 +439,7 @@ void PETScKrylovSolver::setPETScPreconditioner()
   }
 
   // Treat special case default preconditioner (do nothing)
-  if ( pc_petsc == default_pc )
+  if ( pc_petsc == PreconditionerType::default_pc )
     return;
 
   // Get PETSc PC pointer
@@ -449,7 +450,7 @@ void PETScKrylovSolver::setPETScPreconditioner()
   PCSetFromOptions( pc );
 
   // Treat special case Hypre AMG preconditioner
-  if ( pc_petsc == amg )
+  if ( pc_petsc == PreconditionerType::amg )
   {
 #if PETSC_HAVE_HYPRE
     // PCSetFromOptions(pc);

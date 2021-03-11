@@ -6,9 +6,9 @@
 #include <dolfin/common/Timer.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/la/JANPACKKrylovSolver.h>
-#include <dolfin/la/JANPACKMat.h>
-#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/janpack/JANPACKKrylovSolver.h>
+#include <dolfin/la/janpack/JANPACKMat.h>
+#include <dolfin/la/janpack/JANPACKVec.h>
 #include <dolfin/la/petsc/PETScKrylovSolver.h>
 #include <dolfin/la/petsc/PETScMatrix.h>
 #include <dolfin/la/petsc/PETScVector.h>

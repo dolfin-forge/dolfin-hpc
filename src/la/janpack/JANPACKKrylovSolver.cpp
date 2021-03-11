@@ -5,16 +5,17 @@
 
 #ifdef HAVE_JANPACK
 
+#include <dolfin/la/janpackJANPACKKrylovSolver.h>
+
+#include <dolfin/la/janpackJANPACKMat.h>
+#include <dolfin/la/janpackJANPACKVec.h>
+
 #ifdef DOLFIN_HAVE_MPI
 #include <dolfin/main/MPI.h>
 #endif
 
 #include <janpack/ilu.h>
 #include <janpack/krylov_solver.h>
-
-#include <dolfin/la/JANPACKKrylovSolver.h>
-#include <dolfin/la/JANPACKMat.h>
-#include <dolfin/la/JANPACKVec.h>
 
 using namespace dolfin;
 

@@ -8,6 +8,9 @@
 
 #ifdef HAVE_JANPACK
 
+#include <dolfin/common/Variable.h>
+#include <dolfin/la/GenericMatrix.h>
+
 #ifdef HAVE_JANPACK_MPI
 #define jp_mat_type jp_mat_t
 #else
@@ -16,8 +19,6 @@
 #endif
 
 #include <janpack/mat.h>
-#include <dolfin/common/Variable.h>
-#include "GenericMatrix.h"
 
 namespace dolfin
 {

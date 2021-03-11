@@ -5,11 +5,12 @@
 
 #if defined( HAVE_JANPACK ) && !defined( HAVE_JANPACK_MPI )
 
-#include <janpack/amg_solver.h>
+#include <dolfin/la/janpack/JANPACKAMGSolver.h>
 
-#include <dolfin/la/JANPACKAMGSolver.h>
-#include <dolfin/la/JANPACKMat.h>
-#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/janpack/JANPACKMat.h>
+#include <dolfin/la/janpack/JANPACKVec.h>
+
+#include <janpack/amg_solver.h>
 
 using namespace dolfin;
 

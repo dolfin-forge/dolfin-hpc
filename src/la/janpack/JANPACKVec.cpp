@@ -5,9 +5,10 @@
 
 #ifdef HAVE_JANPACK
 
+#include <dolfin/la/janpack/JANPACKVec.h>
+
 #include <dolfin/common/types.h>
-#include <dolfin/la/JANPACKFactory.h>
-#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/janpack/JANPACKFactory.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/basic.h>
 

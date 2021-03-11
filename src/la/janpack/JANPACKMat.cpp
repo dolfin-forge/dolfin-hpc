@@ -1,27 +1,26 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
 
-#include <string>
-
-#include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/la/GenericSparsityPattern.h>
-#include <dolfin/la/JANPACKFactory.h>
-#include <dolfin/la/JANPACKMat.h>
-#include <dolfin/la/JANPACKVec.h>
-#include <dolfin/log/dolfin_log.h>
 
 #ifdef HAVE_JANPACK
+
+#include <dolfin/la/janpack/JANPACKMat.h>
+
+#include <dolfin/common/types.h>
+#include <dolfin/la/GenericSparsityPattern.h>
+#include <dolfin/la/janpack/JANPACKFactory.h>
+#include <dolfin/la/janpack/JANPACKVec.h>
+#include <dolfin/log/dolfin_log.h>
+#include <dolfin/main/MPI.h>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-#ifdef DOLFIN_HAVE_MPI
-#include <dolfin/main/MPI.h>
-#endif
-
 #include <janpack/spmv.h>
+
+#include <string>
 
 using namespace dolfin;
 

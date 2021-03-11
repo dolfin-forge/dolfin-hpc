@@ -6,10 +6,11 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
+#if defined( HAVE_JANPACK ) && !defined( HAVE_JANPACK_MPI )
+
 #include <dolfin/common/types.h>
+#include <dolfin/la/MultigridScheme.h>
 #include <dolfin/parameter/Parametrized.h>
-#include "MultigridScheme.h"
 
 #include <janpack/hybrid.h>
 #include <janpack/amg_solver.h>

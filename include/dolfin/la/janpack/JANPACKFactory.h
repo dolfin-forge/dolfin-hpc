@@ -4,10 +4,10 @@
 #ifndef __DOLFIN_JANPACK_FACTORY_H
 #define __DOLFIN_JANPACK_FACTORY_H
 
-#include "JANPACKMat.h"
-#include "JANPACKVec.h"
-#include "SparsityPattern.h"
-#include "LinearAlgebraFactory.h"
+#include <dolfin/la/LinearAlgebraFactory.h>
+#include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/janpack/JANPACKMat.h>
+#include <dolfin/la/janpack/JANPACKVec.h>
 
 #ifdef HAVE_JANPACK
 
@@ -22,17 +22,17 @@ namespace dolfin
     virtual ~JANPACKFactory() {}
 
     // Create empty matrix
-    JANPACKMat* createMatrix() const;    
+    JANPACKMat* createMatrix() const;
 
     /// Create empty vector
     JANPACKVec* createVector() const;
 
-    /// Create empty sparsity pattern 
+    /// Create empty sparsity pattern
     SparsityPattern* createPattern() const
     { return new SparsityPattern(); }
-    
+
     /// Return singleton instance
-    static JANPACKFactory& instance() 
+    static JANPACKFactory& instance()
     { return factory; }
 
   private:

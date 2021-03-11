@@ -102,11 +102,11 @@ nobase_pkginclude_HEADERS = \
 				la/GenericSparsityPattern.h\
 				la/GenericTensor.h\
 				la/GenericVector.h\
-				la/JANPACKAMGSolver.h\
-				la/JANPACKFactory.h\
-				la/JANPACKKrylovSolver.h\
-				la/JANPACKMat.h\
-				la/JANPACKVec.h\
+				la/janpack/JANPACKAMGSolver.h\
+				la/janpack/JANPACKFactory.h\
+				la/janpack/JANPACKKrylovSolver.h\
+				la/janpack/JANPACKMat.h\
+				la/janpack/JANPACKVec.h\
 				la/KrylovSolver.h\
 				la/LAPACKMatrix.h\
 				la/LAPACKVector.h\

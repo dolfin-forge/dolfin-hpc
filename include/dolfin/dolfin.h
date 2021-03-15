@@ -8,7 +8,6 @@
 #include <dolfin/parameter/dolfin_parameter.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/dolfin_la.h>
-#include <dolfin/elements/dolfin_elements.h>
 #include <dolfin/evolution/dolfin_evolution.h>
 #include <dolfin/function/dolfin_function.h>
 #include <dolfin/io/dolfin_io.h>
@@ -18,6 +17,5 @@
 #include <dolfin/mesh/dolfin_mesh.h>
 #include <dolfin/fem/dolfin_fem.h>
 #include <dolfin/quadrature/dolfin_quadrature.h>
-#include <dolfin/ufl/dolfin_ufl.h>
 
 #endif

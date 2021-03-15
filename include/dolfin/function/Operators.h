@@ -4,21 +4,21 @@
 #ifndef __DOLFIN_FUNCTION_OPERATORS_H_
 #define __DOLFIN_FUNCTION_OPERATORS_H_
 
+#include <dolfin/function/impl/ops.h>
 #include <dolfin/mesh/MeshValues.h>
-
-#include "impl/ops.h"
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-template <class Entity, class Operator, class Value>
-inline MeshValues<real, Entity>&
-operator<<(MeshValues<real, Entity>& v, EntityOp<Operator, Entity, Value>& o)
+template < class Entity, class Operator, class Value >
+inline MeshValues< real, Entity > &
+  operator<<( MeshValues< real, Entity > &          v,
+              EntityOp< Operator, Entity, Value > & o )
 {
-  for (typename Entity::iterator it(v.mesh()); !it.end(); ++it)
+  for ( typename Entity::iterator it( v.mesh() ); !it.end(); ++it )
   {
-    o(static_cast<Entity const&>(*it), v[it->index()]);
+    o( static_cast< Entity const & >( *it ), v[it->index()] );
   }
   return v;
 }

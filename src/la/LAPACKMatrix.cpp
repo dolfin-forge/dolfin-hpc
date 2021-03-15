@@ -10,35 +10,38 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-LAPACKMatrix::LAPACKMatrix(uint M, uint N) :
-    M_(M),
-    N_(N),
-    values_(new double[N * M])
+
+LAPACKMatrix::LAPACKMatrix( size_t M, size_t N )
+  : M_( M )
+  , N_( N )
+  , values_( new double[N * M] )
 {
-  std::memset(values_, 0, sizeof(double)*M_*N_);
+  std::memset( values_, 0, sizeof( double ) * M_ * N_ );
 }
 
 //-----------------------------------------------------------------------------
+
 LAPACKMatrix::~LAPACKMatrix()
 {
   delete[] values_;
 }
 
 //-----------------------------------------------------------------------------
-std::string LAPACKMatrix::str(bool verbose) const
+
+auto LAPACKMatrix::str( bool verbose ) const -> std::string
 {
   std::stringstream s;
 
-  if (verbose)
+  if ( verbose )
   {
-    s << str(false) << std::endl << std::endl;
+    s << str( false ) << std::endl << std::endl;
 
-    for (uint i = 0; i < M_; i++)
+    for ( size_t i = 0; i < M_; i++ )
     {
-      for (uint j = 0; j < N_; j++)
+      for ( size_t j = 0; j < N_; j++ )
       {
-        s << (*this)(i, j);
-        if (j < N_ - 1)
+        s << ( *this )( i, j );
+        if ( j < N_ - 1 )
           s << " ";
       }
       s << std::endl;
@@ -51,7 +54,7 @@ std::string LAPACKMatrix::str(bool verbose) const
 
   return s.str();
 }
+
 //-----------------------------------------------------------------------------
 
-}
-
+} // namespace dolfin

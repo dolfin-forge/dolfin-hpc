@@ -13,236 +13,291 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh & mesh, CellType const & ctype )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  init(mesh, ctype, EuclideanSpace(ctype.dim()), DOLFIN_COMM);
+  init( mesh, ctype, EuclideanSpace( ctype.dim() ), DOLFIN_COMM );
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh & mesh, CellType const & ctype, Comm & comm )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  init(mesh, ctype, EuclideanSpace(ctype.dim()), comm);
+  init( mesh, ctype, EuclideanSpace( ctype.dim() ), comm );
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh &           mesh,
+                        CellType const & ctype,
+                        Space const &    space )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  init(mesh, ctype, space, DOLFIN_COMM);
+  init( mesh, ctype, space, DOLFIN_COMM );
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
-                       Comm& comm) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh &           mesh,
+                        CellType const & ctype,
+                        Space const &    space,
+                        Comm &           comm )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  init(mesh, ctype, space, comm);
+  init( mesh, ctype, space, comm );
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh & mesh, CellType::Type cell_type, size_t gdim )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  CellType * type = CellType::create(cell_type);
-  EuclideanSpace space(gdim);
-  init(mesh, *type, space, DOLFIN_COMM);
+  CellType *     type = CellType::create( cell_type );
+  EuclideanSpace space( gdim );
+  init( mesh, *type, space, DOLFIN_COMM );
   delete type;
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh &         mesh,
+                        CellType::Type cell_type,
+                        size_t         gdim,
+                        Comm &         comm )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  CellType * type = CellType::create(cell_type);
-  EuclideanSpace space(gdim);
-  init(mesh, *type, space, comm);
+  CellType *     type = CellType::create( cell_type );
+  EuclideanSpace space( gdim );
+  init( mesh, *type, space, comm );
   delete type;
 }
+
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh) :
-    mesh_(mesh),
-    cell_vertices_(nullptr),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0),
-    open_(false)
+
+MeshEditor::MeshEditor( Mesh & mesh )
+  : mesh_( mesh )
+  , cell_vertices_( nullptr )
+  , tdim_( 0 )
+  , gdim_( 0 )
+  , num_vertices_( 0 )
+  , num_cells_( 0 )
+  , vertex_index_( 0 )
+  , cell_index_( 0 )
+  , open_( false )
 {
-  init(mesh, mesh.type(), mesh.space(), mesh.topology().comm());
+  init( mesh, mesh.type(), mesh.space(), mesh.topology().comm() );
 }
+
 //-----------------------------------------------------------------------------
+
 MeshEditor::~MeshEditor()
 {
-  if(open_)
+  if ( open_ )
   {
-    warning("MeshEditor : editor has not been closed before destruction");
+    warning( "MeshEditor : editor has not been closed before destruction" );
     close();
   }
 }
-//-----------------------------------------------------------------------------
-void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space,
-                      Comm& comm)
-{
-  // Save mesh and dimension
-  this->tdim_ = ctype.dim();
-  this->gdim_ = space.dim();
 
-  // Initialize the topology to the given cell type and space
+//-----------------------------------------------------------------------------
+
+auto MeshEditor::init_vertices( size_t num_local, size_t num_global /* = 0 */ )
+  -> void
+{
+  if ( !open_ )
   {
-    Mesh m(ctype, space, comm);
-    swap(mesh, m);
-    dolfin_assert(mesh.topology_dimension() == ctype.dim());
-    dolfin_assert(mesh.geometry_dimension() == space.dim());
+    error( "MeshEditor : initializing vertices on empty editor" );
   }
 
-  open_ = true;
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
-{
-  if(!open_)
-  {
-    error("MeshEditor : initializing vertices on empty editor");
-  }
   // Initialize mesh data
-  this->num_vertices_ = num_local;
-  mesh_.topology_.init(0, num_local, num_global);
-  mesh_.geometry_.resize(num_local);
+  num_vertices_ = num_local;
+  mesh_.topology_.init( 0, num_local, num_global );
+  mesh_.geometry_.resize( num_local );
 }
+
 //-----------------------------------------------------------------------------
-void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
+
+auto MeshEditor::add_vertex( size_t v, real const * x ) -> void
 {
-  if(!open_)
+  if ( v >= num_vertices_ )
   {
-    error("MeshEditor : initializing cells on empty editor");
+    error( "MeshEditor : Vertex index (%d) out of range [0, %d].",
+           v, num_vertices_ - 1 );
   }
+
+  if ( vertex_index_ >= num_vertices_ )
+  {
+    error( "MeshEditor : vertex list full, %d vertices added.", num_vertices_ );
+  }
+
+  mesh_.geometry().set( v, x );
+  ++vertex_index_;
+}
+
+//-----------------------------------------------------------------------------
+
+auto MeshEditor::current_vertex() const -> size_t
+{
+  return vertex_index_;
+}
+
+//-----------------------------------------------------------------------------
+
+auto MeshEditor::init_cells( size_t num_local, size_t num_global /* = 0 */ )
+  -> void
+{
+  if ( !open_ )
+  {
+    error( "MeshEditor : initializing cells on empty editor" );
+  }
+
   // Initialize mesh data
-  this->num_cells_ = num_local;
-  mesh_.topology().init(tdim_, num_local, num_global);
+  num_cells_ = num_local;
+  mesh_.topology().init( tdim_, num_local, num_global );
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation
-  this->cell_vertices_ = &mesh_.topology()(tdim_, 0);
+  cell_vertices_ = &mesh_.topology()( tdim_, 0 );
 }
+
 //-----------------------------------------------------------------------------
-void MeshEditor::add_vertex(uint v, real const * x)
+
+auto MeshEditor::add_cell( size_t c, size_t const * v ) -> void
 {
-  if (v >= num_vertices_)
+  if ( c >= num_cells_ )
   {
-    error("Vertex index (%d) out of range [0, %d].", v, num_vertices_ - 1);
+    error( "Cell index (%d) out of range [0, %d].", c, num_cells_ - 1 );
   }
-  if (vertex_index_ >= num_vertices_)
+
+  if ( cell_index_ >= num_cells_ )
   {
-    error("MeshEditor : vertex list full, %d vertices added.", num_vertices_);
+    error( "MeshEditor : cell list full, %d cells added.", num_cells_ );
   }
-  mesh_.geometry().set(v, x);
-  ++vertex_index_;
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::add_cell(uint c, uint const * v)
-{
-  if (c >= num_cells_)
-  {
-   error("Cell index (%d) out of range [0, %d].", c, num_cells_ - 1);
-  }
-  if (cell_index_ >= num_cells_)
-  {
-   error("MeshEditor : cell list full, %d cells added.", num_cells_);
-  }
-  dolfin_assert(cell_vertices_ != nullptr);
-  cell_vertices_->set(c, v);
+
+  dolfin_assert( cell_vertices_ != nullptr );
+  cell_vertices_->set( c, v );
   ++cell_index_;
 }
+
 //-----------------------------------------------------------------------------
-void MeshEditor::close()
+
+auto MeshEditor::current_cell() const -> size_t
+{
+  return cell_index_;
+}
+
+//-----------------------------------------------------------------------------
+
+auto MeshEditor::close() -> void
 {
   // Check consistency of number of vertices
-  if( this->num_vertices_ != mesh_.topology().size(0))
+  if ( num_vertices_ != mesh_.topology().size( 0 ) )
   {
-    error("Mismatch between number of vertices initialized and added to mesh : "
-          "%d != %d", this->num_vertices_, mesh_.topology().size(0));
+    error( "Mismatch between number of vertices initialized and added to mesh :"
+           " %d != %d", num_vertices_, mesh_.topology().size( 0 ) );
   }
+
   // Check consistency of number of cells
-  if( this->num_cells_ != mesh_.topology().size(tdim_))
+  if ( num_cells_ != mesh_.topology().size( tdim_ ) )
   {
-    error("Mismatch between number of cells initialized and added to mesh : "
-          "%d != %d", this->num_cells_, mesh_.topology().size(tdim_));
+    error( "Mismatch between number of cells initialized and added to mesh : "
+           "%d != %d", num_cells_, mesh_.topology().size( tdim_ ) );
   }
+
   // Finalize topology and geometry
   mesh_.topology().finalize();
   mesh_.geometry().finalize();
   mesh_.extent_update();
+
   // Clear data
   clear();
 }
+
 //-----------------------------------------------------------------------------
-void MeshEditor::clear()
+
+auto MeshEditor::init( Mesh &           mesh,
+                       CellType const & ctype,
+                       Space const &    space,
+                       Comm &           comm ) -> void
 {
-  tdim_ = 0;
-  gdim_ = 0;
+  // Save mesh and dimension
+  tdim_ = ctype.dim();
+  gdim_ = space.dim();
+
+  // Initialize the topology to the given cell type and space
+  {
+    Mesh m( ctype, space, comm );
+    swap( mesh, m );
+    dolfin_assert( mesh.topology_dimension() == ctype.dim() );
+    dolfin_assert( mesh.geometry_dimension() == space.dim() );
+  }
+
+  open_ = true;
+}
+
+//-----------------------------------------------------------------------------
+
+auto MeshEditor::clear() -> void
+{
+  tdim_         = 0;
+  gdim_         = 0;
   num_vertices_ = 0;
-  num_cells_ = 0;
+  num_cells_    = 0;
   vertex_index_ = 0;
-  cell_index_ = 0;
-  open_ = false;
+  cell_index_   = 0;
+  open_         = false;
 }
-//-----------------------------------------------------------------------------
-uint MeshEditor::current_vertex() const
-{
-  return vertex_index_;
-}
-//-----------------------------------------------------------------------------
-uint MeshEditor::current_cell() const
-{
-  return cell_index_;
-}
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

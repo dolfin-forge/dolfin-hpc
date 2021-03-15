@@ -25,14 +25,14 @@ public:
   }
 
   /// Create vector of size N distributed by default
-  explicit Vector( uint N )
+  explicit Vector( size_t N )
     : vector_( DefaultFactory::factory().createVector() )
   {
     vector_->init( N );
   }
 
   /// Create vector of size N distributed if specified
-  explicit Vector( uint N, bool distributed )
+  explicit Vector( size_t N, bool distributed )
     : vector_( DefaultFactory::factory().createVector() )
   {
     vector_->init( N, distributed );
@@ -62,37 +62,37 @@ public:
   void apply( FinalizeType finaltype = FINALIZE ) override;
 
   /// Display tensor
-  void disp( uint precision = 2 ) const override;
+  void disp( size_t precision = 2 ) const override;
 
   //--- Implementation of the GenericVector interface ---
 
   /// Initialize vector of size N
-  void init( uint N ) override;
+  void init( size_t N ) override;
 
   /// Initialize vector of size N and distribute if specified
-  void init( uint N, bool distributed ) override;
+  void init( size_t N, bool distributed ) override;
 
-  void init_ghosted( uint                         n,
-                     _ordered_set< uint > &       indices,
-                     _ordered_map< uint, uint > & map ) override;
+  void init_ghosted( size_t                           n,
+                     _ordered_set< size_t > &         indices,
+                     _ordered_map< size_t, size_t > & map ) override;
 
   /// Return size of vector
-  uint size() const override;
+  size_t size() const override;
 
   /// Return local size of vector
-  uint local_size() const override;
+  size_t local_size() const override;
 
   /// Return rank's offset into vector
-  uint offset() const override;
+  size_t offset() const override;
 
   /// Get block of values
-  void get( real * block, uint m, const uint * rows ) const override;
+  void get( real * block, size_t m, const size_t * rows ) const override;
 
   /// Set block of values
-  void set( const real * block, uint m, const uint * rows ) override;
+  void set( const real * block, size_t m, const size_t * rows ) override;
 
   /// Add block of values
-  void add( const real * block, uint m, const uint * rows ) override;
+  void add( const real * block, size_t m, const size_t * rows ) override;
 
   /// Get all local values (not ghost entries)
   void get( real * values ) const override;
@@ -107,17 +107,18 @@ public:
   void axpy( real a, const GenericVector & x ) override;
 
   /// Add multiple of given vector (y=a*x+b*y)
-  void axpby( real a, const GenericVector & x,
-              real b ) override;
+  void axpby( real a, const GenericVector & x, real b ) override;
 
   /// Add multiple of given vector (w=a*x+y)
-  void waxpy( real a, const GenericVector & x,
-                      const GenericVector & y ) override;
+  void
+    waxpy( real a, const GenericVector & x, const GenericVector & y ) override;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  void axpbypcz( real a, const GenericVector & x,
-                 real b, const GenericVector & y,
-                 real c ) override;
+  void axpbypcz( real                  a,
+                 const GenericVector & x,
+                 real                  b,
+                 const GenericVector & y,
+                 real                  c ) override;
 
   /// Return inner product with given vector
   real inner( const GenericVector & x ) const override;
@@ -198,63 +199,63 @@ inline void Vector::apply( FinalizeType finaltype )
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::disp( uint precision ) const
+inline void Vector::disp( size_t precision ) const
 {
   vector_->disp( precision );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::init( uint N )
+inline void Vector::init( size_t N )
 {
   vector_->init( N );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::init( uint N, bool distributed )
+inline void Vector::init( size_t N, bool distributed )
 {
   vector_->init( N, distributed );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::init_ghosted( uint                         n,
-                                  _ordered_set< uint > &       indices,
-                                  _ordered_map< uint, uint > & map )
+inline void Vector::init_ghosted( size_t                           n,
+                                  _ordered_set< size_t > &         indices,
+                                  _ordered_map< size_t, size_t > & map )
 {
   vector_->init_ghosted( n, indices, map );
 }
 
 //-----------------------------------------------------------------------------
-inline uint Vector::size() const
+inline size_t Vector::size() const
 {
   return vector_->size();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Vector::local_size() const
+inline size_t Vector::local_size() const
 {
   return vector_->local_size();
 }
 
 //-----------------------------------------------------------------------------
-inline uint Vector::offset() const
+inline size_t Vector::offset() const
 {
   return vector_->offset();
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::get( real * block, uint m, const uint * rows ) const
+inline void Vector::get( real * block, size_t m, const size_t * rows ) const
 {
   vector_->get( block, m, rows );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::set( const real * block, uint m, const uint * rows )
+inline void Vector::set( const real * block, size_t m, const size_t * rows )
 {
   vector_->set( block, m, rows );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::add( const real * block, uint m, const uint * rows )
+inline void Vector::add( const real * block, size_t m, const size_t * rows )
 {
   vector_->add( block, m, rows );
 }
@@ -284,23 +285,24 @@ inline void Vector::axpy( real a, const GenericVector & x )
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::axpby( real a, const GenericVector & x,
-                           real b )
+inline void Vector::axpby( real a, const GenericVector & x, real b )
 {
   vector_->axpby( a, x, b );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::waxpy( real a, const GenericVector & x,
-                                   const GenericVector & y )
+inline void
+  Vector::waxpy( real a, const GenericVector & x, const GenericVector & y )
 {
   vector_->waxpy( a, x, y );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::axpbypcz( real a, const GenericVector & x,
-                              real b, const GenericVector & y,
-                              real c )
+inline void Vector::axpbypcz( real                  a,
+                              const GenericVector & x,
+                              real                  b,
+                              const GenericVector & y,
+                              real                  c )
 {
   vector_->axpbypcz( a, x, b, y, c );
 }

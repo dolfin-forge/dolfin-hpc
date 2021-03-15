@@ -54,29 +54,29 @@ void Lagrange::set(unsigned int i, real x)
   init();
 }
 //-----------------------------------------------------------------------------
-unsigned int Lagrange::size() const
+auto Lagrange::size() const -> unsigned int
 {
   return n;
 }
 //-----------------------------------------------------------------------------
-unsigned int Lagrange::degree() const
+auto Lagrange::degree() const -> unsigned int
 {
   return q;
 }
 //-----------------------------------------------------------------------------
-real Lagrange::point(unsigned int i) const
+auto Lagrange::point(unsigned int i) const -> real
 {
   dolfin_assert(i <= q);
 
   return points[i];
 }
 //-----------------------------------------------------------------------------
-real Lagrange::operator() (unsigned int i, real x)
+auto Lagrange::operator() (unsigned int i, real x) -> real
 {
   return eval(i,x);
 }
 //-----------------------------------------------------------------------------
-real Lagrange::eval(unsigned int i, real x)
+auto Lagrange::eval(unsigned int i, real x) -> real
 {
   dolfin_assert(i <= q);
 
@@ -88,7 +88,7 @@ real Lagrange::eval(unsigned int i, real x)
   return product;
 }
 //-----------------------------------------------------------------------------
-real Lagrange::ddx(unsigned int i, real x)
+auto Lagrange::ddx(unsigned int i, real x) -> real
 {
   dolfin_assert(i <= q);
 
@@ -106,7 +106,7 @@ real Lagrange::ddx(unsigned int i, real x)
   return sum * constants[i];
 }
 //-----------------------------------------------------------------------------
-real Lagrange::dqdx(unsigned int i)
+auto Lagrange::dqdx(unsigned int i) -> real
 {
   real product = constants[i];
 
@@ -116,7 +116,7 @@ real Lagrange::dqdx(unsigned int i)
   return product;
 }
 //-----------------------------------------------------------------------------
-LogStream& dolfin::operator<<(LogStream& stream, const Lagrange& p)
+auto dolfin::operator<<(LogStream& stream, const Lagrange& p) -> LogStream&
 {
   stream << "[ Lagrange polynomial of degree " << p.q << " with " << p.n << " points ]";
   return stream;

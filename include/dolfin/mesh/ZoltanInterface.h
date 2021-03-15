@@ -13,96 +13,92 @@
 #include <zoltan_cpp.h>
 #endif
 
-
 namespace dolfin
 {
-  /// This class provides an interface to Zoltan
+/// This class provides an interface to Zoltan
 
-  class ZoltanInterface
-  {
-  public:
+class ZoltanInterface
+{
+public:
+  static void partitionCommonZoltan( Mesh &                       mesh,
+                                     MeshValues< size_t, Cell > & partitions,
+                                     MeshValues< size_t, Cell > * weight );
 
-    static void partitionCommonZoltan(Mesh& mesh,
-                                      MeshValues<uint, Cell>& partitions,
-				                              MeshValues<uint, Cell>* weight);
-
-    static void partitionGeomZoltan(Mesh& mesh,
-                                    MeshValues<uint, Vertex>& partitions);
+  static void partitionGeomZoltan( Mesh &                         mesh,
+                                   MeshValues< size_t, Vertex > & partitions );
 
 #ifdef HAVE_ZOLTAN
 
-  private:
+private:
+  /// Zoltan callbacks
 
-    /// Zoltan callbacks
+  // Generall functions
+  static int partitionZoltanNumCells( void * data, int * ierr );
+  static int partitionZoltanNumVertices( void * data, int * ierr );
 
-    // Generall functions
-    static int partitionZoltanNumCells(void *data, int *ierr);
-    static int partitionZoltanNumVertices(void *data, int *ierr);
+  static void partitionZoltanCellList( void *        data,
+                                       int           num_gid_entries,
+                                       int           num_lid_entries,
+                                       ZOLTAN_ID_PTR global_ids,
+                                       ZOLTAN_ID_PTR local_ids,
+                                       int           wgt_dim,
+                                       float *       obj_wgts,
+                                       int *         ierr );
 
-    static void partitionZoltanCellList(void *data,
-					int num_gid_entries,
-					int num_lid_entries,
-					ZOLTAN_ID_PTR global_ids,
-					ZOLTAN_ID_PTR local_ids,
-					int wgt_dim,
-					float *obj_wgts,
-					int *ierr);
+  static void partitionZoltanVertexList( void *        data,
+                                         int           num_gid_entries,
+                                         int           num_lid_entries,
+                                         ZOLTAN_ID_PTR global_ids,
+                                         ZOLTAN_ID_PTR local_ids,
+                                         int           wgt_dim,
+                                         float *       obj_wgts,
+                                         int *         ierr );
 
-    static void partitionZoltanVertexList(void *data,
-					  int num_gid_entries,
-					  int num_lid_entries,
-					  ZOLTAN_ID_PTR global_ids,
-					  ZOLTAN_ID_PTR local_ids,
-					  int wgt_dim,
-					  float *obj_wgts,
-					  int *ierr);
+  // Dual graph based functions
+  static void partitionZoltanNumEdges( void *        data,
+                                       int           num_gid_entries,
+                                       int           num_lid_entries,
+                                       int           num_obj,
+                                       ZOLTAN_ID_PTR global_ids,
+                                       ZOLTAN_ID_PTR local_ids,
+                                       int *         num_edges,
+                                       int *         ierr );
 
-    // Dual graph based functions
-    static void partitionZoltanNumEdges(void *data,
-				       int num_gid_entries,
-				       int num_lid_entries,
-				       int num_obj,
-				       ZOLTAN_ID_PTR global_ids,
-				       ZOLTAN_ID_PTR local_ids,
-				       int *num_edges,
-				       int *ierr);
+  static void partitionZoltanEdgeList( void *        data,
+                                       int           num_gid_entries,
+                                       int           num_lid_entries,
+                                       int           num_obj,
+                                       ZOLTAN_ID_PTR global_ids,
+                                       ZOLTAN_ID_PTR local_ids,
+                                       int *         num_edges,
+                                       ZOLTAN_ID_PTR nbor_global_id,
+                                       int *         nbor_procs,
+                                       int           wgt_dim,
+                                       float *       ewgts,
+                                       int *         ierr );
 
-    static void partitionZoltanEdgeList(void *data,
-					int num_gid_entries,
-					int num_lid_entries,
-					int num_obj,
-					ZOLTAN_ID_PTR global_ids,
-					ZOLTAN_ID_PTR local_ids,
-					int *num_edges,
-					ZOLTAN_ID_PTR nbor_global_id,
-					int *nbor_procs,
-					int wgt_dim,
-					float *ewgts,
-					int *ierr);
+  // Geometry based functions
+  static int partitionZoltanNumGeom( void * data, int * ierr );
 
-    // Geometry based functions
-    static int partitionZoltanNumGeom(void *data, int *ierr);
+  static void partitionZoltanGeomCoords( void *        data,
+                                         int           num_gid_entries,
+                                         int           num_lid_entries,
+                                         int           num_obj,
+                                         ZOLTAN_ID_PTR global_ids,
+                                         ZOLTAN_ID_PTR local_ids,
+                                         int           num_dim,
+                                         double *      geom_vec,
+                                         int *         ierr );
 
-    static void partitionZoltanGeomCoords(void *data,
-					  int num_gid_entries,
-					  int num_lid_entries,
-					  int num_obj,
-					  ZOLTAN_ID_PTR global_ids,
-					  ZOLTAN_ID_PTR local_ids,
-					  int num_dim,
-					  double *geom_vec,
-					  int *ierr);
-
-
-    // Internal common partition function
-    template <class Entity>
-    static void partitionZoltanInternal(Mesh& mesh,
-          MeshValues<uint, Entity>& partitions,
-					Zoltan *zz);
+  // Internal common partition function
+  template < class Entity >
+  static void
+    partitionZoltanInternal( Mesh &                         mesh,
+                             MeshValues< size_t, Entity > & partitions,
+                             Zoltan *                       zz );
 
 #endif
-
-  };
+};
 
 }
 

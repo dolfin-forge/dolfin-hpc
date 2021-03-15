@@ -31,10 +31,10 @@ public:
   ~SlipFrictionBC() override = default;
 
   ///
-  BoundaryNormal& normal();
+  auto normal() -> BoundaryNormal&;
 
   ///
-  Coefficient& friction() const;
+  auto friction() const -> Coefficient&;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -71,7 +71,7 @@ inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
 }
 
 //-----------------------------------------------------------------------------
-inline Coefficient& SlipFrictionBC::friction() const
+inline auto SlipFrictionBC::friction() const -> Coefficient&
 {
   return beta_;
 }

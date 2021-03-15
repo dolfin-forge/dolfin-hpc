@@ -14,15 +14,15 @@ class Function;
 namespace AdaptiveRefinement
 {
 
-using FunctionMapping = Array< std::pair< std::string, Function * > >;
+using FunctionMapping = std::vector< std::pair< std::string, Function * > >;
 
 /// Refine mesh using "simple" of "rivara" strategy
 void refine( Mesh & mesh, MeshValues< bool, Cell > & cell_marker );
 
 ///
-void refine_and_project( Mesh & mesh,
-                         FunctionMapping const & functions,
-                         MeshValues< bool, Cell > &  cell_marker );
+void refine_and_project( Mesh &                     mesh,
+                         FunctionMapping const &    functions,
+                         MeshValues< bool, Cell > & cell_marker );
 
 } // namespace AdaptiveRefinement
 

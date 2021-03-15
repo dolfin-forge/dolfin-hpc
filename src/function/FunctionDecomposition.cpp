@@ -6,20 +6,20 @@
 
 #include <dolfin/function/FunctionDecomposition.h>
 
-#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 namespace dolfin
 {
 //-----------------------------------------------------------------------------
-Array<Function *> FunctionDecomposition::compute(Function const& F)
+auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *>
 {
   message( 1, "Decomposing Function: %p", &F );
 
@@ -30,8 +30,8 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   //that things are acceptable as long as high-level functions are OK.
   FiniteElementSpace const& Wh = F.space();
   ScratchSpace S(Wh);
-  Array<FiniteElementSpace *> spaces = Wh.flatten();
-  Array<Function *> Si;
+  std::vector<FiniteElementSpace *> spaces = Wh.flatten();
+  std::vector<Function *> Si;
   for ( FiniteElementSpace * fespaces : spaces )
   {
     Si.push_back(new Function(*fespaces));
@@ -42,25 +42,25 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     //NOTE: This implementation is based on the assumption that the dofmap for
     //      a CG1 function is indexed by the global indices of vertices.
     MeshValues<bool, Vertex> marked(mesh);
-    uint offset = 0;
-    uint const numcellnodes = S.local_dimension / S.size;
+    size_t offset = 0;
+    size_t const numcellnodes = S.local_dimension / S.size;
     real * block = F.create_block();
     F.get_block(block);
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       S.cell.update(*c);
-      Array<uint> const & cvi = c->entities(0);
+      std::vector<size_t> const & cvi = c->entities(0);
       for (VertexIterator v(*c); !v.end(); ++v)
       {
-        uint ci = 0;
+        size_t ci = 0;
         while (cvi[ci] != v->index())
         {
           ++ci;
         }
         if (!v->is_ghost() && !marked(*v))
         {
-          uint dof_index = v->global_index();
-          for (uint i = 0; i < Si.size(); ++i)
+          size_t dof_index = v->global_index();
+          for (size_t i = 0; i < Si.size(); ++i)
           {
             Si[i]->vector().set(&block[offset + i * numcellnodes + ci], 1,
                                 &dof_index);
@@ -75,8 +75,8 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   }
   else if (Wh.is_cellwise_constant())
   {
-    uint dofii = 0;
-    uint dof_index = 0;
+    size_t dofii = 0;
+    size_t dof_index = 0;
     real * block = F.create_block();
     F.get_block(block);
     for (CellIterator c(mesh); !c.end(); ++c)
@@ -92,11 +92,11 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   }
   else if (Wh.element().is_vectorizable())
   {
-    uint ii = 0;
-    uint offset = 0;
+    size_t ii = 0;
+    size_t offset = 0;
     FiniteElementSpace& Vh0 = *(*spaces.begin());
     ScratchSpace S0(Vh0);
-    uint const * celldofs = Vh0.dofmap().dofsmapping();
+    size_t const * celldofs = Vh0.dofmap().dofsmapping();
     real * block = F.create_block();
     F.get_block(block);
     for (CellIterator c(mesh); !c.end(); ++c)
@@ -114,14 +114,14 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   }
   else
   {
-    uint ii = 0;
-    Array< uint > offset( Si.size() );
-    Array< uint > local_dim( Si.size() );
-    uint const ** celldofs = new uint const *[Si.size()];
-    for (uint i = 0; i < Si.size(); ++i)
+    size_t ii = 0;
+    std::vector< size_t > offset( Si.size() );
+    std::vector< size_t > local_dim( Si.size() );
+    size_t const ** celldofs = new size_t const *[Si.size()];
+    for (size_t i = 0; i < Si.size(); ++i)
     {
       FiniteElementSpace const& Vhi = (*Si[i]).space();
-      local_dim[i] = Vhi.dofmap().local_dimension();
+      local_dim[i] = Vhi.dofmap().num_element_dofs;
       celldofs[i] = Vhi.dofmap().dofsmapping();
     }
     real * block = F.create_block();
@@ -129,7 +129,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       //
-      for (uint i = 0; i < Si.size(); ++i)
+      for (size_t i = 0; i < Si.size(); ++i)
       {
         Si[i]->vector().set(&block[ii], local_dim[i], &celldofs[i][offset[i]]);
         ii += local_dim[i];

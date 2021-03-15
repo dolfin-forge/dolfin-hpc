@@ -64,7 +64,7 @@ SubSystemsManager::~SubSystemsManager()
   SubSystemsManager::fini();
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
+auto SubSystemsManager::init(int argc, char* argv[], size_t n, long w_limit) -> int
 {
   if (count_ == 0 )
   {
@@ -99,7 +99,7 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
   return ++count_;
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::fini()
+auto SubSystemsManager::fini() -> int
 {
   if (count_ > 0 )
   {
@@ -134,7 +134,7 @@ void SubSystemsManager::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::init(int argc, char* argv[], uint n)
+auto SubSystemsManager::MPI::init(int argc, char* argv[], size_t n) -> bool
 {
 #ifdef HAVE_MPI
 
@@ -169,7 +169,7 @@ bool SubSystemsManager::MPI::init(int argc, char* argv[], uint n)
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::fini()
+auto SubSystemsManager::MPI::fini() -> bool
 {
 #ifdef HAVE_MPI
 
@@ -197,7 +197,7 @@ bool SubSystemsManager::MPI::fini()
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::MPI::initialized()
+auto SubSystemsManager::MPI::initialized() -> bool
 {
 #ifdef HAVE_MPI
 
@@ -213,7 +213,7 @@ bool SubSystemsManager::MPI::initialized()
 #endif /* HAVE_MPI */
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::PETSc::init(int argc, char* argv[])
+auto SubSystemsManager::PETSc::init(int argc, char* argv[]) -> bool
 {
 #ifdef HAVE_PETSC
 
@@ -249,7 +249,7 @@ bool SubSystemsManager::PETSc::init(int argc, char* argv[])
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::PETSc::fini()
+auto SubSystemsManager::PETSc::fini() -> bool
 {
 #ifdef HAVE_PETSC
 
@@ -279,7 +279,7 @@ bool SubSystemsManager::PETSc::fini()
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::Zoltan::init(int argc, char* argv[])
+auto SubSystemsManager::Zoltan::init(int argc, char* argv[]) -> bool
 {
 #ifdef HAVE_ZOLTAN
 
@@ -303,7 +303,7 @@ bool SubSystemsManager::Zoltan::init(int argc, char* argv[])
   return true;
 }
 //-----------------------------------------------------------------------------
-bool SubSystemsManager::Zoltan::fini()
+auto SubSystemsManager::Zoltan::fini() -> bool
 {
 #ifdef HAVE_ZOLTAN
 

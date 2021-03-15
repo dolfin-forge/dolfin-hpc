@@ -6,8 +6,8 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/main/PE.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/EdgeKey.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 #include <list>
 #include <vector>
@@ -19,7 +19,8 @@ class CellType;
 struct DCell;
 struct DVertex;
 class Mesh;
-template<class T, class E, uint N> struct MeshValues;
+template < class T, class E, size_t N >
+struct MeshValues;
 
 /// Dynamic mesh class for on-the-fly changes to the mesh. It is used by the
 /// recursive RivaraRefinement and the EdgeCollapse-MeshCoarsening.
@@ -33,125 +34,127 @@ template<class T, class E, uint N> struct MeshValues;
 class DMesh
 {
 public:
-
   /// Constructor on a mesh (preferred)
-  DMesh(Mesh& mesh);
+  DMesh( Mesh & mesh );
 
   /// Destructor
   ~DMesh();
 
   /// Export to a regular mesh
-  void exp(Mesh& mesh);
+  void exp( Mesh & mesh );
 
   /// Bisect marked cells
-  void bisectMarked(MeshValues<bool, Cell> const& marked_ids);
+  void bisectMarked( MeshValues< bool, Cell > const & marked_ids );
 
 private:
-
   /// Edge data structure for propagation
   typedef struct __edge__
   {
-    long mv;    //< global index of midpoint vertex
-    long v1;    //< global index of endpoint
-    long v2;    //< global index of endpoint
-    uint owner;	//< rank of owner
+    size_t mv;    //< global index of midpoint vertex
+    size_t v1;    //< global index of endpoint
+    size_t v2;    //< global index of endpoint
+    size_t owner; //< rank of owner
   } prop_edge;
 
-  static bool less_pair_comp( std::pair< uint, prop_edge > const & x,
-                              std::pair< uint, prop_edge > const & y );
+  static auto less_pair_comp( std::pair< size_t, prop_edge > const & x,
+                              std::pair< size_t, prop_edge > const & y )
+    -> bool;
 
   /// Pair datatype for propagation
-  using Propagation = std::pair<uint, prop_edge>;
+  using Propagation = std::pair< size_t, prop_edge >;
 
   /// Add a new vertex
-  void add_vertex(DVertex* v);
+  void add_vertex( DVertex * v );
 
   /// Add a new cell with vertices vs and inside existing cell parent_id
-  void add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id);
+  void add_cell( DCell * c, std::vector< DVertex * > vs, int parent_id );
 
   /// Remove a vertex
   ///
   /// Entity is just marked as deleted, but not yet erased
-  void removeVertex(DVertex* v);
+  void removeVertex( DVertex * v );
 
   /// Remove a cell
   ///
   /// Entity is just marked as deleted, but not yet erased
-  void removeCell(DCell* c);
+  void removeCell( DCell * c );
 
   /// Renumber mesh entities locally
   ///
-  /// An optional mapping between old and new indices is generated. The Arrays
-  /// have to have the size of the old numbering
-  void number(Array<int> *old2new_cells = nullptr,
-              Array<int> *old2new_vertices = nullptr);
+  /// An optional mapping between old and new indices is generated. The
+  /// std::vectors have to have the size of the old numbering
+  void number( std::vector< int > * old2new_cells    = nullptr,
+               std::vector< int > * old2new_vertices = nullptr );
 
   /// Renumber global indicies to fit within the range of an unsigned int
-  void renumber_glb(_map<long, uint>& new_global);
+  void renumber_glb( _map< size_t, size_t > & new_global );
 
   /// Bisect cell dcell
   ///
   /// The edge for the bisection is given by hv0 and hv1 and hangv is the
   /// hanging node of the opposite cell
-  void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
+  void bisect( DCell * dcell, DVertex * hangv, DVertex * hv0, DVertex * hv1 );
 
   /// Get opposite cell with respect to vertices v1 and v2
-  DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
+  auto opposite( DCell * dcell, DVertex * v1, DVertex * v2 ) -> DCell *;
 
   /// Propagate refinement
-  void propagate_refinement(Mesh& mesh,
-                            Array<Propagation>& propagation, bool& empty);
+  void propagate_refinement( Mesh &                       mesh,
+                             std::vector< Propagation > & propagation,
+                             bool &                       empty );
 
   /// Naive refinement propagation with pairwise communication
-  void propagate_naive(Mesh& mesh,
-                       Array<Propagation>& propagation, bool& empty);
+  void propagate_naive( Mesh &                       mesh,
+                        std::vector< Propagation > & propagation,
+                        bool &                       empty );
 
   /// Refinement propagation within hypercube
-  void propagate_hypercube(Mesh& mesh,
-                           Array<Propagation>& propagation, bool& empty);
+  void propagate_hypercube( Mesh &                       mesh,
+                            std::vector< Propagation > & propagation,
+                            bool &                       empty );
 
   /// Vertices contained in the mesh
-  using VertexSet = _ordered_set<DVertex *>;
+  using VertexSet = _ordered_set< DVertex * >;
   VertexSet vertices;
 
   /// Cells contained in the mesh
-  using CellList = std::list<DCell *>;
+  using CellList = std::list< DCell * >;
   CellList cells;
 
   /// Propagation buffer
-  Array<Propagation> propagate;
+  std::vector< Propagation > propagate;
 
   /// Map between global number of boundary vertex to vertex
-  using BoundaryVertices = _map<long, DVertex *>;
+  using BoundaryVertices = _map< size_t, DVertex * >;
   BoundaryVertices bc_dvs;
 
   /// Refined edges
-  using RefinedEdges = _map<EdgeKey<long>, DVertex *>;
+  using RefinedEdges = _map< EdgeKey< size_t >, DVertex * >;
   RefinedEdges ref_edge;
 
   /// Mesh
-  Mesh& mesh_;
+  Mesh & mesh_;
 
   /// CellType of mesh
   CellType const * const ctype_;
-  Space    const * const space_;
+  Space const * const    space_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh
-  long glb_max_;
+  size_t glb_max_;
 
   /// enumeration salt for bisect
-  long salt_;
+  size_t salt_;
 
   /// Count of deleted
-  uint cdeleted_;
-  uint vdeleted_;
-
+  size_t cdeleted_;
+  size_t vdeleted_;
 };
 //-----------------------------------------------------------------------------
 /// Comparison operator for index/value pairs
-inline bool DMesh::less_pair_comp( std::pair< uint, prop_edge > const & x,
-                                   std::pair< uint, prop_edge > const & y )
+inline auto DMesh::less_pair_comp( std::pair< size_t, prop_edge > const & x,
+                                   std::pair< size_t, prop_edge > const & y )
+  -> bool
 {
   return x.first < y.first;
 }

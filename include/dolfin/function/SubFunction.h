@@ -13,6 +13,8 @@ namespace dolfin
 
 class Function;
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  SubFunction
  *
@@ -33,7 +35,7 @@ class SubFunction
 
 public:
   /// Create sub function
-  SubFunction( Function & f, uint i )
+  SubFunction( Function & f, size_t i )
     : f_( &f )
     , i_( i )
   {
@@ -43,10 +45,10 @@ public:
   ~SubFunction() = default;
 
   /// Return global function
-  Function & function() const;
+  auto function() const -> Function &;
 
   /// Return index of the sub function
-  uint index() const;
+  auto index() const -> size_t;
 
   /// Display basic information
   void disp() const;
@@ -54,30 +56,33 @@ public:
 private:
   /// Create empty sub function
   SubFunction()
-     
+
   {
   }
 
   // Pointer to discrete function
-  Function * const f_{ nullptr };
+  Function * const f_ { nullptr };
 
   // Sub function index
-  uint const i_{ 0 };
+  size_t const i_ { 0 };
 };
 
 //-----------------------------------------------------------------------------
-inline Function & SubFunction::function() const
+
+inline auto SubFunction::function() const -> Function &
 {
   return *f_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint SubFunction::index() const
+
+inline auto SubFunction::index() const -> size_t
 {
   return i_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline void SubFunction::disp() const
 {
   section( "SubFunction" );

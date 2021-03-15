@@ -4,156 +4,178 @@
 #include <dolfin/fem/ScratchSpace.h>
 
 #include <dolfin/fem/FiniteElementSpace.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Space.h>
+
+#include <utility>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
-    mesh(space.mesh()),
-    cell(space.cell()),
-    offset(0),
-    finite_element(&space.element()),
-    dof_map(&space.dofmap()),
-    size(value_size(*finite_element)),
-    space_dimension(finite_element->space_dimension()),
-    local_dimension(dof_map->local_dimension()),
-    num_sub_elements(finite_element->num_sub_elements()),
-    topological_dimension(finite_element->topological_dimension()),
-    geometric_dimension(space.mesh().geometry_dimension()),
-    dofs(new uint[space_dimension]),
-    facet_dofs(new uint[dof_map->num_facet_dofs()]),
-    values(new real[size]),
-    coefficients(new real[space_dimension]),
-    basis_values(new real[space_dimension]),
+
+ScratchSpace::ScratchSpace( FiniteElementSpace const & space )
+  : cell( space.cell() )
+  , offset( 0 )
+  , finite_element( &space.element().ufc() )
+  , dof_map( &space.dofmap().ufc() )
+  , size( finite_element->value_size() )
+  , space_dimension( finite_element->space_dimension() )
+  , local_dimension( dof_map->num_element_dofs() )
+  , num_sub_elements( finite_element->num_sub_elements() )
+  , topological_dimension( finite_element->topological_dimension() )
+  , geometric_dimension( space.mesh().geometry_dimension() )
+  , dofs( finite_element->space_dimension(), 0 )
+  , facet_dofs( dof_map->num_facet_dofs(), 0 )
+  , values( finite_element->value_size(), 0.0 )
+  , coefficients( finite_element->space_dimension(), 0.0 )
+  , basis_values( finite_element->space_dimension(), 0.0 )
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-    all_basis_values(new real*[space_dimension]),
+  , all_basis_values( finite_element->space_dimension(),
+                      std::vector< real >( Space::MAX_DIMENSION, 0.0 ) )
 #endif
-    coordinates(new real*[local_dimension]),
-    owner_(false)
+  , coordinates( dof_map->num_element_dofs() * Space::MAX_DIMENSION, 0.0 )
+  , owner_( false )
 {
-  init();
 }
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
-                           SubSystem const& sub_system) :
-    mesh(space.mesh()),
-    cell(space.cell()),
-    offset(0),
-    finite_element(space.element().create_sub_element(sub_system.array())),
-    dof_map(space.dofmap().create_sub_dofmap(sub_system.array(), offset)),
-    size(value_size(*finite_element)),
-    space_dimension(finite_element->space_dimension()),
-    local_dimension(dof_map->local_dimension()),
-    num_sub_elements(finite_element->num_sub_elements()),
-    topological_dimension(finite_element->topological_dimension()),
-    geometric_dimension(space.mesh().geometry_dimension()),
-    dofs(new uint[space_dimension]),
-    facet_dofs(new uint[dof_map->num_facet_dofs()]),
-    values(new real[size]),
-    coefficients(new real[space_dimension]),
-    basis_values(new real[space_dimension]),
+
+ScratchSpace::ScratchSpace( ScratchSpace const & other )
+  : cell( other.cell )
+  , offset( 0 )
+  , finite_element( other.finite_element->create() )
+  , dof_map( other.dof_map->create() )
+  , size( other.size )
+  , space_dimension( other.space_dimension )
+  , local_dimension( other.local_dimension )
+  , num_sub_elements( other.num_sub_elements )
+  , topological_dimension( other.topological_dimension )
+  , geometric_dimension( other.geometric_dimension )
+  , dofs( other.dofs )
+  , facet_dofs( other.facet_dofs )
+  , values( other.values )
+  , coefficients( other.coefficients )
+  , basis_values( other.basis_values )
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-    all_basis_values(new real*[space_dimension]),
+  , all_basis_values( other.all_basis_values )
 #endif
-    coordinates(new real*[local_dimension]),
-    owner_(true)
+  , coordinates( other.coordinates )
+  , owner_( true )
 {
-  init();
 }
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(ScratchSpace const& other) :
-    mesh(other.mesh),
-    cell(other.cell),
-    offset(0),
-    finite_element(nullptr),
-    dof_map(nullptr),
-    size(0),
-    space_dimension(0),
-    local_dimension(0),
-    num_sub_elements(0),
-    topological_dimension(0),
-    geometric_dimension(0),
-    dofs(nullptr),
-    facet_dofs(nullptr),
-    values(nullptr),
-    coefficients(nullptr),
-    basis_values(nullptr),
+
+ScratchSpace::ScratchSpace( ScratchSpace && other )
+  : cell( other.cell )
+  , offset( other.offset )
+  , finite_element( other.owner_ ? other.finite_element->create()
+                                 : other.finite_element )
+  , dof_map( other.owner_ ? other.dof_map->create()
+                          : other.dof_map )
+  , size( other.size )
+  , space_dimension( other.space_dimension )
+  , local_dimension( other.local_dimension )
+  , num_sub_elements( other.num_sub_elements )
+  , topological_dimension( other.topological_dimension )
+  , geometric_dimension( other.geometric_dimension )
+  , dofs( std::move( other.dofs ) )
+  , facet_dofs( std::move( other.facet_dofs ) )
+  , values( std::move( other.values ) )
+  , coefficients( std::move( other.coefficients ) )
+  , basis_values( std::move( other.basis_values ) )
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-    all_basis_values(nullptr),
+  , all_basis_values( std::move( other.all_basis_values ) )
 #endif
-    coordinates(nullptr),
-    owner_(false)
+  , coordinates( std::move( other.coordinates ) )
+  , owner_( other.owner_ )
 {
-  error("ScratchSpace::ScratchSpace(ScratchSpace const& other)");
 }
 
 //-----------------------------------------------------------------------------
+
+ScratchSpace::ScratchSpace( FiniteElementSpace const & space,
+                            SubSystem const &          sub_system )
+  : cell( space.cell() )
+  , offset( 0 )
+  , finite_element( space.element().create_sub_element( sub_system.array() ) )
+  , dof_map( space.dofmap().create_sub_dofmap( sub_system.array(), offset ) )
+  , size( finite_element->value_size() )
+  , space_dimension( finite_element->space_dimension() )
+  , local_dimension( dof_map->num_element_dofs() )
+  , num_sub_elements( finite_element->num_sub_elements() )
+  , topological_dimension( finite_element->topological_dimension() )
+  , geometric_dimension( space.mesh().geometry_dimension() )
+  , dofs( finite_element->space_dimension(), 0 )
+  , facet_dofs( dof_map->num_facet_dofs(), 0 )
+  , values( finite_element->value_size(), 0.0 )
+  , coefficients( finite_element->space_dimension(), 0.0 )
+  , basis_values( finite_element->space_dimension(), 0.0 )
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+  , all_basis_values( finite_element->space_dimension(),
+                      std::vector< real >( Space::MAX_DIMENSION, 0.0 ) )
+#endif
+  , coordinates( dof_map->num_element_dofs() * Space::MAX_DIMENSION, 0.0 )
+  , owner_( true )
+{
+}
+
+//-----------------------------------------------------------------------------
+
 ScratchSpace::~ScratchSpace()
 {
-  for (uint i = 0; i < local_dimension; ++i)
-  {
-    delete[] coordinates[i];
-  }
-  delete[] coordinates;
-  delete[] basis_values;
-  delete[] coefficients;
-  delete[] values;
-  delete[] facet_dofs;
-  delete[] dofs;
-  if (owner_)
+  if ( owner_ )
   {
     delete dof_map;
     delete finite_element;
   }
-#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-  for ( uint i = 0; i < space_dimension; ++i )
-  {
-    if ( all_basis_values[i] != nullptr )
-      delete[] all_basis_values[i];
-  }
-  delete[] all_basis_values;
-#endif
 }
 
 //-----------------------------------------------------------------------------
-uint ScratchSpace::value_size(ufc::finite_element const& finite_element)
+
+ScratchSpace & ScratchSpace::operator=( ScratchSpace & other )
 {
-  // Compute size of value (number of entries in tensor value)
-  uint size = 1;
-  for (uint i = 0; i < finite_element.value_rank(); ++i)
-  {
-    size *= finite_element.value_dimension(i);
-  }
-  return size;
+  dolfin_assert( other.finite_element->signature() == finite_element->signature() );
+  dolfin_assert( other.dof_map->signature()        == dof_map->signature() );
+
+  cell         = other.cell;
+  offset       = other.offset;
+  dofs         = other.dofs;
+  facet_dofs   = other.facet_dofs;
+  values       = other.values;
+  coefficients = other.coefficients;
+  basis_values = other.basis_values;
+#ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
+  all_basis_values = other.all_basis_values;
+#endif
+  coordinates  = other.coordinates;
+
+  return *this;
 }
 
 //-----------------------------------------------------------------------------
-void ScratchSpace::init()
+
+ScratchSpace & ScratchSpace::operator=( ScratchSpace && other )
 {
-  // Initialize local array for dof coordinates
-  for (uint i = 0; i < local_dimension; ++i)
-  {
-    // Using same storage size as a Point
-    coordinates[i] = new real[Space::MAX_DIMENSION];
-    std::fill_n(coordinates[i],  Space::MAX_DIMENSION, 0.0);
-  }
+  dolfin_assert( other.finite_element->signature() == finite_element->signature() );
+  dolfin_assert( other.dof_map->signature()        == dof_map->signature() );
+
+  cell         = std::move( other.cell );
+  offset       = std::move( other.offset );
+  dofs         = std::move( other.dofs );
+  facet_dofs   = std::move( other.facet_dofs );
+  values       = std::move( other.values );
+  coefficients = std::move( other.coefficients );
+  basis_values = std::move( other.basis_values );
 #ifdef ENABLE_EVALUATE_BASIS_FROM_COORDINATES
-  // Initialize local array for dof coordinates
-  for (uint i = 0; i < space_dimension; ++i)
-  {
-    // Using same storage size as a Point
-    all_basis_values[i] = new real[Space::MAX_DIMENSION];
-    std::fill_n(all_basis_values[i],  Space::MAX_DIMENSION, 0.0);
-  }
+  all_basis_values = std::move( other.all_basis_values );
 #endif
+  coordinates  = std::move( other.coordinates );
+
+  return *this;
 }
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

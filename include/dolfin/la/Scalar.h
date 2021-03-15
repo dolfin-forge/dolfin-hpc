@@ -4,9 +4,9 @@
 #ifndef __DOLFIN_SCALAR_H
 #define __DOLFIN_SCALAR_H
 
-#include "GenericTensor.h"
 #include <dolfin/common/maybe_unused.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/GenericTensor.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
 
@@ -46,19 +46,19 @@ public:
   Scalar * copy() const override;
 
   /// Return tensor rank (number of dimensions)
-  uint rank() const override;
+  size_t rank() const override;
 
   /// Return size of given dimension
-  uint size( uint ) const override;
+  size_t size( size_t ) const override;
 
   /// Get block of values
-  void get( real * block, const uint *, const uint * const * ) const override;
+  void get( real * block, const size_t *, const size_t * const * ) const override;
 
   /// Set block of values
-  void set( const real * block, const uint *, const uint * const * ) override;
+  void set( const real * block, const size_t *, const size_t * const * ) override;
 
   /// Add block of values
-  void add( const real * block, const uint *, const uint * const * ) override;
+  void add( const real * block, const size_t *, const size_t * const * ) override;
 
   /// Set all entries to zero and keep any sparse structure
   void zero() override;
@@ -67,7 +67,7 @@ public:
   void apply( FinalizeType ) override;
 
   /// Display tensor
-  void disp( uint ) const override;
+  void disp( size_t ) const override;
 
   //--- Scalar interface ---
 
@@ -106,13 +106,13 @@ inline Scalar * Scalar::copy() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint Scalar::rank() const
+inline size_t Scalar::rank() const
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-inline uint Scalar::size( uint ) const
+inline size_t Scalar::size( size_t ) const
 {
   error( "The size() function is not available for scalars." );
   return 0;
@@ -120,21 +120,21 @@ inline uint Scalar::size( uint ) const
 
 //-----------------------------------------------------------------------------
 inline void
-  Scalar::get( real * block, const uint *, const uint * const * ) const
+  Scalar::get( real * block, const size_t *, const size_t * const * ) const
 {
   block[0] = value;
 }
 
 //-----------------------------------------------------------------------------
 inline void
-  Scalar::set( const real * block, const uint *, const uint * const * )
+  Scalar::set( const real * block, const size_t *, const size_t * const * )
 {
   value = block[0];
 }
 
 //-----------------------------------------------------------------------------
 inline void
-  Scalar::add( const real * block, const uint *, const uint * const * )
+  Scalar::add( const real * block, const size_t *, const size_t * const * )
 {
   value += block[0];
 }
@@ -152,7 +152,7 @@ inline void Scalar::apply( FinalizeType )
 }
 
 //-----------------------------------------------------------------------------
-inline void Scalar::disp( uint ) const
+inline void Scalar::disp( size_t ) const
 {
   prm( "Scalar value", value );
 }

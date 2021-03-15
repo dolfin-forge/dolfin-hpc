@@ -12,6 +12,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  BoundingBox
  *
@@ -24,11 +26,11 @@ class BoundingBox
 
 public:
   /// Create unit bounding box in R^d
-  BoundingBox( uint d = dolfin::Space::MAX_DIMENSION )
+  BoundingBox( size_t d = dolfin::Space::MAX_DIMENSION )
     : D_( d )
     , BOX_( new Point[D_ + 1] )
   {
-    for ( uint i = 1; i <= D_; ++i )
+    for ( size_t i = 1; i <= D_; ++i )
     {
       BOX_[i][i - 1] = 1.0;
     }
@@ -39,7 +41,7 @@ public:
     : D_( other.D_ )
     , BOX_( new Point[D_ + 1] )
   {
-    for ( uint i = 1; i <= D_; ++i )
+    for ( size_t i = 1; i <= D_; ++i )
     {
       BOX_[i][i - 1] = 1.0;
     }
@@ -52,56 +54,59 @@ public:
   };
 
   /// Access i-the point
-  Point & operator[]( uint i );
+  auto operator[]( size_t i ) -> Point &;
 
   /// Access i-the point
-  Point const & operator[]( uint i ) const;
+  auto operator[]( size_t i ) const -> Point const &;
 
   /// Assignment
-  BoundingBox & operator=( BoundingBox const & other );
+  auto operator=( BoundingBox const & other ) -> BoundingBox &;
 
   /// Translation
-  BoundingBox & operator+=( Point const & p );
+  auto operator+=( Point const & p ) -> BoundingBox &;
 
   /// Translation
-  BoundingBox & operator-=( Point const & p );
+  auto operator-=( Point const & p ) -> BoundingBox &;
 
   /// Homothety
-  BoundingBox & operator*=( real const a );
+  auto operator*=( real const a ) -> BoundingBox &;
 
   /// Scaling along axis
-  BoundingBox & scale( uint axis, real const a );
+  auto scale( size_t axis, real const a ) -> BoundingBox &;
 
   /// Dilatation
-  BoundingBox & operator*=( Point const & p );
+  auto operator*=( Point const & p ) -> BoundingBox &;
 
   /// Return bounding box centroid
-  Point centroid() const;
+  auto centroid() const -> Point;
 
   // Display information
   void disp() const;
 
 private:
-  uint const    D_;
+  size_t const    D_;
   Point * const BOX_;
 };
 
 //-----------------------------------------------------------------------------
-inline Point & BoundingBox::operator[]( uint i )
+
+inline auto BoundingBox::operator[]( size_t i ) -> Point &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline Point const & BoundingBox::operator[]( uint i ) const
+
+inline auto BoundingBox::operator[]( size_t i ) const -> Point const &
 {
   dolfin_assert( i <= D_ );
   return BOX_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator=( BoundingBox const & other )
+
+inline auto BoundingBox::operator=( BoundingBox const & other ) -> BoundingBox &
 {
   if ( this != &other )
   {
@@ -109,7 +114,7 @@ inline BoundingBox & BoundingBox::operator=( BoundingBox const & other )
     {
       error( "BoundingBox : trying to assign with different dimensions" );
     }
-    for ( uint i = 0; i <= D_; ++i )
+    for ( size_t i = 0; i <= D_; ++i )
     {
       BOX_[i] = other.BOX_[i];
     }
@@ -118,9 +123,10 @@ inline BoundingBox & BoundingBox::operator=( BoundingBox const & other )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator+=( Point const & p )
+
+inline auto BoundingBox::operator+=( Point const & p ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] += p;
   }
@@ -128,9 +134,10 @@ inline BoundingBox & BoundingBox::operator+=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator-=( Point const & p )
+
+inline auto BoundingBox::operator-=( Point const & p ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] -= p;
   }
@@ -138,10 +145,11 @@ inline BoundingBox & BoundingBox::operator-=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator*=( real const a )
+
+inline auto BoundingBox::operator*=( real const a ) -> BoundingBox &
 {
   Point c = this->centroid();
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i] = c + a * ( BOX_[i] - c );
   }
@@ -149,9 +157,10 @@ inline BoundingBox & BoundingBox::operator*=( real const a )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::scale( uint axis, real const a )
+
+inline auto BoundingBox::scale( size_t axis, real const a ) -> BoundingBox &
 {
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     BOX_[i][axis] *= a;
   }
@@ -159,12 +168,13 @@ inline BoundingBox & BoundingBox::scale( uint axis, real const a )
 }
 
 //-----------------------------------------------------------------------------
-inline BoundingBox & BoundingBox::operator*=( Point const & p )
+
+inline auto BoundingBox::operator*=( Point const & p ) -> BoundingBox &
 {
   Point c = this->centroid();
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
-    for ( uint d = 0; d < Point::MAX_SIZE; ++d )
+    for ( size_t d = 0; d < Point::MAX_SIZE; ++d )
     {
       BOX_[i][d] = c[d] + p[d] * ( BOX_[i][d] - c[d] );
     }
@@ -173,10 +183,11 @@ inline BoundingBox & BoundingBox::operator*=( Point const & p )
 }
 
 //-----------------------------------------------------------------------------
-inline Point BoundingBox::centroid() const
+
+inline auto BoundingBox::centroid() const -> Point
 {
   Point c( BOX_[0] );
-  for ( uint i = 1; i <= D_; ++i )
+  for ( size_t i = 1; i <= D_; ++i )
   {
     c += 0.5 * ( BOX_[i] - BOX_[0] );
   }
@@ -184,12 +195,13 @@ inline Point BoundingBox::centroid() const
 }
 
 //-----------------------------------------------------------------------------
+
 inline void BoundingBox::disp() const
 {
   section( "BoundingBox" );
   message( "Dimension : %d", D_ );
   section( "Points" );
-  for ( uint i = 0; i <= D_; ++i )
+  for ( size_t i = 0; i <= D_; ++i )
   {
     cout << BOX_[i] << "\n";
   }

@@ -4,7 +4,6 @@
 #include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/UFCMesh.h>
 #include <dolfin/mesh/Mesh.h>
 
 // For factory function
@@ -21,46 +20,51 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
+
+auto DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap) -> DofNumbering *
 {
   DofNumbering * ret = nullptr;
-  uint const tdim = mesh.topology_dimension();
-  uint const num_verts = mesh.topology().global_size(0);
-  uint const num_cells = mesh.topology().global_size(tdim);
+  size_t const tdim = mesh.topology_dimension();
+  size_t const num_verts = mesh.topology().global_size(0);
+  size_t const num_cells = mesh.topology().global_size(tdim);
+
+  std::vector<ufc::dofmap const*> flattened( 1, nullptr );
+  flattened.resize( 0 );
 
   ///
-  Array<ufc::dofmap const*> flattened;
   DofMap::flatten(&ufc_dofmap, flattened);
-  uint const value_size = flattened.size();
+  size_t const value_size = flattened.size();
   bool const vector = DofMap::can_vectorize(flattened);
   destruct( flattened );
 
   // UFC dofmap should be initialized to compute the global dimension
   DofNumbering::init(mesh, ufc_dofmap);
 
+  std::vector< size_t > const & num_entities = mesh.topology().num_entities();
+
   // Real
-  if (ufc_dofmap.global_dimension() == ufc_dofmap.local_dimension())
+  if (ufc_dofmap.global_dimension(num_entities) == ufc_dofmap.num_element_dofs())
   {
     message(1, "DofNumbering: create RealSpaceNumbering for %s",
             ufc_dofmap.signature());
     ret = new RealSpaceNumbering(mesh, ufc_dofmap);
   }
   // CG1s
-  else if (ufc_dofmap.global_dimension() == num_verts)
+  else if (ufc_dofmap.global_dimension(num_entities) == num_verts)
   {
     message(1, "DofNumbering: create CG1sNumbering for %s",
             ufc_dofmap.signature());
     ret = new CG1sNumbering(mesh, ufc_dofmap);
   }
   // DG0s
-  else if (ufc_dofmap.global_dimension() == num_cells)
+  else if (ufc_dofmap.global_dimension(num_entities) == num_cells)
   {
     message(1, "DofNumbering: create DG0sNumbering for %s",
             ufc_dofmap.signature());
     ret = new DG0sNumbering(mesh, ufc_dofmap);
   }
   // DG0v
-  else if (vector && ufc_dofmap.global_dimension() == value_size * num_cells)
+  else if (vector && ufc_dofmap.global_dimension(num_entities) == value_size * num_cells)
   {
     message(1, "DofNumbering: create DG0vNumbering for %s",
             ufc_dofmap.signature());
@@ -76,7 +80,7 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
       ret = new Parallel0Numbering(mesh, ufc_dofmap);
     }
     // CG1v
-    else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
+    else if (vector && ufc_dofmap.global_dimension(num_entities) == value_size * num_verts)
     {
       message(1, "DofNumbering: create CG1vNumbering for %s",
               ufc_dofmap.signature());
@@ -98,7 +102,9 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
   return ret;
 }
+
 //-----------------------------------------------------------------------------
+
 DofNumbering::DofNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
     mesh(mesh),
     ufc_dofmap(ufc_dofmap),
@@ -108,12 +114,16 @@ DofNumbering::DofNumbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
     size_(0)
 {
 }
+
 //-----------------------------------------------------------------------------
+
 DofNumbering::~DofNumbering()
 {
   clear();
 }
+
 //-----------------------------------------------------------------------------
+
 DofNumbering::DofNumbering(DofNumbering const& other) :
     mesh(other.mesh),
     ufc_dofmap(other.ufc_dofmap),
@@ -124,28 +134,32 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
 {
   if (other.array != nullptr)
   {
-    array = new uint[array_size];
+    array = new size_t[array_size];
     std::copy(other.array, other.array + other.array_size, array);
   }
 }
+
 //-----------------------------------------------------------------------------
-void DofNumbering::pretabulate(uint *& array, uint& array_size) const
+
+void DofNumbering::pretabulate(size_t *& array, size_t& array_size) const
 {
   if (this->size_ == 0)
   {
     error("DofNumbering::cache : numbering range is zero");
   }
-  array = new uint[mesh.num_cells() * ufc_dofmap.local_dimension()];
+  array = new size_t[mesh.num_cells() * ufc_dofmap.num_element_dofs()];
   array_size = 0;
   CellIterator cell(mesh);
   UFCCell ufc_cell(*cell);
-  for (; !cell.end(); ++cell, array_size += ufc_dofmap.local_dimension())
+  for (; !cell.end(); ++cell, array_size += ufc_dofmap.num_element_dofs())
   {
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
   }
 }
+
 //-----------------------------------------------------------------------------
+
 void DofNumbering::disp() const
 {
   section("DofNumbering");
@@ -153,16 +167,14 @@ void DofNumbering::disp() const
   message("Type   : %s", this->description().c_str());
   end();
 }
+
 //-----------------------------------------------------------------------------
+
 void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
 {
   if (ufc_dofmap.topological_dimension() != mesh.topology_dimension())
   {
     error("DofNumbering::init : invalid topological dimension.");
-  }
-  if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
-  {
-    error("DofNumbering::init : invalid geometrical dimension.");
   }
   if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {
@@ -171,7 +183,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
 
   // Initialize mesh entities used by dof map
-  for (uint d = 0; d <= mesh.topology_dimension(); ++d)
+  for (size_t d = 0; d <= mesh.topology_dimension(); ++d)
   {
     if (ufc_dofmap.needs_mesh_entities(d))
     {
@@ -179,26 +191,10 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     }
   }
 
-  // Initialize UFC mesh data after entities are created since global sizes may
-  // otherwise be incorrect.
-  UFCMesh ufc_mesh(mesh);
-
-  // Initialize UFC dof map
-  if (ufc_dofmap.init_mesh(ufc_mesh))
-  {
-    CellIterator cell(mesh);
-    UFCCell ufc_cell(*cell);
-    for (; !cell.end(); ++cell)
-    {
-      ufc_cell.update(*cell);
-      ufc_dofmap.init_cell(ufc_mesh, ufc_cell);
-    }
-    ufc_dofmap.init_cell_finalize();
-  }
-
-  message(1, "DofNumbering: initialized UFC dofmap with global dimension %u",
-          ufc_dofmap.global_dimension());
+  message( 1, "DofNumbering: initialized UFC dofmap with global dimension %u",
+           ufc_dofmap.global_dimension( mesh.topology().num_entities() ) );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

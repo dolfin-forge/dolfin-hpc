@@ -9,18 +9,20 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-bool CoefficientMap::has(std::string const& label) const
+
+auto CoefficientMap::has(std::string const& label) const -> bool
 {
   return (this->count(label) > 0);
 }
 
 //-----------------------------------------------------------------------------
+
 void CoefficientMap::disp() const
 {
   section("CoefficientMap");
   // Begin indentation
   message("Number of coefficients : %u", this->size());
-  uint ii = 0;
+  size_t ii = 0;
   dolfin::begin("");
   for ( CoefficientMap::value_type const & coeff : *this )
   {
@@ -31,5 +33,6 @@ void CoefficientMap::disp() const
   end();
 }
 
-}
+//-----------------------------------------------------------------------------
 
+} // namespace dolfin

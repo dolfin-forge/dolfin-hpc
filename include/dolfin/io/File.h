@@ -11,104 +11,115 @@
 namespace dolfin
 {
 
-  class Function;
-  class Mesh;
-  template <class T> class MeshFunction;
-  class ParameterList;
-  class GenericFile;
-  class GenericMatrix;
-  class GenericVector;
+class Function;
+class Mesh;
+template < class T >
+class MeshFunction;
+class ParameterList;
+class GenericFile;
+class GenericMatrix;
+class GenericVector;
 
-  /// A File represents a data file for reading and writing objects.
-  /// Unless specified explicitly, the format is determined by the
-  /// file name suffix.
+//-----------------------------------------------------------------------------
 
-  class File
+/// A File represents a data file for reading and writing objects.
+/// Unless specified explicitly, the format is determined by the
+/// file name suffix.
+
+class File
+{
+public:
+  /// File formats
+  enum Type
   {
-  public:
-
-    /// File formats
-    enum Type {vtk, binary, off ,raw, stl, xyz};
-
-    /// Create a file with given name
-    File(const std::string& filename);
-
-    /// Create a file with given name and type (format)
-    File(const std::string& filename, Type type);
-
-    /// Create a file with given name, at time t
-    File(const std::string& filename, real const& t);
-
-    /// Destructor
-    ~File();
-
-    //--- Input ---
-
-    /// Read vector from file
-    void operator>> (GenericVector& x);
-
-    /// Read matrix from file
-    void operator>> (GenericMatrix& A);
-
-    /// Read mesh from file
-    void operator>> (Mesh& mesh);
-
-    /// Read mesh function from file
-    void operator>> (MeshFunction<int>& meshfunction);
-    void operator>> (MeshFunction<uint>& meshfunction);
-    void operator>> (MeshFunction<real>& meshfunction);
-    void operator>> (MeshFunction<bool>& meshfunction);
-
-    /// Read function from file
-    void operator>> (Function& u);
-
-    /// Read parameter list from file
-    void operator>> (ParameterList& parameters);
-
-    /// Read a collection of funtion to file
-    void operator>> (LabelList<Function>& list);
-
-    //--- Output ---
-
-    /// Write vector to file
-    void operator<< (GenericVector& x);
-
-    /// Write matrix to file
-    void operator<< (GenericMatrix& A);
-
-    /// Write mesh to file
-    void operator<< (Mesh& mesh);
-
-    /// Write mesh function to file
-    void operator<< (MeshFunction<int>& meshfunction);
-    void operator<< (MeshFunction<uint>& meshfunction);
-    void operator<< (MeshFunction<real>& meshfunction);
-    void operator<< (MeshFunction<bool>& meshfunction);
-
-    /// Write any generic function to file
-    void operator<< (Function& u);
-
-    /// Write parameter list to file
-    void operator<< (ParameterList& parameters);
-
-    /// Write a collection of functions to file
-    void operator<< (LabelList<Function>& f);
-
-    void set_counter(uint new_value);
-
-    //--- STATIC
-
-    static std::string basename(std::string file);
-
-    static std::string filename(std::string basename, std::string format);
-
-    static std::string filename(std::string basename);
-
-  private:
-
-    GenericFile * file_;
-
+    vtk,
+    binary,
+    off,
+    raw,
+    stl,
+    xyz
   };
+
+  /// Create a file with given name
+  File( const std::string & filename );
+
+  /// Create a file with given name and type (format)
+  File( const std::string & filename, Type type );
+
+  /// Create a file with given name, at time t
+  File( const std::string & filename, real const & t );
+
+  /// Destructor
+  ~File();
+
+  //--- Input ---
+
+  /// Read vector from file
+  void operator>>( GenericVector & x );
+
+  /// Read matrix from file
+  void operator>>( GenericMatrix & A );
+
+  /// Read mesh from file
+  void operator>>( Mesh & mesh );
+
+  /// Read mesh function from file
+  void operator>>( MeshFunction< int > & meshfunction );
+  void operator>>( MeshFunction< size_t > & meshfunction );
+  void operator>>( MeshFunction< real > & meshfunction );
+  void operator>>( MeshFunction< bool > & meshfunction );
+
+  /// Read function from file
+  void operator>>( Function & u );
+
+  /// Read parameter list from file
+  void operator>>( ParameterList & parameters );
+
+  /// Read a collection of funtion to file
+  void operator>>( LabelList< Function > & list );
+
+  //--- Output ---
+
+  /// Write vector to file
+  void operator<<( GenericVector & x );
+
+  /// Write matrix to file
+  void operator<<( GenericMatrix & A );
+
+  /// Write mesh to file
+  void operator<<( Mesh & mesh );
+
+  /// Write mesh function to file
+  void operator<<( MeshFunction< int > & meshfunction );
+  void operator<<( MeshFunction< size_t > & meshfunction );
+  void operator<<( MeshFunction< real > & meshfunction );
+  void operator<<( MeshFunction< bool > & meshfunction );
+
+  /// Write any generic function to file
+  void operator<<( Function & u );
+
+  /// Write parameter list to file
+  void operator<<( ParameterList & parameters );
+
+  /// Write a collection of functions to file
+  void operator<<( LabelList< Function > & f );
+
+  void set_counter( size_t new_value );
+
+  //--- STATIC
+
+  static auto basename( std::string file ) -> std::string;
+
+  static auto filename( std::string basename, std::string format )
+    -> std::string;
+
+  static auto filename( std::string basename ) -> std::string;
+
+private:
+  GenericFile * file_;
+};
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

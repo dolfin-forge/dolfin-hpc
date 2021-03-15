@@ -10,6 +10,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 LinearSolver::LinearSolver( SolverType solver_type, PreconditionerType pc_type )
 {
   if ( solver_type == lu )
@@ -21,16 +22,20 @@ LinearSolver::LinearSolver( SolverType solver_type, PreconditionerType pc_type )
     krylov_solver = new KrylovSolver( solver_type, pc_type );
   }
 }
+
 //-----------------------------------------------------------------------------
+
 LinearSolver::~LinearSolver()
 {
   delete lu_solver;
   delete krylov_solver;
 }
+
 //-----------------------------------------------------------------------------
-uint LinearSolver::solve( GenericMatrix const & A,
+
+auto LinearSolver::solve( GenericMatrix const & A,
                           GenericVector &       x,
-                          GenericVector const & b )
+                          GenericVector const & b ) -> size_t
 {
   dolfin_assert( lu_solver || krylov_solver );
   if ( lu_solver )
@@ -42,6 +47,7 @@ uint LinearSolver::solve( GenericMatrix const & A,
     return krylov_solver->solve( A, x, b );
   }
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

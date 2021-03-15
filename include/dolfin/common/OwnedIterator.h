@@ -9,6 +9,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /**
  *  @class  OwnedIterator
  *
@@ -21,43 +23,48 @@ class OwnedIterator
 
 public:
   ///
-  OwnedIterator( DistributedData const & distdata )
-    : distdata_( distdata )
-    , owner_( distdata.cached_ownership_ )
-    , iter_( owner_.begin() )
-  {
-    if ( !distdata.is_finalized() )
-    {
-      error( "OwnedIterator : distributed data is not finalized" );
-    }
-  }
+  OwnedIterator( DistributedData const & distdata );
 
   ///
   ~OwnedIterator() = default;
 
   ///
-  OwnedIterator & operator++();
+  auto operator++() -> OwnedIterator &;
 
   ///
-  inline uint index() const;
+  inline auto index() const -> size_t;
 
   ///
-  inline uint global_index() const;
+  inline auto global_index() const -> size_t;
 
   ///
-  inline uint is_shared() const;
+  inline auto is_shared() const -> size_t;
 
   ///
-  inline bool end() const;
+  inline auto end() const -> bool;
 
 private:
-  DistributedData const &       distdata_;
-  Array< uint > const &         owner_;
-  Array< uint >::const_iterator iter_;
+  DistributedData const &               distdata_;
+  std::vector< size_t > const &         owner_;
+  std::vector< size_t >::const_iterator iter_;
 };
 
 //-----------------------------------------------------------------------------
-inline OwnedIterator & OwnedIterator::operator++()
+
+inline OwnedIterator::OwnedIterator( DistributedData const & distdata )
+  : distdata_( distdata )
+  , owner_( distdata.cached_ownership_ )
+  , iter_( owner_.begin() )
+{
+  if ( !distdata.is_finalized() )
+  {
+    error( "OwnedIterator : distributed data is not finalized" );
+  }
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto OwnedIterator::operator++() -> OwnedIterator &
 {
   if ( iter_ == owner_.end() )
   {
@@ -71,26 +78,35 @@ inline OwnedIterator & OwnedIterator::operator++()
   }
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::index() const
+
+inline auto OwnedIterator::index() const -> size_t
 {
   return iter_ - owner_.begin();
 }
+
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::global_index() const
+
+inline auto OwnedIterator::global_index() const -> size_t
 {
   return *iter_;
 }
+
 //-----------------------------------------------------------------------------
-inline uint OwnedIterator::is_shared() const
+
+inline auto OwnedIterator::is_shared() const -> size_t
 {
   return ( *iter_ == distdata_.rank_ );
 }
+
 //-----------------------------------------------------------------------------
-inline bool OwnedIterator::end() const
+
+inline auto OwnedIterator::end() const -> bool
 {
   return iter_ == owner_.end();
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

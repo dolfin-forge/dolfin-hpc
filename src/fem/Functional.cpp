@@ -7,9 +7,12 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Functional::Functional(Mesh& mesh) :
-    Form(mesh)
+
+Functional::Functional( Mesh & mesh )
+  : Form( mesh )
 {
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin

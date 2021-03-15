@@ -14,7 +14,7 @@
 #include <janpack/hybrid.h>
 #include <janpack/amg_solver.h>
 
-namespace dolfin 
+namespace dolfin
 {
   /// Forward declarations
   class JANPACKMat;
@@ -29,10 +29,10 @@ namespace dolfin
 		     MultigridCoarsening cscheme);
 
     ~JANPACKAMGSolver();
- 
+
     /// Solve linear system Ax = b and return number of iterations
-    uint solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b); 
-    
+    size_t solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b);
+
   private:
 
     /// Multigrid Scheme
@@ -43,7 +43,7 @@ namespace dolfin
 
     /// Multigrid Coarsening scheme
     MultigridCoarsening cscheme;
-    
+
     /// Get JANPACK Multigrid scheme id
     int getScheme(MultigridScheme scheme) const;
 
@@ -52,7 +52,7 @@ namespace dolfin
 
     // Get JANPACK Multigrid coarsening scheme id
     int getCoarsening(MultigridCoarsening cscheme) const;
-    
+
     bool mls_init;
 
     // JANPACK multilevel solver cache

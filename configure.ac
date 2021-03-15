@@ -1,6 +1,6 @@
 
 AC_PREREQ(2.59)
-AC_INIT([dolfin],[0.9.3-hpc])
+AC_INIT([dolfin],[0.9.4-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -143,9 +143,8 @@ AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
 # UFL is now default
-PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.2.0])
+PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.4.0])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
-AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
 
 # Checks for libraries.
 AX_ZLIB
@@ -381,10 +380,10 @@ if test "x${with_convert}" != xno; then
 fi
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
-AC_CONFIG_FILES([Makefile src/Makefile\
+AC_CONFIG_FILES([Makefile
+                 src/Makefile\
                  src/adaptivity/Makefile\
                  src/common/Makefile\
-                 src/elements/Makefile\
                  src/evolution/Makefile\
                  src/fem/Makefile\
                  src/function/Makefile\
@@ -395,9 +394,13 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/main/Makefile\
                  src/math/Makefile\
                  src/mesh/Makefile\
+                 src/mesh/celltypes/Makefile\
+                 src/mesh/entities/Makefile\
+                 src/mesh/mappings/Makefile\
+                 src/mesh/unitmeshes/Makefile\
+                 src/mesh/utilities/Makefile\
                  src/parameter/Makefile\
                  src/quadrature/Makefile\
-                 src/ufl/Makefile\
                  src/dolfin.pc\
                  include/Makefile\
                  include/dolfin/Makefile])
@@ -405,7 +408,6 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 # Tests
 AC_CONFIG_FILES([tests/Makefile\
                  tests/common/Makefile\
-                 tests/elements/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\
@@ -413,15 +415,17 @@ AC_CONFIG_FILES([tests/Makefile\
                  tests/log/Makefile\
                  tests/main/Makefile\
                  tests/mesh/Makefile\
-                 tests/parameter/Makefile\
-                 tests/ufl/Makefile])
+                 tests/parameter/Makefile])
 
 # Python
 AC_CONFIG_FILES([site-packages/Makefile])
 
 # Doxygen
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
-		 doc/progr_reference/Makefile])
+                 doc/progr_reference/Makefile])
+
+# add default warning flags
+CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
 
 AC_OUTPUT
 

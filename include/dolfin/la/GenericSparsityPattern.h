@@ -25,13 +25,13 @@ public:
   virtual ~GenericSparsityPattern() = default;
 
   /// Initialize sparsity pattern for a generic tensor
-  virtual void init(uint rank, uint const * dim, uint const * range) = 0;
+  virtual void init(size_t rank, size_t const * dim, size_t const * range) = 0;
 
   /// Insert non-zero entry
-  virtual void insert(uint const * num_rows, uint const * const * rows) = 0;
+  virtual void insert(size_t const * num_rows, size_t const * const * rows) = 0;
 
   /// Return local size
-  virtual uint size(uint i) const = 0;
+  virtual auto size(size_t i) const -> size_t = 0;
 
   /// Finalize sparsity pattern (needed by most parallel la backends)
   virtual void apply() = 0;
@@ -40,21 +40,21 @@ public:
   virtual void clear() = 0;
 
   /// Is blocked
-  virtual bool is_blocked() const = 0;
+  virtual auto is_blocked() const -> bool = 0;
 
   /// Is distributed
-  virtual bool is_distributed() const = 0;
+  virtual auto is_distributed() const -> bool = 0;
 
   /// Return array with number of non-zeroes per row
-  virtual void numNonZeroPerRow(uint nzrow[]) const = 0;
+  virtual void numNonZeroPerRow(size_t nzrow[]) const = 0;
 
   /// Return array with number of non-zeroes per row split between
   /// diagonal and off-diagonal for process rank
-  virtual void numNonZeroPerRow(uint p_rank, uint d_nzrow[],
-                                uint o_nzrow[]) const = 0;
+  virtual void numNonZeroPerRow(size_t p_rank, size_t d_nzrow[],
+                                size_t o_nzrow[]) const = 0;
 
   /// Return total number of non-zeroes
-  virtual uint numNonZero() const = 0;
+  virtual auto numNonZero() const -> size_t = 0;
 
   /// Display sparsity pattern
   virtual void disp() const = 0;

@@ -11,6 +11,8 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+
 /// Chebyshev polynomials of the second kind
 
 class Chebyshev2
@@ -19,7 +21,7 @@ class Chebyshev2
 public:
 
   /// Constructor
-  Chebyshev2(uint n) :
+  Chebyshev2(size_t n) :
       n_(n)
   {
   }
@@ -36,42 +38,47 @@ public:
   real ddx(real x);
 
   /// Evaluation at given point
-  static real eval(uint n, real x);
+  static real eval(size_t n, real x);
 
   /// Evaluation of derivative at given point
-  static real ddx(uint n, real x);
+  static real ddx(size_t n, real x);
 
 private:
 
-  uint const n_;
+  size_t const n_;
 
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline real Chebyshev2::operator()(real x)
 {
   return eval(n_, x);
 }
+
 //-----------------------------------------------------------------------------
+
 inline real Chebyshev2::ddx(real x)
 {
   return ddx(n_, x);
 }
 
 //-----------------------------------------------------------------------------
-inline real eval(uint n, real x)
+
+inline real eval(size_t n, real x)
 {
   return Jacobi::eval(n, +0.5, +0.5, x);
 }
 
 //-----------------------------------------------------------------------------
-inline real ddx(uint n, real x)
+
+inline real ddx(size_t n, real x)
 {
   return Jacobi::ddx(n, +0.5, +0.5, x);
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

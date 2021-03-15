@@ -10,11 +10,11 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/entities/Vertex.h>
 #include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 #include <algorithm>
 #include <string>
@@ -43,9 +43,9 @@ namespace dolfin
 
     static void shutdown();
 
-    static void batchRender(real t = 0.0, uint tstep = 0.0);
+    static void batchRender(real t = 0.0, size_t tstep = 0.0);
 
-    static void ctrlLoop(real t = 0.0, uint tstep = 0.0, int blocking = 0);
+    static void ctrlLoop(real t = 0.0, size_t tstep = 0.0, int blocking = 0);
 
     static void addData(GenericFunction& function,
 			std::string function_name,
@@ -75,12 +75,12 @@ namespace dolfin
     struct libsimData
     {
       double t_;
-      uint tstep_;
+      size_t tstep_;
       bool batch_;
       LabelList<Mesh> mesh_list_;
       LabelList<GenericFunction> function_list_;
       _map<std::string, std::string> function_mesh_map_;
-      Array<libsimPipeline*> pipelines_;
+      std::vector<libsimPipeline*> pipelines_;
     };
 
     // Simulation (insitu) data
@@ -213,7 +213,7 @@ namespace dolfin
 				    mesh->geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);
 
-	uint cell_type = 0;
+	size_t cell_type = 0;
 	switch(mesh->type().cellType())
 	  {
 	  case CellType::triangle:
@@ -234,12 +234,12 @@ namespace dolfin
 	for (CellIterator c(*mesh); !c.end(); ++c)
 	{
 	  *(cp++) = cell_type;
-	  for (uint i = 0; i < c->num_entities(0); ++i)
+	  for (size_t i = 0; i < c->num_entities(0); ++i)
 	  {
 	    *(cp++) = c->entities(0)[i];
 	  }
 	}
-	
+
 	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1,
 				    nconn, visit_conn);
 	VisIt_UnstructuredMesh_setConnectivity(msh, mesh->num_cells(), conn);
@@ -289,8 +289,8 @@ namespace dolfin
 
 	GenericFunction *u = it->first;
 	Mesh *mesh = mesh_it->first;
-	uint const num_cell_vertices = mesh->type().num_entities(0);
-	uint const num_cell_dofs = num_cell_vertices * u->value_size();
+	size_t const num_cell_vertices = mesh->type().num_entities(0);
+	size_t const num_cell_dofs = num_cell_vertices * u->value_size();
 	real *vertex_values = new real[num_cell_dofs * mesh->num_vertices()];
 
 	u->interpolate_vertex_values(vertex_values);
@@ -301,7 +301,7 @@ namespace dolfin
 
 	for (VertexIterator v(*(mesh)); !v.end(); ++v)
 	{
-	  for (uint i = 0; i < u->value_size(); i++)
+	  for (size_t i = 0; i < u->value_size(); i++)
 	  {
 	    *(vp++) = vertex_values[v->index() + i * mesh->num_vertices()];
 	  }

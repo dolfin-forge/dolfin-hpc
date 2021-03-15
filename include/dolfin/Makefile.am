@@ -4,7 +4,6 @@ nobase_pkginclude_HEADERS = \
 				adaptivity/AdaptiveRefinement.h\
 				adaptivity/dolfin_adaptivity.h\
 				common/AdjacentMapping.h\
-				common/Array.h\
 				common/assert.h\
 				common/byteswap.h\
 				common/Check.h\
@@ -26,9 +25,6 @@ nobase_pkginclude_HEADERS = \
 				common/types.h\
 				common/Variable.h\
 				config/dolfin_config.h\
-				elements/dolfin_elements.h\
-				elements/ElementLibrary.h\
-				elements/Elements.h\
 				evolution/dolfin_evolution.h\
 				evolution/Time.h\
 				evolution/TimeDependent.h\
@@ -40,17 +36,15 @@ nobase_pkginclude_HEADERS = \
 				fem/Coefficient.h\
 				fem/CoefficientMap.h\
 				fem/DirichletBC.h\
-				fem/DiscreteSpaces.h\
 				fem/DofMap.h\
 				fem/DofMapCache.h\
-				fem/DofMapSet.h\
 				fem/DofNumbering.h\
 				fem/dolfin_fem.h\
+				fem/Elements.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
 				fem/Functional.h\
-				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
 				fem/NodeNormal.h\
 				fem/numbering/CG1s.h\
@@ -68,13 +62,9 @@ nobase_pkginclude_HEADERS = \
 				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\
 				fem/SubSystem.h\
-				fem/UFC.h\
+				fem/UFCCache.h\
 				fem/UFCCell.h\
-				fem/UFCCellIterator.h\
-				fem/UFCCoefficient.h\
-				fem/UFCExpression.h\
 				fem/UFCHalo.h\
-				fem/UFCMesh.h\
 				function/Analytic.h\
 				function/Constant.h\
 				function/dolfin_function.h\
@@ -88,9 +78,10 @@ nobase_pkginclude_HEADERS = \
 				function/Real.h\
 				function/SpaceTimeFunction.h\
 				function/SubFunction.h\
-				function/UFCFunction.h\
+				function/UserCoefficient.h\
 				function/Value.h\
 				function/ValueSpace.h\
+				function/Zero.h\
 				insitu/dolfin_insitu.h\
 				insitu/libsimInterface.h\
 				insitu/libsimPipeline.h\
@@ -161,83 +152,82 @@ nobase_pkginclude_HEADERS = \
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
-				mesh/AffineMapping.h \
+				mesh/celltypes/CellType.h\
+				mesh/celltypes/HexahedronCell.h\
+				mesh/celltypes/IntervalCell.h\
+				mesh/celltypes/PointCell.h\
+				mesh/celltypes/QuadrilateralCell.h\
+				mesh/celltypes/TetrahedronCell.h\
+				mesh/celltypes/TriangleCell.h\
+				mesh/entities/Cell.h\
+				mesh/entities/Edge.h\
+				mesh/entities/Face.h\
+				mesh/entities/Facet.h\
+				mesh/entities/MeshEntity.h\
+				mesh/entities/Vertex.h\
+				mesh/entities/iterators/CellIterator.h\
+				mesh/entities/iterators/EdgeIterator.h\
+				mesh/entities/iterators/FaceIterator.h\
+				mesh/entities/iterators/FacetIterator.h\
+				mesh/entities/iterators/MeshEntityIterator.h\
+				mesh/entities/iterators/VertexIterator.h\
+				mesh/mappings/EquiAffineMapping.h \
+				mesh/mappings/Mapping.h \
+				mesh/mappings/AffineMapping.h\
+				mesh/unitmeshes/UnitCube.h\
+				mesh/unitmeshes/UnitDisk.h\
+				mesh/unitmeshes/UnitInterval.h\
+				mesh/unitmeshes/UnitSphere.h\
+				mesh/unitmeshes/UnitSquare.h\
+				mesh/utilities/MeshOrdering.h\
+				mesh/utilities/MeshPartition.h\
+				mesh/utilities/MeshQuality.h\
+				mesh/utilities/MeshQualityFunction.h\
+				mesh/utilities/MeshRenumber.h\
+				mesh/utilities/MeshSmoother.h\
+				mesh/utilities/MeshSmoothing.h\
+				mesh/utilities/MPIMeshCommunicator.h\
+				mesh/utilities/RivaraRefinement.h\
+				mesh/utilities/UniformRefinement.h\
 				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\
 				mesh/Box.h\
-				mesh/Cell.h\
-				mesh/CellIterator.h\
-				mesh/CellType.h\
-				mesh/CellTypes.h\
 				mesh/Connectivity.h\
 				mesh/DMesh.h\
 				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
-				mesh/Edge.h\
-				mesh/EdgeIterator.h\
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
-				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
 				mesh/EuclideanSpace.h \
-				mesh/Face.h\
-				mesh/FaceIterator.h\
 				mesh/FaceKey.h\
-				mesh/Facet.h\
-				mesh/FacetIterator.h\
 				mesh/GeometricPredicates.h\
 				mesh/GTSInterface.h\
-				mesh/HexahedronCell.h\
 				mesh/IntersectionDetector.h\
-				mesh/IntervalCell.h\
 				mesh/LoadBalancer.h\
 				mesh/MappedManifold.h \
-				mesh/Mapping.h \
 				mesh/Mesh.h\
 				mesh/MeshData.h\
 				mesh/MeshDependent.h\
 				mesh/MeshDistributedData.h\
 				mesh/MeshEditor.h\
-				mesh/MeshEntity.h\
-				mesh/MeshEntityIterator.h\
 				mesh/MeshFunction.h\
 				mesh/MeshGeometry.h\
-				mesh/MeshOrdering.h\
-				mesh/MeshPartition.h\
-				mesh/MeshQuality.h\
-				mesh/MeshQualityFunction.h\
-				mesh/MeshRenumber.h\
-				mesh/MeshSmoother.h\
-				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
 				mesh/MeshValues.h\
 				mesh/MetisInterface.h\
-				mesh/MPIMeshCommunicator.h\
 				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\
-				mesh/PointCell.h\
 				mesh/predicates_init.h\
-				mesh/QuadrilateralCell.h\
 				mesh/Rectangle.h\
 				mesh/RefinementPattern.h\
-				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
 				mesh/Simplex.h \
 				mesh/Space.h \
 				mesh/StructuredGrid.h\
 				mesh/SubDomain.h\
-				mesh/TetrahedronCell.h\
-				mesh/TriangleCell.h\
-				mesh/UniformRefinement.h\
-				mesh/UnitCube.h\
-				mesh/UnitDisk.h\
-				mesh/UnitInterval.h\
-				mesh/UnitSphere.h\
-				mesh/UnitSquare.h\
-				mesh/Vertex.h\
-				mesh/VertexIterator.h\
 				mesh/VertexNormal.h\
 				mesh/ZoltanInterface.h\
 				parameter/dolfin_parameter.h\
@@ -252,52 +242,4 @@ nobase_pkginclude_HEADERS = \
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
-				quadrature/RadauQuadrature.h\
-				quadrature/UFCReferenceCell.h\
-				ufl/dolfin_ufl.h\
-				ufl/UFL_tuple.h\
-				ufl/UFLAlgebra.h\
-				ufl/UFLArgument.h\
-				ufl/UFLarray.h\
-				ufl/UFLCell.h\
-				ufl/UFLCellSurfaceArea.h\
-				ufl/UFLCellVolume.h\
-				ufl/UFLCircumradius.h\
-				ufl/UFLClass.h\
-				ufl/UFLCoefficient.h\
-				ufl/UFLConditional.h\
-				ufl/UFLData.h\
-				ufl/UFLdict.h\
-				ufl/UFLDifferentiation.h\
-				ufl/UFLDomain.h\
-				ufl/UFLElementList.h\
-				ufl/UFLEnrichedElement.h\
-				ufl/UFLEquation.h\
-				ufl/UFLExpression.h\
-				ufl/UFLFacetArea.h\
-				ufl/UFLFacetNormal.h\
-				ufl/UFLFamily.h\
-				ufl/UFLFiniteElement.h\
-				ufl/UFLFiniteElementSpace.h\
-				ufl/UFLForm.h\
-				ufl/UFLFormData.h\
-				ufl/UFLGeometricQuantity.h\
-				ufl/UFLIndex.h\
-				ufl/UFLIndexed.h\
-				ufl/UFLIndexSum.h\
-				ufl/UFLIntegral.h\
-				ufl/UFLList.h\
-				ufl/UFLMixedElement.h\
-				ufl/UFLObject.h\
-				ufl/UFLQuadratureScheme.h\
-				ufl/UFLrepr.h\
-				ufl/UFLRestrictedElement.h\
-				ufl/UFLSpace.h\
-				ufl/UFLSpatialCoordinate.h\
-				ufl/UFLTensorElement.h\
-				ufl/UFLTensors.h\
-				ufl/UFLTuple.h\
-				ufl/UFLtype.h\
-				ufl/UFLValueArray.h\
-				ufl/UFLVariable.h\
-				ufl/UFLVectorElement.h
+				quadrature/RadauQuadrature.h

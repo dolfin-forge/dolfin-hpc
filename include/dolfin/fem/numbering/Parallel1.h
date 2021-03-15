@@ -4,15 +4,16 @@
 #ifndef __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H
 #define __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H
 
-#include <dolfin/fem/DofNumbering.h>
 #include <dolfin/common/DistributedData.h>
+#include <dolfin/fem/DofNumbering.h>
 
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/entities/Cell.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
 
 #include <string>
 
@@ -32,10 +33,9 @@ class Parallel1Numbering : public DofNumbering
 {
 
 public:
-
   ///
-  Parallel1Numbering(Mesh& mesh, ufc::dofmap& ufc_dofmap) :
-      DofNumbering(mesh, ufc_dofmap)
+  Parallel1Numbering( Mesh & mesh, ufc::dofmap & ufc_dofmap )
+    : DofNumbering( mesh, ufc_dofmap )
   {
   }
 
@@ -43,11 +43,12 @@ public:
   ~Parallel1Numbering() override = default;
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const&,
-                            Cell const& cell) const override
+  inline void tabulate_dofs( size_t * dofs,
+                             ufc::cell const &,
+                             Cell const & cell ) const override
   {
-    uint const ii = ufc_dofmap.local_dimension() * cell.index();
-    std::copy(&array[ii], &array[ii] + ufc_dofmap.local_dimension(), dofs);
+    size_t const ii = ufc_dofmap.num_element_dofs() * cell.index();
+    std::copy( &array[ii], &array[ii] + ufc_dofmap.num_element_dofs(), dofs );
   }
 
   ///
@@ -55,9 +56,9 @@ public:
   {
     DofNumbering::init();
     //---
-    if (!mesh.is_distributed())
+    if ( !mesh.is_distributed() )
     {
-      error("Parallel1Numbering : can only be used for a distributed mesh");
+      error( "Parallel1Numbering : can only be used for a distributed mesh" );
     }
     //---
 
@@ -67,95 +68,94 @@ public:
      * This is a naive and inefficient renumbering hastly coded, sorry...
      */
 
-    UFCMesh ufc_mesh(mesh);
-    uint const tdim = mesh.topology_dimension();
-    uint * dofs = new uint[ufc_dofmap.local_dimension()];
-    _set<uint> owned;
-    _set<uint> ufc_ghosts;
-    _set<uint> ufc_shared;
-    _map<uint, std::vector<uint> > dof2index;
+    size_t const   tdim = mesh.topology_dimension();
+    size_t *       dofs = new size_t[ufc_dofmap.num_element_dofs()];
+    _set< size_t > owned;
+    _set< size_t > ufc_ghosts;
+    _set< size_t > ufc_shared;
+    _map< size_t, std::vector< size_t > > dof2index;
     shared_.clear();
     ghosts_.clear();
 
-    uint pe_size = MPI::size();
-    uint rank = MPI::rank();
+    size_t pe_size = MPI::size();
+    size_t rank    = MPI::rank();
 
-    uint num_expected_shared = 0;
-    uint num_expected_ghosts = 0;
-    for (uint i = 0; i < tdim; ++i)
+    size_t num_expected_shared = 0;
+    size_t num_expected_ghosts = 0;
+    for ( size_t i = 0; i < tdim; ++i )
     {
-      num_expected_shared += ufc_dofmap.num_entity_dofs(i)
-          * mesh.topology().num_shared(i);
-      num_expected_ghosts += ufc_dofmap.num_entity_dofs(i)
-          * mesh.topology().num_ghost(i);
+      num_expected_shared +=
+        ufc_dofmap.num_entity_dofs( i ) * mesh.topology().num_shared( i );
+      num_expected_ghosts +=
+        ufc_dofmap.num_entity_dofs( i ) * mesh.topology().num_ghost( i );
     }
 
     // Cache number of dofs per mesh entity
-    uint * num_entity_dofs = new uint[tdim + 1];
-    uint max_num_entity_dof = 0;
-    for (uint d = 0; d <= tdim; ++d)
+    size_t * num_entity_dofs    = new size_t[tdim + 1];
+    size_t   max_num_entity_dof = 0;
+    for ( size_t d = 0; d <= tdim; ++d )
     {
-      num_entity_dofs[d] = ufc_dofmap.num_entity_dofs(d);
-      max_num_entity_dof = std::max(max_num_entity_dof, num_entity_dofs[d]);
+      num_entity_dofs[d] = ufc_dofmap.num_entity_dofs( d );
+      max_num_entity_dof = std::max( max_num_entity_dof, num_entity_dofs[d] );
     }
-    dolfin_assert(max_num_entity_dof > 0);
-    uint * entity_local_dofs = new uint[max_num_entity_dof];
-    uint * entity_dofs = new uint[max_num_entity_dof];
-    uint * facet_dofs = new uint[ufc_dofmap.num_facet_dofs()];
+    dolfin_assert( max_num_entity_dof > 0 );
+    size_t * entity_local_dofs = new size_t[max_num_entity_dof];
+    size_t * entity_dofs       = new size_t[max_num_entity_dof];
+    size_t * facet_dofs        = new size_t[ufc_dofmap.num_facet_dofs()];
 
-    // Loop, baby, loop !
-    uint ii = 0;
-    CellIterator cell(mesh);
-    UFCCell ufc_cell(*cell);
-    for (; !cell.end(); ++cell)
+    size_t       ii = 0;
+    CellIterator cell( mesh );
+    UFCCell      ufc_cell( *cell );
+    for ( ; !cell.end(); ++cell )
     {
-      ufc_cell.update(*cell);
-      ufc_dofmap.tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+      ufc_cell.update( *cell );
+      ufc_dofmap.tabulate_dofs( dofs, mesh.topology().num_entities(),
+                                ufc_cell.entity_indices );
 
       // Create mapping from dof to dofmap offset
-      for (uint i = 0; i < ufc_dofmap.local_dimension(); ++i)
+      for ( size_t i = 0; i < ufc_dofmap.num_element_dofs(); ++i )
       {
-        dof2index[dofs[i]].push_back(ii++);
+        dof2index[dofs[i]].push_back( ii++ );
       }
 
       // Add dofs restricted to the cell as owned
-      uint const num_celldofs = num_entity_dofs[tdim];
-      ufc_dofmap.tabulate_entity_dofs(entity_local_dofs, tdim, 0);
-      for (uint dof = 0; dof < num_celldofs; ++dof)
+      size_t const num_celldofs = num_entity_dofs[tdim];
+      ufc_dofmap.tabulate_entity_dofs( entity_local_dofs, tdim, 0 );
+      for ( size_t dof = 0; dof < num_celldofs; ++dof )
       {
-        owned.insert(dofs[entity_local_dofs[dof]]);
+        owned.insert( dofs[entity_local_dofs[dof]] );
       }
 
       // Decide ownership
-      for (uint d = 0; d < tdim; ++d)
+      for ( size_t d = 0; d < tdim; ++d )
       {
-        uint const num_dofs = num_entity_dofs[d];
-        for (MeshEntityIterator m(*cell, d); !m.end(); ++m)
+        size_t const num_dofs = num_entity_dofs[d];
+        for ( MeshEntityIterator m( *cell, d ); !m.end(); ++m )
         {
-          dolfin_assert(m.pos() == (uint)cell->index(*m));
+          dolfin_assert( m.pos() == ( size_t ) cell->index( *m ) );
           // Get the dof indices for the entity
-          ufc_dofmap.tabulate_entity_dofs(entity_local_dofs, d, m.pos());
-          for (uint dof = 0; dof < num_dofs; ++dof)
+          ufc_dofmap.tabulate_entity_dofs( entity_local_dofs, d, m.pos() );
+          for ( size_t dof = 0; dof < num_dofs; ++dof )
           {
             entity_dofs[dof] = dofs[entity_local_dofs[dof]];
           }
 
           //
-          if (m->is_ghost())
+          if ( m->is_ghost() )
           {
-            dolfin_assert(m->is_shared());
+            dolfin_assert( m->is_shared() );
             // Append UFC indices of ghost entities
-            ufc_ghosts.insert(entity_dofs, entity_dofs + num_dofs);
+            ufc_ghosts.insert( entity_dofs, entity_dofs + num_dofs );
           }
-          else if (m->is_shared())
+          else if ( m->is_shared() )
           {
             // Append owned shared indices: these will not be renumbered
-            ufc_shared.insert(entity_dofs, entity_dofs + num_dofs);
-            owned.insert(entity_dofs, entity_dofs + num_dofs);
+            ufc_shared.insert( entity_dofs, entity_dofs + num_dofs );
+            owned.insert( entity_dofs, entity_dofs + num_dofs );
           }
           else
           {
-            owned.insert(entity_dofs, entity_dofs + num_dofs);
+            owned.insert( entity_dofs, entity_dofs + num_dofs );
           }
         }
       }
@@ -166,64 +166,69 @@ public:
     delete[] num_entity_dofs;
     delete[] dofs;
 
-    dolfin_assert(ufc_ghosts.size() == num_expected_ghosts);
-    dolfin_assert(ufc_shared.size() == num_expected_shared - num_expected_ghosts);
+    dolfin_assert( ufc_ghosts.size() == num_expected_ghosts );
+    dolfin_assert( ufc_shared.size()
+                   == num_expected_shared - num_expected_ghosts );
 
     // Renumber dofs
-    array_size = mesh.num_cells() * ufc_dofmap.local_dimension();
-    array = new uint[array_size];
+    array_size = mesh.num_cells() * ufc_dofmap.num_element_dofs();
+    array      = new size_t[array_size];
 
-    uint const range = owned.size();
-    uint local_index = 0;
-    MPI::offset(range, local_index);
-    uint const rank_offset = local_index;
-    set_range(rank_offset, range);
+    size_t const range       = owned.size();
+    size_t       local_index = 0;
+    MPI::offset( range, local_index );
+    size_t const rank_offset = local_index;
+    set_range( rank_offset, range );
 
     // Compute renumbering for local and owned shared dofs
-    uint src, dst, max_recv;
-    std::vector<uint> sendbuf;
-    for (_set<uint>::iterator it = owned.begin(); it != owned.end();
-         ++it, ++local_index)
+    size_t                src, dst, max_recv;
+    std::vector< size_t > sendbuf;
+    for ( _set< size_t >::iterator it = owned.begin(); it != owned.end();
+          ++it, ++local_index )
     {
-      for(std::vector<uint>::iterator di = dof2index[*it].begin();
-      di != dof2index[*it].end(); ++di)
+      for ( std::vector< size_t >::iterator di = dof2index[*it].begin();
+            di != dof2index[*it].end();
+            ++di )
       {
         array[*di] = local_index;
       }
       // Send owned shared dofs: old index then new index
-      if (ufc_shared.count(*it) > 0)
+      if ( ufc_shared.count( *it ) > 0 )
       {
-        sendbuf.push_back(*it);
-        sendbuf.push_back(local_index);
-        shared_.insert(local_index);
+        sendbuf.push_back( *it );
+        sendbuf.push_back( local_index );
+        shared_.insert( local_index );
       }
     }
     ufc_shared.clear();
     max_recv = sendbuf.size();
-    MPI::all_reduce_in_place<MPI::max>( max_recv );
-    uint * recvbuf = new uint[max_recv];
-    for (uint j = 1; j < pe_size; ++j)
+    MPI::all_reduce_in_place< MPI::max >( max_recv );
+    size_t * recvbuf = new size_t[max_recv];
+    for ( size_t j = 1; j < pe_size; ++j )
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      src = ( rank - j + pe_size ) % pe_size;
+      dst = ( rank + j ) % pe_size;
 
-      int recv_count = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dst,
-                                      recvbuf, max_recv, src,1 );
+      int recv_count = MPI::sendrecv(
+        &sendbuf[0], sendbuf.size(), dst, recvbuf, max_recv, src, 1 );
 
-      for (int k = 0; k < recv_count; k += 2)
+      for ( int k = 0; k < recv_count; k += 2 )
       {
         // Assign new dof number for ghost dofs
-        _set<uint>::iterator it = ufc_ghosts.find(recvbuf[k]);
-        if (it != ufc_ghosts.end())
+        _set< size_t >::iterator it = ufc_ghosts.find( recvbuf[k] );
+        if ( it != ufc_ghosts.end() )
         {
-          uint const newidx = recvbuf[k + 1];
-          dolfin_assert((newidx < rank_offset)||(newidx >= rank_offset + range));
-          ufc_ghosts.erase(it);
-          ghosts_.insert(newidx);
-          dolfin_assert(shared_.count(newidx) == 0);
-          shared_.insert(newidx);
-          for (std::vector<uint>::iterator di = dof2index[recvbuf[k]].begin();
-               di != dof2index[recvbuf[k]].end(); ++di)
+          size_t const newidx = recvbuf[k + 1];
+          dolfin_assert( ( newidx < rank_offset )
+                         || ( newidx >= rank_offset + range ) );
+          ufc_ghosts.erase( it );
+          ghosts_.insert( newidx );
+          dolfin_assert( shared_.count( newidx ) == 0 );
+          shared_.insert( newidx );
+          for ( std::vector< size_t >::iterator di =
+                  dof2index[recvbuf[k]].begin();
+                di != dof2index[recvbuf[k]].end();
+                ++di )
           {
             array[*di] = newidx;
           }
@@ -232,49 +237,49 @@ public:
     }
     delete[] recvbuf;
 
-    message(1, "Parallel1Numbering: Remaining ghost dofs %u", ufc_ghosts.size());
+    message(
+      1, "Parallel1Numbering: Remaining ghost dofs %u", ufc_ghosts.size() );
 
     //---
 
-    if (ghosts_.size() != num_expected_ghosts)
+    if ( ghosts_.size() != num_expected_ghosts )
     {
-      error("Mismatch: expected number of shared dofs and actual, %u != %u",
-            num_expected_ghosts, ghosts_.size());
+      error( "Mismatch: expected number of shared dofs and actual, %u != %u",
+             num_expected_ghosts,
+             ghosts_.size() );
     }
-    if (shared_.size() != num_expected_shared)
+    if ( shared_.size() != num_expected_shared )
     {
-      error("Mismatch: expected number of shared dofs and actual, %u != %u",
-            num_expected_shared, shared_.size());
+      error( "Mismatch: expected number of shared dofs and actual, %u != %u",
+             num_expected_shared,
+             shared_.size() );
     }
 
 #endif /* HAVE_MPI */
-
   }
 
   ///
-  inline bool is_shared(uint index) const override
+  inline bool is_shared( size_t index ) const override
   {
-    return (shared_.count(index) > 0);
+    return ( shared_.count( index ) > 0 );
   }
 
   ///
-  inline bool is_ghost(uint index) const override
+  inline bool is_ghost( size_t index ) const override
   {
-    return (ghosts_.count(index) > 0);
+    return ( ghosts_.count( index ) > 0 );
   }
 
   ///
   inline std::string description() const override
   {
-    return std::string("Dof numbering for generic parallel vector");
+    return std::string( "Dof numbering for generic parallel vector" );
   }
 
 private:
-
   ///
-  _set<uint> shared_;
-  _set<uint> ghosts_;
-
+  _set< size_t > shared_;
+  _set< size_t > ghosts_;
 };
 
 }

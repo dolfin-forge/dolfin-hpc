@@ -6,7 +6,7 @@
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/CoefficientMap.h>
-#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/mesh/unitmeshes/UnitSquare.h>
 
 using namespace dolfin;
 

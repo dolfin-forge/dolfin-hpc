@@ -19,6 +19,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
+
 PETScLUSolver::PETScLUSolver()
 {
   // Set up solver environment to use only preconditioner
@@ -50,7 +51,9 @@ PETScLUSolver::PETScLUSolver()
   PCASMSetUseInPlace(pc);
 #endif
 }
+
 //-----------------------------------------------------------------------------
+
 PETScLUSolver::~PETScLUSolver()
 {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -63,9 +66,11 @@ PETScLUSolver::~PETScLUSolver()
   if ( idxm ) delete [] idxm;
   if ( idxn ) delete [] idxn;
 }
+
 //-----------------------------------------------------------------------------
-dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
-		       PETScVector& x, const PETScVector& b)
+
+auto PETScLUSolver::solve(const PETScMatrix& A,
+		       PETScVector& x, const PETScVector& b) -> dolfin::size_t
 {
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
@@ -152,9 +157,11 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 
   return 1;
 }
+
 //-----------------------------------------------------------------------------
-dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
-		       PETScVector& x, const PETScVector& b)
+
+auto PETScLUSolver::solve(const PETScKrylovMatrix& A,
+		       PETScVector& x, const PETScVector& b) -> dolfin::size_t
 {
   // Copy data to dense matrix
   const real Anorm = copyToDense(A);
@@ -189,18 +196,22 @@ dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
 
   return 1;
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScLUSolver::disp() const
 {
   KSPView(ksp, PETSC_VIEWER_STDOUT_WORLD);
 }
+
 //-----------------------------------------------------------------------------
-real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
+
+auto PETScLUSolver::copyToDense(const PETScKrylovMatrix&) -> real
 {
   error("PETScLUSolver::copyToDense needs to be fixed");
 /*
   // Get size
-  uint M = A.size(0);
+  size_t M = A.size(0);
   dolfin_assert(M = A.size(1));
 
   if ( !B )
@@ -209,7 +220,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
     MatCreateSeqDense(PETSC_COMM_SELF, M, M, PETSC_NULL &B);
     idxm = new int[M];
     idxn = new int[1];
-    for (uint i = 0; i < M; i++)
+    for (size_t i = 0; i < M; i++)
       idxm[i] = i;
     idxn[0] = 0;
     e.init(M);
@@ -230,7 +241,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
   // Multiply matrix with unit vectors to get the values
   real maxcolsum = 0.0;
   e = 0.0;
-  for (uint j = 0; j < M; j++)
+  for (size_t j = 0; j < M; j++)
   {
     // Multiply with unit vector and set column
     e(j) = 1.0;
@@ -258,6 +269,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix&)
 */
   return 0;
 }
+
 //-----------------------------------------------------------------------------
 
 #endif

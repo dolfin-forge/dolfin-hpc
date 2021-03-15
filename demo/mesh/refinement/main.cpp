@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 
 #include <dolfin.h>
-#include <dolfin/mesh/MeshSmoothing.h>
+#include <dolfin/mesh/utilities/MeshSmoothing.h>
 
 using namespace dolfin;
 
@@ -24,7 +24,7 @@ int main()
     f_mesh << mesh;
 
     // Refine mesh close to x = (0.5, 0.5)
-    Point p( 0.5, 0.5 );
+    Point p( 0.5, 0.5, 0.0 );
     for ( unsigned int i = 0; i < 5; ++i )
     {
       // Mark cells for refinement

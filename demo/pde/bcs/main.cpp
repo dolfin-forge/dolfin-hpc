@@ -9,7 +9,8 @@
 // generated with VMTK (http://villacamozzi.marionegri.it/~luca/vmtk/).
 
 #include <dolfin.h>
-#include "ufc1/Poisson.h"
+
+#include "Poisson.h"
 
 using namespace dolfin;
 
@@ -18,7 +19,7 @@ using namespace dolfin;
 // Sub domain for Dirichlet boundary condition
 struct DirichletBoundary : public SubDomain
 {
-  bool inside(const real* x, bool on_boundary) const
+  bool inside( const real * x, bool on_boundary ) const
   {
     return x[0] < DOLFIN_EPS && on_boundary;
   }
@@ -26,29 +27,30 @@ struct DirichletBoundary : public SubDomain
 
 //-----------------------------------------------------------------------------
 
-
 int main()
 {
+  dolfin_init();
+
   // Create mesh and finite element
-  Mesh mesh("../../../data/meshes/aneurysm.bin");
+  Mesh mesh( "../../../data/meshes/aneurysm.bin" );
 
   // Define variational problem
-  Constant f(0.0);
-  Poisson::BilinearForm a(mesh);
-  Poisson::LinearForm L(mesh,f);
+  Constant              f( 0.0 );
+  Poisson::BilinearForm a( mesh );
+  Poisson::LinearForm   L( mesh, f );
 
   // Define boundary condition values
-  Constant u0(0.0);
-  Constant u1(1.0);
-  Constant u2(2.0);
-  Constant u3(3.0);
+  Constant u0( 0.0 );
+  Constant u1( 1.0 );
+  Constant u2( 2.0 );
+  Constant u3( 3.0 );
 
   // Define boundary conditions
   DirichletBoundary boundary;
-  DirichletBC bc0(u0, mesh, boundary);
-  DirichletBC bc1(u1, mesh, boundary);
-  DirichletBC bc2(u2, mesh, boundary);
-  DirichletBC bc3(u3, mesh, boundary);
+  DirichletBC       bc0( u0, mesh, boundary );
+  DirichletBC       bc1( u1, mesh, boundary );
+  DirichletBC       bc2( u2, mesh, boundary );
+  DirichletBC       bc3( u3, mesh, boundary );
 
   // Solve PDE
   Matrix A;
@@ -62,14 +64,14 @@ int main()
   bc3.apply( A, b, a );
 
   Function     u( a.trial_space() );
-  LinearSolver solver;
 
+  LinearSolver solver;
   solver.solve( A, u.vector(), b );
-  u.sync();
 
   // Save solution to VTK format
-  File vtk_file( "bcs.pvd" );
-  vtk_file << u;
+  File( "bcs.pvd" ) << u;
+
+  dolfin_finalize();
 
   return 0;
 }

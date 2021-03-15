@@ -20,16 +20,16 @@ public:
   explicit MeshDependent(Mesh& mesh);
 
   ///
-  virtual Mesh& mesh() const;
+  virtual auto mesh() const -> Mesh&;
 
   ///
-  bool invalid_mesh_topology() const;
+  auto invalid_mesh_topology() const -> bool;
 
   ///
-  bool invalid_mesh_geometry() const;
+  auto invalid_mesh_geometry() const -> bool;
 
   ///
-  bool invalid_mesh() const;
+  auto invalid_mesh() const -> bool;
 
   ///
   void update_mesh_dependency();
@@ -51,25 +51,25 @@ private:
 };
 
 //---------------------------------------------------------------------------
-inline Mesh& MeshDependent::mesh() const
+inline auto MeshDependent::mesh() const -> Mesh&
 {
   return *mesh_;
 }
 
 //---------------------------------------------------------------------------
-inline bool MeshDependent::invalid_mesh_topology() const
+inline auto MeshDependent::invalid_mesh_topology() const -> bool
 {
   return topology_token_ != mesh_->topology().token();
 }
 
 //---------------------------------------------------------------------------
-inline bool MeshDependent::invalid_mesh_geometry() const
+inline auto MeshDependent::invalid_mesh_geometry() const -> bool
 {
   return geometry_token_ != mesh_->geometry().token();
 }
 
 //---------------------------------------------------------------------------
-inline bool MeshDependent::invalid_mesh() const
+inline auto MeshDependent::invalid_mesh() const -> bool
 {
   return invalid_mesh_topology() || invalid_mesh_geometry();
 }

@@ -4,10 +4,10 @@
 #ifndef __DOLFIN_FINITE_ELEMENT_SPACE_H
 #define __DOLFIN_FINITE_ELEMENT_SPACE_H
 
-#include <dolfin/fem/DiscreteSpaces.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/Elements.h>
 #include <dolfin/fem/FiniteElement.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/entities/Cell.h>
 
 #include <ufc.h>
 
@@ -41,25 +41,15 @@ class FiniteElementSpace
 {
 
 public:
-  /// Create space from i-th coefficient space of given form
-  FiniteElementSpace( Form & form, uint const i );
-
-  /// Create space from i-th coefficient element of given form but on the mesh
-  /// provided as argument
-  FiniteElementSpace( Mesh & mesh, Form & form, uint const i );
+  FiniteElementSpace( FiniteElement const & element, DofMap & dof );
 
   /// Create space from UFC finite element
-  explicit FiniteElementSpace( Mesh &                mesh,
-                               ufc::finite_element & element,
-                               ufc::dofmap &         dofmap,
-                               bool                  owner = false );
-
-  /// Create space from UFL space definition for pre-generated elements
-  explicit FiniteElementSpace( Mesh &                          mesh,
-                               ufl::FiniteElementSpace const & element );
+  explicit FiniteElementSpace( Mesh &                      mesh,
+                               ufc::finite_element const * element,
+                               ufc::dofmap const &         dofmap );
 
   /// Create a finite element space from ith subspace of given space
-  FiniteElementSpace( FiniteElementSpace const & space, uint const i );
+  FiniteElementSpace( FiniteElementSpace const & space, size_t const i );
 
   /// Create a finite element space from given subspace
   FiniteElementSpace( FiniteElementSpace const & space, SubSystem const & sub );
@@ -73,99 +63,65 @@ public:
   /// Destructor
   ~FiniteElementSpace();
 
+  auto operator=( FiniteElementSpace const & ) = delete;
+  auto operator=( FiniteElementSpace && ) = delete;
+
   /// Check if the finite element space definitions are identical
-  bool operator==( FiniteElementSpace const & other ) const;
-  bool operator!=( FiniteElementSpace const & other ) const;
+  auto operator==( FiniteElementSpace const & other ) const -> bool;
+  auto operator!=( FiniteElementSpace const & other ) const -> bool;
 
   /// Return mesh on which the discrete space is defined
-  Mesh & mesh() const;
+  auto mesh() const -> Mesh &;
 
   /// Return cell on which the reference element is defined
-  Cell & cell() const; //!< @tod Cannot const this due to Mesh implementation
+  auto cell() const
+    -> Cell &; //!< @tod Cannot const this due to Mesh implementation
 
   /// Return the element
-  FiniteElement const & element() const;
+  auto element() const -> FiniteElement const &;
 
   /// Return the dofmap
-  DofMap const & dofmap() const;
+  auto dofmap() const -> DofMap const &;
 
   /// Returns a flattened representation of the space
-  Array< FiniteElementSpace * > flatten() const;
+  auto flatten() const -> std::vector< FiniteElementSpace * >;
 
   /// Display basic information
-  void disp() const;
+  auto disp() const -> void;
 
   //---------------------------------------------------------------------------
 
   /// Return whether the discrete space is defined per cell (discontinuous)
-  bool is_cellwise_defined() const;
+  auto is_cellwise_defined() const -> bool;
 
   /// Return whether the discrete space is piecewise constant
-  bool is_cellwise_constant() const;
+  auto is_cellwise_constant() const -> bool;
 
   /// Return whether the discrete space is defined at the vertices only
-  bool is_vertex_based() const;
+  auto is_vertex_based() const -> bool;
 
   /// Return whether the discrete space can be flattened to scalar elements
-  bool is_flattenable() const;
-
-  //--- UFL INTERFACE ---------------------------------------------------------
-
-  /// Returns the family of the finite element
-  /// UFL + FIAT
-  ufl::Family::Type family() const;
-
-  /// Returns the degree of the finite element
-  /// UFL + FIAT
-  uint degree() const;
-
-  /// Return the metatype of the finite element
-  /// UFL C++ only
-  ufl::Family::Type metatype() const;
-
-  /// Return UFL definition of the discrete space
-  operator ufl::FiniteElementSpace const &() const
-  {
-    return *ufl_;
-  }
+  auto is_flattenable() const -> bool;
 
 private:
-  Mesh &              mesh_;
-  mutable Cell        cell_;
-  FiniteElement const finite_element_;
+  Mesh &                mesh_;
+  mutable Cell          cell_;
+  FiniteElement const * finite_element_;
   DofMap & dof_map_; // The dof map is owned by the DofMapCache instance.
-
-  // UFL binding
-  ufl::FiniteElementSpace const * const ufl_;
 };
 
 //-----------------------------------------------------------------------------
-inline Mesh & FiniteElementSpace::mesh() const
+
+inline auto FiniteElementSpace::mesh() const -> Mesh &
 {
   return mesh_;
 }
 
 //-----------------------------------------------------------------------------
-inline ufl::Family::Type FiniteElementSpace::family() const
-{
-  return ufl_->family().type();
-}
 
-//-----------------------------------------------------------------------------
-inline ufl::Family::Type FiniteElementSpace::metatype() const
-{
-  return ufl_->metatype();
-}
-
-//-----------------------------------------------------------------------------
-inline uint FiniteElementSpace::degree() const
-{
-  return ufl_->degree();
-}
-
-//-----------------------------------------------------------------------------
-inline bool
+inline auto
   FiniteElementSpace::operator==( FiniteElementSpace const & other ) const
+  -> bool
 {
   return ( this->mesh() == other.mesh() )
          && ( this->element() == other.element() )
@@ -173,62 +129,74 @@ inline bool
 }
 
 //-----------------------------------------------------------------------------
-inline bool
+
+inline auto
   FiniteElementSpace::operator!=( FiniteElementSpace const & other ) const
+  -> bool
 {
   return !( *this == other );
 }
 
 //-----------------------------------------------------------------------------
-inline Cell & FiniteElementSpace::cell() const
+
+inline auto FiniteElementSpace::cell() const -> Cell &
 {
   return cell_;
 }
 
 //-----------------------------------------------------------------------------
-inline FiniteElement const & FiniteElementSpace::element() const
+
+inline auto FiniteElementSpace::element() const -> FiniteElement const &
 {
-  return finite_element_;
+  return *finite_element_;
 }
 
 //-----------------------------------------------------------------------------
-inline DofMap const & FiniteElementSpace::dofmap() const
+
+inline auto FiniteElementSpace::dofmap() const -> DofMap const &
 {
   return dof_map_;
 }
 
 //-----------------------------------------------------------------------------
-inline bool FiniteElementSpace::is_cellwise_defined() const
+
+inline auto FiniteElementSpace::is_cellwise_defined() const -> bool
 {
-  return ( mesh_.num_global_cells() * dof_map_.local_dimension() )
-         == dof_map_.global_dimension();
+  return ( mesh_.num_global_cells() * dof_map_.num_element_dofs )
+         == dof_map_.global_dim;
 }
 
 //-----------------------------------------------------------------------------
-inline bool FiniteElementSpace::is_cellwise_constant() const
+
+inline auto FiniteElementSpace::is_cellwise_constant() const -> bool
 {
   return is_cellwise_defined()
-         && ( dof_map_.local_dimension() == finite_element_.value_size() );
+         and ( dof_map_.num_element_dofs == element().value_size );
 }
 
 //-----------------------------------------------------------------------------
-inline bool FiniteElementSpace::is_vertex_based() const
+
+inline auto FiniteElementSpace::is_vertex_based() const -> bool
 {
   /// @todo Only a particular case.
-  return ( this->family() == ufl::Family::CG ) && ( this->degree() == 1 );
+  return ( element().family == Element::Family::CG )
+         and ( element().degree == 1 );
 }
 
 //-----------------------------------------------------------------------------
-inline bool FiniteElementSpace::is_flattenable() const
+
+inline auto FiniteElementSpace::is_flattenable() const -> bool
 {
   /// @todo Only a particular case.
-  uint value_size = 1;
-  for ( uint i = 0; i < this->element().value_rank(); ++i )
+  size_t value_size = 1;
+  for ( size_t i = 0; i < element().value_rank; ++i )
   {
-    value_size *= this->element().value_dimension( i );
+    value_size *= element().value_dims[i];
   }
-  return ( this->element().flatten().size() == value_size );
+  return ( element().flatten().size() == value_size );
 }
+
+//-----------------------------------------------------------------------------
 
 } // end namespace dolfin
 

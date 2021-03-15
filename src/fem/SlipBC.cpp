@@ -3,26 +3,25 @@
 
 // Existing code for Dirichlet BC is used
 
-#include <dolfin/fem/UFC.h>
+#include <dolfin/fem/SlipBC.h>
 
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/fem/SlipBC.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Facet.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <cmath>
 #include <string>
 
-#if (__sgi)
-#define fmax(a,b) (a > b ? a : b) ;
+#if ( __sgi )
+#define fmax( a, b ) ( a > b ? a : b );
 #endif
 
 namespace dolfin
@@ -40,9 +39,9 @@ SlipBC::SlipBC( Mesh & mesh, SubDomain const & sub_domain )
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC( Mesh & mesh,
+SlipBC::SlipBC( Mesh &            mesh,
                 SubDomain const & sub_domain,
-                NodeNormal & normals )
+                NodeNormal &      normals )
   : BoundaryCondition( "SlipBC", mesh, sub_domain )
   , mesh( mesh )
   , node_normal( &normals )
@@ -53,7 +52,7 @@ SlipBC::SlipBC( Mesh & mesh,
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC( Mesh & mesh,
+SlipBC::SlipBC( Mesh &            mesh,
                 SubDomain const & sub_domain,
                 SubSystem const & sub_system )
   : BoundaryCondition( "SlipBC", mesh, sub_domain, sub_system )
@@ -75,8 +74,8 @@ SlipBC::~SlipBC()
     delete As;
 }
 //-----------------------------------------------------------------------------
-void SlipBC::apply( GenericMatrix & A,
-                    GenericVector & b,
+void SlipBC::apply( GenericMatrix &      A,
+                    GenericVector &      b,
                     BilinearForm const & form )
 {
   message( "Applying SlipBC boundary conditions to linear system." );
@@ -92,16 +91,16 @@ void SlipBC::apply( GenericMatrix & A,
   // bool const is_P1 = (scratch.space_dimension
   //                       == mesh.type().num_entities(0) * scratch.size);
 
-  std::string const la_backend = dolfin_get<std::string>( "linear algebra backend" );
+  std::string const la_backend =
+    dolfin_get< std::string >( "linear algebra backend" );
 
-  if ( As == nullptr
-       || As->size( 0 ) != A.size( 0 )
+  if ( As == nullptr || As->size( 0 ) != A.size( 0 )
        || As->size( 1 ) != A.size( 1 ) )
   {
     // Create data structure for local assembly data
     if ( la_backend == "JANPACK" )
     {
-      As = reinterpret_cast< Matrix * >( &A );
+      As       = reinterpret_cast< Matrix * >( &A );
       As_local = false;
     }
     else
@@ -115,9 +114,9 @@ void SlipBC::apply( GenericMatrix & A,
 
     // Initialize ghosts for rhs vector using the full space dofmap
     {
-      _ordered_set< uint > rows;
-      DofMap const &   fulldofmap = fullspace.dofmap();
-      Array< uint >    celldofs( fulldofmap.local_dimension() );
+      _ordered_set< size_t > rows;
+      DofMap const &         fulldofmap = fullspace.dofmap();
+      std::vector< size_t >  celldofs( fulldofmap.num_element_dofs );
 
       for ( CellIterator c( mesh ); !c.end(); ++c )
       {
@@ -126,7 +125,7 @@ void SlipBC::apply( GenericMatrix & A,
         rows.insert( celldofs.begin(), celldofs.end() );
       }
 
-      _ordered_map< uint, uint > mapping;
+      _ordered_map< size_t, size_t > mapping;
       b.init_ghosted( rows.size(), rows, mapping );
     }
 
@@ -147,7 +146,7 @@ void SlipBC::apply( GenericMatrix & A,
     }
 
     // Initialize local data structures
-    for ( uint i = 0; i < mesh.type().dim(); ++i )
+    for ( size_t i = 0; i < mesh.type().dim(); ++i )
     {
       a[i].reserve( A.size( 0 ) );
       a_slip_row[i].reserve( A.size( 0 ) );
@@ -175,84 +174,90 @@ void SlipBC::apply( GenericMatrix & A,
   b.apply();
 }
 //-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix&, GenericVector&, GenericVector const&,
-                   BilinearForm const&)
+void SlipBC::apply( GenericMatrix &,
+                    GenericVector &,
+                    GenericVector const &,
+                    BilinearForm const & )
 {
-  error("SlipBC not implemented for non linear systems");
+  error( "SlipBC not implemented for non linear systems" );
 }
 
 //-----------------------------------------------------------------------------
-void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
-                            BilinearForm const& form, ScratchSpace& scratch)
+void SlipBC::applySlipBC_P1( GenericMatrix &      A,
+                             GenericVector &      b,
+                             BilinearForm const & form,
+                             ScratchSpace &       scratch )
 {
-  BoundaryMesh& boundary = mesh.exterior_boundary();
-  if (boundary.num_cells())
+  BoundaryMesh & boundary = mesh.exterior_boundary();
+  if ( boundary.num_cells() )
   {
     // Used to get the global dof indices
-    DofMap const& Udofmap = form.test_space().dofmap();
-    Array< uint > fulldofs( Udofmap.local_dimension() );
+    DofMap const &        Udofmap = form.test_space().dofmap();
+    std::vector< size_t > fulldofs( Udofmap.num_element_dofs );
 
     // If any, to get the node id
-    bool const same_space = (sub_system().depth() == 0);
-    DofMap const& Ndofmap = node_normal->basis()[0].space().dofmap();
+    bool const     same_space = ( sub_system().depth() == 0 );
+    DofMap const & Ndofmap    = node_normal->basis()[0].space().dofmap();
 
-    Array<uint> node_Udofs;
-    Array<uint> node_Ndofs;
-    uint const gdim = mesh.type().dim();
-    uint const vdim = mesh.type().num_entities(0); // number of nodes = vertices
+    std::vector< size_t > node_Udofs;
+    std::vector< size_t > node_Ndofs;
+    size_t const          gdim = mesh.type().dim();
+    size_t const          vdim =
+      mesh.type().num_entities( 0 ); // number of nodes = vertices
 
-    for (VertexIterator v(boundary); !v.end(); ++v)
+    for ( VertexIterator v( boundary ); !v.end(); ++v )
     {
-      Vertex vertex(mesh, boundary.vertex_index(*v));
+      Vertex vertex( mesh, boundary.vertex_index( *v ) );
 
       // Skip vertices not inside the sub domain
-      if (!this->sub_domain().enclosed(vertex, true))
+      if ( !this->sub_domain().enclosed( vertex, true ) )
       {
         continue;
       }
 
-      uint node = vertex.index();
-      if (vertex.is_owned())
+      size_t node = vertex.index();
+      if ( vertex.is_owned() )
       {
-        Cell cell(mesh, (vertex.entities(gdim))[0]);
-        scratch.cell.update(cell);
+        Cell cell( mesh, ( vertex.entities( gdim ) )[0] );
+        scratch.cell.update( cell );
 
         // Find the vertex position in the cell
-        Array<uint> const & cvi = cell.entities(0);
-        uint ci = 0;
-        for (ci = 0; ci < cell.num_entities(0); ++ci)
+        std::vector< size_t > const & cvi = cell.entities( 0 );
+        size_t                        ci  = 0;
+        for ( ci = 0; ci < cell.num_entities( 0 ); ++ci )
         {
-          if (cvi[ci] == node) break;
+          if ( cvi[ci] == node )
+            break;
         }
-        uint const vindex = ci;
+        size_t const vindex = ci;
 
         // Get the component dofs of U for the given node
-        uint voff = 0;
-        Udofmap.tabulate_dofs(fulldofs.data(), scratch.cell);
-        for (uint i = 0; i < scratch.size; ++i, voff += vdim)
+        size_t voff = 0;
+        Udofmap.tabulate_dofs( fulldofs.data(), scratch.cell );
+        for ( size_t i = 0; i < scratch.size; ++i, voff += vdim )
         {
-          node_Udofs.push_back(fulldofs[scratch.offset + voff + vindex]);
+          node_Udofs.push_back( fulldofs[scratch.offset + voff + vindex] );
         }
 
         // The node id is the global index of the 1st comp. of the node normal
         // which is the same as the fullspace dof is there is no subsystem
-        if (same_space)
+        if ( same_space )
         {
-          uint node_id = node_Udofs[0];
-          applyNodeBC(A, b, mesh, node_id, node_Udofs, node_Udofs);
+          size_t node_id = node_Udofs[0];
+          applyNodeBC( A, b, mesh, node_id, node_Udofs, node_Udofs );
           node_Udofs.clear();
         }
         else
         {
           // Get the component dofs of N for the given node
-          uint voff = 0;
-          Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell);
-          for (uint i = 0; i < scratch.size; ++i, voff += vdim)
+          size_t voff = 0;
+          Ndofmap.tabulate_dofs( scratch.dofs.data(), scratch.cell );
+          for ( size_t i = 0; i < scratch.size; ++i, voff += vdim )
           {
-            node_Ndofs.push_back(scratch.dofs[voff + vindex]);
+            node_Ndofs.push_back( scratch.dofs[voff + vindex] );
           }
-          uint node_id = node_Ndofs[0];
-          applyNodeBC(A, b, mesh, node_id, node_Udofs, node_Ndofs);
+          size_t node_id = node_Ndofs[0];
+          applyNodeBC( A, b, mesh, node_id, node_Udofs, node_Ndofs );
           node_Udofs.clear();
           node_Ndofs.clear();
         }
@@ -262,86 +267,92 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 }
 
 //-----------------------------------------------------------------------------
-void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
-                         BilinearForm const& form, ScratchSpace& scratch)
+void SlipBC::applySlipBC( GenericMatrix &      A,
+                          GenericVector &      b,
+                          BilinearForm const & form,
+                          ScratchSpace &       scratch )
 {
   // Be careful for now
-  uint const gdim = mesh.geometry_dimension();
-  dolfin_assert(scratch.size == gdim);
+  size_t const gdim = mesh.geometry_dimension();
+  dolfin_assert( scratch.size == gdim );
 
-  BoundaryMesh& boundary = mesh.exterior_boundary();
-  if ( boundary.num_cells() != 0  )
+  BoundaryMesh & boundary = mesh.exterior_boundary();
+  if ( boundary.num_cells() != 0 )
   {
-    DofMap const& Udofmap = form.test_space().dofmap();
-    Array< uint > fulldofs( Udofmap.local_dimension() );
+    DofMap const &        Udofmap = form.test_space().dofmap();
+    std::vector< size_t > fulldofs( Udofmap.num_element_dofs );
 
     // If any, to get the node id defined as the dof of the first normal comp.
-    bool const same_space = (sub_system().depth() == 0);
-    DofMap const& Ndofmap = node_normal->basis()[0].space().dofmap();
+    bool const     same_space = ( sub_system().depth() == 0 );
+    DofMap const & Ndofmap    = node_normal->basis()[0].space().dofmap();
 
     //
-    Array<uint> node_Udofs;
-    Array<uint> node_Ndofs;
-    uint const num_facet_dofs = scratch.dof_map->num_facet_dofs();
-    uint const num_facet_nodes = num_facet_dofs / scratch.size;
-    uint const vdim = scratch.local_dimension / scratch.size; // component offset
-    _set<uint> visited_nodes;
-    for (CellIterator c(boundary); !c.end(); ++c)
+    std::vector< size_t > node_Udofs;
+    std::vector< size_t > node_Ndofs;
+    size_t const          num_facet_dofs  = scratch.dof_map->num_facet_dofs();
+    size_t const          num_facet_nodes = num_facet_dofs / scratch.size;
+    size_t const          vdim =
+      scratch.local_dimension / scratch.size; // component offset
+    _set< size_t > visited_nodes;
+    for ( CellIterator c( boundary ); !c.end(); ++c )
     {
-      Facet facet(mesh, boundary.facet_index(*c));
+      Facet facet( mesh, boundary.facet_index( *c ) );
 
       // Skip facets outside the sub domain
-      if (!this->sub_domain().overlap(facet, true))
+      if ( !this->sub_domain().overlap( facet, true ) )
       {
         continue;
       }
 
       //
-      Cell cell(mesh, facet.entities(gdim)[0]);
-      uint const local_facet = cell.index(facet);
-      scratch.cell.update(cell);
-      scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
+      Cell         cell( mesh, facet.entities( gdim )[0] );
+      size_t const local_facet = cell.index( facet );
+      scratch.cell.update( cell );
+      scratch.finite_element->tabulate_dof_coordinates(
+        scratch.coordinates.data(), scratch.cell.coordinates.data() );
       // Attention, local-to-local mapping.
-      scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
+      scratch.dof_map->tabulate_facet_dofs( scratch.facet_dofs.data(), local_facet );
 
       // Tabulate full space and nodenormal space if needed
-      Udofmap.tabulate_dofs(fulldofs.data(), scratch.cell);
-      if (!same_space)
+      Udofmap.tabulate_dofs( fulldofs.data(), scratch.cell );
+      if ( !same_space )
       {
-        Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell);
+        Ndofmap.tabulate_dofs( scratch.dofs.data(), scratch.cell );
       }
 
       // Apply slipbc on each non ghosted facet dof node of the subspace
-      for (uint ni = 0; ni < num_facet_nodes; ++ni)
+      for ( size_t ni = 0; ni < num_facet_nodes; ++ni )
       {
         // Get the cell local index of the first dof of node ni
-        uint const ni_celldof0 = scratch.facet_dofs[ni];
+        size_t const ni_celldof0 = scratch.facet_dofs[ni];
         // Get the global index of the first dof of node ni
-        uint const ni_Udof0 = fulldofs[scratch.offset + ni_celldof0];
+        size_t const ni_Udof0 = fulldofs[scratch.offset + ni_celldof0];
 
         // Skip the node if it has already been encountered
-        if ( visited_nodes.count(ni_Udof0) > 0 )
+        if ( visited_nodes.count( ni_Udof0 ) > 0 )
         {
           continue;
         }
 
-        visited_nodes.insert(ni_Udof0); // mark as visited
+        visited_nodes.insert( ni_Udof0 ); // mark as visited
 
         // Skip the node if its component dofs are ghosted
-        if ( Udofmap.is_ghost(ni_Udof0) )
+        if ( Udofmap.is_ghost( ni_Udof0 ) )
         {
           continue;
         }
 
         // Skip the node if the subdomain is defined geometrically
-        if (!sub_domain().inside(scratch.coordinates[ni_celldof0], true))
+        if ( !sub_domain().inside(
+               &scratch.coordinates[ni_celldof0 * Space::MAX_DIMENSION],
+               true ) )
         {
           continue;
         }
 
         // Get the component dofs of U for the given node
-        uint voff = 0;
-        for (uint i = 0; i < scratch.size; ++i, voff += vdim)
+        size_t voff = 0;
+        for ( size_t i = 0; i < scratch.size; ++i, voff += vdim )
         {
           node_Udofs.push_back( fulldofs[scratch.offset + voff + ni_celldof0] );
           dolfin_assert( not Udofmap.is_ghost( node_Udofs.back() ) );
@@ -349,21 +360,21 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
 
         // The node id is the global index of the 1st comp. of the node normal
         // which is the same as the fullspace dof is there is no subsystem
-        if (same_space)
+        if ( same_space )
         {
-          applyNodeBC(A, b, mesh, node_Udofs[0], node_Udofs, node_Udofs);
+          applyNodeBC( A, b, mesh, node_Udofs[0], node_Udofs, node_Udofs );
           node_Udofs.clear();
         }
         else
         {
           // Get the component dofs of N for the given node
-          uint voff = 0;
-          for (uint i = 0; i < scratch.size; ++i, voff += vdim)
+          size_t voff = 0;
+          for ( size_t i = 0; i < scratch.size; ++i, voff += vdim )
           {
             node_Ndofs.push_back( scratch.dofs[voff + ni_celldof0] );
           }
 
-          applyNodeBC(A, b, mesh, node_Ndofs[0], node_Udofs, node_Ndofs);
+          applyNodeBC( A, b, mesh, node_Ndofs[0], node_Udofs, node_Ndofs );
           node_Udofs.clear();
           node_Ndofs.clear();
         }
@@ -374,112 +385,115 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
 }
 
 //-----------------------------------------------------------------------------
-void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
-                         uint const node_id, Array<uint> const& Udofs,
-                         Array<uint> const& Ndofs)
+void SlipBC::applyNodeBC( GenericMatrix &               A,
+                          GenericVector &               b,
+                          Mesh const &                  mesh,
+                          size_t const                  node_id,
+                          std::vector< size_t > const & Udofs,
+                          std::vector< size_t > const & Ndofs )
 {
   // Naive reimplementation -- Aurélien
   // The node type defines the number of discriminated surfaces at the node.
   // Therefore it is the number of constrained directions up to the topological
   // dimension
-  uint const gdim = mesh.topology_dimension();
-  uint const n_type = std::min(node_normal->node_type(node_id), gdim);
-  dolfin_assert(n_type > 0);
+  size_t const gdim   = mesh.topology_dimension();
+  size_t const n_type = std::min( node_normal->node_type( node_id ), gdim );
+  dolfin_assert( n_type > 0 );
 
   // Initialize set of row indices for reordering
-  _ordered_set<uint> row_idx = row_indices;
-  _ordered_set<uint>::iterator it = row_idx.begin();
+  _ordered_set< size_t >           row_idx = row_indices;
+  _ordered_set< size_t >::iterator it      = row_idx.begin();
 
   //--- Fill data structures for each space coordinate ---
-  Array<Function>& basis_functions = node_normal->basis();
-  for (uint i = 0; i < gdim; ++i)
+  std::vector< Function > & basis_functions = node_normal->basis();
+  for ( size_t i = 0; i < gdim; ++i )
   {
     // Copy non-zero entries from the stiffness matrix into local row
-    A.getrow(Udofs[i], a_col_indices[i], a[i]);
+    A.getrow( Udofs[i], a_col_indices[i], a[i] );
 
     // Reset rhs for slip
-    uint nb_cols = a_col_indices[i].size();
-    a_slip_row[i].resize(nb_cols);
-    std::fill(a_slip_row[i].begin(), a_slip_row[i].end(), 0.0);
+    size_t nb_cols = a_col_indices[i].size();
+    a_slip_row[i].resize( nb_cols );
+    std::fill( a_slip_row[i].begin(), a_slip_row[i].end(), 0.0 );
 
     // Reset lhs for slip
     l_slip[i] = 0.0;
 
     // Zero the row in the matrix copy
-    As->set(&a_slip_row[i][0], 1, &Udofs[i], nb_cols, &a_col_indices[i][0]);
+    As->set( &a_slip_row[i][0], 1, &Udofs[i], nb_cols, &a_col_indices[i][0] );
 
     // Fill component i-th basis vector
-    real (&v)[Space::MAX_DIMENSION] = basis_[i];
-    basis_functions[i].vector().get(&v[0], gdim, &Ndofs[0]);
+    real( &v )[Space::MAX_DIMENSION] = basis_[i];
+    basis_functions[i].vector().get( &v[0], gdim, &Ndofs[0] );
 
     // Determine maximum component (to be simplified)
-    it = row_idx.begin();
-    max[i] = (*it);
-    for (; it != row_idx.end(); ++it)
+    it     = row_idx.begin();
+    max[i] = ( *it );
+    for ( ; it != row_idx.end(); ++it )
     {
-      if (std::fabs(v[*it]) > std::fabs(v[max[i]]))
+      if ( std::fabs( v[*it] ) > std::fabs( v[max[i]] ) )
       {
         max[i] = *it;
       }
     }
-    row_idx.erase(max[i]);
+    row_idx.erase( max[i] );
   }
 
   // Integer n_type represents the number of constrained directions
-  if (n_type < gdim)  // At least one free direction
+  if ( n_type < gdim ) // At least one free direction
   {
     //--- For each constrained direction
-    for (uint i = 0; i < n_type; ++i)
+    for ( size_t i = 0; i < n_type; ++i )
     {
       // Set row to the global index
       row[i] = Udofs[max[i]];
 
       // Update the LHS row with the vector components
-      As->set(&basis_[i][0], 1, &row[i], gdim, &Udofs[0]);
+      As->set( &basis_[i][0], 1, &row[i], gdim, &Udofs[0] );
 
       // Reset rhs for slip
       l_slip[i] = 0.0;
     }
     //--- Copy RHS to local vector (here since a surface node is most probable)
-    b.get(&l[0], gdim, &Udofs[0]);
+    b.get( &l[0], gdim, &Udofs[0] );
     //--- TODO: Row swapping of free directions assumes same row structure
-    if (gdim == 3 && n_type == 1)
+    if ( gdim == 3 && n_type == 1 )
     {
       // Find position of the diagonal columns in the vectors
-      uint const maxn_1 = max[1];
-      uint diag_idx_1 = 0;
-      while (a_col_indices[maxn_1][diag_idx_1] != Udofs[maxn_1])
+      size_t const maxn_1     = max[1];
+      size_t       diag_idx_1 = 0;
+      while ( a_col_indices[maxn_1][diag_idx_1] != Udofs[maxn_1] )
       {
         ++diag_idx_1;
       }
-      real row_d1 = std::fabs(
-          a[0][diag_idx_1] * basis_[1][0] + a[1][diag_idx_1] * basis_[1][1]
-              + a[2][diag_idx_1] * basis_[1][2])
-          - std::fabs(
-              a[0][diag_idx_1] * basis_[2][0] + a[1][diag_idx_1] * basis_[2][1]
-                  + a[2][diag_idx_1] * basis_[2][2]);
+      real row_d1 = std::fabs( a[0][diag_idx_1] * basis_[1][0]
+                               + a[1][diag_idx_1] * basis_[1][1]
+                               + a[2][diag_idx_1] * basis_[1][2] )
+                    - std::fabs( a[0][diag_idx_1] * basis_[2][0]
+                                 + a[1][diag_idx_1] * basis_[2][1]
+                                 + a[2][diag_idx_1] * basis_[2][2] );
 
-      uint const maxn_2 = max[2];
-      uint diag_idx_2 = 0;
-      while (a_col_indices[maxn_2][diag_idx_2] != Udofs[maxn_2])
+      size_t const maxn_2     = max[2];
+      size_t       diag_idx_2 = 0;
+      while ( a_col_indices[maxn_2][diag_idx_2] != Udofs[maxn_2] )
       {
         ++diag_idx_2;
       }
       real row_d2 = std::fabs( a[0][diag_idx_2] * basis_[2][0]
                                + a[1][diag_idx_2] * basis_[2][1]
                                + a[2][diag_idx_2] * basis_[2][2] );
-      row_d2     -= std::fabs( a[0][diag_idx_2] * basis_[1][0]
-                               + a[1][diag_idx_2] * basis_[1][1]
-                               + a[2][diag_idx_2] * basis_[1][2] );
+      row_d2 -= std::fabs( a[0][diag_idx_2] * basis_[1][0]
+                           + a[1][diag_idx_2] * basis_[1][1]
+                           + a[2][diag_idx_2] * basis_[1][2] );
 
-      if (row_d1 < 0.0 || row_d2 < 0.0)
+      if ( row_d1 < 0.0 || row_d2 < 0.0 )
       {
         max[1] = maxn_2;
         max[2] = maxn_1;
       }
     }
     //--- For each free direction
-    for (uint i = n_type; i < gdim; ++i)
+    for ( size_t i = n_type; i < gdim; ++i )
     {
       // Set row to the global index
       row[i] = Udofs[max[i]];
@@ -487,46 +501,45 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
       // Project equation on the tangential vector: a[j].tau_i
       // Beware, we assume here that the component contributions were
       // inserted in the same order !
-      uint const nb_cols = a_col_indices[max[i]].size();
-      for (uint k = 0; k < gdim; ++k)
+      size_t const nb_cols = a_col_indices[max[i]].size();
+      for ( size_t k = 0; k < gdim; ++k )
       {
-        for (uint j = 0; j < nb_cols; ++j)
+        for ( size_t j = 0; j < nb_cols; ++j )
         {
           a_slip_row[i][j] += a[k][j] * basis_[i][k];
         }
         l_slip[i] += l[k] * basis_[i][k];
       }
       // Update the LHS row with the projection of the equation on tau_i
-      As->setrow(row[i], a_col_indices[max[i]], a_slip_row[i]);
+      As->setrow( row[i], a_col_indices[max[i]], a_slip_row[i] );
     }
     //--- Apply local equation RHS to the copy of the matrix
-    b.set(&l_slip[0], gdim, &row[0]);
+    b.set( &l_slip[0], gdim, &row[0] );
   }
   else // All directions are constrained
   {
-    for (uint i = 0; i < gdim; ++i)
+    for ( size_t i = 0; i < gdim; ++i )
     {
       // Find position of the diagonal in the vectors
-      uint diag_idx = 0;
-      while (a_col_indices[i][diag_idx] != Udofs[i])
+      size_t diag_idx = 0;
+      while ( a_col_indices[i][diag_idx] != Udofs[i] )
       {
         ++diag_idx;
       }
 
       // Scale the diagonal entry and update the LHS diagonal
-      real diag_val = std::fabs(a[i][diag_idx]);
-      As->set(&diag_val, 1, &Udofs[i], 1, &Udofs[i]);
+      real diag_val = std::fabs( a[i][diag_idx] );
+      As->set( &diag_val, 1, &Udofs[i], 1, &Udofs[i] );
     }
-    //Apply local equation RHS to the copy of the matrix
-    b.set(&l_slip[0], gdim, &Udofs[0]);
+    // Apply local equation RHS to the copy of the matrix
+    b.set( &l_slip[0], gdim, &Udofs[0] );
   }
 
   //--- DEBUGGING
-  //real entries[3] = { 1.0, 2.0, 3.0 };
-  //b.set(&entries[0], gdim, &Udofs[0]);
+  // real entries[3] = { 1.0, 2.0, 3.0 };
+  // b.set(&entries[0], gdim, &Udofs[0]);
   //
 }
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
-

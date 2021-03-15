@@ -12,9 +12,10 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 struct Space
 {
-  static uint const MAX_DIMENSION = 3;
+  static size_t const MAX_DIMENSION = 3;
 
   /// Constructor
   Space() = default;
@@ -23,25 +24,27 @@ struct Space
   virtual ~Space() = default;
 
   /// Equality
-  bool operator==(Space const& other) const
+  auto operator==( Space const & other ) const -> bool
   {
-    if(typeid(*this) != typeid(other)) return false;
-    return (this->dim() == other.dim());
+    if ( typeid( *this ) != typeid( other ) )
+      return false;
+    return ( this->dim() == other.dim() );
   }
 
   /// Non-equality
-  bool operator!=(Space const& other) const
-  { return !(*this == other); }
+  auto operator!=( Space const & other ) const -> bool
+  {
+    return !( *this == other );
+  }
 
   /// Space dimension
-  virtual uint dim() const = 0;
+  virtual auto dim() const -> size_t = 0;
 
   /// Clone pattern
-  virtual Space* clone() const = 0;
+  virtual auto clone() const -> Space * = 0;
 
   /// Display info
   virtual void disp() const = 0;
-
 };
 
 //-----------------------------------------------------------------------------

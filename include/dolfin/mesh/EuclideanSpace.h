@@ -11,49 +11,52 @@
 namespace dolfin
 {
 
-class EuclideanSpace : public Space, public Clonable<EuclideanSpace>
+//-----------------------------------------------------------------------------
+
+class EuclideanSpace : public Space, public Clonable< EuclideanSpace >
 {
 
 public:
-
-  EuclideanSpace(uint dim) :
-    dim_(dim)
+  EuclideanSpace( size_t dim )
+    : dim_( dim )
   {
   }
 
   ~EuclideanSpace() override = default;
 
   /// Equality
-  bool operator==(EuclideanSpace const& other) const
-  { return dim_ == other.dim_; }
+  auto operator==( EuclideanSpace const & other ) const -> bool
+  {
+    return dim_ == other.dim_;
+  }
 
   /// Non-equality
-  bool operator!=(EuclideanSpace const& other) const
-  { return dim_ != other.dim_; }
+  auto operator!=( EuclideanSpace const & other ) const -> bool
+  {
+    return dim_ != other.dim_;
+  }
 
   /// Return dimension
-  inline uint dim() const override
+  inline auto dim() const -> size_t override
   {
     return dim_;
   }
 
   /// Return clone
-  inline EuclideanSpace * clone() const override
+  inline auto clone() const -> EuclideanSpace * override
   {
-    return Clonable<EuclideanSpace>::clone();
+    return Clonable< EuclideanSpace >::clone();
   }
 
   void disp() const override
   {
-    section("EuclideanSpace");
-    message("dimension : %u", dim_);
+    section( "EuclideanSpace" );
+    message( "dimension : %u", dim_ );
     end();
   }
 
 private:
-
-  uint dim_;
-
+  size_t dim_;
 };
 
 //-----------------------------------------------------------------------------

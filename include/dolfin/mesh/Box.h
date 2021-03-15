@@ -4,7 +4,7 @@
 #ifndef __DOLFIN_BOX_H
 #define __DOLFIN_BOX_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
@@ -17,10 +17,15 @@ namespace dolfin
 class Box : public Mesh
 {
 public:
-
-  Box(real a, real b, real c, real d, real e, real f, uint nx, uint ny,
-      uint nz);
-
+  Box( real   a,
+       real   b,
+       real   c,
+       real   d,
+       real   e,
+       real   f,
+       size_t nx,
+       size_t ny,
+       size_t nz );
 };
 
 }

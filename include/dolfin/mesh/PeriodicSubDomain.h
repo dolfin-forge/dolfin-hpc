@@ -30,7 +30,7 @@ public:
   ~PeriodicSubDomain() override = default;
 
   /// Return true for points inside the sub domain
-  bool inside(real const * x, bool const on_boundary) const override = 0;
+  auto inside(real const * x, bool const on_boundary) const -> bool override = 0;
 
   /// Map coordinate x in domain H to coordinate y in domain G
   /// (used for periodic boundary conditions)

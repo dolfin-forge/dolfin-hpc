@@ -8,6 +8,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 SharedMapping::SharedMapping( DistributedData const & data )
   : data_( data )
   , mappings_()
@@ -24,7 +25,7 @@ SharedMapping::SharedMapping( DistributedData const & data )
   // Collect entities by adjacent rank
   for ( SharedIterator it( data ); it.valid(); ++it )
   {
-    for( uint const & id : it.adj() )
+    for ( size_t const & id : it.adj() )
       mappings_[id].send.push_back( it.global_index() );
   }
 
@@ -33,34 +34,42 @@ SharedMapping::SharedMapping( DistributedData const & data )
   send_min_ = data.num_shared();
 
   //
-  Array< MPI_Request> sendreq( mappings_.size() );
-  Array< MPI_Request> recvreq( mappings_.size() );
-  Array< MPI_Status>  status( mappings_.size() );
+  std::vector< MPI_Request > sendreq( mappings_.size() );
+  std::vector< MPI_Request > recvreq( mappings_.size() );
+  std::vector< MPI_Status >  status( mappings_.size() );
 
-  uint i = 0;
-  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
+  size_t i = 0;
+  for ( std::pair< size_t const, AdjacentMapping > & it : mappings_ )
   {
     dolfin_assert( it.first != MPI::rank() );
 
     AdjacentMapping & amap = it.second;
 
     // Update bounds
-    send_max_ = std::max( send_max_, ( uint ) amap.send.size() );
-    send_min_ = std::min( send_min_, ( uint ) amap.send.size() );
+    send_max_ = std::max( send_max_, amap.send.size() );
+    send_min_ = std::min( send_min_, amap.send.size() );
     //
-    MPI::check_error( MPI_Isend( amap.send.data(), amap.send.size(),
-                                 MPI_UNSIGNED, it.first, 0,
-                                 data.comm(), &sendreq[i] ) );
+    MPI::check_error( MPI_Isend( amap.send.data(),
+                                 amap.send.size(),
+                                 MPI_type< size_t >::value,
+                                 it.first,
+                                 0,
+                                 data.comm(),
+                                 &sendreq[i] ) );
     // Resize buffer
     amap.recv.resize( amap.send.size() );
-    MPI::check_error( MPI_Irecv( amap.recv.data(), amap.recv.size(),
-                                 MPI_UNSIGNED, it.first, 0,
-                                 data.comm(), &recvreq[i] ) );
+    MPI::check_error( MPI_Irecv( amap.recv.data(),
+                                 amap.recv.size(),
+                                 MPI_type< size_t >::value,
+                                 it.first,
+                                 0,
+                                 data.comm(),
+                                 &recvreq[i] ) );
 
     ++i;
   }
 
-  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
+  for ( std::pair< size_t const, AdjacentMapping > & it : mappings_ )
   {
     AdjacentMapping & amap = it.second;
     data_.get_local( amap.send.size(), amap.send.data(), amap.send.data() );
@@ -69,18 +78,21 @@ SharedMapping::SharedMapping( DistributedData const & data )
   MPI::check_error( MPI_Waitall( mappings_.size(), &sendreq[0], &status[0] ) );
 
   i = 0;
-  for ( std::pair< uint const, AdjacentMapping > & it : mappings_ )
+  for ( std::pair< size_t const, AdjacentMapping > & it : mappings_ )
   {
-    AdjacentMapping & amap = it.second;
-    int recvcount = 0;
+    AdjacentMapping & amap      = it.second;
+    int               recvcount = 0;
 
     MPI::check_error( MPI_Wait( &recvreq[i], &status[i] ) );
-    MPI::check_error( MPI_Get_count( &status[i], MPI_UNSIGNED, &recvcount ) );
+    MPI::check_error( MPI_Get_count( &status[i], MPI_type< size_t >::value, &recvcount ) );
 
-    if ( static_cast< uint >( recvcount ) != amap.recv.size() )
+    if ( static_cast< size_t >( recvcount ) != amap.recv.size() )
     {
-      error( "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
-             MPI::rank(), recvcount, amap.recv.size() );
+      error(
+        "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
+        MPI::rank(),
+        recvcount,
+        amap.recv.size() );
     }
 
     data_.get_local( amap.recv.size(), amap.recv.data(), amap.recv.data() );
@@ -89,27 +101,33 @@ SharedMapping::SharedMapping( DistributedData const & data )
 
 #endif /* HAVE_MPI */
 }
+
 //-----------------------------------------------------------------------------
-Array< uint > const & SharedMapping::to( uint rank ) const
+
+auto SharedMapping::to( size_t rank ) const -> std::vector< size_t > const &
 {
-  _map< uint, AdjacentMapping >::const_iterator it = mappings_.find( rank );
+  _map< size_t, AdjacentMapping >::const_iterator it = mappings_.find( rank );
   if ( it == mappings_.end() )
   {
     error( "SharedMapping : invalid adjacent %u", rank );
   }
   return it->second.send;
 }
+
 //-----------------------------------------------------------------------------
-Array< uint > const & SharedMapping::from( uint rank ) const
+
+auto SharedMapping::from( size_t rank ) const -> std::vector< size_t > const &
 {
-  _map< uint, AdjacentMapping >::const_iterator it = mappings_.find( rank );
+  _map< size_t, AdjacentMapping >::const_iterator it = mappings_.find( rank );
   if ( it == mappings_.end() )
   {
     error( "SharedMapping : invalid adjacent %u", rank );
   }
   return it->second.recv;
 }
+
 //-----------------------------------------------------------------------------
+
 void SharedMapping::disp() const
 {
   section( "SharedMapping" );
@@ -118,6 +136,7 @@ void SharedMapping::disp() const
   message( "maximum size        : %u", send_max_ );
   end();
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

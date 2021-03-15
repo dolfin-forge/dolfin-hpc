@@ -90,7 +90,7 @@ void GaussianQuadrature::computeWeights()
 #endif
 }
 //-----------------------------------------------------------------------------
-bool GaussianQuadrature::check(unsigned int q) const
+auto GaussianQuadrature::check(unsigned int q) const -> bool
 {
   // Checks that the points and weights are correct. We compute the
   // value of the integral of the Legendre polynomial of degree q.

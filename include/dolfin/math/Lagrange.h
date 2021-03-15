@@ -39,28 +39,28 @@ namespace dolfin
     void set(unsigned int i, real x);
 
     /// Return number of points
-    unsigned int size() const;
+    auto size() const -> unsigned int;
     
     /// Return degree
-    unsigned int degree() const;
+    auto degree() const -> unsigned int;
     
     /// Return point
-    real point(unsigned int i) const;
+    auto point(unsigned int i) const -> real;
     
     /// Return value of polynomial i at given point x
-    real operator() (unsigned int i, real x);
+    auto operator() (unsigned int i, real x) -> real;
     
     /// Return value of polynomial i at given point x
-    real eval(unsigned int i, real x);
+    auto eval(unsigned int i, real x) -> real;
 
     /// Return derivate of polynomial i at given point x
-    real ddx(unsigned int i, real x);
+    auto ddx(unsigned int i, real x) -> real;
 
     /// Return derivative q (a constant) of polynomial
-    real dqdx(unsigned int i);
+    auto dqdx(unsigned int i) -> real;
 
     /// Output
-    friend LogStream& operator<<(LogStream& stream, const Lagrange& p);
+    friend auto operator<<(LogStream& stream, const Lagrange& p) -> LogStream&;
     void disp() const;
     
   private:
@@ -74,7 +74,7 @@ namespace dolfin
 
   };
 
-  LogStream& operator<<(LogStream& stream, const Lagrange& p);
+  auto operator<<(LogStream& stream, const Lagrange& p) -> LogStream&;
 
 }
 

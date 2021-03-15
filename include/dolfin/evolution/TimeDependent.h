@@ -30,12 +30,12 @@ public:
   ~TimeDependent() = default;
 
   ///
-  TimeDependent& swap(TimeDependent& other);
+  auto swap(TimeDependent& other) -> TimeDependent&;
 
   /// With internal clock the current time is synchronized at each call
   /// With a synchronized clock the current time is always fetched from the
   /// associated time instance
-  inline TimeDependent const& operator()(Time const& time) const
+  inline auto operator()(Time const& time) const -> TimeDependent const&
   {
     if(t_ == nullptr)
     {
@@ -49,7 +49,7 @@ public:
   }
 
   /// Synchronize with another time dependent object, do not expose details.
-  inline TimeDependent const& operator()(TimeDependent const& other) const
+  inline auto operator()(TimeDependent const& other) const -> TimeDependent const&
   {
     if(t_ == nullptr)
     {
@@ -63,7 +63,7 @@ public:
   }
 
   /// Return the time associated with the instance
-  inline real clock() const { return (t_ == nullptr ? clock_ : t_->clock()); }
+  inline auto clock() const -> real { return (t_ == nullptr ? clock_ : t_->clock()); }
 
 private:
 

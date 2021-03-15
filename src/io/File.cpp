@@ -19,10 +19,11 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 File::File( const std::string & filename )
   : file_( nullptr )
 {
-  uint const len = filename.size();
+  size_t const len = filename.size();
 
   // Choose file type base on suffix.
   if ( ( filename.rfind( ".bin" ) != std::string::npos )
@@ -45,13 +46,15 @@ File::File( const std::string & filename )
   {
     file_ = new STLFile( filename );
   }
-	else
+  else
   {
     // Could not deduce file type
     error( "Unknown file type for \"%s\".", filename.c_str() );
   }
 }
+
 //-----------------------------------------------------------------------------
+
 File::File( const std::string & filename, Type type )
 {
   switch ( type )
@@ -68,7 +71,9 @@ File::File( const std::string & filename, Type type )
       break;
   }
 }
+
 //-----------------------------------------------------------------------------
+
 File::File( const std::string & filename, real const & t )
   : file_( nullptr )
 {
@@ -87,158 +92,204 @@ File::File( const std::string & filename, real const & t )
     error( "Unknown file type for time dependent \"%s\".", filename.c_str() );
   }
 }
+
 //-----------------------------------------------------------------------------
+
 File::~File()
 {
   delete file_;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( GenericVector & x )
 {
   file_->read();
 
   *file_ >> x;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( GenericMatrix & A )
 {
   file_->read();
 
   *file_ >> A;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( Mesh & mesh )
 {
   file_->read();
 
   *file_ >> mesh;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( MeshFunction< int > & meshfunction )
 {
   file_->read();
 
   *file_ >> meshfunction;
 }
+
 //-----------------------------------------------------------------------------
-void File::operator>>( MeshFunction< uint > & meshfunction )
+
+void File::operator>>( MeshFunction< size_t > & meshfunction )
 {
   file_->read();
 
   *file_ >> meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( MeshFunction< real > & meshfunction )
 {
   file_->read();
 
   *file_ >> meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( MeshFunction< bool > & meshfunction )
 {
   file_->read();
 
   *file_ >> meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( Function & f )
 {
   file_->read();
 
   *file_ >> f;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( ParameterList & parameters )
 {
   file_->read();
 
   *file_ >> parameters;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator>>( LabelList< Function > & list )
 {
   file_->read();
 
   *file_ >> list;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( GenericVector & x )
 {
   file_->write();
 
   *file_ << x;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( GenericMatrix & A )
 {
   file_->write();
 
   *file_ << A;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( Mesh & mesh )
 {
   file_->write();
 
   *file_ << mesh;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( MeshFunction< int > & meshfunction )
 {
   file_->write();
 
   *file_ << meshfunction;
 }
+
 //-----------------------------------------------------------------------------
-void File::operator<<( MeshFunction< uint > & meshfunction )
+
+void File::operator<<( MeshFunction< size_t > & meshfunction )
 {
   file_->write();
 
   *file_ << meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( MeshFunction< real > & meshfunction )
 {
   file_->write();
 
   *file_ << meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( MeshFunction< bool > & meshfunction )
 {
   file_->write();
 
   *file_ << meshfunction;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( Function & u )
 {
   file_->write();
 
   *file_ << u;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( ParameterList & parameters )
 {
   file_->write();
 
   *file_ << parameters;
 }
+
 //-----------------------------------------------------------------------------
+
 void File::operator<<( LabelList< Function > & list )
 {
   file_->write();
 
   *file_ << list;
 }
+
 //-----------------------------------------------------------------------------
-void File::set_counter( uint new_value )
+
+void File::set_counter( size_t new_value )
 {
   file_->set_counter( new_value );
 }
+
 //-----------------------------------------------------------------------------
-std::string File::basename( std::string file )
+
+auto File::basename( std::string file ) -> std::string
 {
   size_t beg = file.find_last_of( '/' );
   if ( beg != std::string::npos )
@@ -248,8 +299,10 @@ std::string File::basename( std::string file )
   size_t pos = file.find( '.' );
   return file.substr( 0, pos );
 }
+
 //-----------------------------------------------------------------------------
-std::string File::filename( std::string basename, std::string format )
+
+auto File::filename( std::string basename, std::string format ) -> std::string
 {
   if ( format == "vtk" )
   {
@@ -265,11 +318,14 @@ std::string File::filename( std::string basename, std::string format )
   }
   return basename;
 }
+
 //-----------------------------------------------------------------------------
-std::string File::filename( std::string basename )
+
+auto File::filename( std::string basename ) -> std::string
 {
-  return filename( basename, dolfin_get<std::string>( "output_format" ) );
+  return filename( basename, dolfin_get< std::string >( "output_format" ) );
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

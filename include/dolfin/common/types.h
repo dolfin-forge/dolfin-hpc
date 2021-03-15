@@ -17,45 +17,52 @@
 #include <unordered_set>
 #endif
 
+#include <algorithm>
 #include <cfloat>
 #include <complex>
 #include <cstdint>
 #include <limits>
 #include <map>
 #include <set>
+#include <vector>
 
 namespace dolfin
 {
 
 // Real numbers
-using real     = double;
+using real = double;
 
 // Unsigned integers
-using uint     = unsigned int;
+using uint   = unsigned int;
+using size_t = std::size_t;
 
 // Index type (at least 64bit)
-using uidx     = uint64_t;
+using uidx = uint64_t;
 
 // Complex numbers
-using complex  = std::complex< double >;
+using complex = std::complex< double >;
 
 //-----------------------------------------------------------------------------
 
-constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::min();
-constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
-constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
-
-constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::min();
-constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
-constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
-
-constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::min();
+constexpr real DOLFIN_REAL_MIN   = std::numeric_limits< real >::lowest();
 constexpr real DOLFIN_REAL_MAX   = std::numeric_limits< real >::max();
 constexpr real DOLFIN_REAL_UNDEF = std::numeric_limits< real >::max();
 
-constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::min();
+constexpr int DOLFIN_INT_MIN   = std::numeric_limits< int >::lowest();
+constexpr int DOLFIN_INT_MAX   = std::numeric_limits< int >::max();
+constexpr int DOLFIN_INT_UNDEF = std::numeric_limits< int >::max();
+
+constexpr long DOLFIN_LONG_MIN   = std::numeric_limits< long >::lowest();
 constexpr long DOLFIN_LONG_MAX   = std::numeric_limits< long >::max();
 constexpr long DOLFIN_LONG_UNDEF = std::numeric_limits< long >::max();
+
+constexpr uint DOLFIN_UINT_MIN   = std::numeric_limits< uint >::lowest();
+constexpr uint DOLFIN_UINT_MAX   = std::numeric_limits< uint >::max();
+constexpr uint DOLFIN_UINT_UNDEF = std::numeric_limits< uint >::max();
+
+constexpr size_t DOLFIN_SIZE_T_MIN   = std::numeric_limits< size_t >::lowest();
+constexpr size_t DOLFIN_SIZE_T_MAX   = std::numeric_limits< size_t >::max();
+constexpr size_t DOLFIN_SIZE_T_UNDEF = std::numeric_limits< size_t >::max();
 
 //-----------------------------------------------------------------------------
 
@@ -120,20 +127,62 @@ using _set = std::unordered_set< Key, Hash, Comp, Alloc >;
 
 //-----------------------------------------------------------------------------
 
+template < typename T >
+void destruct( std::vector< T * > & objects )
+{
+  for ( T * element : objects )
+    if ( element != nullptr )
+      delete element;
+
+  objects.clear();
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T, typename Iterator >
+inline void append( std::vector< T > & array, Iterator begin, Iterator end )
+{
+#ifdef __SUNPRO_CC
+  for ( Iterator it = begin; it != end; ++it )
+  {
+    array.push_back( *it );
+  }
+#else
+  array.insert( array.end(), begin, end );
+#endif
+}
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline auto max_array_size( std::vector< std::vector< T > > const & arrays )
+  -> size_t
+{
+  return std::max_element( arrays.begin(), arrays.end(),
+           []( std::vector< T > const & a, std::vector< T > const & b ) {
+             return a.size() < b.size();
+           } )->size();
+}
+
+//-----------------------------------------------------------------------------
+
 /// Facility to compare object through pointers
 template < class T >
-bool objptrcmp( T const * p0, T const * p1 )
+auto objptrcmp( T const * p0, T const * p1 ) -> bool
 {
   if ( p0 == p1 )
   {
     return true;
   }
-  else if ( ( p0 == nullptr && p1 != nullptr ) || ( p0 != nullptr && p1 == nullptr ) )
+  else if ( ( p0 == nullptr && p1 != nullptr )
+            || ( p0 != nullptr && p1 == nullptr ) )
   {
     return false;
   }
   return ( *p0 == *p1 );
 }
+
+//-----------------------------------------------------------------------------
 
 } // end namespace dolfin
 

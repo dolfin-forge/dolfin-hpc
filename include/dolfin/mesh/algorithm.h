@@ -3,8 +3,8 @@
 #define DOLFIN_MESH_ALGORITHM
 
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/CellIterator.h>
-#include <dolfin/mesh/FacetIterator.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/FacetIterator.h>
 
 namespace dolfin
 {
@@ -36,9 +36,9 @@ void foreach(Mesh& mesh, Operator evaluator, Transform transform, Value& value)
 }
 
 //-----------------------------------------------------------------------------
-// Unary ops (uint)
-template<class Iterator, uint const& (*T)(uint const&), class Operator>
-void foreach(Mesh& mesh, Operator evaluator, uint& value)
+// Unary ops (size_t)
+template<class Iterator, size_t const& (*T)(size_t const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, size_t& value)
 {
   for (Iterator it(mesh); !it.end(); ++it)
   {
@@ -58,9 +58,9 @@ void foreach(Mesh& mesh, Operator evaluator, real& value)
 }
 
 //-----------------------------------------------------------------------------
-// Binary ops (uint)
-template<class Iterator, uint const& (*T)(uint const&, uint const&), class Operator>
-void foreach(Mesh& mesh, Operator evaluator, uint& value)
+// Binary ops (size_t)
+template<class Iterator, size_t const& (*T)(size_t const&, size_t const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, size_t& value)
 {
   for (Iterator it(mesh); !it.end(); ++it)
   {

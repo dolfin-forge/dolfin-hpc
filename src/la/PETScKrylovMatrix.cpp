@@ -19,7 +19,7 @@ using namespace dolfin;
 namespace dolfin
 {
 
-  int usermult(Mat A, Vec x, Vec y)
+  auto usermult(Mat A, Vec x, Vec y) -> int
   {
     void* ctx = nullptr;
     MatShellGetContext(A, &ctx);
@@ -31,13 +31,16 @@ namespace dolfin
 }
 
 //-----------------------------------------------------------------------------
+
 PETScKrylovMatrix::PETScKrylovMatrix(const PETScVector& x, const PETScVector& y)
   : A( nullptr )
 {
   // Create PETSc matrix
   init(x, y);
 }
+
 //-----------------------------------------------------------------------------
+
 PETScKrylovMatrix::~PETScKrylovMatrix()
 {
   // Free memory of matrix
@@ -47,7 +50,9 @@ PETScKrylovMatrix::~PETScKrylovMatrix()
   if ( A ) MatDestroy(A);
 #endif
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
 {
   // Get size and local size of given vector
@@ -84,7 +89,9 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
 #endif
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovMatrix::init(int M, int N)
 {
   // Put here to set up arbitrary Shell of global size M,N.
@@ -114,8 +121,10 @@ void PETScKrylovMatrix::init(int M, int N)
 #endif
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
+
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovMatrix::size(uint dim) const
+
+auto PETScKrylovMatrix::size(size_t dim) const -> dolfin::size_t
 {
   int M = 0;
   int N = 0;
@@ -123,14 +132,18 @@ dolfin::uint PETScKrylovMatrix::size(uint dim) const
   dolfin_assert(M >= 0);
   dolfin_assert(N >= 0);
 
-  return (dim == 0 ? static_cast<uint>(M) : static_cast<uint>(N));
+  return (dim == 0 ? static_cast<size_t>(M) : static_cast<size_t>(N));
 }
+
 //-----------------------------------------------------------------------------
-Mat PETScKrylovMatrix::mat() const
+
+auto PETScKrylovMatrix::mat() const -> Mat
 {
   return A;
 }
+
 //-----------------------------------------------------------------------------
+
 void PETScKrylovMatrix::disp(bool, int) const
 {
   // Since we don't really have the matrix, we create the matrix by
@@ -139,8 +152,8 @@ void PETScKrylovMatrix::disp(bool, int) const
   warning("Display of PETScKrylovMatrix needs to be fixed.");
 
 /*
-  uint M = size(0);
-  uint N = size(1);
+  size_t M = size(0);
+  size_t N = size(1);
   PETScVector x(N), y(M);
   PETScMatrix A(M, N);
 
@@ -162,8 +175,10 @@ void PETScKrylovMatrix::disp(bool, int) const
   A.disp(sparse, precision);
 */
 }
+
 //-----------------------------------------------------------------------------
-LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
+
+auto dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A) -> LogStream&
 {
 
 #if PETSC_VERSION_MAJOR > 2
@@ -184,6 +199,7 @@ LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
   return stream;
 
 }
+
 //-----------------------------------------------------------------------------
 
 #endif

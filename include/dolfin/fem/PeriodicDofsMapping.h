@@ -9,122 +9,128 @@
 namespace dolfin
 {
 
-class DofMap;
+class FiniteElementSpace;
 class MeshEntity;
 
 class PeriodicDofsMapping
 {
 public:
-
   ///
-  PeriodicDofsMapping(DofMap const& dofmap);
+  PeriodicDofsMapping( FiniteElementSpace const & space );
 
   ///
   ~PeriodicDofsMapping();
 
   ///
-  uint max_local_dimension() const;
+  auto max_local_dimension() const -> size_t;
 
   ///
-  uint num_Gdofs() const;
-  uint num_Hdofs() const;
-  uint num_Idofs() const;
+  auto num_Gdofs() const -> size_t;
+  auto num_Hdofs() const -> size_t;
+  auto num_Idofs() const -> size_t;
 
   ///
-  bool is_Gdof(uint i) const;
-  bool is_Hdof(uint i) const;
-  bool is_Idof(uint i) const;
-
-
-  ///
-  uint const * get_Gindices() const;
+  auto is_Gdof( size_t i ) const -> bool;
+  auto is_Hdof( size_t i ) const -> bool;
+  auto is_Idof( size_t i ) const -> bool;
 
   ///
-  void tabulate_dofs(uint Gdof, uint * Hdofs, uint& count) const;
+  auto get_Gindices() const -> size_t const *;
+
+  ///
+  void tabulate_dofs( size_t Gdof, size_t * Hdofs, size_t & count ) const;
 
   //
-  void tabulate_dofs(uint i, uint * Gdof, uint * Hdofs, uint& count) const;
+  void tabulate_dofs( size_t   i,
+                      size_t * Gdof,
+                      size_t * Hdofs,
+                      size_t & count ) const;
 
   ///
-  void tabulate_coordinates(uint Gdof, real * Gcoords, real ** Hcoords , uint& count) const;
+  void tabulate_coordinates( size_t   Gdof,
+                             real *   Gcoords,
+                             real **  Hcoords,
+                             size_t & count ) const;
 
   //
-  void tabulate_coordinates(uint i, uint * Gdof, real * Gcoords, real ** Hcoords, uint& count) const;
+  void tabulate_coordinates( size_t   i,
+                             size_t * Gdof,
+                             real *   Gcoords,
+                             real **  Hcoords,
+                             size_t & count ) const;
 
   ///
   void disp() const;
 
 private:
-
   ///
-  void init(DofMap const& dofmap);
+  void init();
 
   ///
   void clear();
 
-  DofMap const& dofmap_;
+  FiniteElementSpace const & space_;
 
   ///
-  uint max_local_dimension_;
+  size_t max_local_dimension_;
 
   /// Map of G dofs to the offset and count in the arrays
-  using OffsetMap = _ordered_map<uint, uint>;
-  OffsetMap Goffsets_;
-  uint * Gindices_;
-  real * Gxcoords_;
-  _set<uint> Hdofs_;
-  uint * Hcount_;
-  uint * Hoffsets_;
-  uint * Hindices_;
-  real * Hxcoords_;
-  _set<uint> Idofs_;
-
+  using OffsetMap = _ordered_map< size_t, size_t >;
+  OffsetMap      Goffsets_;
+  size_t *       Gindices_;
+  real *         Gxcoords_;
+  _set< size_t > Hdofs_;
+  size_t *       Hcount_;
+  size_t *       Hoffsets_;
+  size_t *       Hindices_;
+  real *         Hxcoords_;
+  _set< size_t > Idofs_;
 };
 
 //-----------------------------------------------------------------------------
-inline uint PeriodicDofsMapping::max_local_dimension() const
+inline auto PeriodicDofsMapping::max_local_dimension() const -> size_t
 {
   return max_local_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-inline uint PeriodicDofsMapping::num_Gdofs() const
+inline auto PeriodicDofsMapping::num_Gdofs() const -> size_t
 {
   return Goffsets_.size();
 }
 
 //-----------------------------------------------------------------------------
-inline uint PeriodicDofsMapping::num_Hdofs() const
+inline auto PeriodicDofsMapping::num_Hdofs() const -> size_t
 {
   return Hdofs_.size();
 }
 
 //-----------------------------------------------------------------------------
-inline uint PeriodicDofsMapping::num_Idofs() const
+inline auto PeriodicDofsMapping::num_Idofs() const -> size_t
 {
   return Idofs_.size();
 }
 
 //-----------------------------------------------------------------------------
-inline bool PeriodicDofsMapping::is_Gdof(uint i) const
+inline auto PeriodicDofsMapping::is_Gdof( size_t i ) const -> bool
 {
-  return (Goffsets_.find(i) != Goffsets_.end());
+  return ( Goffsets_.find( i ) != Goffsets_.end() );
 }
 
 //-----------------------------------------------------------------------------
-inline bool PeriodicDofsMapping::is_Hdof(uint i) const
+inline auto PeriodicDofsMapping::is_Hdof( size_t i ) const -> bool
 {
-  return (Hdofs_.count(i) > 0);
+  return ( Hdofs_.count( i ) > 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline bool PeriodicDofsMapping::is_Idof(uint i) const
+inline auto PeriodicDofsMapping::is_Idof( size_t i ) const -> bool
 {
-  return (Idofs_.count(i) > 0);
+  return ( Idofs_.count( i ) > 0 );
 }
 
 //-----------------------------------------------------------------------------
-inline uint const * PeriodicDofsMapping::get_Gindices() const
+inline auto PeriodicDofsMapping::get_Gindices() const -> size_t const *
 {
   return Gindices_;
 }

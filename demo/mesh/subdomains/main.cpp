@@ -47,7 +47,7 @@ int main()
   Mesh mesh("../../../data/meshes/dolfin-2.bin");
 
   // Create mesh function over the cell facets
-  MeshValues<uint, Cell> sub_domains(mesh);
+  MeshValues<size_t, Cell> sub_domains(mesh);
 
   // Mark all facets as sub domain 3
   sub_domains = 3;

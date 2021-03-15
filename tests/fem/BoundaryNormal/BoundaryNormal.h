@@ -2,30 +2,46 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/elements/Elements.h>
+#include <dolfin/fem/Elements.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/mesh/Mesh.h>
+
+#include "../../elements/element_library.inc"
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void test(std::string file)
+void test( std::string file )
 {
-  Mesh mesh(file);
-  uint const gdim = mesh.geometry_dimension();
-  ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1, gdim);
-  FiniteElementSpace Vh(mesh, space);
-  NodeNormal nn(mesh);
-  nn.init(Vh);
+  using namespace ElementLibrary;
+
+  Mesh mesh( file );
+
+  std::string const element_str =   "VectorElement(FiniteElement('Lagrange', "
+                                  + mesh.type().str() + ", 1), dim="
+                                  + std::to_string( mesh.geometry_dimension() )
+                                  + ")";
+  std::string const dofmap_str  = "FFC dofmap for " + element_str;
+
+  ufc::finite_element * element = create_finite_element( element_str.c_str() );
+  ufc::dofmap *         dofmap  = create_dof_map( dofmap_str.c_str() );
+
+  FiniteElementSpace Vh( mesh, element, *dofmap );
+
+  delete element;
+  delete dofmap;
+
+  NodeNormal nn( mesh );
+  nn.init( Vh );
   nn.compute();
 }
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_NodeNormal )
-  {
-    test(mesh_file("cylinder.bin"));
-    test(mesh_file("aneurysm.bin"));
-    test(mesh_file("sphere.bin"  ));
-  }
+{
+  test( mesh_file( "cylinder.bin" ) );
+  test( mesh_file( "aneurysm.bin" ) );
+  test( mesh_file( "sphere.bin" ) );
+}
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 

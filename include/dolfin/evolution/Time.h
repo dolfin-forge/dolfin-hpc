@@ -13,59 +13,76 @@ class Time
 {
 
 public:
-
-  using Interval = std::pair<real, real>;
+  using Interval = std::pair< real, real >;
 
   Time( real T_start = 0.0, real T_end = 0.0, real T_current = 0.0 );
 
-  Time(Interval I);
+  Time( Interval I );
 
-  Time(Time const& other) = default;
+  Time( Time const & other ) = default;
 
   ~Time() = default;
 
   /// Operators
-  inline operator real&() { return t_; }
-  inline operator real const&() const { return t_; }
-  inline Time& operator=(real t) { t_ = t; return *this; }
-  inline Time& operator+=(real k) { t_ += k; return *this; }
-  inline Time& operator-=(real k) { t_ -= k; return *this; }
+  inline operator real &()
+  {
+    return t_;
+  }
+  inline operator real const &() const
+  {
+    return t_;
+  }
+  inline auto operator=( real t ) -> Time &
+  {
+    t_ = t;
+    return *this;
+  }
+  inline auto operator+=( real k ) -> Time &
+  {
+    t_ += k;
+    return *this;
+  }
+  inline auto operator-=( real k ) -> Time &
+  {
+    t_ -= k;
+    return *this;
+  }
 
   /// Return time interval as a pair of real numbers
-  Interval const& interval() const;
+  auto interval() const -> Interval const &;
 
   /// Return time sign function
-  int sign() const;
+  auto sign() const -> int;
 
   /// Is the current time in the time interval
-  bool is_valid(real atol = 0.0) const;
+  auto is_valid( real atol = 0.0 ) const -> bool;
 
   /// T0
-  real begin() const;
+  auto begin() const -> real;
 
   /// T1
-  real end() const;
+  auto end() const -> real;
 
   /// Measure of time interval
-  real measure() const;
+  auto measure() const -> real;
 
   /// Clock
-  real const& clock() const;
+  auto clock() const -> real const &;
 
   /// Clock [Fragile]
-  real & clock();
+  auto clock() -> real &;
 
   /// Elapsed time
-  real elapsed() const;
+  auto elapsed() const -> real;
 
   /// Remaining time
-  real remaining() const;
+  auto remaining() const -> real;
 
   /// Elapsed normalized time
-  real elapsed_normalized() const;
+  auto elapsed_normalized() const -> real;
 
   /// Remaining normalized time
-  real remaining_normalized() const;
+  auto remaining_normalized() const -> real;
 
   /// Display current time
   void show( std::string const info = "" ) const;
@@ -74,7 +91,11 @@ public:
   void disp() const;
 
   /// Step
-  inline Time& step(real k ) { t_ +=  sign_ * k; return *this; }
+  inline auto step( real k ) -> Time &
+  {
+    t_ += sign_ * k;
+    return *this;
+  }
 
   //--- ITERATOR --------------------------------------------------------------
 
@@ -82,7 +103,6 @@ public:
   {
 
   public:
-
     /// Constructor
     iterator() = default;
 
@@ -92,34 +112,31 @@ public:
     //--- INTERFACE -----------------------------------------------------------
 
     /// Pre-increment
-    virtual Time& operator++() = 0;
+    virtual auto operator++() -> Time & = 0;
 
     /// Pre-decrement
-    virtual Time& operator--() = 0;
+    virtual auto operator--() -> Time & = 0;
 
     /// Is the iterator valid ?
-    virtual bool is_valid() const = 0;
+    virtual auto is_valid() const -> bool = 0;
 
     /// Iteration count
-    virtual uint count() const = 0;
+    virtual auto count() const -> size_t = 0;
 
     /// Display information
     virtual void disp() const = 0;
 
     //-------------------------------------------------------------------------
-
   };
 
   //---------------------------------------------------------------------------
 
 private:
-
   Interval const T_;
-  int const sign_;
+  int const      sign_;
 
   //
   real t_;
-
 };
 
 } /* namespace dolfin */

@@ -13,7 +13,7 @@ namespace dolfin
 int bswap( int x );
 
 /// Byteswap (unsigned) integer data
-uint bswap( uint x );
+// uint bswap( uint x );
 
 /// Byteswap double precision floating point data
 real bswap( real x );
@@ -47,11 +47,28 @@ inline int bswap( int x )
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-inline uint bswap( uint x )
+// inline uint bswap( uint x )
+// {
+//   union
+//   {
+//     uint          x;
+//     unsigned char b[4];
+//   } ein, eout;
+
+//   ein.x     = x;
+//   eout.b[0] = ein.b[3];
+//   eout.b[1] = ein.b[2];
+//   eout.b[2] = ein.b[1];
+//   eout.b[3] = ein.b[0];
+
+//   return eout.x;
+// }
+//-----------------------------------------------------------------------------
+inline uint bswap( uint32_t x )
 {
   union
   {
-    uint          x;
+    unsigned int  x;
     unsigned char b[4];
   } ein, eout;
 

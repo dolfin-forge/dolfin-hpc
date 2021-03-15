@@ -1,3 +1,11 @@
+0.9.4-hpc [2021-03-15]
+ - switched to new versions of ffc-hpc (1.2.0), ufl-hpc (1.2.0) and fiat-hpc (1.6.0)
+ - ufc.h is now part of ffc-hpc
+ - dolfin::Array is gone, can be replaced by std::vector
+ - switched uint to size_t
+ - parameters can now be removed from the ParameterSystem
+ - reordered some header files to new (sub)folders, see:
+     mesh/{celltypes,entities,mappings,unitmeshes,utilities}
 0.9.3-hpc [2020-11-24]
  - C++14 is now required to build DOLFIN HPC
  - STL file reader can now only load data in a certain bounding box to reduce

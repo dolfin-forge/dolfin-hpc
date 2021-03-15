@@ -4,14 +4,16 @@
 #ifndef __DOLFIN_LAPACK_MATRIX_H
 #define __DOLFIN_LAPACK_MATRIX_H
 
+#include <dolfin/common/Variable.h>
 #include <dolfin/common/assert.h>
 #include <dolfin/common/types.h>
-#include <dolfin/common/Variable.h>
 
 #include <string>
 
 namespace dolfin
 {
+
+//-----------------------------------------------------------------------------
 
 /// This class provides a simple wrapper for matrix data for use
 /// with LAPACK (column-major ordering).
@@ -22,51 +24,50 @@ namespace dolfin
 class LAPACKMatrix : public Variable
 {
 public:
-
   /// Create M x N matrix
-  LAPACKMatrix(uint M, uint N);
+  LAPACKMatrix( size_t M, size_t N );
 
   /// Destructor
   ~LAPACKMatrix();
 
   /// Return size of given dimension
-  uint size(uint dim) const
+  auto size( size_t dim ) const -> size_t
   {
-    dolfin_assert(dim < 2);
-    return (dim == 0 ? M_ : N_);
+    dolfin_assert( dim < 2 );
+    return ( dim == 0 ? M_ : N_ );
   }
 
-  double * values()
+  auto values() -> double *
   {
     return values_;
   }
 
   /// Access entry (i, j)
-  double& operator()(uint i, uint j)
+  auto operator()( size_t i, size_t j ) -> double &
   {
     return values_[j * M_ + i];
   }
 
   /// Access entry (i, j), const version
-  double operator()(uint i, uint j) const
+  auto operator()( size_t i, size_t j ) const -> double
   {
     return values_[j * M_ + i];
   }
 
   /// Return informal string representation (pretty-print)
-  std::string str(bool verbose) const;
+  auto str( bool verbose ) const -> std::string;
 
 private:
-
   // Number of rows and columns
-  uint M_;
-  uint N_;
+  size_t M_;
+  size_t N_;
 
   // Values, stored column-major
   double * values_;
-
 };
 
-}
+//-----------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

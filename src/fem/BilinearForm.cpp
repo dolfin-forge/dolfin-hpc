@@ -10,45 +10,50 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-BilinearForm::BilinearForm(Mesh& mesh) :
-    Form(mesh),
-    test_space_(nullptr),
-    trial_space_(nullptr)
+
+BilinearForm::BilinearForm( Mesh & mesh )
+  : Form( mesh )
 {
 }
 
 //-----------------------------------------------------------------------------
+
 BilinearForm::~BilinearForm()
 {
-  delete test_space_;
-  delete trial_space_;
 }
 
 //-----------------------------------------------------------------------------
-void BilinearForm::check(GenericMatrix const& A, GenericVector const& b) const
-{
-  uint const M = this->test_space().dofmap().global_dimension();
-  uint const N = this->trial_space().dofmap().global_dimension();
 
-  if(A.size(0) != A.size(1))
+void BilinearForm::check( GenericMatrix const & A,
+                          GenericVector const & b ) const
+{
+  size_t const M = this->test_space().dofmap().global_dim;
+  size_t const N = this->trial_space().dofmap().global_dim;
+
+  if ( A.size( 0 ) != A.size( 1 ) )
   {
-    error("Only square linear system are supported.");
+    error( "Only square linear system are supported." );
   }
-  if (M != A.size(0))
+
+  if ( M != A.size( 0 ) )
   {
-    error("Incorrect dimension 0 of matrix for given test space.\n"
-          "Space  : %u ; Matrix : %u", M, A.size(0));
+    error( "Incorrect dimension 0 of matrix for given test space.\n"
+           "Space  : %u ; Matrix : %u", M, A.size( 0 ) );
   }
-  if (N != A.size(1))
+
+  if ( N != A.size( 1 ) )
   {
-    error("Incorrect dimension 1 of matrix for given trial space\n"
-          "Space  : %u ; Matrix : %u", N, A.size(1));
+    error( "Incorrect dimension 1 of matrix for given trial space\n"
+           "Space  : %u ; Matrix : %u", N, A.size( 1 ) );
   }
-  if (M != b.size())
+
+  if ( M != b.size() )
   {
-    error("Incorrect dimension of vector for given test space\n"
-          "Space  : %u ; Vector : %u", M, b.size(0));
+    error( "Incorrect dimension of vector for given test space\n"
+           "Space  : %u ; Vector : %u", M, b.size( 0 ) );
   }
 }
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

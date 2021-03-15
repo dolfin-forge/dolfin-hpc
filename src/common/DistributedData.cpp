@@ -3,6 +3,7 @@
 
 #include <dolfin/common/DistributedData.h>
 
+#include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/common/GhostIterator.h>
 #include <dolfin/common/OwnedIterator.h>
@@ -17,6 +18,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 DistributedData::DistributedData( MPI::Communicator & comm )
   : Distributed< DistributedData >( comm )
   , rank_( Distributed::comm_rank() )
@@ -30,7 +32,9 @@ DistributedData::DistributedData( MPI::Communicator & comm )
   , cached_ownership_()
 {
 }
+
 //-----------------------------------------------------------------------------
+
 DistributedData::DistributedData( DistributedData const & other )
   : Distributed< DistributedData >( other )
   , valid_numbering( other.valid_numbering )
@@ -53,102 +57,115 @@ DistributedData::DistributedData( DistributedData const & other )
                        : new SharedMapping( *other.shared_mapping_ ) )
 {
 }
+
 //-----------------------------------------------------------------------------
+
 DistributedData::~DistributedData()
 {
   clear();
 }
+
 //-----------------------------------------------------------------------------
-DistributedData& DistributedData::operator=(DistributedData const& other)
+
+auto DistributedData::operator=( DistributedData const & other )
+  -> DistributedData &
 {
-  DistributedData tmp(other);
+  DistributedData tmp( other );
   swap( *this, tmp );
 
   return *this;
 }
+
 //-----------------------------------------------------------------------------
-void swap( DistributedData& a, DistributedData& b )
+
+void swap( DistributedData & a, DistributedData & b )
 {
   using std::swap;
 
-  swap( static_cast<Distributed<DistributedData>&>(a),
-        static_cast<Distributed<DistributedData>&>(b) );
+  swap( static_cast< Distributed< DistributedData > & >( a ),
+        static_cast< Distributed< DistributedData > & >( b ) );
 
   // Swap flags
-  swap(a.valid_numbering, b.valid_numbering);
+  swap( a.valid_numbering, b.valid_numbering );
 
   // Swap attributes
-  swap(a.rank_             , b.rank_);
-  swap(a.pe_size_          , b.pe_size_);
-  swap(a.range_is_set_     , b.range_is_set_);
-  swap(a.offset_           , b.offset_);
-  swap(a.range_size_       , b.range_size_);
-  swap(a.global_size_      , b.global_size_);
-  swap(a.finalized_        , b.finalized_);
-  swap(a.global_           , b.global_);
-  swap(a.local_            , b.local_);
-  swap(a.adjacents_        , b.adjacents_);
-  swap(a.shared_           , b.shared_);
-  swap(a.ghost_            , b.ghost_);
-  swap(a.cached_numbering_ , b.cached_numbering_);
-  swap(a.cached_ownership_ , b.cached_ownership_);
-  swap(a.shared_mapping_   , b.shared_mapping_);
+  swap( a.rank_, b.rank_ );
+  swap( a.pe_size_, b.pe_size_ );
+  swap( a.range_is_set_, b.range_is_set_ );
+  swap( a.offset_, b.offset_ );
+  swap( a.range_size_, b.range_size_ );
+  swap( a.global_size_, b.global_size_ );
+  swap( a.finalized_, b.finalized_ );
+  swap( a.global_, b.global_ );
+  swap( a.local_, b.local_ );
+  swap( a.adjacents_, b.adjacents_ );
+  swap( a.shared_, b.shared_ );
+  swap( a.ghost_, b.ghost_ );
+  swap( a.cached_numbering_, b.cached_numbering_ );
+  swap( a.cached_ownership_, b.cached_ownership_ );
+  swap( a.shared_mapping_, b.shared_mapping_ );
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::clear()
 {
-	if ( shared_mapping_ )
-	{
-		delete shared_mapping_;
-		shared_mapping_ = nullptr;
-	}
-	cached_ownership_ = Array< uint >();
-	cached_numbering_ = Array< uint >();
-	ghost_.clear();
-	shared_.clear();
-	adjacents_.clear();
-	local_.clear();
-	global_.clear();
-	finalized_    = false;
-	global_size_  = 0;
-	range_size_   = 0;
-	offset_       = 0;
-	range_is_set_ = false;
-	//
-	valid_numbering = false;
+  if ( shared_mapping_ )
+  {
+    delete shared_mapping_;
+    shared_mapping_ = nullptr;
+  }
+  cached_ownership_ = {};
+  cached_numbering_ = {};
+  ghost_.clear();
+  shared_.clear();
+  adjacents_.clear();
+  local_.clear();
+  global_.clear();
+  finalized_    = false;
+  global_size_  = 0;
+  range_size_   = 0;
+  offset_       = 0;
+  range_is_set_ = false;
+  //
+  valid_numbering = false;
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::finalize()
 {
-  if (finalized_)
+  if ( finalized_ )
   {
-    if (local_.size() > 0)
+    if ( local_.size() > 0 )
     {
-      if (cached_numbering_.empty() )
+      if ( cached_numbering_.empty() )
       {
-        error("DistributedData : data is finalized but empty numbering cache");
+        error(
+          "DistributedData : data is finalized but empty numbering cache" );
       }
-      if (cached_ownership_.empty() )
+      if ( cached_ownership_.empty() )
       {
-        error("DistributedData : data is finalized but empty ownership cache");
+        error(
+          "DistributedData : data is finalized but empty ownership cache" );
       }
     }
     // Be conservative for the moment
-    error("DistributedData : trying to finalize data twice");
+    error( "DistributedData : trying to finalize data twice" );
   }
   else
   {
-    //message(1, "DistributedData : finalize");
+    // message(1, "DistributedData : finalize");
     tic();
 
     // Check consistency
-    if (shared_.size() > local_.size())
+    if ( shared_.size() > local_.size() )
     {
-      error("DistributedData : shared size is greater than mapping size");
+      error( "DistributedData : shared size is greater than mapping size" );
     }
-    if (ghost_.size() > shared_.size())
+    if ( ghost_.size() > shared_.size() )
     {
-      error("DistributedData : ghost size is greater than shared size");
+      error( "DistributedData : ghost size is greater than shared size" );
     }
 
     /*
@@ -157,19 +174,22 @@ void DistributedData::finalize()
      */
     if ( cached_numbering_.empty() )
     {
-      message(1, "DistributedData : cache local-to-global mapping (%u)", rank_);
+      message(
+        1, "DistributedData : cache local-to-global mapping (%u)", rank_ );
 
       // Generate cache for existing mapping
-      if (global_.size() != local_.size())
+      if ( global_.size() != local_.size() )
       {
-        error("DistributedData : size mismatch between index mappings %u != %u",
-              global_.size(), local_.size());
+        error(
+          "DistributedData : size mismatch between index mappings %u != %u",
+          global_.size(),
+          local_.size() );
       }
 
       // Cache numbering
-      if (global_.size() > 0)
+      if ( global_.size() > 0 )
       {
-        cached_numbering_ = Array<uint>( global_.size() );
+        cached_numbering_ = std::vector< size_t >( global_.size() );
         for ( IndexMapping::value_type const & index_pair : global_ )
         {
           cached_numbering_[index_pair.first] = index_pair.second;
@@ -182,19 +202,19 @@ void DistributedData::finalize()
      *  Set range and global size
      *
      */
-    if(!range_is_set_)
+    if ( !range_is_set_ )
     {
-      if (local_.size() < ghost_.size())
+      if ( local_.size() < ghost_.size() )
       {
-        error("DistributedData : range not provided and empty mapping");
+        error( "DistributedData : range not provided and empty mapping" );
       }
 
       // If the size has been provided initially then cache size was set,
       // otherwise the local-to-global mapping was just cached.
-      uint owned_size = cached_numbering_.size() - ghost_.size();
+      size_t owned_size = cached_numbering_.size() - ghost_.size();
 
       // Set range, not recomputed if it is consistent
-      set_range(owned_size, global_size_);
+      set_range( owned_size, global_size_ );
     }
 
     /*
@@ -204,61 +224,63 @@ void DistributedData::finalize()
      * the process range, otherwise throw an error.
      * This allows automatic numbering of non-ghosted entities like cells.
      */
-    if (local_.size() == 0)
+    if ( local_.size() == 0 )
     {
-      if (shared_.size() > 0)
+      if ( shared_.size() > 0 )
       {
-        error("DistributedData : no mapping was provided and some entities set "
-              "as shared: impossible to devise a linear numbering.");
+        error( "DistributedData : no mapping was provided and some entities "
+               "set as shared: impossible to devise a linear numbering." );
       }
 
       // Either local size or the range can be used but if both are provided
       // check consistency
-      if (range_size_ != cached_numbering_.size())
+      if ( range_size_ != cached_numbering_.size() )
       {
-        error("DistributedData : no ghost entries defined while size of local"
-            "  size and range are not equal\n"
-              " (local size) %u != %u (range)", cached_numbering_.size(), range_size_);
+        error( "DistributedData : no ghost entries defined while size of local"
+               "  size and range are not equal\n(local size) %u != %u (range)",
+               cached_numbering_.size(), range_size_ );
       }
 
       // Numbering incrementally and set all as owned
-      uint global = offset_;
-      for (uint local = 0; local < range_size_; ++local, ++global)
+      size_t global = offset_;
+      for ( size_t local = 0; local < range_size_; ++local, ++global )
       {
         cached_numbering_[local] = global;
-        local_[global] = local;
+        local_[global]           = local;
       }
 
       // Global renumbering is not necessary
       valid_numbering = true;
 
-      message(1, "DistributedData : generated linear mapping in range [%u, %u[ "
-              "for rank %u", offset_, offset_ + range_size_, rank_);
+      message( 1, "DistributedData : generated linear mapping in range [%u, %u["
+                  " for rank %u", offset_, offset_ + range_size_, rank_ );
     }
 
     // At this point mappings exist and local-to-global is cached.
     // For the sake of completeness let us check the consistency
-    if (local_.size() != cached_numbering_.size())
+    if ( local_.size() != cached_numbering_.size() )
     {
-      error("DistributedData : size mismatch between local-to-global (%u) and "
-            "and global-to-local (%u) mappings", cached_numbering_.size(), local_.size());
+      error( "DistributedData : size mismatch between local-to-global (%u) and "
+             "and global-to-local (%u) mappings",
+             cached_numbering_.size(), local_.size() );
     }
 
     // Cache ownership if needed
     if ( cached_ownership_.empty() && not cached_numbering_.empty() )
     {
-      cached_ownership_ = Array<uint>( cached_numbering_.size(), pe_size_ );
+      cached_ownership_ =
+        std::vector< size_t >( cached_numbering_.size(), pe_size_ );
 
       // Update ownership for shared entities
-      for (SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
-           ++it)
+      for ( SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
+            ++it )
       {
         cached_ownership_[it->first] = rank_;
       }
 
       // Update ownership for ghost entities
-      for (GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end();
-           ++it)
+      for ( GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end();
+            ++it )
       {
         cached_ownership_[it->first] = it->second;
       }
@@ -266,59 +288,62 @@ void DistributedData::finalize()
 
     //
     finalized_ = true;
-    tocd(1);
+    tocd( 1 );
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::assign(DistributedData const& other,
-                             Array<uint> const& mapping)
+
+void DistributedData::assign( DistributedData const &       other,
+                              std::vector< size_t > const & mapping )
 {
   clear();
 
-  if (mapping.size() > other.local_size())
+  if ( mapping.size() > other.local_size() )
   {
-    error("DistributedData : assignment requires mapping size (%u) lower than "
-          "or equal to the local size of other distributed data (%u)",
-          mapping.size(), other.local_size());
+    error( "DistributedData : assignment requires mapping size (%u) lower than "
+           "or equal to the local size of other distributed data (%u)",
+           mapping.size(), other.local_size() );
   }
 
-  cached_numbering_ = Array<uint>( mapping.size() );
-  cached_ownership_ = Array<uint>( mapping.size() );
+  cached_numbering_ = std::vector< size_t >( mapping.size() );
+  cached_ownership_ = std::vector< size_t >( mapping.size() );
 
   // Extract numbering and ownership: two versions depending on the caching in
   // order to save map lookups
-  if (not other.cached_numbering_.empty() and not other.cached_ownership_.empty() )
+  if ( not other.cached_numbering_.empty()
+       and not other.cached_ownership_.empty() )
   {
     SharedSet::const_iterator its;
-    GhostSet::const_iterator itg;
-    for (uint i = 0; i < mapping.size(); ++i)
+    GhostSet::const_iterator  itg;
+    for ( size_t i = 0; i < mapping.size(); ++i )
     {
-      dolfin_assert(mapping[i] < other.cached_numbering_.size());
+      dolfin_assert( mapping[i] < other.cached_numbering_.size() );
 
       // Numbering
-      uint const global = other.cached_numbering_[mapping[i]];
+      size_t const global  = other.cached_numbering_[mapping[i]];
       cached_numbering_[i] = global;
-      local_[global] = i;
+      local_[global]       = i;
 
-      dolfin_assert(mapping[i] < other.cached_numbering_.size());
-      uint const owner = other.cached_ownership_[mapping[i]];
+      dolfin_assert( mapping[i] < other.cached_numbering_.size() );
+      size_t const owner = other.cached_ownership_[mapping[i]];
 
       // Ownership
       cached_ownership_[i] = other.cached_ownership_[mapping[i]];
 
       // Entity is shared: copy adjacents
-      if (owner < pe_size_)
+      if ( owner < pe_size_ )
       {
-        its = other.shared_.find(mapping[i]);
-        dolfin_assert(its != other.shared_.end());
+        its = other.shared_.find( mapping[i] );
+        dolfin_assert( its != other.shared_.end() );
         shared_[i] = its->second;
-        adjacents_.insert(its->second.begin(), its->second.end());
+        adjacents_.insert( its->second.begin(), its->second.end() );
 
         // Entity is ghost: copy owner
-        if (owner != rank_)
+        if ( owner != rank_ )
         {
-          itg = other.ghost_.find(mapping[i]);
-          dolfin_assert(itg != other.ghost_.end());
+          itg = other.ghost_.find( mapping[i] );
+          dolfin_assert( itg != other.ghost_.end() );
           ghost_[i] = itg->second;
         }
       }
@@ -327,27 +352,27 @@ void DistributedData::assign(DistributedData const& other,
   else
   {
     IndexMapping::const_iterator it;
-    SharedSet::const_iterator its;
-    GhostSet::const_iterator itg;
-    for(uint i = 0; i < mapping.size(); ++i)
+    SharedSet::const_iterator    its;
+    GhostSet::const_iterator     itg;
+    for ( size_t i = 0; i < mapping.size(); ++i )
     {
       // Numbering
-      it = other.global_.find(mapping[i]);
+      it                   = other.global_.find( mapping[i] );
       cached_numbering_[i] = it->second;
-      local_[it->second] = i;
+      local_[it->second]   = i;
 
       // Ownership
-      its = other.shared_.find(mapping[i]);
-      if(its != other.shared_.end())
+      its = other.shared_.find( mapping[i] );
+      if ( its != other.shared_.end() )
       {
         shared_[i] = its->second;
-        adjacents_.insert(shared_[i].begin(), shared_[i].end());
+        adjacents_.insert( shared_[i].begin(), shared_[i].end() );
 
         // Entity is ghost: copy owner
-        itg = other.ghost_.find(mapping[i]);
-        if(itg != other.ghost_.end())
+        itg = other.ghost_.find( mapping[i] );
+        if ( itg != other.ghost_.end() )
         {
-          ghost_[i] = itg->second;
+          ghost_[i]            = itg->second;
           cached_ownership_[i] = itg->second;
         }
         else
@@ -364,61 +389,63 @@ void DistributedData::assign(DistributedData const& other,
 
   ///
   range_size_ = cached_numbering_.size() - ghost_.size();
-  MPI::offset(range_size_, offset_, this->comm());
-  MPI::all_reduce<MPI::sum>(range_size_, global_size_, this->comm());
+  MPI::offset( range_size_, offset_, this->comm() );
+  MPI::all_reduce< MPI::sum >( range_size_, global_size_, this->comm() );
 
   ///
   finalized_ = true;
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
+
+void DistributedData::set_range( size_t num_owned, size_t num_global /* = 0 */ )
 {
-  if (finalized_)
+  if ( finalized_ )
   {
-    error("DistributedData : setting range to a finalized data");
+    error( "DistributedData : setting range to a finalized data" );
   }
   // Check if there exists a mapping already
-  if (local_.size() > 0 && local_.size() < num_owned)
+  if ( local_.size() > 0 && local_.size() < num_owned )
   {
-    error("DistributedData : provided range is greater than local size ");
+    error( "DistributedData : provided range is greater than local size " );
   }
   // Check if the provided range size is consistent with cache size if any
   if ( not cached_numbering_.empty() and cached_numbering_.size() < num_owned )
   {
-    error("DistributedData : provided range is greater than cache size ");
+    error( "DistributedData : provided range is greater than cache size " );
   }
   // Check range if already set otherwise set it and compute offset
-  if (range_is_set_)
+  if ( range_is_set_ )
   {
-    if (range_size_ != num_owned)
+    if ( range_size_ != num_owned )
     {
-      error("DistributedData : setting different range than existing");
+      error( "DistributedData : setting different range than existing" );
     }
   }
   else
   {
     range_size_ = num_owned;
-    MPI::offset(range_size_, offset_, this->comm());
+    MPI::offset( range_size_, offset_, this->comm() );
   }
   // Set the global size if provided otherwise compute it
-  if (num_global > 0)
+  if ( num_global > 0 )
   {
     // Check if any existing global size matches the provided value
-    if ((global_size_ > 0) && (global_size_ != num_global))
+    if ( ( global_size_ > 0 ) && ( global_size_ != num_global ) )
     {
-      error("DistributedData : setting different global size than existing");
+      error( "DistributedData : setting different global size than existing" );
     }
     global_size_ = num_global;
   }
   else
   {
-    uint range_sum;
-    MPI::all_reduce<MPI::sum>(range_size_, range_sum, this->comm());
+    size_t range_sum;
+    MPI::all_reduce< MPI::sum >( range_size_, range_sum, this->comm() );
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
-    if ((global_size_ > 0) && (global_size_ != range_sum))
+    if ( ( global_size_ > 0 ) && ( global_size_ != range_sum ) )
     {
-      error("DistributedData : sum of range not equal to global size");
+      error( "DistributedData : sum of range not equal to global size" );
     }
     global_size_ = range_sum;
   }
@@ -426,135 +453,147 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   ///
   range_is_set_ = true;
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
+
+void DistributedData::set_size( size_t num_local, size_t num_global /* = 0 */ )
 {
-  if (finalized_)
+  if ( finalized_ )
   {
-    error("DistributedData : setting size to a finalized data");
+    error( "DistributedData : setting size to a finalized data" );
   }
   // Do not allow setting the size of of a non-empty distributed data
-  if (!this->empty())
+  if ( !this->empty() )
   {
-    error("DistributedData : setting size to a non-empty data");
+    error( "DistributedData : setting size to a non-empty data" );
   }
   // Do not allow resetting the size of data
-  if ( not cached_numbering_.empty() and (cached_numbering_.size() != num_local))
+  if ( not cached_numbering_.empty()
+       and ( cached_numbering_.size() != num_local ) )
   {
-    error("DistributedData : setting different size to data");
+    error( "DistributedData : setting different size to data" );
   }
   // If range is known check consistency, range is zero by default
-  if (num_local < range_size_)
+  if ( num_local < range_size_ )
   {
-    error("DistributedData : setting smaller local size than existing range");
+    error( "DistributedData : setting smaller local size than existing range" );
   }
   // Set the global size if provided
-  if (num_global > 0)
+  if ( num_global > 0 )
   {
-    if ((global_size_ > 0)and (global_size_ != num_global))
+    if ( ( global_size_ > 0 ) and ( global_size_ != num_global ) )
     {
-      error("DistributedData : setting different global size than existing");
+      error( "DistributedData : setting different global size than existing" );
     }
     global_size_ = num_global;
   }
   // Use caching already as the data size is known and save on map lookups
   // Create arrays if they do not exist
-  if ( cached_numbering_.empty() and (num_local > 0) )
+  if ( cached_numbering_.empty() and ( num_local > 0 ) )
   {
-    cached_numbering_ = Array<uint>(num_local, DOLFIN_UINT_UNDEF);
+    cached_numbering_ = std::vector< size_t >( num_local, DOLFIN_SIZE_T_UNDEF );
   }
-  if ( cached_ownership_.empty() and (num_local > 0) )
+  if ( cached_ownership_.empty() and ( num_local > 0 ) )
   {
-    cached_ownership_ = Array<uint>(num_local, pe_size_);
+    cached_ownership_ = std::vector< size_t >( num_local, pe_size_ );
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_map(uint local_index, uint global_index,
-                              bool allow_remap /* = false */)
+
+void DistributedData::set_map( size_t local_index,
+                               size_t global_index,
+                               bool   allow_remap /* = false */ )
 {
-  dolfin_assert(!finalized_);
-  dolfin_assert(local_.count(global_index) == 0);
+  dolfin_assert( !finalized_ );
+  dolfin_assert( local_.count( global_index ) == 0 );
   if ( not cached_numbering_.empty() )
   {
-    dolfin_assert(local_index < cached_numbering_.size());
+    dolfin_assert( local_index < cached_numbering_.size() );
     /* Do not allow remapping by default */
-    if(allow_remap && cached_numbering_[local_index] != DOLFIN_UINT_UNDEF &&
-       cached_numbering_[local_index] != global_index)
+    if ( allow_remap && cached_numbering_[local_index] != DOLFIN_SIZE_T_UNDEF
+         && cached_numbering_[local_index] != global_index )
     {
-      //warning("DistributedData : remap %u", local_index);
-      local_.erase(cached_numbering_[local_index]);
+      // warning("DistributedData : remap %u", local_index);
+      local_.erase( cached_numbering_[local_index] );
     }
-    local_.insert(std::pair<uint, uint>(global_index, local_index));
+    local_.insert( std::pair< size_t, size_t >( global_index, local_index ) );
     cached_numbering_[local_index] = global_index;
   }
   else
   {
     /* Do not allow remapping by default */
-    if (allow_remap)
+    if ( allow_remap )
     {
-      IndexMapping::iterator it = global_.find(local_index);
-      if (it != global_.end())
+      IndexMapping::iterator it = global_.find( local_index );
+      if ( it != global_.end() )
       {
-        //warning("DistributedData : remap %u", local_index);
-        local_.erase(it->second);
+        // warning("DistributedData : remap %u", local_index);
+        local_.erase( it->second );
       }
     }
-    local_.insert(std::pair<uint, uint>(global_index, local_index));
-    dolfin_assert(global_.count(local_index) == 0);
+    local_.insert( std::pair< size_t, size_t >( global_index, local_index ) );
+    dolfin_assert( global_.count( local_index ) == 0 );
     global_[local_index] = global_index;
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_map(Array<uint> const& mapping)
+
+void DistributedData::set_map( std::vector< size_t > const & mapping )
 {
-  if (finalized_)
+  if ( finalized_ )
   {
-    error("DistributedData : setting numbering requires non-finalized data");
+    error( "DistributedData : setting numbering requires non-finalized data" );
   }
   if ( not cached_numbering_.empty() )
   {
     if ( mapping.size() != cached_numbering_.size() )
     {
-      error("DistributedData : local-to-global mapping array has invalid size");
+      error(
+        "DistributedData : local-to-global mapping array has invalid size" );
     }
   }
   else
   {
-    if (local_.size() && mapping.size() != global_.size())
+    if ( local_.size() && mapping.size() != global_.size() )
     {
-      error("DistributedData : local-to-global mapping array has invalid size");
+      error(
+        "DistributedData : local-to-global mapping array has invalid size" );
     }
     global_.clear();
-    cached_numbering_ = Array<uint>(mapping.size());
+    cached_numbering_ = std::vector< size_t >( mapping.size() );
   }
 
-  std::copy(mapping.begin(), mapping.end(), cached_numbering_.begin());
+  std::copy( mapping.begin(), mapping.end(), cached_numbering_.begin() );
   local_.clear();
-  for (uint i = 0; i < cached_numbering_.size(); ++i)
+  for ( size_t i = 0; i < cached_numbering_.size(); ++i )
   {
     local_[cached_numbering_[i]] = i;
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::remap_numbering(Array<uint> const& mapping)
+
+void DistributedData::remap_numbering( std::vector< size_t > const & mapping )
 {
-  if (!finalized_)
+  if ( !finalized_ )
   {
-    error("DistributedData : re-mapping numbering requires finalized data");
+    error( "DistributedData : re-mapping numbering requires finalized data" );
   }
 
-  if (mapping.size() != cached_numbering_.size())
+  if ( mapping.size() != cached_numbering_.size() )
   {
-    error("DistributedData : numbering re-mapping array has invalid size");
+    error( "DistributedData : numbering re-mapping array has invalid size" );
   }
 
   // Update numbering
-  dolfin_assert(global_.size() == 0);
-  dolfin_assert(not cached_numbering_.empty());
+  dolfin_assert( global_.size() == 0 );
+  dolfin_assert( not cached_numbering_.empty() );
 
   for ( IndexMapping::value_type & index_pair : local_ )
   {
-    uint const new_local_index = mapping[index_pair.second];
+    size_t const new_local_index = mapping[index_pair.second];
     // map new local index to global index
     cached_numbering_[new_local_index] = index_pair.first;
     // map global index to new local index
@@ -562,32 +601,32 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   }
 
   // Update shared entities
-  dolfin_assert(not cached_ownership_.empty());
-  std::fill(cached_ownership_.begin(), cached_ownership_.end(), pe_size_);
+  dolfin_assert( not cached_ownership_.empty() );
+  std::fill( cached_ownership_.begin(), cached_ownership_.end(), pe_size_ );
   SharedSet shared;
-  for (SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
-       ++it)
+  for ( SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
+        ++it )
   {
-    uint const new_local_index = mapping[it->first];
+    size_t const new_local_index = mapping[it->first];
     // map new local index to shared adjacents
     shared[new_local_index] = it->second;
     // set default ownership to new local index
     cached_ownership_[new_local_index] = rank_;
   }
-  shared_.swap(shared);
+  shared_.swap( shared );
 
   // Update ghost entities
-  dolfin_assert(not cached_ownership_.empty());
+  dolfin_assert( not cached_ownership_.empty() );
   GhostSet ghost;
-  for (GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end(); ++it)
+  for ( GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end(); ++it )
   {
-    uint const new_local_index = mapping[it->first];
+    size_t const new_local_index = mapping[it->first];
     // map new local index to owner
     ghost[new_local_index] = it->second;
     // set ghost ownership to new local index
     cached_ownership_[new_local_index] = it->second;
   }
-  ghost_.swap(ghost);
+  ghost_.swap( ghost );
 
   // Clear mappings
   if ( shared_mapping_ )
@@ -596,12 +635,14 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     shared_mapping_ = nullptr;
   }
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::renumber_global()
 {
   if ( not finalized_ )
   {
-    error("DistributedData : global renumbering requires finalized data");
+    error( "DistributedData : global renumbering requires finalized data" );
   }
 
   /*
@@ -610,21 +651,23 @@ void DistributedData::renumber_global()
 
 #if HAVE_MPI
 
-  message(1, "DistributedData : renumber global, local size = %u", cached_numbering_.size());
+  message( 1,
+           "DistributedData : renumber global, local size = %u",
+           cached_numbering_.size() );
   tic();
 
-  IndexMapping local_mapping;
-  Array< Array<uint> > sendbuf( pe_size_ );
+  IndexMapping                         local_mapping;
+  std::vector< std::vector< size_t > > sendbuf( pe_size_ );
 
   // Re-index owned entities and collect ghosted entities per owner
-  dolfin_assert(local_.size() == cached_numbering_.size());
-  dolfin_assert(!(local_.size() > 0 && cached_numbering_.empty()));
-  dolfin_assert(!(local_.size() > 0 && cached_ownership_.empty()));
-  uint index = offset_;
-  for (uint i = 0; i < cached_numbering_.size(); ++i)
+  dolfin_assert( local_.size() == cached_numbering_.size() );
+  dolfin_assert( !( local_.size() > 0 && cached_numbering_.empty() ) );
+  dolfin_assert( !( local_.size() > 0 && cached_ownership_.empty() ) );
+  size_t index = offset_;
+  for ( size_t i = 0; i < cached_numbering_.size(); ++i )
   {
-    dolfin_assert(cached_ownership_[i] <= pe_size_);
-    if (cached_ownership_[i] == pe_size_ || cached_ownership_[i] == rank_)
+    dolfin_assert( cached_ownership_[i] <= pe_size_ );
+    if ( cached_ownership_[i] == pe_size_ || cached_ownership_[i] == rank_ )
     {
       cached_numbering_[i] = index;
       local_mapping[index] = i;
@@ -632,8 +675,8 @@ void DistributedData::renumber_global()
     }
     else
     {
-      dolfin_assert(cached_ownership_[i] < pe_size_);
-      sendbuf[cached_ownership_[i]].push_back(cached_numbering_[i]);
+      dolfin_assert( cached_ownership_[i] < pe_size_ );
+      sendbuf[cached_ownership_[i]].push_back( cached_numbering_[i] );
     }
   }
 
@@ -642,75 +685,78 @@ void DistributedData::renumber_global()
   // Maximum number of received entities is the number of owned shared but the
   // issue is that some previous were written in a way that does not ensure
   // appropriate setting of owned shared entities
-  uint recvsize = max_array_size( sendbuf );
-  MPI::all_reduce<MPI::max>(recvsize, recvsize, comm());
+  size_t recvsize = max_array_size( sendbuf );
+  MPI::all_reduce< MPI::max >( recvsize, recvsize, comm() );
 
-  Array< uint > recvbuf( recvsize );
-  Array< uint > sendbck( recvsize );
-  Array< uint > recvbck( ghost_.size() );
+  std::vector< size_t > recvbuf( recvsize );
+  std::vector< size_t > sendbck( recvsize );
+  std::vector< size_t > recvbck( ghost_.size() );
 
-  for (uint j = 1; j < pe_size_; ++j)
+  for ( size_t j = 1; j < pe_size_; ++j )
   {
-    int src = (rank_ - j + pe_size_) % pe_size_;
-    int dst = (rank_ + j) % pe_size_;
+    int src = ( rank_ - j + pe_size_ ) % pe_size_;
+    int dst = ( rank_ + j ) % pe_size_;
 
-    int recv_count = MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1, comm() );
+    int recv_count =
+      MPI::sendrecv( sendbuf[dst], dst, recvbuf, src, 1, comm() );
     sendbck.resize( recv_count );
 
-    for (int k = 0; k < recv_count; ++k)
+    for ( int k = 0; k < recv_count; ++k )
     {
-      dolfin_assert(local_.count(recvbuf[k]) > 0);
-      uint const local_index = local_.find(recvbuf[k])->second;
-      sendbck[k] = cached_numbering_[local_index];
+      dolfin_assert( local_.count( recvbuf[k] ) > 0 );
+      size_t const local_index = local_.find( recvbuf[k] )->second;
+      sendbck[k]               = cached_numbering_[local_index];
 
       // Entity is not marked as shared: invalidate ownership
-      if (cached_ownership_[local_index] == pe_size_)
+      if ( cached_ownership_[local_index] == pe_size_ )
       {
-        //error("Entity %u is not marked as shared", local_index);
+        // error("Entity %u is not marked as shared", local_index);
       }
-      else if (cached_ownership_[local_index] != rank_)
+      else if ( cached_ownership_[local_index] != rank_ )
       {
-        error("DistributedData : entity %u should be owned but is set ghost");
+        error( "DistributedData : entity %u should be owned but is set ghost" );
       }
     }
 
     recvbck.resize( sendbuf[dst].size() );
     MPI::sendrecv( sendbck, src, recvbck, dst, 2, comm() );
 
-    for (uint k = 0; k < recvbck.size(); ++k)
+    for ( size_t k = 0; k < recvbck.size(); ++k )
     {
-      uint const local_index = local_.find(sendbuf[dst][k])->second;
-      dolfin_assert(local_mapping.count(recvbck[k]) == 0);
+      size_t const local_index = local_.find( sendbuf[dst][k] )->second;
+      dolfin_assert( local_mapping.count( recvbck[k] ) == 0 );
       cached_numbering_[local_index] = recvbck[k];
-      local_mapping[recvbck[k]] = local_index;
+      local_mapping[recvbck[k]]      = local_index;
     }
   }
 
-  local_.swap(local_mapping);
+  local_.swap( local_mapping );
 
-  tocd(1);
+  tocd( 1 );
 
 #endif /* HAVE_MPI */
-
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::remap_ownership(Array<uint> const& mapping)
+
+void DistributedData::remap_ownership( std::vector< size_t > const & mapping )
 {
-  dolfin_assert(finalized_);
-  if (mapping.size() != pe_size_)
+  dolfin_assert( finalized_ );
+  if ( mapping.size() != pe_size_ )
   {
-    error("DistributedData : ownership re-mapping array has invalid size");
+    error( "DistributedData : ownership re-mapping array has invalid size" );
   }
 
   // Update current rank
   rank_ = mapping[rank_];
 
   // Update adjacent ranks
-  _set<uint> adjs;
-  for (_set<uint>::const_iterator it = adjacents_.begin();
-       it != adjacents_.end(); ++it)
+  _set< size_t > adjs;
+  for ( _set< size_t >::const_iterator it = adjacents_.begin();
+        it != adjacents_.end();
+        ++it )
   {
-    adjs.insert(mapping[*it]);
+    adjs.insert( mapping[*it] );
   }
   adjacents_ = adjs;
 
@@ -718,8 +764,8 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   for ( SharedSet::value_type & index_pair : shared_ )
   {
     // Update adjacent
-    _set<uint> adj;
-    for ( uint const & id : index_pair.second )
+    _set< size_t > adj;
+    for ( size_t const & id : index_pair.second )
       adj.insert( mapping[id] );
 
     index_pair.second = adj;
@@ -752,26 +798,29 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
     shared_mapping_ = nullptr;
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::get_common_adj(uint n, Array< uint > const & indices,
-                                     _set<uint>& adjs) const
+
+void DistributedData::get_common_adj( size_t                        n,
+                                      std::vector< size_t > const & indices,
+                                      _set< size_t > &              adjs ) const
 {
-  if (n == 0)
+  if ( n == 0 )
   {
     adjs.clear();
     return;
   }
-  dolfin_assert(shared_.count(indices[0]) > 0);
-  adjs = shared_.find(indices[0])->second;
-  for (uint i = 1; (adjs.size()> 0)&&(i < n); ++i)
+  dolfin_assert( shared_.count( indices[0] ) > 0 );
+  adjs = shared_.find( indices[0] )->second;
+  for ( size_t i = 1; ( adjs.size() > 0 ) && ( i < n ); ++i )
   {
-    dolfin_assert(shared_.count(indices[i]) > 0);
-    _set<uint> const& adjx = shared_.find(indices[i])->second;
-    for(_set<uint>::iterator it = adjs.begin(); it != adjs.end();)
+    dolfin_assert( shared_.count( indices[i] ) > 0 );
+    _set< size_t > const & adjx = shared_.find( indices[i] )->second;
+    for ( _set< size_t >::iterator it = adjs.begin(); it != adjs.end(); )
     {
-      if (adjx.count(*it) == 0)
+      if ( adjx.count( *it ) == 0 )
       {
-        adjs.erase(it++);
+        adjs.erase( it++ );
       }
       else
       {
@@ -780,128 +829,147 @@ void DistributedData::get_common_adj(uint n, Array< uint > const & indices,
     }
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_shared(uint local_index)
+
+void DistributedData::set_shared( size_t local_index )
 {
-  dolfin_assert(!finalized_);
-  dolfin_assert(shared_.count(local_index) == 0);
-  dolfin_assert(!((not cached_ownership_.empty())&&(local_index >= cached_ownership_.size())));
-  if ((not cached_ownership_.empty())
-      && (cached_ownership_[local_index] == pe_size_))
+  dolfin_assert( !finalized_ );
+  dolfin_assert( shared_.count( local_index ) == 0 );
+  dolfin_assert( !( ( not cached_ownership_.empty() )
+                    && ( local_index >= cached_ownership_.size() ) ) );
+  if ( ( not cached_ownership_.empty() )
+       && ( cached_ownership_[local_index] == pe_size_ ) )
   {
     cached_ownership_[local_index] = rank_;
   }
   // As explained we allow setting an entity as shared without adjacent only if
   // the entity is not shared already.
-  dolfin_assert(!((cached_ownership_.empty())&&(global_.count(local_index) == 0)));
-  if (shared_[local_index].size() > 0)
+  dolfin_assert( !( ( cached_ownership_.empty() )
+                    && ( global_.count( local_index ) == 0 ) ) );
+  if ( shared_[local_index].size() > 0 )
   {
-    error("DistributedData : cannot set_shared on entities with adjacents");
+    error( "DistributedData : cannot set_shared on entities with adjacents" );
   }
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_shared_adj(uint local_index, uint adj)
+
+void DistributedData::set_shared_adj( size_t local_index, size_t adj )
 {
-  dolfin_assert(!finalized_);
-  dolfin_assert(adj != rank_);
-  dolfin_assert(adj < pe_size_);
-  dolfin_assert(!((not cached_ownership_.empty())&&(local_index >= cached_ownership_.size())));
-  if ((not cached_ownership_.empty())
-      && (cached_ownership_[local_index] == pe_size_))
+  dolfin_assert( !finalized_ );
+  dolfin_assert( adj != rank_ );
+  dolfin_assert( adj < pe_size_ );
+  dolfin_assert( !( ( not cached_ownership_.empty() )
+                    && ( local_index >= cached_ownership_.size() ) ) );
+  if ( ( not cached_ownership_.empty() )
+       && ( cached_ownership_[local_index] == pe_size_ ) )
   {
     cached_ownership_[local_index] = rank_;
   }
-  shared_[local_index].insert(adj);
-  adjacents_.insert(adj);
+  shared_[local_index].insert( adj );
+  adjacents_.insert( adj );
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs)
+
+void DistributedData::setall_shared_adj( size_t                 local_index,
+                                         _set< size_t > const & adjs )
 {
-  dolfin_assert(!finalized_);
-  dolfin_assert(adjs.count(rank_) == 0);
-  dolfin_assert(!((not cached_ownership_.empty())&&(local_index >= cached_ownership_.size())));
-  if ((not cached_ownership_.empty())
-      && (cached_ownership_[local_index] == pe_size_))
+  dolfin_assert( !finalized_ );
+  dolfin_assert( adjs.count( rank_ ) == 0 );
+  dolfin_assert( !( ( not cached_ownership_.empty() )
+                    && ( local_index >= cached_ownership_.size() ) ) );
+  if ( ( not cached_ownership_.empty() )
+       && ( cached_ownership_[local_index] == pe_size_ ) )
   {
     cached_ownership_[local_index] = rank_;
   }
   shared_[local_index] = adjs;
-  adjacents_.insert(adjs.begin(), adjs.end());
+  adjacents_.insert( adjs.begin(), adjs.end() );
 }
+
 //-----------------------------------------------------------------------------
-SharedMapping const& DistributedData::shared_mapping() const
+
+auto DistributedData::shared_mapping() const -> SharedMapping const &
 {
-  if(shared_mapping_ == nullptr)
+  if ( shared_mapping_ == nullptr )
   {
-    shared_mapping_ = new SharedMapping(*this);
+    shared_mapping_ = new SharedMapping( *this );
   }
   return *shared_mapping_;
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::remap_shared_adj()
 {
- #if HAVE_MPI
-  uint const pe_rank = this->comm_rank();
-  uint const pe_size = this->comm_size();
+#if HAVE_MPI
+  size_t const pe_rank = this->comm_rank();
+  size_t const pe_size = this->comm_size();
 
-  Array<uint> buffer;
-  for (SharedIterator vi(*this); vi.valid(); ++vi)
+  std::vector< size_t > buffer;
+  for ( SharedIterator vi( *this ); vi.valid(); ++vi )
   {
-    buffer.push_back(vi.global_index());
+    buffer.push_back( vi.global_index() );
   }
 
-  uint recvmax = buffer.size();
-  MPI::all_reduce_in_place<MPI::max>( recvmax, comm() );
-  Array<uint> recvbuf(recvmax);
-  for (uint j = 1; j < pe_size; ++j)
+  size_t recvmax = buffer.size();
+  MPI::all_reduce_in_place< MPI::max >( recvmax, comm() );
+  std::vector< size_t > recvbuf( recvmax );
+  for ( size_t j = 1; j < pe_size; ++j )
   {
-    int src = (pe_rank - j + pe_size) % pe_size;
-    int dst = (pe_rank + j) % pe_size;
+    int src = ( pe_rank - j + pe_size ) % pe_size;
+    int dst = ( pe_rank + j ) % pe_size;
 
     int recvcount = MPI::sendrecv( buffer, dst, recvbuf, src, 0, comm() );
 
-    for (int k = 0; k < recvcount; ++k)
+    for ( int k = 0; k < recvcount; ++k )
     {
-      if (this->has_global(recvbuf[k]))
+      if ( this->has_global( recvbuf[k] ) )
       {
-        uint const local_index = this->get_local(recvbuf[k]);
-        this->set_shared_adj(local_index, src);
+        size_t const local_index = this->get_local( recvbuf[k] );
+        this->set_shared_adj( local_index, src );
       }
     }
   }
 #endif /* HAVE_MPI */
 }
+
 //-----------------------------------------------------------------------------
-void DistributedData::set_ghost(uint local_index, uint owner)
+
+void DistributedData::set_ghost( size_t local_index, size_t owner )
 {
-  dolfin_assert(!finalized_);
-  dolfin_assert(owner != rank_);
-  dolfin_assert(owner < pe_size_);
-  if (not cached_ownership_.empty())
+  dolfin_assert( !finalized_ );
+  dolfin_assert( owner != rank_ );
+  dolfin_assert( owner < pe_size_ );
+  if ( not cached_ownership_.empty() )
   {
-    dolfin_assert(local_index < cached_ownership_.size());
+    dolfin_assert( local_index < cached_ownership_.size() );
     cached_ownership_[local_index] = owner;
   }
-  shared_[local_index].insert(owner);
+  shared_[local_index].insert( owner );
   ghost_[local_index] = owner;
-  adjacents_.insert(owner);
+  adjacents_.insert( owner );
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::disp() const
 {
-  section("DistributedData");
-  message("rank        : %8u", rank_);
-  message("offset      : %8u", offset_);
-  message("range size  : %8u", range_size_);
-  message("local  size : %8u", this->local_size());
-  message("global size : %8u", this->global_size());
-  message("cached      : %8u", (not cached_numbering_.empty()));
-  message("finalized   : %8u", finalized_);
+  section( "DistributedData" );
+  message( "rank        : %8u", rank_ );
+  message( "offset      : %8u", offset_ );
+  message( "range size  : %8u", range_size_ );
+  message( "local  size : %8u", this->local_size() );
+  message( "global size : %8u", this->global_size() );
+  message( "cached      : %8u", ( not cached_numbering_.empty() ) );
+  message( "finalized   : %8u", finalized_ );
   /*
   if (finalized_)
   {
     section("entities    :");
-    for (uint i = 0; i < this->local_size(); ++i)
+    for (size_t i = 0; i < this->local_size(); ++i)
     {
       message("%8u -> %8u -> %8u : %8u", i, cached_numbering_[i],
               local_.find(cached_numbering_[i])->second, this->get_owner(i));
@@ -911,105 +979,109 @@ void DistributedData::disp() const
   */
   end();
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::check_shared()
 {
 #if HAVE_MPI
-  uint const pe_rank = this->comm_rank();
-  uint const pe_size = this->comm_size();
+  size_t const pe_rank = this->comm_rank();
+  size_t const pe_size = this->comm_size();
 
-  Array< Array<uint> > buffer( pe_size );
-  for (SharedIterator vi(*this); vi.valid(); ++vi)
+  std::vector< std::vector< size_t > > buffer( pe_size );
+  for ( SharedIterator vi( *this ); vi.valid(); ++vi )
   {
-    dolfin_assert(!vi.adj().empty());
-    vi.adj_enqueue(buffer, vi.global_index());
+    dolfin_assert( !vi.adj().empty() );
+    vi.adj_enqueue( buffer, vi.global_index() );
   }
 
   //
-  Array<uint> recvbuf(this->num_shared());
-  for (uint j = 1; j < pe_size; ++j)
+  std::vector< size_t > recvbuf( this->num_shared() );
+  for ( size_t j = 1; j < pe_size; ++j )
   {
-    int src = (pe_rank - j + pe_size) % pe_size;
-    int dst = (pe_rank + j) % pe_size;
+    int src = ( pe_rank - j + pe_size ) % pe_size;
+    int dst = ( pe_rank + j ) % pe_size;
 
     int recvcount = MPI::sendrecv( buffer[dst], dst, recvbuf, src, 0, comm() );
 
-    for (int k = 0; k < recvcount; ++k)
+    for ( int k = 0; k < recvcount; ++k )
     {
-      if (!this->has_global(recvbuf[k]))
+      if ( !this->has_global( recvbuf[k] ) )
       {
-        error("Shared entity not found on adjacent rank");
+        error( "Shared entity not found on adjacent rank" );
       }
-      uint const local_index = this->get_local(recvbuf[k]);
-      if (!this->is_shared(local_index))
+      size_t const local_index = this->get_local( recvbuf[k] );
+      if ( !this->is_shared( local_index ) )
       {
-        error("Shared entity not marked as shared");
+        error( "Shared entity not marked as shared" );
       }
-      if (this->get_shared_adj(local_index).count(src) == 0)
+      if ( this->get_shared_adj( local_index ).count( src ) == 0 )
       {
-        error("Shared entity not marked as shared with rank %u", src);
+        error( "Shared entity not marked as shared with rank %u", src );
       }
     }
   }
 #endif /* HAVE_MPI */
 }
+
 //-----------------------------------------------------------------------------
+
 void DistributedData::check_ghost()
 {
 #if HAVE_MPI
-  uint const pe_rank = this->comm_rank();
-  uint const pe_size = this->comm_size();
+  size_t const pe_rank = this->comm_rank();
+  size_t const pe_size = this->comm_size();
 
-  Array< Array<uint> > buffer( pe_size );
-  for (GhostIterator vi(*this); vi.valid(); ++vi)
+  std::vector< std::vector< size_t > > buffer( pe_size );
+  for ( GhostIterator vi( *this ); vi.valid(); ++vi )
   {
-    dolfin_assert(!vi.adj().empty());
-    if (vi.owner() == pe_rank)
+    dolfin_assert( !vi.adj().empty() );
+    if ( vi.owner() == pe_rank )
     {
-      error("Ghost entity is marked as owned");
+      error( "Ghost entity is marked as owned" );
     }
-    buffer[vi.owner()].push_back(vi.global_index());
+    buffer[vi.owner()].push_back( vi.global_index() );
   }
 
   //
-  uint recvmax = 0;
-  for (uint j = 0; j < pe_size; ++j)
+  size_t recvmax = 0;
+  for ( size_t j = 0; j < pe_size; ++j )
   {
-    uint s = buffer[j].size();
-    MPI::check_error( MPI_Reduce(&s, &recvmax, 1, MPI_UNSIGNED, MPI_MAX, j,
-                                 comm()) );
+    size_t s = buffer[j].size();
+    MPI::reduce< MPI::sum >( &s, &recvmax, 1, j, comm() );
   }
-  Array<uint> recvbuf(recvmax);
-  for (uint j = 1; j < pe_size; ++j)
+  std::vector< size_t > recvbuf( recvmax );
+  for ( size_t j = 1; j < pe_size; ++j )
   {
-    int src = (pe_rank - j + pe_size) % pe_size;
-    int dst = (pe_rank + j) % pe_size;
+    int src = ( pe_rank - j + pe_size ) % pe_size;
+    int dst = ( pe_rank + j ) % pe_size;
 
     int recvcount = MPI::sendrecv( buffer[dst], dst, recvbuf, src, 0, comm() );
 
-    for (int k = 0; k < recvcount; ++k)
+    for ( int k = 0; k < recvcount; ++k )
     {
-      if (!this->has_global(recvbuf[k]))
+      if ( !this->has_global( recvbuf[k] ) )
       {
-        error("Shared entity not found on owner rank");
+        error( "Shared entity not found on owner rank" );
       }
-      uint const local_index = this->get_local(recvbuf[k]);
-      if (!this->is_shared(local_index))
+      size_t const local_index = this->get_local( recvbuf[k] );
+      if ( !this->is_shared( local_index ) )
       {
-        error("Shared entity not marked as shared");
+        error( "Shared entity not marked as shared" );
       }
-      if (this->is_ghost(local_index))
+      if ( this->is_ghost( local_index ) )
       {
-        error("Shared owned entity is marked as ghost");
+        error( "Shared owned entity is marked as ghost" );
       }
-      if (this->get_shared_adj(local_index).count(src) == 0)
+      if ( this->get_shared_adj( local_index ).count( src ) == 0 )
       {
-        error("Shared entity not marked as shared with rank %u", src);
+        error( "Shared entity not marked as shared with rank %u", src );
       }
     }
   }
 #endif /* HAVE_MPI */
 }
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

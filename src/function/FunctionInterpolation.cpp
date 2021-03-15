@@ -7,19 +7,20 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/fem/UFCExpression.h>
+#include <dolfin/function/Expression.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
-#include <dolfin/mesh/CellIterator.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/VertexIterator.h>
+#include <dolfin/mesh/entities/Vertex.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
+#include <dolfin/mesh/entities/iterators/VertexIterator.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+
 void FunctionInterpolation::compute(GenericFunction const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
@@ -37,6 +38,27 @@ void FunctionInterpolation::compute(GenericFunction const& F0, Function& F1)
 }
 
 //-----------------------------------------------------------------------------
+
+struct EvalExpression : ufc::function
+{
+  EvalExpression(Expression const& E) :
+    E_(E)
+  {
+  }
+
+  ///
+  inline void evaluate(real* values, const real* coordinates,
+                       const ufc::cell&) const override
+  {
+    E_.eval(values, coordinates);
+  }
+
+private:
+
+  Expression const& E_;
+};
+
+
 void FunctionInterpolation::compute(Expression const& F0, Function& F1)
 {
   if (!F1.compatible(F0))
@@ -47,13 +69,16 @@ void FunctionInterpolation::compute(Expression const& F0, Function& F1)
   {
     // Just assume that the coefficient can be evaluated on a ufc::cell
     ScratchSpace S1(F1.space());
-    UFCExpression UE(F0);
-    uint dof = 0;
+    EvalExpression EE(F0);
+    size_t dof = 0;
     real * block1 = F1.create_block();
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], UE, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element().ufc().evaluate_dofs(&block1[dof], EE,
+                                              S1.cell.coordinates.data(),
+                                              0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -73,12 +98,15 @@ void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
     // Just assume that the coefficient can be evaluated on a ufc::cell
     ScratchSpace S1(F1.space());
 
-    uint dof = 0;
+    size_t dof = 0;
     real * block1 = F1.create_block();
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element().ufc().evaluate_dofs(&block1[dof], F0,
+                                               S1.cell.coordinates.data(),
+                                               0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -97,23 +125,24 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
   if (F1.space().is_flattenable())
   {
     // Analytical expression and flattened space (naive implementation)
-    Array<ufc::finite_element const*> const& Sflt =
+    std::vector<ufc::finite_element const*> const& Sflt =
         F1.space().element().flatten();
     ScratchSpace S1(F1.space());
 
-    uint dof = 0;
+    size_t dof = 0;
     real * block1 = F1.create_block();
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      S1.dof_map->tabulate_coordinates(S1.coordinates, S1.cell);
+      S1.finite_element->tabulate_dof_coordinates(S1.coordinates.data(),
+                                                  S1.cell.coordinates.data());
 
-      uint celldof = 0;
-      for (uint leaf = 0; leaf < Sflt.size(); ++leaf)
+      size_t celldof = 0;
+      for (size_t leaf = 0; leaf < Sflt.size(); ++leaf)
       {
-        for (uint ii = 0; ii < Sflt[leaf]->space_dimension(); ++ii)
+        for (size_t ii = 0; ii < Sflt[leaf]->space_dimension(); ++ii)
         {
-          F0.evaluate(S1.values, S1.coordinates[celldof++], S1.cell);
+          F0.evaluate(S1.values.data(), &S1.coordinates[Space::MAX_DIMENSION*(celldof++)], S1.cell);
           block1[dof++] = S1.values[leaf];
         }
       }
@@ -128,12 +157,15 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     // The other function is discrete and non-trivial
     ScratchSpace S1(F1.space());
 
-    uint dof = 0;
+    size_t dof = 0;
     real * block1 = F1.create_block();
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
+      // FIXME orientation (0) needs to be correctly set here ?!
+      F1.space().element().ufc().evaluate_dofs(&block1[dof], F0,
+                                               S1.cell.coordinates.data(),
+                                               0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);
@@ -149,54 +181,54 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   dolfin_assert(F0.mesh() != F1.mesh());
 
   Mesh& M0 = F0.mesh();
-  //uint const gdim0 = M0.geometry_dimension();
-  //uint const tdim0 = M0.geometry_dimension();
+  //size_t const gdim0 = M0.geometry_dimension();
+  //size_t const tdim0 = M0.geometry_dimension();
   Cell c00(M0,0);
   UFCCell ufc0(c00);
 
   Mesh& M1 = F1.mesh();
-  uint const gdim1 = M1.geometry_dimension();
-  uint const tdim1 = M1.geometry_dimension();
+  size_t const gdim1 = M1.geometry_dimension();
+  size_t const tdim1 = M1.geometry_dimension();
   FiniteElementSpace const& Vh1 = F1.space();
   DofMap const& dm1 = Vh1.dofmap();
   ScratchSpace S1(Vh1);
 
   //
 #if HAVE_MPI
-  uint rank = dolfin::MPI::rank();
+  size_t rank = dolfin::MPI::rank();
 #endif
-  uint pe_size = dolfin::MPI::size();
+  size_t pe_size = dolfin::MPI::size();
 
   // On-proc for M0 and M1
-  Array<uint> dofs_indices0;
-  Array<uint> dofs_valsidx0;
-  Array<uint> cell_indices0;
-  Array<real> dofs_xcoords0;
+  std::vector<size_t> dofs_indices0;
+  std::vector<size_t> dofs_valsidx0;
+  std::vector<size_t> cell_indices0;
+  std::vector<real> dofs_xcoords0;
 
   // Off-proc for M0: need to recv
-  Array<uint> dofs_indicesX;
-  Array<real> dofs_xcoordsX;
+  std::vector<size_t> dofs_indicesX;
+  std::vector<real> dofs_xcoordsX;
 
   // Off-proc for M1: need to send
-  Array<uint> dofs_indices1;
-  Array<uint> dofs_valsidx1;
-  Array<uint> cell_indices1;
-  Array<real> dofs_xcoords1;
+  std::vector<size_t> dofs_indices1;
+  std::vector<size_t> dofs_valsidx1;
+  std::vector<size_t> cell_indices1;
+  std::vector<real> dofs_xcoords1;
 
   // DEBUG
-  _set<uint> offproc;
+  _set<size_t> offproc;
 
   // Dofs count to be sent and received
 #if HAVE_MPI
-  uint num_sendadj = 0;
-  uint num_recvadj = 0;
+  size_t num_sendadj = 0;
+  size_t num_recvadj = 0;
 #endif
 
-  Array< uint > dof1sendcount( pe_size, 0 );
-  Array< uint > dof1recvcount( pe_size, 0 );
+  std::vector< size_t > dof1sendcount( pe_size, 0 );
+  std::vector< size_t > dof1recvcount( pe_size, 0 );
 
   // Total count to be received from other ranks
-  uint num_dofsF = 0;
+  size_t num_dofsF = 0;
 
   // Some flags
   bool const is_distributed = M0.is_distributed() || M1.is_distributed();
@@ -211,7 +243,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     // This implementation assumes a scalar or vector-valued function which has
     // dofs only located at vertices.
     // (u, r) : (dof indices located at vertex, vertex coordinates)
-    uint const num_cellverts = M1.type().num_entities(0);
+    size_t const num_cellverts = M1.type().num_entities(0);
     M1.init(0, tdim1);
     for (VertexIterator v1(M1); !v1.end(); ++v1)
     {
@@ -219,25 +251,25 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       {
         Cell c1(M1, v1->entities(tdim1)[0]);
         S1.cell.update(c1);
-        dm1.tabulate_dofs(S1.dofs, S1.cell);
-        Array<uint> & vid = c1.entities(0);
-        uint vpos = 0;
+        dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
+        std::vector<size_t> & vid = c1.entities(0);
+        size_t vpos = 0;
         while (vid[vpos] != v1->index())
         {
           ++vpos;
         }
         Point p = v1->point();
-        Array<uint> M0cells;
+        std::vector<size_t> M0cells;
         M0.intersector().overlap(p, M0cells);
         if (M0cells.empty())
         {
           // Global dof indices
-          for (uint v = 0; v < S1.size; ++v)
+          for (size_t v = 0; v < S1.size; ++v)
           {
             dofs_indicesX.push_back(S1.dofs[vpos + v * num_cellverts]);
           }
           // Coordinates
-          for (uint d = 0; d < gdim1; ++d)
+          for (size_t d = 0; d < gdim1; ++d)
           {
             dofs_xcoordsX.push_back(p[d]);
           }
@@ -249,12 +281,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
           // Local cell
           cell_indices0.push_back(M0cells.front());
           // Global dof indices
-          for (uint v = 0; v < S1.size; ++v)
+          for (size_t v = 0; v < S1.size; ++v)
           {
             dofs_indices0.push_back(S1.dofs[vpos + v * num_cellverts]);
           }
           // Coordinates
-          for (uint d = 0; d < gdim1; ++d)
+          for (size_t d = 0; d < gdim1; ++d)
           {
             dofs_xcoords0.push_back(p[d]);
           }
@@ -274,19 +306,19 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {
       S1.cell.update(*c1);
-      dm1.tabulate_dofs(S1.dofs, S1.cell);
+      dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
       Point p = c1->midpoint();
-      Array<uint> M0cells;
+      std::vector<size_t> M0cells;
       M0.intersector().overlap(p, M0cells);
       if (M0cells.empty())
       {
         // Global dof indices
-        for (uint v = 0; v < S1.size; ++v)
+        for (size_t v = 0; v < S1.size; ++v)
         {
           dofs_indicesX.push_back(S1.dofs[v]);
         }
         // Coordinates
-        for (uint d = 0; d < gdim1; ++d)
+        for (size_t d = 0; d < gdim1; ++d)
         {
           dofs_xcoordsX.push_back(p[d]);
         }
@@ -298,12 +330,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         // Local cell
         cell_indices0.push_back(M0cells.front());
         // Global dof indices
-        for (uint v = 0; v < S1.size; ++v)
+        for (size_t v = 0; v < S1.size; ++v)
         {
           dofs_indices0.push_back(S1.dofs[v]);
         }
         // Coordinates
-        for (uint d = 0; d < gdim1; ++d)
+        for (size_t d = 0; d < gdim1; ++d)
         {
           dofs_xcoords0.push_back(p[d]);
         }
@@ -320,33 +352,34 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     // components are approximated in a discrete space other than CG1 and DG0.
     // (u, r) : (indices for dofs located at node n,
     //           node coordinates)
-    _set<uint> done;
-    uint const local_dim1 = dm1.local_dimension() / S1.size;
+    _set<size_t> done;
+    size_t const local_dim1 = dm1.num_element_dofs / S1.size;
     Point p;
     for (CellIterator c1(M1); !c1.end(); ++c1)
     {
       S1.cell.update(*c1);
-      dm1.tabulate_dofs(S1.dofs, S1.cell);
-      dm1.tabulate_coordinates(S1.coordinates, S1.cell);
+      dm1.tabulate_dofs(S1.dofs.data(), S1.cell);
+      S1.finite_element->tabulate_dof_coordinates(S1.coordinates.data(),
+                                                  S1.cell.coordinates.data());
 
       // For each dof of the first leaf
-      for (uint i = 0; i < local_dim1; ++i)
+      for (size_t i = 0; i < local_dim1; ++i)
       {
         if ((done.count(S1.dofs[i]) == 0) && !dm1.is_ghost(S1.dofs[i]))
         {
           done.insert(S1.dofs[i]);
-          std::memcpy(&p[0], S1.coordinates[i], gdim1 * sizeof(real));
-          Array<uint> M0cells;
+          std::memcpy(&p[0], &S1.coordinates[i*Space::MAX_DIMENSION], gdim1 * sizeof(real));
+          std::vector<size_t> M0cells;
           M0.intersector().overlap(p, M0cells);
           if (M0cells.empty())
           {
             // Global dof indices
-            for (uint v = 0; v < S1.size; ++v)
+            for (size_t v = 0; v < S1.size; ++v)
             {
               dofs_indicesX.push_back(S1.dofs[v * local_dim1 + i]);
             }
             // Coordinates
-            for (uint d = 0; d < gdim1; ++d)
+            for (size_t d = 0; d < gdim1; ++d)
             {
               dofs_xcoordsX.push_back(p[d]);
             }
@@ -358,12 +391,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
             // Local cell
             cell_indices0.push_back(M0cells.front());
             // Global dof indices
-            for (uint v = 0; v < S1.size; ++v)
+            for (size_t v = 0; v < S1.size; ++v)
             {
               dofs_indices0.push_back(S1.dofs[v * local_dim1 + i]);
             }
             // coordinates
-            for (uint d = 0; d < gdim1; ++d)
+            for (size_t d = 0; d < gdim1; ++d)
             {
               dofs_xcoords0.push_back(p[d]);
             }
@@ -378,7 +411,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   }
 
   // DEBUG
-  for (uint i = 0; i < dofs_indicesX.size(); ++i)
+  for (size_t i = 0; i < dofs_indicesX.size(); ++i)
   {
     offproc.insert(dofs_indicesX[i]);
   }
@@ -393,8 +426,8 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
     int r_maxrecvcount = u_maxrecvcount * gdim1;
 
     //
-    Array< uint > u_recvbuf( u_maxrecvcount );
-    Array< real > r_recvbuf( r_maxrecvcount );
+    std::vector< size_t > u_recvbuf( u_maxrecvcount );
+    std::vector< real > r_recvbuf( r_maxrecvcount );
     for (int j = 1; j < (int) pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;
@@ -403,7 +436,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       int u_recvcount = MPI::sendrecv( dofs_indicesX, dest, u_recvbuf, src, 1 );
       int r_recvcount = MPI::sendrecv( dofs_xcoordsX, dest, r_recvbuf, src, 1 );
 
-      uint matching_dofs = 0;
+      size_t matching_dofs = 0;
       if (u_recvcount > 0)
       {
         if (just_first_coords)
@@ -414,10 +447,10 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
           //
           Point p;
-          uint node_count = u_recvcount / S1.size;
-          for (uint i = 0; i < node_count; ++i)
+          size_t node_count = u_recvcount / S1.size;
+          for (size_t i = 0; i < node_count; ++i)
           {
-            Array<uint> M0cells;
+            std::vector<size_t> M0cells;
             std::memcpy(&p[0], &r_recvbuf[i * gdim1], gdim1 * sizeof(real));
             M0.intersector().overlap(p, M0cells);
             if (!M0cells.empty())
@@ -427,13 +460,13 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
               // Local cell
               cell_indices1.push_back(M0cells.front());
               // Global dof indices
-              for (uint v = 0; v < S1.size; ++v)
+              for (size_t v = 0; v < S1.size; ++v)
               {
                 dofs_indices1.push_back(u_recvbuf[i * S1.size + v]);
                 ++matching_dofs;
               }
               // Coordinates
-              for (uint d = 0; d < gdim1; ++d)
+              for (size_t d = 0; d < gdim1; ++d)
               {
                 dofs_xcoords1.push_back(p[d]);
               }
@@ -493,28 +526,28 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   //--- Evaluation
 
   // Prepare requests to receive dof indices and values
-  Array< uint > dofs_indicesF( num_dofsF );
-  Array< real > dofs_cvaluesF( num_dofsF );
+  std::vector< size_t > dofs_indicesF( num_dofsF );
+  std::vector< real > dofs_cvaluesF( num_dofsF );
 #ifdef HAVE_MPI
   MPI_Status status;
-  Array< MPI_Request > u_req_recv( num_recvadj );
-  Array< MPI_Request > r_req_recv( num_recvadj );
+  std::vector< MPI_Request > u_req_recv( num_recvadj );
+  std::vector< MPI_Request > r_req_recv( num_recvadj );
   if (is_distributed)
   {
-    uint offsetF = 0;
-    uint recv_id = 0;
+    size_t offsetF = 0;
+    size_t recv_id = 0;
     for (int j = 1; j < (int) pe_size; ++j)
     {
       int src = (rank + j) % pe_size;
-      uint count = dof1recvcount[src];
+      size_t count = dof1recvcount[src];
       if (count > 0)
       {
-        MPI::check_error( MPI_Irecv(&dofs_indicesF[offsetF], count, MPI_UNSIGNED,
-                                    src, 0, dolfin::MPI::DOLFIN_COMM,
-                                    &u_req_recv[recv_id]) );
-        MPI::check_error( MPI_Irecv(&dofs_cvaluesF[offsetF], count, MPI_DOUBLE,
-                                    src, 0, dolfin::MPI::DOLFIN_COMM,
-                                    &r_req_recv[recv_id]) );
+        MPI::check_error( MPI_Irecv(&dofs_indicesF[offsetF], count,
+                                    MPI_type< size_t >::value, src, 0,
+                                    MPI::DOLFIN_COMM, &u_req_recv[recv_id]) );
+        MPI::check_error( MPI_Irecv(&dofs_cvaluesF[offsetF], count,
+                                    MPI_type< real >::value, src, 0,
+                                    MPI::DOLFIN_COMM, &r_req_recv[recv_id]) );
         offsetF += count;
         ++recv_id;
       }
@@ -523,26 +556,26 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 #endif
 
   // Prepare requests to send dof indices and values
-  Array< real > dofs_cvalues1( dofs_indices1.size() );
+  std::vector< real > dofs_cvalues1( dofs_indices1.size() );
 #ifdef HAVE_MPI
-  Array< MPI_Request > u_req_send( num_sendadj );
-  Array< MPI_Request > r_req_send( num_sendadj );
+  std::vector< MPI_Request > u_req_send( num_sendadj );
+  std::vector< MPI_Request > r_req_send( num_sendadj );
   if (is_distributed)
   {
-    uint offset1 = 0;
-    uint send_id = 0;
+    size_t offset1 = 0;
+    size_t send_id = 0;
     if (just_first_coords)
     {
       for (int j = 1; j < (int) pe_size; ++j)
       {
         int dest = (rank - j + pe_size) % pe_size;
-        uint count = dof1sendcount[dest];
+        size_t count = dof1sendcount[dest];
         if (count > 0)
         {
-          uint cell_offset = offset1 / S1.size;
-          uint node_count = count / S1.size;
+          size_t cell_offset = offset1 / S1.size;
+          size_t node_count = count / S1.size;
           Point p;
-          for (uint nodei = cell_offset; nodei < (cell_offset + node_count);
+          for (size_t nodei = cell_offset; nodei < (cell_offset + node_count);
               ++nodei)
           {
             Cell c0(M0, cell_indices1[nodei]);
@@ -556,12 +589,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
             // Evaluate
             F0.evaluate(&dofs_cvalues1[nodei * S1.size], &p[0], ufc0);
           }
-          MPI::check_error( MPI_Isend(&dofs_indices1[offset1], count, MPI_UNSIGNED,
-                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
-                                      &u_req_send[send_id]) );
-          MPI::check_error( MPI_Isend(&dofs_cvalues1[offset1], count, MPI_DOUBLE,
-                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
-                                      &r_req_send[send_id]) );
+          MPI::check_error( MPI_Isend(&dofs_indices1[offset1], count,
+                                      MPI_type< size_t >::value, dest, 0,
+                                      MPI::DOLFIN_COMM, &u_req_send[send_id]) );
+          MPI::check_error( MPI_Isend(&dofs_cvalues1[offset1], count,
+                                      MPI_type< real >::value, dest, 0,
+                                      MPI::DOLFIN_COMM, &r_req_send[send_id]) );
           offset1 += count;
           ++send_id;
         }
@@ -572,10 +605,10 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
   // Local dofs
   Point n;
-  uint const num_dofs0 = dofs_indices0.size();
-  uint const num_node0 = cell_indices0.size();
+  size_t const num_dofs0 = dofs_indices0.size();
+  size_t const num_node0 = cell_indices0.size();
   real * dofs_cvalues0 = new real[num_dofs0];
-  for (uint ii = 0; ii < num_node0; ++ii)
+  for (size_t ii = 0; ii < num_node0; ++ii)
   {
     Cell c0(M0, cell_indices0[ii]);
     ufc0.update(c0);
@@ -608,7 +641,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   }
 
   // DEBUG
-  for (uint i = 0; i < num_dofsF; ++i)
+  for (size_t i = 0; i < num_dofsF; ++i)
   {
     if (offproc.count(dofs_indicesF[i]) == 0)
     {

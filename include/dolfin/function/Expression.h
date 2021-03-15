@@ -19,35 +19,24 @@ namespace dolfin
 class Expression
 {
 public:
-
   /// Evaluate function at given point
-  virtual void eval(real* values, const real* x) const = 0;
+  virtual void eval( real * values, const real * x ) const = 0;
 
   /// Return the rank of the value space
-  virtual uint rank() const = 0;
+  virtual auto rank() const -> size_t = 0;
 
   /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const = 0;
+  virtual auto dim( size_t i ) const -> size_t = 0;
 
   // Return the value size
-  inline uint value_size() const
-  {
-    uint size = 1;
-    for (uint i = 0; i < this->rank(); ++i)
-    {
-      size *= this->dim(i);
-    }
-    return size;
-  }
+  virtual auto value_size() const -> size_t = 0;
 
 protected:
-
   /// Create user-defined function
   Expression() = default;
 
   /// Destructor
   virtual ~Expression() = default;
-
 };
 
 } // end namespace dolfin

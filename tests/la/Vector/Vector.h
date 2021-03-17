@@ -195,7 +195,7 @@ DOLFIN_START_TEST( test_zero_vec )
 #include <dolfin/la/trilinos/TrilinosVector.h>
 DOLFIN_START_TEST( test_trilinos )
 {
-  // trilinos::Vector x(10);
+  trilinos::Vector x;
   // x.init(VEC_SIZE);
 
   // x = 1.0;

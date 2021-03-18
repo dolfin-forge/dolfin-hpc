@@ -12,7 +12,7 @@
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/trilinos/TrilinosObject.h>
 
-#include <Tpetra_Vector.hpp>
+#include <Tpetra_MultiVector.hpp>
 
 namespace dolfin
 {
@@ -28,11 +28,18 @@ namespace trilinos
 /// access the Trilinos/Tpetra Vec pointer using the function vec() and
 /// use the standard Trilinos/Tpetra interface.
 
-using TPMap    = Teuchos::RCP< const Tpetra::Map< int, int > >;
-using TPVector = Teuchos::RCP< Tpetra::Vector< real, int, int > >;
-
 class Vector : public GenericVector, public Object, public Variable
 {
+public:
+  /// TpetraVector map type (local index, global index)
+  using TPMap       = Tpetra::Map< int, int, Tpetra::MultiVector<>::node_type >;
+
+  /// TpetraVector vector type (scalar, local index, global index, node)
+  using TPVector    = Tpetra::MultiVector< double, int, int, Tpetra::MultiVector<>::node_type >;
+
+  /// smart pointer to a TPVector
+  using TPVectorPtr = Teuchos::RCP< TPVector >;
+
 public:
   /// Create empty vector
   Vector();
@@ -47,7 +54,7 @@ public:
   explicit Vector( TPVector x );
 
   /// Destructor
-  ~Vector();
+  ~Vector() override;
 
   //--- Implementation of the GenericTensor interface ---
 
@@ -152,13 +159,13 @@ public:
   Vector & operator=( Vector const & x );
 
   /// Assignment operator
-  Vector & operator=( GenericVector const & x ) override ;
+  Vector & operator=( GenericVector const & x ) override;
 
   /// Assignment operator
   Vector & operator=( real a ) override;
 
-  /// Return PETSc Vec pointer
-  TPVector vec() const;
+  /// Return Trilinos Vec pointer
+  TPVectorPtr vec() const;
 
   //--- Special functions ---
 
@@ -169,13 +176,11 @@ private:
   //
   void clear();
 
-  // Tpetra Vec pointer
-  TPVector x_;
+  // Tpetra multivector - actually a view into the ghosted vector, below
+  TPVectorPtr x_;
 
-  TPMap contigMap;
-
-  // the vector will be 0 based (C-style)
-  static TPVector::element_type::global_ordinal_type const indexBase = 0;
+  // Tpetra multivector with extra rows for ghost values
+  TPVectorPtr x_ghosted_;
 };
 
 } // end namespace trilinos

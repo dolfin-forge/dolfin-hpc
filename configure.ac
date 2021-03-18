@@ -259,18 +259,16 @@ if test "x${with_trilinos}" != xno; then
 #include /usr/include/Makefile.export.Trilinos
    CXXFLAGS="$CXXFLAGS -pipe -fno-plt"
    LIBS="$LIBS -ldl -llapack -lblas"
-   LIBS="$LIBS -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi"
-   LIBS="$LIBS -lbelosxpetra -lbelostpetra -lbelosepetra -lbelos -lml -lifpack"
-   LIBS="$LIBS -lamesos -lgaleri-xpetra -lgaleri-epetra -laztecoo -lisorropia"
-   LIBS="$LIBS -lxpetra-sup -lxpetra -lthyraepetra -lthyracore -lthyratpetra"
-   LIBS="$LIBS -lthyraepetraext -ltrilinosss -ltpetraext -ltpetrainout"
-   LIBS="$LIBS -ltpetra -lkokkostsqr -ltpetraclassiclinalg -ltpetraclassic"
-   LIBS="$LIBS -ltpetraclassicnodeapi -lepetraext -ltriutils -lzoltan -lepetra"
-   LIBS="$LIBS -lrtop -lkokkoskernels -lteuchoskokkoscomm -lteuchoscomm"
-   LIBS="$LIBS -lteuchosparameterlist -lteuchosparser -lteuchoscore"
-   LIBS="$LIBS -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics"
-   LIBS="$LIBS -lkokkosalgorithms -lkokkoscontainers -lkokkoscore"
+   LIBS="$LIBS -lepetra -lepetraext -lkokkosalgorithms -lkokkoscontainers"
+   LIBS="$LIBS -lkokkoscore -lkokkoskernels -lkokkostsqr -lrtop -lteuchoscomm"
+   LIBS="$LIBS -lteuchoscore -lteuchoskokkoscomm -lteuchoskokkoscompat"
+   LIBS="$LIBS -lteuchosnumerics -lteuchosparameterlist -lteuchosparser"
+   LIBS="$LIBS -lteuchosremainder -lthyracore -lthyraepetra -lthyraepetraext"
+   LIBS="$LIBS -lthyratpetra -ltpetra -ltpetraclassic -ltpetraclassiclinalg"
+   LIBS="$LIBS -ltpetraclassicnodeapi -ltpetraext -ltpetrainout -ltriutils"
+   LIBS="$LIBS -lxpetra -lxpetra-sup"
    AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
+   found_la_backend="yes"
 fi
 
 if test "x${with_janpack}" != xno; then

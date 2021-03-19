@@ -140,55 +140,36 @@ void Vector::init( size_t N, bool distributed )
     error( "trilinos::Vector: Vector cannot be initialised more than once" );
   }
 
-  size_t const rank = MPI::rank();
-  size_t const size = MPI::size();
-
-  // Compute number of items per process and remainder
-  size_t const n = N / size;
-  size_t const r = N % size;
-
-  // Mapping across processes
-  size_t Nlocal = ( rank < r )
-                  ? ( rank * ( n + 1 ) + n + 1 ) - ( rank * ( n + 1 ) )
-                  : ( rank * n + r + n ) - ( rank * n + r );
-
-
-#if DEBUG
-  // check if we get N elements across all processes
-  {
-    size_t Ntest = 0;
-    MPI::all_reduce< MPI::sum >( Nlocal, Ntest );
-    dolfin_assert( N == Ntest );
-  }
-#endif
+  size_t Nglobal = 0;
+  MPI::all_reduce< MPI::sum >( N, Nglobal );
+  dolfin_assert( N <= Nglobal );
 
   Teuchos::RCP< const Teuchos::MpiComm< int > > _comm(
     new Teuchos::MpiComm< int >( Teuchos::MpiComm< int >( MPI::DOLFIN_COMM ) ) );
 
-  // Teuchos::RCP< TPMap > _map( new TPMap( N, Nlocal, 0, _comm ) );
-  // Teuchos::RCP< TPMap > _ghost_map;
+  Teuchos::RCP< TPMap > _map( new TPMap( Nglobal, N, 0, _comm ) );
+  Teuchos::RCP< TPMap > _ghost_map;
+  std::vector< int > local_to_global_map;
 
-  // std::vector< int > local_to_global_map;
+  // Save a map for the ghosting of values on other processes
+  if ( local_to_global_map.size() != 0 )
+  {
+    const Teuchos::ArrayView< const int > local_indices( local_to_global_map );
+    _ghost_map = Teuchos::rcp( new TPMap( N, local_indices, 0, _comm ) );
+  }
+  else
+  {
+    _ghost_map = _map;
+  }
 
-  // // Save a map for the ghosting of values on other processes
-  // if ( local_to_global_map.size() != 0 )
-  // {
-  //   const Teuchos::ArrayView< const int > local_indices( local_to_global_map );
-  //   _ghost_map = Teuchos::rcp( new TPMap( N, local_indices, 0, _comm ) );
-  // }
-  // else
-  // {
-  //   _ghost_map = _map;
-  // }
+  // Vector - create with overlap
+  x_ghosted_ = Teuchos::rcp( new TPVector( _ghost_map, 1 ) );
 
-  // // Vector - create with overlap
-  // x_ghosted_ = Teuchos::rcp( new TPVector( _ghost_map, 1 ) );
+  // make sure we actually got a non-empty vector
+  dolfin_assert( not x_ghosted_.is_null() );
 
-  // // make sure we actually got a non-empty vector
-  // dolfin_assert( not x_ghosted_.is_null() );
-
-  // // Get a modifiable view into the ghosted vector
-  // x_ = x_ghosted_->offsetViewNonConst( _map, 0 );
+  // Get a modifiable view into the ghosted vector
+  x_ = x_ghosted_->offsetViewNonConst( _map, 0 );
 }
 
 //-----------------------------------------------------------------------------

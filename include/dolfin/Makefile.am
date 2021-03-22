@@ -127,6 +127,8 @@ nobase_pkginclude_HEADERS = \
 				la/Scalar.h\
 				la/SolverType.h\
 				la/SparsityPattern.h\
+				la/trilinos/TrilinosFactory.h\
+				la/trilinos/TrilinosMatrix.h\
 				la/trilinos/TrilinosObject.h\
 				la/trilinos/TrilinosVector.h\
 				la/Vector.h\

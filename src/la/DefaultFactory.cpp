@@ -6,6 +6,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/la/janpack/JANPACKFactory.h>
 #include <dolfin/la/petsc/PETScFactory.h>
+#include <dolfin/la/trilinos/TrilinosFactory.h>
 #include <dolfin/parameter/parameters.h>
 
 namespace dolfin
@@ -44,6 +45,13 @@ auto DefaultFactory::factory() -> LinearAlgebraFactory &
   if ( backend == "PETSc" )
   {
     return PETScFactory::instance();
+  }
+#endif
+
+#ifdef HAVE_TRILINOS
+  if ( backend == "Trilinos" )
+  {
+    return trilinos::Factory::instance();
   }
 #endif
 

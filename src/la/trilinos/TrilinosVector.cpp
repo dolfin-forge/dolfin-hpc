@@ -338,8 +338,7 @@ void Vector::apply( FinalizeType )
   // Export from overlapping map ghostmap, to non-overlapping xmap
   Tpetra::Export< TPVector::local_ordinal_type,
                   TPVector::global_ordinal_type,
-                  TPVector::node_type >
-    exporter( ghostmap, xmap );
+                  TPVector::node_type > exporter( ghostmap, xmap );
 
   // Forward export to reduction vector
   y->doExport( *x_ghosted_, exporter, Tpetra::ADD );
@@ -347,49 +346,131 @@ void Vector::apply( FinalizeType )
   // Copy back into _x_ghosted
   Tpetra::Import< TPVector::local_ordinal_type,
                   TPVector::global_ordinal_type,
-                  TPVector::node_type >
-    importer( xmap, ghostmap );
+                  TPVector::node_type > importer( xmap, ghostmap );
   x_ghosted_->doImport( *y, importer, Tpetra::INSERT );
 }
 
 //-----------------------------------------------------------------------------
-void Vector::disp( size_t precision ) const
+
+void MPIgather( MPI_Comm                     comm,
+                const std::string &          in_values,
+                std::vector< std::string > & out_values,
+                unsigned int                 receiving_process = 0 )
 {
-  // FIXME
+#ifdef DOLFIN_HAVE_MPI
+  size_t const comm_size = MPI::size();
+
+  // Get data size on each process
+  std::vector< int > pcounts( comm_size );
+  int local_size = in_values.size();
+
+  MPI_Gather( &local_size, 1, MPI_type< int >::value,
+              pcounts.data(), 1, MPI_type< int >::value,
+              receiving_process, comm );
+
+  // Build offsets
+  std::vector< int > offsets( comm_size + 1, 0 );
+  for ( std::size_t i = 1; i <= comm_size; ++i )
+    offsets[i] = offsets[i - 1] + pcounts[i - 1];
+
+  // Gather
+  size_t const n = std::accumulate( pcounts.begin(), pcounts.end(), 0 );
+  std::vector< char > _out( n );
+
+  MPI_Gatherv( const_cast< char * >( in_values.data() ),
+               in_values.size(), MPI_type< char >::value, _out.data(),
+               pcounts.data(), offsets.data(), MPI_type< char >::value,
+               receiving_process, comm );
+
+  // Rebuild
+  out_values.resize( comm_size );
+  for ( std::size_t p = 0; p < comm_size; ++p )
+  {
+    out_values[p] = std::string( _out.begin() + offsets[p],
+                                 _out.begin() + offsets[p + 1] );
+  }
+#else
+  out_values.clear();
+  out_values.push_back( in_values );
+#endif
+}
+
+void Vector::disp( size_t ) const
+{
+  Teuchos::RCP< const TPMap > xmap = x_->getMap();
+
+  std::stringstream ss;
+
+  size_t const rank = MPI::rank();
+  size_t const m    = MPI::size();
+
+  if ( rank == 0 )
+  {
+    ss << xmap->description() << "\n"
+       << "trilinos::vector"
+       << "\n---";
+    for ( size_t j = 0; j != m; ++j )
+      ss << "-";
+    ss << "\n";
+  }
+
+  ss << rank << "] ";
+  for ( size_t j = 0; j < m; ++j )
+  {
+    if ( xmap->isNodeGlobalElement( j ) )
+      ss << "X";
+    else
+      ss << " ";
+  }
+  ss << "\n";
+
+  for ( std::size_t j = 0; j != xmap->getNodeNumElements(); ++j )
+    ss << j << " -> " << xmap->getGlobalElement( j ) << "\n";
+  ss << "\n";
+
+  const Teuchos::RCP< const Teuchos::MpiComm< int > > _mpi_comm =
+    Teuchos::rcp_dynamic_cast< const Teuchos::MpiComm< int > >(
+      xmap()->getComm() );
+  MPI_Comm mpi_comm = *( _mpi_comm->getRawMpiComm() );
+
+  std::vector< std::string > out_str;
+  MPIgather( mpi_comm, ss.str(), out_str );
+
+  if ( rank == 0 )
+  {
+    for ( auto & s : out_str )
+      std::cout << s;
+  }
 }
 
 //-----------------------------------------------------------------------------
 
 size_t Vector::size() const
 {
-  // if ( not contigMap.is_null() )
-  // {
-  //   return static_cast< size_t >( contigMap->getGlobalNumElements() );
-  // }
-
-  return 0;
+  if ( x_.is_null() )
+    return 0;
+  else
+    return x_->getMap()->getMaxAllGlobalIndex() + 1;
 }
 
 //-----------------------------------------------------------------------------
 
 size_t Vector::local_size() const
 {
-  // if ( not contigMap.is_null() )
-  // {
-  //   return static_cast< size_t >( contigMap->getNodeNumElements() );
-  // }
-
-  return 0;
+  if ( x_.is_null() )
+    return 0;
+  else
+    return x_->getLocalLength();
 }
 
 //-----------------------------------------------------------------------------
 
 size_t Vector::offset() const
 {
-  // dolfin_assert( not x_.is_null() );
-  // // this is wrong!!!
-  // int low = contigMap->getMinLocalIndex();
-  // return static_cast< size_t >( low );
+  if ( x_.is_null() )
+    return 0;
+  else
+    return x_->getMap()->getMinGlobalIndex();
 }
 
 //-----------------------------------------------------------------------------
@@ -459,159 +540,124 @@ void Vector::init_ghosted( size_t                           n,
 
 void Vector::get( real * values ) const
 {
-  // #if PETSC_VERSION_MAJOR > 2
-  //   dolfin_assert(x_);
-  //   real const* data = nullptr;
-  //   VecGetArrayRead(x_, &data);
-  //   dolfin_assert(data);
-  //   PetscInt n;
-  //   VecGetLocalSize(x_, &n);
-  //   std::copy(data, data + n, values);
-  //   VecRestoreArrayRead(x_, &data);
-  //   dolfin_assert(x_);
-  // #else
-  //   dolfin_assert(x_);
+  dolfin_assert( not x_.is_null() );
+  dolfin_assert( values != nullptr );
 
-  //   real* data = 0;
-  //   VecGetArray(x_, &data);
-  //   dolfin_assert(data);
-
-  //   for (size_t i = 0; i < local_size(); i++)
-  //     values[i] = data[i];
-  //   VecRestoreArray(x_, &data);
-
-  //   dolfin_assert(x_);
-  // #endif
+  Teuchos::ArrayRCP< const real > arr = x_->getData( 0 );
+  std::copy( arr.get(), arr.get() + local_size(), values );
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::set( real * values )
 {
-  // dolfin_assert(x_);
-  // real* data = nullptr;
-  // VecGetArray(x_, &data);
-  // dolfin_assert(data);
-  // PetscInt n;
-  // VecGetLocalSize(x_, &n);
-  // std::copy(values, values + n, data);
-  // VecRestoreArray(x_, &data);
-  // dolfin_assert(x_);
+  size_t const num_values = local_size();
+
+  if ( num_values != 0 )
+  {
+    dolfin_assert( not x_.is_null() );
+    dolfin_assert( values != nullptr );
+
+    Teuchos::ArrayRCP< real > arr = x_->getDataNonConst( 0 );
+    std::copy( values, values + num_values, arr.get() );
+  }
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::add( real * values )
 {
-  // dolfin_assert(x_);
-  // PetscInt n;
-  // VecGetLocalSize(x_, &n);
-  // int * rows = new int[n];
-  // for (int i = 0; i < n; i++) { rows[i] = i; }
-  // VecSetValues(x_, n, rows, values, ADD_VALUES);
-  // delete[] rows;
+  dolfin_assert( not x_.is_null() );
+
+  size_t const num_values = local_size();
+
+  for ( size_t i = 0; i < num_values; ++i )
+    x_->sumIntoLocalValue( i, 0, values[i] );
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::get( real * block, size_t m, const size_t * rows ) const
 {
-  // dolfin_assert(x_);
+  dolfin_assert( not x_ghosted_.is_null() );
 
-  // if (is_ghosted_)
-  // {
-  //   int low, high;
-  //   Vec xl;
-  //   VecGetOwnershipRange(x_, &low, &high);
-  //   VecGhostGetLocalForm(x_, &xl);
+  Teuchos::RCP< const TPMap >       xmap = x_ghosted_->getMap();
+  Teuchos::ArrayRCP< const real > xarr = x_ghosted_->getData( 0 );
 
-  //   int *tmp = new int[m];
-  //   for (size_t i = 0; i < m; i++)
-  //   {
-  //     if ((int) rows[i] < high && (int) rows[i] >= low)
-  //     {
-  //       tmp[i] = rows[i] - low;
-  //     }
-  //     else
-  //     {
-  //       dolfin_assert(mapping_.size() > 0);
-  //       GhostMapping::const_iterator it = mapping_.find(rows[i]);
-  //       dolfin_assert(mapping_.count(rows[i]) > 0);
-  //       tmp[i] = it->second;
-  //     }
-  //   }
-  //   VecGetValues(xl, static_cast<int>(m), tmp, block);
-  //   VecGhostRestoreLocalForm(x_, &xl);
-
-  //   delete[] tmp;
-  // }
-  // else
-  // {
-  //   VecGetValues(x_, static_cast<int>(m),
-  //                reinterpret_cast<int*>(const_cast<size_t*>(rows)), block);
-  // }
+  for ( size_t i = 0; i < m; ++i )
+  {
+    const int idx = xmap->getLocalElement( rows[i] );
+    if ( idx != Teuchos::OrdinalTraits< int >::invalid() )
+      block[i] = xarr[idx];
+    else
+    {
+      error( "trilinos::Vector: Row %d is not valid", rows[i] );
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::set( const real * block, size_t m, const size_t * rows )
 {
-  // dolfin_assert( x_ );
+  dolfin_assert( not x_ghosted_.is_null() );
 
-  // const TPVector::element_type::global_ordinal_type gblRow = 2;
-  // A(0, 0:1) = [2, -1]
-  // if ( gblRow == 0 )
-  // {
-  //   x_->insertGlobalValues( gblRow, gblRow, 1.0 );
-  // }
-
-  // VecSetValues( x_,
-  //               static_cast< int >( m ),
-  //               reinterpret_cast< int * >( const_cast< size_t * >( rows ) ),
-  //               block,
-  //               INSERT_VALUES );
+  for ( size_t i = 0; i < m; ++i )
+  {
+    if ( x_ghosted_->getMap()->isNodeGlobalElement( rows[i] ) )
+    {
+      x_ghosted_->replaceGlobalValue( rows[i], 0, block[i] );
+    }
+    else
+    {
+      error( "trilinos::Vector: Row %d is not valid", rows[i] );
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::add( const real * block, size_t m, const size_t * rows )
 {
-  // dolfin_assert( x_ );
-  // VecSetValues(x_, static_cast<int>(m),
-  //              reinterpret_cast<int*>(const_cast<size_t*>(rows)), block,
-  //              ADD_VALUES);
+  dolfin_assert( not x_ghosted_.is_null() );
+
+  for ( size_t i = 0; i < m; ++i )
+  {
+    if ( x_ghosted_->getMap()->isNodeGlobalElement( rows[i] ) )
+    {
+      x_ghosted_->sumIntoGlobalValue( rows[i], 0, block[i] );
+    }
+    else
+    {
+      error( "trilinos::Vector: Row %d is not local", rows[i] );
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::axpy( real a, const GenericVector & y )
+void Vector::axpy( real a, const GenericVector & x )
 {
-  // dolfin_assert( x_.is_null() );
-
-  // Vector const & v = y.down_cast< Vector >();
-  // dolfin_assert( v.x_.is_null() );
-
-  // if ( size() != v.size() )
-  // {
-  //   error( "The vectors must be of the same size to apply AXPY." );
-  // }
-
-  // // x_ = a * x_ + v.x_ * 1.0
-  // x_->update( a, *v.vec(), 1.0 );
+  this->axpby( a, x, 1.0 );
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::axpby( real a, const GenericVector & x, real b )
 {
-  // FIXME
+  dolfin_assert( not x_ghosted_.is_null() );
+
+  trilinos::Vector const & X_ = x.down_cast< trilinos::Vector >();
+  dolfin_assert( not X_.x_ghosted_.is_null() );
+
+  x_ghosted_->update( a, *X_.x_ghosted_, b );
 }
 
 //-----------------------------------------------------------------------------
 
 void Vector::waxpy( real a, const GenericVector & x, const GenericVector & y )
 {
-  // FIXME
+  this->axpbypcz( a, x, 1.0, y, 0.0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -622,69 +668,86 @@ void Vector::axpbypcz( real                  a,
                        const GenericVector & y,
                        real                  c )
 {
-  // FIXME
+  dolfin_assert( not x_ghosted_.is_null() );
+
+  trilinos::Vector const & X_ = x.down_cast< trilinos::Vector >();
+  dolfin_assert( not X_.x_ghosted_.is_null() );
+
+  trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
+  dolfin_assert( not Y_.x_ghosted_.is_null() );
+
+  x_ghosted_->update( a, *X_.x_ghosted_, b, *Y_.x_ghosted_, c );
 }
 
 //-----------------------------------------------------------------------------
 
 real Vector::inner( const GenericVector & y ) const
 {
-  // dolfin_assert( x_.is_null() );
+  dolfin_assert( not x_.is_null() );
 
-  // Vector const & v = y.down_cast< Vector >();
-  // dolfin_assert( v.x_.is_null() );
+  trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
+  dolfin_assert( not Y_.x_ghosted_.is_null() );
 
-  // return x_->dot( *v.vec() );
+  std::vector< real >              val( 1 );
+  const Teuchos::ArrayView< real > result( val );
+
+  x_->dot( *Y_.x_, result );
+
+  return val[0];
 }
 
 //-----------------------------------------------------------------------------
 
 real Vector::norm( VectorNormType type ) const
 {
-  // dolfin_assert( not x_.is_null() );
+  dolfin_assert( not x_.is_null() );
+  using TPMagType = Tpetra::MultiVector<>::mag_type;
 
-  real value = 0.0;
+  std::vector< TPMagType >              norms( 1 );
+  Teuchos::ArrayView< TPMagType > const norm_view( norms );
 
-  // switch ( type )
-  // {
-  //   case l1:
-  //     value = x_->norm1();
-  //     break;
-  //   case l2:
-  //     value = x_->norm2();
-  //     break;
-  //   default:
-  //     value = x_->normInf();
-  //     break;
-  // }
+  switch ( type )
+  {
+    case l1:
+      x_->norm1( norm_view );
+      break;
+    case l2:
+      x_->norm2( norm_view );
+      break;
+    default:
+      x_->normInf( norm_view );
+      break;
+  }
 
-  return value;
+  return norms[0];
 }
 
 //-----------------------------------------------------------------------------
 
 real Vector::min() const
 {
-  // dolfin_assert( not x_.is_null() );
+  dolfin_assert( not x_.is_null() );
 
-  real value = 0.0;
+  Teuchos::ArrayRCP< real const > arr = x_->getData( 0 );
+  real min = *std::min_element( arr.get(), arr.get() + arr.size() );
 
-  // TODO
+  MPI::all_reduce_in_place< MPI::min >( min );
 
-  return value;
+  return min;
 }
 
 //-----------------------------------------------------------------------------
 
 real Vector::max() const
 {
-  // dolfin_assert( not x_.is_null() );
+  dolfin_assert( not x_.is_null() );
 
-  real value = 0.0;
+  Teuchos::ArrayRCP< real const > arr = x_->getData( 0 );
+  real max = *std::min_element( arr.get(), arr.get() + arr.size() );
 
-  // TODO
+  MPI::all_reduce_in_place< MPI::max >( max );
 
-  return value;
+  return max;
 }
 
 //-----------------------------------------------------------------------------
@@ -692,14 +755,17 @@ real Vector::max() const
 void Vector::pointwise( const GenericVector & x,
                         VectorPointwiseOp     op ) const
 {
+  // FIXME
 }
 
 //-----------------------------------------------------------------------------
 
 Vector & Vector::operator*=( const real a )
 {
-  // dolfin_assert( x_.is_null() );
-  // x_->scale( a );
+  dolfin_assert( not x_.is_null() );
+
+  x_->scale( a );
+
   return *this;
 }
 
@@ -707,9 +773,12 @@ Vector & Vector::operator*=( const real a )
 
 Vector & Vector::operator/=( const real a )
 {
-  // dolfin_assert( x_.is_null() );
+  dolfin_assert( not x_.is_null() );
   dolfin_assert( a != 0.0 );
-  // x_->scale( 1.0 / a );
+
+  real const b = 1.0 / a;
+  ( *this ) *= b;
+
   return *this;
 }
 
@@ -717,17 +786,12 @@ Vector & Vector::operator/=( const real a )
 
 Vector & Vector::operator*=( const GenericVector & y )
 {
-  // dolfin_assert( x_.is_null() );
-  // Vector const & v = y.down_cast< Vector >();
-  // dolfin_assert( v.x_.is_null() );
+  dolfin_assert( not x_.is_null() );
 
-  // if ( size() != v.size() )
-  // {
-  //   error(
-  //     "Vectors must have the same size for componentwise multiplication." );
-  // }
+  trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
+  dolfin_assert( not Y_.x_ghosted_.is_null() );
 
-  // TODO
+  x_->elementWiseMultiply( 1.0, *( x_->getVector( 0 ) ), *( Y_.x_ ), 0.0 );
 
   return *this;
 }
@@ -736,7 +800,8 @@ Vector & Vector::operator*=( const GenericVector & y )
 
 Vector & Vector::operator+=( const GenericVector & x )
 {
-  // this->axpy( 1.0, x );
+  this->axpy( 1.0, x );
+
   return *this;
 }
 
@@ -744,7 +809,8 @@ Vector & Vector::operator+=( const GenericVector & x )
 
 Vector & Vector::operator-=( const GenericVector & x )
 {
-  // this->axpy( -1.0, x );
+  this->axpy( -1.0, x );
+
   return *this;
 }
 
@@ -752,7 +818,7 @@ Vector & Vector::operator-=( const GenericVector & x )
 
 Vector & Vector::operator=( const GenericVector & v )
 {
-  // *this = v.down_cast< Vector >();
+  *this = v.down_cast< trilinos::Vector >();
   return *this;
 }
 
@@ -760,12 +826,28 @@ Vector & Vector::operator=( const GenericVector & v )
 
 Vector & Vector::operator=( Vector const & v )
 {
-  // if ( &v != this )
-  // {
-  //   dolfin_assert( not v.x_.is_null() );
-  //   init( v.local_size(), v.x_->isDistributed() );
-  //   x_->assign( *v.x_ );
-  // }
+  // Check that vector lengths are equal
+  if ( size() != v.size() )
+  {
+    error( "trilinos::Vector: Vectors must be of equal size for assignment" );
+  }
+
+  // Check that vector local ranges are equal (relevant in parallel)
+  if ( local_size() != v.local_size() )
+  {
+    error( "trilinos::Vector: Vectors must equal local size for assignment" );
+  }
+
+  // Check for self-assignment
+  if ( this != &v )
+  {
+    // Copy data (local operation)
+    dolfin_assert( not v.x_.is_null() );
+    dolfin_assert( not x_.is_null() );
+
+    x_->assign( *v.x_ );
+  }
+
   return *this;
 }
 
@@ -773,8 +855,10 @@ Vector & Vector::operator=( Vector const & v )
 
 Vector & Vector::operator=( real a )
 {
-  // dolfin_assert( not x_.is_null() );
-  // x_->putScalar( a );
+  dolfin_assert( not x_.is_null() );
+
+  x_->putScalar( a );
+
   return *this;
 }
 
@@ -796,11 +880,11 @@ LinearAlgebraFactory & Vector::factory() const
 
 void Vector::clear()
 {
-  // if ( not x_.is_null() )
-  // {
-  //   x_        = Teuchos::null;
-  //   contigMap = Teuchos::null;
-  // }
+  if ( not x_.is_null() )
+  {
+    x_         = Teuchos::null;
+    x_ghosted_ = Teuchos::null;
+  }
 }
 
 //-----------------------------------------------------------------------------

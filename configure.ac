@@ -259,16 +259,13 @@ if test "x${with_trilinos}" != xno; then
 #include /usr/include/Makefile.export.Trilinos
    CXXFLAGS="$CXXFLAGS -pipe -fno-plt"
    LIBS="$LIBS -ldl -llapack -lblas"
-   #LIBS="$LIBS -lepetra -lepetraext -lkokkosalgorithms -lkokkoscontainers"
-   #LIBS="$LIBS -lkokkoscore -lkokkoskernels -lkokkostsqr -lrtop -lteuchoscomm"
-   #LIBS="$LIBS -lteuchoscore -lteuchoskokkoscomm -lteuchoskokkoscompat"
-   #LIBS="$LIBS -lteuchosnumerics -lteuchosparameterlist -lteuchosparser"
-   #LIBS="$LIBS -lteuchosremainder -lthyracore -lthyraepetra -lthyraepetraext"
-   #LIBS="$LIBS -lthyratpetra -ltpetra -ltpetraclassic -ltpetraclassiclinalg"
-   #LIBS="$LIBS -ltpetraclassicnodeapi -ltpetraext -ltpetrainout -ltriutils"
-   #LIBS="$LIBS -lxpetra -lxpetra-sup"
+   #LIBS="$LIBS -lepetra -lepetraext -lkokkoscontainers -lkokkostsqr -lrtop -lteuchosnumerics"
+   #LIBS="$LIBS -lteuchosparser -lteuchosremainder -lthyracore -lthyraepetra -lthyraepetraext"
+   #LIBS="$LIBS -lthyratpetra -ltpetraclassic -ltpetraclassiclinalg  -ltpetraext"
+   #LIBS="$LIBS -ltpetrainout -ltriutils -lxpetra -lxpetra-sup"
    LIBS="$LIBS -lteuchoscore -lteuchoscomm -lteuchoskokkoscomm -ltpetraclassicnodeapi"
-   LIBS="$LIBS -lkokkoscore -lteuchoskokkoscompat -lteuchosparameterlist -ltpetra"
+   LIBS="$LIBS -lkokkoscore -lteuchoskokkoscompat -lkokkosalgorithms -lkokkoskernels"
+   LIBS="$LIBS -lteuchosparameterlist -ltpetra"
    AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
    found_la_backend="yes"
 fi

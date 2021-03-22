@@ -200,6 +200,34 @@ DOLFIN_START_TEST( test_trilinos )
   trilinos::Vector x2( VEC_SIZE );
   trilinos::Vector x3( x2 );
 
+  x1.disp();
+  x1.zero();
+  x1.size();
+  x1.local_size();
+  x1.offset();
+
+  // global: get, set add
+  // local: get, set add
+
+  x1.axpy( 1.1, x2 );
+  x1.norm( VectorNormType::l1 );
+  x1.axpby( 1.1, x2, 2.3 );
+  x1.norm( VectorNormType::l2 );
+  x1.waxpy( 1.1, x2, x3 );
+  x1.norm( VectorNormType::linf );
+  x1.axpbypcz( 1.1, x2, 2.3, x3, 4.2 );
+
+  x1.min();
+  x1.max();
+
+  x1 *= 3.2;
+  x1 /= 4.2;
+  x2  = 23.42;
+  x1 *= x2;
+  x1 += x2;
+  x1 -= x2;
+  x3  = x1;
+
   // x = 1.0;
   // x.zero();
   // ck_assert(x.max() == 0);

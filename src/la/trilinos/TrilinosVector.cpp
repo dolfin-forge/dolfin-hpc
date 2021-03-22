@@ -7,7 +7,253 @@
 
 #include <dolfin/la/trilinos/TrilinosVector.h>
 
-#include <Teuchos_OrdinalTraits.hpp>
+// FIXME lets say, this is not... optimal?!
+#include <Tpetra_Access.hpp>
+#include <Tpetra_applyDirichletBoundaryCondition.hpp>
+#include <Tpetra_Apply_Helpers.hpp>
+#include <Tpetra_ApplyOp.hpp>
+#include <Tpetra_Assembly_Helpers.hpp>
+#include <Tpetra_BlockCrsMatrix_decl.hpp>
+#include <Tpetra_BlockCrsMatrix_def.hpp>
+#include <Tpetra_BlockCrsMatrix_fwd.hpp>
+#include <Tpetra_BlockCrsMatrix_Helpers_decl.hpp>
+#include <Tpetra_BlockCrsMatrix_Helpers_def.hpp>
+#include <Tpetra_BlockCrsMatrix_Helpers.hpp>
+#include <Tpetra_BlockCrsMatrix.hpp>
+#include <Tpetra_BlockMultiVector_decl.hpp>
+#include <Tpetra_BlockMultiVector_def.hpp>
+#include <Tpetra_BlockMultiVector_fwd.hpp>
+#include <Tpetra_BlockMultiVector.hpp>
+#include <Tpetra_BlockVector_decl.hpp>
+#include <Tpetra_BlockVector_def.hpp>
+#include <Tpetra_BlockVector_fwd.hpp>
+#include <Tpetra_BlockVector.hpp>
+#include <Tpetra_BlockView.hpp>
+#include <Tpetra_CombineMode.hpp>
+#include <Tpetra_ComputeGatherMap.hpp>
+#include <Tpetra_computeRowAndColumnOneNorms_decl.hpp>
+#include <Tpetra_computeRowAndColumnOneNorms_def.hpp>
+#include <Tpetra_computeRowAndColumnOneNorms.hpp>
+#include <Tpetra_ConfigDefs.hpp>
+#include <Tpetra_Core.hpp>
+#include <Tpetra_createDeepCopy_CrsMatrix_decl.hpp>
+#include <Tpetra_createDeepCopy_CrsMatrix_def.hpp>
+#include <Tpetra_createDeepCopy_CrsMatrix.hpp>
+#include <Tpetra_createDeepCopy.hpp>
+#include <Tpetra_CrsGraph_decl.hpp>
+#include <Tpetra_CrsGraph_def.hpp>
+#include <Tpetra_CrsGraph_fwd.hpp>
+#include <Tpetra_CrsGraph.hpp>
+#include <Tpetra_CrsMatrix_decl.hpp>
+#include <Tpetra_CrsMatrix_def.hpp>
+#include <Tpetra_CrsMatrix_fwd.hpp>
+#include <Tpetra_CrsMatrix.hpp>
+#include <Tpetra_CrsMatrixMultiplyOp_fwd.hpp>
+#include <Tpetra_CrsMatrixMultiplyOp.hpp>
+#include <Tpetra_CrsMatrix_UQ_PCE_def.hpp>
+#include <Tpetra_CrsMatrix_UQ_PCE.hpp>
+#include <Tpetra_Details_allReduceView.hpp>
+#include <Tpetra_Details_Behavior.hpp>
+#include <Tpetra_Details_Blas.hpp>
+#include <Tpetra_Details_castAwayConstDualView.hpp>
+#include <Tpetra_Details_checkGlobalError.hpp>
+#include <Tpetra_Details_checkLaunchBlocking.hpp>
+#include <Tpetra_Details_checkView.hpp>
+#include <Tpetra_Details_computeOffsets.hpp>
+#include <Tpetra_Details_CooMatrix.hpp>
+#include <Tpetra_Details_copyConvert.hpp>
+#include <Tpetra_Details_copyOffsets.hpp>
+#include <Tpetra_Details_createMirrorView.hpp>
+#include <Tpetra_Details_crsMatrixAssembleElement.hpp>
+#include <Tpetra_Details_CrsPadding.hpp>
+#include <Tpetra_Details_crsUtils.hpp>
+#include <Tpetra_Details_DefaultTypes.hpp>
+#include <Tpetra_Details_determineLocalTriangularStructure.hpp>
+#include <Tpetra_Details_DualViewUtil.hpp>
+#include <Tpetra_Details_EquilibrationInfo.hpp>
+#include <Tpetra_Details_extractBlockDiagonal.hpp>
+#include <Tpetra_Details_extractMpiCommFromTeuchos.hpp>
+#include <Tpetra_Details_fill.hpp>
+#include <Tpetra_Details_fill_MP_Vector.hpp>
+#include <Tpetra_Details_fill_UQ_PCE.hpp>
+#include <Tpetra_Details_FixedHashTable_decl.hpp>
+#include <Tpetra_Details_FixedHashTable_def.hpp>
+#include <Tpetra_Details_FixedHashTable.hpp>
+#include <Tpetra_Details_gathervPrint.hpp>
+#include <Tpetra_Details_getDiagCopyWithoutOffsets_decl.hpp>
+#include <Tpetra_Details_getDiagCopyWithoutOffsets_def.hpp>
+#include <Tpetra_Details_getDiagCopyWithoutOffsets.hpp>
+#include <Tpetra_Details_getEntryOnHost.hpp>
+#include <Tpetra_Details_getGraphDiagOffsets_decl.hpp>
+#include <Tpetra_Details_getGraphDiagOffsets_def.hpp>
+#include <Tpetra_Details_getGraphDiagOffsets.hpp>
+#include <Tpetra_Details_getNumDiags.hpp>
+#include <Tpetra_Details_Hash.hpp>
+#include <Tpetra_Details_iallreduce.hpp>
+#include <Tpetra_Details_initializeKokkos.hpp>
+#include <Tpetra_Details_isInterComm.hpp>
+#include <Tpetra_Details_lclDot.hpp>
+#include <Tpetra_Details_leftScaleLocalCrsMatrix.hpp>
+#include <Tpetra_Details_localDeepCopyRowMatrix_decl.hpp>
+#include <Tpetra_Details_localDeepCopyRowMatrix_def.hpp>
+#include <Tpetra_Details_localDeepCopyRowMatrix.hpp>
+#include <Tpetra_Details_LocalMap_fwd.hpp>
+#include <Tpetra_Details_LocalMap.hpp>
+#include <Tpetra_Details_localRowOffsets_decl.hpp>
+#include <Tpetra_Details_localRowOffsets_def.hpp>
+#include <Tpetra_Details_localRowOffsets.hpp>
+#include <Tpetra_Details_makeColMap_decl.hpp>
+#include <Tpetra_Details_makeColMap_def.hpp>
+#include <Tpetra_Details_makeColMap.hpp>
+#include <Tpetra_Details_makeOptimizedColMap.hpp>
+#include <Tpetra_Details_makeValidVerboseStream.hpp>
+#include <Tpetra_Details_Merge.hpp>
+#include <Tpetra_Details_mpiIsInitialized.hpp>
+#include <Tpetra_Details_MpiTypeTraits.hpp>
+#include <Tpetra_Details_normImpl.hpp>
+#include <Tpetra_Details_OrdinalTraits.hpp>
+#include <Tpetra_Details_packCrsGraph_decl.hpp>
+#include <Tpetra_Details_packCrsGraph_def.hpp>
+#include <Tpetra_Details_packCrsGraph.hpp>
+#include <Tpetra_Details_packCrsMatrix_decl.hpp>
+#include <Tpetra_Details_packCrsMatrix_def.hpp>
+#include <Tpetra_Details_packCrsMatrix.hpp>
+#include <Tpetra_Details_PackTraits.hpp>
+#include <Tpetra_Details_PackTriples.hpp>
+#include <Tpetra_Details_printOnce.hpp>
+#include <Tpetra_Details_Profiling.hpp>
+#include <Tpetra_Details_radixSort.hpp>
+#include <Tpetra_Details_ReadTriples.hpp>
+#include <Tpetra_Details_reallocDualViewIfNeeded.hpp>
+#include <Tpetra_Details_residual.hpp>
+#include <Tpetra_Details_rightScaleLocalCrsMatrix.hpp>
+#include <Tpetra_Details_ScalarViewTraits.hpp>
+#include <Tpetra_Details_scaleBlockDiagonal.hpp>
+#include <Tpetra_Details_shortSort.hpp>
+#include <Tpetra_Details_StaticView.hpp>
+#include <Tpetra_Details_Transfer_decl.hpp>
+#include <Tpetra_Details_Transfer_def.hpp>
+#include <Tpetra_Details_Transfer_fwd.hpp>
+#include <Tpetra_Details_Transfer.hpp>
+#include <Tpetra_Details_unpackCrsGraphAndCombine_decl.hpp>
+#include <Tpetra_Details_unpackCrsGraphAndCombine_def.hpp>
+#include <Tpetra_Details_unpackCrsGraphAndCombine.hpp>
+#include <Tpetra_Details_unpackCrsMatrixAndCombine_decl.hpp>
+#include <Tpetra_Details_unpackCrsMatrixAndCombine_def.hpp>
+#include <Tpetra_Details_unpackCrsMatrixAndCombine.hpp>
+#include <Tpetra_Directory_decl.hpp>
+#include <Tpetra_Directory_def.hpp>
+#include <Tpetra_Directory_fwd.hpp>
+#include <Tpetra_Directory.hpp>
+#include <Tpetra_DirectoryImpl_decl.hpp>
+#include <Tpetra_DirectoryImpl_def.hpp>
+#include <Tpetra_DirectoryImpl.hpp>
+#include <Tpetra_DistObject_decl.hpp>
+#include <Tpetra_DistObject_def.hpp>
+#include <Tpetra_DistObject_fwd.hpp>
+#include <Tpetra_DistObject.hpp>
+#include <Tpetra_Distribution.hpp>
+#include <Tpetra_DistributionLowerTriangularBlock.hpp>
+#include <Tpetra_DistributionMM.hpp>
+#include <Tpetra_Distributor.hpp>
+#include <Tpetra_EpetraRowMatrix.hpp>
+#include <Tpetra_ETIHelperMacros.h>
+#include <Tpetra_Exceptions_decl.hpp>
+#include <Tpetra_Exceptions_def.hpp>
+#include <Tpetra_Exceptions.hpp>
+#include <Tpetra_Export_decl.hpp>
+#include <Tpetra_Export_def.hpp>
+#include <Tpetra_Export_fwd.hpp>
+#include <Tpetra_Export.hpp>
+#include <Tpetra_FECrsGraph_decl.hpp>
+#include <Tpetra_FECrsGraph_def.hpp>
+#include <Tpetra_FECrsGraph_fwd.hpp>
+#include <Tpetra_FECrsGraph.hpp>
+#include <Tpetra_FECrsMatrix_decl.hpp>
+#include <Tpetra_FECrsMatrix_def.hpp>
+#include <Tpetra_FECrsMatrix.hpp>
+#include <Tpetra_FEMultiVector_decl.hpp>
+#include <Tpetra_FEMultiVector_def.hpp>
+#include <Tpetra_FEMultiVector_fwd.hpp>
+#include <Tpetra_FEMultiVector.hpp>
+#include <Tpetra_for_each.hpp>
+#include <Tpetra_for_each_MultiVector.hpp>
+#include <Tpetra_HashTable_decl.hpp>
+#include <Tpetra_HashTable_def.hpp>
+#include <Tpetra_HashTable.hpp>
+#include <Tpetra_iallreduce.hpp>
+#include <Tpetra_idot.hpp>
+#include <Tpetra_Import_decl.hpp>
+#include <Tpetra_Import_def.hpp>
+#include <Tpetra_ImportExportData_decl.hpp>
+#include <Tpetra_ImportExportData_def.hpp>
+#include <Tpetra_ImportExportData_fwd.hpp>
+#include <Tpetra_ImportExportData.hpp>
+#include <Tpetra_Import_fwd.hpp>
+#include <Tpetra_Import.hpp>
+#include <Tpetra_Import_Util2.hpp>
+#include <Tpetra_Import_Util.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorDistObjectKernels.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorDistObjectKernels_MP_Vector.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorDistObjectKernels_UQ_PCE.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorLocalDeepCopy.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorLocalDeepCopy_MP_Vector.hpp>
+#include <Tpetra_KokkosRefactor_Details_MultiVectorLocalDeepCopy_UQ_PCE.hpp>
+#include <Tpetra_leftAndOrRightScaleCrsMatrix_decl.hpp>
+#include <Tpetra_leftAndOrRightScaleCrsMatrix_def.hpp>
+#include <Tpetra_leftAndOrRightScaleCrsMatrix.hpp>
+#include <Tpetra_LocalCrsMatrixOperator_decl.hpp>
+#include <Tpetra_LocalCrsMatrixOperator_def.hpp>
+#include <Tpetra_LocalCrsMatrixOperator_fwd.hpp>
+#include <Tpetra_LocalCrsMatrixOperator.hpp>
+#include <Tpetra_LocalOperator_fwd.hpp>
+#include <Tpetra_LocalOperator.hpp>
+#include <Tpetra_Map_decl.hpp>
+#include <Tpetra_Map_def.hpp>
+#include <Tpetra_Map_fwd.hpp>
+#include <Tpetra_Map.hpp>
+#include <Tpetra_MatrixIO_decl.hpp>
+#include <Tpetra_MatrixIO_def.hpp>
+#include <Tpetra_MatrixIO.hpp>
+#include <Tpetra_MultiVector_decl.hpp>
+#include <Tpetra_MultiVector_def.hpp>
+#include <Tpetra_MultiVector_fwd.hpp>
+#include <Tpetra_MultiVector.hpp>
+#include <Tpetra_Operator_fwd.hpp>
+#include <Tpetra_Operator.hpp>
+#include <Tpetra_Packable_fwd.hpp>
+#include <Tpetra_Packable.hpp>
+#include <Tpetra_replaceDiagonalCrsMatrix_decl.hpp>
+#include <Tpetra_replaceDiagonalCrsMatrix_def.hpp>
+#include <Tpetra_replaceDiagonalCrsMatrix.hpp>
+#include <Tpetra_RowGraph_decl.hpp>
+#include <Tpetra_RowGraph_def.hpp>
+#include <Tpetra_RowGraph_fwd.hpp>
+#include <Tpetra_RowGraph.hpp>
+#include <Tpetra_RowMatrix_decl.hpp>
+#include <Tpetra_RowMatrix_def.hpp>
+#include <Tpetra_RowMatrix_fwd.hpp>
+#include <Tpetra_RowMatrix.hpp>
+#include <Tpetra_RowMatrixTransposer_decl.hpp>
+#include <Tpetra_RowMatrixTransposer_def.hpp>
+#include <Tpetra_RowMatrixTransposer_fwd.hpp>
+#include <Tpetra_RowMatrixTransposer.hpp>
+#include <Tpetra_SrcDistObject.hpp>
+#include <Tpetra_TieBreak_fwd.hpp>
+#include <Tpetra_TieBreak.hpp>
+#include <Tpetra_transform.hpp>
+#include <Tpetra_transform_MultiVector.hpp>
+#include <Tpetra_TsqrAdaptor.hpp>
+#include <Tpetra_TsqrAdaptor_MP_Vector.hpp>
+#include <Tpetra_Util.hpp>
+#include <Tpetra_Vector_decl.hpp>
+#include <Tpetra_Vector_def.hpp>
+#include <Tpetra_Vector_fwd.hpp>
+#include <Tpetra_Vector.hpp>
+#include <Tpetra_Version.hpp>
+#include <Tpetra_withLocalAccess.hpp>
+#include <Tpetra_withLocalAccess_MultiVector.hpp>
+
 
 namespace dolfin
 {
@@ -34,20 +280,26 @@ Vector::Vector( size_t N, bool distributed )
 
 //-----------------------------------------------------------------------------
 
-Vector::Vector( TPVector x )
-  : Variable( "x", "a vector" )
-{
-  // Do nothing
-}
+// Vector::Vector( TPVector x )
+//   : Variable( "x", "a vector" )
+// {
+// }
 
 //-----------------------------------------------------------------------------
 
-Vector::Vector( Vector const & v )
+Vector::Vector( Vector const & copy )
   : Variable( "x", "a vector" )
-  // , x_( Teuchos::rcp( new TPVector::element_type( *v.x_ ) ) )
-  // , contigMap( Teuchos::rcp( new TPMap::element_type( *v.contigMap ) ) )
 {
-  *this = v;
+  if ( not copy.x_.is_null() )
+  {
+    Teuchos::RCP< TPMap const > copy_ghostmap( copy.x_ghosted_->getMap() );
+    Teuchos::RCP< TPMap const > copy_xmap( copy.x_->getMap() );
+
+    x_ghosted_ = Teuchos::rcp( new TPVector( copy_ghostmap, 1 ) );
+    x_ghosted_->assign( *copy.x_ghosted_ );
+
+    x_ = x_ghosted_->offsetViewNonConst( copy_xmap, 0 );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -68,14 +320,36 @@ Vector * Vector::copy() const
 
 void Vector::zero()
 {
-  // delegate to assignment operator with 0.0
-  *this = 0.0;
+  dolfin_assert( not x_ghosted_.is_null() );
+  x_ghosted_->putScalar( 0.0 );
 }
 
 //-----------------------------------------------------------------------------
-void Vector::apply( FinalizeType finaltype )
+void Vector::apply( FinalizeType )
 {
-  // FIXME
+  dolfin_assert( not x_.is_null() );
+
+  // update_ghost_values();
+
+  Teuchos::RCP< const TPMap > xmap = x_->getMap();
+  Teuchos::RCP< TPVector >    y( new TPVector( xmap, 1 ) );
+  Teuchos::RCP< const TPMap > ghostmap = x_ghosted_->getMap();
+
+  // Export from overlapping map ghostmap, to non-overlapping xmap
+  Tpetra::Export< TPVector::local_ordinal_type,
+                  TPVector::global_ordinal_type,
+                  TPVector::node_type >
+    exporter( ghostmap, xmap );
+
+  // Forward export to reduction vector
+  y->doExport( *x_ghosted_, exporter, Tpetra::ADD );
+
+  // Copy back into _x_ghosted
+  Tpetra::Import< TPVector::local_ordinal_type,
+                  TPVector::global_ordinal_type,
+                  TPVector::node_type >
+    importer( xmap, ghostmap );
+  x_ghosted_->doImport( *y, importer, Tpetra::INSERT );
 }
 
 //-----------------------------------------------------------------------------

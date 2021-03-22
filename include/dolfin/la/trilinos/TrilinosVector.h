@@ -13,10 +13,6 @@
 #include <dolfin/la/trilinos/TrilinosObject.h>
 
 #include <Tpetra_MultiVector_def.hpp>
-#include <Tpetra_Map_def.hpp>
-#include <Tpetra_Directory_def.hpp>
-#include <Tpetra_DistObject_def.hpp>
-#include <Tpetra_Details_Transfer_def.hpp>
 
 namespace dolfin
 {
@@ -52,10 +48,10 @@ public:
   explicit Vector( size_t N, bool distributed = true );
 
   /// Copy constructor
-  explicit Vector( const Vector & x );
+  explicit Vector( Vector const & copy );
 
   /// Create vector from given Tpetra Vec pointer
-  explicit Vector( TPVector x );
+  // explicit Vector( TPVector x );
 
   /// Destructor
   ~Vector() override;
@@ -69,7 +65,7 @@ public:
   void zero() override;
 
   /// Finalize assembly of tensor
-  void apply( FinalizeType finaltype = FINALIZE ) override;
+  void apply( FinalizeType ) override;
 
   /// Display tensor
   void disp( size_t precision = 0 ) const override;

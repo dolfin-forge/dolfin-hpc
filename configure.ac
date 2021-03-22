@@ -268,7 +268,7 @@ if test "x${with_trilinos}" != xno; then
    #LIBS="$LIBS -ltpetraclassicnodeapi -ltpetraext -ltpetrainout -ltriutils"
    #LIBS="$LIBS -lxpetra -lxpetra-sup"
    LIBS="$LIBS -lteuchoscore -lteuchoscomm -lteuchoskokkoscomm -ltpetraclassicnodeapi"
-   LIBS="$LIBS -lkokkoscore -lteuchoskokkoscompat -ltpetra"
+   LIBS="$LIBS -lkokkoscore -lteuchoskokkoscompat -lteuchosparameterlist -ltpetra"
    AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
    found_la_backend="yes"
 fi

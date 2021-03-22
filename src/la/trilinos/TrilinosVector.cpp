@@ -1,4 +1,4 @@
-// Copyright (C) 2020 Julian Hornich
+// Copyright (C) 2021 Julian Hornich
 // Licensed under the GNU LGPL Version 2.1.
 
 #include <dolfin/config/dolfin_config.h>

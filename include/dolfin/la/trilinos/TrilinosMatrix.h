@@ -20,6 +20,168 @@ namespace trilinos
 
 class Matrix : public GenericMatrix, public Object, public Variable
 {
+public:
+  enum Norm
+  {
+    l1,
+    linf,
+    frobenius
+  };
+
+  /// Create empty matrix
+  explicit Matrix();
+
+  /// Create matrix of local dimension M x N
+  Matrix( size_t M, size_t N, bool distributed = true );
+
+  /// Copy constructor
+  explicit Matrix( const Matrix & A );
+
+  // /// Create matrix from given Trilinos Mat pointer
+  // explicit Matrix( Mat A );
+
+  /// Destructor
+  ~Matrix() override;
+
+  //--- Implementation of the GenericTensor interface ---
+
+  /// Initialize zero tensor using sparsity pattern
+  auto init( const GenericSparsityPattern & sparsity_pattern ) -> void override;
+
+  /// Return copy of tensor
+  auto copy() const -> Matrix * override;
+
+  /// Return size of given dimension
+  auto size( size_t dim ) const -> size_t override;
+
+  /// Set all entries to zero and keep any sparse structure
+  auto zero() -> void override;
+
+  /// Finalize assembly of tensor
+  auto apply( FinalizeType final = FINALIZE ) -> void override;
+
+  /// Display tensor
+  auto disp( size_t precision = 0 ) const -> void override;
+
+  //--- Implementation of the GenericMatrix interface --
+
+  /// Initialize matrix of local dimension M x N, distributed by default
+  auto init( size_t M, size_t N ) -> void override;
+
+  /// Initialize matrix of local dimension M x N, distributed if specified
+  auto init( size_t M, size_t N, bool distributed ) -> void override;
+
+  /// Get block of values
+  auto get( real *         block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) const -> void override;
+
+  /// Set block of values
+  auto set( const real *   block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) -> void override;
+
+  /// Add block of values
+  auto add( const real *   block,
+            size_t         m,
+            const size_t * rows,
+            size_t         n,
+            const size_t * cols ) -> void override;
+
+  /// Return norm of matrix
+  auto norm( std::string norm_type = "frobenius" ) const -> real override;
+
+  /// Get non-zero values of given row
+  auto getrow( size_t                  row,
+               std::vector< size_t > & columns,
+               std::vector< real > &   values ) const -> void override;
+
+  /// Set values for given row
+  auto setrow( size_t                        row,
+               const std::vector< size_t > & columns,
+               const std::vector< real > &   values ) -> void override;
+
+  /// Set given rows to zero
+  auto zero( size_t m, const size_t * rows ) -> void override;
+
+  /// Set given rows to identity matrix
+  auto ident( size_t m, const size_t * rows ) -> void override;
+
+  /// Duplicate matrix
+  auto dup( GenericMatrix & A ) -> void;
+
+  // Matrix-vector product, y = Ax
+  auto mult( const GenericVector & x,
+             GenericVector &       y,
+             bool                  transposed = false ) const -> void override;
+
+  /// Multiply matrix by given number
+  auto operator*=( real a ) -> const Matrix & override;
+
+  /// Divide matrix by given number
+  auto operator/=( real a ) -> const Matrix & override;
+
+  /// Assignment operator
+  auto operator=( const GenericMatrix & A ) -> const GenericMatrix & override;
+
+  /// Get number of non-zeros in the matrix
+  auto nz() const -> size_t override;
+
+  //--- Special functions ---
+
+  /// Return linear algebra backend factory
+  auto factory() const -> LinearAlgebraFactory & override;
+
+  //--- Special Functions ---
+
+  /// Return Trilinos Mat pointer
+  // auto mat() const -> Mat;
+
+  /// Return norm of matrix
+  auto norm( const Norm type = l1 ) const -> real;
+
+  /// Assignment operator
+  auto operator=( const Matrix & A ) -> const Matrix &;
+
+  /// Matrix axpy, Y = a X+ Y
+  auto operator+=( const Matrix & A ) -> const Matrix &;
+
+private:
+  //
+  auto clear() -> void;
+
+  // Initialize M x N matrix with a given number of nonzeros per row
+  auto init( size_t M, size_t N, std::vector< size_t > const & nz ) -> void;
+
+  // Initialize M x N matrix with a given number of nonzeros per row diagonal
+  // and off-diagonal
+  auto init( size_t M, size_t N,
+             std::vector< size_t > const & d_nzrow,
+             std::vector< size_t > const & o_nzrow ) -> void;
+
+  ///
+  auto getrows_offproc( _ordered_set< size_t > const & rows ) -> void;
+
+  // Print info
+  // auto print( MatInfo const & info ) const -> void;
+
+  // // Matrix
+  // Mat A { nullptr };
+
+  // // Sub-matrices
+  // Mat * AA_sub { nullptr };
+
+  // // True if the matrix is distributed
+  // bool is_distributed_ { false };
+
+  // PetscInt rstart_ { 0 };
+  // PetscInt rend_ { 0 };
+
+  // _map< int, int > mapping_;
 };
 
 } // end namespace trilinos

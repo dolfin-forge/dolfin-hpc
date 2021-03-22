@@ -7,6 +7,8 @@
 
 #include <dolfin/la/trilinos/TrilinosVector.h>
 
+#include <dolfin/la/trilinos/TrilinosFactory.h>
+
 // FIXME lets say, this is not... optimal?!
 #include <Tpetra_Access.hpp>
 #include <Tpetra_applyDirichletBoundaryCondition.hpp>
@@ -311,21 +313,22 @@ Vector::~Vector()
 
 //-----------------------------------------------------------------------------
 
-Vector * Vector::copy() const
+auto Vector::copy() const -> Vector *
 {
   return new Vector( *this );
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::zero()
+auto Vector::zero() -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
   x_ghosted_->putScalar( 0.0 );
 }
 
 //-----------------------------------------------------------------------------
-void Vector::apply( FinalizeType )
+
+auto Vector::apply( FinalizeType ) -> void
 {
   dolfin_assert( not x_.is_null() );
 
@@ -352,10 +355,10 @@ void Vector::apply( FinalizeType )
 
 //-----------------------------------------------------------------------------
 
-void MPIgather( MPI_Comm                     comm,
+auto MPIgather( MPI_Comm                     comm,
                 const std::string &          in_values,
                 std::vector< std::string > & out_values,
-                unsigned int                 receiving_process = 0 )
+                unsigned int                 receiving_process = 0 ) -> void
 {
 #ifdef DOLFIN_HAVE_MPI
   size_t const comm_size = MPI::size();
@@ -395,7 +398,7 @@ void MPIgather( MPI_Comm                     comm,
 #endif
 }
 
-void Vector::disp( size_t ) const
+auto Vector::disp( size_t ) const -> void
 {
   Teuchos::RCP< const TPMap > xmap = x_->getMap();
 
@@ -445,7 +448,7 @@ void Vector::disp( size_t ) const
 
 //-----------------------------------------------------------------------------
 
-size_t Vector::size() const
+auto Vector::size() const -> size_t
 {
   if ( x_.is_null() )
     return 0;
@@ -455,7 +458,7 @@ size_t Vector::size() const
 
 //-----------------------------------------------------------------------------
 
-size_t Vector::local_size() const
+auto Vector::local_size() const -> size_t
 {
   if ( x_.is_null() )
     return 0;
@@ -465,7 +468,7 @@ size_t Vector::local_size() const
 
 //-----------------------------------------------------------------------------
 
-size_t Vector::offset() const
+auto Vector::offset() const -> size_t
 {
   if ( x_.is_null() )
     return 0;
@@ -475,14 +478,14 @@ size_t Vector::offset() const
 
 //-----------------------------------------------------------------------------
 
-void Vector::init( size_t N )
+auto Vector::init( size_t N ) -> void
 {
   init( N, true );
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::init( size_t N, bool distributed )
+auto Vector::init( size_t N, bool distributed ) -> void
 {
   if ( not distributed )
   {
@@ -529,16 +532,16 @@ void Vector::init( size_t N, bool distributed )
 
 //-----------------------------------------------------------------------------
 
-void Vector::init_ghosted( size_t                           n,
+auto Vector::init_ghosted( size_t                           n,
                            _ordered_set< size_t > &         indices,
-                           _ordered_map< size_t, size_t > & map )
+                           _ordered_map< size_t, size_t > & map ) -> void
 {
   // FIXME
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::get( real * values ) const
+auto Vector::get( real * values ) const -> void
 {
   dolfin_assert( not x_.is_null() );
   dolfin_assert( values != nullptr );
@@ -549,7 +552,7 @@ void Vector::get( real * values ) const
 
 //-----------------------------------------------------------------------------
 
-void Vector::set( real * values )
+auto Vector::set( real * values ) -> void
 {
   size_t const num_values = local_size();
 
@@ -565,7 +568,7 @@ void Vector::set( real * values )
 
 //-----------------------------------------------------------------------------
 
-void Vector::add( real * values )
+auto Vector::add( real * values ) -> void
 {
   dolfin_assert( not x_.is_null() );
 
@@ -577,7 +580,7 @@ void Vector::add( real * values )
 
 //-----------------------------------------------------------------------------
 
-void Vector::get( real * block, size_t m, const size_t * rows ) const
+auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
@@ -598,7 +601,7 @@ void Vector::get( real * block, size_t m, const size_t * rows ) const
 
 //-----------------------------------------------------------------------------
 
-void Vector::set( const real * block, size_t m, const size_t * rows )
+auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
@@ -617,7 +620,7 @@ void Vector::set( const real * block, size_t m, const size_t * rows )
 
 //-----------------------------------------------------------------------------
 
-void Vector::add( const real * block, size_t m, const size_t * rows )
+auto Vector::add( const real * block, size_t m, const size_t * rows ) -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
@@ -636,14 +639,14 @@ void Vector::add( const real * block, size_t m, const size_t * rows )
 
 //-----------------------------------------------------------------------------
 
-void Vector::axpy( real a, const GenericVector & x )
+auto Vector::axpy( real a, const GenericVector & x ) -> void
 {
   this->axpby( a, x, 1.0 );
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::axpby( real a, const GenericVector & x, real b )
+auto Vector::axpby( real a, const GenericVector & x, real b ) -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
@@ -655,18 +658,18 @@ void Vector::axpby( real a, const GenericVector & x, real b )
 
 //-----------------------------------------------------------------------------
 
-void Vector::waxpy( real a, const GenericVector & x, const GenericVector & y )
+auto Vector::waxpy( real a, const GenericVector & x, const GenericVector & y ) -> void
 {
   this->axpbypcz( a, x, 1.0, y, 0.0 );
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::axpbypcz( real                  a,
+auto Vector::axpbypcz( real                  a,
                        const GenericVector & x,
                        real                  b,
                        const GenericVector & y,
-                       real                  c )
+                       real                  c ) -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
@@ -681,7 +684,7 @@ void Vector::axpbypcz( real                  a,
 
 //-----------------------------------------------------------------------------
 
-real Vector::inner( const GenericVector & y ) const
+auto Vector::inner( const GenericVector & y ) const -> real
 {
   dolfin_assert( not x_.is_null() );
 
@@ -698,7 +701,7 @@ real Vector::inner( const GenericVector & y ) const
 
 //-----------------------------------------------------------------------------
 
-real Vector::norm( VectorNormType type ) const
+auto Vector::norm( VectorNormType type ) const -> real
 {
   dolfin_assert( not x_.is_null() );
   using TPMagType = Tpetra::MultiVector<>::mag_type;
@@ -724,7 +727,7 @@ real Vector::norm( VectorNormType type ) const
 
 //-----------------------------------------------------------------------------
 
-real Vector::min() const
+auto Vector::min() const -> real
 {
   dolfin_assert( not x_.is_null() );
 
@@ -738,7 +741,7 @@ real Vector::min() const
 
 //-----------------------------------------------------------------------------
 
-real Vector::max() const
+auto Vector::max() const -> real
 {
   dolfin_assert( not x_.is_null() );
 
@@ -752,15 +755,15 @@ real Vector::max() const
 
 //-----------------------------------------------------------------------------
 
-void Vector::pointwise( const GenericVector & x,
-                        VectorPointwiseOp     op ) const
+auto Vector::pointwise( const GenericVector & x,
+                        VectorPointwiseOp     op ) const -> void
 {
   // FIXME
 }
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator*=( const real a )
+auto Vector::operator*=( const real a ) -> Vector &
 {
   dolfin_assert( not x_.is_null() );
 
@@ -771,7 +774,7 @@ Vector & Vector::operator*=( const real a )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator/=( const real a )
+auto Vector::operator/=( const real a ) -> Vector &
 {
   dolfin_assert( not x_.is_null() );
   dolfin_assert( a != 0.0 );
@@ -784,7 +787,7 @@ Vector & Vector::operator/=( const real a )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator*=( const GenericVector & y )
+auto Vector::operator*=( const GenericVector & y ) -> Vector &
 {
   dolfin_assert( not x_.is_null() );
 
@@ -798,7 +801,7 @@ Vector & Vector::operator*=( const GenericVector & y )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator+=( const GenericVector & x )
+auto Vector::operator+=( const GenericVector & x ) -> Vector &
 {
   this->axpy( 1.0, x );
 
@@ -807,7 +810,7 @@ Vector & Vector::operator+=( const GenericVector & x )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator-=( const GenericVector & x )
+auto Vector::operator-=( const GenericVector & x ) -> Vector &
 {
   this->axpy( -1.0, x );
 
@@ -816,7 +819,7 @@ Vector & Vector::operator-=( const GenericVector & x )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator=( const GenericVector & v )
+auto Vector::operator=( const GenericVector & v ) -> Vector &
 {
   *this = v.down_cast< trilinos::Vector >();
   return *this;
@@ -824,7 +827,7 @@ Vector & Vector::operator=( const GenericVector & v )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator=( Vector const & v )
+auto Vector::operator=( Vector const & v ) -> Vector &
 {
   // Check that vector lengths are equal
   if ( size() != v.size() )
@@ -853,7 +856,7 @@ Vector & Vector::operator=( Vector const & v )
 
 //-----------------------------------------------------------------------------
 
-Vector & Vector::operator=( real a )
+auto Vector::operator=( real a ) -> Vector &
 {
   dolfin_assert( not x_.is_null() );
 
@@ -871,14 +874,14 @@ auto Vector::vec() const -> TPVectorPtr
 
 //-----------------------------------------------------------------------------
 
-LinearAlgebraFactory & Vector::factory() const
+auto Vector::factory() const -> LinearAlgebraFactory &
 {
-  // FIXME
+  return trilinos::Factory::instance();
 }
 
 //-----------------------------------------------------------------------------
 
-void Vector::clear()
+auto Vector::clear() -> void
 {
   if ( not x_.is_null() )
   {

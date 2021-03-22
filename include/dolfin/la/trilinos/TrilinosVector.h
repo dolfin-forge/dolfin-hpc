@@ -59,122 +59,122 @@ public:
   //--- Implementation of the GenericTensor interface ---
 
   /// Return copy of tensor
-  Vector * copy() const override;
+  auto copy() const -> Vector * override;
 
   /// Set all entries to zero and keep any sparse structure
-  void zero() override;
+  auto zero() -> void override;
 
   /// Finalize assembly of tensor
-  void apply( FinalizeType ) override;
+  auto apply( FinalizeType ) -> void override;
 
   /// Display tensor
-  void disp( size_t precision = 0 ) const override;
+  auto disp( size_t precision = 0 ) const -> void override;
 
   //--- Implementation of the GenericVector interface ---
 
   /// Return size of vector
-  size_t size() const override;
+  auto size() const -> size_t override;
 
   /// Return local size of vector
-  size_t local_size() const override;
+  auto local_size() const -> size_t override;
 
   /// Return rank's offset into vector
-  size_t offset() const override;
+  auto offset() const -> size_t override;
 
   /// Initialize vector of local size N, distributed by default
-  void init( size_t N ) override;
+  auto init( size_t N ) -> void override;
 
   /// Initialize vector of local size N, distributed if specified
-  void init( size_t N, bool distributed ) override;
+  auto init( size_t N, bool distributed ) -> void override;
 
   /// Initialize ghost entries
-  void init_ghosted( size_t                           n,
+  auto init_ghosted( size_t                           n,
                      _ordered_set< size_t > &         indices,
-                     _ordered_map< size_t, size_t > & map ) override;
+                     _ordered_map< size_t, size_t > & map ) -> void override;
 
   /// Get block of values
-  void get( real * block, size_t m, const size_t * rows ) const override;
+  auto get( real * block, size_t m, const size_t * rows ) const -> void override;
 
   /// Set block of values
-  void set( const real * block, size_t m, const size_t * rows ) override;
+  auto set( const real * block, size_t m, const size_t * rows ) -> void override;
 
   /// Add block of values
-  void add( const real * block, size_t m, const size_t * rows ) override;
+  auto add( const real * block, size_t m, const size_t * rows ) -> void override;
 
   /// Get all values
-  void get( real * values ) const override;
+  auto get( real * values ) const -> void override;
 
   /// Set all values
-  void set( real * values ) override;
+  auto set( real * values ) -> void override;
 
   /// Add values to each entry
-  void add( real * values ) override;
+  auto add( real * values ) -> void override;
 
   /// Add multiple of given vector (AXPY operation)
-  void axpy( real a, const GenericVector & x ) override;
+  auto axpy( real a, const GenericVector & x ) -> void override;
 
   /// Add multiple of given vector (y=a*x+b*y)
-  void axpby( real a, const GenericVector & x, real b ) override;
+  auto axpby( real a, const GenericVector & x, real b ) -> void override;
 
   /// Add multiple of given vector (w=a*x+y)
-  void waxpy( real a, const GenericVector & x, const GenericVector & y ) override;
+  auto waxpy( real a, const GenericVector & x, const GenericVector & y ) -> void override;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  void axpbypcz( real a, const GenericVector & x,
+  auto axpbypcz( real a, const GenericVector & x,
                  real b, const GenericVector & y,
-                 real c ) override;
+                 real c ) -> void override;
 
   /// Return inner product with given vector
-  real inner( const GenericVector & v ) const override;
+  auto inner( const GenericVector & v ) const -> real override;
 
   /// Return norm of vector
-  real norm( VectorNormType type = l2 ) const override;
+  auto norm( VectorNormType type = l2 ) const -> real override;
 
   /// Return minimum value of vector
-  real min() const override;
+  auto min() const -> real override;
 
   /// Return maximum value of vector
-  real max() const override;
+  auto max() const -> real override;
 
   /// Return pointwise operator op of vector and given vector x
-  void pointwise( const GenericVector & x,
-                  VectorPointwiseOp     op = pw_min ) const override;
+  auto pointwise( const GenericVector & x,
+                  VectorPointwiseOp     op = pw_min ) const -> void override;
 
   /// Multiply vector by given number
-  Vector & operator*=( real a ) override;
+  auto operator*=( real a ) -> Vector & override;
 
   /// Divide vector by given number
-  Vector & operator/=( real a ) override;
+  auto operator/=( real a ) -> Vector & override;
 
   /// Multiply vector by given vector component-wise
-  Vector & operator*=( const GenericVector & x ) override;
+  auto operator*=( const GenericVector & x ) -> Vector & override;
 
   /// Add given vector
-  Vector & operator+=( const GenericVector & x ) override;
+  auto operator+=( const GenericVector & x ) -> Vector & override;
 
   /// Subtract given vector
-  Vector & operator-=( const GenericVector & x ) override;
+  auto operator-=( const GenericVector & x ) -> Vector & override;
 
   /// Assignment operator
-  Vector & operator=( Vector const & x );
+  auto operator=( Vector const & x ) -> Vector &;
 
   /// Assignment operator
-  Vector & operator=( GenericVector const & x ) override;
+  auto operator=( GenericVector const & x ) -> Vector & override;
 
   /// Assignment operator
-  Vector & operator=( real a ) override;
+  auto operator=( real a ) -> Vector & override;
 
   /// Return Trilinos Vec pointer
-  TPVectorPtr vec() const;
+  auto vec() const -> TPVectorPtr;
 
   //--- Special functions ---
 
   /// Return linear algebra backend factory
-  LinearAlgebraFactory & factory() const override;
+  auto factory() const -> LinearAlgebraFactory & override;
 
 private:
   //
-  void clear();
+  auto clear() -> void;
 
   // Tpetra multivector - actually a view into the ghosted vector, below
   TPVectorPtr x_;

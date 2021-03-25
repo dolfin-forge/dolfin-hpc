@@ -12,6 +12,8 @@
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/trilinos/TrilinosObject.h>
 
+#include <Tpetra_CrsMatrix.hpp>
+
 namespace dolfin
 {
 
@@ -21,6 +23,21 @@ namespace trilinos
 class Matrix : public GenericMatrix, public Object, public Variable
 {
 public:
+  using LO = int;
+  using GO = size_t;
+
+  static constexpr GO const indexBase = 0;
+
+	  /// Matrix type (scalar, local index, global index)
+  using TPMatrix = Tpetra::CrsMatrix< real, LO, GO >;
+
+  /// Graph type (local index, global index)
+  using TPGraph  = Tpetra::CrsGraph< LO, GO >;
+
+  /// Map type (local index, global index)
+  using TPMap    = Tpetra::Map< LO, GO >;
+
+public:
   enum Norm
   {
     l1,
@@ -28,6 +45,7 @@ public:
     frobenius
   };
 
+public:
   /// Create empty matrix
   explicit Matrix();
 
@@ -45,9 +63,6 @@ public:
 
   //--- Implementation of the GenericTensor interface ---
 
-  /// Initialize zero tensor using sparsity pattern
-  auto init( const GenericSparsityPattern & sparsity_pattern ) -> void override;
-
   /// Return copy of tensor
   auto copy() const -> Matrix * override;
 
@@ -58,10 +73,13 @@ public:
   auto zero() -> void override;
 
   /// Finalize assembly of tensor
-  auto apply( FinalizeType final = FINALIZE ) -> void override;
+  auto apply( FinalizeType finaltype = FINALIZE ) -> void override;
 
   /// Display tensor
   auto disp( size_t precision = 0 ) const -> void override;
+
+  /// Initialize zero tensor using sparsity pattern
+  auto init( const GenericSparsityPattern & sparsity_pattern ) -> void override;
 
   //--- Implementation of the GenericMatrix interface --
 
@@ -111,9 +129,6 @@ public:
   /// Set given rows to identity matrix
   auto ident( size_t m, const size_t * rows ) -> void override;
 
-  /// Duplicate matrix
-  auto dup( GenericMatrix & A ) -> void;
-
   // Matrix-vector product, y = Ax
   auto mult( const GenericVector & x,
              GenericVector &       y,
@@ -154,23 +169,11 @@ private:
   //
   auto clear() -> void;
 
-  // Initialize M x N matrix with a given number of nonzeros per row
-  auto init( size_t M, size_t N, std::vector< size_t > const & nz ) -> void;
-
-  // Initialize M x N matrix with a given number of nonzeros per row diagonal
-  // and off-diagonal
-  auto init( size_t M, size_t N,
-             std::vector< size_t > const & d_nzrow,
-             std::vector< size_t > const & o_nzrow ) -> void;
-
-  ///
-  auto getrows_offproc( _ordered_set< size_t > const & rows ) -> void;
-
   // Print info
   // auto print( MatInfo const & info ) const -> void;
 
-  // // Matrix
-  // Mat A { nullptr };
+  // The matrix
+  Teuchos::RCP< TPMatrix > mat_;
 
   // // Sub-matrices
   // Mat * AA_sub { nullptr };

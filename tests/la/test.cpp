@@ -18,10 +18,11 @@ DOLFIN_SUITE_BEGIN(suite, "la")
   DOLFIN_TCASE_ADD(test_op_mul_vec);
   DOLFIN_TCASE_ADD(test_op_scale_vec);
   DOLFIN_TCASE_ADD(test_zero_vec);
-  DOLFIN_TCASE_ADD(test_trilinos);
+  DOLFIN_TCASE_ADD(test_trilinos_vec);
 
   DOLFIN_TCASE_CREATE( "Matrix" );
   DOLFIN_TCASE_ADD(test_init_mat);
+  DOLFIN_TCASE_ADD(test_trilinos_mat);
 }
 DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------

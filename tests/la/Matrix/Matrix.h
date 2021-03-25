@@ -19,12 +19,18 @@ DOLFIN_START_TEST( test_init_mat )
 
 }DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-
-DOLFIN_SUITE_BEGIN(test_suite_mat, "Matrix")
+#ifdef HAVE_TRILINOS
+#include <dolfin/la/trilinos/TrilinosMatrix.h>
+DOLFIN_START_TEST( test_trilinos_mat )
 {
-  DOLFIN_TCASE_CREATE ("init");
-  DOLFIN_TCASE_ADD(test_init_mat);
-}
-DOLFIN_SUITE_END
+  trilinos::Matrix x1;
+  trilinos::Matrix x2( MAT_SIZE, MAT_SIZE );
+}DOLFIN_END_TEST
+#else
+DOLFIN_START_TEST( test_trilinos_mat )
+{
+}DOLFIN_END_TEST
+#endif
+//-----------------------------------------------------------------------------
 
 #endif

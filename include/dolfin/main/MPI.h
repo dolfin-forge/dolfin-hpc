@@ -120,6 +120,12 @@ public:
                           Communicator & comm = MPI::DOLFIN_COMM ) -> int;
 
   //// Wrap in a template function to allow use of functors
+  template < typename T >
+  static auto all_gather( T const &          sendbuf,
+                          std::vector< T > & recvbuf,
+                          Communicator &     comm = MPI::DOLFIN_COMM ) -> int;
+
+  //// Wrap in a template function to allow use of functors
   template < int Op, typename T >
   static auto all_reduce( T x, T & r, Communicator & comm = MPI::DOLFIN_COMM )
     -> int;
@@ -345,6 +351,23 @@ inline auto MPI::all_gather( T *            sendbuf,
                                           MPI_type< T >::value,
                                           comm ) );
 }
+
+//-----------------------------------------------------------------------------
+
+template < typename T >
+inline auto MPI::all_gather( T const &          sendbuf,
+                             std::vector< T > & recvbuf,
+                             Communicator &     comm ) -> int
+{
+  T * sendbuf_ = const_cast< T * >( &sendbuf );
+  T * recvbuf_ = const_cast< T * >( recvbuf.data() );
+  int size_    = recvbuf.size();
+
+  return MPI::check_error( MPI_Allgather( sendbuf_,  1, MPI_type< T >::value,
+                                          recvbuf_, size_, MPI_type< T >::value,
+                                          comm ) );
+}
+
 //-----------------------------------------------------------------------------
 // unfortunately c++ does not allow partial function template specialization
 // so we have to move the  template to a mpi_helper class

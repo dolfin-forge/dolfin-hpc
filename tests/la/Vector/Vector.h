@@ -193,7 +193,7 @@ DOLFIN_START_TEST( test_zero_vec )
 //-----------------------------------------------------------------------------
 #ifdef HAVE_TRILINOS
 #include <dolfin/la/trilinos/TrilinosVector.h>
-DOLFIN_START_TEST( test_trilinos )
+DOLFIN_START_TEST( test_trilinos_vec )
 {
   trilinos::Vector x1;
   x1.init(VEC_SIZE);
@@ -234,7 +234,7 @@ DOLFIN_START_TEST( test_trilinos )
 
 }DOLFIN_END_TEST
 #else
-DOLFIN_START_TEST( test_trilinos )
+DOLFIN_START_TEST( test_trilinos_vec )
 {
 }DOLFIN_END_TEST
 #endif

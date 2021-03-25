@@ -502,18 +502,19 @@ auto Vector::init( size_t N, bool distributed ) -> void
   MPI::all_reduce< MPI::sum >( N, Nglobal );
   dolfin_assert( N <= Nglobal );
 
+  // FIXME use the correct comm here
   Teuchos::RCP< const Teuchos::MpiComm< int > > _comm(
     new Teuchos::MpiComm< int >( Teuchos::MpiComm< int >( MPI::DOLFIN_COMM ) ) );
 
-  Teuchos::RCP< TPMap > _map( new TPMap( Nglobal, N, 0, _comm ) );
+  Teuchos::RCP< TPMap > _map( new TPMap( Nglobal, N, indexBase, _comm ) );
   Teuchos::RCP< TPMap > _ghost_map;
-  std::vector< int > local_to_global_map;
+  std::vector< GO > local_to_global_map;
 
   // Save a map for the ghosting of values on other processes
   if ( local_to_global_map.size() != 0 )
   {
-    const Teuchos::ArrayView< const int > local_indices( local_to_global_map );
-    _ghost_map = Teuchos::rcp( new TPMap( N, local_indices, 0, _comm ) );
+    const Teuchos::ArrayView< GO const > local_indices( local_to_global_map );
+    _ghost_map = Teuchos::rcp( new TPMap( N, local_indices, indexBase, _comm ) );
   }
   else
   {
@@ -584,7 +585,7 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 {
   dolfin_assert( not x_ghosted_.is_null() );
 
-  Teuchos::RCP< const TPMap >       xmap = x_ghosted_->getMap();
+  Teuchos::RCP< const TPMap >     xmap = x_ghosted_->getMap();
   Teuchos::ArrayRCP< const real > xarr = x_ghosted_->getData( 0 );
 
   for ( size_t i = 0; i < m; ++i )

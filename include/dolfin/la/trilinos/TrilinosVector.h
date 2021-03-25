@@ -20,6 +20,8 @@ namespace dolfin
 namespace trilinos
 {
 
+class Matrix;
+
 /// This class provides a simple vector class based on Trilinos/Tpetra.
 /// It is a simple wrapper for a Tpetra vector pointer (Vec)
 /// implementing the GenericVector interface.
@@ -31,11 +33,19 @@ namespace trilinos
 class Vector : public GenericVector, public Object, public Variable
 {
 public:
+  using LO = int;
+  using GO = size_t;
+
+  static constexpr GO const indexBase = 0;
+
+  /// Tpetra node type
+  using TPNode      = Tpetra::MultiVector<>::node_type;
+
   /// TpetraVector map type (local index, global index)
-  using TPMap       = Tpetra::Map< int, int, Tpetra::MultiVector<>::node_type >;
+  using TPMap       = Tpetra::Map< LO, GO, TPNode >;
 
   /// TpetraVector vector type (scalar, local index, global index, node)
-  using TPVector    = Tpetra::MultiVector< real, int, int, Tpetra::MultiVector<>::node_type >;
+  using TPVector    = Tpetra::MultiVector< real, LO, GO, TPNode >;
 
   /// smart pointer to a TPVector
   using TPVectorPtr = Teuchos::RCP< TPVector >;
@@ -173,6 +183,8 @@ public:
   auto factory() const -> LinearAlgebraFactory & override;
 
 private:
+  friend trilinos::Matrix;
+
   //
   auto clear() -> void;
 

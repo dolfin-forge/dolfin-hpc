@@ -9,23 +9,31 @@
 #ifdef HAVE_TRILINOS
 
 #include <dolfin/la/trilinos/TrilinosObject.h>
+#include <dolfin/la/trilinos/TrilinosVector.h>
+
+#include <Ifpack2_Factory.hpp>
+
+#include <string>
 
 namespace dolfin
 {
 
+enum class PreconditionerType;
+
 namespace trilinos
 {
 
-class Vector;
-enum class PreconditionerType;
+class Matrix;
+class KrylovSolver;
 
-/// This class specifies the interface for user-defined Krylov method
-/// Preconditioners. A user wishing to implement their own Preconditioner needs
-/// only supply a function that approximately solves the linear system given a
-/// right-hand side.
+// Class implementing an interface to trilinos (Ifpack2) preconditioners
 
 class Preconditioner : public Object
 {
+public:
+  /// Preconditioner Type
+  using PCType = Ifpack2::Preconditioner< real, int, size_t, Vector::TPNode >;
+
 public:
   /// Constructor
   Preconditioner() = default;
@@ -33,23 +41,24 @@ public:
   /// Destructor
   virtual ~Preconditioner() = default;
 
-  // static void setup( const KSP ksp, Preconditioner & pc );
+  /// Set the preconditioner type on a solver
+  void set( trilinos::KrylovSolver & solver );
 
-  /// Solve linear system approximately for given right-hand side b
-  virtual void solve( trilinos::Vector & x, trilinos::Vector const & b ) = 0;
+  /// Initialise preconditioner based on Operator P and preconditioner string
+  auto init( Matrix const & P, std::string pc_str ) -> void;
 
-  /// Friends
-  friend class KrylovSolver;
+  /// Initialise preconditioner based on Operator P and preconditioner type
+  auto init( Matrix const & P, PreconditionerType pc_type ) -> void;
 
-protected:
-  // PC petscpc;
+  /// Initialise preconditioner based on Operator P
+  auto init( Matrix const & P ) -> void;
 
 private:
-  // static auto PCApply( PC pc, Vec x, Vec y ) -> int;
-  // static auto PCCreate( PC pc ) -> int;
+  // name of the preconditioner
+  std::string _name;
 
-  /// Return trilinos Preconditioner type
-  // static auto getType( PreconditionerType pc ) -> PCType;
+  // Ifpack2 preconditioner, to be constructed from a Tpetra Operator or Matrix
+  Teuchos::RCP< PCType > pc_;
 };
 
 } // namespace trilinos

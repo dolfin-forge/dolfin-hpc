@@ -23,6 +23,10 @@ enum class PreconditionerType
   dilu,      // diagonal Incomplete LU factorization
   icc,       // Incomplete Cholesky factorization
   amg,       // Algebraic multigrid (through Hypre when available)
+  cheb,      // Chebyshev Polynomial preconditioner (Trilinos/Ifpack2)
+  ilut,      // Incomplete LU factorization with threshold (Trilinos/Ifpack2)
+  riluk,     // Relaxed ILU with level k fill (Trilinos/Ifpack2)
+  relax,     // Jacobi type relaxation (Trilinos/Ifpack2)
   default_pc // Default choice of preconditioner
 };
 
@@ -42,6 +46,14 @@ inline static auto pc_type( std::string type ) -> PreconditionerType
     return PreconditionerType::dilu;
   else if ( type == "amg" )
     return PreconditionerType::amg;
+  else if ( type == "cheb" )
+    return PreconditionerType::cheb;
+  else if ( type == "ilut" )
+    return PreconditionerType::ilut;
+  else if ( type == "riluk" )
+    return PreconditionerType::riluk;
+  else if ( type == "relax" )
+    return PreconditionerType::relax;
   else
   {
     warning( "Undefined preconditioner          "

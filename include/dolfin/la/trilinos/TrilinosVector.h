@@ -12,7 +12,7 @@
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/trilinos/TrilinosObject.h>
 
-#include <Tpetra_MultiVector_def.hpp>
+#include <Tpetra_Vector.hpp>
 
 namespace dolfin
 {
@@ -33,19 +33,23 @@ class Matrix;
 class Vector : public GenericVector, public Object, public Variable
 {
 public:
+  /// local index type
   using LO = int;
+
+  /// global index type
   using GO = size_t;
 
+  /// array indexing starts at 0
   static constexpr GO const indexBase = 0;
 
   /// Tpetra node type
-  using TPNode      = Tpetra::MultiVector<>::node_type;
+  using TPNode      = Tpetra::Vector<>::node_type;
 
   /// TpetraVector map type (local index, global index)
   using TPMap       = Tpetra::Map< LO, GO, TPNode >;
 
   /// TpetraVector vector type (scalar, local index, global index, node)
-  using TPVector    = Tpetra::MultiVector< real, LO, GO, TPNode >;
+  using TPVector    = Tpetra::Vector< real, LO, GO, TPNode >;
 
   /// smart pointer to a TPVector
   using TPVectorPtr = Teuchos::RCP< TPVector >;
@@ -188,11 +192,8 @@ private:
   //
   auto clear() -> void;
 
-  // Tpetra multivector - actually a view into the ghosted vector, below
-  TPVectorPtr x_;
-
-  // Tpetra multivector with extra rows for ghost values
-  TPVectorPtr x_ghosted_;
+  // Tpetra multivector
+  TPVectorPtr vec_;
 };
 
 } // end namespace trilinos

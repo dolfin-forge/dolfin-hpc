@@ -26,6 +26,8 @@
 #include <Tpetra_Export_def.hpp>
 #include <Tpetra_Import.hpp>
 #include <Tpetra_Import_def.hpp>
+#include <Tpetra_ImportExportData.hpp>
+#include <Tpetra_ImportExportData_def.hpp>
 #include <Tpetra_Map.hpp>
 #include <Tpetra_Map_def.hpp>
 #include <Tpetra_RowGraph.hpp>
@@ -34,6 +36,8 @@
 #include <Tpetra_RowMatrix_def.hpp>
 #include <Tpetra_Vector.hpp>
 #include <Tpetra_Vector_def.hpp>
+#include <Tpetra_MultiVector.hpp>
+#include <Tpetra_MultiVector_def.hpp>
 
 #include <Tpetra_Details_FixedHashTable.hpp>
 #include <Tpetra_Details_FixedHashTable_def.hpp>
@@ -105,8 +109,18 @@ auto Matrix::copy() const -> Matrix *
 
 auto Matrix::size( size_t dim ) const -> size_t
 {
-  // FIXME
-  return DOLFIN_SIZE_T_MAX;
+  size_t size = DOLFIN_SIZE_T_MAX;
+
+  if ( dim == 0 )
+  {
+    size = mat_->getColMap()->getMaxAllGlobalIndex() + 1;
+  }
+  else if ( dim == 1 )
+  {
+    size = mat_->getRowMap()->getMaxAllGlobalIndex() + 1;
+  }
+
+  return size;
 }
 
 //-----------------------------------------------------------------------------
@@ -139,9 +153,14 @@ auto Matrix::apply( FinalizeType finaltype ) -> void
 
 //-----------------------------------------------------------------------------
 
-auto Matrix::disp( size_t precision ) const -> void
+auto Matrix::disp( size_t ) const -> void
 {
-  // FIXME
+  if ( mat_->isFillComplete() )
+  {
+    std::stringstream ss;
+    mat_->print( ss );
+    message( ss.str() );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -193,23 +212,20 @@ auto Matrix::init( size_t M, size_t N, bool ) -> void
     std::iota(colIndices.begin(), colIndices.end(), colStart);
   }
 
-  using Teuchos::MpiComm;
   using Teuchos::rcp;
   using Teuchos::RCP;
 
-  RCP< MpiComm< int > const > comm( new MpiComm< int >( MpiComm< int >( MPI::DOLFIN_COMM ) ) );
-
   // Create the row map
   RCP< TPMap const > rowMap = rcp( new TPMap( nGlobalRows, rowIndices.data(),
-                                              nLocalRows, indexBase, comm ) );
+                                              nLocalRows, indexBase, comm_ ) );
 
   // Create the column map
   RCP< TPMap const > colMap = rcp( new TPMap( nGlobalCols, colIndices.data(),
-                                              nLocalCols, indexBase, comm ) );
+                                              nLocalCols, indexBase, comm_ ) );
 
   // Create a Tpetra sparse matrix whose rows have distribution
   // given by the row Map and column Map.
-  RCP< TPMatrix > A( new TPMatrix( rowMap, colMap, 0 ) );
+  mat_ = RCP< TPMatrix >( new TPMatrix( rowMap, colMap, 0 ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -422,14 +438,14 @@ auto Matrix::mult( const GenericVector & x,
     // // Resize RHS if empty
     // if ( Y.size() == 0 )
     //   init_vector( Y, 0 );
-    dolfin_assert( not Y.x_.is_null() );
+    dolfin_assert( not Y.vec_.is_null() );
 
     if ( size( 0 ) != Y.size() )
     {
       error( "trilinos::Matrix: Vector for matrix-vector result has wrong size" );
     }
 
-    mat_->apply( *X.x_, *Y.x_ );
+    mat_->apply( *X.vec_, *Y.vec_ );
   }
   else // transposed
   {
@@ -444,14 +460,14 @@ auto Matrix::mult( const GenericVector & x,
     // // Resize RHS if empty
     // if ( Y.size() == 0 )
     //   init_vector( Y, 1 );
-    dolfin_assert( not Y.x_.is_null() );
+    dolfin_assert( not Y.vec_.is_null() );
 
     if ( size( 1 ) != Y.size() )
     {
       error( "trilinos::Matrix: Vector for transpose matrix-vector result has wrong size" );
     }
 
-    mat_->apply( *X.x_, *Y.x_ghosted_, Teuchos::TRANS );
+    mat_->apply( *X.vec_, *Y.vec_, Teuchos::TRANS );
   }
 }
 
@@ -502,6 +518,13 @@ auto Matrix::nz() const -> size_t
 auto Matrix::factory() const -> LinearAlgebraFactory &
 {
   return trilinos::Factory::instance();
+}
+
+//-----------------------------------------------------------------------------
+
+auto Matrix::mat() const -> TPMatrixPtr
+{
+  return mat_;
 }
 
 //-----------------------------------------------------------------------------

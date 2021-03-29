@@ -23,19 +23,25 @@ namespace trilinos
 class Matrix : public GenericMatrix, public Object, public Variable
 {
 public:
+  /// local index type
   using LO = int;
+
+  /// global index type
   using GO = size_t;
 
   static constexpr GO const indexBase = 0;
-
-	  /// Matrix type (scalar, local index, global index)
-  using TPMatrix = Tpetra::CrsMatrix< real, LO, GO >;
 
   /// Graph type (local index, global index)
   using TPGraph  = Tpetra::CrsGraph< LO, GO >;
 
   /// Map type (local index, global index)
   using TPMap    = Tpetra::Map< LO, GO >;
+
+  /// Matrix type (scalar, local index, global index)
+  using TPMatrix = Tpetra::CrsMatrix< real, LO, GO >;
+
+  /// Matrix Pointer Type
+  using TPMatrixPtr = Teuchos::RCP< TPMatrix >;
 
 public:
   enum Norm
@@ -153,8 +159,8 @@ public:
 
   //--- Special Functions ---
 
-  /// Return Trilinos Mat pointer
-  // auto mat() const -> Mat;
+  /// Return Trilinos Matrix pointer
+  auto mat() const -> TPMatrixPtr;
 
   /// Return norm of matrix
   auto norm( const Norm type = l1 ) const -> real;
@@ -173,7 +179,7 @@ private:
   // auto print( MatInfo const & info ) const -> void;
 
   // The matrix
-  Teuchos::RCP< TPMatrix > mat_;
+  TPMatrixPtr mat_;
 
   // // Sub-matrices
   // Mat * AA_sub { nullptr };

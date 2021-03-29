@@ -25,21 +25,22 @@ namespace trilinos
 ///
 /// All Trilinos objects must be derived from this class.
 
-typedef Teuchos::RCP< const Teuchos::Comm< int > > Comm;
+using MPIComm = Teuchos::RCP< Teuchos::MpiComm< int > const >;
 
 class Object
 {
 public:
   Object()
 #if DOLFIN_HAVE_MPI
-  	: comm( Tpetra::getDefaultComm() )
+  	// FIXME use the correct communicator here
+  	: comm_( new Teuchos::MpiComm< int >( Teuchos::MpiComm< int >( MPI::DOLFIN_COMM ) ) )
 #endif
   {
     SubSystemsManager::Trilinos::initialize();
   }
 
 protected:
-  Comm comm;
+  MPIComm comm_;
 };
 
 } // end namespace trilinos

@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2005 Johan Jansson.
+// Copyright (C) 2021 Julian Hornich
 // Licensed under the GNU LGPL Version 2.1.
 
 #ifndef __DOLFIN_TRILINOS_KRYLOV_SOLVER_H

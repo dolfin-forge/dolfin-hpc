@@ -131,6 +131,7 @@ nobase_pkginclude_HEADERS = \
 				la/trilinos/TrilinosKrylovSolver.h\
 				la/trilinos/TrilinosMatrix.h\
 				la/trilinos/TrilinosObject.h\
+				la/trilinos/TrilinosPreconditioner.h\
 				la/trilinos/TrilinosVector.h\
 				la/Vector.h\
 				la/VectorNormType.h\

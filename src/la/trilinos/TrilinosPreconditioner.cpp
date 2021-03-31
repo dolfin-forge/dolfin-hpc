@@ -8,6 +8,7 @@
 #include <dolfin/la/trilinos/TrilinosPreconditioner.h>
 
 #include <dolfin/la/PreconditionerType.h>
+#include <dolfin/la/trilinos/TrilinosKrylovSolver.h>
 #include <dolfin/la/trilinos/TrilinosVector.h>
 #include <dolfin/la/trilinos/TrilinosMatrix.h>
 
@@ -78,7 +79,7 @@ auto Preconditioner::init( Matrix const & P ) -> void
 
 auto Preconditioner::set( KrylovSolver & solver ) -> void
 {
-  // solver._problem->setRightPrec( pc_ );
+  solver.problem_->setRightPrec( pc_ );
 }
 
 //-----------------------------------------------------------------------------

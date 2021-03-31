@@ -261,23 +261,21 @@ auto Vector::init( size_t N ) -> void
 
 auto Vector::init( size_t N, bool ) -> void
 {
-  if ( not vec_.is_null() )
+  if ( vec_.is_null() )
   {
-    error( "trilinos::Vector: Vector cannot be initialised more than once" );
+    // compute the global vector size
+    size_t Nglobal = 0;
+    MPI::all_reduce< MPI::sum >( N, Nglobal );
+    dolfin_assert( N <= Nglobal );
+
+    Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
+
+    // Vector - create with overlap
+    vec_= Teuchos::rcp( new TPVector( map, true ) );
+
+    // make sure we actually got a non-empty vector
+    dolfin_assert( not vec_.is_null() );
   }
-
-  // compute the global vector size
-  size_t Nglobal = 0;
-  MPI::all_reduce< MPI::sum >( N, Nglobal );
-  dolfin_assert( N <= Nglobal );
-
-  Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
-
-  // Vector - create with overlap
-  vec_= Teuchos::rcp( new TPVector( map, true ) );
-
-  // make sure we actually got a non-empty vector
-  dolfin_assert( not vec_.is_null() );
 }
 
 //-----------------------------------------------------------------------------

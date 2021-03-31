@@ -11,7 +11,12 @@
 
 #ifdef HAVE_TRILINOS
 
-// #include <dolfin/la/petsc/PETScPreconditioner.h>
+#include <dolfin/la/trilinos/TrilinosPreconditioner.h>
+#include <dolfin/la/trilinos/TrilinosVector.h>
+
+#include <BelosTpetraAdapter.hpp>
+#include <BelosSolverFactory.hpp>
+#include <Ifpack2_Factory.hpp>
 
 namespace dolfin
 {
@@ -31,28 +36,46 @@ class Vector;
 class KrylovSolver
 {
 public:
+  /// local index type
+  using LO = int;
+
+  /// global index type
+  using GO = size_t;
+
+  /// Tpetra operator type
+  using TPOperator = Tpetra::Operator< real, LO, GO, Vector::TPVector::node_type >;
+
+  /// Belos problem type
+  using BLSProblem = Belos::LinearProblem< real, Vector::TPVector, TPOperator >;
+
+  /// Belos Solver RCP
+  using BLSSolver  = Belos::SolverManager<real, Vector::TPVector, TPOperator >;
+
+public:
   /// Create Krylov solver for a particular method and preconditioner
   KrylovSolver( SolverType         method = default_solver,
                 PreconditionerType pc     = PreconditionerType::default_pc );
 
-  /// Create Krylov solver for a particular method and PETScPreconditioner
-  // PETScKrylovSolver( SolverType            method,
-  //                    PETScPreconditioner & PETScPreconditioner );
+  /// Create Krylov solver for a particular method and trilinos::Preconditioner
+  KrylovSolver( SolverType                 type,
+                trilinos::Preconditioner & Preconditioner );
 
   /// Destructor
   ~KrylovSolver();
 
   /// Solve linear system Ax = b and return number of iterations
-  auto solve( const trilinos::Matrix & A,
+  auto solve( trilinos::Matrix const & A,
               trilinos::Vector &       x,
-              const trilinos::Vector & b ) -> size_t;
+              trilinos::Vector const & b ) -> size_t;
 
   /// Display solver data
   void disp() const;
 
 private:
+  friend trilinos::Preconditioner;
+
   /// Initialize KSP solver
-  void init( size_t M, size_t N );
+  void init();
 
   /// Read parameters from database
   void readParameters();
@@ -70,27 +93,19 @@ private:
   // auto getType( SolverType method ) const -> KSPType;
 
   /// Krylov method
-  SolverType method;
+  SolverType solver_type_;
 
-  /// PETSc PETScPreconditioner
-  PreconditionerType pc_petsc;
+  // Belos solver pointer
+  Teuchos::RCP< BLSSolver > solver_;
 
-  /// DOLFIN PETScPreconditioner
-  // PETScPreconditioner * pc_dolfin { nullptr };
+  /// Preconditioner Type
+  PreconditionerType pc_type_;
 
-  /// PETSc solver pointer
-  // KSP ksp { nullptr };
+  // The preconditioner, if any
+  Preconditioner * pc_ { nullptr };
 
-  /// Size of old system (need to reinitialize when changing)
-  size_t M_ { 0 };
-  size_t N_ { 0 };
-
-  /// True if we have read parameters
-  bool parameters_read { false };
-
-  // FIXME: Required to avoid PETSc bug with Hypre. See explanation inside
-  //        KrylovSolver:init(). Can be removed when PETSc is patched.
-  bool pc_set { false };
+  // Container for the problem
+  Teuchos::RCP< BLSProblem > problem_;
 };
 
 //-----------------------------------------------------------------------------

@@ -22,8 +22,6 @@
 #include <Tpetra_ImportExportData_def.hpp>
 #include <Tpetra_Map.hpp>
 #include <Tpetra_Map_def.hpp>
-#include <Tpetra_Vector.hpp>
-#include <Tpetra_Vector_def.hpp>
 #include <Tpetra_MultiVector.hpp>
 #include <Tpetra_MultiVector_def.hpp>
 
@@ -67,7 +65,9 @@ Vector::Vector( size_t N, bool distributed )
 Vector::Vector( Vector const & copy )
   : Variable( "x", "a vector" )
 {
-  vec_ = Teuchos::rcp( new TPVector( copy.vec_->getMap(), false ) );
+  vec_ = Teuchos::rcp( new TPVector( copy.vec_->getMap(),
+                                     copy.vec_->getNumVectors(),
+                                     false ) );
   vec_->assign( *copy.vec_ );
 }
 
@@ -271,7 +271,7 @@ auto Vector::init( size_t N, bool ) -> void
     Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
 
     // Vector - create with overlap
-    vec_= Teuchos::rcp( new TPVector( map, true ) );
+    vec_= Teuchos::rcp( new TPVector( map, 1, true ) );
 
     // make sure we actually got a non-empty vector
     dolfin_assert( not vec_.is_null() );
@@ -359,7 +359,7 @@ auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
   {
     if ( vec_->getMap()->isNodeGlobalElement( rows[i] ) )
     {
-      vec_->replaceGlobalValue( rows[i], block[i] );
+      vec_->replaceGlobalValue( rows[i], 0, block[i] );
     }
     else
     {

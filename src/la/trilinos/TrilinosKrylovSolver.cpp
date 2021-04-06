@@ -119,12 +119,14 @@ void KrylovSolver::disp() const
 
 void KrylovSolver::init()
 {
+
+
   Teuchos::RCP< Teuchos::ParameterList > dummy_params = Teuchos::parameterList();
 
   // FIXME
   std::string method_name( "GMRES" );
 
-  Belos::TpetraSolverFactory< real, Vector::TPVector, TPOperator > factory;
+  Belos::SolverFactory<real, Vector::TPVector, TPOperator> factory;
   solver_  = factory.create( method_name, dummy_params );
   problem_ = Teuchos::rcp( new BLSProblem );
 }

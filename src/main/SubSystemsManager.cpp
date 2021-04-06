@@ -18,14 +18,6 @@
 
 #ifdef HAVE_TRILINOS
 #include <Kokkos_Core.hpp>
-#include <Epetra_config.h>
-
-#ifdef DOLFIN_HAVE_MPI
-#include <Epetra_MpiComm.h>
-#else
-#include <Epetra_SerialComm.h>
-#endif
-
 #endif
 
 #include <cstdlib>

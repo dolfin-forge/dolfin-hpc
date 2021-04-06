@@ -12,7 +12,7 @@
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/trilinos/TrilinosObject.h>
 
-#include <Tpetra_Vector.hpp>
+#include <Tpetra_MultiVector.hpp>
 
 namespace dolfin
 {
@@ -43,13 +43,13 @@ public:
   static constexpr GO const indexBase = 0;
 
   /// Tpetra node type
-  using TPNode      = Tpetra::Vector<>::node_type;
+  using TPNode      = Tpetra::MultiVector<>::node_type;
 
   /// TpetraVector map type (local index, global index)
   using TPMap       = Tpetra::Map< LO, GO, TPNode >;
 
   /// TpetraVector vector type (scalar, local index, global index, node)
-  using TPVector    = Tpetra::Vector< real, LO, GO, TPNode >;
+  using TPVector    = Tpetra::MultiVector< real, LO, GO, TPNode >;
 
   /// smart pointer to a TPVector
   using TPVectorPtr = Teuchos::RCP< TPVector >;

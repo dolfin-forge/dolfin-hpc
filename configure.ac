@@ -74,20 +74,20 @@ AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim],
             [with_libsim=${withval}],[with_libsim=no])
 
 AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis],
-		     [Compile with support for ParMETIS]),
-		     [with_parmetis=${withval}],[with_parmetis=no])
+         [Compile with support for ParMETIS]),
+         [with_parmetis=${withval}],[with_parmetis=no])
 
 AC_ARG_WITH(phmap, AC_HELP_STRING([--with-phmap],
          [Compile with support for parallel hashmap (https://git.io/JfE2p)]),
          [with_phmap=${withval}],[with_phmap=no])
 
 AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
-		     [Compile with support for Zoltan]),
-		     [with_zoltan=${withval}],[with_zoltan=no])
+         [Compile with support for Zoltan]),
+         [with_zoltan=${withval}],[with_zoltan=no])
 
 AC_ARG_WITH(convert, AC_HELP_STRING([--with-convert],
-		     [Build external mesh converter tool]),
-		     [with_convert=${withval}],[with_convert=no])
+         [Build external mesh converter tool]),
+         [with_convert=${withval}],[with_convert=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
@@ -131,8 +131,8 @@ fi
 AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 
 if test "x${enable_openmp}" != xno; then
-   AX_OPENMP
-   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+  AX_OPENMP
+  CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       CXXFLAGS="-hnoomp $CXXFLAGS"
@@ -141,7 +141,7 @@ fi
 
 # Store build information (date, host, CXX)
 AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-	["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+  ["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
@@ -170,49 +170,49 @@ found_domain_decomp="no"
    if test "x${is_cray}" = xyes; then
       if test "x${with_parmetis}" != xno; then
          AX_CRAY_PARMETIS
-	 if test "x${have_cray_parmetis}" = xyes; then
-	    found_domain_decomp="yes"
-	 else
-	    with_parmetis="no"
-	 fi
+   if test "x${have_cray_parmetis}" = xyes; then
+      found_domain_decomp="yes"
+   else
+      with_parmetis="no"
+   fi
       fi
 
       if test "x${with_zoltan}" != xno; then
-      	 if test "x${enable_optimize_p1}" != xno; then
-	    AC_MSG_ERROR([Zoltan requires facet connectivity])
-	 fi
+         if test "x${enable_optimize_p1}" != xno; then
+      AC_MSG_ERROR([Zoltan requires facet connectivity])
+   fi
 
          AX_CRAY_ZOLTAN
-	 if test "x${have_cray_zoltan}" = xyes; then
-	    found_domain_decomp="yes"
-	 else
-	    with_zoltan="no"
-	 fi
+   if test "x${have_cray_zoltan}" = xyes; then
+      found_domain_decomp="yes"
+   else
+      with_zoltan="no"
+   fi
       fi
    else
       if test "x${with_parmetis}" != xno; then
          AX_PARMETIS
          if test "${PARMETIS_LIBS}"; then
             LIBS="$PARMETIS_LIBS $LIBS"
-	    found_domain_decomp="yes"
-	    with_parmetis="yes"
-	 else
-	    with_parmetis="no"
+      found_domain_decomp="yes"
+      with_parmetis="yes"
+   else
+      with_parmetis="no"
          fi
       fi
 
       if test "x${with_zoltan}" != xno; then
-      	 if test "x${enable_optimize_p1}" != xno; then
-	    AC_MSG_ERROR([Zoltan requires facet connectivity])
-	 fi
+         if test "x${enable_optimize_p1}" != xno; then
+      AC_MSG_ERROR([Zoltan requires facet connectivity])
+   fi
 
          AX_ZOLTAN
          if test "${ZOLTAN_LIBS}"; then
             LIBS="$ZOLTAN_LIBS $LIBS"
-	    found_domain_decomp="yes"
-	    with_zoltan="yes"
-	 else
-	    with_zoltan="no"
+      found_domain_decomp="yes"
+      with_zoltan="yes"
+   else
+      with_zoltan="no"
          fi
       fi
    fi
@@ -229,7 +229,9 @@ if test "x${with_gts}" = xyes; then
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
 
-AX_PHMAP
+if test "x${with_phmap}" != xno; then
+  AX_PHMAP
+fi
 
 found_la_backend="no"
 
@@ -239,35 +241,23 @@ if test "x${with_petsc}" != xno; then
       AX_CRAY_PETSC
       if test "x${have_cray_petsc}" = xyes; then
          found_la_backend="yes"
-      	 with_petsc="yes"
+         with_petsc="yes"
       else
-	 with_petsc="no"
+   with_petsc="no"
       fi
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then
          found_la_backend="yes"
-	 with_petsc="yes"
+         with_petsc="yes"
       else
-	 with_petsc="no"
+         with_petsc="no"
       fi
    fi
 fi
 
 if test "x${with_trilinos}" != xno; then
-# atm we assume that the trilinos headers etc are in out PATHs
-#include /usr/include/Makefile.export.Trilinos
-   CXXFLAGS="$CXXFLAGS -pipe -fno-plt"
-   LIBS="$LIBS -ldl -llapack -lblas"
-   #LIBS="$LIBS -lepetra -lepetraext -lkokkoscontainers -lkokkostsqr -lrtop -lteuchosnumerics"
-   #LIBS="$LIBS -lteuchosparser -lteuchosremainder -lthyracore -lthyraepetra -lthyraepetraext"
-   #LIBS="$LIBS -lthyratpetra -ltpetraclassic -ltpetraclassiclinalg  -ltpetraext"
-   #LIBS="$LIBS -ltpetrainout -ltriutils -lxpetra -lxpetra-sup"
-   LIBS="$LIBS -lteuchoscore -lteuchoscomm -lteuchoskokkoscomm -ltpetraclassicnodeapi"
-   LIBS="$LIBS -lkokkoscore -lteuchoskokkoscompat -lkokkosalgorithms -lkokkoskernels"
-   LIBS="$LIBS -lteuchosparameterlist -ltpetra"
-   AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
-   found_la_backend="yes"
+  AX_TRILINOS
 fi
 
 if test "x${with_janpack}" != xno; then
@@ -292,9 +282,9 @@ if test "x${enable_quad}" = xyes; then
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AX_CRAY_LIBSCI
       if test $have_cray_libsci = yes; then
-      	 have_lapack=yes
+         have_lapack=yes
       else
-	 have_lapack=no
+   have_lapack=no
       fi
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"],

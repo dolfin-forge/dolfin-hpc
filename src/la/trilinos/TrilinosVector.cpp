@@ -9,25 +9,6 @@
 
 #include <dolfin/la/trilinos/TrilinosFactory.h>
 
-// from the trilinos bug tracker:
-// "you shouldn't ever need to include a "_def""
-// well... that was a lie...
-#include <Tpetra_DistObject.hpp>
-#include <Tpetra_DistObject_def.hpp>
-#include <Tpetra_Export.hpp>
-#include <Tpetra_Export_def.hpp>
-#include <Tpetra_Import.hpp>
-#include <Tpetra_Import_def.hpp>
-#include <Tpetra_ImportExportData.hpp>
-#include <Tpetra_ImportExportData_def.hpp>
-#include <Tpetra_Map.hpp>
-#include <Tpetra_Map_def.hpp>
-#include <Tpetra_MultiVector.hpp>
-#include <Tpetra_MultiVector_def.hpp>
-
-#include <Tpetra_Details_Transfer.hpp>
-#include <Tpetra_Details_Transfer_def.hpp>
-
 #include <numeric>
 
 namespace dolfin
@@ -100,26 +81,21 @@ auto Vector::apply( FinalizeType ) -> void
   dolfin_assert( not vec_.is_null() );
 
   // FIXME
+  // update_ghost_values();
 
-  // // update_ghost_values();
+  Teuchos::RCP< TPMap const > map = vec_->getMap();
+  Teuchos::RCP< TPVector >    y( new TPVector( map, 1 ) );
+  Teuchos::RCP< TPMap const > ghostmap = vec_->getMap();
 
-  // Teuchos::RCP< const TPMap > xmap = vec_->getMap();
-  // Teuchos::RCP< TPVector >    y( new TPVector( xmap, 1 ) );
-  // Teuchos::RCP< const TPMap > ghostmap = x_ghosted_->getMap();
+  // Export from overlapping map ghostmap, to non-overlapping xmap
+  Tpetra::Export< LO, GO, TPNode > exporter( ghostmap, map );
 
-  // // Export from overlapping map ghostmap, to non-overlapping xmap
-  // Tpetra::Export< TPVector::local_ordinal_type,
-  //                 TPVector::global_ordinal_type,
-  //                 TPVector::node_type > exporter( ghostmap, xmap );
+  // Forward export to reduction vector
+  y->doExport( *vec_, exporter, Tpetra::ADD );
 
-  // // Forward export to reduction vector
-  // y->doExport( *x_ghosted_, exporter, Tpetra::ADD );
-
-  // // Copy back into _x_ghosted
-  // Tpetra::Import< TPVector::local_ordinal_type,
-  //                 TPVector::global_ordinal_type,
-  //                 TPVector::node_type > importer( xmap, ghostmap );
-  // x_ghosted_->doImport( *y, importer, Tpetra::INSERT );
+  // Copy back into _x_ghosted
+  Tpetra::Import< LO, GO, TPNode > importer( map, map );
+  vec_->doImport( *y, importer, Tpetra::INSERT );
 }
 
 //-----------------------------------------------------------------------------

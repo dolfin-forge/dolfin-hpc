@@ -16,7 +16,6 @@
 
 #include <BelosTpetraAdapter.hpp>
 #include <BelosSolverFactory.hpp>
-#include <Ifpack2_Factory.hpp>
 
 namespace dolfin
 {
@@ -49,16 +48,15 @@ public:
   using BLSProblem = Belos::LinearProblem< real, Vector::TPVector, TPOperator >;
 
   /// Belos Solver RCP
-  using BLSSolver  = Belos::SolverManager<real, Vector::TPVector, TPOperator >;
+  using BLSSolver  = Belos::SolverManager< real, Vector::TPVector, TPOperator >;
 
 public:
   /// Create Krylov solver for a particular method and preconditioner
-  KrylovSolver( SolverType         method = default_solver,
-                PreconditionerType pc     = PreconditionerType::default_pc );
+  KrylovSolver( SolverType         solver_type = default_solver,
+                PreconditionerType pc          = PreconditionerType::default_pc );
 
   /// Create Krylov solver for a particular method and trilinos::Preconditioner
-  KrylovSolver( SolverType                 type,
-                trilinos::Preconditioner & Preconditioner );
+  KrylovSolver( SolverType solver_type, trilinos::Preconditioner & pc );
 
   /// Destructor
   ~KrylovSolver();
@@ -74,38 +72,29 @@ public:
 private:
   friend trilinos::Preconditioner;
 
-  /// Initialize KSP solver
+  /// Initialize solver
   void init();
 
-  /// Read parameters from database
-  void readParameters();
-
-  /// Set solver
-  void setSolver();
-
-  /// Set PETScPreconditioner
-  void setPETScPreconditioner();
-
   /// Report the number of iterations
-  void writeReport( int num_iterations );
+  void writeReport( Belos::ReturnType result, size_t num_iterations );
 
   /// Get PETSc method identifier
   // auto getType( SolverType method ) const -> KSPType;
 
   /// Krylov method
-  SolverType solver_type_;
+  SolverType solver_type_{ default_solver };
 
   // Belos solver pointer
-  Teuchos::RCP< BLSSolver > solver_;
+  Teuchos::RCP< BLSSolver > solver_{ Teuchos::null };
 
   /// Preconditioner Type
-  PreconditionerType pc_type_;
+  PreconditionerType pc_type_{ PreconditionerType::default_pc };
 
   // The preconditioner, if any
   Preconditioner * pc_ { nullptr };
 
   // Container for the problem
-  Teuchos::RCP< BLSProblem > problem_;
+  Teuchos::RCP< BLSProblem > problem_{ Teuchos::null };
 };
 
 //-----------------------------------------------------------------------------

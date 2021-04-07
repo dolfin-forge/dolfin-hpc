@@ -21,6 +21,8 @@ DOLFIN_START_TEST( test_init_mat )
 //-----------------------------------------------------------------------------
 #ifdef HAVE_TRILINOS
 #include <dolfin/la/trilinos/TrilinosMatrix.h>
+#undef fail
+#include <dolfin/la/trilinos/TrilinosKrylovSolver.h>
 #include "../../demo/pde/poisson/Poisson.h"
 #include <dolfin/function/Function.h>
 #include <dolfin/function/Analytic.h>
@@ -122,6 +124,34 @@ DOLFIN_START_TEST( test_trilinos_mat )
 
     message( "vector l2  norm: %e", u.vector().norm() );
     message( "vector inf norm: %e", u.vector().max() );
+  }
+  {
+    message( "solve test" );
+    dolfin_set( "linear algebra backend", "Trilinos" );
+
+    trilinos::Matrix A( MAT_SIZE, MAT_SIZE );
+    trilinos::Vector x( MAT_SIZE );
+    trilinos::Vector b( MAT_SIZE );
+
+    A.zero();
+    A.apply();
+    x.zero();
+    x.apply();
+    b.zero();
+    b.apply();
+
+    trilinos::KrylovSolver solver1( SolverType::cg, PreconditionerType::relax );
+    solver1.disp();
+    solver1.solve( A, x, b );
+
+    trilinos::KrylovSolver solver2( SolverType::gmres, PreconditionerType::cheb );
+    solver2.disp();
+    solver2.solve( A, x, b );
+
+    trilinos::KrylovSolver solver3( SolverType::bicgstab, PreconditionerType::ilut );
+    solver3.disp();
+    solver3.solve( A, x, b );
+
   }
 }DOLFIN_END_TEST
 #else

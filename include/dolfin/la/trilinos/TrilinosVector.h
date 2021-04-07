@@ -79,7 +79,7 @@ public:
   auto zero() -> void override;
 
   /// Finalize assembly of tensor
-  auto apply( FinalizeType ) -> void override;
+  auto apply( FinalizeType ftype = FINALIZE ) -> void override;
 
   /// Display tensor
   auto disp( size_t precision = 0 ) const -> void override;

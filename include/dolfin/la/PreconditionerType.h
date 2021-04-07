@@ -62,6 +62,59 @@ inline static auto pc_type( std::string type ) -> PreconditionerType
   }
 }
 
+
+//---------------------------------------------------------------------------
+
+inline static auto to_string( PreconditionerType type ) -> std::string
+{
+  std::string name = "";
+
+  switch( type )
+  {
+    case PreconditionerType::none:
+      name = "none";
+      break;
+    case PreconditionerType::jacobi:
+      name = "jacobi";
+      break;
+    case PreconditionerType::bjacobi:
+      name = "bjacobi";
+      break;
+    case PreconditionerType::sor:
+      name = "sor";
+      break;
+    case PreconditionerType::ilu:
+      name = "ilu";
+      break;
+    case PreconditionerType::dilu:
+      name = "dilu";
+      break;
+    case PreconditionerType::icc:
+      name = "icc";
+      break;
+    case PreconditionerType::amg:
+      name = "amg";
+      break;
+    case PreconditionerType::cheb:
+      name = "cheb";
+      break;
+    case PreconditionerType::ilut:
+      name = "ilut";
+      break;
+    case PreconditionerType::riluk:
+      name = "riluk";
+      break;
+    case PreconditionerType::relax:
+      name = "relax";
+      break;
+    case PreconditionerType::default_pc:
+      name = "default_pc";
+      break;
+  }
+
+  return name;
+}
+
 //---------------------------------------------------------------------------
 
 } // namespace dolfin

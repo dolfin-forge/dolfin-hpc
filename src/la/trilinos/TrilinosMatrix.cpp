@@ -9,53 +9,6 @@
 
 #include <dolfin/la/trilinos/TrilinosFactory.h>
 
-// from the trilinos bug tracker:
-// "you shouldn't ever need to include a "_def""
-// well... that was a lie...
-#include <Tpetra_CrsGraph.hpp>
-#include <Tpetra_CrsGraph_def.hpp>
-#include <Tpetra_CrsMatrix.hpp>
-#include <Tpetra_CrsMatrix_def.hpp>
-#include <Tpetra_Directory.hpp>
-#include <Tpetra_Directory_def.hpp>
-#include <Tpetra_DirectoryImpl.hpp>
-#include <Tpetra_DirectoryImpl_def.hpp>
-#include <Tpetra_DistObject.hpp>
-#include <Tpetra_DistObject_def.hpp>
-#include <Tpetra_Export.hpp>
-#include <Tpetra_Export_def.hpp>
-#include <Tpetra_Import.hpp>
-#include <Tpetra_Import_def.hpp>
-#include <Tpetra_ImportExportData.hpp>
-#include <Tpetra_ImportExportData_def.hpp>
-#include <Tpetra_Map.hpp>
-#include <Tpetra_Map_def.hpp>
-#include <Tpetra_RowGraph.hpp>
-#include <Tpetra_RowGraph_def.hpp>
-#include <Tpetra_RowMatrix.hpp>
-#include <Tpetra_RowMatrix_def.hpp>
-#include <Tpetra_Vector.hpp>
-#include <Tpetra_Vector_def.hpp>
-#include <Tpetra_MultiVector.hpp>
-#include <Tpetra_MultiVector_def.hpp>
-
-#include <Tpetra_Details_FixedHashTable.hpp>
-#include <Tpetra_Details_FixedHashTable_def.hpp>
-#include <Tpetra_Details_Transfer.hpp>
-#include <Tpetra_Details_Transfer_def.hpp>
-#include <Tpetra_Details_getDiagCopyWithoutOffsets.hpp>
-#include <Tpetra_Details_getDiagCopyWithoutOffsets_def.hpp>
-#include <Tpetra_Details_makeColMap.hpp>
-#include <Tpetra_Details_makeColMap_def.hpp>
-#include <Tpetra_Details_packCrsGraph.hpp>
-#include <Tpetra_Details_packCrsGraph_def.hpp>
-#include <Tpetra_Details_packCrsMatrix.hpp>
-#include <Tpetra_Details_packCrsMatrix_def.hpp>
-#include <Tpetra_Details_unpackCrsGraphAndCombine.hpp>
-#include <Tpetra_Details_unpackCrsGraphAndCombine_def.hpp>
-#include <Tpetra_Details_unpackCrsMatrixAndCombine.hpp>
-#include <Tpetra_Details_unpackCrsMatrixAndCombine_def.hpp>
-
 #include <numeric>
 
 namespace dolfin

@@ -20,6 +20,13 @@ namespace trilinos
 
 //-----------------------------------------------------------------------------
 
+Preconditioner::Preconditioner( PreconditionerType type )
+  : pc_type_( type )
+{
+}
+
+//-----------------------------------------------------------------------------
+
 auto Preconditioner::init( Matrix const & P, std::string pc_str ) -> void
 {
   init( P, pc_type( pc_str ) );
@@ -29,34 +36,7 @@ auto Preconditioner::init( Matrix const & P, std::string pc_str ) -> void
 
 auto Preconditioner::init( Matrix const & P, PreconditionerType pc_type ) -> void
 {
-  if ( pc_type == PreconditionerType::cheb )
-  {
-    _name = "CHEBYSHEV";
-    // FIXME set parameters?
-  }
-  else if ( pc_type == PreconditionerType::ilut )
-  {
-    _name = "ILUT";
-    // FIXME set parameters?
-  }
-  else if ( pc_type == PreconditionerType::riluk )
-  {
-    _name = "RILUK";
-    // FIXME set parameters?
-  }
-  else if ( pc_type == PreconditionerType::relax )
-  {
-    _name = "RELAXATION";
-    // FIXME set parameters?
-  }
-  else
-  {
-    warning( "Undefined preconditioner          "
-             "Fallback to default preconditioner" );
-
-    _name = "RELAXATION";
-    // FIXME set parameters?
-  }
+  pc_type_ = pc_type;
 
   init( P );
 }
@@ -65,21 +45,96 @@ auto Preconditioner::init( Matrix const & P, PreconditionerType pc_type ) -> voi
 
 auto Preconditioner::init( Matrix const & P ) -> void
 {
-  Ifpack2::Factory pc;
+  Teuchos::RCP< Teuchos::ParameterList > params = Teuchos::parameterList();
 
-  pc_ = pc.create( _name, P.mat().getConst() );
-  Teuchos::RCP< Teuchos::ParameterList > plist = Teuchos::parameterList();
-  // FIXME set some parameters here?
-  pc_->setParameters( *plist );
-  pc_->initialize();
-  pc_->compute();
+  switch ( pc_type_ )
+  {
+    case cheb:
+      name_ = "CHEB";
+      // params->set( "chebyshev: max eigenvalue", (real) );
+      // params->set( "chebyshev: ratio eigenvalue", (real, default 30) );
+      // params->set( "chebyshev: min eigenvalue", (real) );
+      // params->set( "chebyshev: degree", (int) );
+      // params->set( "relaxation: sweeps", (int) );
+      // params->set( "smoother: sweeps", (int) );
+      // params->set( "chebyshev: eigenvalue max iterations", (int) );
+      // params->set( "eigen-analysis: iterations", (int) );
+      // params->set( "eigen-analysis: type", "power method" );
+      // params->set( "chebyshev: assume matrix does not change", false );
+      // params->set( "chebyshev: min diagonal value", (real) );
+      // params->set( "chebyshev: zero starting solution", (bool) );
+      break;
+    case ilu:
+      name_ = "ILUT";
+      // params->set( "fact: ilut level-of-fill", (real) );
+      // params->set( "fact: drop tolerance", (real) );
+      break;
+    case riluk:
+      name_ = "RILUK";
+      // params->set( "fact: iluk level-of-fill" (int) );
+      // params->set( "fact: iluk overalloc" (real) );
+      break;
+    case sor:
+      name_ = "RELAXATION";
+      params->set( "relaxation: type", "Gauss-Seidel" );
+      params->set( "relaxation: damping factor", 1.2 );
+      // params->set( "relaxation: backward mode", false );
+      break;
+    case jacobi:
+      name_ = "RELAXATION";
+      params->set( "relaxation: type", "Jacobi" );
+      params->set( "relaxation: damping factor", 1.0 );
+      // params->set( "relaxation: sweeps", 1 );
+      // params->set( "relaxation: zero starting solution", true );
+      // params->set( "relaxation: fix tiny diagonal entries", false );
+      // params->set( "relaxation: min diagonal value", (real) ); // only if above is true
+      // params->set( "relaxation: check diagonal entries", false );
+      break;
+    case bjacobi:
+    case default_pc:
+      name_ = "BLOCK_RELAXATION";
+      params->set( "relaxation: type", "Jacobi" );
+      params->set( "relaxation: damping factor", 1.0 );
+      // params->set( "relaxation: sweeps", 1 );
+      // params->set( "relaxation: zero starting solution", true );
+      // params->set( "relaxation: fix tiny diagonal entries", false );
+      // params->set( "relaxation: min diagonal value", (real) ); // only if above is true
+      // params->set( "relaxation: check diagonal entries", false );
+      break;
+    case none:
+      name_ = "";
+      break;
+    default:
+      error( "Preconditioner: unsupported trilinos preconditioner: %s",
+             to_string( pc_type_ ).c_str() );
+      break;
+  }
+
+  if ( pc_type_ != none )
+  {
+    Ifpack2::Factory pc;
+    pc_ = pc.create( name_, P.mat().getConst() );
+    pc_->setParameters( *params );
+    pc_->initialize();
+    pc_->compute();
+  }
+  else
+  {
+    pc_ = Teuchos::null;
+  }
+
+  message( 1, "Preconditioner: initialized \"%s\" preconditioner",
+              to_string( pc_type_ ).c_str() );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Preconditioner::set( KrylovSolver & solver ) -> void
 {
-  solver.problem_->setRightPrec( pc_ );
+  if ( pc_ != Teuchos::null )
+  {
+    solver.problem_->setRightPrec( pc_ );
+  }
 }
 
 //-----------------------------------------------------------------------------

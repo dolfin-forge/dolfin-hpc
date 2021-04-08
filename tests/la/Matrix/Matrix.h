@@ -23,6 +23,7 @@ DOLFIN_START_TEST( test_init_mat )
 #include <dolfin/la/trilinos/TrilinosMatrix.h>
 #undef fail
 #include <dolfin/la/trilinos/TrilinosKrylovSolver.h>
+#include <dolfin/la/KrylovSolver.h>
 #include "../../demo/pde/poisson/Poisson.h"
 #include <dolfin/function/Function.h>
 #include <dolfin/function/Analytic.h>
@@ -113,11 +114,12 @@ DOLFIN_START_TEST( test_trilinos_mat )
     L.assemble( b, true );
     bc.apply( A, b, a );
 
-    Function u( a.trial_space() );
-    u.vector().disp();
-    // KrylovSolver solver( bicgstab, bjacobi );
+    A.disp();
 
-    // solver.solve( A, u.vector(), b );
+    Function u( a.trial_space() );
+    KrylovSolver solver( bicgstab, bjacobi );
+
+    solver.solve( A, u.vector(), b );
     // u.sync();
 
     // BinaryFile( "u.bin" ) << u;
@@ -140,15 +142,29 @@ DOLFIN_START_TEST( test_trilinos_mat )
     b.zero();
     b.apply();
 
-    trilinos::KrylovSolver solver1( SolverType::cg, PreconditionerType::relax );
+    trilinos::KrylovSolver solver1( cg, bjacobi );
     solver1.disp();
     solver1.solve( A, x, b );
 
-    trilinos::KrylovSolver solver2( SolverType::gmres, PreconditionerType::cheb );
+    A.zero();
+    A.apply();
+    x.zero();
+    x.apply();
+    b.zero();
+    b.apply();
+
+    trilinos::KrylovSolver solver2( gmres, cheb );
     solver2.disp();
     solver2.solve( A, x, b );
 
-    trilinos::KrylovSolver solver3( SolverType::bicgstab, PreconditionerType::ilut );
+    A.zero();
+    A.apply();
+    x.zero();
+    x.apply();
+    b.zero();
+    b.apply();
+
+    trilinos::KrylovSolver solver3( bicgstab, riluk );
     solver3.disp();
     solver3.solve( A, x, b );
 

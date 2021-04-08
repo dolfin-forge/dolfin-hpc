@@ -13,7 +13,7 @@ namespace dolfin
 
 /// List of predefined preconditioners
 
-enum class PreconditionerType
+enum PreconditionerType
 {
   none,      // No preconditioning
   jacobi,    // Jacobi
@@ -24,9 +24,7 @@ enum class PreconditionerType
   icc,       // Incomplete Cholesky factorization
   amg,       // Algebraic multigrid (through Hypre when available)
   cheb,      // Chebyshev Polynomial preconditioner (Trilinos/Ifpack2)
-  ilut,      // Incomplete LU factorization with threshold (Trilinos/Ifpack2)
   riluk,     // Relaxed ILU with level k fill (Trilinos/Ifpack2)
-  relax,     // Jacobi type relaxation (Trilinos/Ifpack2)
   default_pc // Default choice of preconditioner
 };
 
@@ -35,30 +33,26 @@ enum class PreconditionerType
 inline static auto pc_type( std::string type ) -> PreconditionerType
 {
   if ( type == "none" )
-    return PreconditionerType::none;
+    return none;
   else if ( type == "bjacobi" )
-    return PreconditionerType::bjacobi;
+    return bjacobi;
   else if ( type == "sor" )
-    return PreconditionerType::sor;
+    return sor;
   else if ( type == "ilu" )
-    return PreconditionerType::ilu;
+    return ilu;
   else if ( type == "dilu" )
-    return PreconditionerType::dilu;
+    return dilu;
   else if ( type == "amg" )
-    return PreconditionerType::amg;
+    return amg;
   else if ( type == "cheb" )
-    return PreconditionerType::cheb;
-  else if ( type == "ilut" )
-    return PreconditionerType::ilut;
+    return cheb;
   else if ( type == "riluk" )
-    return PreconditionerType::riluk;
-  else if ( type == "relax" )
-    return PreconditionerType::relax;
+    return riluk;
   else
   {
     warning( "Undefined preconditioner          "
              "Fallback to default preconditioner" );
-    return PreconditionerType::default_pc;
+    return default_pc;
   }
 }
 
@@ -71,43 +65,37 @@ inline static auto to_string( PreconditionerType type ) -> std::string
 
   switch( type )
   {
-    case PreconditionerType::none:
+    case none:
       name = "none";
       break;
-    case PreconditionerType::jacobi:
+    case jacobi:
       name = "jacobi";
       break;
-    case PreconditionerType::bjacobi:
+    case bjacobi:
       name = "bjacobi";
       break;
-    case PreconditionerType::sor:
+    case sor:
       name = "sor";
       break;
-    case PreconditionerType::ilu:
+    case ilu:
       name = "ilu";
       break;
-    case PreconditionerType::dilu:
+    case dilu:
       name = "dilu";
       break;
-    case PreconditionerType::icc:
+    case icc:
       name = "icc";
       break;
-    case PreconditionerType::amg:
+    case amg:
       name = "amg";
       break;
-    case PreconditionerType::cheb:
+    case cheb:
       name = "cheb";
       break;
-    case PreconditionerType::ilut:
-      name = "ilut";
-      break;
-    case PreconditionerType::riluk:
+    case riluk:
       name = "riluk";
       break;
-    case PreconditionerType::relax:
-      name = "relax";
-      break;
-    case PreconditionerType::default_pc:
+    case default_pc:
       name = "default_pc";
       break;
   }

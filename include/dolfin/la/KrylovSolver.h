@@ -8,25 +8,14 @@
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/SolverType.h>
 #include <dolfin/la/janpack/JANPACKKrylovSolver.h>
-#include <dolfin/la/janpack/JANPACKMat.h>
-#include <dolfin/la/janpack/JANPACKVec.h>
 #include <dolfin/la/petsc/PETScKrylovSolver.h>
-#include <dolfin/la/petsc/PETScMatrix.h>
-#include <dolfin/la/petsc/PETScVector.h>
+#include <dolfin/la/trilinos/TrilinosKrylovSolver.h>
 
 namespace dolfin
 {
 
 class GenericMatrix;
 class GenericVector;
-
-class JANPACKKrylovSolver;
-class JANPACKMat;
-class JANPACKVec;
-
-class PETScKrylovSolver;
-class PETScMatrix;
-class PETScVector;
 
 //-----------------------------------------------------------------------------
 
@@ -56,12 +45,19 @@ private:
   /// Preconditioner type
   PreconditionerType pc_type;
 
-  /// PETSc solver
+  /// solvers
 #ifdef HAVE_PETSC
   PETScKrylovSolver * petsc_solver { nullptr };
 #else
   int * petsc_solver { nullptr };
 #endif
+
+#ifdef HAVE_TRILINOS
+  trilinos::KrylovSolver * trilinos_solver { nullptr };
+#else
+  int * trilinos_solver { nullptr };
+#endif
+
 #ifdef HAVE_JANPACK
   JANPACKKrylovSolver * janpack_solver;
 #else

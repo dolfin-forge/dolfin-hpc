@@ -8,6 +8,7 @@
 
 #ifdef HAVE_TRILINOS
 
+#include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/trilinos/TrilinosObject.h>
 #include <dolfin/la/trilinos/TrilinosVector.h>
 
@@ -17,8 +18,6 @@
 
 namespace dolfin
 {
-
-enum class PreconditionerType;
 
 namespace trilinos
 {
@@ -32,11 +31,14 @@ class Preconditioner : public Object
 {
 public:
   /// Preconditioner Type
-  using PCType = Ifpack2::Preconditioner< real, int, size_t, Vector::TPNode >;
+  using IF2PCType = Ifpack2::Preconditioner< real, int, size_t, Vector::TPNode >;
 
 public:
   /// Constructor
   Preconditioner() = default;
+
+  /// Constructor
+  Preconditioner( PreconditionerType type );
 
   /// Destructor
   virtual ~Preconditioner() = default;
@@ -54,11 +56,14 @@ public:
   auto init( Matrix const & P ) -> void;
 
 private:
-  // name of the preconditioner
-  std::string _name;
+  // preconditioner type
+  PreconditionerType pc_type_{ PreconditionerType::none };
+
+  // preconditioner name that has to be passed to the If2pack::Factoty
+  std::string name_{""};
 
   // Ifpack2 preconditioner, to be constructed from a Tpetra Operator or Matrix
-  Teuchos::RCP< PCType > pc_;
+  Teuchos::RCP< IF2PCType > pc_{ Teuchos::null };
 };
 
 } // namespace trilinos

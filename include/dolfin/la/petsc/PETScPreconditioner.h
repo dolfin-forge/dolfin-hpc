@@ -8,6 +8,7 @@
 
 #ifdef HAVE_PETSC
 
+#include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/petsc/PETScObject.h>
 
 #include <petscksp.h>
@@ -17,7 +18,6 @@ namespace dolfin
 {
 
 class PETScVector;
-enum class PreconditionerType;
 
 /// This class specifies the interface for user-defined Krylov
 /// method PETScPreconditioners. A user wishing to implement her own

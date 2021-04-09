@@ -23,7 +23,7 @@ class SparsityPattern: public GenericSparsityPattern
 public:
 
   /// Create empty sparsity pattern
-  SparsityPattern() = default;
+  SparsityPattern();
 
   /// Create sparsity pattern for given global dimensions and local ranges.
   /// If range is a nullptr pointer the pattern is assumed to be serial.
@@ -73,28 +73,35 @@ public:
   //---------------------------------------------------------------------------
 
   /// Return array with row range for process rank
-  void get_range(size_t p_rank, size_t range[]);
+  auto get_range(size_t p_rank, size_t range[]) const -> void;
 
   /// Return number of local rows for process rank
   auto range_size(size_t p_rank) const -> size_t;
 
   ///
-  void set_blocked();
+  auto set_blocked() -> void;
+
+  //---------------------------------------------------------------------------
+
+  // access diagonal columns of the matrix for a given row
+  auto diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void;
+
+  // access off-diagonal columns of the matrix for a given row
+  auto off_diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void;
 
 private:
+  size_t const pe_size;
+  size_t const pe_rank;
 
   /// Tensor rank
   size_t rank_{0};
 
   /// Dimensions
-  size_t * dim_{nullptr};
+  std::vector< size_t > dim_;
 
   /// Range -array of size + 1 where size is size + 1:
   ///    range[rank], range[rank+1] is the range for processor
-  size_t ** range_{nullptr};
-
-  /// Direct access to local range
-  size_t ** local_range_{nullptr};
+  std::vector< std::vector< size_t > > range_;
 
   /// Flags
   bool initialized_{false};
@@ -108,11 +115,11 @@ private:
 
   /// Diagonal portion: submatrix such that row and column
   /// indices are in-range
-  _ordered_set<size_t> * d_entries_{nullptr};
+  std::vector< _ordered_set<size_t> > d_entries_;
   size_t d_count_{0};
 
   /// Off-diagonal portion: entries such that only column indices are off-range
-  _ordered_set<size_t> * o_entries_{nullptr};
+  std::vector< _ordered_set<size_t> > o_entries_;
   size_t o_count_{0};
 
   /// Additionally provide data structure to store remote entries i,e such that
@@ -122,38 +129,69 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+
 inline void SparsityPattern::set_blocked()
 {
   blocked_ = true;
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SparsityPattern::is_blocked() const -> bool
 {
   return blocked_;
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SparsityPattern::is_distributed() const -> bool
 {
   return distributed_;
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SparsityPattern::size( size_t i ) const -> size_t
 {
-  return ( local_range_[i][1] - local_range_[i][0] );
+  return ( range_[i][pe_rank+1] - range_[i][pe_rank] );
 }
+
 //-----------------------------------------------------------------------------
-inline void SparsityPattern::get_range( size_t p_rank, size_t range[] )
+
+inline void SparsityPattern::get_range( size_t p_rank, size_t range[] ) const
 {
-  dolfin_assert( distributed_ );
+  dolfin_assert( p_rank < pe_size );
   // For a serial pattern p_rank is only zero
-  std::copy( &range_[0][p_rank], &range_[0][p_rank + 1], range );
+  range[0] = range_[0][p_rank];
+  range[1] = range_[0][p_rank + 1];
 }
+
 //-----------------------------------------------------------------------------
+
 inline auto SparsityPattern::range_size( size_t p_rank ) const -> size_t
 {
-  dolfin_assert( distributed_ );
+  dolfin_assert( p_rank < pe_size );
   return range_[0][p_rank + 1] - range_[0][p_rank];
 }
+
+//-----------------------------------------------------------------------------
+
+inline auto SparsityPattern::diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void
+{
+  dolfin_assert( row < this->size(0) );
+  cols.resize( d_entries_[row].size() );
+  std::copy( d_entries_[row].begin(), d_entries_[row].end(), cols.begin() );
+}
+
+//-----------------------------------------------------------------------------
+
+inline auto SparsityPattern::off_diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void
+{
+  dolfin_assert( row < this->size(0) );
+  cols.resize( d_entries_[row].size() );
+  std::copy( d_entries_[row].begin(), d_entries_[row].end(), cols.begin() );
+}
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

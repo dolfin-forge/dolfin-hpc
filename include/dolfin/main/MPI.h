@@ -113,7 +113,7 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template < typename T >
-  static auto all_gather( T *            sendbuf,
+  static auto all_gather( T const *      sendbuf,
                           int            sendcount,
                           T *            recvbuf,
                           int            recvcount,
@@ -337,7 +337,7 @@ inline auto MPI::bcast( T * x, int n, int r, Communicator & comm ) -> int
 }
 //-----------------------------------------------------------------------------
 template < typename T >
-inline auto MPI::all_gather( T *            sendbuf,
+inline auto MPI::all_gather( T const *      sendbuf,
                              int            sendcount,
                              T *            recvbuf,
                              int            recvcount,

@@ -94,9 +94,12 @@ auto Matrix::apply( FinalizeType finaltype ) -> void
 {
   dolfin_assert( not mat_.is_null() );
 
-  if (  finaltype == FINALIZE or finaltype == FLUSH )
+  if ( finaltype == FINALIZE or finaltype == FLUSH )
   {
-    mat_->fillComplete();
+    if ( mat_->isFillActive() and not mat_->isFillComplete() )
+    {
+      mat_->fillComplete();
+    }
   }
   else
   {
@@ -122,10 +125,78 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
 {
   SparsityPattern const & spattern = reinterpret_cast< SparsityPattern const & >( sparsity_pattern );
 
+  size_t const pe_rank = MPI::rank();
+
   size_t const nLocalRows = spattern.size( 0 );
   size_t const nLocalCols = spattern.size( 1 );
 
-  init( nLocalRows, nLocalCols, true );
+  // calculate the global row and col indices
+  std::vector< GO > gRowIndices( nLocalRows );
+  std::vector< size_t > lRowRange( 2, DOLFIN_SIZE_T_MAX );
+  spattern.get_range( pe_rank, lRowRange.data() );
+
+  std::vector< GO > gColIndices( nLocalCols );
+  _ordered_set< GO > gColset;
+
+  dolfin_assert( nLocalRows == lRowRange[1] - lRowRange[0] );
+
+  for ( size_t i = 0; i < nLocalRows; ++i )
+  {
+    // global row index is linear in [ lRowRange[0], lRowRange[1] [
+    gRowIndices[i] = lRowRange[0] + i;
+
+    // get columns for this row
+    std::vector< size_t > diag, off_diag;
+    spattern.diagonal_entries( i, diag );
+    spattern.off_diagonal_entries( i, off_diag );
+
+    // insert (potentially new) columns in the set
+    gColset.insert( diag.begin(), diag.end() );
+    gColset.insert( off_diag.begin(), off_diag.end() );
+  }
+
+  // copy the unique set of column indices into the column vector
+  std::copy( gColset.begin(), gColset.end(), gColIndices.begin() );
+
+  // create the range and domain map
+  Teuchos::ArrayView< GO > gRowIndices_view( gRowIndices.data(), nLocalRows );
+  Teuchos::ArrayView< GO > gColIndices_view( gColIndices.data(), nLocalCols );
+
+  Teuchos::RCP< TPMap const > range_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
+                                                    gRowIndices_view,  0, comm_ ) );
+  Teuchos::RCP< TPMap const > domain_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
+                                                     gColIndices_view, 0, comm_ ) );
+
+  // Get number of non-zeros per row to allocate storage
+  std::vector< size_t > nzrow( nLocalRows );
+  sparsity_pattern.numNonZeroPerRow( nzrow.data() );
+  Teuchos::ArrayView< GO > nnz( nzrow.data(), nzrow.size() );
+
+  // Create a non-overlapping row map for the graph
+  Teuchos::RCP< TPGraph > crs_graph( new TPGraph( range_map, nnz, Tpetra::StaticProfile ) );
+
+  std::vector< size_t > entries;
+
+  for ( size_t i = 0; i < nLocalRows; ++i )
+  {
+    // diagonal portion, entries is automatically resized
+    spattern.diagonal_entries( i, entries );
+    std::vector< GO > indices( entries.begin(), entries.end() );
+
+    // off-diagonal portion, entries is automatically resized
+    spattern.off_diagonal_entries( i, entries );
+    indices.insert( indices.end(), entries.begin(), entries.end() );
+
+    Teuchos::ArrayView< GO > indices_view( indices );
+    crs_graph->insertGlobalIndices( gRowIndices[i], indices_view );
+  }
+
+  // FIXME maybe set parameter "Optimize Storage": true here?!
+  // https://docs.trilinos.org/dev/packages/tpetra/doc/html/classTpetra_1_1CrsGraph.html#a32798a1f7119adbed7bfffcad7cf878f
+  crs_graph->fillComplete( domain_map, range_map );
+
+  // finally create the matrix from the CRS graph
+  mat_ = Teuchos::rcp( new TPMatrix( crs_graph ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -178,7 +249,7 @@ auto Matrix::init( size_t M, size_t N, bool ) -> void
 
   // Create a Tpetra sparse matrix whose rows have distribution
   // given by the row Map and column Map.
-  mat_ = RCP< TPMatrix >( new TPMatrix( rowMap, colMap, 0 ) );
+  mat_ = RCP< TPMatrix >( new TPMatrix( rowMap, colMap, 120 ) );
 }
 
 //-----------------------------------------------------------------------------

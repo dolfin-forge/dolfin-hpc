@@ -187,15 +187,13 @@ void SparsityPattern::numNonZeroPerRow( size_t nzrow[] ) const
     error( "SparsityPattern : pattern has not been computed." );
   }
 
-  size_t * nzrow_ = nzrow;
-  std::for_each( d_entries_.begin(), d_entries_.end(),
-                 [&nzrow_]( _ordered_set< size_t > const & row ) { *nzrow_ = row.size(); ++nzrow_; } );
+  for ( size_t i = 0; i < d_entries_.size(); ++i )
+    nzrow[i] = d_entries_[i].size();
 
   if ( not o_entries_.empty() )
   {
-    nzrow_ = nzrow;
-    std::for_each( o_entries_.begin(), o_entries_.end(),
-                   [&nzrow_]( _ordered_set< size_t > const & row ) { *nzrow_ = row.size(); ++nzrow_; } );
+    for ( size_t i = 0; i < o_entries_.size(); ++i )
+      nzrow[i] += o_entries_[i].size();
   }
 }
 

@@ -26,7 +26,7 @@
 #include <dolfin/la/VectorNormType.h>
 #include <dolfin/la/janpack/JANPACKAMGSolver.h>
 #include <dolfin/la/janpack/JANPACKFactory.h>
-#include <dolfin/la/janpack/JANPACKKrylovsolver.h>
+#include <dolfin/la/janpack/JANPACKKrylovSolver.h>
 #include <dolfin/la/janpack/JANPACKMat.h>
 #include <dolfin/la/janpack/JANPACKVec.h>
 #include <dolfin/la/petsc/PETScFactory.h>

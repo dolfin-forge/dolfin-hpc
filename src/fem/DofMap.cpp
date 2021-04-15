@@ -599,7 +599,7 @@ auto DofMap::check( bool throw_error ) -> bool
   delete[] loc_entity_dofs;
   delete[] cell_dofs;
 
-#if DOLFIN_HAVE_MPI
+#if HAVE_MPI
 
   // Simple version
   size_t rank    = dolfin::MPI::rank();

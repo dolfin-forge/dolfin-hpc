@@ -269,7 +269,7 @@ auto MeshTopology::remap( size_t d0, std::vector< size_t > const & mapping )
 
 //-----------------------------------------------------------------------------
 
-auto MeshTopology::num_entities_update() -> void
+auto MeshTopology::num_entities_update() const -> void
 {
   num_entities_.resize( dim_ + 1 );
 
@@ -544,6 +544,9 @@ auto MeshTopology::compute( size_t d0, size_t d1 ) const -> Connectivity const *
   {
     error( "MeshTopology: connectivity (%u, %u) not computed.", d0, d1 );
   }
+
+  // update the number of mesh entities
+  this->num_entities_update();
 
   return connectivity( d0, d1 );
 }

@@ -108,7 +108,9 @@ public:
   auto num_entities() const -> std::vector< size_t > const &;
 
   /// update number of entities in all topological dimensions
-  auto num_entities_update() -> void;
+  /// FIXME this shouldnt be const, but this class is somehow built to not care
+  /// about that...
+  auto num_entities_update() const -> void;
 
   /// Return number of entities in the local topology for given dimension
   auto size( size_t dim ) const -> size_t;
@@ -194,8 +196,10 @@ private:
   // Topology cannot be modified
   bool frozen_;
 
-  // number of entities in each (connectivity) dimension
-  std::vector< size_t > num_entities_;
+  /// number of entities in each (connectivity) dimension
+  /// FIXME this shouldnt be mutable, but this class is somehow built to not care
+  /// about that...
+  mutable std::vector< size_t > num_entities_;
 
   /// Connectivity for pairs of topological dimensions
   mutable Connectivity * C_[CMAX][CMAX];

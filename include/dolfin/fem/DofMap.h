@@ -170,18 +170,6 @@ private:
   // UFC dof map
   ufc::dofmap * const ufc_dofmap_;
 
-public:
-  std::string const signature;
-  size_t const tdim;
-  size_t const global_dim;
-  size_t const num_sub_dofmaps;
-  size_t const num_global_support_dofs;
-  size_t const num_element_support_dofs;
-  size_t const num_element_dofs;
-  size_t const num_facet_dofs;
-  std::vector< size_t > const num_entity_dofs;
-  std::vector< size_t > const num_entity_closure_dofs;
-
 private:
   /// Build dof numbering
   void build();
@@ -206,6 +194,18 @@ private:
 
   // Periodic dofs mapping
   mutable PeriodicDofsMapping * periodic_dofmap_;
+
+public:
+  std::string const signature;
+  size_t const tdim;
+  size_t const global_dim;
+  size_t const num_sub_dofmaps;
+  size_t const num_global_support_dofs;
+  size_t const num_element_support_dofs;
+  size_t const num_element_dofs;
+  size_t const num_facet_dofs;
+  std::vector< size_t > const num_entity_dofs;
+  std::vector< size_t > const num_entity_closure_dofs;
 };
 
 //--- INLINES -----------------------------------------------------------------

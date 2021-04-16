@@ -395,6 +395,14 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 
   for ( size_t i = 0; i < m; ++i )
   {
+    if ( not map->isNodeGlobalElement( rows[i] ) )
+    {
+      std::string msg = "trilinos::Vector::get(): Row " + std::to_string(rows[i]);
+      msg += " is not global (process " + std::to_string( MPI::rank() ) + ")";
+      // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
+      std::cout << msg << std::endl;
+    }
+
     LO const idx = map->getLocalElement( rows[i] );
     if ( idx != Teuchos::OrdinalTraits< LO >::invalid() )
     {
@@ -406,6 +414,7 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
       msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
       // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
       std::cout << msg << std::endl;
+      block[i] = -500.;
     }
   }
 }

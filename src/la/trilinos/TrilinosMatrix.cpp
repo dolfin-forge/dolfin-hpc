@@ -130,61 +130,17 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
   size_t const nLocalRows = spattern.size( 0 );
   size_t const nLocalCols = spattern.size( 1 );
 
-  // calculate the global row and col indices
+  // calculate the global row indices [ lRowRange[0]; lRowRange[1] [
   std::vector< GO > gRowIndices( nLocalRows );
   std::vector< size_t > lRowRange( 2, DOLFIN_SIZE_T_MAX );
   spattern.get_range( pe_rank, lRowRange.data() );
-
-  std::vector< GO > gColIndices;
-  _ordered_set< GO > gColset;
-
   dolfin_assert( nLocalRows == lRowRange[1] - lRowRange[0] );
+  std::iota( gRowIndices.begin(), gRowIndices.end(), lRowRange[0] );
 
-  std::stringstream sstr;
-
-  for ( size_t i = 0; i < nLocalRows; ++i )
-  {
-    // global row index is linear in [ lRowRange[0], lRowRange[1] [
-    gRowIndices[i] = lRowRange[0] + i;
-
-    // get columns for this row
-    std::vector< size_t > diag, off_diag;
-    spattern.diagonal_entries( i, diag );
-    spattern.off_diagonal_entries( i, off_diag );
-
-    // sstr << "Row " << gRowIndices[i] << " process " << pe_rank << ": [ ";
-    for ( size_t d : diag )
-      sstr << gRowIndices[i] << " " << d << "\n";
-    for ( size_t d : off_diag )
-      sstr << gRowIndices[i] << " " << d << "\n";
-
-    // insert (potentially new) columns in the set
-    gColset.insert( diag.begin(), diag.end() );
-    gColset.insert( off_diag.begin(), off_diag.end() );
-  }
-
-  for ( size_t r = 0; r < MPI::size(); ++r )
-  {
-    if ( r == pe_rank )
-    {
-      std::cout << sstr.str() << std::endl;
-    }
-
-    MPI_Barrier( MPI_COMM_WORLD );
-  }
-
-  // copy the unique set of column indices into the column vector
-  gColIndices.resize( gColset.size() );
-  std::copy( gColset.begin(), gColset.end(), gColIndices.begin() );
-
-  // create the range and domain map
-  Teuchos::ArrayView< GO > gRowIndices_view( gRowIndices.data(), nLocalRows );
-  Teuchos::ArrayView< GO > gColIndices_view( gColIndices.data(), nLocalCols );
-
+  // create the range
+  Teuchos::ArrayView< GO > gRowIndices_view( gRowIndices.data(), gRowIndices.size() );
   Teuchos::RCP< TPMap const > range_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
                                                     gRowIndices_view,  0, comm_ ) );
-  Teuchos::RCP< TPMap const > domain_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
-                                                     gColIndices_view, 0, comm_ ) );
 
   // Get number of non-zeros per row to allocate storage
   std::vector< size_t > nzrow( nLocalRows );
@@ -194,21 +150,32 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
   // Create a non-overlapping row map for the graph
   Teuchos::RCP< TPGraph > crs_graph( new TPGraph( range_map, nnz, Tpetra::StaticProfile ) );
 
-  std::vector< size_t > entries;
+  _ordered_set< GO > gColset;
 
   for ( size_t i = 0; i < nLocalRows; ++i )
   {
+    std::vector< size_t > entries;
+
     // diagonal portion, entries is automatically resized
     spattern.diagonal_entries( i, entries );
     std::vector< GO > indices( entries.begin(), entries.end() );
+    gColset.insert( entries.begin(), entries.end() );
 
     // off-diagonal portion, entries is automatically resized
     spattern.off_diagonal_entries( i, entries );
     indices.insert( indices.end(), entries.begin(), entries.end() );
 
+    dolfin_assert( nzrow[i] == indices.size() );
+
     Teuchos::ArrayView< GO > indices_view( indices );
     crs_graph->insertGlobalIndices( gRowIndices[i], indices_view );
   }
+
+  dolfin_assert( nLocalCols == gColset.size() );
+  std::vector< GO > gColIndices( gColset.begin(), gColset.end() );
+  Teuchos::ArrayView< GO > gColIndices_view( gColIndices.data(), gColIndices.size() );
+  Teuchos::RCP< TPMap const > domain_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
+                                                     gColIndices_view, 0, comm_ ) );
 
   // FIXME maybe set parameter "Optimize Storage": true here?!
   // https://docs.trilinos.org/dev/packages/tpetra/doc/html/classTpetra_1_1CrsGraph.html#a32798a1f7119adbed7bfffcad7cf878f

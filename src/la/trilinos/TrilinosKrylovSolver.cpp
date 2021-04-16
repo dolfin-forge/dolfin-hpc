@@ -114,8 +114,7 @@ auto KrylovSolver::solve( trilinos::Matrix const & A,
   writeReport( result, iters );
 
   // Update ghosts
-  // FIXME does nothing so far
-  // x.update_ghost_values();
+  x.update_ghost_values();
 
   return iters;
 }

@@ -46,10 +46,16 @@ Vector::Vector( size_t N, bool distributed )
 Vector::Vector( Vector const & copy )
   : Variable( "x", "a vector" )
 {
-  vec_ = Teuchos::rcp( new TPVector( copy.vec_->getMap(),
-                                     copy.vec_->getNumVectors(),
-                                     false ) );
-  vec_->assign( *copy.vec_ );
+  if ( not copy.vec_.is_null() )
+  {
+    // Create with same map
+    Teuchos::RCP< TPMap const > v_ghostmap( copy.vec_->getMap() );
+    Teuchos::RCP< TPMap const > v_xmap( copy.vec_local_->getMap() );
+    vec_ = Teuchos::rcp( new TPVector( v_ghostmap, 1 ) );
+
+    vec_->assign( *copy.vec_ );
+    vec_local_ = vec_->offsetViewNonConst( v_xmap, 0 );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -81,9 +87,9 @@ auto Vector::apply( FinalizeType ) -> void
   dolfin_assert( not vec_.is_null() );
 
   // FIXME
-  // update_ghost_values();
+  update_ghost_values();
 
-  Teuchos::RCP< TPMap const > map = vec_->getMap();
+  Teuchos::RCP< TPMap const > map = vec_local_->getMap();
   Teuchos::RCP< TPVector >    y( new TPVector( map, 1 ) );
   Teuchos::RCP< TPMap const > ghostmap = vec_->getMap();
 
@@ -94,7 +100,7 @@ auto Vector::apply( FinalizeType ) -> void
   y->doExport( *vec_, exporter, Tpetra::ADD );
 
   // Copy back into _x_ghosted
-  Tpetra::Import< LO, GO, TPNode > importer( map, map );
+  Tpetra::Import< LO, GO, TPNode > importer( map, ghostmap );
   vec_->doImport( *y, importer, Tpetra::INSERT );
 }
 
@@ -228,6 +234,79 @@ auto Vector::offset() const -> size_t
 
 //-----------------------------------------------------------------------------
 
+auto Vector::init( GenericSparsityPattern const & sparsity_pattern ) -> void
+{
+  if ( vec_.is_null() )
+  {
+    SparsityPattern const & spattern = reinterpret_cast< SparsityPattern const & >( sparsity_pattern );
+
+    size_t const pe_rank     = MPI::rank();
+    size_t const nLocalRows  = spattern.size( 0 );
+    size_t       nGlobalRows = 0;
+
+    // compute the global vector size
+    MPI::all_reduce< MPI::sum >( nLocalRows, nGlobalRows );
+    dolfin_assert( nLocalRows <= nGlobalRows );
+
+    // the local vector range is just our local range from spattern
+    std::vector< GO > lIndices( nLocalRows );
+    {
+      std::vector< size_t > lRowRange( 2, DOLFIN_SIZE_T_MAX );
+      spattern.get_range( pe_rank, lRowRange.data() );
+      std::iota( lIndices.begin(), lIndices.end(), lRowRange[0] );
+    }
+
+    // global indices for our vector range map
+    std::vector< GO > gIndices;
+
+    if ( spattern.rank() == 1 )
+    {
+      // for rank == 1 the global indices are the same as our local indices
+      gIndices = lIndices;
+      // gIndices.resize( nGlobalRows );
+      // std::iota( gIndices.begin(), gIndices.end(), 0 );
+    }
+    else // ( spattern.rank() == 2 )
+    {
+      _ordered_set< size_t > gColset;
+
+      // dont be confused here, we take all the (unique) column indices from the
+      // matrix to make sure we get all the ghost points into our vector range
+      for ( size_t i = 0; i < nLocalRows; ++i )
+      {
+        // get columns for this row
+        std::vector< size_t > diag, off_diag;
+        spattern.diagonal_entries( i, diag );
+        spattern.off_diagonal_entries( i, off_diag );
+
+        // insert (potentially new) columns in the set
+        gColset.insert( diag.begin(), diag.end() );
+        gColset.insert( off_diag.begin(), off_diag.end() );
+      }
+
+      // copy the unique set of column indices into the column vector
+      gIndices.resize( gColset.size() );
+      std::copy( gColset.begin(), gColset.end(), gIndices.begin() );
+    }
+
+    Teuchos::ArrayView< GO > gColIndices_view( gIndices.data(), gIndices.size() );
+    Teuchos::RCP< TPMap > map_global( new TPMap( nGlobalRows, gColIndices_view, indexBase, comm_ ) );
+
+    // Vector - create with overlap
+    vec_ = Teuchos::rcp( new TPVector( map_global, 1, true ) );
+
+    // make sure we actually got a non-empty vector
+    dolfin_assert( not vec_.is_null() );
+
+    Teuchos::ArrayView< GO > lIndices_view( lIndices.data(), lIndices.size() );
+    Teuchos::RCP< TPMap > map_local( new TPMap( nGlobalRows, lIndices_view, indexBase, comm_ ) );
+
+    // Get a modifiable view into the ghosted vector
+    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );  }
+}
+
+//-----------------------------------------------------------------------------
+
 auto Vector::init( size_t N ) -> void
 {
   init( N, true );
@@ -251,6 +330,9 @@ auto Vector::init( size_t N, bool ) -> void
 
     // make sure we actually got a non-empty vector
     dolfin_assert( not vec_.is_null() );
+
+    // Get a modifiable view into the ghosted vector
+    vec_local_ = vec_->offsetViewNonConst( map, 0 );
   }
 }
 
@@ -308,19 +390,22 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 {
   dolfin_assert( not vec_.is_null() );
 
-  Teuchos::RCP< TPMap const >     xmap = vec_->getMap();
-  Teuchos::ArrayRCP< real  const> xarr = vec_->getData( 0 );
+  Teuchos::RCP< TPMap const >     map = vec_->getMap();
+  Teuchos::ArrayRCP< real const > arr = vec_->getData( 0 );
 
   for ( size_t i = 0; i < m; ++i )
   {
-    LO const idx = xmap->getLocalElement( rows[i] );
+    LO const idx = map->getLocalElement( rows[i] );
     if ( idx != Teuchos::OrdinalTraits< LO >::invalid() )
     {
-      block[i] = xarr[idx];
+      block[i] = arr[idx];
     }
     else
     {
-      error( "trilinos::Vector: Row %d is not valid", rows[i] );
+      std::string msg = "trilinos::Vector::get(): Row " + std::to_string(rows[i]);
+      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
+      // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
+      std::cout << msg << std::endl;
     }
   }
 }
@@ -331,15 +416,20 @@ auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
 {
   dolfin_assert( not vec_.is_null() );
 
+  Teuchos::RCP< TPMap const > map = vec_->getMap();
+
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( vec_->getMap()->isNodeGlobalElement( rows[i] ) )
+    if ( map->isNodeGlobalElement( rows[i] ) )
     {
       vec_->replaceGlobalValue( rows[i], 0, block[i] );
     }
     else
     {
-      error( "trilinos::Vector: Row %d is not valid", rows[i] );
+      std::string msg = "trilinos::Vector::set(): Row " + std::to_string(rows[i]);
+      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
+      // warning( "trilinos::Vector::set(): Row %d is not valid", rows[i] );
+      std::cout << msg << std::endl;
     }
   }
 }
@@ -350,15 +440,20 @@ auto Vector::add( const real * block, size_t m, const size_t * rows ) -> void
 {
   dolfin_assert( not vec_.is_null() );
 
+  Teuchos::RCP< TPMap const > map = vec_->getMap();
+
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( vec_->getMap()->isNodeGlobalElement( rows[i] ) )
+    if ( map->isNodeGlobalElement( rows[i] ) )
     {
       vec_->sumIntoGlobalValue( rows[i], 0, block[i] );
     }
     else
     {
-      error( "trilinos::Vector: Row %d is not local", rows[i] );
+      std::string msg = "trilinos::Vector::add(): Row " + std::to_string(rows[i]);
+      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
+      // warning( "trilinos::Vector::add(): Row %d is not local", rows[i] );
+      std::cout << msg << std::endl;
     }
   }
 }
@@ -594,7 +689,7 @@ auto Vector::operator=( real a ) -> Vector &
 
 auto Vector::vec() const -> TPVectorPtr
 {
-  return vec_;
+  return vec_local_;
 }
 
 //-----------------------------------------------------------------------------
@@ -602,6 +697,22 @@ auto Vector::vec() const -> TPVectorPtr
 auto Vector::factory() const -> LinearAlgebraFactory &
 {
   return trilinos::Factory::instance();
+}
+
+//-----------------------------------------------------------------------------
+
+void Vector::update_ghost_values()
+{
+  dolfin_assert( not vec_.is_null() );
+
+  Teuchos::RCP< TPMap const > localmap( vec_local_->getMap() );
+  Teuchos::RCP< TPMap const > map( vec_->getMap() );
+
+  // Export from non-overlapping map x, to overlapping ghost values
+  Tpetra::Import< LO, GO, TPNode > importer( localmap, map );
+
+  // FIXME: is this safe, since vec_local_ is a view into vec_?
+  vec_->doImport( *vec_local_, importer, Tpetra::INSERT );
 }
 
 //-----------------------------------------------------------------------------

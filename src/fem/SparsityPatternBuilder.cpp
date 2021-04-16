@@ -23,13 +23,13 @@ namespace SparsityPatternBuilder
 
 //-----------------------------------------------------------------------------
 void build( GenericSparsityPattern & sparsity_pattern,
-            Form &             form)
+            Form const &             form)
 {
   message( 1, "SparsityPatternBuilder: build" );
   tic();
 
   Mesh &     mesh  = form.mesh();
-  UFCCache & cache = form.cache();
+  UFCCache & cache = const_cast< Form & >( form ).cache();
 
   std::vector< size_t > local_dimensions( form.rank() );
   std::vector< size_t > local_sizes( form.rank() );

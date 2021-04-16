@@ -61,6 +61,11 @@ public:
 
   //--- Implementation of the GenericVector interface ---
 
+  void init( const GenericSparsityPattern & sparsity_pattern ) override
+  {
+    init( sparsity_pattern.size( 0 ), sparsity_pattern.is_distributed() );
+  }
+
   /// Initialize vector of local size N, distributed by default
   void init( size_t N ) override;
 

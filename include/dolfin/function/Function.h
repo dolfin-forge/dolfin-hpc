@@ -29,6 +29,7 @@ namespace dolfin
 class Cell;
 class Expression;
 class Form;
+class BilinearForm;
 class Mesh;
 class SubFunction;
 
@@ -55,6 +56,9 @@ public:
 
   /// Copy constructor
   Function( Function const & other );
+
+  /// Copy constructor
+  Function( BilinearForm const & form );
 
   /// Destructor
   ~Function() override;

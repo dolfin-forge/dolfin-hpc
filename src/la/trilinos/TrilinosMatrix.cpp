@@ -135,10 +135,12 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
   std::vector< size_t > lRowRange( 2, DOLFIN_SIZE_T_MAX );
   spattern.get_range( pe_rank, lRowRange.data() );
 
-  std::vector< GO > gColIndices( nLocalCols );
+  std::vector< GO > gColIndices;
   _ordered_set< GO > gColset;
 
   dolfin_assert( nLocalRows == lRowRange[1] - lRowRange[0] );
+
+  std::stringstream sstr;
 
   for ( size_t i = 0; i < nLocalRows; ++i )
   {
@@ -150,12 +152,29 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
     spattern.diagonal_entries( i, diag );
     spattern.off_diagonal_entries( i, off_diag );
 
+    // sstr << "Row " << gRowIndices[i] << " process " << pe_rank << ": [ ";
+    for ( size_t d : diag )
+      sstr << gRowIndices[i] << " " << d << "\n";
+    for ( size_t d : off_diag )
+      sstr << gRowIndices[i] << " " << d << "\n";
+
     // insert (potentially new) columns in the set
     gColset.insert( diag.begin(), diag.end() );
     gColset.insert( off_diag.begin(), off_diag.end() );
   }
 
+  for ( size_t r = 0; r < MPI::size(); ++r )
+  {
+    if ( r == pe_rank )
+    {
+      std::cout << sstr.str() << std::endl;
+    }
+
+    MPI_Barrier( MPI_COMM_WORLD );
+  }
+
   // copy the unique set of column indices into the column vector
+  gColIndices.resize( gColset.size() );
   std::copy( gColset.begin(), gColset.end(), gColIndices.begin() );
 
   // create the range and domain map
@@ -338,7 +357,7 @@ auto Matrix::getrow( size_t                  row,
   dolfin_assert( not mat_.is_null() );
 
   size_t const ncols = mat_->getNumEntriesInGlobalRow( row );
-  if ( ncols == Teuchos::OrdinalTraits< size_t >::invalid() )
+  if ( ncols == Teuchos::OrdinalTraits< GO >::invalid() )
   {
     error( "trilinos::Matrix: Row %d not in range", row );
   }
@@ -393,18 +412,25 @@ auto Matrix::zero( size_t m, const size_t * rows ) -> void
   {
     size_t const ncols = mat_->getNumEntriesInGlobalRow( rows[i] );
 
-    std::vector< GO >        colcols( ncols );
-    Teuchos::ArrayView< GO > cols( colcols );
+    if ( ncols != Teuchos::OrdinalTraits< GO >::invalid() )
+    {
+      std::vector< GO >        colcols( ncols );
+      Teuchos::ArrayView< GO > cols( colcols );
 
-    std::vector< real >        coldata( ncols );
-    Teuchos::ArrayView< real > data( coldata );
+      std::vector< real >        coldata( ncols );
+      Teuchos::ArrayView< real > data( coldata );
 
-    size_t n = 0;
-    mat_->getGlobalRowCopy( rows[i], cols, data, n );
-    dolfin_assert( n == ncols );
+      size_t n = 0;
+      mat_->getGlobalRowCopy( rows[i], cols, data, n );
+      dolfin_assert( n == ncols );
 
-    std::fill( coldata.begin(), coldata.end(), 0.0 );
-    mat_->replaceGlobalValues( rows[i], cols, data );
+      std::fill( coldata.begin(), coldata.end(), 0.0 );
+      mat_->replaceGlobalValues( rows[i], cols, data );
+    }
+    else
+    {
+      warning( "trilinos::Matrix::zero(): Row %d is not valid.", m );
+    }
   }
 }
 //-----------------------------------------------------------------------------

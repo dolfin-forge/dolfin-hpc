@@ -89,6 +89,8 @@ public:
   // access off-diagonal columns of the matrix for a given row
   auto off_diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void;
 
+  auto rank() const -> size_t { return rank_; }
+
 private:
   size_t const pe_size;
   size_t const pe_rank;
@@ -153,6 +155,7 @@ inline auto SparsityPattern::is_distributed() const -> bool
 
 inline auto SparsityPattern::size( size_t i ) const -> size_t
 {
+  dolfin_assert( i < rank_ );
   return ( range_[i][pe_rank+1] - range_[i][pe_rank] );
 }
 
@@ -179,6 +182,8 @@ inline auto SparsityPattern::range_size( size_t p_rank ) const -> size_t
 inline auto SparsityPattern::diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void
 {
   dolfin_assert( row < this->size(0) );
+  dolfin_assert( not d_entries_.empty() );
+
   cols.resize( d_entries_[row].size() );
   std::copy( d_entries_[row].begin(), d_entries_[row].end(), cols.begin() );
 }
@@ -188,8 +193,16 @@ inline auto SparsityPattern::diagonal_entries( size_t row, std::vector< size_t >
 inline auto SparsityPattern::off_diagonal_entries( size_t row, std::vector< size_t > & cols ) const -> void
 {
   dolfin_assert( row < this->size(0) );
-  cols.resize( d_entries_[row].size() );
-  std::copy( d_entries_[row].begin(), d_entries_[row].end(), cols.begin() );
+
+  if ( not o_entries_.empty() )
+  {
+    cols.resize( o_entries_[row].size() );
+    std::copy( o_entries_[row].begin(), o_entries_[row].end(), cols.begin() );
+  }
+  else
+  {
+    cols.clear();
+  }
 }
 
 //-----------------------------------------------------------------------------

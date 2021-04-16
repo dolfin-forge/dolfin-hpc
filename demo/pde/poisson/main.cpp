@@ -20,6 +20,8 @@
 
 #include "Poisson.h"
 
+#include <dolfin/fem/SparsityPatternBuilder.h>
+
 #include <dolfin.h>
 
 using namespace dolfin;
@@ -66,8 +68,14 @@ int main()
 {
   dolfin_init();
 
+  dolfin_set( "linear algebra backend", "Trilinos" );
+
+  // dolfin_set( "Krylov relative tolerance", 1e-2 );
+  // dolfin_set( "Krylov maximum iterations", 100 );
+
   // Create mesh
   Mesh mesh( "UnitSquareMesh_32x32.bin" );
+  // UnitSquare mesh( 10, 10 );
 
   // Create coefficients
   Analytic< Source > f( mesh );
@@ -85,12 +93,15 @@ int main()
   // Solve PDE
   Matrix A;
   Vector b;
+  // GenericSparsityPattern * sparsity_pattern = b.factory().createPattern();
+  // SparsityPatternBuilder::build( *sparsity_pattern, a );
+  // b.init( *sparsity_pattern );
 
   a.assemble( A, true );
   L.assemble( b, true );
   bc.apply( A, b, a );
 
-  Function u( a.trial_space() );
+  Function u( a );
 
   KrylovSolver solver( bicgstab, bjacobi );
   solver.solve( A, u.vector(), b );

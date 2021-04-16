@@ -95,6 +95,9 @@ public:
   /// Return rank's offset into vector
   auto offset() const -> size_t override;
 
+  // init from SparsityPattern
+  auto init( GenericSparsityPattern const & sparsity_pattern ) -> void override;
+
   /// Initialize vector of local size N, distributed by default
   auto init( size_t N ) -> void override;
 
@@ -186,6 +189,9 @@ public:
   /// Return linear algebra backend factory
   auto factory() const -> LinearAlgebraFactory & override;
 
+  /// Update the ghost values of the vector
+  void update_ghost_values();
+
 private:
   friend trilinos::Matrix;
 
@@ -194,6 +200,9 @@ private:
 
   // Tpetra multivector
   TPVectorPtr vec_;
+
+  // local view into the vector
+  TPVectorPtr vec_local_;
 };
 
 } // end namespace trilinos

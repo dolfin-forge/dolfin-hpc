@@ -15,6 +15,8 @@
 #include <dolfin/mesh/entities/iterators/FacetIterator.h>
 #include <dolfin/parameter/parameters.h>
 
+#include <dolfin/la/SparsityPattern.h>
+
 namespace dolfin
 {
 
@@ -50,6 +52,27 @@ void build( GenericSparsityPattern & sparsity_pattern,
   // Only build for rank >= 2 (matrices and higher order tensors)
   if ( form.rank() < 2 )
   {
+    SparsityPattern & spattern = reinterpret_cast< SparsityPattern & >( sparsity_pattern );
+
+    // Build sparsity pattern for cell integrals
+    if ( not form.cell_integrals().empty() )
+    {
+      for ( CellIterator cell( mesh ); !cell.end(); ++cell )
+      {
+        // Update to current cell
+        cache.cell.update( *cell );
+
+        // Tabulate dofs for each dimension
+        for ( size_t i = 0; i < form.rank(); ++i )
+        {
+          form.dofmaps()[i]->tabulate_dofs( cache.dofs[i], cache.cell );
+        }
+
+        // Fill sparsity pattern.
+        spattern.insert_d_entry( local_dimensions[form.rank()-1], cache.dofs[form.rank()-1] );
+      }
+    }
+
     tocd( 1 );
     return;
   }

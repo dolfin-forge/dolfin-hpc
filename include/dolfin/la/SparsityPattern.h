@@ -91,6 +91,15 @@ public:
 
   auto rank() const -> size_t { return rank_; }
 
+  auto insert_d_entry( size_t num, size_t const * values ) -> void
+  {
+    for ( size_t j = 0; j < num; ++j )
+    {
+      d_entries_[0].insert( values[j] );
+      ++d_count_;
+    }
+  }
+
 private:
   size_t const pe_size;
   size_t const pe_rank;

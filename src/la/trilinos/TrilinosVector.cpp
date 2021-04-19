@@ -86,8 +86,7 @@ auto Vector::apply( FinalizeType ) -> void
 {
   dolfin_assert( not vec_.is_null() );
 
-  // FIXME
-  update_ghost_values();
+  // update_ghost_values();
 
   Teuchos::RCP< TPMap const > map = vec_local_->getMap();
   Teuchos::RCP< TPVector >    y( new TPVector( map, 1 ) );
@@ -263,12 +262,20 @@ auto Vector::init( GenericSparsityPattern const & sparsity_pattern ) -> void
     {
       // for rank == 1 the global indices are the same as our local indices
       gIndices = lIndices;
-      // gIndices.resize( nGlobalRows );
-      // std::iota( gIndices.begin(), gIndices.end(), 0 );
+      // _ordered_set< size_t > gColset;
+      // gColset.insert( lIndices.begin(), lIndices.end() );
+
+      // std::vector< size_t > diag;
+      // spattern.diagonal_entries( 0, diag );
+      // gColset.insert( diag.begin(), diag.end() );
+
+      // gIndices.resize( gColset.size() );
+      // std::copy( gColset.begin(), gColset.end(), gIndices.begin() );
     }
     else // ( spattern.rank() == 2 )
     {
       _ordered_set< size_t > gColset;
+      gColset.insert( lIndices.begin(), lIndices.end() );
 
       // dont be confused here, we take all the (unique) column indices from the
       // matrix to make sure we get all the ghost points into our vector range
@@ -302,7 +309,8 @@ auto Vector::init( GenericSparsityPattern const & sparsity_pattern ) -> void
     Teuchos::RCP< TPMap > map_local( new TPMap( nGlobalRows, lIndices_view, indexBase, comm_ ) );
 
     // Get a modifiable view into the ghosted vector
-    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );  }
+    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -318,21 +326,54 @@ auto Vector::init( size_t N, bool ) -> void
 {
   if ( vec_.is_null() )
   {
-    // compute the global vector size
+    // // compute the global vector size
+    // size_t Nglobal = 0;
+    // MPI::all_reduce< MPI::sum >( N, Nglobal );
+    // dolfin_assert( N <= Nglobal );
+
+    // Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
+
+    // // Vector - create with overlap
+    // vec_= Teuchos::rcp( new TPVector( map, 1, true ) );
+
+    // // make sure we actually got a non-empty vector
+    // dolfin_assert( not vec_.is_null() );
+
+    // // Get a modifiable view into the ghosted vector
+    // vec_local_ = vec_->offsetViewNonConst( map, 0 );
+
     size_t Nglobal = 0;
     MPI::all_reduce< MPI::sum >( N, Nglobal );
     dolfin_assert( N <= Nglobal );
 
-    Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
+    std::vector< size_t > Nall( MPI::size() );
+    MPI::all_gather( &N, 1, Nall.data(), 1 );
+
+    size_t my_start = 0;
+    for ( size_t i = 0; i < Nall.size(); ++i )
+      if ( i < MPI::rank() )
+        my_start += Nall[i];
+
+    std::vector< size_t > global( Nglobal );
+    std::iota( global.begin(), global.end(), 0 );
+
+    std::vector< size_t > local( N );
+    std::iota( local.begin(), local.end(), my_start );
+
+    Teuchos::ArrayView< GO > g_view( global.data(), global.size() );
+    Teuchos::RCP< TPMap > map_global( new TPMap( Nglobal, g_view, indexBase, comm_ ) );
 
     // Vector - create with overlap
-    vec_= Teuchos::rcp( new TPVector( map, 1, true ) );
+    vec_ = Teuchos::rcp( new TPVector( map_global, 1, true ) );
 
     // make sure we actually got a non-empty vector
     dolfin_assert( not vec_.is_null() );
 
+    Teuchos::ArrayView< GO > l_view( local.data(), local.size() );
+    Teuchos::RCP< TPMap > map_local( new TPMap( Nglobal, l_view, indexBase, comm_ ) );
+
     // Get a modifiable view into the ghosted vector
-    vec_local_ = vec_->offsetViewNonConst( map, 0 );
+    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );
   }
 }
 
@@ -350,6 +391,8 @@ auto Vector::init_ghosted( size_t                           n,
 auto Vector::get( real * values ) const -> void
 {
   dolfin_assert( not vec_.is_null() );
+
+  message( "get( values )" );
   dolfin_assert( values != nullptr );
 
   Teuchos::ArrayRCP< const real > arr = vec_->getData( 0 );
@@ -361,6 +404,8 @@ auto Vector::get( real * values ) const -> void
 auto Vector::set( real * values ) -> void
 {
   size_t const num_values = local_size();
+
+  message( "set( values )" );
 
   if ( num_values != 0 )
   {
@@ -377,6 +422,8 @@ auto Vector::set( real * values ) -> void
 auto Vector::add( real * values ) -> void
 {
   dolfin_assert( not vec_.is_null() );
+
+  message( "add( values )" );
 
   size_t const num_values = local_size();
 
@@ -414,7 +461,6 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
       msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
       // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
       std::cout << msg << std::endl;
-      block[i] = -500.;
     }
   }
 }

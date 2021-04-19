@@ -101,7 +101,7 @@ int main()
   L.assemble( b, true );
   bc.apply( A, b, a );
 
-  Function u( a );
+  Function u( a.trial_space() );
 
   KrylovSolver solver( bicgstab, bjacobi );
   solver.solve( A, u.vector(), b );
@@ -111,8 +111,6 @@ int main()
 
   // Save solution to file
   File( "poisson.pvd" ) << u;
-
-  dolfin_finalize();
 
   return 0;
 }

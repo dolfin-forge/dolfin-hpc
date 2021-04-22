@@ -74,11 +74,7 @@ auto Vector::copy() const -> Vector *
 
 auto Vector::zero() -> void
 {
-  if ( not vec_local_.is_null() )
-    vec_local_->putScalar( 0.0 );
-
-  if ( not vec_ghost_.is_null() )
-    vec_ghost_->putScalar( 0.0 );
+  *this = 0.0;
 }
 
 //-----------------------------------------------------------------------------
@@ -290,14 +286,15 @@ auto Vector::init( size_t N, bool ) -> void
 
 //-----------------------------------------------------------------------------
 
-auto Vector::init_ghosted( size_t                           n,
+auto Vector::init_ghosted( size_t,
                            _ordered_set< size_t > &         indices,
                            _ordered_map< size_t, size_t > & ) -> void
 {
   dolfin_assert( not vec_local_.is_null() );
 
   // sync ghosts -> local
-  apply();
+  if ( not vec_ghost_.is_null() )
+    apply();
 
   // compute the ghost map ( global map - local map )
   std::vector< GO > new_ghost_indices;
@@ -418,8 +415,8 @@ auto Vector::get( real * values ) const -> void
   dolfin_assert( not vec_local_.is_null() );
   dolfin_assert( values != nullptr );
 
-  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
-  std::copy( arr.get(), arr.get() + local_size(), values );
+  Teuchos::ArrayRCP< real const > data = vec_local_->getData( 0 );
+  std::copy( data.get(), data.get() + local_size(), values );
 }
 
 //-----------------------------------------------------------------------------
@@ -542,8 +539,8 @@ auto Vector::min() const -> real
 {
   dolfin_assert( not vec_local_.is_null() );
 
-  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
-  real min = *std::min_element( arr.get(), arr.get() + arr.size() );
+  Teuchos::ArrayRCP< real const > data = vec_local_->getData( 0 );
+  real min = *std::min_element( data.get(), data.get() + data.size() );
 
   MPI::all_reduce_in_place< MPI::min >( min );
 
@@ -556,8 +553,8 @@ auto Vector::max() const -> real
 {
   dolfin_assert( not vec_local_.is_null() );
 
-  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
-  real max = *std::min_element( arr.get(), arr.get() + arr.size() );
+  Teuchos::ArrayRCP< real const > data = vec_local_->getData( 0 );
+  real max = *std::max_element( data.get(), data.get() + data.size() );
 
   MPI::all_reduce_in_place< MPI::max >( max );
 
@@ -576,9 +573,11 @@ auto Vector::pointwise( const GenericVector &, VectorPointwiseOp ) const -> void
 
 auto Vector::operator*=( const real a ) -> Vector &
 {
-  dolfin_assert( not vec_local_.is_null() );
+  if ( not vec_local_.is_null() )
+    vec_local_->scale( a );
 
-  vec_local_->scale( a );
+  if ( not vec_ghost_.is_null() )
+    vec_ghost_->scale( a );
 
   return *this;
 }
@@ -604,7 +603,13 @@ auto Vector::operator*=( const GenericVector & y ) -> Vector &
   trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
   dolfin_assert( not Y_.vec_local_.is_null() );
 
-  vec_local_->elementWiseMultiply( 1.0, *( vec_local_->getVector( 0 ) ), *( Y_.vec_local_ ), 0.0 );
+  if ( not vec_local_.is_null() )
+    vec_local_->elementWiseMultiply( 1.0, *( vec_local_->getVector( 0 ) ),
+                                     *( Y_.vec_local_ ), 0.0 );
+
+  if ( not vec_ghost_.is_null() and not Y_.vec_ghost_.is_null() )
+    vec_ghost_->elementWiseMultiply( 1.0, *( vec_ghost_->getVector( 0 ) ),
+                                     *( Y_.vec_ghost_ ), 0.0 );
 
   return *this;
 }
@@ -659,6 +664,12 @@ auto Vector::operator=( Vector const & v ) -> Vector &
     dolfin_assert( not vec_local_.is_null() );
 
     vec_local_->assign( *v.vec_local_ );
+
+    if ( not vec_local_.is_null() )
+      vec_local_->assign( *v.vec_local_ );
+
+    if ( not vec_ghost_.is_null() and not v.vec_ghost_.is_null() )
+      vec_ghost_->assign( *v.vec_ghost_ );
   }
 
   return *this;
@@ -668,9 +679,11 @@ auto Vector::operator=( Vector const & v ) -> Vector &
 
 auto Vector::operator=( real a ) -> Vector &
 {
-  dolfin_assert( not vec_local_.is_null() );
+  if ( not vec_local_.is_null() )
+    vec_local_->putScalar( a );
 
-  vec_local_->putScalar( a );
+  if ( not vec_ghost_.is_null() )
+    vec_ghost_->putScalar( a );
 
   return *this;
 }

@@ -27,7 +27,7 @@ public:
   //--- Implementation of the GenericTensor interface ---
 
   /// Initialize zero tensor using sparsity pattern
-  void init( const GenericSparsityPattern & sparsity_pattern ) override = 0;
+  inline void init( const GenericSparsityPattern & sparsity_pattern ) override;
 
   /// Return copy of tensor
   auto copy() const -> GenericVector * override = 0;
@@ -171,6 +171,13 @@ public:
   /// Set given entry to value
   virtual void setitem( size_t i, real value );
 };
+
+//-----------------------------------------------------------------------------
+
+inline void GenericVector::init( const GenericSparsityPattern & sparsity_pattern )
+{
+  init( sparsity_pattern.size( 0 ), sparsity_pattern.is_distributed() );
+}
 
 //-----------------------------------------------------------------------------
 

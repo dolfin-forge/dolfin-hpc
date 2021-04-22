@@ -29,7 +29,6 @@ namespace dolfin
 class Cell;
 class Expression;
 class Form;
-class BilinearForm;
 class Mesh;
 class SubFunction;
 
@@ -56,9 +55,6 @@ public:
 
   /// Copy constructor
   Function( Function const & other );
-
-  /// Copy constructor
-  Function( BilinearForm const & form );
 
   /// Destructor
   ~Function() override;
@@ -202,9 +198,7 @@ public:
   auto waxpy( real a, const Function & x, const Function & y ) -> Function &;
 
   /// Add multiple of given vector (z=a*x+b*y+c*z)
-  auto
-    axpbypcz( real a, const Function & x, real b, const Function & y, real c )
-      -> Function &;
+  auto axpbypcz( real a, const Function & x, real b, const Function & y, real c ) -> Function &;
 
   /// Assignment to a real value, error if empty
   auto operator=( real value ) -> Function &;

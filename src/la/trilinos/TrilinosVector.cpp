@@ -20,7 +20,7 @@ namespace trilinos
 //-----------------------------------------------------------------------------
 
 Vector::Vector()
-  : Variable( "x", "a sparse vector" )
+  : Variable( "x", "a vector" )
 {
   // Do nothing
 }
@@ -28,7 +28,7 @@ Vector::Vector()
 //-----------------------------------------------------------------------------
 
 Vector::Vector( size_t N, bool distributed )
-  : Variable( "x", "a sparse vector" )
+  : Variable( "x", "a vector" )
 {
   // Create Tpetra vector
   init( N, distributed );
@@ -36,25 +36,22 @@ Vector::Vector( size_t N, bool distributed )
 
 //-----------------------------------------------------------------------------
 
-// Vector::Vector( TPVector x )
-//   : Variable( "x", "a vector" )
-// {
-// }
-
-//-----------------------------------------------------------------------------
-
 Vector::Vector( Vector const & copy )
   : Variable( "x", "a vector" )
 {
-  if ( not copy.vec_.is_null() )
+  if ( not copy.vec_local_.is_null() )
   {
     // Create with same map
-    Teuchos::RCP< TPMap const > v_ghostmap( copy.vec_->getMap() );
-    Teuchos::RCP< TPMap const > v_xmap( copy.vec_local_->getMap() );
-    vec_ = Teuchos::rcp( new TPVector( v_ghostmap, 1 ) );
+    Teuchos::RCP< TPMap const > v_local( copy.vec_local_->getMap() );
+    vec_local_ = Teuchos::rcp( new TPVector( v_local, 1 ) );
+    vec_local_->assign( *copy.vec_local_ );
+  }
 
-    vec_->assign( *copy.vec_ );
-    vec_local_ = vec_->offsetViewNonConst( v_xmap, 0 );
+  if ( not copy.vec_ghost_.is_null() )
+  {
+    Teuchos::RCP< TPMap const > v_ghost( copy.vec_ghost_->getMap() );
+    vec_ghost_ = Teuchos::rcp( new TPVector( v_ghost, 1 ) );
+    vec_ghost_->assign( *copy.vec_ghost_ );
   }
 }
 
@@ -62,7 +59,8 @@ Vector::Vector( Vector const & copy )
 
 Vector::~Vector()
 {
-  clear();
+  vec_local_ = Teuchos::null;
+  vec_ghost_ = Teuchos::null;
 }
 
 //-----------------------------------------------------------------------------
@@ -76,31 +74,40 @@ auto Vector::copy() const -> Vector *
 
 auto Vector::zero() -> void
 {
-  dolfin_assert( not vec_.is_null() );
-  vec_->putScalar( 0.0 );
+  if ( not vec_local_.is_null() )
+    vec_local_->putScalar( 0.0 );
+
+  if ( not vec_ghost_.is_null() )
+    vec_ghost_->putScalar( 0.0 );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::apply( FinalizeType ) -> void
 {
-  dolfin_assert( not vec_.is_null() );
+  if ( not vec_ghost_.is_null() )
+  {
+    dolfin_assert( not vec_local_.is_null() );
 
-  // update_ghost_values();
+    Teuchos::RCP< TPMap const > map_ghost( vec_ghost_->getMap() );
+    Teuchos::RCP< TPMap const > map_local( vec_local_->getMap() );
 
-  Teuchos::RCP< TPMap const > map = vec_local_->getMap();
-  Teuchos::RCP< TPVector >    y( new TPVector( map, 1 ) );
-  Teuchos::RCP< TPMap const > ghostmap = vec_->getMap();
+    // check if ghosts have been modified on any process
+    MPI::all_reduce_in_place< MPI::sum >( ghosts_need_sync_, MPI::DOLFIN_COMM );
 
-  // Export from overlapping map ghostmap, to non-overlapping xmap
-  Tpetra::Export< LO, GO, TPNode > exporter( ghostmap, map );
+    if ( ghosts_need_sync_ )
+    {
+      // add our local ghost part to the global vector
+      Tpetra::Export< LO, GO, TPNode > exporter( map_ghost, map_local );
+      vec_local_->doExport( *vec_ghost_, exporter, Tpetra::ADD );
 
-  // Forward export to reduction vector
-  y->doExport( *vec_, exporter, Tpetra::ADD );
+      ghosts_need_sync_ = false;
+    }
 
-  // Copy back into _x_ghosted
-  Tpetra::Import< LO, GO, TPNode > importer( map, ghostmap );
-  vec_->doImport( *y, importer, Tpetra::INSERT );
+    // replace our ghost points by the global owners value
+    Tpetra::Export< LO, GO, TPNode > exporter( map_local, map_ghost );
+    vec_ghost_->doExport( *vec_local_, exporter, Tpetra::REPLACE );
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -150,38 +157,45 @@ auto MPIgather( MPI_Comm                     comm,
 
 auto Vector::disp( size_t ) const -> void
 {
-  Teuchos::RCP< const TPMap > xmap = vec_->getMap();
-
   std::stringstream ss;
 
   size_t const rank = MPI::rank();
   size_t const m    = MPI::size();
 
-  if ( rank == 0 )
+  if ( not vec_local_.is_null() )
   {
-    ss << xmap->description() << "\n"
-       << "trilinos::vector"
-       << "\n---";
-    for ( size_t j = 0; j != m; ++j )
-      ss << "-";
+    Teuchos::RCP< const TPMap > map_local = vec_local_->getMap();
+
+    if ( rank == 0 )
+    {
+      ss << map_local->description() << "\n"
+         << "trilinos::vector"
+         << "\n---";
+      for ( size_t j = 0; j < m; ++j )
+        ss << "-";
+      ss << "\n";
+    }
+
+    ss << rank << "] local:\n";
+    ss << map_local->description() << "\n";
+    Teuchos::ArrayRCP< real const > arr_local = vec_local_->getData( 0 );
+
+    for ( std::size_t j = 0; j != map_local->getNodeNumElements(); ++j )
+      ss << j << " -> " << map_local->getGlobalElement( j ) << " = " << arr_local[j] << "\n";
     ss << "\n";
   }
 
-  ss << rank << "] ";
-  for ( size_t j = 0; j < m; ++j )
+  if ( not vec_ghost_.is_null() )
   {
-    if ( xmap->isNodeGlobalElement( j ) )
-      ss << "X";
-    else
-      ss << " ";
+    ss << rank << "] ghost:\n";
+    Teuchos::RCP< const TPMap > map_ghost     = vec_ghost_->getMap();
+    Teuchos::ArrayRCP< real const > arr_ghost = vec_ghost_->getData( 0 );
+    ss << map_ghost->description() << "\n";
+
+    for ( std::size_t j = 0; j != map_ghost->getNodeNumElements(); ++j )
+      ss << j << " -> " << map_ghost->getGlobalElement( j ) << " = " << arr_ghost[j] << "\n";
+    ss << "\n";
   }
-  ss << "\n";
-
-  Teuchos::ArrayRCP< real const > arr = vec_->getData( 0 );
-
-  for ( std::size_t j = 0; j != xmap->getNodeNumElements(); ++j )
-    ss << j << " -> " << xmap->getGlobalElement( j ) << " = " << arr[j] << "\n";
-  ss << "\n";
 
   MPI_Comm mpi_comm = *( comm_->getRawMpiComm() );
 
@@ -194,123 +208,42 @@ auto Vector::disp( size_t ) const -> void
       std::cout << s;
   }
 
+  // FIXME use just this?
   // Teuchos::RCP< std::ostream > ostr;
   // Teuchos::FancyOStream os( ostr );
   // vec_->describe( os, Teuchos::VERB_EXTREME );
 
-  vec_->print( std::cout );
+  vec_local_->print( std::cout );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::size() const -> size_t
 {
-  if ( vec_.is_null() )
+  if ( vec_local_.is_null() )
     return 0;
   else
-    return vec_->getMap()->getMaxAllGlobalIndex() + 1;
+    return vec_local_->getMap()->getMaxAllGlobalIndex() + 1;
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::local_size() const -> size_t
 {
-  if ( vec_.is_null() )
+  if ( vec_local_.is_null() )
     return 0;
   else
-    return vec_->getLocalLength();
+    return vec_local_->getLocalLength();
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::offset() const -> size_t
 {
-  if ( vec_.is_null() )
+  if ( vec_local_.is_null() )
     return 0;
   else
-    return vec_->getMap()->getMinGlobalIndex();
-}
-
-//-----------------------------------------------------------------------------
-
-auto Vector::init( GenericSparsityPattern const & sparsity_pattern ) -> void
-{
-  if ( vec_.is_null() )
-  {
-    SparsityPattern const & spattern = reinterpret_cast< SparsityPattern const & >( sparsity_pattern );
-
-    size_t const pe_rank     = MPI::rank();
-    size_t const nLocalRows  = spattern.size( 0 );
-    size_t       nGlobalRows = 0;
-
-    // compute the global vector size
-    MPI::all_reduce< MPI::sum >( nLocalRows, nGlobalRows );
-    dolfin_assert( nLocalRows <= nGlobalRows );
-
-    // the local vector range is just our local range from spattern
-    std::vector< GO > lIndices( nLocalRows );
-    {
-      std::vector< size_t > lRowRange( 2, DOLFIN_SIZE_T_MAX );
-      spattern.get_range( pe_rank, lRowRange.data() );
-      std::iota( lIndices.begin(), lIndices.end(), lRowRange[0] );
-    }
-
-    // global indices for our vector range map
-    std::vector< GO > gIndices;
-
-    if ( spattern.rank() == 1 )
-    {
-      // for rank == 1 the global indices are the same as our local indices
-      gIndices = lIndices;
-      // _ordered_set< size_t > gColset;
-      // gColset.insert( lIndices.begin(), lIndices.end() );
-
-      // std::vector< size_t > diag;
-      // spattern.diagonal_entries( 0, diag );
-      // gColset.insert( diag.begin(), diag.end() );
-
-      // gIndices.resize( gColset.size() );
-      // std::copy( gColset.begin(), gColset.end(), gIndices.begin() );
-    }
-    else // ( spattern.rank() == 2 )
-    {
-      _ordered_set< size_t > gColset;
-      gColset.insert( lIndices.begin(), lIndices.end() );
-
-      // dont be confused here, we take all the (unique) column indices from the
-      // matrix to make sure we get all the ghost points into our vector range
-      for ( size_t i = 0; i < nLocalRows; ++i )
-      {
-        // get columns for this row
-        std::vector< size_t > diag, off_diag;
-        spattern.diagonal_entries( i, diag );
-        spattern.off_diagonal_entries( i, off_diag );
-
-        // insert (potentially new) columns in the set
-        gColset.insert( diag.begin(), diag.end() );
-        gColset.insert( off_diag.begin(), off_diag.end() );
-      }
-
-      // copy the unique set of column indices into the column vector
-      gIndices.resize( gColset.size() );
-      std::copy( gColset.begin(), gColset.end(), gIndices.begin() );
-    }
-
-    Teuchos::ArrayView< GO > gColIndices_view( gIndices.data(), gIndices.size() );
-    Teuchos::RCP< TPMap > map_global( new TPMap( nGlobalRows, gColIndices_view, indexBase, comm_ ) );
-
-    // Vector - create with overlap
-    vec_ = Teuchos::rcp( new TPVector( map_global, 1, true ) );
-
-    // make sure we actually got a non-empty vector
-    dolfin_assert( not vec_.is_null() );
-
-    Teuchos::ArrayView< GO > lIndices_view( lIndices.data(), lIndices.size() );
-    Teuchos::RCP< TPMap > map_local( new TPMap( nGlobalRows, lIndices_view, indexBase, comm_ ) );
-
-    // Get a modifiable view into the ghosted vector
-    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );
-  }
+    return vec_local_->getMap()->getMinGlobalIndex();
 }
 
 //-----------------------------------------------------------------------------
@@ -324,56 +257,34 @@ auto Vector::init( size_t N ) -> void
 
 auto Vector::init( size_t N, bool ) -> void
 {
-  if ( vec_.is_null() )
+  if ( vec_local_.is_null() )
   {
-    // // compute the global vector size
-    // size_t Nglobal = 0;
-    // MPI::all_reduce< MPI::sum >( N, Nglobal );
-    // dolfin_assert( N <= Nglobal );
-
-    // Teuchos::RCP< TPMap > map( new TPMap( Nglobal, N, indexBase, comm_ ) );
-
-    // // Vector - create with overlap
-    // vec_= Teuchos::rcp( new TPVector( map, 1, true ) );
-
-    // // make sure we actually got a non-empty vector
-    // dolfin_assert( not vec_.is_null() );
-
-    // // Get a modifiable view into the ghosted vector
-    // vec_local_ = vec_->offsetViewNonConst( map, 0 );
-
-    size_t Nglobal = 0;
-    MPI::all_reduce< MPI::sum >( N, Nglobal );
-    dolfin_assert( N <= Nglobal );
-
+    // compute global number of elements amd local offset
     std::vector< size_t > Nall( MPI::size() );
     MPI::all_gather( &N, 1, Nall.data(), 1 );
 
-    size_t my_start = 0;
-    for ( size_t i = 0; i < Nall.size(); ++i )
-      if ( i < MPI::rank() )
-        my_start += Nall[i];
+    size_t const Nglobal = std::accumulate( Nall.begin(), Nall.end(), 0 );
+    size_t const offset  = std::accumulate( Nall.data(), Nall.data() + MPI::rank(), 0 );
 
-    std::vector< size_t > global( Nglobal );
-    std::iota( global.begin(), global.end(), 0 );
+    dolfin_assert( N <= Nglobal );
+    dolfin_assert( offset <= Nglobal );
 
-    std::vector< size_t > local( N );
-    std::iota( local.begin(), local.end(), my_start );
+    // create our local index range
+    std::vector< size_t > indices( N );
+    std::iota( indices.begin(), indices.end(), offset );
 
-    Teuchos::ArrayView< GO > g_view( global.data(), global.size() );
-    Teuchos::RCP< TPMap > map_global( new TPMap( Nglobal, g_view, indexBase, comm_ ) );
+    // local and global map are the same in this case
+    Teuchos::ArrayView< GO > indices_view( indices.data(), indices.size() );
+    Teuchos::RCP< TPMap > map( new TPMap( Nglobal, indices_view, indexBase, comm_ ) );
 
     // Vector - create with overlap
-    vec_ = Teuchos::rcp( new TPVector( map_global, 1, true ) );
+    vec_local_ = Teuchos::rcp( new TPVector( map, 1, true ) );
 
     // make sure we actually got a non-empty vector
-    dolfin_assert( not vec_.is_null() );
+    dolfin_assert( not vec_local_.is_null() );
 
-    Teuchos::ArrayView< GO > l_view( local.data(), local.size() );
-    Teuchos::RCP< TPMap > map_local( new TPMap( Nglobal, l_view, indexBase, comm_ ) );
-
-    // Get a modifiable view into the ghosted vector
-    vec_local_ = vec_->offsetViewNonConst( map_local, 0 );
+    // for now we don't have any ghost info
+    vec_ghost_ = Teuchos::null;
   }
 }
 
@@ -381,86 +292,65 @@ auto Vector::init( size_t N, bool ) -> void
 
 auto Vector::init_ghosted( size_t                           n,
                            _ordered_set< size_t > &         indices,
-                           _ordered_map< size_t, size_t > & map ) -> void
+                           _ordered_map< size_t, size_t > & ) -> void
 {
-  // FIXME
-}
+  dolfin_assert( not vec_local_.is_null() );
 
-//-----------------------------------------------------------------------------
+  // sync ghosts -> local
+  apply();
 
-auto Vector::get( real * values ) const -> void
-{
-  dolfin_assert( not vec_.is_null() );
-
-  message( "get( values )" );
-  dolfin_assert( values != nullptr );
-
-  Teuchos::ArrayRCP< const real > arr = vec_->getData( 0 );
-  std::copy( arr.get(), arr.get() + local_size(), values );
-}
-
-//-----------------------------------------------------------------------------
-
-auto Vector::set( real * values ) -> void
-{
-  size_t const num_values = local_size();
-
-  message( "set( values )" );
-
-  if ( num_values != 0 )
+  // compute the ghost map ( global map - local map )
+  std::vector< GO > new_ghost_indices;
   {
-    dolfin_assert( not vec_.is_null() );
-    dolfin_assert( values != nullptr );
-
-    Teuchos::ArrayRCP< real > arr = vec_->getDataNonConst( 0 );
-    std::copy( values, values + num_values, arr.get() );
+    for ( size_t idx : indices )
+    {
+      if ( not vec_local_->getMap()->isNodeGlobalElement( idx ) )
+      {
+        new_ghost_indices.push_back( idx );
+      }
+    }
   }
-}
+  Teuchos::ArrayView< GO > new_ghost_indices_view( new_ghost_indices.data(),
+                                                   new_ghost_indices.size() );
+  Teuchos::RCP< TPMap > map_ghost( new TPMap( this->size(), new_ghost_indices_view,
+                                              indexBase, comm_ ) );
 
-//-----------------------------------------------------------------------------
+  // set the ghost vector
+  vec_ghost_ = Teuchos::rcp( new TPVector( map_ghost, 1, true ) );
 
-auto Vector::add( real * values ) -> void
-{
-  dolfin_assert( not vec_.is_null() );
-
-  message( "add( values )" );
-
-  size_t const num_values = local_size();
-
-  for ( size_t i = 0; i < num_values; ++i )
-    vec_->sumIntoLocalValue( i, 0, values[i] );
+  // sync local -> ghost
+  apply();
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
-  Teuchos::RCP< TPMap const >     map = vec_->getMap();
-  Teuchos::ArrayRCP< real const > arr = vec_->getData( 0 );
+  Teuchos::ArrayRCP< real const > local_data = vec_local_->getData( 0 );
+  Teuchos::ArrayRCP< real const > ghost_data = ( not vec_ghost_.is_null() )
+                                               ? vec_ghost_->getData( 0 )
+                                               : Teuchos::null;
 
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( not map->isNodeGlobalElement( rows[i] ) )
+    if ( vec_local_->getMap()->isNodeGlobalElement( rows[i] ) )
     {
-      std::string msg = "trilinos::Vector::get(): Row " + std::to_string(rows[i]);
-      msg += " is not global (process " + std::to_string( MPI::rank() ) + ")";
-      // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
-      std::cout << msg << std::endl;
+      LO const idx = vec_local_->getMap()->getLocalElement( rows[i] );
+      block[i]     = local_data[idx];
     }
-
-    LO const idx = map->getLocalElement( rows[i] );
-    if ( idx != Teuchos::OrdinalTraits< LO >::invalid() )
+    else if ( not vec_ghost_.is_null() )
     {
-      block[i] = arr[idx];
+      if ( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
+      {
+        LO const idx = vec_ghost_->getMap()->getLocalElement( rows[i] );
+        block[i]     = ghost_data[idx];
+      }
     }
     else
     {
-      std::string msg = "trilinos::Vector::get(): Row " + std::to_string(rows[i]);
-      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
-      // warning( "trilinos::Vector::get(): Row %d is not valid", rows[i] );
-      std::cout << msg << std::endl;
+      error( "trilinos::Vector::get(): invalid row id: %d", rows[i] );
     }
   }
 }
@@ -469,22 +359,26 @@ auto Vector::get( real * block, size_t m, const size_t * rows ) const -> void
 
 auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
 {
-  dolfin_assert( not vec_.is_null() );
-
-  Teuchos::RCP< TPMap const > map = vec_->getMap();
+  dolfin_assert( not vec_local_.is_null() );
 
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( map->isNodeGlobalElement( rows[i] ) )
+    if ( vec_local_->getMap()->isNodeGlobalElement( rows[i] ) )
     {
-      vec_->replaceGlobalValue( rows[i], 0, block[i] );
+      vec_local_->replaceGlobalValue( rows[i], 0, block[i] );
+    }
+    else if ( not vec_ghost_.is_null() )
+    {
+      if( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
+      {
+        vec_ghost_->replaceGlobalValue( rows[i], 0, block[i] );
+        ghosts_need_sync_ = true;
+      }
     }
     else
     {
-      std::string msg = "trilinos::Vector::set(): Row " + std::to_string(rows[i]);
-      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
-      // warning( "trilinos::Vector::set(): Row %d is not valid", rows[i] );
-      std::cout << msg << std::endl;
+      error( "trilinos::Vector::set(): invalid row id: %d (value: %f)",
+             rows[i], block[i] );
     }
   }
 }
@@ -493,24 +387,65 @@ auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
 
 auto Vector::add( const real * block, size_t m, const size_t * rows ) -> void
 {
-  dolfin_assert( not vec_.is_null() );
-
-  Teuchos::RCP< TPMap const > map = vec_->getMap();
+  dolfin_assert( not vec_local_.is_null() );
 
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( map->isNodeGlobalElement( rows[i] ) )
+    if ( vec_local_->getMap()->isNodeGlobalElement( rows[i] ) )
     {
-      vec_->sumIntoGlobalValue( rows[i], 0, block[i] );
+      vec_local_->sumIntoGlobalValue( rows[i], 0, block[i] );
+    }
+    else if ( not vec_ghost_.is_null() )
+    {
+      if( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
+      {
+        vec_ghost_->sumIntoGlobalValue( rows[i], 0, block[i] );
+        ghosts_need_sync_ = true;
+      }
     }
     else
     {
-      std::string msg = "trilinos::Vector::add(): Row " + std::to_string(rows[i]);
-      msg += " is not local (process " + std::to_string( MPI::rank() ) + ")";
-      // warning( "trilinos::Vector::add(): Row %d is not local", rows[i] );
-      std::cout << msg << std::endl;
+      error( "trilinos::Vector::add(): invalid row id: %d (value: %f)",
+             rows[i], block[i] );
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+
+auto Vector::get( real * values ) const -> void
+{
+  dolfin_assert( not vec_local_.is_null() );
+  dolfin_assert( values != nullptr );
+
+  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
+  std::copy( arr.get(), arr.get() + local_size(), values );
+}
+
+//-----------------------------------------------------------------------------
+
+auto Vector::set( real * values ) -> void
+{
+  dolfin_assert( not vec_local_.is_null() );
+  dolfin_assert( values != nullptr );
+
+  size_t const num_values = local_size();
+
+  for ( size_t i = 0; i < num_values; ++i )
+    vec_local_->replaceLocalValue( i, 0, values[i] );
+}
+
+//-----------------------------------------------------------------------------
+
+auto Vector::add( real * values ) -> void
+{
+  dolfin_assert( not vec_local_.is_null() );
+  dolfin_assert( values != nullptr );
+
+  size_t const num_values = local_size();
+
+  for ( size_t i = 0; i < num_values; ++i )
+    vec_local_->sumIntoLocalValue( i, 0, values[i] );
 }
 
 //-----------------------------------------------------------------------------
@@ -524,12 +459,12 @@ auto Vector::axpy( real a, const GenericVector & x ) -> void
 
 auto Vector::axpby( real a, const GenericVector & x, real b ) -> void
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
   trilinos::Vector const & X_ = x.down_cast< trilinos::Vector >();
-  dolfin_assert( not X_.vec_.is_null() );
+  dolfin_assert( not X_.vec_local_.is_null() );
 
-  vec_->update( a, *X_.vec_, b );
+  vec_local_->update( a, *X_.vec_local_, b );
 }
 
 //-----------------------------------------------------------------------------
@@ -547,67 +482,67 @@ auto Vector::axpbypcz( real                  a,
                        const GenericVector & y,
                        real                  c ) -> void
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
   trilinos::Vector const & X_ = x.down_cast< trilinos::Vector >();
-  dolfin_assert( not X_.vec_.is_null() );
+  dolfin_assert( not X_.vec_local_.is_null() );
 
   trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
-  dolfin_assert( not Y_.vec_.is_null() );
+  dolfin_assert( not Y_.vec_local_.is_null() );
 
-  vec_->update( a, *X_.vec_, b, *Y_.vec_, c );
+  vec_local_->update( a, *X_.vec_local_, b, *Y_.vec_local_, c );
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::inner( const GenericVector & y ) const -> real
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
   trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
-  dolfin_assert( not Y_.vec_.is_null() );
+  dolfin_assert( not Y_.vec_local_.is_null() );
 
-  std::vector< real >              val( 1 );
-  const Teuchos::ArrayView< real > result( val );
+  std::vector< real >              value( 1 );
+  Teuchos::ArrayView< real > const result( value );
 
-  vec_->dot( *Y_.vec_, result );
+  vec_local_->dot( *Y_.vec_local_, result );
 
-  return val[0];
+  return value[0];
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::norm( VectorNormType type ) const -> real
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
   using TPMagType = Tpetra::Vector<>::mag_type;
 
-  std::vector< TPMagType >              norms( 1 );
-  Teuchos::ArrayView< TPMagType > const norm_view( norms );
+  std::vector< TPMagType >              norm( 1 );
+  Teuchos::ArrayView< TPMagType > const norm_view( norm );
 
   switch ( type )
   {
     case l1:
-      vec_->norm1( norm_view );
+      vec_local_->norm1( norm_view );
       break;
     case l2:
-      vec_->norm2( norm_view );
+      vec_local_->norm2( norm_view );
       break;
     default:
-      vec_->normInf( norm_view );
+      vec_local_->normInf( norm_view );
       break;
   }
 
-  return norms[0];
+  return norm[0];
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::min() const -> real
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
-  Teuchos::ArrayRCP< real const > arr = vec_->getData( 0 );
+  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
   real min = *std::min_element( arr.get(), arr.get() + arr.size() );
 
   MPI::all_reduce_in_place< MPI::min >( min );
@@ -619,9 +554,9 @@ auto Vector::min() const -> real
 
 auto Vector::max() const -> real
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
-  Teuchos::ArrayRCP< real const > arr = vec_->getData( 0 );
+  Teuchos::ArrayRCP< real const > arr = vec_local_->getData( 0 );
   real max = *std::min_element( arr.get(), arr.get() + arr.size() );
 
   MPI::all_reduce_in_place< MPI::max >( max );
@@ -631,19 +566,19 @@ auto Vector::max() const -> real
 
 //-----------------------------------------------------------------------------
 
-auto Vector::pointwise( const GenericVector & x,
-                        VectorPointwiseOp     op ) const -> void
+auto Vector::pointwise( const GenericVector &, VectorPointwiseOp ) const -> void
 {
   // FIXME
+  // elementWiseMultiply  ?!
 }
 
 //-----------------------------------------------------------------------------
 
 auto Vector::operator*=( const real a ) -> Vector &
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
-  vec_->scale( a );
+  vec_local_->scale( a );
 
   return *this;
 }
@@ -652,7 +587,7 @@ auto Vector::operator*=( const real a ) -> Vector &
 
 auto Vector::operator/=( const real a ) -> Vector &
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
   dolfin_assert( a != 0.0 );
 
   ( *this ) *= 1.0 / a;
@@ -664,12 +599,12 @@ auto Vector::operator/=( const real a ) -> Vector &
 
 auto Vector::operator*=( const GenericVector & y ) -> Vector &
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
   trilinos::Vector const & Y_ = y.down_cast< trilinos::Vector >();
-  dolfin_assert( not Y_.vec_.is_null() );
+  dolfin_assert( not Y_.vec_local_.is_null() );
 
-  vec_->elementWiseMultiply( 1.0, *( vec_->getVector( 0 ) ), *( Y_.vec_ ), 0.0 );
+  vec_local_->elementWiseMultiply( 1.0, *( vec_local_->getVector( 0 ) ), *( Y_.vec_local_ ), 0.0 );
 
   return *this;
 }
@@ -720,10 +655,10 @@ auto Vector::operator=( Vector const & v ) -> Vector &
   if ( this != &v )
   {
     // Copy data (local operation)
-    dolfin_assert( not v.vec_.is_null() );
-    dolfin_assert( not vec_.is_null() );
+    dolfin_assert( not v.vec_local_.is_null() );
+    dolfin_assert( not vec_local_.is_null() );
 
-    vec_->assign( *v.vec_ );
+    vec_local_->assign( *v.vec_local_ );
   }
 
   return *this;
@@ -733,9 +668,9 @@ auto Vector::operator=( Vector const & v ) -> Vector &
 
 auto Vector::operator=( real a ) -> Vector &
 {
-  dolfin_assert( not vec_.is_null() );
+  dolfin_assert( not vec_local_.is_null() );
 
-  vec_->putScalar( a );
+  vec_local_->putScalar( a );
 
   return *this;
 }
@@ -752,29 +687,6 @@ auto Vector::vec() const -> TPVectorPtr
 auto Vector::factory() const -> LinearAlgebraFactory &
 {
   return trilinos::Factory::instance();
-}
-
-//-----------------------------------------------------------------------------
-
-void Vector::update_ghost_values()
-{
-  dolfin_assert( not vec_.is_null() );
-
-  Teuchos::RCP< TPMap const > localmap( vec_local_->getMap() );
-  Teuchos::RCP< TPMap const > map( vec_->getMap() );
-
-  // Export from non-overlapping map x, to overlapping ghost values
-  Tpetra::Import< LO, GO, TPNode > importer( localmap, map );
-
-  // FIXME: is this safe, since vec_local_ is a view into vec_?
-  vec_->doImport( *vec_local_, importer, Tpetra::INSERT );
-}
-
-//-----------------------------------------------------------------------------
-
-auto Vector::clear() -> void
-{
-  vec_ = Teuchos::null;
 }
 
 //-----------------------------------------------------------------------------

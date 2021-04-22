@@ -7,9 +7,7 @@
 #include <dolfin/common/maybe_unused.h>
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/Form.h>
-#include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/SubFunction.h>
 #include <dolfin/la/Vector.h>
@@ -46,29 +44,6 @@ Function::Function( Mesh & mesh )
   , renumbered_( false )
 {
   // Do nothing
-}
-
-//-----------------------------------------------------------------------------
-
-Function::Function( BilinearForm const & form )
-  : GenericFunction()
-  , TimeDependent()
-  , mesh_( &form.mesh() )
-  , fe_space_( new FiniteElementSpace( form.trial_space() ) )
-  , scratch_( new ScratchSpace( *fe_space_ ) )
-  , X_( new Vector() )
-  , renumbered_( false )
-{
-  if ( dolfin_get< std::string >( "linear algebra backend" ) == "Trilinos" )
-  {
-    GenericSparsityPattern * sparsity_pattern = X_->factory().createPattern();
-    SparsityPatternBuilder::build( *sparsity_pattern, form );
-    X_->init( *sparsity_pattern );
-    delete sparsity_pattern;
-  }
-
-  // Initialise function
-  InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
@@ -535,7 +510,6 @@ void Function::InitializeGhosts()
     {
       indices.insert(scratch_->dofs[j]);
     }
-
   }
 
   ghost_mapping_.clear();

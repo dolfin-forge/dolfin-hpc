@@ -64,9 +64,6 @@ public:
   /// Copy constructor
   explicit Vector( Vector const & copy );
 
-  /// Create vector from given Tpetra Vec pointer
-  // explicit Vector( TPVector x );
-
   /// Destructor
   ~Vector() override;
 
@@ -94,9 +91,6 @@ public:
 
   /// Return rank's offset into vector
   auto offset() const -> size_t override;
-
-  // init from SparsityPattern
-  auto init( GenericSparsityPattern const & sparsity_pattern ) -> void override;
 
   /// Initialize vector of local size N, distributed by default
   auto init( size_t N ) -> void override;
@@ -189,20 +183,15 @@ public:
   /// Return linear algebra backend factory
   auto factory() const -> LinearAlgebraFactory & override;
 
-  /// Update the ghost values of the vector
-  void update_ghost_values();
-
 private:
   friend trilinos::Matrix;
 
-  //
-  auto clear() -> void;
+  // local (no-overlapping) vector
+  TPVectorPtr vec_local_ { Teuchos::null };
 
-  // Tpetra multivector
-  TPVectorPtr vec_;
-
-  // local view into the vector
-  TPVectorPtr vec_local_;
+  // ghost (overlapping) vector
+  TPVectorPtr vec_ghost_ { Teuchos::null };
+  bool        ghosts_need_sync_ { false };
 };
 
 } // end namespace trilinos

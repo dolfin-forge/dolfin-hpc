@@ -90,9 +90,6 @@ auto KrylovSolver::solve( trilinos::Matrix const & A,
   // Reinitialize solver if necessary
   init();
 
-  // Reinitialize solution vector if necessary
-  x.init( b.local_size() );
-
   // set Matrix
   problem_->setOperator( A.mat() );
 
@@ -114,7 +111,7 @@ auto KrylovSolver::solve( trilinos::Matrix const & A,
   writeReport( result, iters );
 
   // Update ghosts
-  x.update_ghost_values();
+  x.apply();
 
   return iters;
 }

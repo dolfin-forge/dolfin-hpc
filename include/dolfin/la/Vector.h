@@ -66,8 +66,6 @@ public:
 
   //--- Implementation of the GenericVector interface ---
 
-  void init( const GenericSparsityPattern & sparsity_pattern ) override;
-
   /// Initialize vector of size N
   void init( size_t N ) override;
 
@@ -211,14 +209,6 @@ inline void Vector::apply( FinalizeType finaltype )
 inline void Vector::disp( size_t precision ) const
 {
   vector_->disp( precision );
-}
-
-//-----------------------------------------------------------------------------
-
-
-inline void Vector::init( const GenericSparsityPattern & sparsity_pattern )
-{
-  vector_->init( sparsity_pattern );
 }
 
 //-----------------------------------------------------------------------------

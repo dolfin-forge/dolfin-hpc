@@ -19,7 +19,7 @@ namespace SparsityPatternBuilder
 
 /// Build sparsity pattern
 void build( GenericSparsityPattern & sparsity_pattern,
-            Form const & form );
+            Form &                   form );
 
 } // end namespace SparsityPatternBuilder
 

@@ -455,14 +455,14 @@ auto Matrix::mult( const GenericVector & x,
     // // Resize RHS if empty
     // if ( Y.size() == 0 )
     //   init_vector( Y, 0 );
-    dolfin_assert( not Y.vec_.is_null() );
+    dolfin_assert( not Y.vec().is_null() );
 
     if ( size( 0 ) != Y.size() )
     {
       error( "trilinos::Matrix: Vector for matrix-vector result has wrong size" );
     }
 
-    mat_->apply( *X.vec_, *Y.vec_ );
+    mat_->apply( *X.vec(), *Y.vec() );
   }
   else // transposed
   {
@@ -477,14 +477,14 @@ auto Matrix::mult( const GenericVector & x,
     // // Resize RHS if empty
     // if ( Y.size() == 0 )
     //   init_vector( Y, 1 );
-    dolfin_assert( not Y.vec_.is_null() );
+    dolfin_assert( not Y.vec().is_null() );
 
     if ( size( 1 ) != Y.size() )
     {
       error( "trilinos::Matrix: Vector for transpose matrix-vector result has wrong size" );
     }
 
-    mat_->apply( *X.vec_, *Y.vec_, Teuchos::TRANS );
+    mat_->apply( *X.vec(), *Y.vec(), Teuchos::TRANS );
   }
 }
 

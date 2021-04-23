@@ -89,15 +89,24 @@ auto Vector::apply( FinalizeType ) -> void
     Teuchos::RCP< TPMap const > map_local( vec_local_->getMap() );
 
     // check if ghosts have been modified on any process
-    MPI::all_reduce_in_place< MPI::sum >( ghosts_need_sync_, MPI::DOLFIN_COMM );
+    bool ghosts_need_sync = not ghost_stash_.empty();
+    MPI::all_reduce_in_place< MPI::sum >( ghosts_need_sync, MPI::DOLFIN_COMM );
 
-    if ( ghosts_need_sync_ )
+    if ( ghosts_need_sync )
     {
+      // set ghosts to zero
+      vec_ghost_->putScalar( 0.0 );
+
+      // insert ghost additions
+      for ( std::pair< GO const, real > const & ghost : ghost_stash_ )
+        vec_ghost_->replaceGlobalValue( ghost.first, 0, ghost.second );
+
+      // clear ghost stash
+      ghost_stash_.clear();
+
       // add our local ghost part to the global vector
       Tpetra::Export< LO, GO, TPNode > exporter( map_ghost, map_local );
       vec_local_->doExport( *vec_ghost_, exporter, Tpetra::ADD );
-
-      ghosts_need_sync_ = false;
     }
 
     // replace our ghost points by the global owners value
@@ -366,8 +375,7 @@ auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
     {
       if( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
       {
-        vec_ghost_->replaceGlobalValue( rows[i], 0, block[i] );
-        ghosts_need_sync_ = true;
+        ghost_stash_[rows[i]] = block[i];
       }
     }
     else
@@ -394,8 +402,7 @@ auto Vector::add( const real * block, size_t m, const size_t * rows ) -> void
     {
       if( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
       {
-        vec_ghost_->sumIntoGlobalValue( rows[i], 0, block[i] );
-        ghosts_need_sync_ = true;
+        ghost_stash_[rows[i]] += block[i];
       }
     }
     else

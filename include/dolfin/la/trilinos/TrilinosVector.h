@@ -189,7 +189,7 @@ private:
 
   // ghost (overlapping) vector
   TPVectorPtr vec_ghost_ { Teuchos::null };
-  bool        ghosts_need_sync_ { false };
+  _map< GO, real > ghost_stash_;
 };
 
 } // end namespace trilinos

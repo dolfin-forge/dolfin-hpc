@@ -66,8 +66,6 @@ int main()
 {
   dolfin_init();
 
-  dolfin_set( "linear algebra backend", "Trilinos" );
-
   // Create mesh
   Mesh mesh( "UnitSquareMesh_32x32.bin" );
 

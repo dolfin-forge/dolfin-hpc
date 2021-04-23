@@ -72,9 +72,7 @@ public:
   /// Initialize vector of size N and distribute if specified
   void init( size_t N, bool distributed ) override;
 
-  void init_ghosted( size_t                           n,
-                     _ordered_set< size_t > &         indices,
-                     _ordered_map< size_t, size_t > & map ) override;
+  void init_ghosted( _ordered_set< size_t > & indices ) override;
 
   /// Return size of vector
   size_t size() const override;
@@ -227,11 +225,9 @@ inline void Vector::init( size_t N, bool distributed )
 
 //-----------------------------------------------------------------------------
 
-inline void Vector::init_ghosted( size_t                           n,
-                                  _ordered_set< size_t > &         indices,
-                                  _ordered_map< size_t, size_t > & map )
+inline void Vector::init_ghosted( _ordered_set< size_t > & indices )
 {
-  vector_->init_ghosted( n, indices, map );
+  vector_->init_ghosted( indices );
 }
 
 //-----------------------------------------------------------------------------

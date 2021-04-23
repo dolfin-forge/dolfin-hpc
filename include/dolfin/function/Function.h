@@ -60,7 +60,6 @@ public:
   ~Function() override;
 
   //--- DEFERRED INITIALIZATION -----------------------------------------------
-  // NOTE: Beware, camembert !
 
   /// Create an empty discrete function without any mesh assignment
   Function();
@@ -241,10 +240,7 @@ private:
   }
 
   /// Initialize Vector
-  void InitializeVector();
-
-  /// Initialize ghost pattern
-  void InitializeGhosts();
+  void init_vector();
 
 private:
   /// Mesh, only allow modification by swap or assignment
@@ -259,16 +255,12 @@ private:
   /// Vector of dofs
   GenericVector * X_ { nullptr };
 
-  /// Renumbered dof_map;
-  bool renumbered_ { false };
-
   /// function cache
   std::vector< size_t > indices_;
   std::vector< real >   data_cache_;
 
   /// cached mappings
-  _map< size_t, size_t >         cache_mapping_;
-  _ordered_map< size_t, size_t > ghost_mapping_;
+  _map< size_t, size_t > cache_mapping_;
 };
 
 //-----------------------------------------------------------------------------

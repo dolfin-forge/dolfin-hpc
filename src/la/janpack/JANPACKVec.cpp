@@ -198,7 +198,7 @@ void JANPACKVec::zero()
 
 dolfin::size_t JANPACKVec::size() const
 {
-  size_t32_t m = 0;
+  uint32_t m = 0;
   jp_vec_size( const_cast< jp_vec_type * >( x_ ), &m );
   return static_cast< size_t >( m );
 }
@@ -207,7 +207,7 @@ dolfin::size_t JANPACKVec::size() const
 
 dolfin::size_t JANPACKVec::local_size() const
 {
-  size_t32_t n = 0;
+  uint32_t n = 0;
   jp_vec_local_size( const_cast< jp_vec_type * >( x_ ), &n );
 
   return static_cast< size_t >( n );
@@ -217,7 +217,7 @@ dolfin::size_t JANPACKVec::local_size() const
 
 dolfin::size_t JANPACKVec::offset() const
 {
-  size_t32_t range[2];
+  uint32_t range[2];
 
   if ( x_ )
     jp_vec_range( const_cast< jp_vec_type * >( x_ ), range );
@@ -411,24 +411,22 @@ jp_vec_type * JANPACKVec::vec() const
 
 //-----------------------------------------------------------------------------
 
-void JANPACKVec::init_ghosted( size_t                           n,
-                               _ordered_set< size_t > &         indices,
-                               _ordered_map< size_t, size_t > & map )
+void JANPACKVec::init_ghosted( _ordered_set< size_t > & indices )
 {
 
   if ( is_ghosted )
     apply();
 
-  size_t32_t range[2];
+  uint32_t range[2];
   jp_vec_range( x_, range );
 
-  std::vector< size_t32_t >            ghost_indices;
-  _ordered_set< size_t32_t >::iterator sit;
+  std::vector< uint32_t >            ghost_indices;
+  _ordered_set< uint32_t >::iterator sit;
   for ( sit = indices.begin(); sit != indices.end(); ++sit )
   {
-    if ( *sit < ( size_t32_t ) range[0] || *sit >= ( size_t32_t ) range[1] )
+    if ( *sit < ( uint32_t ) range[0] || *sit >= ( uint32_t ) range[1] )
     {
-      ghost_indices.push_back( ( size_t32_t ) *sit );
+      ghost_indices.push_back( ( uint32_t ) *sit );
     }
   }
 

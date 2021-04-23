@@ -68,9 +68,7 @@ public:
   void init( size_t N, bool distributed ) override;
 
   /// Initialize ghost entries
-  void init_ghosted( size_t                           n,
-                     _ordered_set< size_t > &         indices,
-                     _ordered_map< size_t, size_t > & map ) override;
+  void init_ghosted( _ordered_set< size_t > & indices ) override;
 
   /// Return size of vector
   auto size() const -> size_t override;

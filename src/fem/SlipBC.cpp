@@ -125,8 +125,7 @@ void SlipBC::apply( GenericMatrix &      A,
         rows.insert( celldofs.begin(), celldofs.end() );
       }
 
-      _ordered_map< size_t, size_t > mapping;
-      b.init_ghosted( rows.size(), rows, mapping );
+      b.init_ghosted( rows );
     }
 
     // Initialize normal field on given space and compute at the boundary

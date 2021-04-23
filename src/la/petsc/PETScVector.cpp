@@ -247,9 +247,7 @@ void PETScVector::disp( size_t ) const
   end();
 }
 //-----------------------------------------------------------------------------
-void PETScVector::init_ghosted( size_t,
-                                _ordered_set< size_t > &         indices,
-                                _ordered_map< size_t, size_t > & map )
+void PETScVector::init_ghosted( _ordered_set< size_t > & indices )
 {
   if ( !is_distributed_ )
   {
@@ -277,16 +275,6 @@ void PETScVector::init_ghosted( size_t,
   }
 
   VecGetValues( x_, local_size, rows.data(), values.data() );
-
-  if ( is_ghosted_ && map.size() > 0 )
-  {
-    // dolfin_assert(map.size() > 0);
-    for ( int i = 0; i < local_size; i++ )
-    {
-      // dolfin_assert(map.count(low + i) > 0);
-      rows[i] = map[low + i];
-    }
-  }
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   VecDestroy( &x_ );

@@ -286,9 +286,7 @@ auto Vector::init( size_t N, bool ) -> void
 
 //-----------------------------------------------------------------------------
 
-auto Vector::init_ghosted( size_t,
-                           _ordered_set< size_t > &         indices,
-                           _ordered_map< size_t, size_t > & ) -> void
+auto Vector::init_ghosted( _ordered_set< size_t > & indices ) -> void
 {
   dolfin_assert( not vec_local_.is_null() );
 

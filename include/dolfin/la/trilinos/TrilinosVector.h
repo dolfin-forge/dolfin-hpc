@@ -99,9 +99,7 @@ public:
   auto init( size_t N, bool distributed ) -> void override;
 
   /// Initialize ghost entries
-  auto init_ghosted( size_t                           n,
-                     _ordered_set< size_t > &         indices,
-                     _ordered_map< size_t, size_t > & map ) -> void override;
+  auto init_ghosted( _ordered_set< size_t > & indices ) -> void override;
 
   /// Get block of values
   auto get( real * block, size_t m, const size_t * rows ) const -> void override;

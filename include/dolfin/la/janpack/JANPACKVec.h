@@ -64,8 +64,7 @@ namespace dolfin
     void init(size_t N, bool distributed);
 
     ///
-    void init_ghosted(size_t n, _ordered_set<size_t>& indices,
-		      _ordered_map<size_t, size_t>& map);
+    void init_ghosted( _ordered_set<size_t>& indices );
 
     /// Return size of vector
     size_t size() const;

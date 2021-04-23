@@ -520,8 +520,7 @@ void initGlobalTensor( GenericTensor & A, Form & form, bool reset_tensor )
         }
       }
 
-      _ordered_map< size_t, size_t > empty;
-      A.down_cast< GenericVector >().init_ghosted( indices.size(), indices, empty );
+      A.down_cast< GenericVector >().init_ghosted( indices );
     }
 
     delete sparsity_pattern;

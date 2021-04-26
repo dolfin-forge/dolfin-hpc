@@ -200,6 +200,8 @@ void Form::init()
   rank_             = this->form().rank();
   num_coefficients_ = this->form().num_coefficients();
 
+  size_t const tdim = mesh_.topology().dim();
+
   // init FiniteElementSpaces
   if ( spaces_.empty() )
   {
@@ -217,6 +219,12 @@ void Form::init()
       dofmaps_.emplace_back( &(DofMap::acquire( mesh_, *dof, false )) );
       delete dof;
 
+      for ( size_t i = 0; i <= tdim; ++i )
+      {
+        if ( dofmaps_.back()->ufc().needs_mesh_entities( i ) == true )
+          mesh_.init(i);
+      }
+
       // create FiniteElementSpaces
       spaces_.emplace_back( elements_[i], *dofmaps_[i] );
     }
@@ -224,6 +232,8 @@ void Form::init()
     // initialize UFCCache
     cache_.init( *this );
   }
+
+  mesh_.topology().num_entities_update();
 
   // Create cell integrals
   destruct( cell_integrals_ );

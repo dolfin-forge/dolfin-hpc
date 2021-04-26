@@ -110,8 +110,8 @@ auto Vector::apply( FinalizeType ) -> void
     }
 
     // replace our ghost points by the global owners value
-    Tpetra::Export< LO, GO, TPNode > exporter( map_local, map_ghost );
-    vec_ghost_->doExport( *vec_local_, exporter, Tpetra::REPLACE );
+    Tpetra::Import< LO, GO, TPNode > importer( map_local, map_ghost );
+    vec_ghost_->doImport( *vec_local_, importer, Tpetra::REPLACE );
   }
 }
 

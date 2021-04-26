@@ -66,8 +66,6 @@ int main()
 {
   dolfin_init();
 
-  dolfin_set( "linear algebra backend", "Trilinos" );
-
   // Create mesh
   Mesh mesh( "UnitSquareMesh_32x32.bin" );
 
@@ -103,7 +101,6 @@ int main()
   message( "vector inf norm: %e", u.vector().norm( linf ) );
 
   // Save solution to file
-  u.vector().disp();
   File( "poisson.pvd" ) << u;
 
   return 0;

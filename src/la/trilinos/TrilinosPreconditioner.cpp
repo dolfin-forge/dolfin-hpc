@@ -46,7 +46,6 @@ auto Preconditioner::init( Matrix const & P, PreconditionerType pc_type ) -> voi
 auto Preconditioner::init( Matrix const & P ) -> void
 {
   Teuchos::RCP< Teuchos::ParameterList > params = Teuchos::parameterList();
-
   switch ( pc_type_ )
   {
     case cheb:
@@ -133,6 +132,14 @@ auto Preconditioner::set( KrylovSolver & solver ) -> void
 {
   if ( pc_ != Teuchos::null )
   {
+    // FIXME we would like 'solver.problem_->setLeftPrec( pc_ )' here, but:
+    // > Belos::BiCGStabSolMgr::solve: The left-preconditioned case has not yet
+    // > been implemented.  Please use right preconditioning for now.  If you
+    // > need to use left preconditioning, please contact the Belos developers.
+    // > Left preconditioning is more interesting in BiCGStab because whether it
+    // > works depends on the initial guess (e.g., an initial guess of all zeros
+    // > might NOT work).
+    // :-(
     solver.problem_->setRightPrec( pc_ );
   }
 }

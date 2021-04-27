@@ -103,13 +103,18 @@ void SlipBC::apply( GenericMatrix &      A,
       As       = reinterpret_cast< Matrix * >( &A );
       As_local = false;
     }
-    else
+    else if ( dolfin_get< std::string >( "linear algebra backend" ) == "PETSc" )
     {
       delete As;
       As = new Matrix();
 #if HAVE_PETSC
       ( *( As->instance() ) ).down_cast< PETScMatrix >().dup( A );
 #endif
+    }
+    else if ( dolfin_get< std::string >( "linear algebra backend" ) == "Trilinos" )
+    {
+      As = new Matrix();
+      *( As->instance() ) = A;
     }
 
     // Initialize ghosts for rhs vector using the full space dofmap

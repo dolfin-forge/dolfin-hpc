@@ -375,7 +375,8 @@ auto Vector::set( const real * block, size_t m, const size_t * rows ) -> void
     {
       if( vec_ghost_->getMap()->isNodeGlobalElement( rows[i] ) )
       {
-        ghost_stash_[rows[i]] = block[i];
+        // FIXME we dont track off-process rows now, this would need extra logic
+        ghost_stash_[rows[i]] = 0.0;//block[i];
       }
     }
     else

@@ -258,18 +258,12 @@ auto Matrix::set( const real *   block,
                   const size_t * cols ) -> void
 {
   dolfin_assert( not mat_.is_null() );
-  dolfin_assert( not mat_->isFillComplete() );
+
+  if ( mat_->isFillComplete() )
+    mat_->resumeFill();
 
   for ( size_t i = 0; i < m; ++i )
-  {
-    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
-    {
-      warning( "[%d] trilinos::Matrix::set(): Row %d is not local.",
-               MPI::rank(), rows[i] );
-    }
-
     mat_->replaceGlobalValues( rows[i], n, block + i * n, cols );
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -281,18 +275,12 @@ auto Matrix::add( const real *   block,
                   const size_t * cols ) -> void
 {
   dolfin_assert( not mat_.is_null() );
-  dolfin_assert( not mat_->isFillComplete() );
+
+  if ( mat_->isFillComplete() )
+    mat_->resumeFill();
 
   for ( size_t i = 0; i < m; ++i )
-  {
-    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
-    {
-      warning( "[%d] trilinos::Matrix::add(): Row %d is not local.",
-               MPI::rank(), rows[i] );
-    }
-
     mat_->sumIntoGlobalValues( rows[i], n, block + i * n, cols );
-  }
 }
 //-----------------------------------------------------------------------------
 
@@ -328,32 +316,21 @@ auto Matrix::getrow( size_t                  row,
 {
   dolfin_assert( not mat_.is_null() );
 
-  if ( not mat_->getRowMap()->isNodeGlobalElement( row ) )
-  {
-    warning( "[%d] trilinos::Matrix::getrow(): Row %d is not local.", MPI::rank(), row );
-  }
-
   size_t const ncols = mat_->getNumEntriesInGlobalRow( row );
-  if ( ncols == Teuchos::OrdinalTraits< GO >::invalid() )
+
+  if ( ncols != 0 and ncols != Teuchos::OrdinalTraits< GO >::invalid() )
   {
-    error( "[%d] trilinos::Matrix: Row %d not in range", MPI::rank(), row );
+    columns.resize( ncols );
+    values.resize( ncols );
+
+    Teuchos::ArrayView< GO >   _columns( columns );
+    Teuchos::ArrayView< real > _values( values );
+
+    size_t n = 0;
+    mat_->getGlobalRowCopy( row, _columns, _values, n );
+
+    dolfin_assert( n == ncols );
   }
-
-  if ( ncols == 0 )
-  {
-    warning( "[%d] Col %d is empty", MPI::rank(), row );
-  }
-
-  columns.resize( ncols );
-  values.resize( ncols );
-
-  Teuchos::ArrayView< GO >   _columns( columns );
-  Teuchos::ArrayView< real > _values( values );
-
-  size_t n = 0;
-  mat_->getGlobalRowCopy( row, _columns, _values, n );
-
-  dolfin_assert( n == ncols );
 }
 
 //-----------------------------------------------------------------------------
@@ -363,16 +340,13 @@ auto Matrix::setrow( size_t                        row,
                      const std::vector< real > &   values ) -> void
 {
   dolfin_assert( not mat_.is_null() );
-  dolfin_assert( not mat_->isFillComplete() );
+
+  if ( mat_->isFillComplete() )
+    mat_->resumeFill();
 
   if ( columns.size() != values.size() )
   {
     error( "trilinos::Matrix: Number of columns and values don't match" );
-  }
-
-  if ( not mat_->getRowMap()->isNodeGlobalElement( row ) )
-  {
-    warning( "[%d] trilinos::Matrix::setrow(): Row %d is not local.", MPI::rank(), row );
   }
 
   // Handle case n = 0
@@ -384,18 +358,7 @@ auto Matrix::setrow( size_t                        row,
     // Tpetra View of values
     Teuchos::ArrayView< real const > data( values );
 
-    LO num = mat_->replaceGlobalValues( row, column_idx, data );
-
-    if ( num != static_cast< LO >( columns.size() ) )
-    {
-      warning( "[%d] Row %d: Could only set %d cols instead of %d",
-               MPI::rank(), row, num, columns.size() );
-    }
-
-    if ( num == Teuchos::OrdinalTraits< LO >::invalid() )
-    {
-      warning( "[%d] Row %d: Could not set any cols", MPI::rank(), row );
-    }
+    mat_->replaceGlobalValues( row, column_idx, data );
   }
 }
 
@@ -404,7 +367,9 @@ auto Matrix::setrow( size_t                        row,
 auto Matrix::zero( size_t m, const size_t * rows ) -> void
 {
   dolfin_assert( not mat_.is_null() );
-  dolfin_assert( not mat_->isFillComplete() );
+
+  if ( mat_->isFillComplete() )
+    mat_->resumeFill();
 
   for ( size_t i = 0; i < m; ++i )
   {
@@ -426,12 +391,6 @@ auto Matrix::zero( size_t m, const size_t * rows ) -> void
       std::fill( data.data(), data.data() + n, 0.0 );
       mat_->replaceGlobalValues( rows[i], cols_view, data_view );
     }
-    else
-    {
-      // FIXME we dont really want this warning
-      warning( "[%d] trilinos::Matrix::zero(): Row %d is not local.",
-               MPI::rank(), rows[i] );
-    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -446,22 +405,11 @@ auto Matrix::ident( size_t m, const size_t * rows ) -> void
   // Clear affected rows to zero
   zero( m, rows );
 
-  // Get map of locally available columns
-
   real const one = 1;
-  Teuchos::ArrayView< real const > data( &one, 1 );
 
   // Set diagonal entries where possible
   for ( size_t i = 0; i < m; ++i )
-  {
-    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
-    {
-      warning( "[%d] trilinos::Matrix::ident(): Row %d is not local.",
-               MPI::rank(), rows[i] );
-    }
-
     mat_->replaceGlobalValues( rows[i], 1, &one, &rows[i] );
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -595,9 +543,14 @@ auto Matrix::norm( const Norm type ) const -> real
 
 auto Matrix::operator=( const Matrix & A ) -> const Matrix &
 {
-  mat_ = Teuchos::RCP< TPMatrix >( new TPMatrix( A.mat_->getRowMap(),
-                                                 A.mat_->getColMap(),
-                                                 0 ) );
+  // if ( this->size( 0 ) != A.size( 0 ) or this->size( 1 ) != A.size( 1 ) )
+  {
+    mat_ = Teuchos::RCP< TPMatrix >( new TPMatrix( A.mat_->getRowMap(),
+                                                   A.mat_->getColMap(),
+                                                   0 ) );
+  }
+
+  *mat_ = *A.mat_;
 
   return *this;
 }

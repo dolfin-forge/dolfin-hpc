@@ -128,7 +128,6 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
   size_t const pe_rank = MPI::rank();
 
   size_t const nLocalRows = spattern.size( 0 );
-  size_t const nLocalCols = spattern.size( 1 );
 
   // calculate the global row indices [ lRowRange[0]; lRowRange[1] [
   std::vector< GO > gRowIndices( nLocalRows );
@@ -171,7 +170,7 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
     crs_graph->insertGlobalIndices( gRowIndices[i], indices_view );
   }
 
-  dolfin_assert( nLocalCols == gColset.size() );
+  dolfin_assert( spattern.size( 1 ) == gColset.size() );
   std::vector< GO > gColIndices( gColset.begin(), gColset.end() );
   Teuchos::ArrayView< GO > gColIndices_view( gColIndices.data(), gColIndices.size() );
   Teuchos::RCP< TPMap const > domain_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
@@ -261,12 +260,15 @@ auto Matrix::set( const real *   block,
   dolfin_assert( not mat_.is_null() );
   dolfin_assert( not mat_->isFillComplete() );
 
-  // Tpetra View of column indices
-  Teuchos::ArrayView< GO const > column_idx( cols, n );
   for ( size_t i = 0; i < m; ++i )
   {
-    Teuchos::ArrayView< real const > data( block + i * n, n );
-    mat_->replaceGlobalValues( rows[i], column_idx, data );
+    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
+    {
+      warning( "[%d] trilinos::Matrix::set(): Row %d is not local.",
+               MPI::rank(), rows[i] );
+    }
+
+    mat_->replaceGlobalValues( rows[i], n, block + i * n, cols );
   }
 }
 
@@ -281,12 +283,15 @@ auto Matrix::add( const real *   block,
   dolfin_assert( not mat_.is_null() );
   dolfin_assert( not mat_->isFillComplete() );
 
-  // Tpetra View of column indices
-  Teuchos::ArrayView< GO const > column_idx( cols, n );
   for ( size_t i = 0; i < m; ++i )
   {
-    Teuchos::ArrayView< real const > data( block + i * n, n );
-    mat_->sumIntoGlobalValues( rows[i], column_idx, data );
+    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
+    {
+      warning( "[%d] trilinos::Matrix::add(): Row %d is not local.",
+               MPI::rank(), rows[i] );
+    }
+
+    mat_->sumIntoGlobalValues( rows[i], n, block + i * n, cols );
   }
 }
 //-----------------------------------------------------------------------------
@@ -323,10 +328,20 @@ auto Matrix::getrow( size_t                  row,
 {
   dolfin_assert( not mat_.is_null() );
 
+  if ( not mat_->getRowMap()->isNodeGlobalElement( row ) )
+  {
+    warning( "[%d] trilinos::Matrix::getrow(): Row %d is not local.", MPI::rank(), row );
+  }
+
   size_t const ncols = mat_->getNumEntriesInGlobalRow( row );
   if ( ncols == Teuchos::OrdinalTraits< GO >::invalid() )
   {
-    error( "trilinos::Matrix: Row %d not in range", row );
+    error( "[%d] trilinos::Matrix: Row %d not in range", MPI::rank(), row );
+  }
+
+  if ( ncols == 0 )
+  {
+    warning( "[%d] Col %d is empty", MPI::rank(), row );
   }
 
   columns.resize( ncols );
@@ -355,6 +370,11 @@ auto Matrix::setrow( size_t                        row,
     error( "trilinos::Matrix: Number of columns and values don't match" );
   }
 
+  if ( not mat_->getRowMap()->isNodeGlobalElement( row ) )
+  {
+    warning( "[%d] trilinos::Matrix::setrow(): Row %d is not local.", MPI::rank(), row );
+  }
+
   // Handle case n = 0
   if ( columns.size() != 0 )
   {
@@ -364,7 +384,18 @@ auto Matrix::setrow( size_t                        row,
     // Tpetra View of values
     Teuchos::ArrayView< real const > data( values );
 
-    mat_->replaceGlobalValues( row, column_idx, data );
+    LO num = mat_->replaceGlobalValues( row, column_idx, data );
+
+    if ( num != static_cast< LO >( columns.size() ) )
+    {
+      warning( "[%d] Row %d: Could only set %d cols instead of %d",
+               MPI::rank(), row, num, columns.size() );
+    }
+
+    if ( num == Teuchos::OrdinalTraits< LO >::invalid() )
+    {
+      warning( "[%d] Row %d: Could not set any cols", MPI::rank(), row );
+    }
   }
 }
 
@@ -381,22 +412,25 @@ auto Matrix::zero( size_t m, const size_t * rows ) -> void
 
     if ( ncols != Teuchos::OrdinalTraits< GO >::invalid() )
     {
-      std::vector< GO >        colcols( ncols );
-      Teuchos::ArrayView< GO > cols( colcols );
+      std::vector< GO >          cols( ncols );
+      std::vector< real >        data( ncols );
+      Teuchos::ArrayView< GO >   cols_view( cols );
+      Teuchos::ArrayView< real > data_view( data );
 
-      std::vector< real >        coldata( ncols );
-      Teuchos::ArrayView< real > data( coldata );
-
+      // fetch the column indices
       size_t n = 0;
-      mat_->getGlobalRowCopy( rows[i], cols, data, n );
+      mat_->getGlobalRowCopy( rows[i], cols_view, data_view, n );
       dolfin_assert( n == ncols );
 
-      std::fill( coldata.begin(), coldata.end(), 0.0 );
-      mat_->replaceGlobalValues( rows[i], cols, data );
+      // set all columns in this row to zero
+      std::fill( data.data(), data.data() + n, 0.0 );
+      mat_->replaceGlobalValues( rows[i], cols_view, data_view );
     }
     else
     {
-      warning( "trilinos::Matrix::zero(): Row %d is not valid.", m );
+      // FIXME we dont really want this warning
+      warning( "[%d] trilinos::Matrix::zero(): Row %d is not local.",
+               MPI::rank(), rows[i] );
     }
   }
 }
@@ -413,22 +447,20 @@ auto Matrix::ident( size_t m, const size_t * rows ) -> void
   zero( m, rows );
 
   // Get map of locally available columns
-  Teuchos::RCP< TPMap const > colmap( mat_->getColMap() );
 
   real const one = 1;
-  GO         col = 0;
-
   Teuchos::ArrayView< real const > data( &one, 1 );
-  Teuchos::ArrayView< GO >         column_idx( &col, 1 );
 
   // Set diagonal entries where possible
   for ( size_t i = 0; i < m; ++i )
   {
-    if ( colmap->isNodeGlobalElement( rows[i] ) )
+    if ( not mat_->getRowMap()->isNodeGlobalElement( rows[i] ) )
     {
-      col = rows[i];
-      mat_->replaceGlobalValues( rows[i], column_idx, data );
+      warning( "[%d] trilinos::Matrix::ident(): Row %d is not local.",
+               MPI::rank(), rows[i] );
     }
+
+    mat_->replaceGlobalValues( rows[i], 1, &one, &rows[i] );
   }
 }
 
@@ -443,49 +475,39 @@ auto Matrix::mult( const GenericVector & x,
   trilinos::Vector const & X = x.down_cast< trilinos::Vector const >();
   trilinos::Vector &       Y = y.down_cast< trilinos::Vector >();
 
+  dolfin_assert( not X.vec().is_null() );
+  dolfin_assert( not Y.vec().is_null() );
+
   if ( not transposed )
   {
+    if ( size( 0 ) != Y.size() )
+    {
+      error( "trilinos::Matrix: Vector for matrix-vector result has wrong size" );
+    }
 
     if ( size( 1 ) != X.size() )
     {
       error( "trilinos::Matrix: Non-matching dimensions %d and %d for matrix-vector product",
              size( 1 ), X.size() );
     }
-
-    // // Resize RHS if empty
-    // if ( Y.size() == 0 )
-    //   init_vector( Y, 0 );
-    dolfin_assert( not Y.vec().is_null() );
-
-    if ( size( 0 ) != Y.size() )
-    {
-      error( "trilinos::Matrix: Vector for matrix-vector result has wrong size" );
-    }
-
-    mat_->apply( *X.vec(), *Y.vec() );
   }
   else // transposed
   {
     if ( size( 0 ) != X.size() )
     {
-      error(
-        "TpetraMatrix.cpp",
-        "compute transpose matrix-vector product with Tpetra matrix",
-        "Non-matching dimensions for transpose matrix-vector product" );
+      error( "trilinos::Matrix: Vector for transposed matrix-vector result has wrong size" );
     }
-
-    // // Resize RHS if empty
-    // if ( Y.size() == 0 )
-    //   init_vector( Y, 1 );
-    dolfin_assert( not Y.vec().is_null() );
 
     if ( size( 1 ) != Y.size() )
     {
-      error( "trilinos::Matrix: Vector for transpose matrix-vector result has wrong size" );
+      error( "trilinos::Matrix: Non-matching dimensions %d and %d for transposed matrix-vector product",
+             size( 1 ), Y.size() );
     }
-
-    mat_->apply( *X.vec(), *Y.vec(), Teuchos::TRANS );
   }
+
+
+  mat_->apply( *X.vec(), *Y.vec(),
+               ( transposed ? Teuchos::TRANS : Teuchos::NO_TRANS ) );
 }
 
 //-----------------------------------------------------------------------------

@@ -74,6 +74,7 @@ auto Preconditioner::init( Matrix const & P ) -> void
       // params->set( "fact: iluk overalloc" (real) );
       break;
     case sor:
+    case default_pc:
       name_ = "RELAXATION";
       params->set( "relaxation: type", "Gauss-Seidel" );
       params->set( "relaxation: damping factor", 1.2 );
@@ -90,7 +91,6 @@ auto Preconditioner::init( Matrix const & P ) -> void
       // params->set( "relaxation: check diagonal entries", false );
       break;
     case bjacobi:
-    case default_pc:
       name_ = "BLOCK_RELAXATION";
       params->set( "relaxation: type", "Jacobi" );
       params->set( "relaxation: damping factor", 1.0 );

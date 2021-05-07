@@ -89,10 +89,10 @@ auto Vector::apply( FinalizeType ) -> void
     Teuchos::RCP< TPMap const > map_local( vec_local_->getMap() );
 
     // check if ghosts have been modified on any process
-    bool ghosts_need_sync = not ghost_stash_.empty();
-    MPI::all_reduce_in_place< MPI::sum >( ghosts_need_sync, MPI::DOLFIN_COMM );
+    int ghosts_need_sync = not ghost_stash_.empty();
+    MPI::all_reduce_in_place< MPI::max >( ghosts_need_sync, MPI::DOLFIN_COMM );
 
-    if ( ghosts_need_sync )
+    if ( ghosts_need_sync > 0 )
     {
       // set ghosts to zero
       vec_ghost_->putScalar( 0.0 );

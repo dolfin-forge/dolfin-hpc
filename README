@@ -31,14 +31,15 @@ these steps:
 DOLFIN HPC can be build with various options, issue ./configure --help
 to list all of them.
 
-Suggested/Minimal Trilinos installation:
+Suggested/Minimal Trilinos (13.0.1) installation:
 
 cmake .. -D CMAKE_BUILD_TYPE=RELEASE \
          -D CMAKE_C_FLAGS="-O2 -g" \
          -D CMAKE_CXX_FLAGS="-O2 -g" \
+         -D BUILD_SHARED_LIBS:BOOL=ON \
          -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
          -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES:BOOL=OFF \
-         -D Trilinos_ENABLE_TEUCHOS_TIME_MONITOR:BOOL=OFF
+         -D Trilinos_ENABLE_TEUCHOS_TIME_MONITOR:BOOL=OFF \
          -D Trilinos_ENABLE_Epetra=OFF \
          -D Trilinos_ENABLE_Tpetra=ON \
          -D Trilinos_ENABLE_AztecOO=OFF \
@@ -51,5 +52,4 @@ cmake .. -D CMAKE_BUILD_TYPE=RELEASE \
          -D TPL_ENABLE_gtest:BOOL=OFF \
          -D TPL_ENABLE_MPI:BOOL=ON \
          -D TPL_ENABLE_HDF5:BOOL=OFF \
-         -D CMAKE_INSTALL_PREFIX:PATH=/some/dir \
-         -D BUILD_SHARED_LIBS:BOOL=ON
+         -D CMAKE_INSTALL_PREFIX:PATH=/some/dir

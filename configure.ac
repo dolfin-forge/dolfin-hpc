@@ -451,9 +451,6 @@ Configuration of DOLFIN ${PACKAGE_VERSION} finished.
 
 Prefix: '${prefix}'.
 Compiler: ${CXX} ${CPPFLAGS} ${CXXFLAGS}
-Compiler: ${CXX}
-Compiler: ${CXXFLAGS}
-Compiler: ${CPPFLAGS}
 Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:

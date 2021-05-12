@@ -24,18 +24,18 @@ AC_DEFUN([AX_TRILINOS],[
 	  TRILINOS_MAKEFILE=${ac_trilinos_path}/include/Makefile.export.Trilinos
 
     # add trilinos CXXFLAGS and include dirs
-	  CXXFLAGS="$(grep Trilinos_INCLUDE_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $CXXFLAGS"
-	  CXXFLAGS="$(grep Trilinos_TPL_INCLUDE_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $CXXFLAGS"
-	  CXXFLAGS="$(grep Trilinos_CXX_COMPILER_FLAGS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $CXXFLAGS"
+	  CXXFLAGS="$(grep Trilinos_INCLUDE_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $CXXFLAGS"
+	  CXXFLAGS="$(grep Trilinos_TPL_INCLUDE_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $CXXFLAGS"
+	  CXXFLAGS="$(grep Trilinos_CXX_COMPILER_FLAGS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $CXXFLAGS"
 
     # add trilinos link flags and dirs
-	  LDFLAGS="$(grep Trilinos_LIBRARY_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $LDFLAGS"
-	  LDFLAGS="$(grep Trilinos_TPL_LIBRARY_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $LDFLAGS"
-	  LDFLAGS="$(grep Trilinos_EXTRA_LD_FLAGS ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $LDFLAGS"
+	  LDFLAGS="$(grep Trilinos_LIBRARY_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $LDFLAGS"
+	  LDFLAGS="$(grep Trilinos_TPL_LIBRARY_DIRS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $LDFLAGS"
+	  LDFLAGS="$(grep Trilinos_EXTRA_LD_FLAGS ${TRILINOS_MAKEFILE} | sed 's/.*=//') $LDFLAGS"
 
     # add trilinos libraries
-	  LIBS="$(grep Trilinos_TPL_LIBRARIES ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $LIBS"
-	  LIBS="$(grep Trilinos_LIBRARIES ${TRILINOS_MAKEFILE} | sed 's/.*= *//') $LIBS"
+	  LIBS="$(grep Trilinos_TPL_LIBRARIES ${TRILINOS_MAKEFILE} | sed 's/.*=//') $LIBS"
+	  LIBS="$(grep Trilinos_LIBRARIES ${TRILINOS_MAKEFILE} | sed 's/.*=//') $LIBS"
 
     AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
     found_la_backend="yes"

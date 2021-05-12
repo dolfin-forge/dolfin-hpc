@@ -2,7 +2,7 @@
 AC_PREREQ(2.59)
 AC_INIT([dolfin],[0.9.5-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_MAINTAINER_MODE
 AC_LANG(C++)
 AC_CONFIG_MACRO_DIR([m4])
@@ -114,6 +114,12 @@ PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
 
+# Ensure strict C++14 compliance
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
+
+# add default warning flags
+CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
+
 if test "x${enable_mpi}" != xno; then
    AX_MPI
    CXX="$MPICXX"
@@ -127,12 +133,9 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-# Ensure strict C++14 compliance
-AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
-
 if test "x${enable_openmp}" != xno; then
   AX_OPENMP
-  CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+  CXXFLAGS="$OPENMP_CXXFLAGS $CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       CXXFLAGS="-hnoomp $CXXFLAGS"
@@ -271,11 +274,9 @@ if test "x${with_janpack}" != xno; then
    fi
 fi
 
-
 if test "x${found_la_backend}" != xyes; then
    AC_MSG_ERROR([Linear Algebra backend not found])
 fi
-
 
 if test "x${enable_quad}" = xyes; then
    # This assumes a modern CRAY, for example XT or XE series systems
@@ -339,6 +340,9 @@ if test "x${enable_debug}" != xno; then
    AC_MSG_RESULT([[Using DEBUG mode]])
        ;;
    esac
+else
+   AC_MSG_RESULT([[Using RELEASE mode]])
+   CXXFLAGS="-DNDEBUG $CXXFLAGS"
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -351,7 +355,6 @@ AC_TYPE_UINT8_T
 if test "x${ac_cv_c_bigendian}" != xno; then
    AC_DEFINE(HAVE_BIG_ENDIAN, 1, [Big endian byte order.])
 fi
-
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
@@ -371,9 +374,9 @@ if test "x${enable_python}" = xyes; then
     ;;
     esac
 fi
+
 # Add variable for installation of Python modules
 AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])
-
 
 # Checks for Doxygen
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
@@ -437,9 +440,6 @@ AC_CONFIG_FILES([site-packages/Makefile])
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
                  doc/progr_reference/Makefile])
 
-# add default warning flags
-CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
-
 AC_OUTPUT
 
 # Display help text
@@ -450,7 +450,10 @@ echo \
 Configuration of DOLFIN ${PACKAGE_VERSION} finished.
 
 Prefix: '${prefix}'.
-Compiler: ${CXX} ${CXXFLAGS} ${CPPFLAGS}
+Compiler: ${CXX} ${CPPFLAGS} ${CXXFLAGS}
+Compiler: ${CXX}
+Compiler: ${CXXFLAGS}
+Compiler: ${CPPFLAGS}
 Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:

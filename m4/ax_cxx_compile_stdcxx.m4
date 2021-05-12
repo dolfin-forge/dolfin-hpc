@@ -69,14 +69,14 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
       cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
       AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
                      $cachevar,
-        [ac_save_CXX="$CXX"
-         CXX="$CXX $switch"
+        [ac_save_CXXFLAGS="$CXXFLAGS"
+         CXXFLAGS="$switch $CXXFLAGS"
          AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
           [eval $cachevar=yes],
           [eval $cachevar=no])
-         CXX="$ac_save_CXX"])
+         CXXFLAGS="$ac_save_CXXFLAGS"])
       if eval test x\$$cachevar = xyes; then
-        CXX="$CXX $switch"
+        CXXFLAGS="$switch $CXXFLAGS"
         if test -n "$CXXCPP" ; then
           CXXCPP="$CXXCPP $switch"
         fi
@@ -96,14 +96,14 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
         cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
         AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
                        $cachevar,
-          [ac_save_CXX="$CXX"
-           CXX="$CXX $switch"
+          [ac_save_CXXFLAGS="$CXXFLAGS"
+           CXXFLAGS="$switch $CXXFLAGS"
            AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
             [eval $cachevar=yes],
             [eval $cachevar=no])
-           CXX="$ac_save_CXX"])
+           CXXFLAGS="$ac_save_CXXFLAGS"])
         if eval test x\$$cachevar = xyes; then
-          CXX="$CXX $switch"
+          CXXFLAGS="$switch $CXXFLAGS"
           if test -n "$CXXCPP" ; then
             CXXCPP="$CXXCPP $switch"
           fi

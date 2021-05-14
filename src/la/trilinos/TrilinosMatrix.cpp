@@ -125,9 +125,9 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
 {
   SparsityPattern const & spattern = reinterpret_cast< SparsityPattern const & >( sparsity_pattern );
 
-  size_t const pe_rank = MPI::rank();
-
-  size_t const nLocalRows = spattern.size( 0 );
+  GO const     letTPetraDecide = Teuchos::OrdinalTraits< GO >::invalid();
+  size_t const pe_rank         = MPI::rank();
+  size_t const nLocalRows      = spattern.size( 0 );
 
   // calculate the global row indices [ lRowRange[0]; lRowRange[1] [
   std::vector< GO > gRowIndices( nLocalRows );
@@ -137,9 +137,10 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
   std::iota( gRowIndices.begin(), gRowIndices.end(), lRowRange[0] );
 
   // create the range
-  Teuchos::ArrayView< GO > gRowIndices_view( gRowIndices.data(), gRowIndices.size() );
-  Teuchos::RCP< TPMap const > range_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
-                                                    gRowIndices_view,  0, comm_ ) );
+  Teuchos::RCP< TPMap const > range_map( new TPMap( letTPetraDecide,
+                                                    gRowIndices.data(),
+                                                    gRowIndices.size(),
+                                                    0, comm_ ) );
 
   // Get number of non-zeros per row to allocate storage
   std::vector< size_t > nzrow( nLocalRows );
@@ -172,12 +173,12 @@ auto Matrix::init( const GenericSparsityPattern & sparsity_pattern ) -> void
 
   dolfin_assert( spattern.size( 1 ) == gColset.size() );
   std::vector< GO > gColIndices( gColset.begin(), gColset.end() );
-  Teuchos::ArrayView< GO > gColIndices_view( gColIndices.data(), gColIndices.size() );
-  Teuchos::RCP< TPMap const > domain_map( new TPMap( Teuchos::OrdinalTraits< GO >::invalid(),
-                                                     gColIndices_view, 0, comm_ ) );
+  Teuchos::RCP< TPMap const > domain_map( new TPMap( letTPetraDecide,
+                                                     gColIndices.data(),
+                                                     gColIndices.size(),
+                                                     0, comm_ ) );
 
-  // FIXME maybe set parameter "Optimize Storage": true here?!
-  // https://docs.trilinos.org/dev/packages/tpetra/doc/html/classTpetra_1_1CrsGraph.html#a32798a1f7119adbed7bfffcad7cf878f
+  // finalize the graph
   crs_graph->fillComplete( domain_map, range_map );
 
   // finally create the matrix from the CRS graph
@@ -239,14 +240,10 @@ auto Matrix::init( size_t M, size_t N, bool ) -> void
 
 //-----------------------------------------------------------------------------
 
-auto Matrix::get( real *         block,
-                  size_t         m,
-                  const size_t * rows,
-                  size_t         n,
-                  const size_t * cols ) const -> void
+auto Matrix::get( real *, size_t, const size_t *, size_t, const size_t * ) const
+  -> void
 {
-  // FIXME
-  error( "trilinos::Matrix: get not implemented." );
+  error( "trilinos::Matrix: not yet implemented." );
 }
 
 //-----------------------------------------------------------------------------
@@ -564,12 +561,10 @@ auto Matrix::operator+=( const Matrix & A ) -> const Matrix &
   trilinos::Matrix const & AA = A.down_cast< trilinos::Matrix const >();
   dolfin_assert( not AA.mat_.is_null() );
 
-  real const one = 1.0;
-
-  mat_ = Teuchos::rcp_dynamic_cast< TPMatrix >( mat_->add( one, *AA.mat_, one,
-                                                            Teuchos::null,
-                                                            Teuchos::null,
-                                                            Teuchos::null ) );
+  mat_ = Teuchos::rcp_dynamic_cast< TPMatrix >( mat_->add( 1.0, *AA.mat_, 1.0,
+                                                           Teuchos::null,
+                                                           Teuchos::null,
+                                                           Teuchos::null ) );
 
   return *this;
 }

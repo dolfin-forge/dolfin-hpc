@@ -573,6 +573,7 @@ auto Vector::pointwise( const GenericVector &, VectorPointwiseOp ) const -> void
 {
   // FIXME
   // elementWiseMultiply  ?!
+  warning( "trilinos::Vector::pointwise not yet implemented." );
 }
 
 //-----------------------------------------------------------------------------

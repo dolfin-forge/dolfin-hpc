@@ -120,6 +120,22 @@ AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
 # add default warning flags
 CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
 
+if test "x${enable_debug}" != xno; then
+   CXXFLAGS="-g -DDEBUG=1 $CXXFLAGS"
+   case "$host_os" in
+   *solaris*)
+       LIBS="$LIBS -lumem"
+       AC_MSG_RESULT([[Using DEBUG mode on Illumos/Solaris with libumem support]])
+       ;;
+   *)
+   AC_MSG_RESULT([[Using DEBUG mode]])
+       ;;
+   esac
+else
+   AC_MSG_RESULT([[Using RELEASE mode]])
+   CXXFLAGS="-DNDEBUG $CXXFLAGS"
+fi
+
 if test "x${enable_mpi}" != xno; then
    AX_MPI
    CXX="$MPICXX"
@@ -143,9 +159,13 @@ else
 fi
 
 # Store build information (date, host, CXX)
-AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-  ["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
-
+if test "x${enable_debug}" != xno; then
+   AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
+      ["(Debug Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+else
+   AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
+      ["(Release Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+fi
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
@@ -328,22 +348,6 @@ if test "x${enable_check}" = xyes; then
 fi
 # Add variable for automake to compile tests
 AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" = xyes])
-
-if test "x${enable_debug}" != xno; then
-   CXXFLAGS="-g -DDEBUG=1 $CXXFLAGS"
-   case "$host_os" in
-   *solaris*)
-       LIBS="$LIBS -lumem"
-       AC_MSG_RESULT([[Using DEBUG mode on Illumos/Solaris with libumem support]])
-       ;;
-   *)
-   AC_MSG_RESULT([[Using DEBUG mode]])
-       ;;
-   esac
-else
-   AC_MSG_RESULT([[Using RELEASE mode]])
-   CXXFLAGS="-DNDEBUG $CXXFLAGS"
-fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN

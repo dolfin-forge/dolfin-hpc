@@ -2,7 +2,7 @@
 AC_PREREQ(2.59)
 AC_INIT([dolfin],[0.9.5-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_MAINTAINER_MODE
 AC_LANG(C++)
 AC_CONFIG_MACRO_DIR([m4])
@@ -65,25 +65,29 @@ AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
            [Compile with support for PETSc linear algebra]),
            [with_petsc=${withval}],[with_petsc=no])
 
+AC_ARG_WITH(trilinos, AC_HELP_STRING([--with-trilinos],
+           [Compile with support for Trilinos linear algebra]),
+           [with_trilinos=${withval}],[with_trilinos=no])
+
 AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim],
             [Compile with support for VisIt/libsim]),
             [with_libsim=${withval}],[with_libsim=no])
 
 AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis],
-		     [Compile with support for ParMETIS]),
-		     [with_parmetis=${withval}],[with_parmetis=no])
+         [Compile with support for ParMETIS]),
+         [with_parmetis=${withval}],[with_parmetis=no])
 
 AC_ARG_WITH(phmap, AC_HELP_STRING([--with-phmap],
          [Compile with support for parallel hashmap (https://git.io/JfE2p)]),
          [with_phmap=${withval}],[with_phmap=no])
 
 AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan],
-		     [Compile with support for Zoltan]),
-		     [with_zoltan=${withval}],[with_zoltan=no])
+         [Compile with support for Zoltan]),
+         [with_zoltan=${withval}],[with_zoltan=no])
 
 AC_ARG_WITH(convert, AC_HELP_STRING([--with-convert],
-		     [Build external mesh converter tool]),
-		     [with_convert=${withval}],[with_convert=no])
+         [Build external mesh converter tool]),
+         [with_convert=${withval}],[with_convert=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
@@ -110,6 +114,12 @@ PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 AX_COMPILER_VERSION
 
+# Ensure strict C++14 compliance
+AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
+
+# add default warning flags
+CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
+
 if test "x${enable_mpi}" != xno; then
    AX_MPI
    CXX="$MPICXX"
@@ -123,12 +133,9 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-# Ensure strict C++14 compliance
-AX_CXX_COMPILE_STDCXX_14([noext], [mandatory])
-
 if test "x${enable_openmp}" != xno; then
-   AX_OPENMP
-   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+  AX_OPENMP
+  CXXFLAGS="$OPENMP_CXXFLAGS $CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       CXXFLAGS="-hnoomp $CXXFLAGS"
@@ -137,7 +144,7 @@ fi
 
 # Store build information (date, host, CXX)
 AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-	["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+  ["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
@@ -166,49 +173,49 @@ found_domain_decomp="no"
    if test "x${is_cray}" = xyes; then
       if test "x${with_parmetis}" != xno; then
          AX_CRAY_PARMETIS
-	 if test "x${have_cray_parmetis}" = xyes; then
-	    found_domain_decomp="yes"
-	 else
-	    with_parmetis="no"
-	 fi
+   if test "x${have_cray_parmetis}" = xyes; then
+      found_domain_decomp="yes"
+   else
+      with_parmetis="no"
+   fi
       fi
 
       if test "x${with_zoltan}" != xno; then
-      	 if test "x${enable_optimize_p1}" != xno; then
-	    AC_MSG_ERROR([Zoltan requires facet connectivity])
-	 fi
+         if test "x${enable_optimize_p1}" != xno; then
+      AC_MSG_ERROR([Zoltan requires facet connectivity])
+   fi
 
          AX_CRAY_ZOLTAN
-	 if test "x${have_cray_zoltan}" = xyes; then
-	    found_domain_decomp="yes"
-	 else
-	    with_zoltan="no"
-	 fi
+   if test "x${have_cray_zoltan}" = xyes; then
+      found_domain_decomp="yes"
+   else
+      with_zoltan="no"
+   fi
       fi
    else
       if test "x${with_parmetis}" != xno; then
          AX_PARMETIS
          if test "${PARMETIS_LIBS}"; then
             LIBS="$PARMETIS_LIBS $LIBS"
-	    found_domain_decomp="yes"
-	    with_parmetis="yes"
-	 else
-	    with_parmetis="no"
+      found_domain_decomp="yes"
+      with_parmetis="yes"
+   else
+      with_parmetis="no"
          fi
       fi
 
       if test "x${with_zoltan}" != xno; then
-      	 if test "x${enable_optimize_p1}" != xno; then
-	    AC_MSG_ERROR([Zoltan requires facet connectivity])
-	 fi
+         if test "x${enable_optimize_p1}" != xno; then
+      AC_MSG_ERROR([Zoltan requires facet connectivity])
+   fi
 
          AX_ZOLTAN
          if test "${ZOLTAN_LIBS}"; then
             LIBS="$ZOLTAN_LIBS $LIBS"
-	    found_domain_decomp="yes"
-	    with_zoltan="yes"
-	 else
-	    with_zoltan="no"
+      found_domain_decomp="yes"
+      with_zoltan="yes"
+   else
+      with_zoltan="no"
          fi
       fi
    fi
@@ -225,7 +232,9 @@ if test "x${with_gts}" = xyes; then
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
 
-AX_PHMAP
+if test "x${with_phmap}" != xno; then
+  AX_PHMAP
+fi
 
 found_la_backend="no"
 
@@ -235,19 +244,23 @@ if test "x${with_petsc}" != xno; then
       AX_CRAY_PETSC
       if test "x${have_cray_petsc}" = xyes; then
          found_la_backend="yes"
-      	 with_petsc="yes"
+         with_petsc="yes"
       else
-	 with_petsc="no"
+   with_petsc="no"
       fi
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then
          found_la_backend="yes"
-	 with_petsc="yes"
+         with_petsc="yes"
       else
-	 with_petsc="no"
+         with_petsc="no"
       fi
    fi
+fi
+
+if test "x${with_trilinos}" != xno; then
+  AX_TRILINOS
 fi
 
 if test "x${with_janpack}" != xno; then
@@ -261,20 +274,18 @@ if test "x${with_janpack}" != xno; then
    fi
 fi
 
-
 if test "x${found_la_backend}" != xyes; then
    AC_MSG_ERROR([Linear Algebra backend not found])
 fi
-
 
 if test "x${enable_quad}" = xyes; then
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AX_CRAY_LIBSCI
       if test $have_cray_libsci = yes; then
-      	 have_lapack=yes
+         have_lapack=yes
       else
-	 have_lapack=no
+   have_lapack=no
       fi
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"],
@@ -329,6 +340,9 @@ if test "x${enable_debug}" != xno; then
    AC_MSG_RESULT([[Using DEBUG mode]])
        ;;
    esac
+else
+   AC_MSG_RESULT([[Using RELEASE mode]])
+   CXXFLAGS="-DNDEBUG $CXXFLAGS"
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -341,7 +355,6 @@ AC_TYPE_UINT8_T
 if test "x${ac_cv_c_bigendian}" != xno; then
    AC_DEFINE(HAVE_BIG_ENDIAN, 1, [Big endian byte order.])
 fi
-
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
@@ -361,9 +374,9 @@ if test "x${enable_python}" = xyes; then
     ;;
     esac
 fi
+
 # Add variable for installation of Python modules
 AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])
-
 
 # Checks for Doxygen
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
@@ -390,6 +403,9 @@ AC_CONFIG_FILES([Makefile
                  src/io/Makefile\
                  src/insitu/Makefile\
                  src/la/Makefile\
+                 src/la/janpack/Makefile\
+                 src/la/petsc/Makefile\
+                 src/la/trilinos/Makefile\
                  src/log/Makefile\
                  src/main/Makefile\
                  src/math/Makefile\
@@ -424,9 +440,6 @@ AC_CONFIG_FILES([site-packages/Makefile])
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
                  doc/progr_reference/Makefile])
 
-# add default warning flags
-CXXFLAGS="-Wall -Wextra -pedantic $CXXFLAGS"
-
 AC_OUTPUT
 
 # Display help text
@@ -437,7 +450,7 @@ echo \
 Configuration of DOLFIN ${PACKAGE_VERSION} finished.
 
 Prefix: '${prefix}'.
-Compiler: ${CXX} ${CXXFLAGS} ${CPPFLAGS}
+Compiler: ${CXX} ${CPPFLAGS} ${CXXFLAGS}
 Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:
@@ -446,6 +459,7 @@ Package features:
   MPI I/O:                     ${enable_mpiio}
   OpenMP:                      ${enable_openmp}
   PETSc:                       ${with_petsc}
+  Trilinos:                    ${with_trilinos}
   JANPACK:                     ${with_janpack}
   GTS:                         ${with_gts}
   ParMETIS:                    ${with_parmetis}

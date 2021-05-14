@@ -194,7 +194,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   ScratchSpace S1(Vh1);
 
   //
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   size_t rank = dolfin::MPI::rank();
 #endif
   size_t pe_size = dolfin::MPI::size();
@@ -219,7 +219,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   _set<size_t> offproc;
 
   // Dofs count to be sent and received
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   size_t num_sendadj = 0;
   size_t num_recvadj = 0;
 #endif
@@ -232,9 +232,9 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
   // Some flags
   bool const is_distributed = M0.is_distributed() || M1.is_distributed();
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   bool const just_first_coords = Vh1.is_flattenable()
-      && Vh1.element().is_vectorizable();
+                                 && Vh1.element().is_vectorizable();
 #endif
 
   //--- Collect on-proc and off-proc dofs
@@ -419,7 +419,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   //--- Exchange off-proc dofs
   if (is_distributed)
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     int u_maxrecvcount = dofs_indicesX.size();
     MPI::all_reduce_in_place<MPI::max>( u_maxrecvcount );
@@ -528,7 +528,8 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   // Prepare requests to receive dof indices and values
   std::vector< size_t > dofs_indicesF( num_dofsF );
   std::vector< real > dofs_cvaluesF( num_dofsF );
-#ifdef HAVE_MPI
+
+#ifdef DOLFIN_HAVE_MPI
   MPI_Status status;
   std::vector< MPI_Request > u_req_recv( num_recvadj );
   std::vector< MPI_Request > r_req_recv( num_recvadj );
@@ -557,7 +558,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
   // Prepare requests to send dof indices and values
   std::vector< real > dofs_cvalues1( dofs_indices1.size() );
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   std::vector< MPI_Request > u_req_send( num_sendadj );
   std::vector< MPI_Request > r_req_send( num_sendadj );
   if (is_distributed)
@@ -626,7 +627,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   // End off proc
   if (is_distributed)
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
     for (int j = 0; j < (int) num_sendadj; ++j)
     {
       MPI::check_error( MPI_Wait(&u_req_send[j], &status) );

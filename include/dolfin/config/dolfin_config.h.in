@@ -67,7 +67,7 @@
 #undef HAVE_MEMSET
 
 /* Define if you have the MPI library. */
-#undef HAVE_MPI
+#undef DOLFIN_HAVE_MPI
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
@@ -77,6 +77,9 @@
 
 /* Define if you have the Petsc library. */
 #undef HAVE_PETSC
+
+/* Define if you have the trilinos library. */
+#undef HAVE_TRILINOS
 
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW

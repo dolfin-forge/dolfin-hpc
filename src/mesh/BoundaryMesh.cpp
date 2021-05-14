@@ -335,9 +335,8 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
     // may own lower-dimensional entities on the exterior boundary.
     if ( mesh.is_distributed() )
     {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
       DistributedData const & distdata = mesh.distdata()[0];
-      // _set< size_t > const &  vadjs    = distdata.get_adj_ranks();
       size_t                  recvmax  = max_array_size( shared_vertices );
       MPI::all_reduce_in_place< MPI::max >( recvmax );
       std::vector< std::vector< size_t > > recvbuf( pe_size,
@@ -390,7 +389,7 @@ void BoundaryMesh::compute( Mesh & mesh, bool exterior, bool interior )
         }
       }
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
     }
 
     // Create boundary vertices and cells

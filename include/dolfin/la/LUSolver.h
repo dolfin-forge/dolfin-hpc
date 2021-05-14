@@ -4,12 +4,12 @@
 #ifndef __DOLFIN_LU_SOLVER_H
 #define __DOLFIN_LU_SOLVER_H
 
-#include "GenericMatrix.h"
-#include "GenericVector.h"
-#include "PETScLUSolver.h"
-#include "PETScMatrix.h"
 #include <dolfin/common/Timer.h>
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/la/GenericMatrix.h>
+#include <dolfin/la/GenericVector.h>
+#include <dolfin/la/petsc/PETScLUSolver.h>
+#include <dolfin/la/petsc/PETScMatrix.h>
 
 namespace dolfin
 {

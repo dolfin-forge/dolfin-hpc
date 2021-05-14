@@ -149,7 +149,6 @@ struct DirichletBoundary : public SubDomain
 //------------------------------------------------------------------------
 DOLFIN_START_TEST( test_BinaryFile_Poisson )
 {
-  // FIXME reintroduce once ffc can generate dolfin-hpc bindings
   {
     //------------------------------------------------------------------------
 

@@ -36,6 +36,14 @@
 #include <stdexcept>
 #include <ufc.h>
 
+#ifdef __GNUG__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#elif __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
 class poisson_finite_element_0: public ufc::finite_element
 {
 public:
@@ -2656,16 +2664,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 0
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 0
     // optimize:                    True
     // precision:                   16
@@ -2744,16 +2752,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 2
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 2
     // optimize:                    True
     // precision:                   16
@@ -2831,16 +2839,16 @@ return enabled;
   {
     // This function was generated using 'uflacs' representation
     // with the following integrals metadata:
-    // 
+    //
     // num_cells:         None
     // optimize:          True
     // precision:         16
     // quadrature_degree: 2
     // quadrature_rule:   'default'
     // representation:    'uflacs'
-    // 
+    //
     // and the following integral 0 metadata:
-    // 
+    //
     // estimated_polynomial_degree: 2
     // optimize:                    True
     // precision:                   16
@@ -3496,5 +3504,9 @@ private:
 
 };
 
-
+#ifdef __GNUG__
+#pragma GCC diagnostic pop
+#elif __clang__
+#pragma clang diagnostic pop
+#endif
 #endif

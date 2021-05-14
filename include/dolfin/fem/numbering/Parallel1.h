@@ -62,7 +62,7 @@ public:
     }
     //---
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     /*
      * This is a naive and inefficient renumbering hastly coded, sorry...
@@ -255,7 +255,7 @@ public:
              shared_.size() );
     }
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
   }
 
   ///

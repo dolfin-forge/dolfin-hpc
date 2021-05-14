@@ -11,7 +11,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 auto PE::rank() -> size_t
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   if ( SubSystemsManager::active( SubSystemsManager::mpi ) )
     return MPI::rank();
 #endif
@@ -21,7 +21,7 @@ auto PE::rank() -> size_t
 //-----------------------------------------------------------------------------
 auto PE::size() -> size_t
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   if ( SubSystemsManager::active( SubSystemsManager::mpi ) )
     return MPI::size();
 #endif

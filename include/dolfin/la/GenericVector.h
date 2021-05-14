@@ -71,9 +71,7 @@ public:
   virtual void init( size_t N, bool distributed ) = 0;
 
   /// Initialize ghost entries
-  virtual void init_ghosted( size_t                           n,
-                             _ordered_set< size_t > &         indices,
-                             _ordered_map< size_t, size_t > & map ) = 0;
+  virtual void init_ghosted( _ordered_set< size_t > & indices ) = 0;
 
   /// Return size of vector
   virtual auto size() const -> size_t = 0;
@@ -174,8 +172,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-inline void
-  GenericVector::init( const GenericSparsityPattern & sparsity_pattern )
+inline void GenericVector::init( const GenericSparsityPattern & sparsity_pattern )
 {
   init( sparsity_pattern.size( 0 ), sparsity_pattern.is_distributed() );
 }

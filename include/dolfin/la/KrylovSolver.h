@@ -5,30 +5,17 @@
 #define __DOLFIN_KRYLOV_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
-
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/SolverType.h>
-
-#include "JANPACKKrylovSolver.h"
-#include "JANPACKMat.h"
-#include "JANPACKVec.h"
-#include "PETScKrylovSolver.h"
-#include "PETScMatrix.h"
-#include "PETScVector.h"
+#include <dolfin/la/janpack/JANPACKKrylovSolver.h>
+#include <dolfin/la/petsc/PETScKrylovSolver.h>
+#include <dolfin/la/trilinos/TrilinosKrylovSolver.h>
 
 namespace dolfin
 {
 
 class GenericMatrix;
 class GenericVector;
-
-class JANPACKKrylovSolver;
-class JANPACKMat;
-class JANPACKVec;
-
-class PETScKrylovSolver;
-class PETScMatrix;
-class PETScVector;
 
 //-----------------------------------------------------------------------------
 
@@ -41,7 +28,7 @@ class KrylovSolver
 public:
   /// Create Krylov solver
   KrylovSolver( SolverType         solver_type = default_solver,
-                PreconditionerType pc_type     = default_pc );
+                PreconditionerType pc_type     = PreconditionerType::default_pc );
 
   /// Destructor
   ~KrylovSolver();
@@ -58,12 +45,19 @@ private:
   /// Preconditioner type
   PreconditionerType pc_type;
 
-  /// PETSc solver
+  /// solvers
 #ifdef HAVE_PETSC
   PETScKrylovSolver * petsc_solver { nullptr };
 #else
-  int * petsc_solver;
+  int * petsc_solver { nullptr };
 #endif
+
+#ifdef HAVE_TRILINOS
+  trilinos::KrylovSolver * trilinos_solver { nullptr };
+#else
+  int * trilinos_solver { nullptr };
+#endif
+
 #ifdef HAVE_JANPACK
   JANPACKKrylovSolver * janpack_solver;
 #else

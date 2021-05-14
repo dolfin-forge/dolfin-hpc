@@ -1,4 +1,5 @@
-#include <dolfin/common/Check.h>
+#include <dolfin_tests.h>
+#include <dolfin/config/dolfin_config.h>
 
 #ifdef HAVE_CHECK
 

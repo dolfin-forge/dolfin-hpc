@@ -10,6 +10,7 @@
 #include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/UFCHalo.h>
 #include <dolfin/la/GenericTensor.h>
+#include <dolfin/la/GenericVector.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/log/log.h>
@@ -498,6 +499,30 @@ void initGlobalTensor( GenericTensor & A, Form & form, bool reset_tensor )
     GenericSparsityPattern * sparsity_pattern = A.factory().createPattern();
     SparsityPatternBuilder::build( *sparsity_pattern, form );
     A.init( *sparsity_pattern );
+
+    // initialize ghost values for vectors
+    if ( A.rank() == 1 )
+    {
+      _ordered_set< size_t > indices;
+
+      for ( CellIterator cell( form.mesh() ); !cell.end(); ++cell )
+      {
+        // Update to current cell
+        form.cache().cell.update( *cell );
+
+        // Tabulate dofs
+        form.spaces()[0].dofmap().tabulate_dofs( form.cache().dofs[0],
+                                                 form.cache().cell );
+
+        for ( size_t j = 0; j < form.spaces()[0].element().space_dim; ++j )
+        {
+          indices.insert( form.cache().dofs[0][j] );
+        }
+      }
+
+      A.down_cast< GenericVector >().init_ghosted( indices );
+    }
+
     delete sparsity_pattern;
   }
   else

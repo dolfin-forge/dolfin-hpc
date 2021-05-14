@@ -33,6 +33,7 @@ int main()
 
   // Create mesh and a point in the mesh
   UnitCube mesh(8, 8, 8);
+
   real x[3] = {0.3, 0.3, 0.3};
   real f_values[1] = {0.0};
   real g_values[1] = {0.0};

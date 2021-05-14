@@ -17,6 +17,8 @@ ParameterSystem::ParameterSystem()
 //--- Linear algebra ---
 #ifdef HAVE_PETSC
   set( "linear algebra backend", "PETSc" );
+#elif HAVE_TRILINOS
+  set( "linear algebra backend", "Trilinos" );
 #elif HAVE_JANPACK
   set( "linear algebra backend", "JANPACK" );
 #else

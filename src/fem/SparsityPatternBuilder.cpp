@@ -23,7 +23,7 @@ namespace SparsityPatternBuilder
 
 //-----------------------------------------------------------------------------
 void build( GenericSparsityPattern & sparsity_pattern,
-            Form &             form)
+            Form &                   form)
 {
   message( 1, "SparsityPatternBuilder: build" );
   tic();

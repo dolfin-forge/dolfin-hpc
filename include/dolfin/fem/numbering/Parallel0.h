@@ -63,7 +63,7 @@ public:
     }
     //---
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     message( 1, "Parallel0Numbering : build" );
     tic();
@@ -250,7 +250,7 @@ public:
 
     tocd();
 
-#endif /* HAVE_MPI */
+#endif /* DOLFIN_HAVE_MPI */
   }
 
   ///

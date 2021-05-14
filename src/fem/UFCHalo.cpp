@@ -185,7 +185,7 @@ void UFCHalo::update()
     return;
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
   size_t const      tdim      = mesh.topology_dimension();
   size_t const      facet_dim = mesh.type().facet_dim();

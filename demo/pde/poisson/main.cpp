@@ -86,22 +86,22 @@ int main()
   Matrix A;
   Vector b;
 
+  // assemble system
   a.assemble( A, true );
   L.assemble( b, true );
   bc.apply( A, b, a );
 
   Function u( a.trial_space() );
 
+  // solve system
   KrylovSolver solver( bicgstab, bjacobi );
   solver.solve( A, u.vector(), b );
 
-  message( "vector l2  norm: %e", u.vector().norm() );
-  message( "vector inf norm: %e", u.vector().max() );
+  message( "vector l2  norm: %e", u.vector().norm( l2 ) );
+  message( "vector inf norm: %e", u.vector().norm( linf ) );
 
   // Save solution to file
   File( "poisson.pvd" ) << u;
-
-  dolfin_finalize();
 
   return 0;
 }

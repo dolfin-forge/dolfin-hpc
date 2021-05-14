@@ -6,7 +6,7 @@
 namespace dolfin
 {
 
-#if defined( HAVE_MPI )
+#if defined( DOLFIN_HAVE_MPI )
 
 //-----------------------------------------------------------------------------
 

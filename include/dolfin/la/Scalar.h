@@ -11,10 +11,10 @@
 #include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_PETSC
-#include "PETScFactory.h"
+#include <dolfin/la/petsc/PETScFactory.h>
 #endif
 #ifdef HAVE_JANPACK
-#include "JANPACKFactory.h"
+#include <dolfin/la/janpack/JANPACKFactory.h>
 #endif
 
 namespace dolfin

@@ -8,7 +8,8 @@
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/fem/ScratchSpace.h>
-#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/petsc/PETScMatrix.h>
+#include <dolfin/la/trilinos/TrilinosMatrix.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/entities/Facet.h>
@@ -94,16 +95,17 @@ void SlipBC::apply( GenericMatrix &      A,
   std::string const la_backend =
     dolfin_get< std::string >( "linear algebra backend" );
 
-  if ( As == nullptr || As->size( 0 ) != A.size( 0 )
-       || As->size( 1 ) != A.size( 1 ) )
+  if (    ( As == nullptr )
+       or ( As->size( 0 ) != A.size( 0 ) )
+       or ( As->size( 1 ) != A.size( 1 ) ) )
   {
     // Create data structure for local assembly data
-    if ( la_backend == "JANPACK" )
+    if ( la_backend == "JANPACK" or la_backend == "Trilinos" )
     {
       As       = reinterpret_cast< Matrix * >( &A );
       As_local = false;
     }
-    else
+    else if ( la_backend == "PETSc" )
     {
       delete As;
       As = new Matrix();
@@ -125,8 +127,7 @@ void SlipBC::apply( GenericMatrix &      A,
         rows.insert( celldofs.begin(), celldofs.end() );
       }
 
-      _ordered_map< size_t, size_t > mapping;
-      b.init_ghosted( rows.size(), rows, mapping );
+      b.init_ghosted( rows );
     }
 
     // Initialize normal field on given space and compute at the boundary
@@ -156,10 +157,16 @@ void SlipBC::apply( GenericMatrix &      A,
   }
 
   // Copy global stiffness matrix into temporary one (if needed)
-  if ( la_backend != "JANPACK" )
+  if ( la_backend == "PETSc" )
   {
     *( As->instance() ) = A;
   }
+#if HAVE_TRILINOS
+  else if ( la_backend == "Trilinos" )
+  {
+    As->down_cast< trilinos::Matrix const >().mat()->resumeFill();
+  }
+#endif
 
   applySlipBC( A, b, form, scratch );
 
@@ -167,10 +174,11 @@ void SlipBC::apply( GenericMatrix &      A,
   As->apply();
 
   // Apply changes in the stiffness matrix and load vector (if needed)
-  if ( la_backend != "JANPACK" )
+  if ( la_backend == "PETSc" )
   {
     A = *( As->instance() );
   }
+
   b.apply();
 }
 //-----------------------------------------------------------------------------

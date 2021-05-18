@@ -282,7 +282,17 @@ if test "x${with_petsc}" != xno; then
 fi
 
 if test "x${with_trilinos}" != xno; then
-  AX_TRILINOS
+   if test "x${is_cray}" = xyes; then
+      AX_CRAY_TRILINOS
+      if test "x${have_cray_trilinos}" = xyes; then
+         found_la_backend="yes"
+         with_trilinos="yes"
+      else
+         with_trilinos="no"
+      fi
+   else
+      AX_TRILINOS
+   fi
 fi
 
 if test "x${with_janpack}" != xno; then
@@ -333,6 +343,7 @@ if test "x${enable_quad}" = xyes; then
       AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])
    fi
 fi
+
 
 if test "x${with_libsim}" != xno; then
    AX_LIBSIM

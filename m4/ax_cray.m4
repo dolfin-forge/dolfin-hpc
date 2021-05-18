@@ -37,6 +37,22 @@ AC_DEFUN([AX_CRAY_PETSC],[
 	fi
 ])
 
+AC_DEFUN([AX_CRAY_TRILINOS],[
+	AC_MSG_CHECKING([Cray Trilinos])
+	if test "${CRAY_TRILINOS_VERSION}"; then
+	   have_cray_trilinos="yes"
+	else
+	   have_cray_trilinos="no"
+	fi
+	AC_SUBST(have_cray_trilinos)
+	if test "x${have_cray_trilinos}" = xyes; then
+           AC_DEFINE(HAVE_TRILINOS, 1, [Define if you have the trilinos library.])
+	   AC_MSG_RESULT([yes])
+	else
+	   AC_MSG_RESULT([no])
+	fi
+])
+
 AC_DEFUN([AX_CRAY_PARMETIS],[
 	AC_MSG_CHECKING([Cray ParMETIS])
 	AC_EGREP_CPP(yes,

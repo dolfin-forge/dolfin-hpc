@@ -254,6 +254,8 @@ fi
 
 if test "x${with_phmap}" != xno; then
   AX_PHMAP
+else
+  have_phmap_h="no"
 fi
 
 found_la_backend="no"

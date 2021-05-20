@@ -27,45 +27,51 @@ public:
   // Subsystem state mask
   enum Type
   {
-    mpi      = 1,
-    petsc    = 2,
-    petscmpi = 4,
-    janpack  = 8,
-    zoltan   = 16
+    mpi                  = 1,
+    petsc                = 2,
+    petscmpi             = 4,
+    janpack              = 8,
+    zoltan               = 16,
+    trilinos             = 32,
+    trilinosmpi          = 64,
+    number_of_subsystems = 128
   };
 
   //-------------------------------------------------------------------------
-  static auto start( int    argc    = 0,
-                     char * argv[]  = nullptr,
-                     size_t n       = 0,
-                     long   w_limit = 0 ) -> int
+
+  static auto start( int argc = 0, char * argv[] = nullptr,
+                     size_t n = 0,   long w_limit = 0 )
+      -> int
   {
-    return SubSystemsManager::instance().init( argc, argv, n, w_limit );
+    return SubSystemsManager::instance().initialize( argc, argv, n, w_limit );
   }
 
   //-------------------------------------------------------------------------
+
   static void status()
   {
     SubSystemsManager::instance().disp();
   }
 
   //-------------------------------------------------------------------------
+
   static inline auto active( SubSystemsManager::Type s ) -> bool
   {
     return SubSystemsManager::instance().iset( s );
   }
 
   //-------------------------------------------------------------------------
+
   struct MPI
   {
     static SubSystemsManager::Type const flag = mpi;
 
     /// Initialize MPI
-    static auto init( int argc = 0, char * argv[] = nullptr, size_t n = 0 )
+    static auto initialize( int argc = 0, char * argv[] = nullptr, size_t n = 0 )
       -> bool;
 
     /// Finalize MPI
-    static auto fini() -> bool;
+    static auto finalize() -> bool;
 
     // Check if MPI has been initialized
     static auto initialized() -> bool;
@@ -75,48 +81,76 @@ public:
   };
 
   //-------------------------------------------------------------------------
+
   struct PETSc
   {
     static SubSystemsManager::Type const flag = petsc;
 
     /// Initialize PETSc with command-line arguments
-    static auto init( int argc = 0, char * argv[] = nullptr ) -> bool;
+    static auto initialize( int argc = 0, char * argv[] = nullptr ) -> bool;
 
     /// Finalize PETSc
-    static auto fini() -> bool;
+    static auto finalize() -> bool;
 
     ///
     static int sema;
   };
 
   //-------------------------------------------------------------------------
+
   struct PETScMPI
   {
     static SubSystemsManager::Type const flag = petscmpi;
   };
 
   //-------------------------------------------------------------------------
+
   struct JANPACK
   {
     static SubSystemsManager::Type const flag = janpack;
   };
 
   //-------------------------------------------------------------------------
+
   struct Zoltan
   {
     static SubSystemsManager::Type const flag = zoltan;
 
     /// Initialize PETSc with command-line arguments
-    static auto init( int argc = 0, char * argv[] = nullptr ) -> bool;
+    static auto initialize( int argc = 0, char * argv[] = nullptr ) -> bool;
 
     /// Finalize PETSc
-    static auto fini() -> bool;
+    static auto finalize() -> bool;
 
     ///
     static int sema;
   };
 
   //-------------------------------------------------------------------------
+
+  struct Trilinos
+  {
+    static SubSystemsManager::Type const flag = trilinos;
+
+    /// Initialize Trilinos with command-line arguments
+    static auto initialize( int argc = 0, char * argv[] = nullptr ) -> bool;
+
+    /// Finalize Trilinos
+    static auto finalize() -> bool;
+
+    ///
+    static int sema;
+  };
+
+  //-------------------------------------------------------------------------
+
+  struct TrilinosMPI
+  {
+    static SubSystemsManager::Type const flag = trilinosmpi;
+  };
+
+  //-------------------------------------------------------------------------
+
   void disp() const;
 
   //--- ALARM ---------------------------------------------------------------
@@ -127,11 +161,12 @@ public:
   }
 
 private:
-  auto init( int    argc    = 0,
-             char * argv[]  = nullptr,
-             size_t n       = 0,
-             long   w_limit = 0 ) -> int;
-  auto fini() -> int;
+  auto initialize( int    argc    = 0,
+                   char * argv[]  = nullptr,
+                   size_t   n       = 0,
+                   long   w_limit = 0 ) -> int;
+
+  auto finalize() -> int;
 
   // Constructor
   SubSystemsManager() = default;
@@ -143,12 +178,12 @@ private:
   ~SubSystemsManager();
 
   /// State control
-  void init( SubSystemsManager::Type s )
+  auto initialize( SubSystemsManager::Type s ) -> void
   {
     state_ = ( state_ & s ) + ( state_ | s );
   }
 
-  void fini( SubSystemsManager::Type s )
+  auto finalize( SubSystemsManager::Type s ) -> void
   {
     state_ &= ( 1 ^ s );
   }

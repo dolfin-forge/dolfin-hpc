@@ -74,7 +74,7 @@ typedef struct atomic_cell
 
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile("Binary", filename),
-#if defined( HAVE_MPI )
+#if defined( DOLFIN_HAVE_MPI )
     t_( nullptr ),
 #endif
     version_(BINARY_VERSION)
@@ -83,12 +83,12 @@ BinaryFile::BinaryFile(const std::string filename) :
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real const& t) :
     GenericFile("Binary", filename),
-#if defined( HAVE_MPI )
+#if defined( DOLFIN_HAVE_MPI )
     t_(&t),
 #endif
     version_(BINARY_VERSION)
 {
-#if !defined( HAVE_MPI )
+#if !defined( DOLFIN_HAVE_MPI )
   MAYBE_UNUSED(t);
 #endif
 }

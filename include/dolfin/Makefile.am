@@ -102,11 +102,11 @@ nobase_pkginclude_HEADERS = \
 				la/GenericSparsityPattern.h\
 				la/GenericTensor.h\
 				la/GenericVector.h\
-				la/JANPACKAMGSolver.h\
-				la/JANPACKFactory.h\
-				la/JANPACKKrylovSolver.h\
-				la/JANPACKMat.h\
-				la/JANPACKVec.h\
+				la/janpack/JANPACKAMGSolver.h\
+				la/janpack/JANPACKFactory.h\
+				la/janpack/JANPACKKrylovSolver.h\
+				la/janpack/JANPACKMat.h\
+				la/janpack/JANPACKVec.h\
 				la/KrylovSolver.h\
 				la/LAPACKMatrix.h\
 				la/LAPACKVector.h\
@@ -115,18 +115,24 @@ nobase_pkginclude_HEADERS = \
 				la/LUSolver.h\
 				la/Matrix.h\
 				la/MultigridScheme.h\
-				la/PETScFactory.h\
-				la/PETScKrylovMatrix.h\
-				la/PETScKrylovSolver.h\
-				la/PETScLUSolver.h\
-				la/PETScMatrix.h\
-				la/PETScObject.h\
-				la/PETScPreconditioner.h\
-				la/PETScVector.h\
+				la/petsc/PETScFactory.h\
+				la/petsc/PETScKrylovMatrix.h\
+				la/petsc/PETScKrylovSolver.h\
+				la/petsc/PETScLUSolver.h\
+				la/petsc/PETScMatrix.h\
+				la/petsc/PETScObject.h\
+				la/petsc/PETScPreconditioner.h\
+				la/petsc/PETScVector.h\
 				la/PreconditionerType.h\
 				la/Scalar.h\
 				la/SolverType.h\
 				la/SparsityPattern.h\
+				la/trilinos/TrilinosFactory.h\
+				la/trilinos/TrilinosKrylovSolver.h\
+				la/trilinos/TrilinosMatrix.h\
+				la/trilinos/TrilinosObject.h\
+				la/trilinos/TrilinosPreconditioner.h\
+				la/trilinos/TrilinosVector.h\
 				la/Vector.h\
 				la/VectorNormType.h\
 				la/VectorPointwiseOp.h\

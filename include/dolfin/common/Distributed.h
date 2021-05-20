@@ -60,7 +60,7 @@ Distributed< T >::Distributed( MPI::Communicator & comm )
   , comm_rank_( 0 )
   , comm_size_( 1 )
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   /*
    * MPI 1.1:
    *  "A null handle argument is an erroneous IN argument in MPI calls"
@@ -136,7 +136,7 @@ inline auto Distributed< T >::distributed() const -> bool
 template < typename T >
 Distributed< T >::~Distributed()
 {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
   if ( comm_ != DOLFIN_COMM_NULL )
     MPI::check_error( MPI_Comm_free( &comm_ ) );
 #endif
@@ -150,7 +150,7 @@ auto Distributed< T >::operator=( Distributed< T > const & other )
 {
   if ( this != &other )
   {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     if ( comm_ != DOLFIN_COMM_NULL )
       MPI::check_error( MPI_Comm_free( &comm_ ) );
     if ( other.comm_ != DOLFIN_COMM_NULL )

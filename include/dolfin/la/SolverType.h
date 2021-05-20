@@ -9,79 +9,123 @@
 namespace dolfin
 {
 
-  /// List of predefined solvers
+//---------------------------------------------------------------------------
 
-  enum SolverType
-  {
-    lu,            // LU factorization
-    cg,            // Krylov conjugate gradient method
-    pipecg,        // Pipelined conjugate gradient method
-    asyncg,        // Gropp's asynchronous conjugate gradient method
-    gmres,         // Krylov GMRES method
-    bicgstab,      // Krylov stabilised biconjugate gradient squared method
-    pipebicgstab,  // Pipelined stabilised biconjugate gradient squared method
-    default_solver // Default Krylov solver
-  };
+/// List of predefined solvers
 
-  //---------------------------------------------------------------------------
-  inline static auto krylov_method(std::string type) -> SolverType
-  {
-    if (type == "cg")
-      return cg;
-    else if (type == "gmres")
-      return gmres;
-    else if (type == "bicgstab")
-      return bicgstab;
-    else if (type == "pipebicgstab")
-      return pipebicgstab;
-    else
-    {
-      warning("Undefined solver type            "
-              "Fallback to default Krylov method");
-      return default_solver;
-    }
-  }
+enum SolverType
+{
+  lu,            // LU factorization
+  cg,            // Krylov conjugate gradient method
+  pipecg,        // Pipelined conjugate gradient method
+  asyncg,        // Gropp's asynchronous conjugate gradient method
+  gmres,         // Krylov GMRES method
+  bicgstab,      // Krylov stabilised biconjugate gradient squared method
+  pipebicgstab,  // Pipelined stabilised biconjugate gradient squared method
+  default_solver // Default Krylov solver
+};
 
-  //---------------------------------------------------------------------------
-  inline static auto solver_type(std::string type, bool fallback = false) -> SolverType
+//---------------------------------------------------------------------------
+
+inline static auto krylov_method( std::string type ) -> SolverType
+{
+  if ( type == "cg" )
+    return cg;
+  else if ( type == "gmres" )
+    return gmres;
+  else if ( type == "bicgstab" )
+    return bicgstab;
+  else if ( type == "pipebicgstab" )
+    return pipebicgstab;
+  else
   {
-    if (type == "lu")
-    {
-      return lu;
-    }
-    else if (type == "cg")
-    {
-      return cg;
-    }
-    else if (type == "gmres")
-    {
-      return gmres;
-    }
-    else if (type == "bicgstab")
-    {
-      return bicgstab;
-    }
-    else if (type == "pipebicgstab")
-    {
-      return pipebicgstab;
-    }
-    else if (type == "default")
-    {
-      return default_solver;
-    }
-    else
-    {
-      if(fallback)
-      {
-        warning("Undefined solver type: "
-                "Fallback to default Krylov method");
-        return default_solver;
-      }
-    }
-    error("Undefined solver type.");
+    warning( "Undefined solver type            "
+             "Fallback to default Krylov method" );
     return default_solver;
   }
-
 }
+
+//---------------------------------------------------------------------------
+
+inline static auto solver_type( std::string type, bool fallback = false )
+  -> SolverType
+{
+  if ( type == "lu" )
+  {
+    return lu;
+  }
+  else if ( type == "cg" )
+  {
+    return cg;
+  }
+  else if ( type == "gmres" )
+  {
+    return gmres;
+  }
+  else if ( type == "bicgstab" )
+  {
+    return bicgstab;
+  }
+  else if ( type == "pipebicgstab" )
+  {
+    return pipebicgstab;
+  }
+  else if ( type == "default" )
+  {
+    return default_solver;
+  }
+  else
+  {
+    if ( fallback )
+    {
+      warning( "Undefined solver type: "
+               "Fallback to default Krylov method" );
+      return default_solver;
+    }
+  }
+  error( "Undefined solver type." );
+  return default_solver;
+}
+
+//---------------------------------------------------------------------------
+
+inline static auto to_string( SolverType type ) -> std::string
+{
+  std::string name = "";
+
+  switch( type )
+  {
+    case lu:
+      name = "lu";
+      break;
+    case cg:
+      name = "cg";
+      break;
+    case pipecg:
+      name = "pipecg";
+      break;
+    case asyncg:
+      name = "asyncg";
+      break;
+    case gmres:
+      name = "gmres";
+      break;
+    case bicgstab:
+      name = "bicgstab";
+      break;
+    case pipebicgstab:
+      name = "pipebicgstab";
+      break;
+    case default_solver:
+      name = "default_solver";
+      break;
+  }
+
+  return name;
+}
+
+//---------------------------------------------------------------------------
+
+} // namespace dolfin
 
 #endif

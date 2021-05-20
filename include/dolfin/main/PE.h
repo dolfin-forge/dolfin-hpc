@@ -23,7 +23,7 @@ struct PE
   /// Returns whether the context is parallel.
   static inline auto parallel() -> bool
   {
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
     return SubSystemsManager::active( SubSystemsManager::mpi );
 #endif
     return false;

@@ -14,7 +14,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 void MeshPartition::partition( MeshValues< size_t, Cell > & partitions )
 {
   const std::string method = dolfin_get< std::string >( "Mesh partitioner" );

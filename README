@@ -17,7 +17,7 @@ The package dependencies of DOLFIN HPC 0.9.4 are:
     * ffc 1.2.0-hpc (https://bitbucket.org/adaptivesimulations/ffc-hpc)
     * ufl 1.2.0-hpc (https://bitbucket.org/adaptivesimulations/ufl-hpc)
     * ParMETIS
-    * Supported LA-backend (currently PETSc or JANPACK)
+    * Supported LA-backend (currently PETSc, Trilinos or JANPACK)
 
 Installation:
 
@@ -30,3 +30,26 @@ these steps:
 
 DOLFIN HPC can be build with various options, issue ./configure --help
 to list all of them.
+
+Suggested/Minimal Trilinos (13.0.1) installation:
+
+cmake .. -D CMAKE_BUILD_TYPE=RELEASE \
+         -D CMAKE_C_FLAGS="-O2 -g" \
+         -D CMAKE_CXX_FLAGS="-O2 -g" \
+         -D BUILD_SHARED_LIBS:BOOL=ON \
+         -D Trilinos_ENABLE_ALL_PACKAGES:BOOL=OFF \
+         -D Trilinos_ENABLE_ALL_OPTIONAL_PACKAGES:BOOL=OFF \
+         -D Trilinos_ENABLE_TEUCHOS_TIME_MONITOR:BOOL=OFF \
+         -D Trilinos_ENABLE_Epetra=OFF \
+         -D Trilinos_ENABLE_Tpetra=ON \
+         -D Trilinos_ENABLE_AztecOO=OFF \
+         -D Trilinos_ENABLE_Ifpack2=ON \
+         -D Trilinos_ENABLE_Fortran=OFF \
+         -D Trilinos_ENABLE_OpenMP=ON \
+         -D Trilinos_ENABLE_THREAD_SAFE:BOOL=ON \
+         -D Trilinos_ENABLE_Gtest:BOOL=OFF \
+         -D Trilinos_ENABLE_TESTS=OFF \
+         -D TPL_ENABLE_gtest:BOOL=OFF \
+         -D TPL_ENABLE_MPI:BOOL=ON \
+         -D TPL_ENABLE_HDF5:BOOL=OFF \
+         -D CMAKE_INSTALL_PREFIX:PATH=/some/dir

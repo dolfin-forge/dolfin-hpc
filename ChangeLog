@@ -1,3 +1,6 @@
+0.9.5-hpc [2021-05-20]
+ - add support for Trilinos as an LA backend (uses Kokkos, Tpetra, Belos, Ifpack2 so far)
+ - fix automatic mesh entity initialization for >=P2 forms
 0.9.4-hpc [2021-03-15]
  - switched to new versions of ffc-hpc (1.2.0), ufl-hpc (1.2.0) and fiat-hpc (1.6.0)
  - ufc.h is now part of ffc-hpc

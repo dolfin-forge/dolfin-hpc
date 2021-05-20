@@ -72,9 +72,7 @@ public:
   /// Initialize vector of size N and distribute if specified
   void init( size_t N, bool distributed ) override;
 
-  void init_ghosted( size_t                           n,
-                     _ordered_set< size_t > &         indices,
-                     _ordered_map< size_t, size_t > & map ) override;
+  void init_ghosted( _ordered_set< size_t > & indices ) override;
 
   /// Return size of vector
   size_t size() const override;
@@ -177,120 +175,140 @@ public:
 
 private:
   // Pointer to concrete implementation
-  GenericVector * const vector_;
+  GenericVector * vector_ { nullptr };
 };
 
 //-----------------------------------------------------------------------------
+
 inline Vector * Vector::copy() const
 {
-  return new Vector( *this );
+  Vector * V = new Vector();
+  delete V->vector_;
+  V->vector_ = vector_->copy();
+  return V;
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::zero()
 {
   vector_->zero();
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::apply( FinalizeType finaltype )
 {
   vector_->apply( finaltype );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::disp( size_t precision ) const
 {
   vector_->disp( precision );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::init( size_t N )
 {
   vector_->init( N );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::init( size_t N, bool distributed )
 {
   vector_->init( N, distributed );
 }
 
 //-----------------------------------------------------------------------------
-inline void Vector::init_ghosted( size_t                           n,
-                                  _ordered_set< size_t > &         indices,
-                                  _ordered_map< size_t, size_t > & map )
+
+inline void Vector::init_ghosted( _ordered_set< size_t > & indices )
 {
-  vector_->init_ghosted( n, indices, map );
+  vector_->init_ghosted( indices );
 }
 
 //-----------------------------------------------------------------------------
+
 inline size_t Vector::size() const
 {
   return vector_->size();
 }
 
 //-----------------------------------------------------------------------------
+
 inline size_t Vector::local_size() const
 {
   return vector_->local_size();
 }
 
 //-----------------------------------------------------------------------------
+
 inline size_t Vector::offset() const
 {
   return vector_->offset();
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::get( real * block, size_t m, const size_t * rows ) const
 {
   vector_->get( block, m, rows );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::set( const real * block, size_t m, const size_t * rows )
 {
   vector_->set( block, m, rows );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::add( const real * block, size_t m, const size_t * rows )
 {
   vector_->add( block, m, rows );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::get( real * values ) const
 {
   vector_->get( values );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::set( real * values )
 {
   vector_->set( values );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::add( real * values )
 {
   vector_->add( values );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::axpy( real a, const GenericVector & x )
 {
   vector_->axpy( a, x );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::axpby( real a, const GenericVector & x, real b )
 {
   vector_->axpby( a, x, b );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void
   Vector::waxpy( real a, const GenericVector & x, const GenericVector & y )
 {
@@ -298,6 +316,7 @@ inline void
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::axpbypcz( real                  a,
                               const GenericVector & x,
                               real                  b,
@@ -308,30 +327,35 @@ inline void Vector::axpbypcz( real                  a,
 }
 
 //-----------------------------------------------------------------------------
+
 inline real Vector::inner( const GenericVector & x ) const
 {
   return vector_->inner( x );
 }
 
 //-----------------------------------------------------------------------------
+
 inline real Vector::norm( VectorNormType type ) const
 {
   return vector_->norm( type );
 }
 
 //-----------------------------------------------------------------------------
+
 inline real Vector::min() const
 {
   return vector_->min();
 }
 
 //-----------------------------------------------------------------------------
+
 inline real Vector::max() const
 {
   return vector_->max();
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Vector::pointwise( const GenericVector & x,
                                VectorPointwiseOp     op ) const
 {
@@ -339,6 +363,7 @@ inline void Vector::pointwise( const GenericVector & x,
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator*=( real a )
 {
   *vector_ *= a;
@@ -346,6 +371,7 @@ inline Vector & Vector::operator*=( real a )
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator/=( real a )
 {
   *this *= 1.0 / a;
@@ -353,6 +379,7 @@ inline Vector & Vector::operator/=( real a )
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator*=( const GenericVector & x )
 {
   *vector_ *= x;
@@ -360,6 +387,7 @@ inline Vector & Vector::operator*=( const GenericVector & x )
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator+=( const GenericVector & x )
 {
   axpy( 1.0, x );
@@ -367,6 +395,7 @@ inline Vector & Vector::operator+=( const GenericVector & x )
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator-=( const GenericVector & x )
 {
   axpy( -1.0, x );
@@ -374,6 +403,7 @@ inline Vector & Vector::operator-=( const GenericVector & x )
 }
 
 //-----------------------------------------------------------------------------
+
 inline GenericVector & Vector::operator=( const GenericVector & x )
 {
   *vector_ = x;
@@ -381,6 +411,7 @@ inline GenericVector & Vector::operator=( const GenericVector & x )
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator=( real a )
 {
   *vector_ = a;
@@ -388,24 +419,28 @@ inline Vector & Vector::operator=( real a )
 }
 
 //-----------------------------------------------------------------------------
+
 inline LinearAlgebraFactory & Vector::factory() const
 {
   return vector_->factory();
 }
 
 //-----------------------------------------------------------------------------
+
 inline GenericVector const * Vector::instance() const
 {
   return vector_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline GenericVector * Vector::instance()
 {
   return vector_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline Vector & Vector::operator=( Vector const & x )
 {
   *vector_ = *x.vector_;

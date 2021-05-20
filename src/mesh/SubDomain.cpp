@@ -40,7 +40,7 @@ void SubDomain::mark( MeshValues< size_t, Entity > & sub_domains,
     }
   }
 
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   if ( mesh.is_distributed() )
   {
     size_t const      pe_size  = MPI::size();

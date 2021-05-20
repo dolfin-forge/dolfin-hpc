@@ -20,7 +20,7 @@ SharedMapping::SharedMapping( DistributedData const & data )
     error( "SharedMapping : distributed data is not finalized" );
   }
 
-#if HAVE_MPI
+#if DOLFIN_HAVE_MPI
 
   // Collect entities by adjacent rank
   for ( SharedIterator it( data ); it.valid(); ++it )
@@ -49,22 +49,14 @@ SharedMapping::SharedMapping( DistributedData const & data )
     send_max_ = std::max( send_max_, amap.send.size() );
     send_min_ = std::min( send_min_, amap.send.size() );
     //
-    MPI::check_error( MPI_Isend( amap.send.data(),
-                                 amap.send.size(),
+    MPI::check_error( MPI_Isend( amap.send.data(), amap.send.size(),
                                  MPI_type< size_t >::value,
-                                 it.first,
-                                 0,
-                                 data.comm(),
-                                 &sendreq[i] ) );
+                                 it.first, 0, data.comm(), &sendreq[i] ) );
     // Resize buffer
     amap.recv.resize( amap.send.size() );
-    MPI::check_error( MPI_Irecv( amap.recv.data(),
-                                 amap.recv.size(),
+    MPI::check_error( MPI_Irecv( amap.recv.data(), amap.recv.size(),
                                  MPI_type< size_t >::value,
-                                 it.first,
-                                 0,
-                                 data.comm(),
-                                 &recvreq[i] ) );
+                                 it.first, 0, data.comm(), &recvreq[i] ) );
 
     ++i;
   }
@@ -88,18 +80,20 @@ SharedMapping::SharedMapping( DistributedData const & data )
 
     if ( static_cast< size_t >( recvcount ) != amap.recv.size() )
     {
-      error(
-        "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
-        MPI::rank(),
-        recvcount,
-        amap.recv.size() );
+      error( "AdjacentMapping : inconsistent count %u from rank %u: expected %u",
+             MPI::rank(), recvcount, amap.recv.size() );
     }
 
     data_.get_local( amap.recv.size(), amap.recv.data(), amap.recv.data() );
     ++i;
   }
 
-#endif /* HAVE_MPI */
+  // init empty AdjacentMappings if they dont exist
+  for ( size_t rank = 0; rank < MPI::size(); ++rank )
+    if ( mappings_.find( rank ) == mappings_.end() )
+      mappings_[rank] = AdjacentMapping();
+
+#endif /* DOLFIN_HAVE_MPI */
 }
 
 //-----------------------------------------------------------------------------

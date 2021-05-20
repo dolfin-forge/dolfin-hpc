@@ -128,7 +128,7 @@ void VertexNormal::computeNormal( Mesh & mesh )
   BoundaryMesh & boundary = mesh.exterior_boundary();
 
   VertexDataMap vdmap;
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
   int rank = dolfin::MPI::rank();
 #endif
   int                      pe_size = dolfin::MPI::size();
@@ -138,7 +138,7 @@ void VertexNormal::computeNormal( Mesh & mesh )
   //--- Collect shared data ---------------------------------------------------
   if ( mesh.is_distributed() )
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     DistributedData const & ddv = mesh.distdata()[0];
 
@@ -317,7 +317,7 @@ void VertexNormal::computeNormal( Mesh & mesh )
 
   if ( mesh.is_distributed() )
   {
-#ifdef HAVE_MPI
+#ifdef DOLFIN_HAVE_MPI
 
     DistributedData const & ddv = mesh.distdata()[0];
 

@@ -26,40 +26,40 @@ public:
     : Variable( "A", "DOLFIN matrix" )
   {
     DefaultFactory factory;
-    matrix = factory.createMatrix();
+    matrix_ = factory.createMatrix();
   }
 
   /// Create M x N matrix distributed by default
   Matrix( size_t M, size_t N )
     : Variable( "A", "DOLFIN matrix" )
-    , matrix( 0 )
+    , matrix_( nullptr )
   {
     DefaultFactory factory;
-    matrix = factory.createMatrix();
-    matrix->init( M, N );
+    matrix_ = factory.createMatrix();
+    matrix_->init( M, N );
   }
 
   /// Create M x N matrix distributed if specified
   Matrix( size_t M, size_t N, bool distributed )
     : Variable( "A", "DOLFIN matrix" )
-    , matrix( 0 )
+    , matrix_( nullptr )
   {
     DefaultFactory factory;
-    matrix = factory.createMatrix();
-    matrix->init( M, N, distributed );
+    matrix_ = factory.createMatrix();
+    matrix_->init( M, N, distributed );
   }
 
   /// Copy constructor
   explicit Matrix( const Matrix & A )
     : Variable( "A", "DOLFIN matrix" )
-    , matrix( A.matrix->copy() )
+    , matrix_( A.matrix_->copy() )
   {
   }
 
   /// Destructor
   ~Matrix() override
   {
-    delete matrix;
+    delete matrix_;
   }
 
   //--- Implementation of the GenericTensor interface ---
@@ -170,207 +170,232 @@ public:
 
 private:
   // Pointer to concrete implementation
-  GenericMatrix * matrix { 0 };
+  GenericMatrix * matrix_ { nullptr };
 };
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::init( const GenericSparsityPattern & sparsity_pattern )
 {
-  matrix->init( sparsity_pattern );
+  matrix_->init( sparsity_pattern );
 }
 
 //-----------------------------------------------------------------------------
+
 inline Matrix * Matrix::copy() const
 {
   Matrix * A = new Matrix();
-  delete A->matrix;
-  A->matrix = matrix->copy();
+  delete A->matrix_;
+  A->matrix_ = matrix_->copy();
   return A;
 }
 
 //-----------------------------------------------------------------------------
+
 inline size_t Matrix::size( size_t dim ) const
 {
-  return matrix->size( dim );
+  return matrix_->size( dim );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::zero()
 {
-  matrix->zero();
+  matrix_->zero();
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::apply( FinalizeType finaltype )
 {
-  matrix->apply( finaltype );
+  matrix_->apply( finaltype );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::disp( size_t precision ) const
 {
-  matrix->disp( precision );
+  matrix_->disp( precision );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::init( size_t M, size_t N )
 {
-  matrix->init( M, N );
+  matrix_->init( M, N );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::init( size_t M, size_t N, bool distributed )
 {
-  matrix->init( M, N, distributed );
+  matrix_->init( M, N, distributed );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::get( real *         block,
                          size_t         m,
                          const size_t * rows,
                          size_t         n,
                          const size_t * cols ) const
 {
-  matrix->get( block, m, rows, n, cols );
+  matrix_->get( block, m, rows, n, cols );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::set( const real *   block,
                          size_t         m,
                          const size_t * rows,
                          size_t         n,
                          const size_t * cols )
 {
-  matrix->set( block, m, rows, n, cols );
+  matrix_->set( block, m, rows, n, cols );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::add( const real *   block,
                          size_t         m,
                          const size_t * rows,
                          size_t         n,
                          const size_t * cols )
 {
-  matrix->add( block, m, rows, n, cols );
+  matrix_->add( block, m, rows, n, cols );
 }
 
 //-----------------------------------------------------------------------------
+
 inline double Matrix::norm( std::string norm_type ) const
 {
-  return matrix->norm( norm_type );
+  return matrix_->norm( norm_type );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::getrow( size_t                  row,
                             std::vector< size_t > & columns,
                             std::vector< real > &   values ) const
 {
-  matrix->getrow( row, columns, values );
+  matrix_->getrow( row, columns, values );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::setrow( size_t                        row,
                             const std::vector< size_t > & columns,
                             const std::vector< real > &   values )
 {
-  matrix->setrow( row, columns, values );
+  matrix_->setrow( row, columns, values );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::zero( size_t m, const size_t * rows )
 {
-  matrix->zero( m, rows );
+  matrix_->zero( m, rows );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::ident( size_t m, const size_t * rows )
 {
-  matrix->ident( m, rows );
+  matrix_->ident( m, rows );
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::mult( const GenericVector & x,
                           GenericVector &       y,
                           bool                  transposed ) const
 {
-  matrix->mult( x, y, transposed );
+  matrix_->mult( x, y, transposed );
 }
 
 //-----------------------------------------------------------------------------
+
 inline const Matrix & Matrix::operator*=( real a )
 {
-  *matrix *= a;
+  *matrix_ *= a;
   return *this;
 }
 //-----------------------------------------------------------------------------
+
 inline const Matrix & Matrix::operator/=( real a )
 {
-  *matrix /= a;
+  *matrix_ /= a;
   return *this;
 }
 inline const GenericMatrix & Matrix::operator=( const GenericMatrix & A )
 {
-  *matrix = A;
+  *matrix_ = A;
   return *this;
 }
 
 //-----------------------------------------------------------------------------
+
 inline size_t Matrix::nz() const
 {
-  return matrix->nz();
+  return matrix_->nz();
 }
 
 //-----------------------------------------------------------------------------
+
 inline LinearAlgebraFactory & Matrix::factory() const
 {
-  return matrix->factory();
+  return matrix_->factory();
 }
 
 //-----------------------------------------------------------------------------
+
 inline const GenericMatrix * Matrix::instance() const
 {
-  return matrix;
+  return matrix_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline GenericMatrix * Matrix::instance()
 {
-  return matrix;
+  return matrix_;
 }
 
 //-----------------------------------------------------------------------------
+
 inline const Matrix & Matrix::operator=( const Matrix & A )
 {
-  *matrix = *A.matrix;
+  *matrix_ = *A.matrix_;
   return *this;
 }
 
 //-----------------------------------------------------------------------------
+
 inline void Matrix::spy() const
 {
   if ( PE::size() == 1 )
   {
     std::stringstream ss;
-    ss << "A" << matrix->size( 0 ) * matrix->size( 1 ) << ".xpm" << std::ends;
+    ss << "A" << matrix_->size( 0 ) * matrix_->size( 1 ) << ".xpm" << std::ends;
     std::ofstream     Afile( ss.str().c_str() );
     real              val = 0.;
     std::stringstream xpm;
     xpm << "/* XPM */\n"
         << "static char * map_xpm = {\n"
         << "/* width height number_of_colors chars_per_pixel */\n"
-        << "\"" << matrix->size( 0 ) << " " << matrix->size( 1 ) << " 2 1\",\n"
+        << "\"" << matrix_->size( 0 ) << " " << matrix_->size( 1 ) << " 2 1\",\n"
         << "/* intensity levels */\n"
         << "\"0 c #ffffff\",\n"
         << "\"1 c none\",\n"
         << "/* map */\n";
     Afile << xpm.str();
-    for ( size_t i = 0; i < matrix->size( 0 ); ++i )
+    for ( size_t i = 0; i < matrix_->size( 0 ); ++i )
     {
       std::stringstream row;
       row << "\"";
-      for ( size_t j = 0; j < matrix->size( 1 ); ++j )
+      for ( size_t j = 0; j < matrix_->size( 1 ); ++j )
       {
-        val = matrix->getitem( std::pair< size_t, size_t >( i, j ) );
+        val = matrix_->getitem( std::pair< size_t, size_t >( i, j ) );
         if ( val > 1.0e-14 )
         {
           row << "1";
@@ -389,6 +414,6 @@ inline void Matrix::spy() const
 
 //-----------------------------------------------------------------------------
 
-}
+} // namespace dolfin
 
 #endif

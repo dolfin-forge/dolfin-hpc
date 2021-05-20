@@ -38,10 +38,6 @@ Function::Function( Mesh & mesh )
   : GenericFunction()
   , TimeDependent()
   , mesh_( &mesh )
-  , fe_space_( nullptr )
-  , scratch_( nullptr )
-  , X_( nullptr )
-  , renumbered_( false )
 {
   // Do nothing
 }
@@ -55,10 +51,9 @@ Function::Function( FiniteElementSpace const & space )
   , fe_space_( new FiniteElementSpace( space ) )
   , scratch_( new ScratchSpace( *fe_space_ ) )
   , X_( new Vector() )
-  , renumbered_( false )
 {
   // Initialise function
-  InitializeVector();
+  init_vector();
 }
 
 //-----------------------------------------------------------------------------
@@ -68,20 +63,19 @@ Function::Function( SubFunction const & sub_function )
   , TimeDependent( sub_function.function() )
   , mesh_( &sub_function.function().mesh() )
   , fe_space_( new FiniteElementSpace( sub_function.function().space(),
-                                             sub_function.index() ) )
+                                       sub_function.index() ) )
   , scratch_( new ScratchSpace( *fe_space_ ) )
   , X_( new Vector() )
-  , renumbered_( false )
 {
   // Initialize vector, scratch space and ghosts
-  InitializeVector();
+  init_vector();
 
   // Copy subvector, naive implementation
-  Function& gFunc = sub_function.function();
-  DofMap const& gDm = gFunc.space().dofmap();
-  size_t const gLocalDim = gDm.num_element_dofs;
-  size_t const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
-  size_t const thisLocalDim = scratch_->local_dimension;
+  Function &     gFunc        = sub_function.function();
+  DofMap const & gDm          = gFunc.space().dofmap();
+  size_t const   gLocalDim    = gDm.num_element_dofs;
+  size_t const   gDmOffset    = gDm.sub_dofmaps_offsets()[sub_function.index()];
+  size_t const   thisLocalDim = scratch_->local_dimension;
 
   // Sync ghosts before getting the block
   real * gblock = gFunc.create_block();
@@ -111,12 +105,8 @@ Function::Function( Function const & other )
   : GenericFunction()
   , TimeDependent( other )
   , mesh_( &other.mesh() )
-  , fe_space_( nullptr )
-  , scratch_( nullptr )
-  , X_( nullptr )
-  , renumbered_( false )
 {
-  if(!other.empty())
+  if ( not other.empty() )
   {
     *this = other;
   }
@@ -131,46 +121,52 @@ Function::~Function()
 
 //-----------------------------------------------------------------------------
 
-void Function::init(Form& form, size_t i)
+void Function::init( Form & form, size_t i )
 {
-  if(mesh_ == nullptr)
+  if ( mesh_ == nullptr )
   {
-    const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i]->mesh();
+    const_cast< Mesh *& >( mesh_ ) = &form.dofmaps()[i]->mesh();
   }
 
-  if(mesh_ != &form.dofmaps()[i]->mesh())
+  if ( mesh_ != &form.dofmaps()[i]->mesh() )
   {
-    error("Function : mesh mismatch between function and coefficient %d", i);
+    error( "Function : mesh mismatch between function and coefficient %d", i );
   }
 
   //
   clear();
+
   fe_space_ = new FiniteElementSpace( form.spaces()[i] );
-  scratch_ = new ScratchSpace(*fe_space_);
-  X_ = new Vector();
+  scratch_  = new ScratchSpace( *fe_space_ );
+  X_        = new Vector();
+
   //
-  InitializeVector();
+  init_vector();
 }
 
 //-----------------------------------------------------------------------------
 
-void Function::init(FiniteElementSpace const& space)
+void Function::init( FiniteElementSpace const & space )
 {
-  if(mesh_ == nullptr)
+  if ( mesh_ == nullptr )
   {
-    const_cast<Mesh *&>(mesh_) = &space.mesh();
+    const_cast< Mesh *& >( mesh_ ) = &space.mesh();
   }
-  if(mesh_ != &space.mesh())
+
+  if ( mesh_ != &space.mesh() )
   {
-    error("Function : mesh mismatch between function and space");
+    error( "Function : mesh mismatch between function and space" );
   }
+
   //
   clear();
-  fe_space_ = new FiniteElementSpace(space);
-  scratch_ = new ScratchSpace(*fe_space_);
-  X_ = new Vector();
+
+  fe_space_ = new FiniteElementSpace( space );
+  scratch_  = new ScratchSpace( *fe_space_ );
+  X_        = new Vector();
+
   //
-  InitializeVector();
+  init_vector();
 }
 
 //-----------------------------------------------------------------------------
@@ -194,8 +190,6 @@ void Function::clear()
     delete scratch_;
     scratch_ = nullptr;
   }
-
-  renumbered_ = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -249,28 +243,32 @@ void Function::evaluate(size_t n, real* values, const real* x,
 
 //-----------------------------------------------------------------------------
 
-void Function::eval(real* values, const real* x) const
+void Function::eval( real * values, const real * x ) const
 {
   // Find the cell that contains x
   Point p( x );
-  std::vector<size_t> cells;
-  mesh_->intersector().overlap(p, cells);
-  if (cells.size() == 0)
+
+  std::vector< size_t > cells;
+  mesh_->intersector().overlap( p, cells );
+
+  if ( cells.size() == 0 )
   {
-    if (!mesh_->is_distributed())
+    if ( not mesh_->is_distributed() )
     {
-      warning("Unable to evaluate function at given point (not inside domain).");
+      warning( "Unable to evaluate function at given point (not inside domain)." );
     }
 
-    for (size_t j = 0; j < scratch_->size; ++j)
+    for ( size_t j = 0; j < scratch_->size; ++j )
     {
-      values[j] = std::numeric_limits<real>::infinity();
+      values[j] = std::numeric_limits< real >::infinity();
     }
     return;
   }
-  Cell cell(*mesh_, cells[0]);
-  scratch_->cell.update(cell);
-  evaluate(values, x, scratch_->cell);
+
+  Cell cell( *mesh_, cells[0] );
+  scratch_->cell.update( cell );
+
+  evaluate( values, x, scratch_->cell );
 }
 
 //-----------------------------------------------------------------------------
@@ -330,11 +328,13 @@ void Function::interpolate_vertex_values(real* values) const
 
     if (mesh_->is_distributed())
     {
-#ifdef HAVE_MPI
-      size_t const rank = dolfin::MPI::rank();
-      size_t const pe_size = dolfin::MPI::size();
+#ifdef DOLFIN_HAVE_MPI
+      size_t const rank            = dolfin::MPI::rank();
+      size_t const pe_size         = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
+
       std::vector< std::vector<real> > sendbuf( pe_size );
+
       // Send sum of local weights
       for (SharedIterator it(dist0); it.valid(); ++it)
       {
@@ -468,64 +468,53 @@ void Function::interpolate( real *                      coefficients,
 
 //-----------------------------------------------------------------------------
 
-void Function::InitializeVector()
+void Function::init_vector()
 {
   dolfin_assert( fe_space_->element().tdim == mesh_->topology().dim() );
+
   if ( X_->size() != fe_space_->dofmap().global_dim )
   {
     // Specific case in serial local_size == global_dimension
-    X_->init(fe_space_->dofmap().local_size());
+    X_->init( fe_space_->dofmap().local_size() );
   }
 
-  InitializeGhosts();
+  // initialize ghost values
+  if ( mesh_->is_distributed() )
+  {
+    _ordered_set< size_t > indices;
+
+    for ( CellIterator cell( *mesh_ ); !cell.end(); ++cell )
+    {
+      // Update to current cell
+      scratch_->cell.update( *cell );
+
+      // Tabulate dofs
+      fe_space_->dofmap().tabulate_dofs( scratch_->dofs.data(), scratch_->cell );
+
+      for ( size_t j = 0; j < fe_space_->element().space_dim; ++j )
+      {
+        indices.insert( scratch_->dofs[j] );
+      }
+    }
+
+    X_->init_ghosted( indices );
+
+#ifdef ENABLE_FUNCTION_CACHE
+    cache_mapping_.clear();
+    indices_.resize( indices.size() );
+    data_cache_.resize( indices.size() );
+
+    size_t i = 0;
+    for ( size_t const & index : indices )
+    {
+      indices_[i]           = index;
+      cache_mapping_[index] = i++;
+    }
+#endif
+  }
 
   X_->zero();
   X_->apply();
-
-  renumbered_ = false;
-}
-
-//-----------------------------------------------------------------------------
-
-void Function::InitializeGhosts()
-{
-  if ( not mesh_->is_distributed() )
-  {
-    return;
-  }
-
-  _ordered_set<size_t> indices;
-
-  for (CellIterator cell(*mesh_); !cell.end(); ++cell)
-  {
-    // Update to current cell
-    scratch_->cell.update(*cell);
-
-    // Tabulate dofs
-    fe_space_->dofmap().tabulate_dofs(scratch_->dofs.data(), scratch_->cell);
-
-    for (size_t j = 0; j < fe_space_->element().space_dim; ++j)
-    {
-      indices.insert(scratch_->dofs[j]);
-    }
-
-  }
-
-  ghost_mapping_.clear();
-  X_->init_ghosted(indices.size(), indices, ghost_mapping_);
-
-#ifdef ENABLE_FUNCTION_CACHE
-  cache_mapping_.clear();
-  indices_.resize( indices.size() );
-  data_cache_.resize( indices.size() );
-
-  size_t i = 0;
-  for ( size_t const & index : indices )
-  {
-    indices_[i]           = index;
-    cache_mapping_[index] = i++;
-  }
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -556,49 +545,45 @@ void Function::disp() const
 
 void Function::sync()
 {
-
-  if(!mesh_->is_distributed()) return;
-
-  if ( not renumbered_)
+  if( mesh_->is_distributed() )
   {
-    InitializeGhosts();
-    renumbered_ = true;
-  }
-
-  X_->apply();
+    X_->apply();
 
 #ifdef ENABLE_FUNCTION_CACHE
-  if ( not indices_.empty() )
-  {
-    X_->get( data_cache_.data(), indices_.size(), indices_.data() );
-  }
+    if ( not indices_.empty() )
+    {
+      X_->get( data_cache_.data(), indices_.size(), indices_.data() );
+    }
 #endif
+  }
 }
 
 //-----------------------------------------------------------------------------
 
 auto Function::operator=(Function const& other) -> Function&
 {
-  if(this == &other)
+  if ( this == &other )
   {
     return *this;
   }
 
-  if(this->empty())
+  if ( this->empty() )
   {
-    const_cast<Mesh *&>(mesh_) = other.mesh_;
-    fe_space_ = new FiniteElementSpace(*other.fe_space_);
-    scratch_ = new ScratchSpace(*fe_space_);
-    X_ = new Vector();
-    renumbered_ = false;
+    const_cast< Mesh *& >( mesh_ ) = other.mesh_;
+
+    fe_space_ = new FiniteElementSpace( *other.fe_space_ );
+    scratch_  = new ScratchSpace( *fe_space_ );
+    X_        = new Vector();
+
     indices_.clear();
     data_cache_.clear();
+
     //
-    InitializeVector();
+    init_vector();
   }
-  else if(this->space() != other.space())
+  else if ( this->space() != other.space() )
   {
-    error("Function : attempt to assign function with different space");
+    error( "Function : attempt to assign function with different space" );
   }
 
   // Copy vector
@@ -617,7 +602,6 @@ auto Function::swap(Function& other) -> Function&
   std::swap(this->fe_space_, other.fe_space_);
   std::swap(this->scratch_, other.scratch_);
   std::swap(this->X_, other.X_);
-  std::swap(this->renumbered_, other.renumbered_);
 #ifdef ENABLE_FUNCTION_CACHE
   std::swap(this->indices_, other.indices_);
   std::swap(this->data_cache_, other.data_cache_);

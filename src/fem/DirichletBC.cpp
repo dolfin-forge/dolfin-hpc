@@ -206,6 +206,118 @@ void DirichletBC::apply_impl( GenericMatrix &       A,
   b.apply();
 }
 //-----------------------------------------------------------------------------
+void DirichletBC::zero( GenericMatrix &       A,
+                              BilinearForm const &  form )
+{
+
+  if ( form.trial_space() != form.test_space() )
+  {
+    error(
+      "DirichletBC is implemented only for identical test and trial space" );
+  }
+
+  if ( entities_.empty() || this->invalid_mesh() )
+  {
+    if ( ( method_ == topological ) || ( method_ == geometric ) )
+    {
+      entities_.clear();
+
+      // Build set of boundary facets
+      size_t const tdim = mesh().topology_dimension();
+      for ( FacetIterator f( mesh() ); !f.end(); ++f )
+      {
+        bool const on_boundary =
+          ( f->num_entities( tdim ) == 1 ) && !f->is_shared();
+
+        // loop over all conditions in reverse order
+        for ( size_t c = conditions.size(); c > 0; --c )
+        {
+          if ( conditions[c - 1].second.enclosed( *f, on_boundary ) )
+          {
+            // Get cell to which facet belongs (there may be two, but pick
+            // first)
+            Cell cell( mesh(), f->entities( tdim )[0] );
+            entities_.push_back( cell.index() );
+            entities_.push_back( cell.index( *f ) );
+            entities_.push_back( c - 1 );
+            break;
+          }
+        }
+      }
+    }
+
+    this->update_mesh_dependency();
+  }
+
+  // Check compatibility of function g and the test (sub)space
+  FiniteElementSpace const & space = form.trial_space();
+  ufc::finite_element *      fe =
+    space.element().create_sub_element( this->sub_system() );
+
+  for ( size_t c = 0; c < conditions.size(); ++c )
+  {
+    Coefficient & g_ = conditions[c].first;
+
+    if ( ( fe->value_rank() != g_.rank() )
+         || ( fe->value_dimension( 0 ) != g_.dim( 0 ) ) )
+    {
+      error(
+        "Rank and/or value dimension mismatch between function and space.\n"
+        "Function : rank = %d, dim = %d; Space : rank = %d, dim = %d.",
+        g_.rank(),
+        g_.dim( 0 ),
+        fe->value_rank(),
+        fe->value_dimension( 0 ) );
+    }
+  }
+
+  delete fe;
+
+  // A map to hold the mapping from boundary dofs to boundary values
+  _map< size_t, real > boundary_values;
+
+  // Compute dofs and values
+  switch ( method_ )
+  {
+    case topological:
+      computeBCTopological( boundary_values, space, this->sub_system() );
+      break;
+    case geometric:
+      computeBCGeometric( boundary_values, space, this->sub_system() );
+      break;
+    case pointwise:
+      computeBCPointwise( boundary_values, space, this->sub_system() );
+      break;
+    default:
+      error( "Unknown method for application of boundary conditions." );
+      break;
+  }
+
+  // Copy boundary value data to arrays
+  std::vector< size_t > dofs( boundary_values.size() );
+  std::vector< real >   values( boundary_values.size() );
+  size_t                i = 0;
+  for ( std::pair< size_t const, real > & bnd_value : boundary_values )
+  {
+    dofs[i]     = bnd_value.first;
+    values[i++] = bnd_value.second;
+  }
+
+
+  message( "Applying boundary conditions to linear system" );
+
+  // Modify linear system (A_i = 0)
+  if ( not dolfin_get< bool >( "Krylov keep PC" ) )
+  {
+    A.zero( boundary_values.size(), dofs.data() );
+  }
+
+  // Finalise changes to A
+  if ( not dolfin_get< bool >( "Krylov keep PC" ) )
+    A.apply();
+
+}
+//-----------------------------------------------------------------------------
 void DirichletBC::computeBCTopological( _map< size_t, real > & boundary_values,
                                         FiniteElementSpace const & space,
                                         SubSystem const &          sub_system )

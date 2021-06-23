@@ -105,6 +105,10 @@ public:
               GenericVector const & x,
               BilinearForm const &  form ) override;
 
+  /// Set boundary rows to zero
+  void zero( GenericMatrix &       A,
+                   BilinearForm const &  form );
+
 private:
   /// Apply boundary conditions
   void apply_impl( GenericMatrix &       A,

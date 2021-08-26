@@ -50,6 +50,9 @@ public:
   virtual void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
                      BilinearForm const& form, SubSystem const sub_system);
 
+  /// Set boundary rows to zero in linear system
+  virtual void zero(GenericMatrix& A, BilinearForm const& form) = 0;
+
   ///
   auto operator()(Time const& t) -> BoundaryCondition&
   {

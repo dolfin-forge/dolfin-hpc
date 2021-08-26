@@ -49,6 +49,10 @@ public:
               GenericVector const & x,
               BilinearForm const &  form ) override;
 
+  /// Apply boundary condition to off-diagonal block in linear system
+  void zero( GenericMatrix &      A,
+              BilinearForm const & form );
+
   auto normal() -> BoundaryNormal &
   {
     return *node_normal;
@@ -71,6 +75,16 @@ private:
 
   void applyNodeBC( GenericMatrix &               A,
                     GenericVector &               b,
+                    Mesh const &                  mesh,
+                    size_t const                  node,
+                    std::vector< size_t > const & udofs,
+                    std::vector< size_t > const & ndofs );
+
+  void applyZeroSlipBC( GenericMatrix &      A,
+                    BilinearForm const & form,
+                    ScratchSpace &       scratch );
+
+  void applyZeroNodeBC( GenericMatrix &               A,
                     Mesh const &                  mesh,
                     size_t const                  node,
                     std::vector< size_t > const & udofs,

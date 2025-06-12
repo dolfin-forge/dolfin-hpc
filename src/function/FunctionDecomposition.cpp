@@ -19,7 +19,7 @@
 namespace dolfin
 {
 //-----------------------------------------------------------------------------
-auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *>
+auto FunctionDecomposition::compute(Function const& F) -> std::vector<std::unique_ptr<Function>>
 {
   message( 1, "Decomposing Function: %p", &F );
 
@@ -31,10 +31,10 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
   FiniteElementSpace const& Wh = F.space();
   ScratchSpace S(Wh);
   std::vector<FiniteElementSpace *> spaces = Wh.flatten();
-  std::vector<Function *> Si;
+  std::vector<std::unique_ptr<Function>> Si;
   for ( FiniteElementSpace * fespaces : spaces )
   {
-    Si.push_back(new Function(*fespaces));
+    Si.push_back(std::make_unique<Function>(*fespaces));
   }
 
   if (Wh.is_vertex_based())
@@ -82,7 +82,7 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       dof_index = c->global_index();
-      for ( Function * f : Si )
+      for ( auto& f : Si )
       {
         f->vector().set(&block[dofii], 1, &dof_index);
         ++dofii;
@@ -102,7 +102,7 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       //
-      for ( Function * f : Si )
+      for ( auto& f : Si )
       {
         f->vector().set(&block[ii], S0.local_dimension, &celldofs[offset]);
         ii += S0.local_dimension;
@@ -142,7 +142,7 @@ auto FunctionDecomposition::compute(Function const& F) -> std::vector<Function *
   }
 
   // Synchronize leaf functions
-  for ( Function * f : Si )
+  for ( auto& f : Si )
   {
     f->sync();
   }

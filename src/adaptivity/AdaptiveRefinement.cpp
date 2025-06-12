@@ -130,7 +130,7 @@ void refine_and_project( Mesh &                     mesh,
 
   MeshValues< size_t, Cell > & partitions = LoadBalancer::partitions( mesh );
 
-  std::vector< std::vector< Function * > >            coarse( functions.size() );
+  std::vector< std::vector< std::unique_ptr< Function > > > coarse( functions.size() );
   std::vector< std::vector< std::vector< real > > >   x_values( functions.size() );
   std::vector< std::vector< std::vector< size_t > > > x_rows( functions.size() );
 
@@ -268,16 +268,6 @@ void refine_and_project( Mesh &                     mesh,
 #endif
 
     File( filename ) << proj.vector();
-  }
-
-  // cleanup coarse functions
-  for ( size_t i = 0; i < functions.size(); ++i )
-  {
-    while ( !coarse[i].empty() )
-    {
-      delete coarse[i].back();
-      coarse[i].pop_back();
-    }
   }
 
   swap( mesh, new_mesh );

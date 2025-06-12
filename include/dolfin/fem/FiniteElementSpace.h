@@ -12,6 +12,7 @@
 #include <ufc.h>
 
 #include <string>
+#include <memory>
 
 namespace dolfin
 {
@@ -80,6 +81,9 @@ public:
   /// Return the element
   auto element() const -> FiniteElement const &;
 
+  // Return the shared pointer to the element
+  std::shared_ptr<FiniteElement> element_ptr() const { return finite_element_; }
+
   /// Return the dofmap
   auto dofmap() const -> DofMap const &;
 
@@ -106,7 +110,7 @@ public:
 private:
   Mesh &                mesh_;
   mutable Cell          cell_;
-  FiniteElement const * finite_element_;
+  std::shared_ptr<FiniteElement> finite_element_;
   DofMap & dof_map_; // The dof map is owned by the DofMapCache instance.
 };
 

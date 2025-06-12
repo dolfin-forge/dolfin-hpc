@@ -5,6 +5,7 @@
 #define __DOLFIN_FUNCTION_DECOMPOSITION_H
 
 #include <dolfin/common/types.h>
+#include <memory>
 
 namespace dolfin
 {
@@ -16,7 +17,7 @@ class FunctionDecomposition
 
 public:
   ///
-  static auto compute( Function const & F ) -> std::vector< Function * >;
+  static auto compute( Function const & F ) -> std::vector<std::unique_ptr<Function>>;
 };
 
 } /* namespace dolfin */

@@ -10,6 +10,8 @@
 #include <dolfin/mesh/entities/Cell.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 
+#include <utility>
+
 #include <ufc.h>
 #include <utility>
 

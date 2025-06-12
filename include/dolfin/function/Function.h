@@ -149,7 +149,7 @@ public:
   void operator<<( GenericFunction const & other );
 
   /// Compute function decomposition into scalar component functions
-  auto decompose() -> std::vector< Function * >;
+  auto decompose() -> std::vector<std::unique_ptr<Function>>;
 
   /// Return the number of sub functions i.e number of subspaces
   auto num_sub_functions() const -> size_t;
@@ -358,7 +358,7 @@ inline void Function::operator<<( GenericFunction const & other )
 
 //-----------------------------------------------------------------------------
 
-inline auto Function::decompose() -> std::vector< Function * >
+inline auto Function::decompose() -> std::vector<std::unique_ptr<Function>>
 {
   return FunctionDecomposition::compute( *this );
 }

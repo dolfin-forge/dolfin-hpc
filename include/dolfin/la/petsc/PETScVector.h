@@ -441,7 +441,7 @@ inline auto PETScVector::min() const -> real
 {
   real value = 0.0;
 
-  VecMin( x_, PETSC_NULL, &value );
+  VecMin( x_, NULL, &value );
 
   return value;
 }
@@ -450,7 +450,7 @@ inline auto PETScVector::max() const -> real
 {
   real value = 0.0;
 
-  VecMax( x_, PETSC_NULL, &value );
+  VecMax( x_, NULL, &value );
 
   return value;
 }

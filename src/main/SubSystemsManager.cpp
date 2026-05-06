@@ -239,7 +239,7 @@ auto SubSystemsManager::PETSc::initialize(int argc, char* argv[]) -> bool
 #endif
 
   // Initialize PETSc
-  PetscInitialize( &argc, &argv, PETSC_NULL, PETSC_NULL );
+  PetscInitialize( &argc, &argv, NULL, NULL );
   SubSystemsManager::instance().initialize( PETSc::flag );
 
   // remove PETSc Signal handling

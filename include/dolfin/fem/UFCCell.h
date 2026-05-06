@@ -11,6 +11,7 @@
 #include <dolfin/mesh/MeshDistributedData.h>
 
 #include <ufc.h>
+#include <utility>
 
 namespace dolfin
 {

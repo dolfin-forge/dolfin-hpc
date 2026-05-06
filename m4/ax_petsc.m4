@@ -44,7 +44,7 @@ AC_DEFUN([AX_PETSC],[
 	   elif test -d "$ac_petsc_dir/conf"; then
 	   
           cat <<EOF >config_petsc
-include $PETSC_DIR/conf/variables
+include $PETSC_DIR/conf/petscvariables
 
 petsclibs:
 	echo -L$PETSC_DIR/lib/  \$(PETSC_LIB)
@@ -58,7 +58,7 @@ EOF
 	  elif test -d "$ac_petsc_dir/lib/petsc/conf"; then
 	   
           cat <<EOF >config_petsc
-include $PETSC_DIR/lib/petsc/conf/variables
+include $PETSC_DIR/lib/petsc/conf/petscvariables
 
 petsclibs:
 	echo -L$PETSC_DIR/lib/  \$(PETSC_LIB)
@@ -76,7 +76,7 @@ EOF
 	   if test -d "$ac_petsc_dir/conf"; then
 	   
           cat <<EOF >config_petsc
-include $PETSC_DIR/conf/variables
+include $PETSC_DIR/conf/petscvariables
 
 petsclibs:
 	echo -L$PETSC_DIR/lib64/  \$(PETSC_LIB)
@@ -90,7 +90,7 @@ EOF
 	  elif test -d "$ac_petsc_dir/lib64/petsc/conf"; then
 	   
           cat <<EOF >config_petsc
-include $PETSC_DIR/lib/petsc/conf/variables
+include $PETSC_DIR/lib/petsc/conf/petscvariables
 
 petsclibs:
 	echo -L$PETSC_DIR/lib64/  \$(PETSC_LIB)

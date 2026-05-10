@@ -166,19 +166,3 @@ On M5, set `OMP_NUM_THREADS=1` before `import petsc4py` and set
 factorization errors. See `fenicsx-notebooks` commit `1686ac2`.
 This is Mac-specific; on Dardel (x86, MPI-distributed) MUMPS behaves
 differently and these workarounds are not needed.
-
-## FEniCSx local environment (MacBook M5)
-
-- Installed via conda: `conda activate fenicsx`
-- Version: FEniCSx 0.10.0, PETSc 3.25.1, MPICH 5.0
-- Working notebooks in ~/repos/fenicsx-notebooks/:
-  - poisson.ipynb — P1, exact solution verification
-  - stokes.ipynb — Taylor-Hood P2/P1, lid-driven cavity
-  - navier-stokes.ipynb — backward Euler, Re=100, regularized lid
-
-### MUMPS note for Apple Silicon
-On M5, set OMP_NUM_THREADS=1 before import petsc4py and set
-MUMPS CNTL(1)=0.1 (pivot threshold) to avoid non-deterministic
-factorization errors. See fenicsx-notebooks commit 1686ac2.
-This is Mac-specific; on Dardel (x86, MPI-distributed) MUMPS behaves
-differently and these workarounds are not needed.

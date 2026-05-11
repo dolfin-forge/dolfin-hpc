@@ -106,14 +106,14 @@ void PETScMatrix::init( size_t M, size_t N, bool distributed )
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ( dolfin::MPI::DOLFIN_COMM, M_, N_,
                   PETSC_DETERMINE, PETSC_DETERMINE,
-                  120, PETSC_NULL,
-                  120, PETSC_NULL,
+                  120, NULL,
+                  120, NULL,
                   &A );
 #else
     MatCreateMPIAIJ( dolfin::MPI::DOLFIN_COMM, M_, N_,
                      PETSC_DETERMINE, PETSC_DETERMINE,
-                     120, PETSC_NULL,
-                     120, PETSC_NULL,
+                     120, NULL,
+                     120, NULL,
                      &A );
 #endif
 #endif
@@ -121,7 +121,7 @@ void PETScMatrix::init( size_t M, size_t N, bool distributed )
   else
   {
     // Create PETSc sequential matrix with a guess for number of non-zeroes
-    MatCreateSeqAIJ( PETSC_COMM_SELF, M_, N_, 50, PETSC_NULL, &A );
+    MatCreateSeqAIJ( PETSC_COMM_SELF, M_, N_, 50, NULL, &A );
 
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
@@ -400,7 +400,7 @@ void PETScMatrix::zero( size_t m, size_t const * rows )
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral( PETSC_COMM_SELF, m_, rows_.data(), PETSC_COPY_VALUES, &is );
-  MatZeroRowsIS( A, is, null, PETSC_NULL, PETSC_NULL );
+  MatZeroRowsIS( A, is, null, NULL, NULL );
   ISDestroy( &is );
 #else
   ISCreateGeneral( PETSC_COMM_SELF, m_, rows_.data(), &is );
@@ -418,7 +418,7 @@ void PETScMatrix::ident( size_t m, size_t const * rows )
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral( PETSC_COMM_SELF, m_, rows_.data(), PETSC_COPY_VALUES, &is );
-  MatZeroRowsIS( A, is, one, PETSC_NULL, PETSC_NULL );
+  MatZeroRowsIS( A, is, one, NULL, NULL );
   ISDestroy( &is );
 #else
   ISCreateGeneral( PETSC_COMM_SELF, m_, rows_.data(), &is );

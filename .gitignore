@@ -23,3 +23,5 @@ src/Makefile
 src/*/Makefile
 tests/Makefile
 tests/*/Makefile
+
+.DS_Store

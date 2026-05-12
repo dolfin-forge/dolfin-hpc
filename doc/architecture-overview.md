@@ -54,10 +54,12 @@ The path from a variational form to an assembled sparse matrix has five stages.
   v = TestFunction(elem)     : ufc::cell_integral   Poisson::LinearForm   L(mesh,f,g);
   u = TrialFunction(elem)  {                        Matrix A;  Vector b;
   f = Coefficient(elem)      tabulate_tensor(       a.assemble(A, true);
-  a = inner(grad(v),           A, w, c)             L.assemble(b, true);
-        grad(u))*dx          { /* Gaussian          bc.apply(A, b, a);
-  L = v*f*dx + v*g*ds          quadrature,          KrylovSolver s(...);
-                               Jacobian,            s.solve(A, u.vector(), b);
+  a = inner(grad(v),           A, w,                L.assemble(b, true);
+        grad(u))*dx            coord_dofs,          bc.apply(A, b, a);
+  L = v*f*dx + v*g*ds          orientation)         KrylovSolver s(...);
+                             { /* Gaussian          s.solve(A, u.vector(), b);
+                               quadrature,
+                               Jacobian,
                                basis fns */
                              }
                            };
@@ -89,7 +91,7 @@ provides `form()`, `coefficients()`, and `cell_integrals()`.
 
 **Step 4 — Assemble.** `a.assemble(A, true)` delegates to `Assembler::assemble(A, form, reset)`
 (`include/dolfin/fem/Assembler.h`). The assembler loops over all local cells, fetches geometric
-data and coefficient values, calls `ufc::cell_integral::tabulate_tensor(A_local, w, cell)` for
+data and coefficient values, calls `ufc::cell_integral::tabulate_tensor(A, w, coordinate_dofs, cell_orientation)` for
 each cell to compute the local element stiffness matrix, then scatters `A_local` into the global
 `GenericTensor` using the DOF map.
 
@@ -171,7 +173,7 @@ maps local DOF indices (0, 1, 2 for a triangle) to global DOF indices given the 
 The assembler calls this for each cell to know where to scatter the local tensor.
 
 **Cell integral class.** `poisson_cell_integral_0 : public ufc::cell_integral` implements
-`tabulate_tensor(double* A, const double* const* w, const ufc::cell& c)`. This single function
+`tabulate_tensor(double* A, const double* const* w, const double* coordinate_dofs, int cell_orientation)` (UFC 2.4.0 signature). This single function
 is the computational core: it evaluates the bilinear form `a(v,u)` on one cell by Gaussian
 quadrature, computing the Jacobian of the geometric mapping, pulling back the basis function
 gradients, and accumulating the 3×3 local stiffness matrix into `A`. All constants and

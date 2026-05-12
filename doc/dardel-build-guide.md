@@ -87,7 +87,8 @@ project, e.g. `naiss2025-5-152`):
 salloc -n 4 -A <project-id> -t 00:30:00 -p shared
 ```
 
-Once allocated, the environment modules are reset. Reload them:
+> **Note:** After `salloc` succeeds, the shell moves to the compute node and all loaded
+> modules are reset. You must reload them before running anything.
 
 ```bash
 ml PDC
@@ -151,16 +152,27 @@ However, ffc requires FIAT (Finite element Automatic Tabulator) which is
 compiled without first installing FIAT.
 
 **Workaround:** Use the pre-compiled form headers provided with the demos,
-or compile forms locally on your MacBook and transfer the generated `.h`
-file to Dardel.
+or compile forms locally on your local machine and transfer the generated `.h`
+file to Dardel via `scp`.
 
-To compile a form on your MacBook (FEniCS legacy environment needed):
+To compile a form locally, `ffc` is needed. Two options:
+
+- **FEniCSx conda environment** (if you have it set up):
+  ```bash
+  conda activate fenicsx
+  ffc -l dolfin MyForm.ufl
+  ```
+- **Legacy FEniCS** (if installed separately):
+  ```bash
+  ffc -l dolfin MyForm.ufl
+  ```
+
+Both produce `MyForm.h`. Transfer it to Dardel with:
 ```bash
-ffc -l dolfin MyForm.ufl
+scp MyForm.h <username>@dardel.pdc.kth.se:~/your-project/
 ```
 
-This produces `MyForm.h` which can be transferred to Dardel and used
-directly in compilation.
+The file can then be used directly in compilation on Dardel.
 
 **TODO:** Install FIAT on Dardel to enable on-system form compilation.
 Track in KNOWN_ISSUES.md.
@@ -185,6 +197,10 @@ ml parmetis/4.0.3-cpeCray-24.11
 
 srun ./demo
 ```
+
+> **Note:** Replace `<project-id>` with your NAISS allocation ID (e.g. `naiss2025-5-152`).
+> Ask your PI for the correct ID, or find it yourself by running `projinfo` or `groups`
+> on the Dardel login node.
 
 Submit with:
 ```bash

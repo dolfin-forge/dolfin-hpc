@@ -81,7 +81,7 @@ ls -la demo
 
 Dardel requires all MPI jobs to run on compute nodes, not the login node.
 Submit an interactive allocation (replace `<project-id>` with your NAISS
-project, e.g. `naiss2025-5-152`):
+project, e.g. `naiss2026-3-301`):
 
 ```bash
 salloc -n 4 -A <project-id> -t 00:30:00 -p shared

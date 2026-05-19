@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # Copyright (C) 2006 Anders Logg
 # Licensed under the GNU LGPL Version 2.1
@@ -18,12 +18,14 @@
 import getopt
 import sys
 import os
-from dolfin_utils.commands import getoutput
+#from dolfin_utils.commands import getoutput
+from commands import getoutput
 import re
 import warnings
 import os.path
 
-from dolfin_utils import meshconvert
+#from dolfin_utils import meshconvert
+import meshconvert
 
 def main(argv):
     "Main function"

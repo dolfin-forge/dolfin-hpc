@@ -6,17 +6,7 @@ Issues are tracked here until a proper fix is committed.
 
 ---
 
-## 1. Memory leaks / pointer allocation
-
-**Status:** Fix in progress (patch expected from Joel Kronborg)  
-**Affected versions:** 0.9.x  
-**Description:** Memory leaks have been identified in pointer allocation in the core library. The exact locations are being identified via Valgrind4hpc on Dardel.  
-**Workaround:** None required for correctness; affects long-running simulations and memory-constrained environments.  
-**Resolution:** Patch pending — will be committed to `dev` once received and reviewed.
-
----
-
-## 2. Interpolation operator
+## 1. Interpolation operator
 
 **Status:** Known bug, no fix available  
 **Affected versions:** 0.8.x, 0.9.x  
@@ -37,7 +27,7 @@ project(expr, V, u);
 
 ---
 
-## 3. Periodic boundary conditions
+## 2. Periodic boundary conditions
 
 **Status:** Known bug, no fix available  
 **Affected versions:** 0.9.x  
@@ -47,7 +37,7 @@ project(expr, V, u);
 
 ---
 
-## 4. In-built mesh generators in parallel
+## 3. In-built mesh generators in parallel
 
 **Status:** Known limitation  
 **Affected versions:** 0.9.x  
@@ -57,13 +47,30 @@ project(expr, V, u);
 
 ---
 
-## 5. MeshQualityFunction linking error
+## 4. MeshQualityFunction linking error
 
 **Status:** Known build issue on Dardel  
 **Affected versions:** 0.9.x  
 **Description:** A linking error involving `MeshQualityFunction` has been observed when building on Dardel with certain module environments. The class is defined as a header-only implementation in `include/dolfin/mesh/utilities/MeshQualityFunction.h`.  
 **Workaround:** If the linking error occurs, remove the include of `MeshQualityFunction.h` from `include/dolfin/mesh/dolfin_mesh.h` and the corresponding entry from `include/dolfin/Makefile.am`.  
 **Resolution:** Under investigation. Will be revisited when Dardel build environment is fully documented.
+
+---
+
+## 5. dolfin-convert requires Python 2
+
+**Status:** Known limitation  
+**Affected versions:** 0.9.x  
+**Description:** `dolfin-convert` (in `misc/utils/convert/attic/`) is used to convert Gmsh `.msh`
+files to the dolfin-hpc `.bin` format required by 0.9.x. The script requires Python 2, which is
+unavailable on Dardel (Python 3.11 only) and on most modern local machines. This means new mesh
+generation from Gmsh is currently blocked on these systems.  
+**Workaround:** Use a system with Python 2 installed to run the conversion, then transfer the
+resulting `.bin` file. Alternatively, use the pre-converted `.bin` meshes provided with the
+installed demos (e.g. `UnitSquareMesh_32x32.bin` in the Poisson demo).  
+**Resolution:** Port `dolfin-convert` to Python 3, or replace with
+[meshio](https://github.com/nschloe/meshio) (a modern Python 3 mesh conversion library that
+supports both Gmsh `.msh` and DOLFIN XML output).
 
 ---
 

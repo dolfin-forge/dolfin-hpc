@@ -124,7 +124,26 @@ The dolfin-hpc module sets:
 
 ---
 
-## 6. Writing your own solver
+## 6. Mesh generation
+
+New meshes cannot currently be generated from Gmsh directly on Dardel.
+`dolfin-convert` (the tool that converts Gmsh `.msh` files to the `.bin`
+format required by dolfin-hpc 0.9.x) requires Python 2, which is not
+available on Dardel (Python 3.11 only).
+
+For demos and initial work, use the pre-converted `.bin` meshes provided
+with the installed module. The Poisson demo includes `UnitSquareMesh_32x32.bin`
+and can be run immediately without any mesh conversion step.
+
+If you need a custom mesh, generate and convert it on a machine with Python 2
+available, then transfer the `.bin` file to Dardel via `scp`.
+
+See `KNOWN_ISSUES.md` §5 for details and the long-term fix (Python 3 port or
+replacement with `meshio`).
+
+---
+
+## 7. Writing your own solver
 
 For a new solver `mysolver.cpp` that uses an existing pre-compiled form
 header `MyForm.h`:
@@ -138,7 +157,7 @@ Or add a `Makefile` following the pattern in the Poisson demo.
 
 ---
 
-## 7. Compiling new UFL forms
+## 8. Compiling new UFL forms
 
 To compile a new `.ufl` form file into a C++ header, `ffc` (FEniCS Form
 Compiler) is needed. The ffc-hpc installation is at:
@@ -179,7 +198,7 @@ Track in KNOWN_ISSUES.md.
 
 ---
 
-## 8. Batch job script
+## 9. Batch job script
 
 For production runs, use a batch script. Save as `run.sh`:
 
@@ -214,7 +233,7 @@ squeue -u $USER
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 **`pkg-config: dolfin not found`**  
 You forgot to load the modules. Run `ml PDC && ml dolfin-hpc/0.9.5`.
@@ -224,7 +243,7 @@ Load `ml parmetis/4.0.3-cpeCray-24.11` before linking.
 
 **`ffc: No module named FIAT`**  
 FIAT is not installed. Compile forms locally and transfer the `.h` file.
-See section 7.
+See section 8.
 
 **`AssocGrpSubmitJobsLimit`**  
 Your allocation is exhausted or not yet activated. Contact your PI or
@@ -236,7 +255,7 @@ installed headers. They do not affect correctness.
 
 ---
 
-## 10. Installed paths reference
+## 11. Installed paths reference
 
 | Component | Path |
 |---|---|

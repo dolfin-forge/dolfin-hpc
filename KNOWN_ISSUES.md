@@ -57,6 +57,23 @@ project(expr, V, u);
 
 ---
 
+## 5. dolfin-convert requires Python 2
+
+**Status:** Known limitation  
+**Affected versions:** 0.9.x  
+**Description:** `dolfin-convert` (in `misc/utils/convert/attic/`) is used to convert Gmsh `.msh`
+files to the dolfin-hpc `.bin` format required by 0.9.x. The script requires Python 2, which is
+unavailable on Dardel (Python 3.11 only) and on most modern local machines. This means new mesh
+generation from Gmsh is currently blocked on these systems.  
+**Workaround:** Use a system with Python 2 installed to run the conversion, then transfer the
+resulting `.bin` file. Alternatively, use the pre-converted `.bin` meshes provided with the
+installed demos (e.g. `UnitSquareMesh_32x32.bin` in the Poisson demo).  
+**Resolution:** Port `dolfin-convert` to Python 3, or replace with
+[meshio](https://github.com/nschloe/meshio) (a modern Python 3 mesh conversion library that
+supports both Gmsh `.msh` and DOLFIN XML output).
+
+---
+
 ## Reporting new issues
 
 Please open a GitHub issue at https://github.com/dolfin-forge/dolfin-hpc/issues with:

@@ -6,17 +6,7 @@ Issues are tracked here until a proper fix is committed.
 
 ---
 
-## 1. Memory leaks / pointer allocation
-
-**Status:** Fix in progress (patch expected from Joel Kronborg)  
-**Affected versions:** 0.9.x  
-**Description:** Memory leaks have been identified in pointer allocation in the core library. The exact locations are being identified via Valgrind4hpc on Dardel.  
-**Workaround:** None required for correctness; affects long-running simulations and memory-constrained environments.  
-**Resolution:** Patch pending — will be committed to `dev` once received and reviewed.
-
----
-
-## 2. Interpolation operator
+## 1. Interpolation operator
 
 **Status:** Known bug, no fix available  
 **Affected versions:** 0.8.x, 0.9.x  
@@ -37,7 +27,7 @@ project(expr, V, u);
 
 ---
 
-## 3. Periodic boundary conditions
+## 2. Periodic boundary conditions
 
 **Status:** Known bug, no fix available  
 **Affected versions:** 0.9.x  
@@ -47,7 +37,7 @@ project(expr, V, u);
 
 ---
 
-## 4. In-built mesh generators in parallel
+## 3. In-built mesh generators in parallel
 
 **Status:** Known limitation  
 **Affected versions:** 0.9.x  
@@ -57,7 +47,7 @@ project(expr, V, u);
 
 ---
 
-## 5. MeshQualityFunction linking error
+## 4. MeshQualityFunction linking error
 
 **Status:** Known build issue on Dardel  
 **Affected versions:** 0.9.x  

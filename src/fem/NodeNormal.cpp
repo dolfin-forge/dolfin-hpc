@@ -106,7 +106,7 @@ auto NodeNormal::node_type( size_t node_id ) const -> size_t
   _map< size_t, size_t >::const_iterator it = node_type_.find( node_id );
   if ( it == node_type_.end() )
   {
-    error( "Invalid node id requested for node type" );
+    error( "Invalid node id %d requested for node type", node_id );
   }
   return it->second;
 }

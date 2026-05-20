@@ -18,9 +18,10 @@ FiniteElementSpace::FiniteElementSpace( FiniteElement const & element,
                                         DofMap &              dof )
   : mesh_( dof.mesh() )
   , cell_( dof.mesh(), 0 )
-  , finite_element_( new FiniteElement( element ) )
+  , finite_element_( std::make_shared<FiniteElement>( element ) )
   , dof_map_( DofMap::acquire( mesh_, dof.ufc(), false ) )
-{}
+{
+}
 
 //-----------------------------------------------------------------------------
 
@@ -29,7 +30,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                      mesh,
                                         ufc::dofmap const &         dofmap )
   : mesh_( mesh )
   , cell_( mesh, 0 )
-  , finite_element_( new FiniteElement( *element ) )
+  , finite_element_( std::make_shared<FiniteElement>( *element ) )
   , dof_map_( DofMap::acquire( mesh, dofmap, false ) )
 {
 }
@@ -40,7 +41,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
                                         size_t const               i )
   : mesh_( space.mesh() )
   , cell_( space.cell() )
-  , finite_element_( new FiniteElement( space.element().ufc(), i ) )
+  , finite_element_( std::make_shared<FiniteElement>( space.element().ufc(), i ) )
   , dof_map_( DofMap::acquire( space.mesh(),
                                *space.dofmap().ufc().create_sub_dofmap( i ),
                                true ) )
@@ -53,7 +54,7 @@ FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & space,
                                         SubSystem const &          sub )
   : mesh_( space.mesh() )
   , cell_( space.cell() )
-  , finite_element_( new FiniteElement( space.element().ufc(), sub ) )
+  , finite_element_( std::make_shared<FiniteElement>( space.element().ufc(), sub ) )
   , dof_map_( DofMap::acquire( space.mesh(),
                                *space.dofmap().create_sub_dofmap( sub ),
                                true ) )
@@ -66,7 +67,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                     other_mesh,
                                         FiniteElementSpace const & space )
   : mesh_( other_mesh )
   , cell_( space.cell() )
-  , finite_element_( &space.element() )
+  , finite_element_( space.element_ptr() )
   , dof_map_( DofMap::acquire( other_mesh, space.dofmap().ufc(), false ) )
 {
   if ( other_mesh.type().cellType() != space.cell().type() )
@@ -80,7 +81,7 @@ FiniteElementSpace::FiniteElementSpace( Mesh &                     other_mesh,
 FiniteElementSpace::FiniteElementSpace( FiniteElementSpace const & other )
   : mesh_( other.mesh() )
   , cell_( other.cell() )
-  , finite_element_( &other.element() )
+  , finite_element_( other.element_ptr() )
   , dof_map_( DofMap::acquire( other.mesh(), other.dofmap().ufc(), false ) )
 {
 }

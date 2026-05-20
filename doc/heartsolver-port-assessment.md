@@ -138,6 +138,24 @@ This is a design-level change — the `SurfaceDistribution` class that populates
 via integer tags must either be kept as a mesh-marking utility (and the BCs reconstructed from it
 using helper SubDomains) or replaced entirely.
 
+**Additional: time-dependent BCs — `update()` does not exist in 0.9.**
+
+The 0.8 HeartSolver required a custom `update()` method added manually to `DirichletBC.h`. That
+method was never upstreamed and is absent from 0.9. The correct 0.9 replacement is the
+`bc(t)` pattern:
+
+1. Wrap each time-varying boundary value in a `TimeDependent` subclass
+   (`include/dolfin/evolution/TimeDependent.h`) that overrides `sync(Time const& t)` to update
+   its value from `clock()`.
+2. Pass an instance to `DirichletBC` as the `Coefficient` argument.
+3. In the time loop, call `bc(t)` before `bc.apply(A, b)`. This propagates time through
+   `BoundaryCondition::operator()(Time const& t)` → `DirichletBC::sync(t)` → each stored
+   `Coefficient::operator()(t)` (see `include/dolfin/fem/BoundaryCondition.h`).
+
+There is no demo in the shipped codebase that demonstrates this — the `demo/pde/bcs/` demo uses
+only static coefficients. Every time-dependent BC call site in `main.cpp` and `ALESolver.cpp`
+must be converted; this work is included in the 1.0-week estimate for this item.
+
 ### 6. MPI API rename
 
 | 0.8 call | 0.9 equivalent |

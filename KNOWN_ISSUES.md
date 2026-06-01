@@ -87,11 +87,17 @@ abort immediately with:
 This demo cannot be run with p1 optimizations enabled!
 ```
 
-The Poisson demo (pure P1) is unaffected and runs correctly.  
+The Poisson demo (pure P1) is unaffected and runs correctly.
+
+**Note:** `--enable-optimize-p1` is the correct build choice for HeartSolver, which uses
+P1/P1 elements with stabilization throughout. No module rebuild is needed for HeartSolver
+use. The limitation applies only to demos and solvers that use higher-order elements
+(P2/P1 Taylor-Hood or above).  
 **Workaround:** None without rebuilding. Do not attempt the Stokes demo or any P2/P1
 solver with the current module.  
 **Resolution:** Rebuild the module without `--enable-optimize-p1`, or request an updated
 module from PDC. When requesting, specify that P2/P1 (Taylor-Hood) support is required.
+This is only needed if running solvers that use higher-order elements; HeartSolver is unaffected.
 
 ---
 

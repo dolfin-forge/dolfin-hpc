@@ -83,7 +83,7 @@ All repos live under the GitHub organization: https://github.com/dolfin-forge
 | Project | Status | Quota |
 |---|---|---|
 | `naiss2025-5-152` | Expiring | — |
-| `naiss2026-3-301` | Approved, active ~2026-06-01 | 100,000 core-h/month |
+| `naiss2026-3-301` | Active | 100,000 core-h/month |
 
 Storage: `naiss2026-3-100` (continuation allocation)  
 Path: `/cfs/klemming/projects/supr/heartsolver` — 29 TB, 1.6M files

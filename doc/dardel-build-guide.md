@@ -96,6 +96,19 @@ ml dolfin-hpc/0.9.5
 ml parmetis/4.0.3-cpeCray-24.11
 ```
 
+> **Note:** The module sets `PKG_CONFIG_PATH` but **not** `LD_LIBRARY_PATH`.
+> If the binary fails to find `libdolfin.so.0` at runtime, set it manually:
+
+```bash
+export LD_LIBRARY_PATH=/pdc/software/24.11/other/dolfin_hpc/install/lib:$LD_LIBRARY_PATH
+```
+
+On Dardel login nodes (csh/tcsh), use instead:
+
+```bash
+setenv LD_LIBRARY_PATH /pdc/software/24.11/other/dolfin_hpc/install/lib:${LD_LIBRARY_PATH}
+```
+
 Run the demo:
 
 ```bash
@@ -103,8 +116,21 @@ cd ~/poisson_test
 srun -n 4 ./demo
 ```
 
-Expected output: DOLFIN solver log showing mesh partitioning across 4 MPI
-ranks, assembly, and linear solve.
+Verified output:
+
+```
+Initializing DOLFIN version 0.9.5-hpc
+(Release Build: 2025-11-19 on x86_64-unknown-linux-gnu using gnu 13.2.1)
+
+Running on 4 processes (1 group)
+Elapsed time: 4.750000e-03 seconds
+Applying boundary conditions to linear system
+Solving linear system of size 1089 x 1089 (Krylov solver).
+Krylov solver (bcgs, bjacobi) converged in 63 iterations.
+Elapsed time: 0.005295 (Krylov solver)
+vector l2  norm: 4.748175e+02
+vector inf norm: 2.029040e+01
+```
 
 ---
 
@@ -252,6 +278,14 @@ check SUPR for allocation status.
 **PETSC_NULL deprecation warnings**  
 Harmless. These are fixed in the dolfin-hpc 0.9.5 source but not in the
 installed headers. They do not affect correctness.
+
+**`libdolfin.so.0: cannot open shared object file`**  
+The module sets `PKG_CONFIG_PATH` but not `LD_LIBRARY_PATH`. Set it manually:
+```bash
+export LD_LIBRARY_PATH=/pdc/software/24.11/other/dolfin_hpc/install/lib:$LD_LIBRARY_PATH
+```
+On csh/tcsh: `setenv LD_LIBRARY_PATH /pdc/software/24.11/other/dolfin_hpc/install/lib:${LD_LIBRARY_PATH}`  
+See section 4 for details.
 
 ---
 

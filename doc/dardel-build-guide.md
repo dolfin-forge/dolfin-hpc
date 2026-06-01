@@ -116,6 +116,11 @@ cd ~/poisson_test
 srun -n 4 ./demo
 ```
 
+> **Note:** The installed module was compiled with `--enable-optimize-p1`. The Stokes demo
+> (Taylor-Hood P2/P1 elements) will abort with `This demo cannot be run with p1 optimizations enabled!`
+> and cannot be used with this module. **Poisson is the verified Tier 1 demo.**
+> See `KNOWN_ISSUES.md` §6 for the resolution path.
+
 Verified output:
 
 ```

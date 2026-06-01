@@ -74,6 +74,27 @@ supports both Gmsh `.msh` and DOLFIN XML output).
 
 ---
 
+## 6. --enable-optimize-p1 blocks Taylor-Hood demos (Stokes)
+
+**Status:** Known limitation of the installed Dardel module  
+**Affected versions:** dolfin-hpc/0.9.5 module on Dardel (software environment 24.11)  
+**Description:** The installed module was compiled with `--enable-optimize-p1`. This flag
+enables a P1-specific optimisation path that is incompatible with higher-order elements.
+Any demo or solver using Taylor-Hood P2/P1 elements (e.g. the shipped Stokes demo) will
+abort immediately with:
+
+```
+This demo cannot be run with p1 optimizations enabled!
+```
+
+The Poisson demo (pure P1) is unaffected and runs correctly.  
+**Workaround:** None without rebuilding. Do not attempt the Stokes demo or any P2/P1
+solver with the current module.  
+**Resolution:** Rebuild the module without `--enable-optimize-p1`, or request an updated
+module from PDC. When requesting, specify that P2/P1 (Taylor-Hood) support is required.
+
+---
+
 ## Reporting new issues
 
 Please open a GitHub issue at https://github.com/dolfin-forge/dolfin-hpc/issues with:

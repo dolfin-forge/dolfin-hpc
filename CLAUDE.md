@@ -26,6 +26,7 @@ All repos live under the GitHub organization: https://github.com/dolfin-forge
 - `ufl-hpc` — Unified Form Language
 - `ffc-hpc` — FEniCS Form Compiler  
 - `ufc2-hpc` — Unified Form-assembly Code interface
+- `dolfin-hpc-codes` — demo codes and examples, originally by Ashish Bhole
 
 ### HeartSolver stack (currently runs on dolfin-hpc 0.8 only)
 - `heartsolver` — main heart solver (FSI, cardiac mechanics)

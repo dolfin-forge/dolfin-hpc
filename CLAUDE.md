@@ -37,6 +37,31 @@ All repos live under the GitHub organization: https://github.com/dolfin-forge
 ### Local clones on this machine
 - `~/repos/dolfin-hpc` — working clone of dolfin-hpc (this is the active dev repo)
 - `~/repos/heartsolver_repos/` — flat snapshots of HeartSolver repos downloaded from Bitbucket
+- `~/repos/dolfin-hpc-codes-forge` — working clone of dolfin-hpc-codes (upstream: ashishbhole, origin: dolfin-forge)
+
+---
+
+## dolfin-forge repositories
+
+| Repo | Visibility | Purpose |
+|---|---|---|
+| `dolfin-hpc` | Public | Core C++ library |
+| `dolfin-hpc-codes` | Public | Demo and research codes |
+| `dolfin-hpc-research` | Private | Development repo for unpublished work |
+| `fenicsx-notebooks` | Public | FEniCSx teaching notebooks |
+| `ufl-hpc`, `ffc-hpc`, `ufc2-hpc` | Public | Form language/compiler stack |
+
+### dolfin-hpc-codes branch structure
+
+- `main` — stable teaching demos (Ashish Bhole)
+- `research/euler-3d` — 3D Euler solver (Joel Kronborg)
+- `research/navier-stokes-3d` — 3D Navier-Stokes solver (Joel Kronborg)
+
+### Development workflow
+
+New research code developed privately in `dolfin-hpc-research`.
+When ready for reproducibility/publication: open PR to `dolfin-hpc-codes` under `research/<project>`.
+When polished as a teaching demo: open PR to `dolfin-hpc-codes` `main`.
 
 ---
 

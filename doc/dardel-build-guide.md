@@ -307,3 +307,75 @@ See section 4 for details.
 | PETSc | `/cfs/klemming/pdc/software/dardel/24.11/other/petsc/3.22.2/` |
 | ParMETIS | `/pdc/software/24.11/eb/software/parmetis/4.0.3-cpeCray-24.11/` |
 
+---
+
+## 12. User build (memory fixes + variant flags)
+
+The installed `dolfin-hpc/0.9.5` module was built from an earlier Bitbucket snapshot and
+may lack recent upstream fixes. Building from the dolfin-forge GitHub repository gives you
+the latest patches and allows flag variants not available in the installed module.
+
+**Two common build variants:**
+
+| Variant | Flag | Use case |
+|---|---|---|
+| p1opt | `--enable-optimize-p1` | P1/P1 solvers (Euler, NS, HeartSolver) — production |
+| no-p1opt | *(omit flag)* | Taylor-Hood P2/P1 (Stokes demos); cannot coexist with p1opt |
+
+### Step 1 — Clone repositories
+
+```bash
+cd /cfs/klemming/projects/supr/heartsolver/<your-username>
+git clone git@github.com:dolfin-forge/ufc2-hpc.git
+git clone git@github.com:dolfin-forge/dolfin-hpc.git dolfin-hpc-src
+```
+
+### Step 2 — Build ufc2-hpc (cmake, required before dolfin-hpc)
+
+```bash
+# Load modules first (needed for compiler and PETSc paths)
+ml PDC
+ml dolfin-hpc/0.9.5
+ml parmetis/4.0.3-cpeCray-24.11
+
+cd /cfs/klemming/projects/supr/heartsolver/<your-username>/ufc2-hpc
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt ..
+make -j8 && make install
+```
+
+### Step 3 — Configure and build dolfin-hpc (p1opt variant)
+
+```bash
+cd /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-src
+./configure CC=cc CXX=CC MPICXX=CC CXXFLAGS="-std=c++14 -g" \
+  --with-parmetis \
+  --with-petsc=/cfs/klemming/pdc/software/dardel/24.11/other/petsc/3.22.2 \
+  --with-gts --host=x86_64-unknown-linux-gnu \
+  --enable-mpi --enable-mpi-io --enable-function-cache \
+  --enable-optimize-p1 --disable-progress-bar --enable-static \
+  --prefix=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt
+make -j8
+make install
+```
+
+For the **no-p1opt** variant: omit `--enable-optimize-p1` and change the prefix to
+`dolfin-hpc-install` (keeps both installs side by side).
+
+### Step 4 — Use the user install
+
+Add to your environment before compiling or running any solver:
+
+```bash
+# bash
+export PKG_CONFIG_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib:$LD_LIBRARY_PATH
+
+# tcsh (Dardel login node default)
+setenv PKG_CONFIG_PATH /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib/pkgconfig:${PKG_CONFIG_PATH}
+setenv LD_LIBRARY_PATH /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib:${LD_LIBRARY_PATH}
+```
+
+`pkg-config --modversion dolfin` should still return `0.9.5-hpc`; verify the library path
+points to your install, not `/pdc/software/...`, before running.
+

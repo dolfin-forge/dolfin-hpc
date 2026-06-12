@@ -377,7 +377,7 @@ export PETSC_DIR=/cfs/klemming/pdc/software/dardel/24.11/other/petsc/3.22.2/pets
 export PETSC_ARCH=arch-linux-c-opt
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PETSC_DIR/$PETSC_ARCH/lib/pkgconfig
 
-./configure CC=cc CXX=CC MPICXX=CC CXXFLAGS="-std=c++14 -g" \
+./configure CC=cc CXX=CC MPICXX=CC CXXFLAGS="-std=c++14 -O2 -g" \
   --with-parmetis \
   --with-petsc=$PETSC_DIR \
   --host=x86_64-unknown-linux-gnu \
@@ -393,6 +393,7 @@ make install
 - `--with-gts` must be **omitted** — gts is not in the 24.11 environment; "GTS: no" in the configure summary is correct and expected
 - `--with-petsc` points to the **inner source tree**: `.../petsc/3.22.2/petsc-v3.22.2` (not `.../3.22.2`)
 - `PETSC_DIR`, `PETSC_ARCH`, and the PETSc `PKG_CONFIG_PATH` entry must be exported **before** configure
+- **`CXXFLAGS` replaces autoconf's default `-g -O2` entirely** — `-O2` must be stated explicitly; omitting it produces an unoptimized library with a significant performance penalty
 
 **Expected configure summary:** MPI yes, MPI I/O yes, PETSc yes, ParMETIS yes, Function cache yes, Optimize P1 yes, GTS no, RELEASE mode.
 

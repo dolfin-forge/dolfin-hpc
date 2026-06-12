@@ -406,19 +406,26 @@ export PKG_CONFIG_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/d
 export LD_LIBRARY_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib:$LD_LIBRARY_PATH
 ```
 
-After rebuilding your solver binary, confirm it links the user install (not the PDC module):
+After rebuilding your solver binary, verify the user build with these three checks:
 
+**1. Binary size** (~14 MB for static user build vs ~2.6 MB against the module):
 ```bash
-ldd ./demo | grep dolfin
-# Must show: /cfs/klemming/.../dolfin-hpc-install-p1opt/lib/libdolfin.so.0
-# Must NOT show: /pdc/software/...
+ls -lh ./demo
 ```
 
-Static build produces a binary ~14 MB (vs ~2.6 MB against the module). Confirm the
-memory fix is present in the installed headers:
+**2. Embedded build string** — confirms the binary was built from your user install,
+not the PDC module (the date will match your build date):
+```bash
+strings ./demo | grep "Release Build"
+# Expected: (Release Build: 2026-06-12 on x86_64-unknown-linux-gnu using gnu ...)
+```
 
+**3. Memory fix in installed headers:**
 ```bash
 grep "decompose" /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/include/dolfin/function/Function.h
 # Must read: auto decompose() -> std::vector<std::unique_ptr<Function>>;
 ```
+
+> **Note:** `ldd ./demo | grep dolfin` shows nothing — the build is fully static
+> (`libdolfin.a`). Binary size and the embedded build string are the correct indicators.
 

@@ -311,9 +311,12 @@ See section 4 for details.
 
 ## 12. User build (memory fixes + variant flags)
 
+**Verified on Dardel 24.11, 2026-06-12 (p1opt variant).**
+
 The installed `dolfin-hpc/0.9.5` module was built from an earlier Bitbucket snapshot and
-may lack recent upstream fixes. Building from the dolfin-forge GitHub repository gives you
-the latest patches and allows flag variants not available in the installed module.
+lacks recent upstream fixes (notably the `FunctionDecomposition` memory-leak fix). Building
+from the dolfin-forge GitHub repository gives you all upstream patches and allows flag
+variants not available in the installed module.
 
 **Two common build variants:**
 
@@ -322,9 +325,31 @@ the latest patches and allows flag variants not available in the installed modul
 | p1opt | `--enable-optimize-p1` | P1/P1 solvers (Euler, NS, HeartSolver) — production |
 | no-p1opt | *(omit flag)* | Taylor-Hood P2/P1 (Stokes demos); cannot coexist with p1opt |
 
+### Daily environment setup
+
+A convenience script is provided in `dolfin-hpc-research/env/dardel-env.sh`. It loads
+modules, sets `PKG_CONFIG_PATH`/`LD_LIBRARY_PATH`/`PETSC_DIR`/`PETSC_ARCH`, and defines
+navigation aliases. Run it from a bash subshell (Dardel login is tcsh):
+
+```bash
+bash -l
+source /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-research/env/dardel-env.sh
+```
+
+### Step 0 — configure.ac fix (required before autoreconf)
+
+Dardel's autoheader (SUSE toolchain) rejects empty `AC_DEFINE` descriptions. Before
+running `autoreconf`, edit `configure.ac` lines 163–167: change the empty third argument
+`[]` to `[Build information string]` in both `AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO, ...)`
+calls. This fix is committed to the dolfin-forge repository (fetch from main before building).
+
 ### Step 1 — Clone repositories
 
 ```bash
+ml PDC
+ml dolfin-hpc/0.9.5
+ml parmetis/4.0.3-cpeCray-24.11
+
 cd /cfs/klemming/projects/supr/heartsolver/<your-username>
 git clone git@github.com:dolfin-forge/ufc2-hpc.git
 git clone git@github.com:dolfin-forge/dolfin-hpc.git dolfin-hpc-src
@@ -333,25 +358,29 @@ git clone git@github.com:dolfin-forge/dolfin-hpc.git dolfin-hpc-src
 ### Step 2 — Build ufc2-hpc (cmake, required before dolfin-hpc)
 
 ```bash
-# Load modules first (needed for compiler and PETSc paths)
-ml PDC
-ml dolfin-hpc/0.9.5
-ml parmetis/4.0.3-cpeCray-24.11
-
 cd /cfs/klemming/projects/supr/heartsolver/<your-username>/ufc2-hpc
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt ..
 make -j8 && make install
 ```
 
+Verify: `pkg-config --modversion ufc-1` → `2.4.0`
+
 ### Step 3 — Configure and build dolfin-hpc (p1opt variant)
 
 ```bash
 cd /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-src
+
+autoreconf -i   # Perl locale warnings and AX_LIBSIM warning are harmless
+
+export PETSC_DIR=/cfs/klemming/pdc/software/dardel/24.11/other/petsc/3.22.2/petsc-v3.22.2
+export PETSC_ARCH=arch-linux-c-opt
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PETSC_DIR/$PETSC_ARCH/lib/pkgconfig
+
 ./configure CC=cc CXX=CC MPICXX=CC CXXFLAGS="-std=c++14 -g" \
   --with-parmetis \
-  --with-petsc=/cfs/klemming/pdc/software/dardel/24.11/other/petsc/3.22.2 \
-  --with-gts --host=x86_64-unknown-linux-gnu \
+  --with-petsc=$PETSC_DIR \
+  --host=x86_64-unknown-linux-gnu \
   --enable-mpi --enable-mpi-io --enable-function-cache \
   --enable-optimize-p1 --disable-progress-bar --enable-static \
   --prefix=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt
@@ -359,23 +388,44 @@ make -j8
 make install
 ```
 
-For the **no-p1opt** variant: omit `--enable-optimize-p1` and change the prefix to
-`dolfin-hpc-install` (keeps both installs side by side).
+**Key differences from the installed module configure:**
+- `autoreconf -i` is required — `configure` is not committed to git
+- `--with-gts` must be **omitted** — gts is not in the 24.11 environment; "GTS: no" in the configure summary is correct and expected
+- `--with-petsc` points to the **inner source tree**: `.../petsc/3.22.2/petsc-v3.22.2` (not `.../3.22.2`)
+- `PETSC_DIR`, `PETSC_ARCH`, and the PETSc `PKG_CONFIG_PATH` entry must be exported **before** configure
 
-### Step 4 — Use the user install
+**Expected configure summary:** MPI yes, MPI I/O yes, PETSc yes, ParMETIS yes, Function cache yes, Optimize P1 yes, GTS no, RELEASE mode.
 
-Add to your environment before compiling or running any solver:
+For the **no-p1opt** variant: omit `--enable-optimize-p1` and change both cmake and configure
+prefixes to `dolfin-hpc-install` (keeps both installs side by side).
+
+### Step 4 — Set environment and verify
 
 ```bash
-# bash
 export PKG_CONFIG_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib/pkgconfig:$PKG_CONFIG_PATH
 export LD_LIBRARY_PATH=/cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib:$LD_LIBRARY_PATH
-
-# tcsh (Dardel login node default)
-setenv PKG_CONFIG_PATH /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib/pkgconfig:${PKG_CONFIG_PATH}
-setenv LD_LIBRARY_PATH /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/lib:${LD_LIBRARY_PATH}
 ```
 
-`pkg-config --modversion dolfin` should still return `0.9.5-hpc`; verify the library path
-points to your install, not `/pdc/software/...`, before running.
+After rebuilding your solver binary, verify the user build with these three checks:
+
+**1. Binary size** (~14 MB for static user build vs ~2.6 MB against the module):
+```bash
+ls -lh ./demo
+```
+
+**2. Embedded build string** — confirms the binary was built from your user install,
+not the PDC module (the date will match your build date):
+```bash
+strings ./demo | grep "Release Build"
+# Expected: (Release Build: 2026-06-12 on x86_64-unknown-linux-gnu using gnu ...)
+```
+
+**3. Memory fix in installed headers:**
+```bash
+grep "decompose" /cfs/klemming/projects/supr/heartsolver/<your-username>/dolfin-hpc-install-p1opt/include/dolfin/function/Function.h
+# Must read: auto decompose() -> std::vector<std::unique_ptr<Function>>;
+```
+
+> **Note:** `ldd ./demo | grep dolfin` shows nothing — the build is fully static
+> (`libdolfin.a`). Binary size and the embedded build string are the correct indicators.
 

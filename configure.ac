@@ -161,10 +161,12 @@ fi
 # Store build information (date, host, CXX)
 if test "x${enable_debug}" != xno; then
    AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-      ["(Debug Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+      ["(Debug Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"],
+      [Build information string])
 else
    AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-      ["(Release Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
+      ["(Release Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"],
+      [Build information string])
 fi
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])

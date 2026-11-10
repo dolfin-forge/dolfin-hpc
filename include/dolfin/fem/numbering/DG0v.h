@@ -42,11 +42,8 @@ public:
                              ufc::cell const & ufc_cell,
                              Cell const & ) const override
   {
-    std::fill_n( dofs, value_size_, value_size_ * ufc_cell.index );
-    for ( size_t k = 1; k < value_size_; ++k )
-    {
-      ++dofs[k];
-    }
+    for ( size_t k = 0; k < value_size_; ++k )
+      dofs[k] = value_size_ * ufc_cell.index + k;
   }
 
   ///

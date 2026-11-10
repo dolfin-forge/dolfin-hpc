@@ -17,6 +17,7 @@ DOLFIN_SUITE_BEGIN(suite, "fem")
 
   DOLFIN_TCASE_CREATE("DofNumbering");
   DOLFIN_TCASE_ADD(test_DofNumbering);
+  DOLFIN_TCASE_ADD(test_DofNumbering_DG0v);
 
   DOLFIN_TCASE_CREATE("DofMap");
   DOLFIN_TCASE_ADD(test_DofMap);

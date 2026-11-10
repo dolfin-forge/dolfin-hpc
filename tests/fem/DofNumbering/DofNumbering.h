@@ -4,10 +4,15 @@
 
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofNumbering.h>
+#include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/celltypes/CellType.h>
+#include <dolfin/mesh/entities/iterators/CellIterator.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Space.h>
+#include <dolfin/mesh/unitmeshes/UnitCube.h>
+
+#include <set>
 
 #include "../../elements/element_library.inc"
 
@@ -59,6 +64,49 @@ DOLFIN_START_TEST( test_DofNumbering )
     delete element;
     delete cell;
   }
+}
+DOLFIN_END_TEST
+//-----------------------------------------------------------------------------
+
+// Verify that DG0vNumbering::tabulate_dofs returns dofs[k] = vs*global_cell_index + k
+// and that all indices are unique across all owned cells.
+DOLFIN_START_TEST( test_DofNumbering_DG0v )
+{
+  UnitCube mesh( 2, 2, 2 );
+
+  ffc_discontinuous_lagrange_0_3dvector_dofmap_1 ufc_dofmap;
+  DofNumbering * numbering = DofNumbering::create( mesh, ufc_dofmap );
+  ck_assert_msg( numbering != nullptr, "DG0vNumbering not created" );
+  numbering->init( mesh, ufc_dofmap );
+  numbering->build();
+
+  static const size_t vs = 3;
+  std::set< size_t > seen_dofs;
+  size_t nchecked = 0;
+
+  for ( CellIterator c( mesh ); !c.end(); ++c )
+  {
+    if ( c->is_ghost() ) continue;
+    UFCCell ufc_cell( *c );
+    ufc_cell.update( *c );
+
+    size_t dofs[vs];
+    numbering->tabulate_dofs( dofs, ufc_cell, *c );
+
+    size_t const global_idx = c->global_index();
+    for ( size_t k = 0; k < vs; ++k )
+    {
+      ck_assert_msg( dofs[k] == vs * global_idx + k,
+        "DG0v dofs[%zu]=%zu expected %zu (global_idx=%zu)",
+        k, dofs[k], vs * global_idx + k, global_idx );
+      ck_assert_msg( seen_dofs.count( dofs[k] ) == 0, "DG0v dof index collision" );
+      seen_dofs.insert( dofs[k] );
+    }
+    ++nchecked;
+  }
+
+  ck_assert_msg( nchecked > 0, "No owned cells found" );
+  delete numbering;
 }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
